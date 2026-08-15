@@ -36,6 +36,11 @@ Then decide:
 
 ## Notes for the session
 
+- **Sibling of ticket 13.** `[you, 2026-08-15]` The choice menu and the pressure mechanism are
+  coupled — mechanism 2 (resource starvation) and mechanism 4 (information revealed on entry) in
+  particular are really statements about what the player gets to decide. The two tickets run as
+  siblings rather than in sequence, accepting one round of reconciliation later. Whichever of 06
+  and 13 resolves **second** must explicitly check itself against the first and record the check.
 - Feel is ultimately validated by playtesting, not argument. This ticket fixes the *mechanism*; it
   does not claim to prove the feeling. Say so in the answer.
 - Beware mechanisms that produce *stress* without producing *decisions*. A real-time timer makes

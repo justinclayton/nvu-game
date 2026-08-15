@@ -2,7 +2,7 @@
 
 Type: grilling
 Status: open
-Blocked by: 03, 04, 05, 06
+Blocked by: 03, 04, 05, 06, 13, 14
 Map: [core design map](../map.md)
 
 ## Question
@@ -33,6 +33,14 @@ Decide:
 - The floor structure settled in ticket 05.
 - The pressure filter settled in ticket 06 — check the turn structure against it explicitly and
   record the check.
+- The decision filter settled in ticket 13 and the topology settled in ticket 14. The phases
+  designed here must be the phases in which 13's choices actually get made — a phase sequence that
+  wraps no decisions has failed, however tidy it is. Record the check.
+
+## Overlap to watch
+
+Item 6 (*what ends a floor*) overlaps ticket 05's run structure and ticket 13's engagement rules.
+If either has already settled it, adopt rather than re-decide, and say which ticket owns it.
 
 ## Notes for the session
 

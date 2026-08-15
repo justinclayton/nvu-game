@@ -35,6 +35,9 @@ Decide:
 
 - The resource model from ticket 04 and the acquisition model from ticket 09.
 - The reading-time implications of ticket 06.
+- The decision filter from ticket 13 — a card has to carry whatever information the player needs at
+  the moment they make the floor's primary choice. If ticket 14 made rooms out of cards, this
+  ticket also owns whether a room card and a player card share an anatomy.
 
 ## Notes for the session
 

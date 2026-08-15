@@ -68,7 +68,8 @@ head, reacting to what's in front of you, with little time for deep strategy.*
 <!-- In scope, but not sharp enough to ticket. Graduates into tickets as the frontier advances. -->
 
 - **Boss encounter design** beyond the structural distinction settled in ticket 08 — what a boss
-  fight actually asks of the player.
+  fight actually asks of the player. Ticket 13 settles the choices an *ordinary* floor presents;
+  whether a boss inverts, narrows, or simply intensifies those stays fog until 13 and 08 land.
 - **Roguelite meta-progression** — whether anything persists between runs at all, and whether it
   is even in scope for a core spec.
 - **Death and run failure** — what happens when a run ends badly, and how long a run should be.
@@ -77,7 +78,8 @@ head, reacting to what's in front of you, with little time for deep strategy.*
 - **Win condition beyond the boss** — how many floors, whether a run has an ending or is endless.
 - **Solo automa** — only if ticket 03 lands on co-op-first.
 - **Table footprint and component budget** — the physical constraints that will eventually bound
-  card count, board size, and per-turn upkeep.
+  card count and per-turn upkeep. The *floor layout's* share of this graduated into ticket 14,
+  which produces the map's first hard footprint number; what remains here is everything else.
 - **Whether "North vs Up" means anything mechanical**, or is purely a title.
 
 ## Out of scope

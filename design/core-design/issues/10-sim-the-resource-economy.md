@@ -40,6 +40,11 @@ It must support both free-play (step a floor manually and watch the piles move) 
    buying, rushing the boss?
 5. **The acquisition inversion.** If gaining cards gains health, does the sim show players
    over-buying into a bloated unresponsive deck, or is the tension self-correcting?
+6. **The damage-as-cull rubber band (ticket 15).** This is the sim's most important job if ticket
+   15 survives. Run floors **with and without player-chosen damage** and compare: win rate, average
+   deck quality over the course of a run, and — the telling one — whether a rational player is ever
+   *incentivised to take a hit*. If the answer to that last one is yes, the rubber band is too
+   strong and ticket 15 needs a cost attached.
 
 ## Deliverable
 

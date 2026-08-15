@@ -22,6 +22,12 @@ Decide:
 4. **Movement.** How the player moves between rooms, whether rooms can be skipped or revisited,
    and whether the floor layout is known in advance or revealed on entry. (Revealed-on-entry is a
    candidate mechanism for ticket 06.)
+   - **New since ticket 03:** there are always **two** characters. Do Red and Gray occupy the same
+     room, or can they split up? Splitting is a large and interesting lever — it creates the
+     "Gray is alone two rooms away and in trouble" scenario that the down-not-dead rule was made
+     for — but it roughly doubles the board state a solo player tracks, and it interacts with
+     everything ticket 08 decides about which enemies threaten whom. Rule on it here; it is a
+     structural question, not a turn-economy one.
 5. **The boss.** Where the floor boss sits in the structure and what forces the player to face it.
 6. **Ascension.** What beating a boss changes, and what carries between floors.
 7. **Escalation.** What gets harder floor to floor, and along which axis.

@@ -28,6 +28,10 @@ Decide:
    fifteen seconds to parse defeats it. State the reading-time budget and design to it.
 6. **Text load.** How much rules text a card may carry, and whether keywords are needed to keep
    it down.
+6a. **Legibility of card *quality*.** If ticket 15 survives, the player culls their weakest cards
+   while under fire. That only works if some cards are visibly worse than others and the player can
+   sort good from bad at a glance, under pressure, without deliberating. Decide whether quality is
+   signalled explicitly (a tier, a colour, a number) or left to be inferred from the card's text.
 7. **Physical upkeep.** What the card asks a human to do — rotate, flip, cover, slide under
    another card — and whether that survives a real table.
 

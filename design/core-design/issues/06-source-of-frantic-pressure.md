@@ -16,6 +16,20 @@ settles becomes a filter that tickets 07, 08, 09, and 11 must each satisfy. It w
 kept as its own ticket rather than folded into the turn economy, because a pillar that is nobody's
 job to defend gets quietly designed away.
 
+## Constraint inherited from ticket 03
+
+Turns are **strictly alternating** — Red acts fully, then Gray — and information is **fully open**.
+That decision deliberately removed two of the cheapest sources of franticness: simultaneous action
+and hidden hands. Neither is available here.
+
+The pillar therefore rests entirely on **game state**. Whatever this ticket settles has to make a
+player feel outmatched while they sit and think for as long as they like, with all information in
+front of them. That is a harder problem than it looks, and it is the reason this ticket exists
+separately rather than folded into the turn structure.
+
+One source is now available that was not before: **two characters with separate health pools and a
+down-not-dead rule**. A partner one card from going down is pressure that needs no clock.
+
 Decide which mechanism (or small combination) carries the pillar:
 
 1. **Escalating tempo** — threats arrive faster than they can be cleared, so the player is always

@@ -54,6 +54,14 @@ head, reacting to what's in front of you, with little time for deep strategy.*
   those documents are **uncertain provenance**, one decision is a verified confabulation, and every
   quantitative claim cites a `prototype/NOTES.md` that is not in this repo. **Nothing here is
   adopted** — each item is an input to the ticket that owns it.
+- [Establish how Decipher's Force pile actually worked](issues/01-decipher-force-pile-mechanics.md)
+  — `[research]` Life Force is exactly three piles, and **spending is not damage**: spent cards
+  recirculate face down, lost cards leave face up and only ever return by a named "retrieve". You
+  draw *from* the resource, never from the library; nothing is ever reshuffled; and you lose only
+  when all three piles are simultaneously empty. Its documented cost is procedural, not strategic —
+  the deck size stops being a dial, and the scoring layer punishes spending your own resource. Five
+  cross-edition rules conflicts and nine evidence gaps are recorded, not resolved. **Nothing here is
+  adopted** — ticket 04 owns the ruling.
 
 ## Not yet specified
 

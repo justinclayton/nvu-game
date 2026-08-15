@@ -48,3 +48,31 @@ character is down; and whether a full round is Red+Gray or something finer.
 
 - This is the ticket most likely to reveal that an upstream decision does not work. If it does,
   say so and reopen the upstream ticket rather than patching around it here.
+
+## Settled upstream by ticket 04 — do not relitigate
+
+- **Start of turn: the player decides how many cards to *convert* from deck to hand.** This is the
+  core decision of the game. Every card converted is stamina spent whether used or not.
+- **Playing an X-cost card = "exhaust X cards from your hand."** The played card also exhausts.
+- **Damage = "exhaust X cards from your deck."** Chosen costs come off the hand; unchosen punishment
+  comes off the deck.
+- **The whole hand exhausts at end of turn**, with **Retain** as the exception for situational and
+  equipped cards.
+- **Exhausted cards do not return during a floor.** There is no discard pile.
+- **A character is exhausted (down) when they begin a turn and cannot convert.**
+- **No mandatory minimum conversion.** Explicitly declined — a character who converts nothing has no
+  cards and cannot act, so stalling is self-punishing.
+
+What this ticket still owes, sharpened by the above:
+
+- **Hand size.** Is there a cap on conversion at all, or is cost the only limit? Ticket 04's finding
+  is that a hand is *tools and fuel* simultaneously, so over-drawing is already self-limiting — a
+  printed cap may be unnecessary.
+- **Whether movement, searching, and other floor actions cost stamina**, and how much. Ticket 04
+  ruled that exhausting is not a combat verb — sprinting, searching, forcing a door, tripping all
+  can cost. This ticket decides which, and whether they cost from hand or deck.
+- **Actions per turn** — whether actions are a separate currency from card costs, or the same thing.
+- `[you]` **"Do nothing: recover 1 card" is a logged candidate turn action.** Explicitly unadopted;
+  must survive playtest. Ticket 10 owns the number.
+- `[proposed by agent → not adopted, logged]` **"Bracing"** — absorbing a point of damage by
+  exhausting a card from hand, making blocking an act of stamina rather than a printed stat.

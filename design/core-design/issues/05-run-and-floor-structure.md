@@ -41,3 +41,25 @@ Decide:
   no room for time pressure in it.
 - Run length and floor count may partly stay in the fog if they depend on the turn economy
   (ticket 07). Settle the structure; leave the numbers to the sim (ticket 10) if needed.
+
+## Settled upstream by ticket 04 — do not relitigate
+
+`[you]`, ruled while resolving ticket 04 on 2026-08-14, because the resource model could not be
+settled without it:
+
+**A floor is one continuous encounter.** Not a series of fights with a boss at the end. It is a 2D
+floor plan the characters move around over many turns — entering rooms, finding a monster, denting
+it, fleeing when they are in over their heads, scavenging for things that help, doubling back,
+getting chased along the way. The floor ends by ascending: perhaps a big enemy blocks the exit,
+perhaps a key must be found, perhaps there is only one enemy per floor but the players are too busy
+running around to face it. A run is many floors.
+
+Two constraints follow directly:
+
+- **A floor should not drag**, and its length is balanced against deck size. Ticket 04's model makes
+  these the same dial: floor length ≈ deck size ÷ average conversion per turn, minus damage taken.
+- **Ascending restores the exhaust pile** — cards return to the deck, healing to full. Attrition
+  therefore lives *within* a floor, not across a run. The run-level arc is deckbuilding, not
+  attrition.
+
+This ticket owns the detail — room layout, how the exit is gated, how movement works, how many rooms.

@@ -1,7 +1,7 @@
 # 15 — Explore damage-as-thinning as a built-in rubber band
 
 Type: grilling
-Status: open
+Status: resolved
 Blocked by: 04
 Map: [core design map](../map.md)
 
@@ -91,3 +91,71 @@ rate, deck quality over time, and whether players are incentivised to take hits.
 
 - This is an *exploration*, not a commitment. The honest outcome may be that the rubber band is too
   strong and damage has to hurt plainly. Record that outcome as a real answer if it happens.
+
+## Answer
+
+Resolved 2026-08-14 **by ticket 04, against the hypothesis** — deliberately, as ticket 04 was
+required to do rather than silently orphaning this.
+
+`[you]` **The player does not choose which cards damage takes.** Enemy damage exhausts X cards from
+the **top of the deck**, no choice. There is no cull, and therefore no rubber band from this
+mechanism.
+
+### Why
+
+- **Table cost against the pillar.** The floor is a fast, reactive chase, and hits are frequent. Any
+  version of the cull — free pick, choose-from-top-N, pay-to-choose — stops the table for a small
+  optimisation decision on *every hit*. That is the "elegant on paper, miserable at a table" failure
+  ticket 04 was required to guard against, and it is worse in solo where one person makes both
+  characters' decisions.
+- **The payoff largely evaporated under ticket 04's model.** This ticket was written assuming a
+  cycling deck, where culling a weak card improves every future draw. Ticket 04 settled that **the
+  deck does not recycle during a floor** — you get one pass. Culling a bad card therefore barely
+  improves your odds; it mostly just shortens the floor. The rubber band this hypothesis was built
+  on is much weaker than it looked when written.
+- **The information it was reaching for arrived by another route.** `[you]` The exhaust pile is
+  **face up**. You feel the loss as it happens and you learn what is no longer waiting in your deck.
+  That gives damage weight and gives the player a read on their remaining resources — without a
+  decision per hit.
+
+### What survives
+
+`[proposed by agent → not adopted, logged]` **"Bracing."** Damage comes off the deck by default, but
+a card exhausted from hand may absorb a point. This keeps a choice at the only moment it is
+interesting — whether to *take* the hit, not which cards it eats — for one card of cost and no
+per-hit deliberation. Not ruled on. Candidate for ticket 07 or ticket 11 if blocking should be an act
+of stamina rather than a printed stat.
+
+### Downstream
+
+- **Ticket 10** no longer needs its most important job. Sub-question 6 ("run floors with and without
+  player-chosen damage") is void — there is no player-chosen damage to compare against.
+- **Ticket 09** keeps sub-question 5, but only its **voluntary** thinning half. Involuntary thinning
+  is settled: it is random, off the top, and it is pure loss.
+- The genuine tension this ticket was hunting is now carried elsewhere and more cheaply: under ticket
+  04, adding a card is **+1 floor-time and −1 consistency** on a deck you see once. That is the
+  bidirectional pressure, and it lives in acquisition rather than in damage.
+
+### Corroboration that arrived after the fact
+
+Ticket 16's survey ran concurrently and was not available to the ticket 04 session. Read afterwards,
+it **independently supports this resolution** rather than challenging it.
+
+- **Undaunted: Normandy is this hypothesis running in a published game, and it is too strong.**
+  Damage permanently removes unit cards, and a published guide recommends **deliberately baiting
+  casualties as free deck-thinning**. Experienced players attack-bait their own weak units on purpose.
+  That is sub-question 3's failure mode — *players want to take damage* — observed in the wild, in a
+  well-regarded game. It is the strongest available evidence that a player-steered cull inverts the
+  danger the design is built on.
+- **A third answer to sub-question 1 that this ticket never considered**, and worth recording even
+  though the ticket is closed: Undaunted resolves *which* card dies by **fixed rules priority**, so
+  neither player chooses, while the attacker still chooses the target. The choice space was never the
+  binary "player picks vs. random." North vs Up landed on a fourth option — off the top, but **face
+  up** — which keeps the loss legible without a decision.
+- **Coup** answers "what makes damage still hurt" differently again: a lost influence flips **face
+  up**, converting private information into public. North vs Up's face-up exhaust pile is the same
+  instinct applied to a solo/co-op game, where the audience for that information is you.
+
+Full survey: [research/16-cards-as-resource-survey.md](../research/16-cards-as-resource-survey.md),
+§4.1 (Undaunted) and §2.1 (Coup). Sourcing on the Undaunted claim is community-level, not a designer
+statement.

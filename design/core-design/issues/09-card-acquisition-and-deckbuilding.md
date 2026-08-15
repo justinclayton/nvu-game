@@ -44,3 +44,23 @@ Decide:
 - The resource model settled in ticket 04.
 - The pressure filter settled in ticket 06 — shopping is the classic place where a frantic game
   goes quiet. Check it and record the check.
+
+## Settled upstream by ticket 04 — do not relitigate
+
+- **The inversion is the design** `[you]`. No rule will be added to let players thin safely.
+- **Sub-question 3 is answered.** Because the deck does not recycle during a floor, the trade falls
+  out of the structure with no keyword: **a card you add is +1 floor-time and −1 consistency.** It
+  makes you able to stay on the floor longer, and it makes you worse, because you get exactly one
+  pass through your deck and every mediocre card appears instead of the one you needed. This is the
+  answer to "what makes adding a card ever feel costly" — it needs nothing invented.
+- **Sub-question 4 is constrained.** There is no discard pile. A new card goes into the deck, on top
+  of it, into hand, or into exhaust — and "into exhaust" now means *unavailable until the floor is
+  cleared*, which is a real cost worth using deliberately.
+- **Sub-question 5's involuntary half is settled by ticket 15**, which resolved against the cull:
+  damage is random, off the top, pure loss. This ticket still decides whether **voluntary** thinning
+  exists and at what price.
+- **Sub-question 6 is partly settled**: the exhaust pile returns to the deck when a floor is cleared.
+  What persists between *runs* remains in the fog.
+- **The recursion guard rail is: there isn't one** `[you]`. Balance is handled per-mechanic. Any card
+  this ticket lets in that returns cards from exhaust is a heal, a refuel, and a floor-clock
+  extension simultaneously — judge each on its own merits, and see ticket 04's recorded dissent.

@@ -26,6 +26,16 @@ Decide:
 8. **Upkeep.** The physical actions a human performs each turn: shuffling, flipping, sliding
    cards between piles, tracking counters. Count them honestly.
 
+## Settled upstream — do not relitigate
+
+From ticket 03: **strict alternating turns**, Red then Gray. **Fully open information.** Two
+characters always in play, each with their own deck and health pool, controlled by one player each
+in co-op and both by one player solo. A character at zero is **down, not dead**.
+
+What remains open here is everything *inside* a turn, plus: whether the alternation is fixed
+Red-then-Gray or the party chooses who leads each round; what happens to the sequence when one
+character is down; and whether a full round is Red+Gray or something finer.
+
 ## Must satisfy
 
 - The player-count model settled in ticket 03.

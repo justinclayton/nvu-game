@@ -23,7 +23,18 @@ Decide:
    how ticket 04 resolved this and state the acquisition rules that follow from it.
 4. **Where new cards go.** Into the discard, on top of the deck, into hand, into a separate zone.
    Under a deck-as-resource model this choice has real teeth.
-5. **Thinning.** Whether cards can be removed, trashed, or upgraded, and what that costs.
+5. **Thinning.** Whether cards can be removed, trashed, or upgraded, and what that costs. **Read
+   ticket 15 before answering this** — thinning is the hinge of this design, and it pulls two ways
+   at once. In the CCG, where the deck was the life total, thinning was self-harm and never became
+   a strategy. In a deckbuilder, thinning is one of the strongest strategies there is, because a
+   small deck cycles fast and concentrates its best cards into the chains players build decks to
+   find. This game contains both pressures simultaneously. Ticket 15 explores whether that
+   collision becomes the engine — damage as a *cull* the player steers. Whatever it concludes, this
+   ticket decides whether **voluntary** thinning is also available, and at what price, alongside
+   the involuntary kind.
+   - Related, from the same source: **any card that returns cards to the resource pool is a healing
+     card and a refuelling card at the same time.** Whatever ticket 04 settled as the recursion
+     guard rail applies to every acquirable card this ticket lets into the game.
 6. **Persistence.** Whether the deck resets between floors, and whether anything survives a run.
    (The between-runs half of this stays in the fog under meta-progression.)
 7. **Deck size.** Starting deck size and shape, and whether there is a ceiling.

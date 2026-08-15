@@ -40,8 +40,43 @@ It must support both free-play (step a floor manually and watch the piles move) 
    buying, rushing the boss?
 5. **The acquisition inversion.** If gaining cards gains health, does the sim show players
    over-buying into a bloated unresponsive deck, or is the tension self-correcting?
+6. **The damage-as-cull rubber band (ticket 15).** This is the sim's most important job if ticket
+   15 survives. Run floors **with and without player-chosen damage** and compare: win rate, average
+   deck quality over the course of a run, and — the telling one — whether a rational player is ever
+   *incentivised to take a hit*. If the answer to that last one is yes, the rubber band is too
+   strong and ticket 15 needs a cost attached.
 
 ## Deliverable
 
 The simulator file, linked from this ticket, plus the answer summary. If the sim kills the model,
 say so plainly — that is a successful prototype, and ticket 04's fallback branch takes over.
+
+## Revised by tickets 04 and 15
+
+**Sub-question 6 is void.** Ticket 15 resolved against the damage-as-cull hypothesis — damage is
+random off the top of the deck, so there is no player-chosen damage to compare against. Drop it.
+
+**The model to simulate is now specific and much simpler than this ticket assumed.** Per character:
+deck, hand, face-up exhaust pile, no discard pile, no reshuffling. Cards leave the deck by exactly
+two routes — conversion at the start of a turn, and damage. The whole hand exhausts at end of turn
+regardless of use, so **a turn's stamina cost is exactly how much was converted, not how much was
+spent.**
+
+That yields one tight relationship to explore rather than a tangle:
+
+    floor length ≈ deck size ÷ average conversion per turn − damage taken
+
+**Numbers to find** (ticket 04 deliberately produced none, and no figure from the previous design
+attempts may be used):
+
+1. **Starting deck size**, and how it must scale as the deck grows over a run.
+2. **Average conversion per turn** under pressure, and whether players systematically over- or
+   under-convert.
+3. **Damage per hit** relative to deck size — how many hits a floor should be able to spend.
+4. **Whether fighting is dominated by fleeing and scavenging.** Ticket 04's answer is that fleeing
+   and searching also cost stamina, so avoidance is not free. Verify that this is actually true at
+   the table's numbers rather than merely true in principle.
+5. **Whether over-acquiring produces a bloated, unresponsive deck**, given that a bigger deck is both
+   more floor-time and worse consistency on a single pass.
+6. **"Do nothing: recover 1 card"** — the candidate turn action from ticket 07. Does it exist, and at
+   what rate does it become a stalling strategy?

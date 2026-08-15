@@ -33,7 +33,7 @@ Decide:
 
 - The turn economy settled in ticket 07, including its upkeep budget.
 - The pressure filter settled in ticket 06.
-- The decision filter from ticket 13 and the topology from ticket 14. Items 1 (where the enemy
+- The decision filter from ticket 18 and the topology from ticket 19. Items 1 (where the enemy
   physically sits) and 6 (whether unkilled enemies follow the player) are only answerable against a
-  settled topology — and if ticket 13 made engagement optional, this ticket owns what an enemy does
+  settled topology — and if ticket 18 made engagement optional, this ticket owns what an enemy does
   when it is bypassed.

@@ -31,10 +31,16 @@ head, reacting to what's in front of you, with little time for deep strategy.*
   recommendations, no application to this game, no design opinions.
 - **Declined method.** No survey of comparable games (Slay the Spire-likes, Aeon's End, Clank!,
   Star Realms). The human declined this deliberately. Only revisit if the human asks.
+  - **One carve-out, granted 2026-08-14** `[you]`: prior art for *the mechanic* — card games of any
+    genre that make the cards themselves stand in for tokens, health, or counters — is in scope, and
+    is [ticket 16](issues/16-cards-as-resource-precedent-survey.md). This is not a reversal. A survey
+    of *comparable games* — deckbuilders and roguelites as peers — stays declined. The test is
+    whether the subject is one mechanic's precedent or another game's overall design.
 - **Skills.** Every session invokes `/grilling` and `/domain-modeling`. Prototype tickets invoke
   `/prototype`. Research tickets are resolved by a `/research` subagent.
-- **Glossary.** `CONTEXT.md` does not exist yet — create it at the repo root the moment the first
-  domain term is actually settled (likely from ticket 04 or 05), and keep it a glossary only.
+- **Glossary.** [`CONTEXT.md`](../../CONTEXT.md) exists at the repo root, created from ticket 04.
+  It is a glossary only. Add a term the moment a ticket settles it, tagged with that ticket; never
+  add a term still under argument.
 - **Previous attempts.** `previous-attempts-at-design/` is reference material, opened only when a
   ticket directs it. Its content and structure must not shape this map.
 
@@ -48,37 +54,109 @@ head, reacting to what's in front of you, with little time for deep strategy.*
      Research tickets are tagged [research] — they establish facts and rule nothing. A fact only
      becomes a constraint on this design when a grilling ticket adopts it and the human says so. -->
 
+- [Establish how Decipher's Force pile actually worked](issues/01-decipher-force-pile-mechanics.md)
+  — `[research]` Reference on one card-as-resource economy, for ticket 04 only. The transferable
+  parts: a card is a unit of resource; the resource pool is a set of named piles, and cards not in
+  those piles don't count — so *drawing to hand costs you life*; the player taking a loss chooses
+  which cards go; you lose when the pool is empty; spent cards return to the bottom of the deck
+  unshuffled. **Two findings that earn their keep:** deck-thinning was never viable there — when the
+  deck is the life total, thinning is self-harmful without any rule saying so, which is prior art
+  for the inversion at the centre of ticket 04. And the economy broke four publicly-named times,
+  every one a **recursion** — any card that puts resource back into the pool is a healing card and a
+  refuelling card at once. **The warning:** every transfer was a card moved by hand, every turn. The
+  bookkeeping cost is real, and ticket 04 owes an answer against the low-complexity constraint.
+  **Researched twice, independently.** A second pass verified the rules against primary PDFs and
+  corroborates every load-bearing point; both are preserved in the ticket. It adds that **spending is
+  not damage** (spent cards recirculate face down; lost cards leave face up), that the loss condition
+  is a *conjunction* of three empty piles rather than one empty deck, and that the cost of the system
+  was procedural rather than strategic — deck size stops being a dial, and the scoring layer punishes
+  spending your own resource. Five cross-edition rules conflicts and nine evidence gaps are recorded,
+  not resolved.
 - [Extract settled constraints from previous design attempts](issues/02-extract-constraints-from-previous-attempts.md)
   — `[research]` Three prior-stated constraints survive scrutiny: physical tabletop, 1–2 player
   co-op, and *resources are printed on cards or are the cards themselves*. Nearly all mechanics in
   those documents are **uncertain provenance**, one decision is a verified confabulation, and every
   quantitative claim cites a `prototype/NOTES.md` that is not in this repo. **Nothing here is
   adopted** — each item is an input to the ticket that owns it.
-- [Establish how Decipher's Force pile actually worked](issues/01-decipher-force-pile-mechanics.md)
-  — `[research]` Life Force is exactly three piles, and **spending is not damage**: spent cards
-  recirculate face down, lost cards leave face up and only ever return by a named "retrieve". You
-  draw *from* the resource, never from the library; nothing is ever reshuffled; and you lose only
-  when all three piles are simultaneously empty. Its documented cost is procedural, not strategic —
-  the deck size stops being a dial, and the scoring layer punishes spending your own resource. Five
-  cross-edition rules conflicts and nine evidence gaps are recorded, not resolved. **Nothing here is
-  adopted** — ticket 04 owns the ruling.
+- [Decide solo, co-op, or both](issues/03-solo-coop-or-both.md) — `[you]` **Two characters are
+  always in play: Red** (stocky, aggressive, headstrong) **and Gray** (concerned, attuned,
+  resourceful). Co-op = one player each; solo = one player runs both. Solo and co-op are therefore
+  the *same game*, not two tunings. Ceiling is 2 players. Following from it
+  `[proposed by agent → you approved]`: one deck and one health pool **per character**, so a
+  character can be in trouble alone; **fully open information** (a solo player sees both hands
+  anyway); **strict alternating turns**, Red then Gray; and **down, not dead** — a character at zero
+  is revivable, the run ends only when both are down. Whether *energy* is shared or per-character is
+  deliberately **not** decided — handed to ticket 04, which must define the term first.
+- [Survey card games that use cards themselves as resource, health, or counters](issues/16-cards-as-resource-precedent-survey.md)
+  — `[research]` Widens ticket 01's single data point: **31 qualifying games** across five families —
+  cards as *currency*, *health*, *clock*, *damage*, *counters*. Requested by the human as a narrow
+  carve-out from the declined-survey rule; San Juan was the human's example, the rest of the seed list
+  was the agent's, and **three of the agent's seeds were factually wrong**. **The finding that matters
+  most for ticket 04:** the recursion failure mode ticket 01 found in Decipher **recurs in three more
+  games** — Necropotence restricted twice, Lorcana's Fortisphere banned for "a never-ending loop" —
+  so it is a property of the economy, not of one game. **The finding that cuts against the map's
+  current hypothesis:** in Undaunted, where damage removes cards, players **deliberately bait
+  casualties as free deck-thinning**; losing health makes the deck better, and a published strategy
+  guide recommends it. That is ticket 15's rubber-band hypothesis observed in the wild, working *too*
+  well — it is evidence for the mechanism and a warning about its tuning at once. **On bookkeeping:**
+  Ravensburger publishes an official *"Inkwell Error"* judge procedure for miscounts in a
+  permanently-hidden resource pile — a publisher conceding the pile is unverifiable in practice.
+  Three distinct answers to *who chooses which card is lost* are now on the table: player-picks,
+  opponent-picks, and Undaunted's **fixed priority where neither player chooses**. **Nothing here is
+  adopted** — facts only; a fact binds this design only when a grilling ticket adopts it and the
+  human says so.
+- [Design the deck-as-energy-and-HP model](issues/04-deck-as-energy-and-hp-model.md) — `[you]` The
+  hypothesis **survives in its pure form**. Your deck **is** your **stamina**; there is no energy
+  number and the word "energy" is retired. Three zones, no discard pile: **deck**, **hand**, face-up
+  **exhaust pile**. At the start of your turn you decide how many cards to **convert** from deck to
+  hand — the core decision, since every card converted is stamina spent whether used or not. Playing
+  an X-cost card **exhausts X cards from your hand**; damage **exhausts X cards from your deck**
+  (chosen costs from hand, unchosen punishment from deck). **The whole hand exhausts at end of turn**,
+  with **Retain** as the exception. Nothing returns during a floor; clearing a floor restores the
+  exhaust pile. You are **exhausted** — down, not dead — when you begin a turn and cannot convert,
+  which leaves you one **last stand** turn. **Stamina is per-character**, and solo is mechanically
+  identical to co-op. **The deckbuilding inversion is the design**: a card you add is +1 floor-time
+  and −1 consistency. **No structural anti-recursion rule** — declined deliberately, over the agent's
+  recommendation, with the dissent recorded. Low-complexity adopted as a **strong preference**. Zero
+  components; health is one visible stack; no shuffling during a floor. Two rulings made here belong
+  to other tickets and are recorded on them: **a floor is one continuous encounter** on a 2D plan,
+  ended by ascending (ticket 05), and **persistent effects live in your hand** via Retain, costing
+  hand space and always temptingly burnable as fuel (ticket 11).
+- [Explore damage-as-thinning as a built-in rubber band](issues/15-damage-as-thinning-rubber-band.md)
+  — `[you]` **Resolved against the hypothesis**, deliberately, by ticket 04. The player does *not*
+  choose which cards damage takes: it comes off the top of the deck, face up. The cull costs a
+  decision on every hit in a game built on frequent hits, and its payoff largely evaporated once the
+  deck stopped recycling. The information it was reaching for arrives instead from the face-up
+  exhaust pile. "Bracing" survives as an unadopted candidate. **Ticket 16 ran concurrently and was
+  not available to that session; read afterwards it independently supports the resolution** — in
+  Undaunted, a published guide recommends baiting casualties as free deck-thinning, which is this
+  hypothesis working *too* well in the wild.
 
 ## Not yet specified
 
 <!-- In scope, but not sharp enough to ticket. Graduates into tickets as the frontier advances. -->
 
 - **Boss encounter design** beyond the structural distinction settled in ticket 08 — what a boss
-  fight actually asks of the player. Ticket 13 settles the choices an *ordinary* floor presents;
-  whether a boss inverts, narrows, or simply intensifies those stays fog until 13 and 08 land.
+  fight actually asks of the player. Ticket 18 settles the choices an *ordinary* floor presents;
+  whether a boss inverts, narrows, or simply intensifies those stays fog until 18 and 08 land.
 - **Roguelite meta-progression** — whether anything persists between runs at all, and whether it
   is even in scope for a core spec.
-- **Death and run failure** — what happens when a run ends badly, and how long a run should be.
+- **Death and run failure** — what happens when a run ends badly, and how long a run should be. The
+  *within-floor* half is now settled (ticket 04); what remains is the run level, and it is narrower
+  than it was: ticket 04 established that attrition lives inside a floor and clearing one heals you
+  fully, so the run-level arc is deckbuilding rather than wearing down.
 - **Room contents and item pickups** — the "find items" half of the pitch. May resolve entirely
-  inside ticket 09; if it doesn't, it graduates.
+  inside ticket 09; if it doesn't, it graduates. Sharpened by ticket 04: searching a room can itself
+  cost stamina, so scavenging is a push-your-luck decision rather than a free pickup.
+- **What else costs stamina, beyond fighting** — ticket 04 opened this door deliberately (sprinting,
+  tripping, falling, searching, banging your head on a pipe). Ticket 07 owns the turn-level part;
+  the broader question of which floor interactions have a stamina price is not yet sharp enough to
+  ticket and depends on ticket 05's floor structure.
 - **Win condition beyond the boss** — how many floors, whether a run has an ending or is endless.
-- **Solo automa** — only if ticket 03 lands on co-op-first.
+- **Fixed duo or roster** — whether Red and Gray are the only two characters or one pairing drawn
+  from a larger cast. Pending ticket 13; a roster would expand content scope considerably.
 - **Table footprint and component budget** — the physical constraints that will eventually bound
-  card count and per-turn upkeep. The *floor layout's* share of this graduated into ticket 14,
+  card count and per-turn upkeep. The *floor layout's* share of this graduated into ticket 19,
   which produces the map's first hard footprint number; what remains here is everything else.
 - **Whether "North vs Up" means anything mechanical**, or is purely a title.
 

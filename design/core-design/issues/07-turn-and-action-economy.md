@@ -2,7 +2,7 @@
 
 Type: grilling
 Status: open
-Blocked by: 03, 04, 05, 06, 13, 14
+Blocked by: 03, 04, 05, 06, 18, 19
 Map: [core design map](../map.md)
 
 ## Question
@@ -26,6 +26,16 @@ Decide:
 8. **Upkeep.** The physical actions a human performs each turn: shuffling, flipping, sliding
    cards between piles, tracking counters. Count them honestly.
 
+## Settled upstream — do not relitigate
+
+From ticket 03: **strict alternating turns**, Red then Gray. **Fully open information.** Two
+characters always in play, each with their own deck and health pool, controlled by one player each
+in co-op and both by one player solo. A character at zero is **down, not dead**.
+
+What remains open here is everything *inside* a turn, plus: whether the alternation is fixed
+Red-then-Gray or the party chooses who leads each round; what happens to the sequence when one
+character is down; and whether a full round is Red+Gray or something finer.
+
 ## Must satisfy
 
 - The player-count model settled in ticket 03.
@@ -33,16 +43,44 @@ Decide:
 - The floor structure settled in ticket 05.
 - The pressure filter settled in ticket 06 — check the turn structure against it explicitly and
   record the check.
-- The decision filter settled in ticket 13 and the topology settled in ticket 14. The phases
+- The decision filter settled in ticket 18 and the topology settled in ticket 19. The phases
   designed here must be the phases in which 13's choices actually get made — a phase sequence that
   wraps no decisions has failed, however tidy it is. Record the check.
 
 ## Overlap to watch
 
-Item 6 (*what ends a floor*) overlaps ticket 05's run structure and ticket 13's engagement rules.
+Item 6 (*what ends a floor*) overlaps ticket 05's run structure and ticket 18's engagement rules.
 If either has already settled it, adopt rather than re-decide, and say which ticket owns it.
 
 ## Notes for the session
 
 - This is the ticket most likely to reveal that an upstream decision does not work. If it does,
   say so and reopen the upstream ticket rather than patching around it here.
+
+## Settled upstream by ticket 04 — do not relitigate
+
+- **Start of turn: the player decides how many cards to *convert* from deck to hand.** This is the
+  core decision of the game. Every card converted is stamina spent whether used or not.
+- **Playing an X-cost card = "exhaust X cards from your hand."** The played card also exhausts.
+- **Damage = "exhaust X cards from your deck."** Chosen costs come off the hand; unchosen punishment
+  comes off the deck.
+- **The whole hand exhausts at end of turn**, with **Retain** as the exception for situational and
+  equipped cards.
+- **Exhausted cards do not return during a floor.** There is no discard pile.
+- **A character is exhausted (down) when they begin a turn and cannot convert.**
+- **No mandatory minimum conversion.** Explicitly declined — a character who converts nothing has no
+  cards and cannot act, so stalling is self-punishing.
+
+What this ticket still owes, sharpened by the above:
+
+- **Hand size.** Is there a cap on conversion at all, or is cost the only limit? Ticket 04's finding
+  is that a hand is *tools and fuel* simultaneously, so over-drawing is already self-limiting — a
+  printed cap may be unnecessary.
+- **Whether movement, searching, and other floor actions cost stamina**, and how much. Ticket 04
+  ruled that exhausting is not a combat verb — sprinting, searching, forcing a door, tripping all
+  can cost. This ticket decides which, and whether they cost from hand or deck.
+- **Actions per turn** — whether actions are a separate currency from card costs, or the same thing.
+- `[you]` **"Do nothing: recover 1 card" is a logged candidate turn action.** Explicitly unadopted;
+  must survive playtest. Ticket 10 owns the number.
+- `[proposed by agent → not adopted, logged]` **"Bracing"** — absorbing a point of damage by
+  exhausting a card from hand, making blocking an act of stamina rather than a printed stat.

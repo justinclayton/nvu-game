@@ -1,4 +1,4 @@
-# 13 — Decide what choices a floor actually presents to the player
+# 18 — Decide what choices a floor actually presents to the player
 
 Type: grilling
 Status: open
@@ -39,7 +39,7 @@ Decide:
 ## Output
 
 A **one-line testable filter**, in the same style as ticket 06's pressure filter, that tickets 07,
-08, 11, and 14 can each be checked against. Something a later session can hold a proposal up to and
+08, 11, and 19 can each be checked against. Something a later session can hold a proposal up to and
 say yes or no.
 
 ## Must satisfy
@@ -52,11 +52,11 @@ say yes or no.
   genuinely coupled — resource starvation makes the interesting choice "what can I afford", while
   reveal-on-entry makes it "do I commit blind". Running them in sequence was rejected in favour of
   running them as siblings and paying one round of reconciliation later. `[you, 2026-08-15]`
-  Whichever of 06 and 13 resolves second must **explicitly check itself against the first** and
+  Whichever of 06 and 18 resolves second must **explicitly check itself against the first** and
   record the check. If they conflict, say so and reopen — do not paper over it.
 - Do not settle what a room physically is, how many there are, or how movement works. Those are
-  ticket 14. If a decision here implies a constraint on topology (for example, "routing exists"
-  rules out a pure linear track), state it as a constraint *for* 14 rather than deciding 14 here.
+  ticket 19. If a decision here implies a constraint on topology (for example, "routing exists"
+  rules out a pure linear track), state it as a constraint *for* 19 rather than deciding 19 here.
 - Beware choices that are only nominally choices — an option nobody would ever take is not a
   decision. For each choice settled, name the situation in which a reasonable player picks each
   side.

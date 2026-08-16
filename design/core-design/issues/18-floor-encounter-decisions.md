@@ -2,7 +2,7 @@
 
 Type: grilling
 Status: open
-Blocked by: 05
+Blocked by: —
 Map: [core design map](../map.md)
 
 ## Question
@@ -41,6 +41,32 @@ Decide:
 A **one-line testable filter**, in the same style as ticket 06's pressure filter, that tickets 07,
 08, 11, and 19 can each be checked against. Something a later session can hold a proposal up to and
 say yes or no.
+
+## Settled upstream by ticket 05 — do not relitigate
+
+- **One enemy per floor, and killing it grants passage.** `[you]` There is no separate boss. A floor
+  is a single monster plus a map you run around on, so this ticket's item 2 (*is engagement optional*)
+  is really asking **when**, not whether — the fight cannot be skipped, only postponed. That makes the
+  primary decision much more likely to be *engage now or prepare more* than *fight or bypass*.
+- **Red and Gray can move independently within a floor.** `[you]` Item 7's core question is answered;
+  what remains is whether splitting is a *good idea* in given situations, what it costs, and whether
+  the interesting choice is partly social.
+- **Scavenged items go to hand with Retain and are gone on ascending.** So scavenging trades hand
+  space for a tool, and everything found is use-it-or-lose-it within the floor. Commit-versus-conserve
+  (item 4) has a hard deadline built in.
+- **A floor must play in 5–7 minutes.** This is a hard constraint, not a target. A choice menu with
+  many options per room will not fit. Prefer few, sharp decisions over a rich verb list.
+
+## Do not assume — open upstream
+
+**Whether damage to the floor's enemy persists when the party breaks off contact is NOT settled.**
+Ticket 05 routed it to tickets 08 and 19 because it depends on how the enemy is physically tracked.
+The dent-it-and-flee-and-return loop described in ticket 04 **only exists if damage persists.** If it
+does not, the floor becomes *prepare, then win in one go*, which is a different set of decisions
+entirely.
+
+Either resolve this ticket in a way that works under both, or state explicitly which branch you took
+and flag that 08/19 must honour it. Do not silently assume the loop.
 
 ## Must satisfy
 

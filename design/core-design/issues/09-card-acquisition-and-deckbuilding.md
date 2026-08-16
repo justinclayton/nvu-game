@@ -39,6 +39,34 @@ Decide:
    (The between-runs half of this stays in the fog under meta-progression.)
 7. **Deck size.** Starting deck size and shape, and whether there is a ceiling.
 
+## Settled upstream by ticket 05 — do not relitigate
+
+- **Sub-question 1 is largely answered.** `[you]` The source is **per-floor rewards on clearing a
+  floor**, Slay the Spire style: a choice between several cards, added permanently to the deck. No
+  market. The run's deckbuilding arc is ten of these decisions and nothing else.
+- **Sub-question 2:** acquisition is a **reward, not a purchase**. Nothing is paid.
+- `[proposed by agent → you approved]` **Declining a reward is always allowed.** Under ticket 04's
+  inversion, skipping a card preserves consistency, so "no thanks" is a real play. The player
+  therefore sets their own final deck size — this ticket owns starting deck size and shape, but the
+  ceiling is the player's, not the designer's.
+- **Sub-question 5's voluntary half is constrained, not closed.** `[you]` Removal is **not** ruled out,
+  but it is **never a default** — if implemented at all it must be rare and special. Note that
+  declining rewards already provides thinning-by-omission at zero component cost, so a removal
+  mechanism has to justify itself against that, and against the map's **minimise play zones**
+  philosophy.
+- **In-floor pickups are not deckbuilding.** `[you]` Items scavenged during a floor go **straight to
+  hand with Retain** and are **gone on ascending** — they never enter the deck. So scavenging is never
+  a healing verb, and the deck stays a pure product of the ten reward decisions. A future exception
+  may let *some* items be carried onward; it is explicitly not the default, and it would be this
+  ticket's to design.
+- **Sub-question 6:** the deck does not reset between floors — acquired cards are permanent for the
+  run. Between-runs persistence stays in the fog.
+- **A vocabulary warning.** Slay the Spire's *Status* was reached for as shorthand for the temporary
+  in-floor item, but Status cards there are junk-as-punishment — the same lifecycle, opposite valence.
+  Do not import the word. This game will probably want both ideas and they need distinct names.
+  Relatedly, **Curse** is a live placeholder (ticket 05) for a card that follows you between floors as
+  a penalty; its name is provisional and a thematic replacement is owed before the spec locks.
+
 ## Must satisfy
 
 - The resource model settled in ticket 04.

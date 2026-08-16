@@ -1,7 +1,7 @@
 # 05 — Define the run and floor structure
 
 Type: grilling
-Status: open
+Status: resolved
 Blocked by: —
 Map: [core design map](../map.md)
 
@@ -59,6 +59,112 @@ latter. Do not reopen it.
   that is ticket 19's job, and settling representation here is the specific failure the rescope
   below was made to prevent.
 
+## Answer
+
+Resolved 2026-08-15. All four items settled; one adjacent question deliberately left open and routed.
+
+### 1. The boss — `[you]`
+
+**One enemy per floor, and defeating it is what grants passage.** The in-universe explanation for
+*why* killing it opens the way varies floor to floor for variety's sake — it dropped the key, it was
+holding the door, the machinery restarts when it dies. The explanation is flavour; the structure is
+constant.
+
+This picks the third of the three gate shapes ticket 04 floated and collapses "floor boss" and "room
+enemy" into a single thing. **A floor is a monster, plus a map you are running around on.** There is
+no such thing as a boss floor, because every floor is one.
+
+Stated as a default, not a law: **design space is deliberately left to deviate** once tickets 18, 19,
+and 08 establish what makes floors differ. A later floor that breaks this pattern is a designed
+exception, and the exception has to earn itself against the default rather than the reverse.
+
+The agent recommended a broader unification — a locked exit whose lock varies in *kind* (a key, a
+mechanism, sigils, a monster). **Not adopted.** The narrower rule is simpler to start with and can
+widen later if it needs to; the wide version cannot be narrowed once floors are built against it.
+
+### 2. Ascension — what carries — `[you]`
+
+Ticket 04 settled that the exhaust pile returns and the character heals to full. Beyond that:
+
+- **Card rewards.** Clearing a floor offers permanent card-reward options, Slay the Spire style — a
+  choice between several, added to the deck for the rest of the run. This is what gives the player
+  direction over building synergies, and it is the run's primary arc.
+  `[proposed by agent → you approved]` **Declining is always allowed.** Under ticket 04's inversion a
+  skipped card is consistency preserved, so "no thanks" is a genuinely strong play rather than a
+  courtesy option. The player therefore sets their own final deck size.
+  `[you]` **Removal is not ruled out**, but it is never a default — if it is implemented at all it
+  must be rare and special. (This revises the agent's proposal to close removal off entirely.)
+- **Scavenged items do not carry.** See item 5 below.
+- **Nothing bad carries, by default** `[you]` — with a **card-specific exception**. A card may follow
+  you between floors as a penalty. Placeholder keyword: **Curse**, taking Slay the Spire's meaning.
+  The name is explicitly provisional and needs a thematically-appropriate replacement before the spec
+  locks; it is kept out of `CONTEXT.md` until then. The default remains that a floor cleared is a
+  clean slate, and any carried penalty is a specific card doing a specific thing, never a background
+  rule.
+
+There is no permanent injury, no wound track, and no run-level damage. Ticket 04 put attrition inside
+a floor; a general carried penalty would reintroduce the run-as-attrition arc that was already ruled
+against.
+
+### 3. Escalation — `[you]`
+
+**Enemy difficulty scales floor to floor.** That is the certain axis.
+
+**Floor size and complexity are a probable second axis**, deferred: it cannot be settled before
+ticket 19 decides what a floor plan actually is. Revisit once 19 lands.
+
+Note the run's central tension, which falls out of ticket 04 rather than needing invention: the deck
+*is* stamina, so deckbuilding is the player's counter to escalation — but every added card also
+dilutes consistency. The run is a race between growing the stamina pool and thinning out the
+guarantee that the right card shows up. Escalation sets the pace of that race.
+
+### 4. Run length — `[you]`
+
+**Ten floors, fixed.** Deck size is a separate dial from floor count, tuned by ticket 10's simulator.
+
+**Five to seven minutes per floor**, giving a full run of roughly 60–75 minutes. This is adopted as a
+**hard design constraint, not a target** — its explicit purpose is to keep the design from
+over-complicating itself. A floor that takes five minutes cannot host many rooms or much per-turn
+bookkeeping, and tickets 19 and 07 must fit inside that budget rather than discover it later.
+
+### 5. Scavenged items — `[you]`
+
+Ruled here because it determines what "carries" means, though ticket 09 owns acquisition mechanics.
+
+Items found during a floor go **straight to hand, with Retain by default, and do not leave the floor
+with you.** They are tools that occupy hand space, burnable as fuel when desperate, gone on ascending.
+A way to carry *some* items onward may exist later — definitely not all, and definitely not the
+default.
+
+Two consequences:
+
+- **Hand size must be capped.** Otherwise "it takes up hand space" is not a cost at all. This is a
+  requirement pushed onto ticket 07, which owns hand size.
+- Pickups deliberately **do not enter the deck**, so scavenging is never a healing verb and the deck
+  stays a pure product of deckbuilding. The agent flagged this as the load-bearing choice and as
+  cheap to flip at ticket 20's table test.
+
+**Vocabulary note:** Slay the Spire's "Status" was the reference reached for, but Status cards there
+are junk — clutter as punishment. A scavenged item is the opposite valence with the same lifecycle.
+The word is **not imported**; this game will likely want both ideas and they need separate names.
+
+### Left open, deliberately — `[you]`
+
+**Whether damage to a floor's enemy persists when the party breaks off contact** is *not* settled
+here. It is downstream of how the enemy is physically represented and how its damage is tracked: if
+separate health tracking proves fiddly at the table, "you have to take it down in one go" becomes a
+live option, which would produce a materially different floor.
+
+Routed to **tickets 08 and 19**. **Ticket 18 must not assume the dent-it-and-retreat loop exists**
+until this lands — the floor described in ticket 04 depends on it, and it is not yet guaranteed.
+
+### Designer philosophy surfaced here — `[you]`
+
+**Minimise play zones.** Not a game rule for players — a working discipline for the designers. Deck as
+stamina, consumables and equipment as Retained cards in hand: both are instances of it. Promoted to
+the map's standing Notes, because a floor plan is the most zone-hungry thing left on this map and this
+principle is exactly the kind that erodes silently when a later ticket finds a zone convenient.
+
 ## Rescope history
 
 `[proposed by agent → you approved, 2026-08-15]` This ticket originally carried encounter-scale
@@ -70,5 +176,8 @@ what that representation had to accomplish, and the floor encounter had no ownin
 The splitting-up question in particular was recorded here as "a structural question, not a
 turn-economy one" — that remains true, but it is *encounter* structure rather than *run* structure,
 so it now sits in ticket 18 (may they split) and ticket 19 (what the topology must support if they
-can). `[proposed by agent → flag for your review]` — this is the one item of the rescope where a
-prior session's placement was overridden rather than merely moved.
+can). `[proposed by agent → you approved, 2026-08-15]` — this was the one item of the rescope where a
+prior session's placement was overridden rather than merely moved. **Resolved during this session:**
+the move stands, and the underlying design question was answered outright — `[you]` **Red and Gray can
+move independently within a floor.** Ticket 18 carries it as settled upstream; ticket 19 must supply a
+topology that supports two separated characters.

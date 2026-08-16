@@ -58,6 +58,22 @@ Decide:
 - **Retain** exists as a keyword, taking Slay the Spire's meaning: the card is not exhausted at end
   of turn. Used for highly situational cards and for anything that should feel equipped.
 
+## Card kinds established by ticket 05 — `[you]`
+
+Two more things a card can be, both of which this ticket must find room for in the anatomy:
+
+- **Scavenged item** — found during a floor, goes to hand with **Retain**, gone on ascending. It never
+  enters the deck. Decide whether "leaves at end of floor" is a printed keyword, a card kind, or a
+  property of where the card came from — and note the card must read as temporary at a glance, or
+  players will build plans around something that is about to vanish.
+- **Curse** *(placeholder name — a thematic replacement is owed before the spec locks)* — a card that
+  follows you between floors as a penalty, taking Slay the Spire's meaning. The default is that
+  nothing bad carries; a Curse is a specific card breaking that default deliberately.
+
+These have the *same lifecycle vocabulary* and **opposite valence**: one is a good thing that leaves,
+one is a bad thing that stays. Slay the Spire's word "Status" was explicitly **not** imported for the
+first, because it means junk there. Naming these two apart is partly this ticket's job.
+
 ## New card type to design — `[you]`, from the ticket 04 session
 
 **Persistent effects live in your hand.** A card granting an ongoing buff stays in hand via Retain

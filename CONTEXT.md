@@ -8,14 +8,26 @@ Every entry is tagged with the ticket that settled it.
 ---
 
 **Run** — a whole play session, from the start of the first floor until both characters are exhausted
-or the tower is beaten. A run spans many floors. *(ticket 04)*
+or the tower is beaten. A run is **ten floors**, and should take 60–75 minutes. *(tickets 04, 05)*
 
 **Floor** — one level of the tower, and **one continuous encounter**. A 2D floor plan the characters
 move around over many turns: entering rooms, fighting, fleeing, scavenging, doubling back, being
-chased. A floor ends by **ascending**. *(ticket 04; detail owned by ticket 05)*
+chased. **A floor holds one enemy**, and defeating it is what grants passage; the in-fiction reason
+varies floor to floor. A floor ends by **ascending**, and should play in **5–7 minutes**.
+*(tickets 04, 05)*
 
 **Ascend** — to leave a floor for the next one. Ascending restores every card in the exhaust pile to
-the deck: a floor cleared is a full heal. *(ticket 04)*
+the deck: a floor cleared is a full heal. It also discards every **scavenged item** still in hand, and
+offers a **card reward**. *(tickets 04, 05)*
+
+**Card reward** — the choice of cards offered on clearing a floor, one of which may be added
+permanently to the deck for the rest of the run. **Declining is always allowed**, and is a real play:
+under the deck-as-stamina model a card refused is consistency preserved. Ten reward decisions are the
+whole of a run's deckbuilding. *(ticket 05; mechanics owned by ticket 09)*
+
+**Scavenged item** — something found during a floor. It goes **straight to hand** with **Retain**, so
+it occupies hand space until used or burned as fuel, and it does **not** leave the floor with you.
+Scavenged items never enter the deck, so scavenging is never a heal. *(ticket 05)*
 
 **Character** — Red or Gray. Both are always in play. In co-op one player runs each; solo, one player
 runs both, under identical rules. *(tickets 03, 04)*

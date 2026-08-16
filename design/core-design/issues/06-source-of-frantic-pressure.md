@@ -2,7 +2,7 @@
 
 Type: grilling
 Status: open
-Blocked by: 05
+Blocked by: —
 Map: [core design map](../map.md)
 
 ## Question

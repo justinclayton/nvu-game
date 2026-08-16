@@ -35,6 +35,35 @@ Decide:
 8. **Footprint.** Rough table area a floor occupies, and component count. This is the first hard
    number the map will have on physical budget.
 
+## Settled upstream by ticket 05 — do not relitigate
+
+- **A floor must play in 5–7 minutes**, full run ten floors in 60–75. `[you]` Adopted as a hard
+  constraint whose stated purpose is to stop the design over-complicating itself. This binds items 4,
+  5, 7, and 8 directly: room count, movement cost, setup time, and footprint all have to fit inside
+  five minutes of real table time, **ten times in a row**, including teardown. Budget setup and
+  teardown as part of the five minutes, not on top of it.
+- **One enemy per floor, killed to grant passage.** `[you]` The topology has to make one monster and
+  a handful of rooms interesting for five minutes. That is a very different problem from routing
+  between many encounters — it argues for geometry that supports *avoiding and returning to a known
+  point*, not for a branching content-delivery map.
+- **Red and Gray move independently.** `[you]` Whatever topology is chosen must support two
+  characters in different places, and item 3 (does distance mean anything) inherits a second job:
+  whether the *distance between the two characters* means anything.
+- **Scavenged items go to hand with Retain, gone on ascending.** Rooms therefore need to be able to
+  contain findable things, and searching them is a use-it-or-lose-it proposition.
+
+## This ticket owns a question routed from ticket 05
+
+**Does damage to the floor's enemy persist when the party breaks off contact?** `[you]` Ticket 05
+deliberately left this open because it is really a *representation* question: it depends on how the
+enemy is physically represented and therefore how its damage is tracked. If separate health tracking
+turns out to be fiddly, "you have to take it down in one go" becomes the answer, and the floor changes
+shape.
+
+Settle it jointly with ticket 08, and note that the map's **minimise play zones** philosophy applies
+with full force — an enemy health track is exactly the kind of thing this project would rather express
+with cards it already has.
+
 ## Must satisfy
 
 - The decision filter settled in ticket 18 — check each candidate topology against it explicitly

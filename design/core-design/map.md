@@ -36,6 +36,12 @@ head, reacting to what's in front of you, with little time for deep strategy.*
     is [ticket 16](issues/16-cards-as-resource-precedent-survey.md). This is not a reversal. A survey
     of *comparable games* — deckbuilders and roguelites as peers — stays declined. The test is
     whether the subject is one mechanic's precedent or another game's overall design.
+- **Minimise play zones** `[you, ticket 05]`. A designer philosophy, not a game rule. A new zone is a
+  cost to be justified, never a free tool. Where a game would normally reach for another zone, a
+  counter, or a track, look first for a way to express it with the cards and zones that already
+  exist — deck-as-stamina and items-as-Retained-cards-in-hand are the pattern. The constraint is
+  meant to force creative representation, so treat "we need somewhere to put this" as a design
+  prompt rather than a shopping list.
 - **Skills.** Every session invokes `/grilling` and `/domain-modeling`. Prototype tickets invoke
   `/prototype`. Research tickets are resolved by a `/research` subagent.
 - **Glossary.** [`CONTEXT.md`](../../CONTEXT.md) exists at the repo root, created from ticket 04.
@@ -132,27 +138,50 @@ head, reacting to what's in front of you, with little time for deep strategy.*
   Undaunted, a published guide recommends baiting casualties as free deck-thinning, which is this
   hypothesis working *too* well in the wild.
 
+- [Define the run and floor structure](issues/05-run-and-floor-structure.md) — `[you]` **One enemy per
+  floor, and killing it grants passage** — the diegetic reason varies for flavour, the structure
+  doesn't. "Boss" and "room enemy" collapse into one thing: a floor *is* a monster plus a map you run
+  around on. Stated as a default with design space left to deviate. **Ten floors, fixed**, at a hard
+  budget of **5–7 minutes each** (~60–75 minute run) — adopted explicitly to stop the design
+  over-complicating itself, so tickets 19 and 07 must fit inside it. **Clearing a floor offers
+  permanent card rewards**, Slay the Spire style, and `[proposed by agent → you approved]` **declining
+  is always allowed**, which makes the player set their own deck size and gives thinning-by-omission
+  for free. Removal is not ruled out but is never a default. **Escalation scales enemy difficulty**;
+  floor size as a second axis waits on ticket 19. **Scavenged items go straight to hand with Retain
+  and do not leave the floor** — so scavenging is never a healing verb — which forces a **hand size
+  cap** onto ticket 07. **Nothing bad carries between floors except card-specific penalties**
+  (placeholder keyword *Curse*, name provisional). **Red and Gray move independently within a floor.**
+  Deliberately left open and routed to tickets 08 and 19: **whether damage to the floor's enemy
+  persists when you break off** — it depends on how the enemy is physically tracked, and ticket 18 may
+  not assume the dent-and-retreat loop exists until it lands. Surfaced here and promoted to the
+  standing Notes: **minimise play zones**, a designer philosophy rather than a game rule.
+
 ## Not yet specified
 
 <!-- In scope, but not sharp enough to ticket. Graduates into tickets as the frontier advances. -->
 
-- **Boss encounter design** beyond the structural distinction settled in ticket 08 — what a boss
-  fight actually asks of the player. Ticket 18 settles the choices an *ordinary* floor presents;
-  whether a boss inverts, narrows, or simply intensifies those stays fog until 18 and 08 land.
+- **Floors that deviate from the one-enemy default** — ticket 05 made "one enemy per floor, killing it
+  grants passage" the rule for every floor, and deliberately left room to break it later. What a
+  deviation would look like, and whether the tower's last floor is one, stays fog until 18, 19, and 08
+  establish what makes floors differ at all. Note this replaces the old *boss encounter design* entry:
+  ticket 05 collapsed boss and room enemy into a single thing, so there is no separate boss to design.
 - **Roguelite meta-progression** — whether anything persists between runs at all, and whether it
   is even in scope for a core spec.
-- **Death and run failure** — what happens when a run ends badly, and how long a run should be. The
-  *within-floor* half is now settled (ticket 04); what remains is the run level, and it is narrower
-  than it was: ticket 04 established that attrition lives inside a floor and clearing one heals you
-  fully, so the run-level arc is deckbuilding rather than wearing down.
+- **Death and run failure** — what happens when a run ends badly. Narrower again after ticket 05: run
+  *length* is settled (ten floors, 60–75 minutes) and the run-level arc is deckbuilding rather than
+  wearing down, so what remains is only what failure costs and what, if anything, a failed run leaves
+  behind. That last part may turn out to be meta-progression's question rather than this one's.
 - **Room contents and item pickups** — the "find items" half of the pitch. May resolve entirely
   inside ticket 09; if it doesn't, it graduates. Sharpened by ticket 04: searching a room can itself
-  cost stamina, so scavenging is a push-your-luck decision rather than a free pickup.
+  cost stamina, so scavenging is a push-your-luck decision rather than a free pickup. Sharpened again
+  by ticket 05, which settled the *lifecycle* — a pickup goes to hand with Retain and is gone on
+  ascending — leaving only what pickups actually *are* and how a floor decides what's in a room. Two
+  named threads remain: whether a floor can hand you something that clutters rather than helps, and
+  the later exception under which a *few* items might be carried onward.
 - **What else costs stamina, beyond fighting** — ticket 04 opened this door deliberately (sprinting,
   tripping, falling, searching, banging your head on a pipe). Ticket 07 owns the turn-level part;
   the broader question of which floor interactions have a stamina price is not yet sharp enough to
-  ticket and depends on ticket 05's floor structure.
-- **Win condition beyond the boss** — how many floors, whether a run has an ending or is endless.
+  ticket and now depends on ticket 19's floor plan rather than ticket 05, which has landed.
 - **Fixed duo or roster** — whether Red and Gray are the only two characters or one pairing drawn
   from a larger cast. Pending ticket 13; a roster would expand content scope considerably.
 - **Table footprint and component budget** — the physical constraints that will eventually bound

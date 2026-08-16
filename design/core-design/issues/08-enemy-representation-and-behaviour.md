@@ -25,9 +25,26 @@ Decide:
    whether that tracking is a component or a card-state.
 6. **Persistence.** Whether unkilled enemies follow the player between rooms or are left behind —
    a large lever on whether the player feels chased.
-7. **Boss distinction.** What *structurally* separates a floor boss from a room enemy: more
-   health, a phase change, a rule that breaks a normal rule, or a different subsystem entirely.
-   Only the structural distinction is settled here; actual boss encounter design stays in the fog.
+7. ~~**Boss distinction.**~~ **Struck by ticket 05.** `[you]` There is one enemy per floor and killing
+   it grants passage, so boss and room enemy are the same thing and there is no structural distinction
+   left to draw. What replaces this item: enemies must **scale in difficulty floor to floor** (ticket
+   05's escalation axis), so decide *along which dimensions* an enemy gets harder — health, damage,
+   behaviour complexity, or how hard it is to disengage from — and keep the answer inside ticket 07's
+   upkeep budget at every point on the curve.
+
+## Routed here by ticket 05 — decide jointly with ticket 19
+
+**Does damage to the floor's enemy persist when the party breaks off contact?** `[you]` Left open
+deliberately, because it is downstream of items 1 and 5 above: how the enemy is represented determines
+how its damage is tracked, and if separate health tracking is fiddly at the table, "you have to take
+it down in one go" becomes the answer.
+
+This is not a small detail. Ticket 04's picture of a floor — dent it, flee, scavenge, come back —
+**only exists if damage persists.** Ticket 18 has been told not to assume it. Whichever way this goes,
+say so loudly and check it against 18's decision filter.
+
+The map's **minimise play zones** philosophy bears directly on item 5: an enemy health track is
+precisely the sort of thing this project would rather express with cards it already has.
 
 ## Must satisfy
 

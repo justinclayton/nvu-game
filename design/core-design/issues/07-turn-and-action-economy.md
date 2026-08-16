@@ -2,7 +2,7 @@
 
 Type: grilling
 Status: open
-Blocked by: 03, 04, 05, 06, 18, 19
+Blocked by: 03, 04, 06, 18, 19
 Map: [core design map](../map.md)
 
 ## Question
@@ -76,6 +76,12 @@ What this ticket still owes, sharpened by the above:
 - **Hand size.** Is there a cap on conversion at all, or is cost the only limit? Ticket 04's finding
   is that a hand is *tools and fuel* simultaneously, so over-drawing is already self-limiting — a
   printed cap may be unnecessary.
+  - **Ticket 05 has since forced this.** `[you]` Scavenged items go to hand with Retain, and their
+    stated cost is that they *occupy hand space*. With no cap, that cost does not exist and item
+    pickups are free. So a **maximum hand size is now required**, not optional. What remains here is
+    the number, whether it applies to conversion or to holding, and how Retained cards count against
+    it. Note that the cap is what makes carrying an item a real decision, so it cannot be so generous
+    that nobody ever feels it.
 - **Whether movement, searching, and other floor actions cost stamina**, and how much. Ticket 04
   ruled that exhausting is not a combat verb — sprinting, searching, forcing a door, tripping all
   can cost. This ticket decides which, and whether they cost from hand or deck.

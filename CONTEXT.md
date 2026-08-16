@@ -77,4 +77,4 @@ cannot convert. The run ends only when both characters are down. *(tickets 03, 0
 
 **Last stand** — the final turn a character gets when their deck empties: they still have the hand
 they are holding, and no possibility of another. Whether it carries special rules is open.
-*(ticket 04; owned by ticket 17)*
+*(ticket 04; special rules owned by ticket 17)*

@@ -71,10 +71,9 @@ ticket fixes the **mechanism**, and makes no claim to have proved the feeling.*
 
 ### Two things press on the player at once
 
-Two things press on the player at the same time, and neither of them is enough on its own. The pair
-has no agreed name.
+Two things press on the player at the same time, and neither of them is enough on its own.
 
-1. **You get poorer every turn.** `[you]` This half is ratified from ticket 04 (*Design the
+1. **You get poorer every turn.** `[you]` This is ratified from ticket 04 (*Design the
    deck-as-energy-and-HP model*) rather than chosen here: your deck is your stamina, and for as long
    as a floor's encounter is running it only ever runs down. Ascending is what reverses it — a floor
    cleared is a full heal — so the drain is one-way *inside* an encounter, not across a run.
@@ -87,10 +86,11 @@ has no agreed name.
    without the player prompting it. Two things can do that: **the floor's enemy**, and **hazards**,
    in the rooms that have them.
 
-The agent framed the pair as *you weaken while it strengthens*, and that framing was accepted. The
+The agent framed these two as *you weaken while it strengthens*, and that framing was accepted. The
 agent also argued at the outset that the drain on its own gives *scarcity, not franticness*. That
 still stands: a drain that only punishes turns going by is indifferent to a player who thinks for
-five minutes. The second half is what turns the floor into a race the player is losing.
+five minutes. What turns the floor into a race the player is losing is that **something acts on them
+every turn**.
 
 ### Rulings
 

@@ -71,8 +71,8 @@ ticket fixes the **mechanism**, and makes no claim to have proved the feeling.*
 
 ### Two blades close on you at once
 
-Two things press on the player at the same time, and neither of them is enough on its own. Call the
-pair **the scissors**.
+Two things press on the player at the same time, and neither of them is enough on its own. The pair
+has no agreed name.
 
 1. **You get poorer every turn.** `[you]` This blade is ratified from ticket 04 (*Design the
    deck-as-energy-and-HP model*) rather than chosen here: your deck is your stamina, and for as long
@@ -123,7 +123,7 @@ five minutes. The second blade is what turns the floor into a race the player is
   the geometry for free, with no rule written for it. Explicitly **not** adopted: any rule that
   makes higher floors cost more per action. Such a rule would be a number to track on every action,
   and it would do by fiat what the geometry does diegetically.
-- **The pressure can genuinely kill you.** `[you]` The scissors are allowed to close. But when a
+- **The pressure can genuinely kill you.** `[you]` It is allowed to close on you. But when a
   player loses, the honest reason has to be **"I spent badly," never "I was slow"** — the rules
   cannot see slow, and should not try to. **Revive is the safety valve**: when a hazard breaks badly
   and a character goes down, the other character can bring them back at a cost, so a single bad

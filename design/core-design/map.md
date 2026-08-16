@@ -157,8 +157,8 @@ head, reacting to what's in front of you, with little time for deep strategy.*
   standing Notes: **minimise play zones**, a designer philosophy rather than a game rule.
 
 - [Decide what creates the frantic, in-over-your-head pressure](issues/06-source-of-frantic-pressure.md)
-  — `[you]` The pillar is carried by two things at once, and neither is enough alone — call the pair
-  **the scissors**. **You get poorer every turn**: ticket 04's drain, ratified rather than chosen
+  — `[you]` The pillar is carried by two things at once, and neither is enough alone.
+  **You get poorer every turn**: ticket 04's drain, ratified rather than chosen
   again, but **widened so that most moves cost stamina in some form**, not just card play (a
   constraint on ticket 07, *Define the turn and action economy within a floor*). And **something
   acts on you every turn**, either the floor's enemy or a hazard, on the floors that use them. There
@@ -174,7 +174,7 @@ head, reacting to what's in front of you, with little time for deep strategy.*
   ticket 19** (*Decide the floor's topology and physical representation*), **explicitly not
   binding**, and it is the leading proposal for the second axis of escalation that ticket 05 left
   open. The squeeze works through **space and supply, not rate**: fewer places to scavenge falls out
-  of the geometry for free, and no rule makes a higher floor cost more per action. The scissors are
+  of the geometry for free, and no rule makes a higher floor cost more per action. The pressure is
   allowed to **close and kill you**, but the honest failure is *"I spent badly," never "I was
   slow"*, with **revive as the safety valve** at a cost ticket 14 (*Design the down and revive
   rules*) sets. **Instruction overridden** `[you]`: the ticket demanded a one-line testable filter

@@ -39,6 +39,15 @@ the health bar, and nothing else tracks health. Each character has their own. *(
 same substance as the energy used to pay for cards; there is no separate resource and no number
 anywhere. *(ticket 04)*
 
+**Drain** — shorthand for the standing decision that **most actions cost stamina**, not only playing
+cards: moving between rooms, scavenging, and interacting with the floor all have a price. The drain
+runs one way for as long as an encounter lasts; **ascending** is what reverses it. It is one half of
+**the scissors**. *(tickets 04, 06; the per-action price list is owned by ticket 07)*
+
+**The scissors** — the two things that together produce the game's central feeling of being in over
+your head: the **drain** takes from you every turn while the floor's enemy, or a hazard, acts on you
+every turn. Neither blade is enough alone. *(ticket 06)*
+
 **Hand** — the cards a character converted this turn. Simultaneously their available **tools** and
 the **fuel** those tools burn. The whole hand exhausts at end of turn unless a card has **Retain**.
 *(ticket 04)*

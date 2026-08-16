@@ -75,8 +75,10 @@ Two things press on the player at the same time, and neither of them is enough o
 pair **the scissors**.
 
 1. **You get poorer every turn.** `[you]` This blade is ratified from ticket 04 (*Design the
-   deck-as-energy-and-HP model*) rather than chosen here: your deck is your stamina, it only ever
-   runs down, and re-litigating that would reopen 04. What this ticket adds is width. Playing cards
+   deck-as-energy-and-HP model*) rather than chosen here: your deck is your stamina, and for as long
+   as a floor's encounter is running it only ever runs down. Ascending is what reverses it — a floor
+   cleared is a full heal — so the drain is one-way *inside* an encounter, not across a run.
+   Re-litigating any of that would reopen 04. What this ticket adds is width. Playing cards
    is not the only thing that costs you. **Most moves cost stamina in some form** — moving,
    scavenging, and interacting with the floor are all expected to have a stamina price, not just
    card play. That is a constraint on **ticket 07** (*Define the turn and action economy within a

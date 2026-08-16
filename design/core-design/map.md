@@ -188,44 +188,42 @@ head, reacting to what's in front of you, with little time for deep strategy.*
 
 <!-- In scope, but not sharp enough to ticket. Graduates into tickets as the frontier advances. -->
 
-- **Floors that deviate from the one-enemy default** — ticket 05 made "one enemy per floor, killing it
-  grants passage" the rule for every floor, and deliberately left room to break it later. What a
-  deviation would look like, and whether the tower's last floor is one, stays fog until 18, 19, and 08
-  establish what makes floors differ at all. Note this replaces the old *boss encounter design* entry:
-  ticket 05 collapsed boss and room enemy into a single thing, so there is no separate boss to design.
+- **Floors that deviate from the one-enemy default** — every floor holds one enemy, and killing it
+  grants passage. There is no separate boss encounter; the floor's enemy is the whole fight. The rule
+  may be broken later, and what a deviation would look like is open, as is whether the tower's last
+  floor is one. This stays fog until tickets 18, 19, and 08 establish what makes floors differ at all.
 - **Roguelite meta-progression** — whether anything persists between runs at all, and whether it
   is even in scope for a core spec.
-- **Death and run failure** — what happens when a run ends badly. Narrower again after ticket 05: run
-  *length* is settled (ten floors, 60–75 minutes) and the run-level arc is deckbuilding rather than
-  wearing down, so what remains is only what failure costs and what, if anything, a failed run leaves
-  behind. That last part may turn out to be meta-progression's question rather than this one's.
+- **Death and run failure** — what happens when a run ends badly. Run *length* is settled (ten
+  floors, 60–75 minutes) and the run-level arc is deckbuilding rather than wearing down, so what
+  remains is only what failure costs and what, if anything, a failed run leaves behind. That last
+  part may turn out to be meta-progression's question rather than this one's.
 - **Room contents and item pickups** — the "find items" half of the pitch. May resolve entirely
-  inside ticket 09; if it doesn't, it graduates. Sharpened by ticket 04: searching a room can itself
-  cost stamina, so scavenging is a push-your-luck decision rather than a free pickup. Sharpened again
-  by ticket 05, which settled the *lifecycle* — a pickup goes to hand with Retain and is gone on
-  ascending — leaving only what pickups actually *are* and how a floor decides what's in a room. Two
-  named threads remain: whether a floor can hand you something that clutters rather than helps, and
-  the later exception under which a *few* items might be carried onward. Ticket 06 adds a gradient:
-  if the pyramid proposal is adopted, **rooms worth scavenging get scarcer the higher you climb**, so
-  how generous a floor is becomes an escalation dial in its own right.
-- **What else costs stamina, beyond fighting** — ticket 04 opened this door deliberately (sprinting,
-  tripping, falling, searching, banging your head on a pipe). Ticket 06 has since ruled the
-  *principle* — **most moves cost stamina in some form** — so what remains is no longer whether but
-  **which**: the specific price list for movement, scavenging, and floor interactions. Ticket 07 owns
-  the turn-level part; the rest depends on ticket 19's floor plan.
-- **Hazard design** — ticket 06 named hazards as a second thing that can act on the player each
-  turn, alongside the floor's enemy, and ruled them a **tool, not a requirement**, leaving how
-  heavily to use them to balance time. What a hazard actually *is* has not been touched: it might be
-  a fixed feature of the floor, something that triggers, or something that acts on you every turn
-  you stand near it. That cannot sharpen until tickets 18 (*Decide what choices a floor actually
-  presents to the player*) and 19 (*Decide the floor's topology and physical representation*)
-  establish what a floor physically contains. It may resolve inside 18 or 19; if it doesn't, it
-  graduates.
+  inside ticket 09; if it doesn't, it graduates. Searching a room can itself cost stamina, so
+  scavenging is a push-your-luck decision rather than a free pickup. The *lifecycle* is settled: a
+  pickup goes to hand with Retain and is gone on ascending. What remains open is what pickups
+  actually *are* and how a floor decides what's in a room. Two named threads remain: whether a floor
+  can hand you something that clutters rather than helps, and the later exception under which a
+  *few* items might be carried onward. If the pyramid proposal is adopted, **rooms worth scavenging
+  get scarcer the higher you climb**, which makes how generous a floor is an escalation dial in its
+  own right.
+- **What else costs stamina, beyond fighting** — **most moves cost stamina in some form**, so the
+  question is not whether but **which**. What remains is the specific price list for movement,
+  scavenging, and floor interactions, covering things like sprinting, tripping, falling, searching,
+  and banging your head on a pipe. Ticket 07 owns the turn-level part; the rest depends on ticket
+  19's floor plan.
+- **Hazard design** — hazards are a second thing that can act on the player each turn, alongside the
+  floor's enemy, and they are a **tool, not a requirement**; how heavily to use them is left to
+  balance time. What a hazard actually *is* remains open: it might be a fixed feature of the floor,
+  something that triggers, or something that acts on you every turn you stand near it. That cannot
+  sharpen until tickets 18 (*Decide what choices a floor actually presents to the player*) and 19
+  (*Decide the floor's topology and physical representation*) establish what a floor physically
+  contains. It may resolve inside 18 or 19; if it doesn't, it graduates.
 - **Fixed duo or roster** — whether Red and Gray are the only two characters or one pairing drawn
   from a larger cast. Pending ticket 13; a roster would expand content scope considerably.
 - **Table footprint and component budget** — the physical constraints that will eventually bound
-  card count and per-turn upkeep. The *floor layout's* share of this graduated into ticket 19,
-  which produces the map's first hard footprint number; what remains here is everything else.
+  card count and per-turn upkeep. The *floor layout's* share belongs to ticket 19, which produces
+  the map's first hard footprint number; what remains here is everything else.
 - **Whether "North vs Up" means anything mechanical**, or is purely a title.
 
 ## Out of scope

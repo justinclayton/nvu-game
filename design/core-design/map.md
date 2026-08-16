@@ -156,6 +156,29 @@ head, reacting to what's in front of you, with little time for deep strategy.*
   not assume the dent-and-retreat loop exists until it lands. Surfaced here and promoted to the
   standing Notes: **minimise play zones**, a designer philosophy rather than a game rule.
 
+- [Decide what creates the frantic, in-over-your-head pressure](issues/06-source-of-frantic-pressure.md)
+  — `[you]` The pillar is a **pair of scissors**, neither blade sufficient alone: **you get poorer
+  every turn** — ticket 04's drain, ratified rather than rechosen, but **widened so that most moves
+  cost stamina in some form**, not just card play (a constraint on ticket 07) — while **something
+  acts on you every turn**, from the floor's enemy and from hazards where a floor uses them. **No
+  wall clock** of any kind, rejected outright. **"You cannot simply leave" is binding on ticket 08**
+  as a requirement, free in implementation; pursuit is the obvious way but 08 picks the mechanism.
+  **Hazards are a tool, not a requirement** — dosage is a balance-time question, and the agent's
+  recommendation to bind a weaker "pressure must not come from the enemy alone" was declined with the
+  dissent recorded. The pressure is **both diegetic and structural**, which the **pyramid tower**
+  makes possible at once: the tower narrows as it rises, so higher floors are tighter, with fewer
+  scavengable rooms and less space to avoid enemies — escalation you can see on the table instead of
+  bigger numbers. That is a **strong candidate for ticket 19, explicitly not binding**, and it is the
+  leading proposal for the second escalation axis ticket 05 left open. The squeeze is **space and
+  supply, not rate** — fewer scavenge sites falls out of the geometry for free; no per-floor cost
+  multiplier. The scissors are allowed to **close and kill you**, but the honest failure is *"I spent
+  badly," never "I was slow"*, with **revive as the safety valve** at a cost ticket 14 sets.
+  **Instruction overridden** `[you]`: the ticket demanded a one-line testable filter for 07/08/09/11
+  and the human rejected every draft — **no tests; these get decided when we talk specifics** — so 06
+  hands down constraints argued case by case, not a formula. **Deferred:** whether you see the whole
+  floor on arrival, routed to 18 and 19. 06 resolved before 18, so **18 inherits** the sibling
+  reconciliation check.
+
 ## Not yet specified
 
 <!-- In scope, but not sharp enough to ticket. Graduates into tickets as the frontier advances. -->
@@ -177,11 +200,19 @@ head, reacting to what's in front of you, with little time for deep strategy.*
   by ticket 05, which settled the *lifecycle* — a pickup goes to hand with Retain and is gone on
   ascending — leaving only what pickups actually *are* and how a floor decides what's in a room. Two
   named threads remain: whether a floor can hand you something that clutters rather than helps, and
-  the later exception under which a *few* items might be carried onward.
+  the later exception under which a *few* items might be carried onward. Ticket 06 adds a gradient:
+  under the pyramid proposal, **scavengable rooms get scarcer as you ascend**, so a floor's generosity
+  is itself an escalation dial.
 - **What else costs stamina, beyond fighting** — ticket 04 opened this door deliberately (sprinting,
-  tripping, falling, searching, banging your head on a pipe). Ticket 07 owns the turn-level part;
-  the broader question of which floor interactions have a stamina price is not yet sharp enough to
-  ticket and now depends on ticket 19's floor plan rather than ticket 05, which has landed.
+  tripping, falling, searching, banging your head on a pipe). Ticket 06 has since ruled the
+  *principle* — **most moves cost stamina in some form** — so what remains is no longer whether but
+  **which**: the specific price list for movement, scavenging, and floor interactions. Ticket 07 owns
+  the turn-level part; the rest depends on ticket 19's floor plan.
+- **Hazard design** — ticket 06 named hazards as a second source of per-turn pressure and ruled them
+  a **tool, not a requirement**, with dosage left to balance time. What a hazard *is* — static floor
+  feature, triggered thing, something that acts each turn you're near it — is untouched, and can't
+  sharpen until 18 and 19 establish what a floor physically contains. May resolve inside 18/19; if it
+  doesn't, it graduates.
 - **Fixed duo or roster** — whether Red and Gray are the only two characters or one pairing drawn
   from a larger cast. Pending ticket 13; a roster would expand content scope considerably.
 - **Table footprint and component budget** — the physical constraints that will eventually bound

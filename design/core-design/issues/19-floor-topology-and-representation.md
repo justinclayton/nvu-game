@@ -82,6 +82,19 @@ with cards it already has.
 - The output of this ticket is what ticket 20 puts on a table in index-card form. Keep it concrete
   enough to build.
 
+## Inherited from ticket 06
+
+`[you, 2026-08-16]` **The pyramid tower** — the tower narrows as it rises, so higher floors are
+physically tighter, with fewer scavengable rooms and less space to avoid your enemies. This is the
+human's own proposal and the leading answer to the second escalation axis ticket 05 left open here.
+It is recorded as a **strong candidate, explicitly not binding** — this ticket may reject it, but
+should say why if it does. Two riders if it is adopted:
+
+- The squeeze is **space and supply, not rate**: fewer scavenge sites falls out of the geometry for
+  free. 06 explicitly rejected any rule making higher floors cost more per action.
+- Ticket 06 also deferred **whether the player sees the whole floor on arrival** to this ticket and
+  ticket 18.
+
 ## Provenance
 
 `[proposed by agent → you approved, 2026-08-15]` Items 4, 5, and 6 were originally items 3, 4, and

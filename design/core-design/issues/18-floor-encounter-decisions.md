@@ -87,6 +87,19 @@ and flag that 08/19 must honour it. Do not silently assume the loop.
   decision. For each choice settled, name the situation in which a reasonable player picks each
   side.
 
+## Inherited from ticket 06
+
+`[you, 2026-08-16]` **Ticket 06 resolved first, so this ticket owes the sibling reconciliation
+check** — read 06's Answer and record explicitly how this ticket sits against it. What lands here:
+
+- **This ticket now owns a question 06 deferred**: whether the player sees the whole floor on
+  arrival, or it is revealed as they move. 06 could not settle it before the floor plan is physical.
+  The agent recommended full visibility from turn one; that is **unadopted input**, not a decision.
+- **Hazards are a tool available to this ticket**, not a requirement — 06 declined to mandate that a
+  floor's pressure come from more than the enemy, over the agent's recommendation.
+- **"You cannot simply leave"** is binding on ticket 08, which constrains what a break-off or
+  bypass decision can look like here.
+
 ## Provenance
 
 `[proposed by agent → you approved, 2026-08-15]` This ticket did not exist during charting. The

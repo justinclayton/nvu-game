@@ -62,6 +62,12 @@ Decide:
 during that final turn. Both tickets describe the zero state and must not contradict each other —
 in particular, whether a partner can revive a character *during* their last stand.
 
+**Inherited from ticket 06** `[you, 2026-08-16]`: revive is the **safety valve that makes the pillar
+survivable**. Ticket 06 ruled the pressure may genuinely close and kill you, but that a single
+unlucky hazard break must not end the run on the spot — the revive is what keeps that true. So the
+cost this ticket sets is load-bearing in both directions: too cheap and the pressure stops being
+real, too dear and one bad break is fatal after all.
+
 **A hole ticket 04 logged and left open for this ticket to watch:** ticket 03 ends the run only when
 both characters are down, so in co-op a character sitting at one card of deck can idle indefinitely
 while their partner solves the floor. Ticket 04 declined to write a rule against it (a character who

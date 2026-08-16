@@ -84,7 +84,11 @@ What this ticket still owes, sharpened by the above:
     that nobody ever feels it.
 - **Whether movement, searching, and other floor actions cost stamina**, and how much. Ticket 04
   ruled that exhausting is not a combat verb — sprinting, searching, forcing a door, tripping all
-  can cost. This ticket decides which, and whether they cost from hand or deck.
+  can cost. **Ticket 06 has since ruled the principle** `[you]`: **most moves cost stamina in some
+  form.** So "whether" is largely settled and this ticket decides **which and how much**, and whether
+  they cost from hand or deck. A design that makes most floor movement free contradicts ticket 06 and
+  needs to say so out loud. Note 06 produced **no filter** to check against — it rejected the
+  one-liner it was asked for, so its constraints are argued case by case.
 - **Actions per turn** — whether actions are a separate currency from card costs, or the same thing.
 - `[you]` **"Do nothing: recover 1 card" is a logged candidate turn action.** Explicitly unadopted;
   must survive playtest. Ticket 10 owns the number.

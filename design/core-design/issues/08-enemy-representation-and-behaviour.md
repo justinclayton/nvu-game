@@ -49,7 +49,14 @@ precisely the sort of thing this project would rather express with cards it alre
 ## Must satisfy
 
 - The turn economy settled in ticket 07, including its upkeep budget.
-- The pressure filter settled in ticket 06.
+- **Ticket 06's constraints** — note there is deliberately **no filter**: 06 rejected the one-line
+  test it was asked to produce, so its constraints are argued case by case. Two bind this ticket
+  directly. **(a) "You cannot simply leave" is a requirement** `[you, ticket 06]` — the enemy must
+  make breaking off cost something, so that disengaging is never a free way to switch the floor's
+  pressure off. Pursuit is the obvious mechanism and was the human's own suggestion, but this ticket
+  chooses how. **(b) Something must act on the player every turn** — the enemy is the primary source
+  of that, since 06 ruled hazards a tool rather than a requirement, so a floor may well have no
+  second threat.
 - The decision filter from ticket 18 and the topology from ticket 19. Items 1 (where the enemy
   physically sits) and 6 (whether unkilled enemies follow the player) are only answerable against a
   settled topology — and if ticket 18 made engagement optional, this ticket owns what an enemy does

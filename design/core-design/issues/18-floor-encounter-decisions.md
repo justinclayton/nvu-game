@@ -38,9 +38,16 @@ Decide:
 
 ## Output
 
-A **one-line testable filter**, in the same style as ticket 06's pressure filter, that tickets 07,
-08, 11, and 19 can each be checked against. Something a later session can hold a proposal up to and
-say yes or no.
+A **one-line testable filter**, that tickets 07, 08, 11, and 19 can each be checked against.
+Something a later session can hold a proposal up to and say yes or no.
+
+**Raise this with the human before producing it.** `[agent note, 2026-08-16]` This originally read
+"in the same style as ticket 06's pressure filter" — but **ticket 06 produced no filter**. It was
+asked for one, the agent drafted three, and the human rejected all of them: *"no tests, we'll decide
+these things when we talk specifics."* That ruling was made about 06 and has not been extended to
+this ticket, so the requirement stands as written — but the 18 session should ask whether the same
+reasoning applies here rather than producing a filter the human has already declined once. Ticket
+20 currently expects this filter to exist and would need updating if it is dropped.
 
 ## Settled upstream by ticket 05 — do not relitigate
 

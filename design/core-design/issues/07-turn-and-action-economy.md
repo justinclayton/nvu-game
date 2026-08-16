@@ -41,8 +41,8 @@ character is down; and whether a full round is Red+Gray or something finer.
 - The player-count model settled in ticket 03.
 - The resource model settled in ticket 04.
 - The floor structure settled in ticket 05.
-- The pressure filter settled in ticket 06 — check the turn structure against it explicitly and
-  record the check.
+- Ticket 06's pressure constraints — **there is no filter**; 06 rejected the one-liner it was asked
+  for, so hold the turn structure up against its rulings by argument and record the check.
 - The decision filter settled in ticket 18 and the topology settled in ticket 19. The phases
   designed here must be the phases in which 13's choices actually get made — a phase sequence that
   wraps no decisions has failed, however tidy it is. Record the check.

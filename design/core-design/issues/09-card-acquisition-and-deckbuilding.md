@@ -70,8 +70,9 @@ Decide:
 ## Must satisfy
 
 - The resource model settled in ticket 04.
-- The pressure filter settled in ticket 06 — shopping is the classic place where a frantic game
-  goes quiet. Check it and record the check.
+- Ticket 06's pressure constraints — **there is no filter**; 06 rejected the one-liner it was asked
+  for. Shopping is the classic place where a frantic game goes quiet, so argue this one explicitly
+  against 06's rulings and record the check.
 
 ## Settled upstream by ticket 04 — do not relitigate
 

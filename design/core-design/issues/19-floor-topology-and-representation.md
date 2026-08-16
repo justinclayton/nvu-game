@@ -68,7 +68,7 @@ with cards it already has.
 
 - The decision filter settled in ticket 18 — check each candidate topology against it explicitly
   and record the check.
-- The pressure filter settled in ticket 06.
+- Ticket 06's pressure constraints — no filter; see *Inherited from ticket 06* below.
 - Ticket 02's best-attested prior constraint: *low complexity — no extra physical components, no
   extra systems; resources are printed on cards or are the cards themselves.* Ticket 04 rules on
   whether that constraint is adopted; if it is, a floor made of dedicated tiles is in tension with

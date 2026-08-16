@@ -37,7 +37,8 @@ Decide:
 
 - The loss condition and resource model from ticket 04.
 - The turn economy and upkeep budget from ticket 07.
-- The pressure filter from ticket 06 — a revive scramble should intensify the pillar, not pause it.
+- Ticket 06's pressure constraints (no filter — see below) — a revive scramble should intensify the
+  pillar, not pause it.
 
 ## Notes for the session
 

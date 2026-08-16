@@ -49,8 +49,9 @@ precisely the sort of thing this project would rather express with cards it alre
 ## Must satisfy
 
 - The turn economy settled in ticket 07, including its upkeep budget.
-- **Ticket 06's constraints** — note there is deliberately **no filter**: 06 rejected the one-line
-  test it was asked to produce, so its constraints are argued case by case. Two bind this ticket
+- **The constraints from ticket 06** (*Decide what creates the frantic, in-over-your-head
+  pressure*) — note that there is deliberately **no filter**. 06 rejected the one-line test it was
+  asked to produce, so its constraints are argued case by case. Two of them bind this ticket
   directly. **(a) "You cannot simply leave" is a requirement** `[you, ticket 06]` — the enemy must
   make breaking off cost something, so that disengaging is never a free way to switch the floor's
   pressure off. Pursuit is the obvious mechanism and was the human's own suggestion, but this ticket

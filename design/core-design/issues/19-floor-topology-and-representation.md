@@ -85,15 +85,16 @@ with cards it already has.
 ## Inherited from ticket 06
 
 `[you, 2026-08-16]` **The pyramid tower** — the tower narrows as it rises, so higher floors are
-physically tighter, with fewer scavengable rooms and less space to avoid your enemies. This is the
-human's own proposal and the leading answer to the second escalation axis ticket 05 left open here.
-It is recorded as a **strong candidate, explicitly not binding** — this ticket may reject it, but
-should say why if it does. Two riders if it is adopted:
+physically tighter, with fewer rooms worth scavenging and less space to keep away from your enemies.
+This is the human's own proposal, and the leading answer to the second axis of escalation that
+ticket 05 left open here. It is recorded as a **strong candidate, explicitly not binding** — this
+ticket may reject it, but should say why if it does. Two riders if it is adopted:
 
-- The squeeze is **space and supply, not rate**: fewer scavenge sites falls out of the geometry for
-  free. 06 explicitly rejected any rule making higher floors cost more per action.
-- Ticket 06 also deferred **whether the player sees the whole floor on arrival** to this ticket and
-  ticket 18.
+- The squeeze works through **space and supply, not rate**: fewer places to scavenge falls out of
+  the geometry for free. 06 explicitly rejected any rule that makes higher floors cost more per
+  action.
+- Ticket 06 also deferred **whether the player sees the whole floor when they arrive on it** to this
+  ticket and to ticket 18.
 
 ## Provenance
 

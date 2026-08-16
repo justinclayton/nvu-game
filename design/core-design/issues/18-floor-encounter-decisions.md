@@ -96,8 +96,9 @@ and flag that 08/19 must honour it. Do not silently assume the loop.
 
 ## Inherited from ticket 06
 
-`[you, 2026-08-16]` **Ticket 06 resolved first, so this ticket owes the sibling reconciliation
-check** — read 06's Answer and record explicitly how this ticket sits against it. What lands here:
+`[you, 2026-08-16]` Ticket 06 (*Decide what creates the frantic, in-over-your-head pressure*)
+**resolved first, so this ticket owes the sibling reconciliation check** — read 06's Answer and
+record explicitly how this ticket sits against it. What lands here:
 
 - **This ticket now owns a question 06 deferred**: whether the player sees the whole floor on
   arrival, or it is revealed as they move. 06 could not settle it before the floor plan is physical.

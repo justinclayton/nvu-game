@@ -69,12 +69,12 @@ Then decide:
 *Resolved 2026-08-16 by grilling session. Feel is validated by playtesting, not by argument: this
 ticket fixes the **mechanism**, and makes no claim to have proved the feeling.*
 
-### Two blades close on you at once
+### Two things press on the player at once
 
 Two things press on the player at the same time, and neither of them is enough on its own. The pair
 has no agreed name.
 
-1. **You get poorer every turn.** `[you]` This blade is ratified from ticket 04 (*Design the
+1. **You get poorer every turn.** `[you]` This half is ratified from ticket 04 (*Design the
    deck-as-energy-and-HP model*) rather than chosen here: your deck is your stamina, and for as long
    as a floor's encounter is running it only ever runs down. Ascending is what reverses it — a floor
    cleared is a full heal — so the drain is one-way *inside* an encounter, not across a run.
@@ -90,7 +90,7 @@ has no agreed name.
 The agent framed the pair as *you weaken while it strengthens*, and that framing was accepted. The
 agent also argued at the outset that the drain on its own gives *scarcity, not franticness*. That
 still stands: a drain that only punishes turns going by is indifferent to a player who thinks for
-five minutes. The second blade is what turns the floor into a race the player is losing.
+five minutes. The second half is what turns the floor into a race the player is losing.
 
 ### Rulings
 

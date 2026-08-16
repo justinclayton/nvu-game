@@ -194,14 +194,14 @@ head, reacting to what's in front of you, with little time for deep strategy.*
   floor is one. This stays fog until tickets 18, 19, and 08 establish what makes floors differ at all.
 - **Roguelite meta-progression** — whether anything persists between runs at all, and whether it
   is even in scope for a core spec.
-- **Death and run failure** — what happens when a run ends badly. Run *length* is settled (ten
-  floors, 60–75 minutes) and the run-level arc is deckbuilding rather than wearing down, so what
+- **Death and run failure** — what happens when a run ends badly. A run is ten floors and 60–75
+  minutes, and the run-level arc is deckbuilding rather than wearing down, so what
   remains is only what failure costs and what, if anything, a failed run leaves behind. That last
   part may turn out to be meta-progression's question rather than this one's.
 - **Room contents and item pickups** — the "find items" half of the pitch. May resolve entirely
   inside ticket 09; if it doesn't, it graduates. Searching a room can itself cost stamina, so
-  scavenging is a push-your-luck decision rather than a free pickup. The *lifecycle* is settled: a
-  pickup goes to hand with Retain and is gone on ascending. What remains open is what pickups
+  scavenging is a push-your-luck decision rather than a free pickup. A pickup goes to hand with
+  Retain and is gone on ascending. What remains open is what pickups
   actually *are* and how a floor decides what's in a room. Two named threads remain: whether a floor
   can hand you something that clutters rather than helps, and the later exception under which a
   *few* items might be carried onward. If the pyramid proposal is adopted, **rooms worth scavenging

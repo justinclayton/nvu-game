@@ -39,9 +39,9 @@ the health bar, and nothing else tracks health. Each character has their own. *(
 same substance as the energy used to pay for cards; there is no separate resource and no number
 anywhere. *(ticket 04)*
 
-**Drain** — shorthand for the standing decision that **most actions cost stamina**, not only playing
-cards: moving between rooms, scavenging, and interacting with the floor all have a price. The drain
-runs one way for as long as an encounter lasts; **ascending** is what reverses it.
+**Drain** — the rule that **most actions cost stamina**, not only playing cards: moving between
+rooms, scavenging, and interacting with the floor all have a price. The drain runs one way for as
+long as an encounter lasts; **ascending** is what reverses it.
 *(tickets 04, 06; the per-action price list is owned by ticket 07)*
 
 **Hand** — the cards a character converted this turn. Simultaneously their available **tools** and

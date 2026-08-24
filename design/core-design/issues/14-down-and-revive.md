@@ -47,7 +47,7 @@ Decide:
 
 ## Settled upstream by ticket 04
 
-- **A character is exhausted (down) when they begin a turn and cannot convert** — i.e. their deck is
+- **A character is exhausted (down) when they begin a turn and cannot draw** — i.e. their deck is
   empty at the start of their turn. An empty deck is not instantly fatal; they get one final turn
   with the hand they are holding.
 - **"Exhausted" is the fiction as well as the mechanic.** Health is stamina, measured in cards; at
@@ -73,5 +73,5 @@ and one bad break is fatal after all.
 **A hole ticket 04 logged and left open for this ticket to watch:** ticket 03 ends the run only when
 both characters are down, so in co-op a character sitting at one card of deck can idle indefinitely
 while their partner solves the floor. Ticket 04 declined to write a rule against it (a character who
-converts nothing has no cards and cannot act, so it is self-punishing) — but it is not *fatal*, and
+draws nothing has no cards and cannot act, so it is self-punishing) — but it is not *fatal*, and
 the down-and-revive rules are where it would bite.

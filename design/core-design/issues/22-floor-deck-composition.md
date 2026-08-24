@@ -39,6 +39,24 @@ Decide:
 7. **Where the deck comes from.** Whether each floor has its own printed deck, floors are built from
    one shared pool, or a floor deck is assembled by rule at setup.
 
+## Settled upstream by ticket 21 — do not relitigate
+
+`[you, 2026-08-23]` Ticket 21 resolved first, so **this ticket owes the sibling reconciliation
+check** — read its Answer and record explicitly how this ticket sits against it. What lands here:
+
+- **Item 2 is half-answered.** There are three room kinds at level 1: **combat** (`Power X`),
+  **hazard** (`Scramble X`), and **item rooms**. What is left is the *mix* — how many of each, and
+  whether the ratio shifts floor to floor.
+- **Item rooms are the only reward-bearing room**, and carry **no punishment** by default. They are
+  the deck's one always-safe-to-decline card, which makes them the lever on how generous a floor is.
+- **Two escalation dials were left here deliberately.** A room's **challenge** and its **punishment**
+  are independent numbers, so a room can be cheap to beat and brutal to fail; and **multi-stat rooms**
+  (`Power 3, Scramble 2`, both required) are legal but **none are printed at level 1** — so the first
+  playtest moves one variable. Both are yours to spend.
+- **Rooms have no behaviour**, so there is no per-room upkeep to budget beyond flipping and reading.
+- **Every room is one turn minimum**, and a Fled room is more, so deck size is the floor-length dial
+  almost by itself.
+
 ## Must satisfy
 
 - The encounter loop settled in [ticket 18](18-floor-encounter-decisions.md).

@@ -92,12 +92,12 @@ differently, the agent's position is recorded too, tagged `[proposed by agent �
 ### The model in one paragraph
 
 Each character has a deck of cards. **That deck is their stamina** — how long they can keep going.
-At the start of your turn you decide how many cards to **convert** from deck into hand; that is the
-core decision of the game, because every card converted is stamina spent whether you use it or not.
+At the start of your turn you decide how many cards to **draw** from deck into hand; that is the
+core decision of the game, because every card drawn is stamina spent whether you use it or not.
 To play a card you **exhaust cards from your hand** equal to its cost. At the end of your turn your
 whole hand exhausts. Enemies and hazards **exhaust cards from your deck**. Exhausted cards are gone
 for the rest of the floor and return only when the floor is cleared. When you begin a turn and
-cannot convert, you are **exhausted** — down, not dead.
+cannot draw, you are **exhausted** — down, not dead.
 
 ### 0. What "energy" means — and the shared/per-character ruling ticket 03 handed here
 
@@ -121,7 +121,7 @@ fungible across characters, so "a character can be in trouble alone" stays true 
 | Zone | What it is | What it means to the player |
 |---|---|---|
 | **Deck** | Face-down draw pile | Your stamina. Its height *is* your health bar — nothing is counted or tracked. |
-| **Hand** | Cards converted this turn | Your options *and* your fuel, simultaneously. Empties at end of turn. |
+| **Hand** | Cards drawn this turn | Your options *and* your fuel, simultaneously. Empties at end of turn. |
 | **Exhaust pile** | **Face up** | What the floor has taken out of you. Read it to know what is no longer waiting in your deck. |
 
 `[you]` **The exhaust pile is face up.** You watch what you lose as it goes, and you gain real
@@ -175,7 +175,7 @@ candidate for ticket 07 or 11 if blocking needs to exist as an act of stamina ra
 
 ### 5. The loss condition
 
-`[you]` **You are exhausted when you begin a turn and cannot convert.** An empty deck is not
+`[you]` **You are exhausted when you begin a turn and cannot draw.** An empty deck is not
 instantly fatal — you get one final turn with the hand you are holding and no possibility of another.
 
 `[you]` **"Last stand" is live design space**, not settled here. The instinct: card costs might be
@@ -184,9 +184,9 @@ skin-of-your-teeth win. Noted as unusually safe from exploitation — it is unre
 nearly dying and ends immediately after. **Graduated to its own ticket (16)**, since "what happens at
 zero" is now a shared question with ticket 14.
 
-`[proposed by agent → you declined]` A mandatory minimum conversion of one card per turn, to stop a
+`[proposed by agent → you declined]` A mandatory minimum draw of one card per turn, to stop a
 character stalling at zero draw. Declined as an unnecessary rule, and correctly: because the hand
-empties at end of turn, a character who converts nothing has no cards and cannot act at all —
+empties at end of turn, a character who draws nothing has no cards and cannot act at all —
 stalling is spectating, not surviving. **One narrow hole remains and is logged rather than ruled on:**
 in co-op, one character could idle at one card of deck indefinitely while the other solves the floor,
 since ticket 03 ends the run only when both are down. To be watched at the table, not pre-empted.
@@ -220,9 +220,9 @@ The model was chosen partly on this axis and it comes out well:
   exhaust. No decisions are re-litigated and nothing is looked up.
 
 `[proposed by agent → you approved]` **A clean equation falls out for ticket 10.** Because the hand
-empties regardless of use, a turn's stamina cost is *exactly how much you converted* — not how much
+empties regardless of use, a turn's stamina cost is *exactly how much you drew* — not how much
 you spent. Nothing else leaves the deck except damage. So floor length ≈ deck size ÷ average
-conversion per turn, minus damage taken. Ticket 10 gets one tight relationship to simulate instead of
+draw per turn, minus damage taken. Ticket 10 gets one tight relationship to simulate instead of
 a tangle, and deck size and floor length are the same dial — which is what the human asked for.
 
 ### 8. Recursion — **no structural guard rail, by decision**
@@ -256,7 +256,7 @@ above satisfies it completely, but making it absolute would outlaw a component b
 whether it would make the game simpler — which is the previous attempts' mistake in a new costume.
 
 **Ticket 02's warning about inherited numbers** — honoured. No figure from the previous documents was
-used. This ticket produces no numbers at all; every quantity (deck size, conversion rate, hand size,
+used. This ticket produces no numbers at all; every quantity (deck size, draw rate, hand size,
 cost curve, damage values) is handed to ticket 10 to measure.
 
 ### Two things this ticket settled that belong to other tickets
@@ -271,10 +271,14 @@ Recorded here for provenance; the owning ticket still decides the detail.
   - **Superseded 2026-08-23** `[you]` — *one continuous encounter* stands; the 2D floor plan does not.
     A floor is a **deck of cards played against**; see
     [ticket 18](18-floor-encounter-decisions.md). Everything else this ticket settled — deck as
-    stamina, convert, exhaust, the three zones, no discard pile, last stand — is untouched by that
+    stamina, draw, exhaust, the three zones, no discard pile, last stand — is untouched by that
     change.
+  - **Two of this ticket's keywords were renamed by ticket 21** `[you, 2026-08-23]`, meanings
+    unchanged: **`Convert` → `Draw`**, and **`Retain` → `Hold`**. Ticket 21 also refined *when* a
+    played card is exhausted — at cleanup, with the rest of the play zone, rather than the instant it
+    is played. Its cost still comes off the hand on play.
 - `[you]` **Persistent effects live in your hand.** A card granting an ongoing buff stays in hand via
-  Retain and works as long as you keep it — but it occupies hand space you cannot refill for free,
+  Hold and works as long as you keep it — but it occupies hand space you cannot refill for free,
   and it is always available to burn as fuel when you are desperate. Duration is never a rules
   question: it lasts as long as you can afford it. No tokens, no upkeep, no tracking. **Handed to
   ticket 11 (card anatomy)** as a card type to design. The agent's assessment: this is the strongest

@@ -21,7 +21,7 @@ Decide:
    while one player acts.
 6. ~~**What ends a floor.**~~ **Struck by ticket 18.** `[you]` A floor ends when the floor deck has
    been exhausted. What remains here is only where the **flip** sits in the phase order relative to
-   conversion — ticket 18 says the card is flipped at the **start of the turn**, before the draw
+   drawing — ticket 18 says the card is flipped at the **start of the turn**, before the draw
    phase, so the players always see what they face before they spend. Fit that in and do not move it.
 7. **Interrupts and reactions.** Whether a player can act outside their own turn. This is a major
    lever on the frantic pillar and on downtime.
@@ -30,7 +30,8 @@ Decide:
 
 ## Settled upstream — do not relitigate
 
-From ticket 03: **strict alternating turns**, Red then Gray. **Fully open information.** Two
+From ticket 03, **as amended by ticket 21**: ~~strict alternating turns~~ — **both characters act
+simultaneously, either of them in any order.** **Fully open information.** Two
 characters always in play, each with their own deck and health pool, controlled by one player each
 in co-op and both by one player solo. A character at zero is **down, not dead**.
 
@@ -65,27 +66,54 @@ If either has already settled it, adopt rather than re-decide, and say which tic
 - This is the ticket most likely to reveal that an upstream decision does not work. If it does,
   say so and reopen the upstream ticket rather than patching around it here.
 
+## Settled upstream by ticket 21 — the five phases
+
+`[you, 2026-08-23]` The grilling session on [ticket 21](21-defeating-a-floor-card.md) settled the
+turn's shape. It is recorded here because this ticket owns it:
+
+1. **Flip.** Draw a room from the floor deck and place it face up in the **active room zone**.
+2. **Draw phase.** Both players at once, in any order. A player draws one card at a time into hand,
+   deciding after each whether to draw again, until they declare they are done.
+3. **Play phase.** Both players in any order, until they cannot or choose to stop. Playing a card
+   Exhausts cards from that player's hand equal to its **cost**, then places it face up in the
+   **play zone**, where its **stats** join the shared pool. The moment the pool meets the room's
+   challenge the room is **Cleared** — exhausted from the floor deck, paying any reward printed on it.
+4. **Cleanup.** If the room is still there, take its punishment and send it to the **Fled** pile.
+   Then exhaust every card in hand **and** in the play zone, except `Hold` cards still in hand.
+5. **Turn end.**
+
+What this leaves this ticket: **hand size** (if any), **actions per turn**, **interrupts**, the
+**upkeep count**, and what happens to the sequence when one character is down. Note that item 5 of
+the original question — what the other player does while one acts — is dissolved rather than
+answered: they act at the same time.
+
+**The tension is all in phase 2** `[you]`. Cleanup exhausts the hand regardless, so a card not played
+was lost anyway and cards spent on costs were about to die — in the play phase, playing everything
+legal is very nearly always right. This was accepted deliberately, with `Hold` as what keeps the play
+phase from being empty. If a table says it needs a fix, ticket 21 logged the surgical one: pay costs
+from the **deck** rather than the hand. Do not adopt it here without the human.
+
 ## Settled upstream by ticket 04 — do not relitigate
 
-- **Start of turn: the player decides how many cards to *convert* from deck to hand.** This is the
-  core decision of the game. Every card converted is stamina spent whether used or not.
+- **Start of turn: the player decides how many cards to *draw* from deck to hand.** This is the
+  core decision of the game. Every card drawn is stamina spent whether used or not.
 - **Playing an X-cost card = "exhaust X cards from your hand."** The played card also exhausts.
 - **Damage = "exhaust X cards from your deck."** Chosen costs come off the hand; unchosen punishment
   comes off the deck.
-- **The whole hand exhausts at end of turn**, with **Retain** as the exception for situational and
+- **The whole hand exhausts at end of turn**, with **Hold** as the exception for situational and
   equipped cards.
 - **Exhausted cards do not return during a floor.** There is no discard pile.
-- **A character is exhausted (down) when they begin a turn and cannot convert.**
-- **No mandatory minimum conversion.** Explicitly declined — a character who converts nothing has no
+- **A character is exhausted (down) when they begin a turn and cannot draw.**
+- **No mandatory minimum draw.** Explicitly declined — a character who draws nothing has no
   cards and cannot act, so stalling is self-punishing.
 
 What this ticket still owes, sharpened by the above:
 
-- **Hand size.** Is there a cap on conversion at all, or is cost the only limit? Ticket 04's finding
+- **Hand size.** Is there a cap on drawing at all, or is cost the only limit? Ticket 04's finding
   is that a hand is *tools and fuel* simultaneously, so over-drawing is already self-limiting — a
   printed cap may be unnecessary.
   - **The argument that forced a cap has lapsed.** Ticket 05 made a maximum hand size *required*
-    because scavenged items went to hand with Retain and their whole cost was occupying hand space.
+    because scavenged items went to hand with Hold and their whole cost was occupying hand space.
     Ticket 18 removed rooms and therefore scavenging, so that pressure is gone and the cap is an open
     question again. Whether floor cards hand out anything that lives in hand is
     [ticket 21](21-defeating-a-floor-card.md) item 6; wait for it, or rule the cap on its own merits.
@@ -93,7 +121,7 @@ What this ticket still owes, sharpened by the above:
   not a combat verb, and **ticket 06 ruled the principle** `[you]`: **most moves cost stamina in some
   form.** The price list that principle was heading for was written against rooms and doors and died
   with them. This ticket now owes the honest answer to what a turn even contains beyond flipping,
-  converting, and playing — and if the answer is *nothing else*, whether ticket 06's principle has
+  drawing, and playing — and if the answer is *nothing else*, whether ticket 06's principle has
   been quietly reduced to ticket 04's drain. Say so out loud either way. Note 06 produced **no
   filter** — its constraints are argued case by case.
 - **Actions per turn** — whether actions are a separate currency from card costs, or the same thing.

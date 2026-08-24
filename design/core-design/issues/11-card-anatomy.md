@@ -48,6 +48,23 @@ Decide:
   them look nothing alike. Wait on [ticket 21](21-defeating-a-floor-card.md) for what actually has to
   be printed there.
 
+## Settled upstream by ticket 21 — do not relitigate
+
+`[you, 2026-08-23]`
+
+- **A card's cost and its stats are separate, unrelated numbers.** The anatomy needs both, and needs
+  them impossible to confuse at a glance.
+- **Stats are named keywords** — `Power` and `Scramble` at level 1, more expected. **Most cards carry
+  exactly one stat.** Multi-stat cards exist, are naturally more valuable, and are costed for it.
+- **Stats need not be simple printed numbers.** *"Power equal to twice the number of cards Gray plays
+  this turn"* is an intended shape, because that is where build synergy is expected to come from. The
+  anatomy has to hold a conditional stat without becoming a spreadsheet.
+- **`Hold` is printed on the card face**, not implied by a card being an item.
+- **A room card** prints a **challenge** (a named threshold like `Power 3`) and a **punishment**
+  (normally *"1 character Exhausts X from deck"*). Item rooms are one card doing double duty: the room
+  while it is in the active room zone, the item once it is in hand. That dual reading is this ticket's
+  hardest anatomy problem — the same face has to be legible as both.
+
 ## Notes for the session
 
 - Anatomy is easy to over-specify in the abstract. Keep it to what ticket 12's exemplar cards will
@@ -60,14 +77,14 @@ Decide:
 - **Two cost phrasings exist and they mean different things to the player:** "exhaust X cards from
   your hand" (a cost you chose) and "exhaust X cards from your deck" (a punishment you didn't).
   Keywords may be introduced later; for now these are the literal phrases.
-- **Retain** exists as a keyword, taking Slay the Spire's meaning: the card is not exhausted at end
+- **Hold** exists as a keyword, taking Slay the Spire's meaning: the card is not exhausted at end
   of turn. Used for highly situational cards and for anything that should feel equipped.
 
 ## Card kinds established by ticket 05 — `[you]`
 
 Two more things a card can be, both of which this ticket must find room for in the anatomy:
 
-- **A temporary in-floor card** — something a floor hands you that goes to hand with **Retain** and is
+- **A temporary in-floor card** — something a floor hands you that goes to hand with **Hold** and is
   gone on ascending, never entering the deck. `[you, ticket 05]` The *scavenged item* was the original
   case and died with rooms; whether floor cards pay one instead is
   [ticket 21](21-defeating-a-floor-card.md) item 6. The anatomy question survives either way: decide
@@ -84,7 +101,7 @@ first, because it means junk there. Naming these two apart is partly this ticket
 
 ## New card type to design — `[you]`, from the ticket 04 session
 
-**Persistent effects live in your hand.** A card granting an ongoing buff stays in hand via Retain
+**Persistent effects live in your hand.** A card granting an ongoing buff stays in hand via Hold
 and works for as long as you keep it. It costs nothing to maintain and needs no tracking — but it
 occupies hand space you cannot refill for free, *and* it sits there every turn as a candidate to be
 burned as fuel when you are desperate. Duration is never a rules question: it lasts exactly as long
@@ -94,5 +111,5 @@ The agent's assessment, recorded for provenance: this is the strongest single id
 ticket 04 session. It gives persistent effects with no tokens, no upkeep, and built-in tension, and
 it re-asks the "is this still worth it?" question every turn without a single rule.
 
-Decide here: what such cards look like, whether they are their own type or just Retain plus a static
+Decide here: what such cards look like, whether they are their own type or just Hold plus a static
 effect, and whether burning one as fuel is a normal exhaust or something the card gets to react to.

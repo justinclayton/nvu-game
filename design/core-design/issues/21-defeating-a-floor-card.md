@@ -1,7 +1,7 @@
 # 21 — Decide what defeating a floor card takes, and what failing it costs
 
 Type: grilling
-Status: open
+Status: resolved
 Blocked by: —
 Map: [core design map](../map.md)
 
@@ -66,6 +66,158 @@ Decide:
 
 ## Provenance
 
-`[proposed by agent → awaiting your approval, 2026-08-23]` Created to hold the questions
+`[proposed by agent → you approved, 2026-08-23]` Created to hold the questions
 [ticket 18](18-floor-encounter-decisions.md) explicitly left open when the floor-deck decision landed.
-Nothing in it is decided.
+
+## Answer
+
+Resolved by grilling session, 2026-08-23. **A floor deck is a deck of rooms.** Rooms came back — not
+as geography, but as cards met in the order the shuffle chose.
+
+### The room
+
+`[you]` Every floor card is a **room**, and there are three kinds at level 1:
+
+- **Combat room** — holds an enemy. Its challenge is **`Power X`**, a single stat standing in for
+  combined attack and health.
+- **Hazard room** — no enemy, but something to get through. Its challenge is **`Scramble X`**:
+  running, not falling, not braining yourself on a pipe.
+- **Item room** — holds an item you can take. The card is **both things at once**: it is the room
+  while it sits in the active room zone, and it is the item itself once it is in a player's hand.
+
+More stat keywords are expected. `Power` and `Scramble` are what level 1 needs to find out whether
+any of this works.
+
+### Clearing a room
+
+`[proposed by agent → you approved]` A room prints a **named threshold** rather than a bare number,
+so the question at every flip is *do we have the right thing right now*, not *do we have enough*. A
+bare number would make every card in a deck interchangeable fuel and turn each turn into addition.
+
+`[you]` **A card's cost and its stats are separate and unrelated numbers.** To play a card you
+Exhaust cards from your hand equal to its cost, then place it face up in the **play zone**, where its
+stats join a **shared pool** for the turn. Red's `Power 2` beside Gray's `Power 1, Scramble 2` gives
+the team 3 Power and 2 Scramble to spend against the room. Both characters' contributions **pool**.
+
+Keeping cost and stats apart is what buys room for stats that are not simple printed numbers —
+*"Power equal to twice the number of cards Gray plays this turn"* — and that is where build synergy
+is expected to come from.
+
+`[you]` **Most cards carry one stat.** Multi-stat cards exist, are naturally more valuable, and are
+costed accordingly.
+
+`[proposed by agent → you approved]` The threshold is **checked continuously**: the instant the pool
+meets it the room is **Cleared**. Excess evaporates; nothing banks between turns. **Rooms are
+all-or-nothing** — there is no partial progress and a room does not remember being attacked, because
+recording progress needs a marker or a damage track on the card, which is what *minimise play zones*
+exists to refuse. The chip-it-down feel is carried by the reshuffle instead: a room you could not
+beat comes back and you meet it with a different hand.
+
+`[proposed by agent → you approved]` **A room may name more than one stat** — `Power 3, Scramble 2`,
+both required — but **no multi-stat rooms are printed at level 1**, so the first playtest can judge
+threshold numbers with only one variable moving. It is a ready-made escalation dial for
+[ticket 22](22-floor-deck-composition.md).
+
+### Failing a room
+
+`[proposed by agent → you approved]` The cost of failure is **printed per room**, in the vocabulary
+ticket 04 already has — *Exhaust X from deck* — so there is no new verb and the phrasing itself still
+tells the player they had no agency. Per-room rather than a general rule because it is a second
+difficulty dial: a room can be easy to beat and brutal to fail, or the reverse, and that is most of
+what makes rooms feel different from each other.
+
+`[you]` **One character absorbs the whole amount, and the team chooses which — no splitting.**
+*"1 character Exhausts 3 from deck"* is the normal shape. The choice is strategic and its
+consequences are unseen until the exhausted cards are turned over. A minority of rooms read *"both
+characters exhaust…"*, reserved for things that should feel wide-area: blasts, toxic clouds.
+
+`[you]` **Declining is failing without trying.** You see the room before you draw anything, so you
+can take the loss without spending a card — or bail part-way through drawing when you realise you are
+not getting what you need. It is not a separate action; the outcome is identical to failing.
+
+`[proposed by agent → you approved]` **Item rooms carry no punishment by default.** Missing the item
+is the loss. That gives the deck one room type that is always safe to decline, which makes declining
+a real decision rather than an automatic one — you skip an item room when you are poor, and pay for
+it later. The punishment line stays available for a trapped item room when ticket 22 wants one.
+
+### Rewards
+
+`[proposed by agent → you approved]` **Item rooms are the entire reward system at level 1.** A combat
+or hazard room pays you by being gone. One reward dial means the first playtest can actually judge
+the reward rate.
+
+`[proposed by agent → you approved]` A cleared item room's item goes **to a character's hand with
+`Hold`** — never into the deck. The team chooses whose hand, which lets an item be routed to whoever
+its stats suit and is a cheap piece of the asymmetry [ticket 13](13-red-and-gray-asymmetry.md) wants.
+
+**The item does not enter the deck, and this was ruled deliberately.** Under ticket 04 the deck *is*
+stamina, so a card entering a deck mid-floor is **healing**, and item rooms would have been the
+game's only heal. Tickets 01 and 16 found that exact shape — a card that returns resource to the pool
+— break four separately published games, every failure a recursion. If a heal is ever wanted it
+should be a rare, named, deliberate thing, not a side effect of picking things up.
+
+### Rooms do nothing but sit there
+
+`[proposed by agent → you approved]` A room has **no behaviour beyond the flip**. It does not act on
+a later turn, alter the next flip, or stay in play once met. All of its pressure lives in its
+threshold and its failure cost. Anything persistent has to be *run* by a human every turn it exists,
+and enemy logic is where physical games get slow; ticket 06's *something acts on you every turn* is
+already satisfied by the flip alone. A floor that needs more menace should get it from what is **in**
+the deck — ticket 22's problem, not a rules feature.
+
+### Vocabulary settled here
+
+- **Cleared** `[proposed by agent → you approved]` — a room defeated and removed from the floor deck
+  permanently. It is never reshuffled. When every room in a floor deck is Cleared the deck cannot be
+  replenished and **the encounter is over**. *Exhaust* stays exclusively a character-card word.
+- **Fled** `[you]` — the floor deck's discard pile. A room you failed, or declined outright, is Fled;
+  the Fled pile shuffles back into the floor deck when its draw pile runs out. Chosen over *Skipped*
+  because a deliberate decline is an immediate "NOPE" flee, so the word fits both routes in.
+- **Draw** `[you]` — **renames `Convert`**, everywhere. Ticket 04's act of moving cards from deck to
+  hand, unchanged in meaning and still the central decision of the game. The coined word was there to
+  stress that the move spends stamina; the rules text can say that in a sentence, and every player
+  already knows what drawing is.
+- **Hold** `[you]` — **renames `Retain`**, everywhere. Ticket 04's keyword, unchanged in meaning: this
+  card is not exhausted at end of turn. `[proposed by agent → you approved]` It is **printed on the
+  card face**, not a property of being an item, so any card that should feel equipped or situational
+  can carry it. "Item" describes where a card came from, not how it behaves.
+- **Play zone** `[you]` — where played cards sit face up during a turn. `[proposed by agent → you
+  approved]` **The stat pool is not a zone** — it is just the sum of the face-up cards on the table.
+  No tracker, no tokens, no counter.
+
+### Settled here, owned elsewhere
+
+- **The turn's five phases** `[you]` belong to [ticket 07](07-turn-and-action-economy.md), recorded
+  there: flip a room into the active room zone; both players draw simultaneously in any order, one
+  card at a time, each stopping when they declare they are done; both play in any order until they
+  cannot or choose to stop, Clearing the room the moment the threshold is met; cleanup takes the
+  punishment if the room is still there, sends it to Fled, and **exhausts both the hand and the play
+  zone**, with `Hold` cards in hand as the only exception; turn ends.
+- **Strict alternating turns is out** `[you]` — see [ticket 03](03-solo-coop-or-both.md), which is
+  amended. Both characters act **simultaneously and collaboratively**, either of them acting in any
+  order, and choosing that sequencing — whether Red draws out fully before Gray, or they alternate,
+  or they change it mid-turn — is itself part of the collaborative strategy.
+- **Ticket 04 refined, not contradicted:** a played card is exhausted at **cleanup** along with the
+  rest of the play zone, rather than immediately on play. Its cost is still Exhausted from hand at the
+  moment it is played.
+
+### Two findings logged against this design
+
+- **The play phase is close to pure execution.** Cleanup exhausts the hand anyway, so a card not
+  played was lost regardless, and cards spent paying a cost were about to die — playing everything
+  legal is very nearly always right. `[you]` **Accepted deliberately**: the tension belongs in the
+  draw phase, and *"the resolution is satisfying"* is its own reason. What keeps it from being empty
+  is `Hold` — a held item makes every turn ask *is this the room I break it out for*. **Flagged to
+  [ticket 20](20-encounter-tabletop-prototype.md)**, whose first question is whether the correct move
+  announces itself. The surgical fix, if a table says it needs one, is paying costs from the deck
+  rather than the hand.
+- **Quarterbacking.** With open information and simultaneous play, one player can simply run both
+  hands. `[you]` Logged as a known cost, not designed against — it is a playtest finding, and ticket
+  20 should watch for it.
+
+### Sibling check
+
+Ticket 21 resolved before [ticket 22](22-floor-deck-composition.md), so 22 owes the reconciliation.
+What 22 inherits: three room types to build a deck from, one reward-bearing type, two escalation
+dials this ticket deliberately left it (multi-stat rooms, and failure cost tuned independently of
+threshold), and no room behaviour to budget upkeep for.

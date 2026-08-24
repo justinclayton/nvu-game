@@ -58,20 +58,20 @@ random off the top of the deck, so there is no player-chosen damage to compare a
 
 **The model to simulate is now specific and much simpler than this ticket assumed.** Per character:
 deck, hand, face-up exhaust pile, no discard pile, no reshuffling. Cards leave the deck by exactly
-two routes — conversion at the start of a turn, and damage. The whole hand exhausts at end of turn
-regardless of use, so **a turn's stamina cost is exactly how much was converted, not how much was
+two routes — drawing at the start of a turn, and damage. The whole hand exhausts at end of turn
+regardless of use, so **a turn's stamina cost is exactly how much was drawn, not how much was
 spent.**
 
 That yields one tight relationship to explore rather than a tangle:
 
-    floor length ≈ deck size ÷ average conversion per turn − damage taken
+    floor length ≈ deck size ÷ average draw per turn − damage taken
 
 **Numbers to find** (ticket 04 deliberately produced none, and no figure from the previous design
 attempts may be used):
 
 1. **Starting deck size**, and how it must scale as the deck grows over a run.
-2. **Average conversion per turn** under pressure, and whether players systematically over- or
-   under-convert.
+2. **Average draw per turn** under pressure, and whether players systematically over- or
+   under-draw.
 3. **Damage per hit** relative to deck size — how many hits a floor should be able to spend.
 4. **Whether deliberately failing dominates fighting.** The floor-deck model replaces the old
    flee-and-scavenge worry with a sharper one: a player who eats the consequence instead of spending

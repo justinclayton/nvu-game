@@ -39,7 +39,7 @@ head, reacting to what's in front of you, with little time for deep strategy.*
 - **Minimise play zones** `[you, ticket 05]`. A designer philosophy, not a game rule. A new zone is a
   cost to be justified, never a free tool. Where a game would normally reach for another zone, a
   counter, or a track, look first for a way to express it with the cards and zones that already
-  exist — deck-as-stamina and items-as-Retained-cards-in-hand are the pattern. The constraint is
+  exist — deck-as-stamina and items-as-Held-cards-in-hand are the pattern. The constraint is
   meant to force creative representation, so treat "we need somewhere to put this" as a design
   prompt rather than a shopping list.
 - **Skills.** Every session invokes `/grilling` and `/domain-modeling`. Prototype tickets invoke
@@ -94,7 +94,9 @@ head, reacting to what's in front of you, with little time for deep strategy.*
   the *same game*, not two tunings. Ceiling is 2 players. Following from it
   `[proposed by agent → you approved]`: one deck and one health pool **per character**, so a
   character can be in trouble alone; **fully open information** (a solo player sees both hands
-  anyway); **strict alternating turns**, Red then Gray; and **down, not dead** — a character at zero
+  anyway); ~~strict alternating turns~~ — **superseded by ticket 21**, both characters now act
+  simultaneously and collaboratively, either of them in any order, which makes *solo is mechanically
+  identical to co-op* more true rather than less; and **down, not dead** — a character at zero
   is revivable, the run ends only when both are down. Whether *energy* is shared or per-character is
   deliberately **not** decided — handed to ticket 04, which must define the term first.
 - [Survey card games that use cards themselves as resource, health, or counters](issues/16-cards-as-resource-precedent-survey.md)
@@ -118,19 +120,19 @@ head, reacting to what's in front of you, with little time for deep strategy.*
 - [Design the deck-as-energy-and-HP model](issues/04-deck-as-energy-and-hp-model.md) — `[you]` The
   hypothesis **survives in its pure form**. Your deck **is** your **stamina**; there is no energy
   number and the word "energy" is retired. Three zones, no discard pile: **deck**, **hand**, face-up
-  **exhaust pile**. At the start of your turn you decide how many cards to **convert** from deck to
-  hand — the core decision, since every card converted is stamina spent whether used or not. Playing
+  **exhaust pile**. At the start of your turn you decide how many cards to **draw** from deck to
+  hand — the core decision, since every card drawn is stamina spent whether used or not. Playing
   an X-cost card **exhausts X cards from your hand**; damage **exhausts X cards from your deck**
   (chosen costs from hand, unchosen punishment from deck). **The whole hand exhausts at end of turn**,
-  with **Retain** as the exception. Nothing returns during a floor; clearing a floor restores the
-  exhaust pile. You are **exhausted** — down, not dead — when you begin a turn and cannot convert,
+  with **Hold** as the exception. Nothing returns during a floor; clearing a floor restores the
+  exhaust pile. You are **exhausted** — down, not dead — when you begin a turn and cannot draw,
   which leaves you one **last stand** turn. **Stamina is per-character**, and solo is mechanically
   identical to co-op. **The deckbuilding inversion is the design**: a card you add is +1 floor-time
   and −1 consistency. **No structural anti-recursion rule** — declined deliberately, over the agent's
   recommendation, with the dissent recorded. Low-complexity adopted as a **strong preference**. Zero
   components; health is one visible stack; no shuffling during a floor. Two rulings made here belong
   to other tickets and are recorded on them: **a floor is one continuous encounter** on a 2D plan,
-  ended by ascending (ticket 05), and **persistent effects live in your hand** via Retain, costing
+  ended by ascending (ticket 05), and **persistent effects live in your hand** via Hold, costing
   hand space and always temptingly burnable as fuel (ticket 11).
 - [Explore damage-as-thinning as a built-in rubber band](issues/15-damage-as-thinning-rubber-band.md)
   — `[you]` **Resolved against the hypothesis**, deliberately, by ticket 04. The player does *not*
@@ -210,6 +212,31 @@ head, reacting to what's in front of you, with little time for deep strategy.*
   **"you cannot simply leave"** is discharged by the encounter's shape, so **no pursuit rule is
   owed**. Nothing was decided and nothing dropped.
 
+- [Decide what defeating a floor card takes, and what failing it costs](issues/21-defeating-a-floor-card.md)
+  — `[you]` **A floor deck is a deck of rooms** — rooms came back, not as geography but as cards met
+  in the shuffle's order. Three kinds at level 1: **combat** (`Power X`), **hazard** (`Scramble X`),
+  and **item rooms**, whose card is the room in the room zone and the item once it is in hand. A room
+  prints a **named threshold** rather than a bare number, so the question at each flip is *do we have
+  the right thing*, not *do we have enough*. **Cost and stats are separate, unrelated numbers**:
+  playing a card Exhausts cards from hand equal to its cost, then puts it face up in the **play zone**
+  where its stats join a **shared pool** across both characters — which is what leaves room for stats
+  that are not simple numbers, and that is where build synergy comes from. Most cards carry one stat.
+  The threshold is **checked continuously**, excess evaporates, and rooms are **all-or-nothing** with
+  no memory — the reshuffle carries the chip-it-down feel instead of a damage track. Failure is
+  **printed per room**, normally *"1 character Exhausts X from deck"* with the **team choosing who
+  absorbs the whole amount**; **declining is failing without trying**, and you can bail mid-draw.
+  **Item rooms are the only reward**, pay into a chosen character's hand with `Hold`, and carry **no
+  punishment** — the deck's one always-safe decline. **An item never enters the deck**, ruled
+  deliberately: the deck is stamina, so that would be the game's only heal and exactly the recursion
+  that broke four games in tickets 01 and 16. **Rooms have no behaviour beyond the flip.** New
+  vocabulary: **Cleared** (out of the floor deck for good; all rooms Cleared ends the encounter),
+  **Fled** (the discard that shuffles back), plus two renames of ticket 04's keywords — **`Convert` →
+  `Draw`** and **`Retain` → `Hold`**. Settled here but owned elsewhere: **the turn's five phases**
+  (ticket 07) and **the end of strict alternating turns** (ticket 03) — both characters now act
+  simultaneously, either in any order. **Two findings logged rather than fixed:** the play phase is
+  near-pure execution because cleanup exhausts the hand anyway, accepted knowingly with `Hold` as its
+  saving grace; and quarterbacking is a real co-op risk under open information. Both go to ticket 20.
+
 ## Not yet specified
 
 <!-- In scope, but not sharp enough to ticket. Graduates into tickets as the frontier advances. -->
@@ -224,20 +251,17 @@ head, reacting to what's in front of you, with little time for deep strategy.*
   minutes, and the run-level arc is deckbuilding rather than wearing down, so what
   remains is only what failure costs and what, if anything, a failed run leaves behind. That last
   part may turn out to be meta-progression's question rather than this one's.
-- **Finding things during a floor** — the "find items" half of the pitch, which lost its mechanism
-  when rooms did. Scavenging was a floor's supply of one-shot tools and a push-your-luck decision
-  about spending stamina to search; the floor-deck model has no searching in it. Whether that half of
-  the pitch comes back at all is open. If it does, the obvious home is a floor card that pays a tool
-  rather than a threat, which is ticket 21 item 6 — so this may resolve inside 21, and graduates only
-  if it doesn't. Two named threads survive the change: whether a floor can hand you something that
-  clutters rather than helps, and the later exception under which a *few* items might be carried
-  onward.
+- **Finding things during a floor** — **largely resolved by ticket 21**: item rooms are how a floor
+  hands you things, the item goes to hand with `Hold`, and it is gone on ascending. Two named threads
+  survive: whether a floor can hand you something that **clutters rather than helps**, and the later
+  exception under which a *few* items might be **carried onward** past ascending. Neither is sharp
+  enough to ticket, and both may resolve inside ticket 09.
 - **What else costs stamina, beyond fighting** — ticket 06 ruled that **most moves cost stamina in
   some form**, but the moves that ruling was about were movement, searching, and forcing doors, and
-  none of those exist now. The open question is sharper and more awkward than it was: whether a turn
-  contains anything at all beyond flipping, converting, and playing, and if it doesn't, whether 06's
-  principle has quietly collapsed into ticket 04's drain. Ticket 07 owns it and has been told to say
-  so out loud either way.
+  none of those exist now. Ticket 21 settled the turn's five phases and there is **nothing in them
+  that costs stamina except drawing and paying card costs** — so on the current design 06's principle
+  has collapsed back into ticket 04's drain. Ticket 07 owns saying that out loud, or finding
+  something else in a turn worth pricing.
 - **Fixed duo or roster** — whether Red and Gray are the only two characters or one pairing drawn
   from a larger cast. Pending ticket 13; a roster would expand content scope considerably.
 - **Table footprint and component budget** — the physical constraints that will eventually bound

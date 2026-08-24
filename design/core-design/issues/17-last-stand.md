@@ -9,7 +9,7 @@ Map: [core design map](../map.md)
 
 **The idea — `[you]`, surfaced while resolving ticket 04.**
 
-Ticket 04 settled that a character is exhausted when they **begin a turn and cannot convert**. An
+Ticket 04 settled that a character is exhausted when they **begin a turn and cannot draw**. An
 empty deck is not instantly fatal: you get one final turn with the hand you are already holding, and
 no possibility of another. That is structurally a last stand whether or not any rule says so.
 

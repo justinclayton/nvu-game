@@ -2,7 +2,7 @@
 
 Type: prototype
 Status: open
-Blocked by: 21, 22
+Blocked by: 22
 Map: [core design map](../map.md)
 
 ## Kind of prototype
@@ -30,7 +30,15 @@ character deck. Then answer:
    was at the table.
 4. **Setup cost.** Time building the floor deck and clearing it away, honestly measured, against the
    5–7 minute floor budget.
-5. **What broke.** The thing that felt wrong, in plain language, before theorising about why.
+5. **Two things ticket 21 sent here specifically, both `[you]`-accepted rather than fixed:**
+   - **Is the play phase empty?** Cleanup exhausts the hand regardless, so playing everything legal
+     is nearly always right and all the tension sits in the draw phase. That was accepted knowingly —
+     *"the tension is in the draw phase for sure, but the resolution is satisfying"* — with `Hold`
+     items as the thing that keeps phase 3 alive. Watch whether it *is* alive. The logged fix, if it
+     isn't, is paying costs from the deck rather than the hand.
+   - **Quarterbacking.** With open information and simultaneous play, does one player end up running
+     both hands? Play it with two people who both want to decide.
+6. **What broke.** The thing that felt wrong, in plain language, before theorising about why.
 
 ## Notes for the session
 

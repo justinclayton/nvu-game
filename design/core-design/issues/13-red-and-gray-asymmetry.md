@@ -47,3 +47,14 @@ Decide:
   *mean* mechanically is entirely open.
 - Resist giving each character a long unique rules block. Under the low-complexity constraint, the
   best answer is likely one structural difference plus different starting decks.
+
+## Inherited from ticket 21
+
+`[you, 2026-08-23]` The stat keywords are a ready-made axis for this ticket. Rooms print a **named**
+threshold — `Power X` for combat, `Scramble X` for hazards — and a card only counts toward the stat
+it carries, so **a character whose deck leans Power is genuinely bad at hazard rooms** and vice
+versa. That is asymmetry with real teeth and no extra rules, and it is the obvious first place to
+look for how Red and Gray differ. It is a **candidate, not a decision** — this ticket rules.
+
+Also available cheaply: the team chooses whose hand a cleared item lands in, so an item can be routed
+to whichever character its stats suit.

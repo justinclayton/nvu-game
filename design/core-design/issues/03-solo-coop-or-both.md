@@ -102,3 +102,22 @@ on its own merits, not inherited.
 - How Red and Gray actually differ in play — spun out as ticket 13. "Archetypes" is a design
   intent, not yet a mechanic.
 - Whether the pair is a fixed duo or drawn from a roster — in the fog, pending ticket 13.
+
+## Superseded in part
+
+`[you, 2026-08-23, ticket 21]` **Strict alternating turns, Red then Gray, is out.** Both characters
+act **simultaneously and collaboratively**: either of them may draw or play in any order, and
+choosing that sequencing — whether Red draws out fully before Gray, whether they alternate, whether
+they change it mid-turn — is itself part of the collaborative strategy.
+
+Everything else this ticket settled stands, and two of its rulings get stronger:
+
+- **Solo is mechanically identical to co-op** is now more true than it was, not less. One person
+  running both characters does exactly what two people do; there is no turn order to simulate.
+- **A character can be in trouble alone** is now load-bearing. A room's punishment normally reads
+  *"1 character Exhausts X from deck"* and the team chooses who absorbs the whole amount, so
+  protecting a nearly-empty Red by making Gray eat the hit is a live decision every turn.
+
+**Logged as a known cost, not designed against** `[you]`: with fully open information and
+simultaneous play, one player can simply run both hands — quarterbacking. It is a playtest finding
+for [ticket 20](20-encounter-tabletop-prototype.md) to watch for, not something to pre-empt.

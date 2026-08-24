@@ -131,7 +131,7 @@ bookkeeping, and tickets 19 and 07 must fit inside that budget rather than disco
 
 Ruled here because it determines what "carries" means, though ticket 09 owns acquisition mechanics.
 
-Items found during a floor go **straight to hand, with Retain by default, and do not leave the floor
+Items found during a floor go **straight to hand, with Hold by default, and do not leave the floor
 with you.** They are tools that occupy hand space, burnable as fuel when desperate, gone on ascending.
 A way to carry *some* items onward may exist later — definitely not all, and definitely not the
 default.
@@ -161,7 +161,7 @@ until this lands — the floor described in ticket 04 depends on it, and it is n
 ### Designer philosophy surfaced here — `[you]`
 
 **Minimise play zones.** Not a game rule for players — a working discipline for the designers. Deck as
-stamina, consumables and equipment as Retained cards in hand: both are instances of it. Promoted to
+stamina, consumables and equipment as Held cards in hand: both are instances of it. Promoted to
 the map's standing Notes, because a floor plan is the most zone-hungry thing left on this map and this
 principle is exactly the kind that erodes silently when a later ticket finds a zone convenient.
 
@@ -189,7 +189,7 @@ topology that supports two separated characters.
 
 - **A floor is a 2D plan with rooms you run around.** Gone. A floor is a shuffled deck; a turn is a
   flipped card.
-- **Scavenged items go to hand with Retain and do not leave the floor.** Gone with the rooms. Whether
+- **Scavenged items go to hand with Hold and do not leave the floor.** Gone with the rooms. Whether
   floor cards hand out anything comparable is [ticket 21](21-defeating-a-floor-card.md) item 6.
 - **Red and Gray move independently within a floor.** There is nowhere to move. What the two
   characters do separately is now a turn-economy question for ticket 07 and ticket 21 item 7.

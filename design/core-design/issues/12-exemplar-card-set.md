@@ -2,7 +2,7 @@
 
 Type: prototype
 Status: open
-Blocked by: 08, 11
+Blocked by: 11, 21, 22
 Map: [core design map](../map.md)
 
 ## Question
@@ -22,8 +22,10 @@ card that stresses each of:
 - **Health loss** — a card that hurts to lose, so the damage rules from ticket 04 have teeth.
 - **Effect** — a card that does something interesting enough to justify the whole system.
 - **The acquisition inversion** — a card whose purchase is a genuinely hard call under ticket 09.
-- **An enemy** — rendered per ticket 08, so the enemy side of the anatomy is tested too.
-- **A boss** — enough to prove the structural distinction ticket 08 settled is expressible.
+- **A floor card** — a threat rendered per tickets 11 and 21, so the floor side of the anatomy is
+  tested too, and the player can actually be beaten by something.
+- **The floor deck's hardest card** — whatever ticket 22 item 3 settles a climax to be, or the
+  nastiest card in the deck if it settles that there is no climax.
 
 Alongside the cards, a one-page rules summary sufficient to actually play a floor with them.
 

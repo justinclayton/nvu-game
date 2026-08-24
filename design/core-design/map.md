@@ -201,6 +201,15 @@ head, reacting to what's in front of you, with little time for deep strategy.*
   22. The abandoned spatial model is preserved in
   [`abandoned/`](abandoned/spatial-floor-model.md).
 
+- [Decide how enemies are represented and how they act](issues/08-enemy-representation-and-behaviour.md)
+  — `[you]` **Closed without a session, absorbed rather than answered.** The floor-deck model settled
+  representation, arrival, and persistence outright — an enemy is a card in the floor deck, it arrives
+  on the flip, and a card that beat you returns through the reshuffle rather than following you
+  anywhere. Everything still open moved: **behaviour** and both **damage** questions to ticket 21,
+  **escalation axes** and **whether a floor deck is one monster or many** to ticket 22. Ticket 06's
+  **"you cannot simply leave"** is discharged by the encounter's shape, so **no pursuit rule is
+  owed**. Nothing was decided and nothing dropped.
+
 ## Not yet specified
 
 <!-- In scope, but not sharp enough to ticket. Graduates into tickets as the frontier advances. -->

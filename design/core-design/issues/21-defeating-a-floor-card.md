@@ -35,7 +35,12 @@ Decide:
    stamina back, something removed from the deck — how often a floor card carries one, and how it
    sits against ticket 05's card reward on ascending without making floors a second deckbuilding
    step.
-7. **Who fights.** Both characters act against the same flipped card each turn, under ticket 03's
+7. **Does a floor card do anything other than present a defeat condition?** Whether it can act on a
+   later turn, change the next flip, or stay in play once met. The flip is currently free — an enemy
+   that has to be *run* costs upkeep every turn it exists, and physical games get slow exactly here.
+   Ticket 06's *something acts on you every turn* is already satisfied by the flip alone, so anything
+   added here is on top of a bar that is already cleared, and needs its own reason. `[from ticket 08]`
+8. **Who fights.** Both characters act against the same flipped card each turn, under ticket 03's
    strict alternating turns. Decide whether defeating it is a joint effort, whether one character
    can carry it alone, and who eats the consequence when it is not defeated.
 
@@ -48,6 +53,8 @@ Decide:
   by the flipped card itself, so this ticket owns whether that is enough.
 - The map's **minimise play zones** philosophy. The floor deck has already added a draw pile, a
   discard pile, and an exhaust pile to the table. Adding anything further needs a stated reason.
+- **Ticket 07's upkeep budget**, at every point on the escalation curve — inherited with item 7 from
+  ticket 08, which was closed into this ticket and ticket 22.
 
 ## Notes for the session
 

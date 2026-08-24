@@ -1,49 +1,40 @@
 # 08 — Decide how enemies are represented and how they act
 
 Type: grilling
-Status: open
-Blocked by: 21, 22
+Status: closed — absorbed
+Blocked by: —
 Map: [core design map](../map.md)
 
 ## Question
 
 What is an enemy, physically, and how does it act in a game with no computer to run it?
 
-**Most of this ticket was answered by [ticket 18](18-floor-encounter-decisions.md).** An enemy is a
-card in the floor deck. It arrives by being flipped at the start of a turn, it sits in one place on
-the table, it acts by what is printed on it, and it leaves by being exhausted. There is no
-positioning, no pursuit, and no enemy that follows you between rooms, because there are no rooms.
+## Answer
 
-What is left is what a card cannot answer by existing:
+`[you, 2026-08-23]` **Closed without a session. The ticket no longer has a subject of its own** — the
+floor-deck model answered most of it outright and rehomed the rest, and holding the node open would
+only invite a session to invent enemy machinery to justify it.
 
-1. **Behaviour beyond the flip.** Whether a floor card does anything other than present a defeat
-   condition — acts on a later turn, changes the next flip, stays in play after being met. Weigh
-   every candidate against per-turn upkeep: enemy logic is where physical games get slow, and the
-   flip is currently free.
-2. **Identity across a floor.** Whether the ten-or-so cards of a floor deck are ten faces of one
-   monster, a monster and its lesser company, or ten unrelated threats. Ticket 05's *one enemy per
-   floor* was written about a creature you cornered on a map, and it does not translate cleanly to a
-   deck. Settle jointly with [ticket 22](22-floor-deck-composition.md) item 2.
-3. **Escalation dimensions.** Along which axes an enemy gets harder floor to floor — what it takes
-   to defeat, what it costs to fail, or how it behaves — inside ticket 07's upkeep budget at every
-   point on the curve.
-4. **Whether this ticket still has a subject.** It may collapse entirely into 21 and 22. If a session
-   finds nothing here that those two do not already own, **rule it out of scope and close it** rather
-   than inventing enemy machinery to justify the node.
+Where each of its seven items went:
 
-## Settled elsewhere — do not relitigate
+1. **Representation** — answered by [ticket 18](18-floor-encounter-decisions.md). An enemy is a card
+   in the floor deck.
+2. **Arrival** — answered by ticket 18. It is flipped face up at the start of the turn.
+3. **Behaviour** — moved to [ticket 21](21-defeating-a-floor-card.md) item 7, as *does a floor card
+   do anything other than present a defeat condition?*, carrying ticket 07's upkeep budget with it.
+4. **Damage to the player** — [ticket 21](21-defeating-a-floor-card.md) item 4, the negative
+   consequence of failing.
+5. **Damage to the enemy** — [ticket 21](21-defeating-a-floor-card.md) items 1–3: the defeat check,
+   whether partial progress exists, and whether a card carries damage into the discard pile.
+6. **Persistence** — answered by ticket 18. There is nowhere to follow the player to; a card that
+   beat you returns through the reshuffle instead.
+7. **Escalation dimensions** (which replaced the struck boss item) — merged into
+   [ticket 22](22-floor-deck-composition.md) item 4, which now names the axes explicitly. Enemy
+   **identity across a floor** — whether a deck is one monster or many — is ticket 22 item 2.
 
-- **Representation, arrival, and persistence** — [ticket 18](18-floor-encounter-decisions.md). An
-  enemy is a floor card; it arrives on the flip; a card that beat you returns via the discard pile.
-- **Damage to the player, damage to the enemy, and who chooses what is lost** —
-  [ticket 21](21-defeating-a-floor-card.md).
-- **"You cannot simply leave"** `[you, ticket 06]` — now satisfied structurally: the floor deck must
-  be beaten to advance and failures come back around. This ticket no longer owes a pursuit mechanism.
-- **Boss distinction** — struck by ticket 05, and now owned as *the last card* by ticket 22 item 3.
+**Nothing was decided here**, and nothing was dropped. This is a bookkeeping close, not a ruling:
+every open question the ticket held is live on 21 or 22.
 
-## Must satisfy
-
-- The encounter loop settled in ticket 18.
-- The turn economy settled in ticket 07, including its upkeep budget.
-- Ticket 06's constraint that **something acts on the player every turn** — carried by the flipped
-  card, so anything added here is on top of a bar already cleared.
+`[you, ticket 06]` The one requirement this ticket was carrying — **"you cannot simply leave"** — is
+discharged by the encounter's shape rather than by anything an enemy does. The floor deck must be
+beaten to advance, and a card you failed against is shuffled back in. No pursuit rule is owed.

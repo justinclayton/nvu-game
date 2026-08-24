@@ -26,7 +26,10 @@ Decide:
    enemy difficulty as one axis and left a second axis open; **the pyramid tower answered it
    spatially and died with the spatial floor**, so the second axis is open again. Deck composition is
    the obvious candidate — more cards, nastier mix, harsher reshuffles — but that is a candidate, not
-   a decision.
+   a decision. **Name the axes explicitly** `[from ticket 08]`: an individual threat can get harder by
+   what it takes to defeat, by what it costs to fail, or by how it behaves, and the deck can get
+   harder by what it holds. Say which of those the game uses and which it deliberately leaves flat,
+   and keep every point on the curve inside ticket 07's upkeep budget.
 5. **The reshuffle.** Ticket 18 rules that the discard pile shuffles back in when the draw pile
    empties. Decide whether anything about the deck changes when that happens — whether a second pass
    is the same floor again or a worse one — and how many passes a floor is expected to take.

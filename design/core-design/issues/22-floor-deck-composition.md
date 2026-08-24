@@ -193,3 +193,30 @@ escalation dials (multi-stat rooms, independent failure-cost tuning). This ticke
 those dials — it escalates through item scarcity instead — and in the process reopened and amended
 ticket 21's reward and challenge rules directly, rather than layering a contradiction on top
 silently.
+
+### Amended by ticket 09, 2026-08-24
+
+[Ticket 09](09-card-acquisition-and-deckbuilding.md) specified the mid-floor reward this ticket
+created but left unspecified, and renamed a term running through this ticket's composition table.
+
+- **`Item` is renamed `Stuff`.** `[you]` The escalation dial is **Stuff scarcity**: the *Item* row
+  of the composition table is the **Stuff** row, falling from 9 at floor 1 to 0 at floor 10. The
+  room is still called an `Item room` for now, provisionally. Nothing about the counts changes.
+- **Stuff rooms hold Good Stuff only.** `[you]` Bad Stuff — junk, slime, a torn seal — comes from a
+  separate pool *outside* the floor deck, handed over by a room's printed punishment. So this
+  ticket's ruling that a Stuff room is the deck's one always-safe flip holds fully: what you find
+  there is always worth finding.
+- **The pool policy now covers five pools, not three.** `[you]` Alongside the combat, hazard, and
+  Stuff room pools this ticket sized, there are now **two per-character permanent card reward
+  pools** — one Red, one Gray — plus the Bad Stuff pool. The reward pools are sized by a different
+  rule than the room pools: large enough that a card declined and sent to the bottom is
+  **essentially never seen again in that run**. Exact counts stay with ticket 12, as this ticket
+  ruled for the room pools.
+- **The hazard room's high threshold is now specified.** `[you]` It reveals the top card of a reward
+  pool face up; the players may add it to the top of that character's deck or skip it. Which
+  character or characters reveal is **printed on the hazard card**. The exemplar set starts with one
+  standard line: *"One character reveals reward. You may add it to the top of your deck or skip
+  it."*
+
+Unchanged: the win condition, the composition counts, escalation through scarcity, the reshuffle,
+and the combat room's untuned `Power`.

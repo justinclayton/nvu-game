@@ -205,3 +205,17 @@ floors except card-specific penalties**.
 
 The abandoned material is preserved at
 [`abandoned/spatial-floor-model.md`](../abandoned/spatial-floor-model.md).
+
+## Superseded in part by ticket 09, 2026-08-24
+
+**`Curse` is retired.** This ticket's card-specific exception to *nothing bad carries* — a card that
+follows you between floors as a penalty, placeholder keyword `Curse` — is
+[dropped from the core spec by ticket 09](09-card-acquisition-and-deckbuilding.md), and the naming
+debt it carried is discharged by deletion rather than by finding a better word.
+
+The reasoning: ascending is the full heal and the clean slate, and a mechanic that punches a hole in
+that has to earn it. Ticket 09's **Bad Stuff** covers the same design need — a punishment that
+lingers and costs you to be rid of — entirely within a single floor. So this ticket's default becomes
+absolute: **nothing bad crosses a floor boundary.**
+
+Everything else this ticket ruled stands.

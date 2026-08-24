@@ -113,3 +113,34 @@ it re-asks the "is this still worth it?" question every turn without a single ru
 
 Decide here: what such cards look like, whether they are their own type or just Hold plus a static
 effect, and whether burning one as fuel is a normal exhaust or something the card gets to react to.
+
+## Handed down by ticket 09, 2026-08-24
+
+Ticket 09 answered one of the two naming questions this ticket was left holding, and added three
+things to the anatomy.
+
+**The `Curse` bullet above is dead.** `[you, ticket 09]` `Curse` is retired from the core spec —
+nothing bad crosses a floor boundary, full stop. This ticket no longer owes it a name, and the
+"opposite valence, same lifecycle" naming problem is resolved: there is only the temporary in-floor
+card, and it is called **Stuff**.
+
+**`Item` is renamed `Stuff`, and Stuff splits by origin.** `[you, ticket 09]` **Good Stuff** comes
+from the floor deck through Item rooms. **Bad Stuff** comes from a pool outside the floor deck, handed
+over by a room's printed punishment. Both are Stuff once in your possession and behave identically:
+`Hold`, playable, ordinary fuel. The only structural difference is that **Bad Stuff contributes no
+stats** toward a challenge — so this ticket's anatomy must make "has no stats" a readable thing for a
+card to be, and must let per-card text restrict a piece further, including forbidding its use as fuel.
+
+**Card-level Red/Gray asymmetry is now committed, not optional.** `[you, ticket 09]` Permanent card
+rewards come from **two per-character pools** — Red picks 1 of 3 from Red's, Gray from Gray's. Red's
+cards and Gray's cards are therefore different cards. Ticket 13 owns *how* they differ; it no longer
+owns *whether*. This ticket's anatomy has to carry a character marking.
+
+**A card this ticket may build, or may decline to build.** `[you, ticket 09]` Nothing in the rules
+carries Stuff past ascending. What stays open is a *card* that does — something reading roughly *"if
+you are holding this when you clear a floor, keep up to 2 Stuff for the next floor."* Ticket 09 moved
+this off the map's fog and into this ticket's design space; it is not owed, only allowed.
+
+**A naming debt this ticket may want to take.** `[you, ticket 09]` **`Item room` is provisional** and
+survives only because nothing better was on the table. A good name for it probably involves neither
+`Stuff` nor `Item`. `Cache` and `Stash` are starting points, not decisions.

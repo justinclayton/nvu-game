@@ -153,8 +153,9 @@ head, reacting to what's in front of you, with little time for deep strategy.*
   permanent card rewards**, Slay the Spire style, and `[proposed by agent → you approved]` **declining
   is always allowed**, which makes the player set their own deck size and gives thinning-by-omission
   for free. Removal is not ruled out but is never a default. **Escalation scales enemy difficulty**;
-  a second axis is open and waits on ticket 22. **Nothing bad carries between floors except
-  card-specific penalties** (placeholder keyword *Curse*, name provisional). Surfaced here and
+  a second axis is open and waits on ticket 22. **Nothing bad carries between floors** — the
+  card-specific exception, placeholder keyword *Curse*, was **retired by ticket 09**, so the default
+  is now absolute. Surfaced here and
   promoted to the standing Notes: **minimise play zones**, a designer philosophy rather than a game
   rule. **Four of this ticket's rulings were superseded by ticket 18's floor-deck model** — the 2D
   floor plan, scavenged items, Red and Gray moving independently, and the open question of whether
@@ -255,6 +256,38 @@ head, reacting to what's in front of you, with little time for deep strategy.*
   13**: floor rooms, not player cards, may be the primary stat source, with starter decks doing
   effects instead.
 
+- [Design the card acquisition and deckbuilding model](issues/09-card-acquisition-and-deckbuilding.md)
+  — `[you]` Most of this ticket was already settled upstream; what it actually decided is small, and
+  what it *discovered* is not. **Permanent card rewards are per-character**: Red chooses one of three
+  from a Red reward pool, Gray one of three from a Gray pool, because a character can only build
+  toward something if the cards they are offered are theirs. That commits the design to **card-level
+  Red/Gray asymmetry**, so ticket 13 now owns only *how* they differ, not *whether*. Pools are
+  **flat** — no rarity tiers, no escalation by floor — since ticket 22 already put escalation on one
+  dial and a second would reopen it. The ascend reward goes **into the deck** before the shuffle; the
+  mid-floor reward ticket 22 created is a **reveal, not a shop** — top card face up, take it or skip
+  it, onto the **top of the deck**, with which character reveals **printed on the hazard card**. That
+  mid-floor card **is +1 stamina immediately**, which is the first mechanic judged under ticket 04's
+  *no guard rail, balance per-mechanic* ruling; it is **accepted**, because the source is finite and
+  every use permanently worsens the deck it heals. **No voluntary thinning**, deliberately: declining
+  already thins for free, a trash pile is a new zone, and under deck-as-stamina removal is
+  *self-damage that makes you better* — the exact Undaunted failure ticket 16 found in the wild.
+  Starting decks are **per character and allowed to differ**; **12–15 cards is provisional and owned
+  by ticket 10**, and there is **no ceiling**. **Deck growth is left uncapped on purpose** — the
+  inversion is supposed to govern it, which is a claim nothing has tested, so ticket 10 is **charged
+  with proving it** against the arithmetic that a run could add forty cards to a fifteen-card deck.
+  **The discovery: the design needed a word for a bad card, and finding it reorganised items.** A bad
+  card cannot go in your deck, because the deck is stamina — junk in the deck is a punishment that
+  heals you. So **`Item` is renamed `Stuff`** — tools, junk, and slime under one plain word — and
+  **Stuff splits by where it came from**: **Good Stuff** lives in the floor deck and is what an Item
+  room hands you, so an Item room is never a disappointment; **Bad Stuff** lives in a pool *outside*
+  the floor deck and arrives only as a room's printed punishment. Bad Stuff behaves like any other
+  Stuff — `Hold`, playable, ordinary fuel — and differs only in contributing **no stats**, so it is an
+  effective cut to your hand size that you must pay to undo. **There is no keyword for it**; it is a
+  design concept, and per-card text does the rest. **`Curse` is retired** and its naming debt
+  discharged by deletion: nothing bad crosses a floor boundary. **Amends tickets 21 and 22** with the
+  rename and the two-pool split, and hands ticket 07 a recommendation of **max hand size 5** — which
+  07 owns, because a rule with that reach should not be set as a side-effect of designing junk.
+
 ## Not yet specified
 
 <!-- In scope, but not sharp enough to ticket. Graduates into tickets as the frontier advances. -->
@@ -269,11 +302,6 @@ head, reacting to what's in front of you, with little time for deep strategy.*
   minutes, and the run-level arc is deckbuilding rather than wearing down, so what
   remains is only what failure costs and what, if anything, a failed run leaves behind. That last
   part may turn out to be meta-progression's question rather than this one's.
-- **Finding things during a floor** — **largely resolved by ticket 21**: item rooms are how a floor
-  hands you things, the item goes to hand with `Hold`, and it is gone on ascending. Two named threads
-  survive: whether a floor can hand you something that **clutters rather than helps**, and the later
-  exception under which a *few* items might be **carried onward** past ascending. Neither is sharp
-  enough to ticket, and both may resolve inside ticket 09.
 - **What else costs stamina, beyond fighting** — ticket 06 ruled that **most moves cost stamina in
   some form**, but the moves that ruling was about were movement, searching, and forcing doors, and
   none of those exist now. Ticket 21 settled the turn's five phases and there is **nothing in them
@@ -281,7 +309,9 @@ head, reacting to what's in front of you, with little time for deep strategy.*
   has collapsed back into ticket 04's drain. Ticket 07 owns saying that out loud, or finding
   something else in a turn worth pricing.
 - **Fixed duo or roster** — whether Red and Gray are the only two characters or one pairing drawn
-  from a larger cast. Pending ticket 13; a roster would expand content scope considerably.
+  from a larger cast. Pending ticket 13. A roster is now considerably more expensive than it was:
+  ticket 09 gave each character their own reward pool, so every additional character is a whole pool
+  of printed cards rather than a different starting deck.
 - **Table footprint and component budget** — the physical constraints that will eventually bound
   card count and per-turn upkeep. The *floor decks'* share belongs to ticket 22, which produces the
   map's first hard component number; what remains here is everything else.

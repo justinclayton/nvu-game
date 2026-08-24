@@ -133,3 +133,21 @@ What this ticket still owes, sharpened by the above:
   must survive playtest. Ticket 10 owns the number.
 - `[proposed by agent → not adopted, logged]` **"Bracing"** — absorbing a point of damage by
   exhausting a card from hand, making blocking an act of stamina rather than a printed stat.
+
+## Handed down by ticket 09, 2026-08-24
+
+**Maximum hand size is this ticket's to decide, and ticket 09 recommends 5.**
+
+There is currently no hand limit anywhere in the design. Ticket 04 makes *how many to draw* the
+central decision of the game and leaves it deliberately unbounded.
+
+Ticket 09 created a reason to bound it. **Bad Stuff** — a piece of junk handed to you by a room's
+punishment — has `Hold`, so it sits in your hand and does not clear at cleanup, and getting rid of it
+means paying to play it. That is only a punishment if hand space is scarce. More generally, `Hold`
+itself is only a cost when holding one thing means not holding another.
+
+`[you, ticket 09]` **A maximum hand size of 5 is recommended; ticket 07 owns the decision.** Weigh it
+against the draw decision, not against junk alone — a cap changes what the draw phase is, puts a
+ceiling on how much fuel a big turn can assemble, and prices `Hold` for every card that carries it.
+Ticket 09 deliberately did not decide this, because a rule with that much reach should not be set as
+a side-effect of designing junk.

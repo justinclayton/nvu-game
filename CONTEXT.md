@@ -46,10 +46,23 @@ threshold**: the lower clears the room and moves the players on; the higher clea
 permanent **card reward**. Which is reached locks in only once the players declare the play phase
 done. *(tickets 21, 22)*
 
-**Item room** — a room holding an item. The card is **both things at once**: the room while it sits
-in the active room zone, and the item itself once it is in a player's hand. **Prints no challenge**
-— flipping one sends the item straight to a chosen character's hand with **Hold**, and the room is
-Cleared; it can never go to Fled. *(tickets 21, 22)*
+**Item room** — a room holding a piece of **Stuff**. The card is **both things at once**: the room
+while it sits in the active room zone, and the Stuff itself once it is in a player's hand. **Prints
+no challenge** — flipping one sends the Stuff straight to a chosen character's hand with **Hold**,
+and the room is Cleared; it can never go to Fled. Only **Good Stuff** is found here. *The name is
+provisional* — a better one is owed that involves neither "Item" nor "Stuff". *(tickets 21, 22, 09)*
+
+**Stuff** — a card a floor hands you: a tool, a piece of junk, a faceful of slime. It goes to hand
+with **Hold**, it is **playable**, and it is **ordinary fuel** — it can be Exhausted from hand to pay
+another card's cost like anything else. Stuff **never enters a deck** and is gone on ascending. It is
+a mass noun: *"I have three Stuff."* *(tickets 21, 09)*
+
+**Good Stuff** / **Bad Stuff** — where a piece of Stuff came from, and loosely how welcome it is.
+**Good Stuff** lives in the floor deck and is what an Item room hands you, so an Item room is never a
+disappointment. **Bad Stuff** lives in a pool **outside** the floor deck and reaches you only as a
+room's printed punishment; it contributes **no stats** toward a challenge, so it clutters your hand
+until you pay to play it. These are descriptions of the split, **not printed keywords** — nothing on
+a card says which it is. *(ticket 09)*
 
 **Power** / **Scramble** — the two stat keywords at level 1. Both rooms and player cards carry them:
 a room prints how much is needed, a played card contributes what it has. More are expected as the
@@ -76,11 +89,17 @@ outmatched and had to scramble.* *(tickets 18, 21)*
 exhaust pile to their deck: a floor cleared is a full heal. It also offers a **card reward**.
 *(tickets 04, 05)*
 
-**Card reward** — the choice of cards offered on clearing a floor, or on meeting a **hazard room**'s
-higher threshold, one of which may be added permanently to the deck for the rest of the run.
-**Declining is always allowed**, and is a real play: under the deck-as-stamina model a card refused
-is consistency preserved. No longer exactly ten reward decisions a run, now that hazards can pay one
-mid-floor too. *(tickets 05, 22; mechanics owned by ticket 09)*
+**Card reward** — a card added permanently to a character's deck for the rest of the run. It arrives
+two ways. **On ascending**, each character chooses one of **three** cards drawn from their own
+**reward pool**, and it goes into their deck before the shuffle. **On meeting a hazard room's higher
+threshold**, the top card of a reward pool is turned face up and the only choice is take it or skip
+it; taken, it goes **on top of the deck**, since nothing shuffles during a floor. **Declining is
+always allowed** and is a real play: under the deck-as-stamina model a card refused is consistency
+preserved. A declined card goes to the bottom of its pool. *(tickets 05, 22, 09)*
+
+**Reward pool** — the cards a character's permanent rewards are drawn from. There is **one per
+character**, so Red is offered Red's cards and Gray is offered Gray's — which is what lets each of
+them build toward something. Flat: no rarity tiers and no escalation by floor. *(ticket 09)*
 
 **Character** — Red or Gray. Both are always in play. In co-op one player runs each; solo, one player
 runs both, under identical rules. *(tickets 03, 04)*
@@ -130,8 +149,8 @@ things that should feel wide-area. *(tickets 04, 21)*
 **Hold** — a keyword, taking Slay the Spire's meaning: this card is not exhausted at end of turn. Used
 for highly situational cards, for anything that should feel equipped, and for persistent effects,
 which work for as long as they are held in hand. **Printed on the card face**, so it is not exclusive
-to items. A Hold card survives cleanup only while it stays in hand — playing it moves it to the play
-zone, where it is exhausted like anything else, so using an item spends it. *(tickets 04, 21; card
+to Stuff. A Hold card survives cleanup only while it stays in hand — playing it moves it to the play
+zone, where it is exhausted like anything else, so using a piece of Stuff spends it. *(tickets 04, 21; card
 design owned by ticket 11)*
 
 **Exhausted** (of a character) — down, not dead. A character is exhausted when they begin a turn and

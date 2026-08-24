@@ -82,3 +82,24 @@ attempts may be used):
    more floor-time and worse consistency on a single pass.
 6. **"Do nothing: recover 1 card"** — the candidate turn action from ticket 07. Does it exist, and at
    what rate does it become a stalling strategy?
+
+## Handed down by ticket 09, 2026-08-24
+
+**A specific charge, added to this ticket's simulation brief: does the inversion actually govern deck
+growth?**
+
+Ticket 09 declined to cap how much a deck can grow, on the grounds that ticket 04's inversion — a
+card you add is +1 floor-time and −1 consistency — is supposed to punish greed without a rule saying
+so. Nothing has tested that claim.
+
+The arithmetic that makes it urgent: **three hazard rooms per floor**, each able to pay a permanent
+card at its high threshold, **plus one reward at every ascend**, is up to **forty cards added to a
+12–15 card starting deck** over ten floors.
+
+`[you, ticket 09]` **Simulate deck growth across ten floors and report whether the inversion actually
+punishes greed, or whether a cap is needed after all.** If it cannot govern this, the inversion is
+weaker than ticket 04 claims and the map should know.
+
+**Also handed down:** starting deck size is **12–15 cards per character, provisional**, and is this
+ticket's number to settle — ticket 09 deliberately refused to pick it, because it cannot be chosen
+honestly before ticket 11 says what a card does.

@@ -252,3 +252,27 @@ Ticket 21 resolved before [ticket 22](22-floor-deck-composition.md), so 22 owes 
 What 22 inherits: three room types to build a deck from, one reward-bearing type, two escalation
 dials this ticket deliberately left it (multi-stat rooms, and failure cost tuned independently of
 threshold), and no room behaviour to budget upkeep for.
+
+### Amended by ticket 09, 2026-08-24
+
+[Ticket 09](09-card-acquisition-and-deckbuilding.md) needed a word for a bad card and, in finding
+one, reorganised this ticket's item rules. Three changes:
+
+- **`Item` is renamed `Stuff`.** `[you]` Everywhere this ticket says *item*, read *Stuff* — a word
+  that covers a powerful tool, a piece of useless junk, and a faceful of slime alike. It is a mass
+  noun: *"I have three Stuff."* The room is still called an **`Item room`** for now, but that name
+  is explicitly provisional and a better one is owed.
+- **Stuff splits into Good Stuff and Bad Stuff, by where it comes from.** `[you]` **Good Stuff**
+  lives in the floor deck and is what an Item room hands you — so an Item room is never a
+  disappointment. **Bad Stuff** lives in a pool *outside* the floor deck and reaches a player only
+  as a room's printed punishment. Bad Stuff never appears as the contents of an Item room. The names
+  are a loose description of the split, not printed keywords.
+- **A room's punishment may hand out Bad Stuff instead of exhausting cards.** `[you]` This slots
+  into the existing per-room punishment slot with no new rule — some rooms cost you stamina, some
+  leave you carrying something. Bad Stuff behaves exactly like any other piece of Stuff: it has
+  `Hold`, it is playable (which is how you get rid of it), and it is ordinary fuel. Its only
+  structural difference is that it contributes **no stats** toward a challenge. Per-card printed
+  text may restrict a particular piece further, including forbidding its use as fuel.
+
+Unchanged by this amendment: what Clearing a room takes, what failing it costs in stamina, the
+all-or-nothing threshold rule, and the Fled reshuffle.

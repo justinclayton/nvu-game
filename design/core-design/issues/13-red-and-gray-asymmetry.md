@@ -58,3 +58,21 @@ look for how Red and Gray differ. It is a **candidate, not a decision** — this
 
 Also available cheaply: the team chooses whose hand a cleared item lands in, so an item can be routed
 to whichever character its stats suit.
+
+## Handed down by ticket 09, 2026-08-24
+
+**This ticket no longer decides *whether* Red and Gray differ — only how.**
+
+`[you, ticket 09]` Permanent card rewards come from **two per-character pools**: Red chooses one of
+three from a Red pool, Gray one of three from a Gray pool. The reason is synergy — a character can
+only build toward something if the cards they are offered are theirs. That commits the design to
+**card-level asymmetry**, so "Red and Gray play the same cards with different flavour" is off the
+table.
+
+`[you, ticket 09]` **Starting decks are per character and are allowed to differ.** Ticket 09 settled
+the shape and left the content to this ticket. Size is 12–15 cards, provisional, owned by ticket 10.
+
+Still this ticket's to answer, unchanged: what the difference *is*, and whether it runs deeper than
+the card pools — different starting deck contents, different stat leanings, or different roles
+entirely. Ticket 22's handed-down note that **stats may live on floor rooms rather than on player
+cards** is still live and bears directly on this.

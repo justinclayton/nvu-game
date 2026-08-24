@@ -1,7 +1,7 @@
 # 22 — Decide what is in a floor deck, and how it escalates
 
 Type: grilling
-Status: open
+Status: resolved
 Blocked by: —
 Map: [core design map](../map.md)
 
@@ -78,3 +78,118 @@ check** — read its Answer and record explicitly how this ticket sits against i
 `[proposed by agent → awaiting your approval, 2026-08-23]` Created to hold the questions
 [ticket 18](18-floor-encounter-decisions.md) explicitly left open, plus the escalation axis that fell
 back open when the pyramid tower was abandoned. Nothing in it is decided.
+
+## Answer
+
+Resolved by grilling session, 2026-08-24. **The win condition changed underneath this ticket, and
+most of what follows is a consequence of that one change.**
+
+### The win condition — supersedes ticket 18's "every room Cleared"
+
+`[you]` **A floor deck holds exactly one combat room, and clearing it ends the floor.** Ticket 18's
+original rule — the encounter is over only when the whole deck is exhausted — no longer holds; see
+that ticket's *Superseded in part* note. The combat room is the climax item 3 asked about: the card
+that ends the floor when defeated. This vindicates ticket 05's original "boss and room enemy
+collapse into one thing" rather than reopening it — there really is one enemy per floor, and
+beating it is what grants passage. Hazard and item rooms are never mandatory: a floor can end with
+either kind still sitting uncleared in the deck. They are the resources on the way to the fight, not
+obstacles between the players and the exit.
+
+`[you]` **Combat rooms always carry a punishment, printed on the card as its Flee cost.** Full text
+in [ticket 21's amendment](21-defeating-a-floor-card.md); in short, this is the existing *Exhaust X
+from deck* punishment, not a new mechanic, guaranteed present for this one room kind and framed
+diegetically — failing or declining a combat room is fleeing it, with a few scrapes to show. It is
+why the first encounter with a floor's combat room is expected to end in flight: the players see it,
+cannot meet its `Power` yet, and pay the Flee cost rather than lose for nothing.
+
+### 1. Size and 2. composition
+
+`[you]` **Size is a resource-count question now, not a turn-budget one** — the floor ends on the
+combat room's defeat, not on exhausting the deck. Composition is fixed in shape, variable in
+generosity:
+
+- **Combat: exactly 1**, every floor.
+- **Hazard: flat 3**, every floor, floor 1 through floor 10.
+- **Item: 9 at floor 1, decreasing by 1 per floor, reaching 0 at floor 10.**
+
+| Floor | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 |
+|---|---|---|---|---|---|---|---|---|---|---|
+| Item | 9 | 8 | 7 | 6 | 5 | 4 | 3 | 2 | 1 | 0 |
+| Total rooms | 13 | 12 | 11 | 10 | 9 | 8 | 7 | 6 | 5 | 4 |
+
+(Combat and hazard add 4 to every row's total.)
+
+### 3. The last card
+
+Answered above: the combat room is the climax. Not decided separately.
+
+### 4. Escalation
+
+`[you]` **Escalation is resource scarcity, not a harder fight.** Item count is the dial: −1 per
+floor, hitting zero by floor 10, so the last floors test whether a run's permanent card rewards
+(ticket 05's ascend reward) can carry the fight without floor items to lean on. Hazard count stays
+flat — the shrinking total room count (13 down to 4) is itself the pyramid ticket 05 lost when the
+spatial tower died, recovered here through composition rather than topology.
+
+`[you]` **The combat room's `Power` requirement is deliberately left untuned.** It depends on how
+much a synergy-built deck can move the stat pool, which neither ticket 11 (card anatomy) nor ticket
+12 (exemplars) has answered yet. Ticket 10's simulator is the right tool to tune it once real cards
+exist — not this ticket.
+
+### 5. The reshuffle
+
+`[you]` **Unchanged from the standing answer.** Nothing about the deck's contents changes when the
+Fled pile shuffles back in; the players are weaker, not the deck harder. This still holds under the
+new win condition — a Fled combat room reshuffles back in exactly as printed, met again once the
+players have drawn more from what else is left in the deck.
+
+### 6. Setup and the component number
+
+`[you]` **Floor decks are assembled at setup from three shared pools** (combat, hazard, item), not
+printed as ten bespoke decks — see item 7. **Pool size targets uncommon repeats within a single
+run, not zero repeats.** A run draws each pool 10 times (combat), 30 times (hazard), and 45 times
+(item) across its ten floors; eliminating repeats entirely would mean printing a card for every
+draw — 85 unique cards — which outruns what ticket 12's 8–12 exemplars can validate and collides
+with ticket 02's low-complexity constraint. The target instead: roughly 1.5–2× the largest
+single-floor draw for hazards and items (so on the order of 15–18 hazards, 12–15 items), and a
+combat pool closer to one-per-floor (around 10) since the fiction wants each floor's threat to read
+as a different monster. **Exact counts are left to ticket 12's exemplar set**; this ticket sets the
+policy, not the printed number.
+
+### 7. Where the deck comes from
+
+`[you]` **A shared pool per room kind, assembled by rule at setup.** Building a floor deck draws its
+fixed counts — 1 combat, 3 hazard, and however many items that floor calls for — from the three
+pools and shuffles them together. The same physical card can appear on floor 2 and again on floor 9.
+
+### Amendment to ticket 21
+
+Making the combat room the win condition forced three changes to ticket 21's room-kind rules. Full
+text lives in [ticket 21's amendment](21-defeating-a-floor-card.md); summarized:
+
+- Item rooms lost their challenge entirely — the item is guaranteed on the flip, though the turn's
+  mandatory draw still costs stamina.
+- Hazard rooms gained a second, higher threshold: clear-and-leave versus
+  clear-and-pay-a-permanent-card-reward, locking in only once the players declare the play phase
+  done.
+- Hazard rooms, not item rooms, are now where a floor's permanent card rewards are found — item
+  rooms remain the source of Hold items to hand.
+
+### An input for tickets 11 and 13, not decided here
+
+`[you]` During this session, surfaced while exploring why the scratch deck didn't produce the
+*in-over-your-head, need-to-gear-up* feeling: **stats live on floor rooms, not on starter or
+acquired player cards.** Item and hazard rooms are the primary source of `Power`/`Scramble`; a
+character's own deck is proposed to do more interesting things by default instead — healing,
+drawing extra, moving cards around, effects rather than stats. This directly bears on ticket 11's
+card anatomy and ticket 13's Red/Gray asymmetry, and **is not itself decided by this ticket** — it
+is handed down as context for whichever session opens those, the same way ticket 06 hands down
+constraints rather than deciding them for later tickets.
+
+### Sibling check
+
+Ticket 21 resolved first and left this ticket three room kinds, one reward-bearing type, and two
+escalation dials (multi-stat rooms, independent failure-cost tuning). This ticket used neither of
+those dials — it escalates through item scarcity instead — and in the process reopened and amended
+ticket 21's reward and challenge rules directly, rather than layering a contradiction on top
+silently.

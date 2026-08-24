@@ -17,8 +17,9 @@ floor to floor. A floor ends by **ascending**, and should play in **5–7 minute
 
 **Floor deck** — the deck of **rooms** the players face on a floor. Shuffled at the start of the
 encounter. It has a draw pile, a **Fled** pile, and a **Cleared** pile, and it belongs to the floor
-rather than to either character. The encounter is over when every room in it is Cleared.
-*(tickets 18, 21)*
+rather than to either character. It holds exactly one **combat room**; clearing that room ends the
+encounter, not exhausting the whole deck — hazard and item rooms are resources along the way, never
+mandatory to clear. *(tickets 18, 21, 22)*
 
 **Room** — one card of the floor deck, and the whole of what the players face on a given turn.
 Flipped face up into the **active room zone** at the **start of the turn**, before anything is spent,
@@ -29,18 +30,26 @@ no behaviour beyond being flipped — all of its pressure is its **challenge** a
 
 **Challenge** — the **named threshold** a room prints, such as `Power 3` or `Scramble 2`. The players
 Clear the room the instant their **stat pool** meets it. Excess is wasted. There is no partial
-progress: a room is Cleared or it is not, and it does not remember being attacked. *(ticket 21)*
+progress: a room is Cleared or it is not, and it does not remember being attacked. A **hazard room**
+prints two thresholds rather than one; which is reached locks in only once play stops, not the
+instant either is first met. *(tickets 21, 22)*
 
 **Combat room** — a room holding an enemy. Its challenge is **`Power X`**, one stat standing in for
-combined attack and health. *(ticket 21)*
+combined attack and health. **Exactly one per floor deck; clearing it is the floor's win
+condition.** Always carries a punishment, printed on the card as its **Flee cost** — the same
+`Exhaust X from deck` punishment any room can carry, guaranteed here and framed diegetically: failing
+or declining is fleeing the fight, with a few scrapes to show. *(tickets 21, 22)*
 
 **Hazard room** — a room with no enemy but something to get through. Its challenge is
-**`Scramble X`** — running, not falling, not braining yourself on a pipe. *(ticket 21)*
+**`Scramble X`** — running, not falling, not braining yourself on a pipe. **Prints a second, higher
+threshold**: the lower clears the room and moves the players on; the higher clears it and pays a
+permanent **card reward**. Which is reached locks in only once the players declare the play phase
+done. *(tickets 21, 22)*
 
-**Item room** — a room holding an item. The card is **both things at once**: the room while it sits in
-the active room zone, and the item itself once it is in a player's hand. Clearing one sends the item
-to a chosen character's hand with **Hold**. Item rooms carry **no punishment** by default — missing
-the item is the loss. *(ticket 21)*
+**Item room** — a room holding an item. The card is **both things at once**: the room while it sits
+in the active room zone, and the item itself once it is in a player's hand. **Prints no challenge**
+— flipping one sends the item straight to a chosen character's hand with **Hold**, and the room is
+Cleared; it can never go to Fled. *(tickets 21, 22)*
 
 **Power** / **Scramble** — the two stat keywords at level 1. Both rooms and player cards carry them:
 a room prints how much is needed, a played card contributes what it has. More are expected as the
@@ -53,9 +62,10 @@ add up to, and it evaporates at cleanup. *(ticket 21)*
 **Play zone** — where played cards sit face up during a turn, contributing their stats. Everything in
 it is exhausted at cleanup, so nothing persists here between turns. *(ticket 21)*
 
-**Cleared** — a room defeated and removed from the floor deck **permanently**; it is never reshuffled.
-When every room is Cleared the deck cannot be replenished and the encounter is over. Applies only to
-rooms — a character's cards are **exhausted**, never Cleared. *(ticket 21)*
+**Cleared** — a room defeated and removed from the floor deck **permanently**; it is never
+reshuffled. Clearing the floor deck's one **combat room** ends the encounter; a hazard or item room
+being Cleared does not. Applies only to rooms — a character's cards are **exhausted**, never
+Cleared. *(tickets 18, 21, 22)*
 
 **Fled** — the floor deck's discard pile, and the verb for going there. A room the players failed, or
 declined outright, is Fled. The Fled pile is shuffled back into the floor deck when its draw pile runs
@@ -66,10 +76,11 @@ outmatched and had to scramble.* *(tickets 18, 21)*
 exhaust pile to their deck: a floor cleared is a full heal. It also offers a **card reward**.
 *(tickets 04, 05)*
 
-**Card reward** — the choice of cards offered on clearing a floor, one of which may be added
-permanently to the deck for the rest of the run. **Declining is always allowed**, and is a real play:
-under the deck-as-stamina model a card refused is consistency preserved. Ten reward decisions are the
-whole of a run's deckbuilding. *(ticket 05; mechanics owned by ticket 09)*
+**Card reward** — the choice of cards offered on clearing a floor, or on meeting a **hazard room**'s
+higher threshold, one of which may be added permanently to the deck for the rest of the run.
+**Declining is always allowed**, and is a real play: under the deck-as-stamina model a card refused
+is consistency preserved. No longer exactly ten reward decisions a run, now that hazards can pay one
+mid-floor too. *(tickets 05, 22; mechanics owned by ticket 09)*
 
 **Character** — Red or Gray. Both are always in play. In co-op one player runs each; solo, one player
 runs both, under identical rules. *(tickets 03, 04)*

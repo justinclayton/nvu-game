@@ -52,6 +52,15 @@ here it falls out of the deck's own structure instead of needing a chase rule.
 - **The co-op question** — Red and Gray no longer move independently, because there is nowhere to
   move. What they do share or split is now a turn-economy question for ticket 07.
 
+### Superseded in part
+
+`[you, 2026-08-24]` [Ticket 22](22-floor-deck-composition.md) changed the win condition stated in
+*The rules as stated* above. ~~The encounter is over — the floor is cleared — when the whole deck
+has been exhausted.~~ A floor deck now holds exactly one **combat room**, and clearing it ends the
+floor — hazard and item rooms are never mandatory to clear, and a floor can end with either kind
+still sitting uncleared in the deck. The rest of this ticket's rules — the flip, the
+discard-and-reshuffle loop, one card of information at a time — are unaffected.
+
 ### What it deliberately does not settle
 
 These are open, and are ticketed, not decided here:

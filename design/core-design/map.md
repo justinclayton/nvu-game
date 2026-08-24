@@ -237,6 +237,24 @@ head, reacting to what's in front of you, with little time for deep strategy.*
   near-pure execution because cleanup exhausts the hand anyway, accepted knowingly with `Hold` as its
   saving grace; and quarterbacking is a real co-op risk under open information. Both go to ticket 20.
 
+- [Decide what is in a floor deck, and how it escalates](issues/22-floor-deck-composition.md) —
+  `[you]` **The win condition changed underneath this ticket.** A floor deck now holds exactly one
+  **combat room**, and clearing it ends the floor — not exhausting the whole deck, as ticket 18
+  first stated (see that ticket's *Superseded in part* note). Composition is fixed in shape and
+  variable in generosity: **1 combat, 3 hazard flat every floor, and item count falling from 9 at
+  floor 1 to 0 at floor 10** — the pyramid ticket 05 lost when the spatial tower died, recovered
+  here through room count rather than topology. Escalation is **resource scarcity, not a harder
+  fight**; the combat room's `Power` requirement is deliberately left untuned pending ticket 11's
+  card anatomy and ticket 12's exemplars. Floor decks are assembled at setup from **three shared
+  pools** rather than ten bespoke printed decks, sized so repeats are *uncommon* within a single run
+  rather than eliminated — full non-repetition would be 85 unique cards, against ticket 02's
+  low-complexity constraint. **Amends [ticket 21](issues/21-defeating-a-floor-card.md)**: item rooms
+  lost their challenge (the item is now guaranteed on the flip), hazard rooms gained a second,
+  higher threshold paying a permanent card reward mid-floor, and every combat room now carries a
+  punishment framed on the card as its **Flee cost**. **Handed down, not decided, for tickets 11 and
+  13**: floor rooms, not player cards, may be the primary stat source, with starter decks doing
+  effects instead.
+
 ## Not yet specified
 
 <!-- In scope, but not sharp enough to ticket. Graduates into tickets as the frontier advances. -->

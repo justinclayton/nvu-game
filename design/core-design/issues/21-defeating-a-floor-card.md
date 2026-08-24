@@ -168,8 +168,10 @@ the deck — ticket 22's problem, not a rules feature.
 ### Vocabulary settled here
 
 - **Cleared** `[proposed by agent → you approved]` — a room defeated and removed from the floor deck
-  permanently. It is never reshuffled. When every room in a floor deck is Cleared the deck cannot be
-  replenished and **the encounter is over**. *Exhaust* stays exclusively a character-card word.
+  permanently. It is never reshuffled. ~~When every room in a floor deck is Cleared the deck cannot
+  be replenished and the encounter is over.~~ **Amended by ticket 22**: the encounter now ends when
+  the floor's one **combat room** is Cleared, not when every room is. *Exhaust* stays exclusively a
+  character-card word.
 - **Fled** `[you]` — the floor deck's discard pile. A room you failed, or declined outright, is Fled;
   the Fled pile shuffles back into the floor deck when its draw pile runs out. Chosen over *Skipped*
   because a deliberate decline is an immediate "NOPE" flee, so the word fits both routes in.
@@ -214,6 +216,35 @@ the deck — ticket 22's problem, not a rules feature.
 - **Quarterbacking.** With open information and simultaneous play, one player can simply run both
   hands. `[you]` Logged as a known cost, not designed against — it is a playtest finding, and ticket
   20 should watch for it.
+
+### Amended by ticket 22, 2026-08-24
+
+Three of this ticket's rulings changed once [ticket 22](22-floor-deck-composition.md) made a
+floor's single combat room, rather than the whole deck, the win condition.
+
+- **The win condition.** `[you]` A floor deck now holds exactly one combat room, and clearing it
+  ends the floor. The **Cleared** entry above, which said the encounter ends when every room is
+  Cleared, no longer holds — hazard and item rooms are resources on the way to the fight, never
+  mandatory to clear.
+- **Combat rooms always carry a punishment**, printed on the card as its **Flee cost**. `[you]`
+  Not a new mechanic — the same *Exhaust X from deck* punishment this ticket already defined,
+  guaranteed present (never `none`) for this one room kind, and named for its diegetic reading:
+  failing or declining a combat room is fleeing it, with a few scrapes to show. It is why the first
+  encounter with a floor's combat room is expected to end in flight — the players see it, cannot
+  meet its `Power` yet, and pay the Flee cost rather than lose for nothing.
+- **Item rooms lost their challenge entirely.** `[you]` They print no threshold at all — the item
+  is guaranteed the moment the room is flipped. The turn still runs its full shape (flip, draw,
+  play, cleanup), so the mandatory draw still costs stamina; the room is guaranteed, not free.
+  There is nothing left to decline once one is flipped — only whose hand the item goes to.
+- **Hazard rooms gained a second, higher threshold.** `[you]` The lower threshold clears the room
+  and lets the players move on with no reward; a higher threshold on the same room clears it *and*
+  pays a permanent card reward — the same reward ticket 05 defined for ascending, now also
+  reachable mid-floor. **Which threshold is reached locks in when the players declare the play
+  phase done**, not the instant either is first met — checking continuously would punish playing a
+  strong card early, locking a team into the low tier by accident.
+- **Hazard rooms, not item rooms, are now the source of permanent card rewards within a floor.**
+  Item rooms remain the source of Hold items to hand. The "item rooms are the entire reward system
+  at level 1" line under *Rewards* above is superseded by this split.
 
 ### Sibling check
 

@@ -91,9 +91,10 @@ the **fuel** those tools burn. The whole hand exhausts at end of turn unless a c
 *(ticket 04)*
 
 **Draw** — the act, in the draw phase, of moving cards from deck to hand, one at a time, until the
-player declares they are done. Drawing spends stamina whether or not the cards get used, which
-makes it the central decision of the game — and since the whole hand is exhausted at cleanup anyway,
-it is where nearly all of a turn's tension lives. *(tickets 04, 21)*
+player declares they are done. Each character must draw **at least one** card. Drawing spends stamina
+whether or not the cards get used, which makes it the central decision of the game — and since the
+whole hand is exhausted at cleanup anyway, it is where nearly all of a turn's tension lives. A player
+cannot draw again once the play phase has begun. *(tickets 04, 21)*
 
 **Exhaust** — to move a character's card to their exhaust pile. Takes Slay the Spire's meaning: the
 card is gone for the rest of the floor. Used both for costs the player chose and for damage they
@@ -125,6 +126,9 @@ design owned by ticket 11)*
 **Exhausted** (of a character) — down, not dead. A character is exhausted when they begin a turn and
 cannot draw. The run ends only when both characters are down. *(tickets 03, 04)*
 
-**Last stand** — the final turn a character gets when their deck empties: they still have the hand
-they are holding, and no possibility of another. Whether it carries special rules is open.
-*(ticket 04; special rules owned by ticket 17)*
+**Last stand** — what a character gets the **first time** their deck is found empty: every card in
+their hand can be played **at no cost** until the end of that turn. If the **room** is Cleared before
+they are further Exhausted they **survive**, and at that cleanup the cards that would have been
+exhausted are **shuffled back into their deck** instead — so they carry on with a thin but now-known
+deck. Once per character per floor. `Hold` cards in hand stay in hand rather than joining the
+shuffle-back. *(tickets 04, 17)*

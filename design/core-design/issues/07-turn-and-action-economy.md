@@ -104,8 +104,12 @@ from the **deck** rather than the hand. Do not adopt it here without the human.
   equipped cards.
 - **Exhausted cards do not return during a floor.** There is no discard pile.
 - **A character is exhausted (down) when they begin a turn and cannot draw.**
-- **No mandatory minimum draw.** Explicitly declined — a character who draws nothing has no
-  cards and cannot act, so stalling is self-punishing.
+- ~~**No mandatory minimum draw.**~~ **Reversed by ticket 04 `[you, 2026-08-23]`: each character
+  must draw at least one card during the draw phase.** Declining a room is therefore no longer free —
+  the turn costs the team two cards whether or not they engage. A character who cannot meet the
+  minimum because their deck is empty is **down**; one who cannot meet it because their hand is at a
+  cap simply declares themselves done, which is why the cap below is now load-bearing rather than
+  cosmetic.
 
 What this ticket still owes, sharpened by the above:
 

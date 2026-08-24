@@ -1,0 +1,1053 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>North vs Up — encounter simulator</title>
+<style>
+  :root {
+    --bg: #14161a; --panel: #1c1f25; --panel2: #242830; --line: #333945;
+    --ink: #e6e8ec; --dim: #9aa3b2; --red: #d8514b; --gray: #8d97a8;
+    --gold: #d9a441; --good: #5aa469; --bad: #c2534d;
+  }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--ink);
+         font:14px/1.5 ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif; }
+  h1 { font-size:16px; margin:0; font-weight:600; letter-spacing:.02em; }
+  h2 { font-size:13px; margin:0 0 8px; text-transform:uppercase; letter-spacing:.08em; color:var(--dim); font-weight:600; }
+  h3 { font-size:12px; margin:0 0 6px; color:var(--dim); font-weight:600; }
+  header { display:flex; align-items:center; gap:16px; padding:10px 16px;
+           border-bottom:1px solid var(--line); background:var(--panel); flex-wrap:wrap; }
+  nav { display:flex; gap:4px; margin-left:auto; }
+  nav button.tab { background:transparent; border:1px solid transparent; color:var(--dim); }
+  nav button.tab.on { background:var(--panel2); border-color:var(--line); color:var(--ink); }
+  button { background:var(--panel2); border:1px solid var(--line); color:var(--ink);
+           padding:5px 10px; border-radius:5px; cursor:pointer; font:inherit; font-size:13px; }
+  button:hover:not(:disabled) { border-color:#4d5666; }
+  button:disabled { opacity:.35; cursor:not-allowed; }
+  button.primary { background:#2f4a6b; border-color:#3d608a; }
+  button.warn { background:#5a3330; border-color:#7d4540; }
+  input, select, textarea { background:#121418; border:1px solid var(--line); color:var(--ink);
+           padding:4px 7px; border-radius:4px; font:inherit; font-size:13px; }
+  input[type=number] { width:64px; }
+  input[type=checkbox] { accent-color:#3d608a; }
+  label { color:var(--dim); font-size:12px; }
+  main { padding:16px; max-width:1400px; margin:0 auto; }
+  .page { display:none; } .page.on { display:block; }
+  .panel { background:var(--panel); border:1px solid var(--line); border-radius:8px; padding:12px; margin-bottom:14px; }
+  .row { display:flex; gap:10px; flex-wrap:wrap; align-items:flex-end; }
+  .field { display:flex; flex-direction:column; gap:3px; }
+  .grid2 { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+  .grid3 { display:grid; grid-template-columns:1fr 1fr 1fr; gap:14px; }
+  table { width:100%; border-collapse:collapse; font-size:13px; }
+  th { text-align:left; color:var(--dim); font-weight:600; font-size:11px;
+       text-transform:uppercase; letter-spacing:.06em; padding:4px 6px; border-bottom:1px solid var(--line); }
+  td { padding:4px 6px; border-bottom:1px solid #262b34; }
+  .muted { color:var(--dim); }
+  .tiny { font-size:12px; }
+  .note { color:var(--dim); font-size:12px; margin:0 0 10px; }
+  .warnbox { background:#3a2f1c; border:1px solid #6b5426; color:#e7cf9a;
+             padding:8px 10px; border-radius:6px; font-size:12px; margin-bottom:12px; }
+
+  .card { width:132px; min-height:96px; background:var(--panel2); border:1px solid var(--line);
+          border-radius:7px; padding:7px 8px; display:flex; flex-direction:column; gap:4px;
+          position:relative; cursor:default; }
+  .card.sel { border-color:var(--gold); box-shadow:0 0 0 1px var(--gold) inset; }
+  .card.click { cursor:pointer; }
+  .card.click:hover { border-color:#5d6a80; }
+  .card .nm { font-weight:600; font-size:12.5px; line-height:1.25; }
+  .card .cost { position:absolute; top:6px; right:7px; font-size:11px; color:var(--gold); }
+  .card .stats { display:flex; gap:6px; flex-wrap:wrap; margin-top:auto; }
+  .pip { font-size:11px; padding:1px 5px; border-radius:3px; border:1px solid var(--line); }
+  .pip.pw { color:#e79a8f; border-color:#5e3b36; }
+  .pip.sc { color:#8fc6e7; border-color:#365060; }
+  .pip.hold { color:var(--gold); border-color:#5e4a24; }
+  .card .txt { font-size:11px; color:var(--dim); font-style:italic; }
+  .owner { font-size:10px; letter-spacing:.06em; text-transform:uppercase; }
+  .owner.Red { color:var(--red); } .owner.Gray { color:var(--gray); } .owner.Either { color:var(--dim); }
+  .hand { display:flex; gap:7px; flex-wrap:wrap; min-height:100px; }
+
+  .zone { background:var(--panel); border:1px solid var(--line); border-radius:8px; padding:10px; }
+  .pile { display:flex; flex-direction:column; align-items:center; justify-content:center;
+          width:96px; height:96px; border:1px dashed var(--line); border-radius:7px; color:var(--dim); }
+  .pile .n { font-size:24px; color:var(--ink); }
+  .pile .l { font-size:10px; text-transform:uppercase; letter-spacing:.07em; }
+  .phasebar { display:flex; align-items:center; gap:10px; padding:9px 12px; background:var(--panel2);
+              border:1px solid var(--line); border-radius:8px; margin-bottom:12px; flex-wrap:wrap; }
+  .phasebar .ph { font-weight:700; letter-spacing:.05em; text-transform:uppercase; font-size:12px; }
+  .steps { display:flex; gap:5px; margin-left:auto; }
+  .steps span { font-size:11px; padding:2px 7px; border-radius:4px; color:var(--dim); border:1px solid transparent; }
+  .steps span.on { background:#2f4a6b; color:#fff; }
+  .charpanel { border:1px solid var(--line); border-radius:8px; padding:10px; background:var(--panel); }
+  .charpanel.Red { border-top:3px solid var(--red); }
+  .charpanel.Gray { border-top:3px solid var(--gray); }
+  .charpanel.down { opacity:.5; }
+  .chead { display:flex; align-items:center; gap:8px; margin-bottom:8px; flex-wrap:wrap; }
+  .chead .who { font-weight:700; letter-spacing:.05em; }
+  .badge { font-size:10px; padding:1px 6px; border-radius:3px; text-transform:uppercase; letter-spacing:.06em; }
+  .badge.ls { background:#5a4520; color:#f0d79a; }
+  .badge.dn { background:#4a2b2b; color:#f0b0ac; }
+  .badge.done { background:#2c4030; color:#a8d6b3; }
+  #log { height:210px; overflow-y:auto; background:#101216; border:1px solid var(--line);
+         border-radius:6px; padding:8px; font:12px/1.55 ui-monospace, SFMono-Regular, Menlo, monospace; }
+  #log div { border-bottom:1px solid #1a1d23; padding:1px 0; }
+  #log .t { color:#6f7a8c; }
+  #log .hl { color:var(--gold); } #log .g { color:var(--good); } #log .b { color:var(--bad); }
+  .actions { display:flex; gap:7px; flex-wrap:wrap; align-items:center; }
+  .stub { color:var(--gold); font-size:11px; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>North vs Up — encounter simulator</h1>
+  <span class="tiny muted">rules as of tickets 04 / 18 / 21, phases per 07</span>
+  <nav>
+    <button class="tab on" data-page="play">Play</button>
+    <button class="tab" data-page="decks">Decks</button>
+    <button class="tab" data-page="library">Library</button>
+    <button class="tab" data-page="rules">Rules &amp; stubs</button>
+  </nav>
+</header>
+
+<main>
+
+<!-- ============================ PLAY ============================ -->
+<section class="page on" id="page-play">
+  <div class="phasebar">
+    <span class="ph" id="phaseName">Not started</span>
+    <span class="muted tiny" id="turnNo"></span>
+    <span class="muted tiny" id="phaseHelp"></span>
+    <span class="steps" id="steps"></span>
+  </div>
+
+  <div class="actions" style="margin-bottom:12px">
+    <button class="primary" id="btnStart">Start floor</button>
+    <span id="turnActions" class="actions"></span>
+  </div>
+
+  <div class="zone" style="margin-bottom:12px">
+    <h2>Floor deck</h2>
+    <div class="row" style="align-items:flex-start">
+      <div class="pile"><div class="n" id="nFloor">0</div><div class="l">Draw</div></div>
+      <div style="display:flex;flex-direction:column;gap:4px">
+        <h3>Active room</h3>
+        <div id="activeRoom"></div>
+      </div>
+      <div class="pile"><div class="n" id="nFled">0</div><div class="l">Fled</div></div>
+      <div class="pile"><div class="n" id="nCleared">0</div><div class="l">Cleared</div></div>
+    </div>
+  </div>
+
+  <div class="zone" style="margin-bottom:12px">
+    <h2>Play zone <span class="muted tiny" id="poolReadout"></span></h2>
+    <div class="hand" id="playZone"></div>
+  </div>
+
+  <div class="grid2" style="margin-bottom:12px">
+    <div class="charpanel Red" id="panel-Red"></div>
+    <div class="charpanel Gray" id="panel-Gray"></div>
+  </div>
+
+  <div class="panel">
+    <div class="row" style="justify-content:space-between;align-items:center;margin-bottom:6px">
+      <h2 style="margin:0">Log</h2>
+      <div class="row">
+        <input id="noteInput" placeholder="adjudicate rules text / note something…" style="width:340px">
+        <button id="btnNote">Add note</button>
+      </div>
+    </div>
+    <div id="log"></div>
+  </div>
+</section>
+
+<!-- ============================ DECKS ============================ -->
+<section class="page" id="page-decks">
+  <div class="panel">
+    <h2>Settings</h2>
+    <div class="row">
+      <label><input type="checkbox" id="setMandatory"> Mandatory minimum draw of 1
+        <span class="stub">(amends ticket 04)</span></label>
+      <label><input type="checkbox" id="setCap"> Maximum hand size
+        <input type="number" id="setCapN" min="1" value="7"> <span class="stub">(ticket 07, open)</span></label>
+      <label><input type="checkbox" id="setLastStand"> Last stand
+        <span class="stub">(ticket 17)</span></label>
+    </div>
+  </div>
+
+  <div class="grid3">
+    <div class="panel"><h2>Red's deck <span class="muted tiny" id="cntRed"></span></h2><div id="deck-Red"></div></div>
+    <div class="panel"><h2>Gray's deck <span class="muted tiny" id="cntGray"></span></h2><div id="deck-Gray"></div></div>
+    <div class="panel"><h2>Floor deck <span class="muted tiny" id="cntFloor"></span></h2><div id="deck-floor"></div></div>
+  </div>
+
+  <div class="panel">
+    <div class="row">
+      <button id="btnExport">Export everything (JSON)</button>
+      <button id="btnImport">Import…</button>
+      <button class="warn" id="btnWipe">Wipe all content</button>
+      <input type="file" id="fileImport" accept="application/json" style="display:none">
+    </div>
+  </div>
+</section>
+
+<!-- ============================ LIBRARY ============================ -->
+<section class="page" id="page-library">
+  <div class="warnbox">
+    Rules text is <strong>displayed but never executed</strong> — ticket 11 (card anatomy) is open, and
+    conditional stats such as <em>"Power equal to twice the cards Gray plays this turn"</em> have no
+    settled form yet. Adjudicate those by hand and record what you did in the log.
+  </div>
+
+  <div class="grid2">
+    <div class="panel">
+      <h2>New player card</h2>
+      <div class="row">
+        <div class="field"><label>Name</label><input id="pcName" style="width:170px"></div>
+        <div class="field"><label>Owner</label><select id="pcOwner">
+          <option>Either</option><option>Red</option><option>Gray</option></select></div>
+        <div class="field"><label>Cost</label><input type="number" id="pcCost" min="0" value="0"></div>
+        <div class="field"><label>Power</label><input type="number" id="pcPower" min="0" value="0"></div>
+        <div class="field"><label>Scramble</label><input type="number" id="pcScr" min="0" value="0"></div>
+        <div class="field"><label>&nbsp;</label><label><input type="checkbox" id="pcHold"> Hold</label></div>
+      </div>
+      <div class="row" style="margin-top:8px">
+        <div class="field" style="flex:1"><label>Rules text (not executed)</label>
+          <input id="pcText" style="width:100%"></div>
+        <button class="primary" id="btnAddCard">Add card</button>
+      </div>
+      <p class="note" style="margin-top:8px">Cost and stats are separate, unrelated numbers (ticket 21).
+        Paying a cost exhausts that many <em>other</em> cards from the same character's hand.</p>
+      <table style="margin-top:6px"><thead><tr><th>Name</th><th>Own</th><th>Cost</th><th>Pw</th><th>Sc</th><th>Hold</th><th></th></tr></thead>
+        <tbody id="tblCards"></tbody></table>
+    </div>
+
+    <div class="panel">
+      <h2>New room</h2>
+      <div class="row">
+        <div class="field"><label>Name</label><input id="rmName" style="width:170px"></div>
+        <div class="field"><label>Kind</label><select id="rmKind">
+          <option value="combat">Combat</option><option value="hazard">Hazard</option>
+          <option value="item">Item</option></select></div>
+        <div class="field"><label>Challenge Power</label><input type="number" id="rmPower" min="0" value="0"></div>
+        <div class="field"><label>Challenge Scramble</label><input type="number" id="rmScr" min="0" value="0"></div>
+      </div>
+      <div class="row" style="margin-top:8px">
+        <div class="field"><label>Punishment</label><select id="rmPunKind">
+          <option value="none">None</option>
+          <option value="one">1 character exhausts X from deck</option>
+          <option value="both">Both characters exhaust X from deck</option></select></div>
+        <div class="field"><label>X</label><input type="number" id="rmPunN" min="0" value="0"></div>
+      </div>
+      <div id="itemFields" style="display:none">
+        <h3 style="margin-top:10px">The item this room becomes (goes to a hand with Hold)</h3>
+        <div class="row">
+          <div class="field"><label>Cost</label><input type="number" id="rmICost" min="0" value="0"></div>
+          <div class="field"><label>Power</label><input type="number" id="rmIPower" min="0" value="0"></div>
+          <div class="field"><label>Scramble</label><input type="number" id="rmIScr" min="0" value="0"></div>
+        </div>
+      </div>
+      <div class="row" style="margin-top:8px">
+        <div class="field" style="flex:1"><label>Rules text (not executed)</label>
+          <input id="rmText" style="width:100%"></div>
+        <button class="primary" id="btnAddRoom">Add room</button>
+      </div>
+      <p class="note" style="margin-top:8px">Multi-stat challenges are legal but none are printed at
+        level 1 (ticket 21) — set both numbers only if you are deliberately testing that dial.
+        Item rooms carry no punishment by default.</p>
+      <table style="margin-top:6px"><thead><tr><th>Name</th><th>Kind</th><th>Challenge</th><th>Punishment</th><th></th></tr></thead>
+        <tbody id="tblRooms"></tbody></table>
+    </div>
+  </div>
+
+  <div class="panel">
+    <button id="btnSample">Load scratch content</button>
+    <span class="note" style="margin-left:8px">Throwaway numbers so the tool is not empty on first open.
+      <strong>This is not an exemplar set</strong> — tickets 12 and 22 are open and nothing here is a proposal.</span>
+  </div>
+</section>
+
+<!-- ============================ RULES ============================ -->
+<section class="page" id="page-rules">
+  <div class="panel">
+    <h2>What this implements, and where it is guessing</h2>
+    <p class="note">Everything below marked <span class="stub">stub</span> is a placeholder for an open
+      ticket, not a decision. Everything else is the rules as written today.</p>
+    <h3>The turn (ticket 07)</h3>
+    <ol class="tiny muted">
+      <li><strong>Flip</strong> — a room from the floor deck into the active room zone. If the draw pile is empty, the Fled pile shuffles back in first.</li>
+      <li><strong>Draw</strong> — both characters at once, one card at a time, each stopping when they declare they are done. <em>You cannot draw again once the play phase begins.</em></li>
+      <li><strong>Play</strong> — either character, any order. Paying a cost exhausts that many other cards from that character's hand. The room is Cleared the instant the shared pool meets its challenge; excess evaporates.</li>
+      <li><strong>Cleanup</strong> — if the room is still there, take its punishment and send it to Fled. Then exhaust every card in hand and in the play zone, except Hold cards still in hand.</li>
+      <li><strong>Turn end.</strong></li>
+    </ol>
+    <h3>Last stand (ticket 17)</h3>
+    <p class="tiny muted">The first time a character's deck becomes empty — by drawing its last card or
+      by a punishment taking it — every card in their hand is free to play for the rest of that turn.
+      If the <strong>room</strong> is Cleared before that character goes down, they survive: at that
+      cleanup, the cards that would have been exhausted are shuffled back into their deck instead, and
+      they carry on with a thin but now-known deck. Once per character per floor.</p>
+    <ul class="tiny muted">
+      <li>Trigger fires when the deck <em>becomes</em> empty, not when a draw from an empty deck is attempted. <span class="stub">agent reading</span></li>
+      <li>Hold cards in hand stay in hand — they were never going to be exhausted. <span class="stub">agent reading</span></li>
+      <li>Only the character in last stand plays free; their partner pays costs normally. <span class="stub">agent reading</span></li>
+      <li>A last stand triggered by a cleanup punishment gives nothing that turn — the room was not cleared, so there is no free play left to use and no survival. <span class="stub">agent reading</span></li>
+    </ul>
+    <h3>Stubs for open tickets</h3>
+    <ul class="tiny muted">
+      <li><strong>Down (ticket 14)</strong> <span class="stub">stub</span> — a character who begins a turn unable to draw is down, takes no further part, and there is no revive. The floor ends when both are down.</li>
+      <li><strong>Hand cap (ticket 07)</strong> <span class="stub">open</span> — off by default; toggle it on the Decks tab.</li>
+      <li><strong>Mandatory draw (amends ticket 04)</strong> — on by default per your ruling. Ticket 04 had explicitly declined a minimum draw, so this reverses it: declining a room is no longer free.</li>
+      <li><strong>Card anatomy (ticket 11)</strong> <span class="stub">open</span> — level-1 fields only. Rules text is displayed, never executed.</li>
+      <li><strong>Asymmetry (ticket 13)</strong> <span class="stub">open</span> — an owner field only; no other difference between Red and Gray.</li>
+      <li><strong>Deck composition (ticket 22)</strong> <span class="stub">open</span> — the tool has no opinion. You author the floor deck.</li>
+      <li><strong>Ascending (ticket 05)</strong> — out of scope. This tool plays one floor.</li>
+    </ul>
+  </div>
+</section>
+
+</main>
+
+<script>
+"use strict";
+
+/* ---------------------------------------------------------------- state */
+
+var LS = "nvu-encounter-sim-v1";
+var uidN = 0;
+function uid() { return "u" + (++uidN); }
+
+var S = {
+  cards: [],           // {id,name,owner,cost,power,scramble,hold,text}
+  rooms: [],           // {id,name,kind,power,scramble,punKind,punN,item,text}
+  decks: { Red: {}, Gray: {}, floor: {} },   // id -> count
+  settings: { mandatory: true, cap: false, capN: 7, lastStand: true }
+};
+var G = null;          // live game
+
+function save() { try { localStorage.setItem(LS, JSON.stringify(S)); } catch (e) {} }
+function load() {
+  try {
+    var raw = localStorage.getItem(LS);
+    if (raw) {
+      var p = JSON.parse(raw);
+      S.cards = p.cards || [];
+      S.rooms = p.rooms || [];
+      S.decks = p.decks || { Red: {}, Gray: {}, floor: {} };
+      if (p.settings) S.settings = Object.assign(S.settings, p.settings);
+      // keep uid() from colliding with loaded ids
+      var seen = S.cards.concat(S.rooms);
+      for (var i = 0; i < seen.length; i++) {
+        var n = parseInt(String(seen[i].id).replace(/^u/, ""), 10);
+        if (n > uidN) uidN = n;
+      }
+    }
+  } catch (e) {}
+}
+
+/* ---------------------------------------------------------------- utils */
+
+function shuffle(a) {
+  for (var i = a.length - 1; i > 0; i--) {
+    var j = Math.floor(Math.random() * (i + 1));
+    var t = a[i]; a[i] = a[j]; a[j] = t;
+  }
+  return a;
+}
+function byId(list, id) { for (var i = 0; i < list.length; i++) if (list[i].id === id) return list[i]; return null; }
+function esc(s) {
+  return String(s == null ? "" : s).replace(/[&<>"]/g, function (c) {
+    return ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c];
+  });
+}
+function el(id) { return document.getElementById(id); }
+
+/* ---------------------------------------------------------------- log */
+
+function log(msg, cls) {
+  if (!G) return;
+  G.log.push({ t: G.turn, msg: msg, cls: cls || "" });
+  renderLog();
+}
+function renderLog() {
+  var box = el("log");
+  var entries = G ? G.log : [];
+  box.innerHTML = entries.map(function (e) {
+    return '<div><span class="t">T' + e.t + '</span> <span class="' + e.cls + '">' + esc(e.msg) + "</span></div>";
+  }).join("");
+  box.scrollTop = box.scrollHeight;
+}
+
+/* ---------------------------------------------------------------- game */
+
+function instantiate(def) { return { iid: uid(), def: def }; }
+
+function buildPile(map, source) {
+  var out = [];
+  for (var id in map) {
+    var def = byId(source, id);
+    if (!def) continue;
+    for (var i = 0; i < map[id]; i++) out.push(instantiate(def));
+  }
+  return out;
+}
+
+function newChar(name) {
+  return {
+    name: name,
+    deck: shuffle(buildPile(S.decks[name], S.cards)),
+    hand: [], exhaust: [],
+    down: false, doneDrawing: false, drewThisTurn: 0,
+    lastStand: false, lastStandUsed: false, lastStandThisTurn: false
+  };
+}
+
+function startFloor() {
+  var floor = shuffle(buildPile(S.decks.floor, S.rooms));
+  if (!floor.length) { alert("The floor deck is empty. Build one on the Decks tab."); return; }
+  G = {
+    turn: 0, phase: "flip",
+    floor: floor, fled: [], cleared: [], room: null, roomCleared: false,
+    play: [],
+    chars: { Red: newChar("Red"), Gray: newChar("Gray") },
+    pending: null, punDone: false,
+    log: [], over: null
+  };
+  if (!G.chars.Red.deck.length && !G.chars.Gray.deck.length) {
+    alert("Both character decks are empty. Build them on the Decks tab."); G = null; return;
+  }
+  log("Floor begins — " + floor.length + " rooms, Red " + G.chars.Red.deck.length +
+      " cards, Gray " + G.chars.Gray.deck.length + " cards.", "hl");
+  doFlip();
+}
+
+/* --- phase 1: flip ------------------------------------------------ */
+
+function doFlip() {
+  G.turn++;
+  G.roomCleared = false;
+  G.play = [];
+  G.pending = null;
+  G.punDone = false;
+
+  if (!G.floor.length && G.fled.length) {
+    G.floor = shuffle(G.fled); G.fled = [];
+    log("Draw pile empty — " + G.floor.length + " Fled room(s) shuffled back in.", "b");
+  }
+  if (!G.floor.length) { finish("cleared"); return; }
+
+  G.room = G.floor.pop();
+  log("Flip: " + G.room.def.name + " — " + challengeText(G.room.def) + ".");
+
+  var names = ["Red", "Gray"], i, c;
+  for (i = 0; i < 2; i++) {
+    c = G.chars[names[i]];
+    c.doneDrawing = false; c.drewThisTurn = 0; c.lastStandThisTurn = false;
+    if (!c.down && !c.deck.length) {
+      c.down = true; c.lastStand = false;
+      log(c.name + " begins the turn unable to draw — down.", "b");
+    }
+  }
+  if (G.chars.Red.down && G.chars.Gray.down) { finish("wiped"); return; }
+
+  G.phase = "draw";
+  for (i = 0; i < 2; i++) {
+    c = G.chars[names[i]];
+    if (c.down || !c.deck.length) c.doneDrawing = true;
+  }
+  maybeEndDraw();
+  render();
+}
+
+/* --- phase 2: draw ------------------------------------------------ */
+
+function canDraw(c) {
+  if (G.phase !== "draw" || c.down || c.doneDrawing || !c.deck.length) return false;
+  if (atCap(c)) return false;
+  return true;
+}
+function atCap(c) { return S.settings.cap && c.hand.length >= S.settings.capN; }
+function canDeclareDone(c) {
+  if (G.phase !== "draw" || c.down || c.doneDrawing) return false;
+  // the minimum draw cannot be enforced against someone who is physically unable to draw —
+  // a hand already at the cap (Hold cards carried over) would otherwise deadlock the turn
+  if (S.settings.mandatory && c.drewThisTurn === 0 && c.deck.length && !atCap(c)) return false;
+  return true;
+}
+function draw(c) {
+  if (!canDraw(c)) return;
+  var card = c.deck.pop();
+  c.hand.push(card); c.drewThisTurn++;
+  log(c.name + " draws " + card.def.name + ". Deck " + c.deck.length + ".");
+  if (!c.deck.length) {
+    c.doneDrawing = true;
+    triggerLastStand(c, "drew their last card");
+  } else if (S.settings.cap && c.hand.length >= S.settings.capN) {
+    c.doneDrawing = true;
+    log(c.name + " is at the hand cap.");
+  }
+  maybeEndDraw(); render();
+}
+function declareDone(c) {
+  if (!canDeclareDone(c)) return;
+  c.doneDrawing = true;
+  log(c.name + " stops drawing with " + c.hand.length + " in hand.");
+  maybeEndDraw(); render();
+}
+function maybeEndDraw() {
+  if (G.phase !== "draw") return;
+  if (G.chars.Red.doneDrawing && G.chars.Gray.doneDrawing) {
+    G.phase = "play";
+    log("Draw phase closes. No more drawing this turn.");
+    checkChallenge();   // a room with no challenge is already met
+  }
+}
+
+/* --- last stand (ticket 17) --------------------------------------- */
+
+function triggerLastStand(c, why) {
+  if (!S.settings.lastStand || c.lastStandUsed || c.down) return;
+  c.lastStand = true; c.lastStandUsed = true; c.lastStandThisTurn = true;
+  log("LAST STAND — " + c.name + " " + why + ". Their whole hand is free to play this turn.", "hl");
+}
+
+/* --- phase 3: play ------------------------------------------------ */
+
+function costOf(c, card) { return c.lastStandThisTurn ? 0 : (card.def.cost || 0); }
+function canPlay(c, card) {
+  if (G.phase !== "play" || c.down || G.pending) return false;
+  return c.hand.length - 1 >= costOf(c, card);
+}
+function beginPlay(owner, iid) {
+  var c = G.chars[owner], card = null, i;
+  for (i = 0; i < c.hand.length; i++) if (c.hand[i].iid === iid) card = c.hand[i];
+  if (!card || !canPlay(c, card)) return;
+  var need = costOf(c, card);
+  if (need === 0) { finishPlay(owner, iid, []); return; }
+  G.pending = { owner: owner, iid: iid, need: need, chosen: [] };
+  render();
+}
+function togglePay(iid) {
+  var p = G.pending;
+  if (!p || iid === p.iid) return;
+  var i = p.chosen.indexOf(iid);
+  if (i >= 0) p.chosen.splice(i, 1);
+  else if (p.chosen.length < p.need) p.chosen.push(iid);
+  render();
+}
+function confirmPay() {
+  var p = G.pending;
+  if (!p || p.chosen.length !== p.need) return;
+  finishPlay(p.owner, p.iid, p.chosen.slice());
+}
+function cancelPay() { G.pending = null; render(); }
+
+function finishPlay(owner, iid, payIids) {
+  var c = G.chars[owner], paid = [], i, k;
+  for (i = 0; i < payIids.length; i++) {
+    k = -1;
+    for (var j = 0; j < c.hand.length; j++) if (c.hand[j].iid === payIids[i]) k = j;
+    if (k < 0) continue;
+    var gone = c.hand.splice(k, 1)[0];
+    c.exhaust.push(gone); paid.push(gone.def.name);
+  }
+  k = -1;
+  for (i = 0; i < c.hand.length; i++) if (c.hand[i].iid === iid) k = i;
+  var card = c.hand.splice(k, 1)[0];
+  G.play.push({ iid: card.iid, def: card.def, owner: owner });
+  G.pending = null;
+  log(owner + " plays " + card.def.name +
+      (paid.length ? " — exhausting " + paid.join(", ") + " from hand."
+                   : (c.lastStandThisTurn ? " for free (last stand)." : ".")));
+  checkChallenge();
+  render();
+}
+function pool() {
+  var p = { power: 0, scramble: 0 };
+  for (var i = 0; i < G.play.length; i++) {
+    p.power += G.play[i].def.power || 0;
+    p.scramble += G.play[i].def.scramble || 0;
+  }
+  return p;
+}
+function checkChallenge() {
+  if (G.roomCleared || !G.room) return;
+  var p = pool(), d = G.room.def;
+  if (p.power >= (d.power || 0) && p.scramble >= (d.scramble || 0)) {
+    G.roomCleared = true;
+    log(d.name + " is CLEARED. Excess evaporates.", "g");
+    if (d.kind === "item") G.phase = "award";
+  }
+}
+function awardItem(owner) {
+  var d = G.room.def, it = d.item || { cost: 0, power: 0, scramble: 0 };
+  var item = { id: d.id + "-item", name: d.name, owner: "Either",
+               cost: it.cost || 0, power: it.power || 0, scramble: it.scramble || 0,
+               hold: true, text: d.text };
+  G.chars[owner].hand.push(instantiate(item));
+  log(d.name + " goes to " + owner + "'s hand with Hold.", "g");
+  G.phase = "play";
+  render();
+}
+
+/* --- phase 4: cleanup --------------------------------------------- */
+
+function exhaustFromDeck(c, n) {
+  var taken = 0;
+  for (var i = 0; i < n && c.deck.length; i++) { c.exhaust.push(c.deck.pop()); taken++; }
+  log(c.name + " exhausts " + taken + " from deck" +
+      (taken < n ? " (only " + taken + " were left)." : ".") + " Deck " + c.deck.length + ".", "b");
+  if (!c.deck.length) triggerLastStand(c, "was emptied by a punishment");
+}
+function needsPunishmentChoice() {
+  return G.phase === "cleanup" && !G.roomCleared && G.room && !G.punDone &&
+         G.room.def.punKind === "one" && G.room.def.punN > 0 &&
+         (!G.chars.Red.down || !G.chars.Gray.down);
+}
+function enterCleanup() {
+  if (G.phase !== "play") return;
+  G.phase = "cleanup"; G.punDone = false; G.pending = null;
+  if (!G.roomCleared) log(G.room.def.name + " was not cleared.", "b");
+  if (!needsPunishmentChoice()) applyPunishment(null);
+  render();
+}
+function applyPunishment(who) {
+  var d = G.room.def, names = ["Red", "Gray"], i;
+  if (!G.roomCleared && d.punKind !== "none" && d.punN > 0) {
+    if (d.punKind === "both") {
+      for (i = 0; i < 2; i++) if (!G.chars[names[i]].down) exhaustFromDeck(G.chars[names[i]], d.punN);
+    } else if (who && !G.chars[who].down) {
+      exhaustFromDeck(G.chars[who], d.punN);
+    }
+  }
+  G.punDone = true;
+  render();
+}
+function finishCleanup() {
+  if (G.phase !== "cleanup" || !G.punDone) return;
+
+  if (G.roomCleared) G.cleared.push(G.room);
+  else { G.fled.push(G.room); log(G.room.def.name + " is Fled."); }
+  G.room = null;
+
+  var names = ["Red", "Gray"], i, j;
+  for (i = 0; i < 2; i++) {
+    var c = G.chars[names[i]];
+    var mine = [], held = [], loose = [];
+    for (j = 0; j < G.play.length; j++) if (G.play[j].owner === c.name) mine.push(G.play[j]);
+    for (j = 0; j < c.hand.length; j++) (c.hand[j].def.hold ? held : loose).push(c.hand[j]);
+
+    var survives = c.lastStandThisTurn && G.roomCleared && !c.down;
+
+    if (survives) {
+      var back = loose.slice();
+      for (j = 0; j < mine.length; j++) back.push({ iid: mine[j].iid, def: mine[j].def });
+      c.deck = shuffle(c.deck.concat(back));
+      c.hand = held;
+      c.lastStand = false;
+      log(c.name + " SURVIVES the last stand — " + back.length +
+          " card(s) shuffled back into their deck." +
+          (held.length ? " " + held.length + " Hold card(s) stay in hand." : ""), "g");
+    } else {
+      for (j = 0; j < loose.length; j++) c.exhaust.push(loose[j]);
+      for (j = 0; j < mine.length; j++) c.exhaust.push({ iid: mine[j].iid, def: mine[j].def });
+      c.hand = held;
+      var n = loose.length + mine.length;
+      if (n) log(c.name + " exhausts " + n + " card(s) at cleanup" +
+                 (held.length ? "; " + held.length + " Hold card(s) stay in hand." : "."));
+      if (c.lastStandThisTurn) log(c.name + "'s last stand ends without the room being cleared.", "b");
+    }
+  }
+  G.play = [];
+  doFlip();
+}
+
+function finish(how) {
+  G.phase = "over";
+  G.over = how;
+  if (how === "cleared") log("Every room is Cleared — the floor is over. The characters ascend.", "g");
+  else log("Both characters are down. The run ends here.", "b");
+  render();
+}
+
+/* ---------------------------------------------------------------- render */
+
+function statPips(d) {
+  var h = "";
+  if (d.power)    h += '<span class="pip pw">Power ' + d.power + "</span>";
+  if (d.scramble) h += '<span class="pip sc">Scramble ' + d.scramble + "</span>";
+  if (d.hold)     h += '<span class="pip hold">Hold</span>';
+  return h;
+}
+function challengeText(d) {
+  var bits = [];
+  if (d.power)    bits.push("Power " + d.power);
+  if (d.scramble) bits.push("Scramble " + d.scramble);
+  return bits.length ? bits.join(", ") : "no challenge";
+}
+function punishText(d) {
+  if (d.kind === "item" && (d.punKind === "none" || !d.punN)) return "none — missing the item is the loss";
+  if (d.punKind === "none" || !d.punN) return "none";
+  return (d.punKind === "both" ? "both characters exhaust " : "1 character exhausts ") +
+         d.punN + " from deck";
+}
+
+function cardHTML(d, o) {
+  o = o || {};
+  var cls = "card" + (o.click ? " click" : "") + (o.sel ? " sel" : "");
+  return '<div class="' + cls + '" ' + (o.attr || "") + ">" +
+    (d.cost ? '<span class="cost">' + (o.free ? "<s>" + d.cost + "</s> 0" : d.cost) + "</span>" : "") +
+    '<div class="nm">' + esc(d.name) + "</div>" +
+    (d.owner && d.owner !== "Either" ? '<div class="owner ' + d.owner + '">' + d.owner + "</div>" : "") +
+    (d.text ? '<div class="txt">' + esc(d.text) + " ⚠</div>" : "") +
+    '<div class="stats">' + statPips(d) + "</div></div>";
+}
+function roomHTML(d) {
+  return '<div class="card" style="width:180px;min-height:112px">' +
+    '<div class="nm">' + esc(d.name) + "</div>" +
+    '<div class="owner">' + d.kind + "</div>" +
+    (d.text ? '<div class="txt">' + esc(d.text) + " ⚠</div>" : "") +
+    '<div class="stats"><span class="pip ' + (d.power ? "pw" : "sc") + '">' +
+      esc(challengeText(d)) + "</span></div>" +
+    '<div class="tiny muted">fail: ' + esc(punishText(d)) + "</div></div>";
+}
+
+function render() { renderBoard(); renderLibrary(); renderDecks(); }
+
+function renderBoard() {
+  var phases = ["flip", "draw", "play", "cleanup"];
+  el("steps").innerHTML = phases.map(function (p) {
+    var on = G && (G.phase === p || (G.phase === "award" && p === "play"));
+    return '<span class="' + (on ? "on" : "") + '">' + p + "</span>";
+  }).join("");
+
+  if (!G) {
+    el("phaseName").textContent = "Not started";
+    el("turnNo").textContent = "";
+    el("phaseHelp").textContent = "Build decks, then start a floor.";
+    el("nFloor").textContent = el("nFled").textContent = el("nCleared").textContent = "0";
+    el("activeRoom").innerHTML = "";
+    el("playZone").innerHTML = "";
+    el("poolReadout").textContent = "";
+    el("turnActions").innerHTML = "";
+    ["Red", "Gray"].forEach(function (w) {
+      el("panel-" + w).innerHTML = '<div class="chead"><span class="who">' + w +
+        '</span></div><div class="muted tiny">—</div>';
+    });
+    return;
+  }
+
+  el("phaseName").textContent = G.phase === "award" ? "play — award item" : G.phase;
+  el("turnNo").textContent = "turn " + G.turn;
+  el("nFloor").textContent = G.floor.length;
+  el("nFled").textContent = G.fled.length;
+  el("nCleared").textContent = G.cleared.length;
+  el("activeRoom").innerHTML = G.room ? roomHTML(G.room.def) : '<div class="muted tiny">—</div>';
+
+  var p = pool();
+  el("poolReadout").textContent = G.room
+    ? "— pool Power " + p.power + ", Scramble " + p.scramble + " vs " + challengeText(G.room.def) +
+      (G.roomCleared ? "   ✓ CLEARED" : "")
+    : "";
+  el("playZone").innerHTML = G.play.length
+    ? G.play.map(function (x) {
+        return cardHTML(Object.assign({}, x.def, { owner: x.owner }));
+      }).join("")
+    : '<div class="muted tiny">empty</div>';
+
+  var help = {
+    draw: "Both characters draw one card at a time, in any order, each stopping when they declare they are done.",
+    play: "Either character, any order. You cannot draw again this turn.",
+    award: "Choose whose hand takes the item.",
+    cleanup: "Take the punishment if the room is still there, then exhaust everything.",
+    over: ""
+  }[G.phase] || "";
+  el("phaseHelp").textContent = help;
+
+  var A = [];
+  if (G.phase === "play") {
+    A.push('<button class="primary" onclick="enterCleanup()">Stop playing → cleanup</button>');
+    if (G.pending) {
+      var pe = G.pending;
+      A.push('<span class="tiny hl">Choose ' + pe.need + " card(s) from " + pe.owner +
+             "'s hand to exhaust as the cost (" + pe.chosen.length + "/" + pe.need + ")</span>");
+      A.push("<button " + (pe.chosen.length === pe.need ? "" : "disabled") +
+             ' onclick="confirmPay()">Confirm</button>');
+      A.push('<button onclick="cancelPay()">Cancel</button>');
+    }
+  } else if (G.phase === "award") {
+    A.push('<span class="tiny hl">' + esc(G.room.def.name) + " → whose hand?</span>");
+    ["Red", "Gray"].forEach(function (w) {
+      if (!G.chars[w].down) A.push('<button onclick="awardItem(\'' + w + '\')">' + w + "</button>");
+    });
+  } else if (G.phase === "cleanup") {
+    if (needsPunishmentChoice()) {
+      A.push('<span class="tiny b">' + esc(punishText(G.room.def)) + " — who absorbs it?</span>");
+      ["Red", "Gray"].forEach(function (w) {
+        if (!G.chars[w].down)
+          A.push('<button class="warn" onclick="applyPunishment(\'' + w + '\')">' + w + " takes it</button>");
+      });
+    } else {
+      A.push('<button class="primary" onclick="finishCleanup()">Finish cleanup → next turn</button>');
+    }
+  } else if (G.phase === "over") {
+    A.push('<span class="tiny ' + (G.over === "cleared" ? "g" : "b") + '">' +
+           (G.over === "cleared" ? "Floor cleared." : "Both characters down.") + "</span>");
+  }
+  el("turnActions").innerHTML = A.join(" ");
+
+  renderChar("Red"); renderChar("Gray");
+}
+
+function renderChar(w) {
+  var c = G.chars[w], box = el("panel-" + w);
+  box.className = "charpanel " + w + (c.down ? " down" : "");
+
+  var badges = "";
+  if (c.down) badges += '<span class="badge dn">down</span>';
+  if (c.lastStand) badges += '<span class="badge ls">last stand</span>';
+  if (G.phase === "draw" && c.doneDrawing && !c.down) badges += '<span class="badge done">done drawing</span>';
+
+  var acts = "";
+  if (G.phase === "draw" && !c.down) {
+    acts = "<button " + (canDraw(c) ? "" : "disabled") +
+           ' onclick="draw(G.chars[\'' + w + '\'])">Draw 1</button>' +
+           "<button " + (canDeclareDone(c) ? "" : "disabled") +
+           ' onclick="declareDone(G.chars[\'' + w + '\'])">Done</button>';
+    if (S.settings.mandatory && c.drewThisTurn === 0 && c.deck.length)
+      acts += ' <span class="tiny muted">must draw at least 1</span>';
+  }
+
+  var pe = G.pending;
+  var hand = c.hand.map(function (x) {
+    var free = c.lastStandThisTurn && (x.def.cost || 0) > 0;
+    if (pe && pe.owner === w) {
+      var isTarget = pe.iid === x.iid;
+      return cardHTML(x.def, {
+        click: !isTarget,
+        sel: pe.chosen.indexOf(x.iid) >= 0,
+        free: free,
+        attr: isTarget ? 'style="outline:2px solid #3d608a"'
+                       : 'onclick="togglePay(\'' + x.iid + '\')"'
+      });
+    }
+    var ok = canPlay(c, x);
+    return cardHTML(x.def, {
+      click: ok, free: free,
+      attr: ok ? 'onclick="beginPlay(\'' + w + "','" + x.iid + '\')"' : ""
+    });
+  }).join("") || '<div class="muted tiny">empty</div>';
+
+  box.innerHTML =
+    '<div class="chead"><span class="who ' + w + '">' + w + "</span>" + badges +
+    '<span class="tiny muted" style="margin-left:auto">deck ' + c.deck.length +
+    " · hand " + c.hand.length + " · exhausted " + c.exhaust.length + "</span></div>" +
+    '<div class="actions" style="margin-bottom:8px">' + acts + "</div>" +
+    '<div class="hand">' + hand + "</div>";
+}
+
+/* ---------------------------------------------------------------- library UI */
+
+function renderLibrary() {
+  el("tblCards").innerHTML = S.cards.map(function (c) {
+    return "<tr><td>" + esc(c.name) + (c.text ? ' <span class="muted">⚠</span>' : "") + "</td>" +
+      '<td class="owner ' + c.owner + '">' + c.owner + "</td><td>" + c.cost + "</td>" +
+      "<td>" + (c.power || "") + "</td><td>" + (c.scramble || "") + "</td>" +
+      "<td>" + (c.hold ? "✓" : "") + "</td>" +
+      '<td><button onclick="delCard(\'' + c.id + '\')">×</button></td></tr>';
+  }).join("") || '<tr><td colspan="7" class="muted tiny">no cards yet</td></tr>';
+
+  el("tblRooms").innerHTML = S.rooms.map(function (r) {
+    return "<tr><td>" + esc(r.name) + (r.text ? ' <span class="muted">⚠</span>' : "") + "</td>" +
+      '<td class="muted">' + r.kind + "</td><td>" + esc(challengeText(r)) + "</td>" +
+      '<td class="muted tiny">' + esc(punishText(r)) + "</td>" +
+      '<td><button onclick="delRoom(\'' + r.id + '\')">×</button></td></tr>';
+  }).join("") || '<tr><td colspan="5" class="muted tiny">no rooms yet</td></tr>';
+}
+
+function delCard(id) {
+  S.cards = S.cards.filter(function (c) { return c.id !== id; });
+  delete S.decks.Red[id]; delete S.decks.Gray[id];
+  save(); render();
+}
+function delRoom(id) {
+  S.rooms = S.rooms.filter(function (r) { return r.id !== id; });
+  delete S.decks.floor[id];
+  save(); render();
+}
+
+/* ---------------------------------------------------------------- deck UI */
+
+function deckRows(which, source, map) {
+  var rows = source.filter(function (d) {
+    return which === "floor" || d.owner === "Either" || d.owner === which;
+  }).map(function (d) {
+    var n = map[d.id] || 0;
+    var sub = which === "floor"
+      ? challengeText(d)
+      : "cost " + d.cost + " · " + challengeText(d) + (d.hold ? " · Hold" : "");
+    return "<tr><td>" + esc(d.name) + "</td>" +
+      '<td class="muted tiny">' + esc(sub) + "</td>" +
+      '<td><button onclick="bump(\'' + which + "','" + d.id + '\',-1)">−</button>' +
+      '<span style="display:inline-block;min-width:22px;text-align:center">' + n + "</span>" +
+      '<button onclick="bump(\'' + which + "','" + d.id + '\',1)">+</button></td></tr>';
+  }).join("");
+  return "<table>" + (rows || '<tr><td class="muted tiny">nothing in the library</td></tr>') + "</table>";
+}
+function bump(which, id, d) {
+  var map = which === "floor" ? S.decks.floor : S.decks[which];
+  map[id] = Math.max(0, (map[id] || 0) + d);
+  if (!map[id]) delete map[id];
+  save(); renderDecks();
+}
+function total(map) { var t = 0; for (var k in map) t += map[k]; return t; }
+
+function renderDecks() {
+  el("deck-Red").innerHTML   = deckRows("Red", S.cards, S.decks.Red);
+  el("deck-Gray").innerHTML  = deckRows("Gray", S.cards, S.decks.Gray);
+  el("deck-floor").innerHTML = deckRows("floor", S.rooms, S.decks.floor);
+  el("cntRed").textContent   = total(S.decks.Red) + " cards";
+  el("cntGray").textContent  = total(S.decks.Gray) + " cards";
+  el("cntFloor").textContent = total(S.decks.floor) + " rooms";
+  el("setMandatory").checked = S.settings.mandatory;
+  el("setCap").checked       = S.settings.cap;
+  el("setCapN").value        = S.settings.capN;
+  el("setLastStand").checked = S.settings.lastStand;
+}
+
+/* ---------------------------------------------------------------- wiring */
+
+Array.prototype.forEach.call(document.querySelectorAll("nav .tab"), function (b) {
+  b.onclick = function () {
+    Array.prototype.forEach.call(document.querySelectorAll("nav .tab"), function (x) {
+      x.classList.toggle("on", x === b);
+    });
+    Array.prototype.forEach.call(document.querySelectorAll(".page"), function (p) {
+      p.classList.toggle("on", p.id === "page-" + b.dataset.page);
+    });
+  };
+});
+
+el("rmKind").onchange = function (e) {
+  var isItem = e.target.value === "item";
+  el("itemFields").style.display = isItem ? "" : "none";
+  if (isItem) { el("rmPunKind").value = "none"; el("rmPunN").value = 0; }
+};
+
+el("btnAddCard").onclick = function () {
+  var name = el("pcName").value.trim();
+  if (!name) { alert("Give the card a name."); return; }
+  S.cards.push({
+    id: uid(), name: name, owner: el("pcOwner").value,
+    cost: +el("pcCost").value || 0, power: +el("pcPower").value || 0,
+    scramble: +el("pcScr").value || 0, hold: el("pcHold").checked,
+    text: el("pcText").value.trim()
+  });
+  el("pcName").value = ""; el("pcText").value = "";
+  save(); render();
+};
+
+el("btnAddRoom").onclick = function () {
+  var name = el("rmName").value.trim();
+  if (!name) { alert("Give the room a name."); return; }
+  var kind = el("rmKind").value;
+  S.rooms.push({
+    id: uid(), name: name, kind: kind,
+    power: +el("rmPower").value || 0, scramble: +el("rmScr").value || 0,
+    punKind: el("rmPunKind").value, punN: +el("rmPunN").value || 0,
+    item: kind === "item" ? { cost: +el("rmICost").value || 0,
+      power: +el("rmIPower").value || 0, scramble: +el("rmIScr").value || 0 } : null,
+    text: el("rmText").value.trim()
+  });
+  el("rmName").value = ""; el("rmText").value = "";
+  save(); render();
+};
+
+[["setMandatory", "mandatory"], ["setCap", "cap"], ["setLastStand", "lastStand"]]
+  .forEach(function (pair) {
+    el(pair[0]).onchange = function (e) { S.settings[pair[1]] = e.target.checked; save(); render(); };
+  });
+el("setCapN").onchange = function (e) {
+  S.settings.capN = Math.max(1, +e.target.value || 1); save(); render();
+};
+
+el("btnStart").onclick = function () {
+  if (G && G.phase !== "over" && !confirm("Abandon the floor in progress and start a new one?")) return;
+  startFloor(); render();
+};
+el("btnNote").onclick = function () {
+  var v = el("noteInput").value.trim();
+  if (!v || !G) return;
+  log("NOTE: " + v, "hl");
+  el("noteInput").value = "";
+};
+el("noteInput").onkeydown = function (e) { if (e.key === "Enter") el("btnNote").click(); };
+
+el("btnExport").onclick = function () {
+  var blob = new Blob([JSON.stringify(S, null, 2)], { type: "application/json" });
+  var a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = "nvu-encounter-content.json";
+  a.click();
+};
+el("btnImport").onclick = function () { el("fileImport").click(); };
+el("fileImport").onchange = function (e) {
+  var f = e.target.files[0];
+  if (!f) return;
+  var r = new FileReader();
+  r.onload = function () {
+    try {
+      var p = JSON.parse(r.result);
+      S.cards = p.cards || []; S.rooms = p.rooms || [];
+      S.decks = p.decks || { Red: {}, Gray: {}, floor: {} };
+      if (p.settings) S.settings = Object.assign(S.settings, p.settings);
+      save(); render();
+    } catch (err) { alert("Could not read that file."); }
+  };
+  r.readAsText(f);
+};
+el("btnWipe").onclick = function () {
+  if (!confirm("Delete every card, room and deck?")) return;
+  S.cards = []; S.rooms = []; S.decks = { Red: {}, Gray: {}, floor: {} };
+  save(); render();
+};
+
+el("btnSample").onclick = function () {
+  if (S.cards.length && !confirm("Add scratch content on top of what is already here?")) return;
+  function C(name, owner, cost, power, scramble, hold) {
+    S.cards.push({ id: uid(), name: name, owner: owner, cost: cost, power: power,
+                   scramble: scramble, hold: !!hold, text: "" });
+  }
+  C("Swing",         "Red",    0, 1, 0);
+  C("Shoulder",      "Red",    1, 3, 0);
+  C("Haymaker",      "Red",    2, 5, 0);
+  C("Vault",         "Red",    0, 0, 1);
+  C("Dart",          "Gray",   0, 0, 1);
+  C("Slip Past",     "Gray",   1, 0, 3);
+  C("Read the Room", "Gray",   1, 1, 2);
+  C("Jab",           "Either", 0, 1, 0);
+  C("Scrap Pipe",    "Either", 1, 2, 0, true);
+  function R(name, kind, power, scramble, punKind, punN, item) {
+    S.rooms.push({ id: uid(), name: name, kind: kind, power: power, scramble: scramble,
+                   punKind: punKind, punN: punN, item: item || null, text: "" });
+  }
+  R("Skitterer",       "combat", 3, 0, "one",  2);
+  R("Bulkhead Brute",  "combat", 6, 0, "one",  3);
+  R("Collapsed Stair", "hazard", 0, 3, "one",  2);
+  R("Steam Vent",      "hazard", 0, 4, "both", 1);
+  R("Supply Locker",   "item",   0, 2, "none", 0, { cost: 1, power: 3, scramble: 0 });
+  R("Toolbelt",        "item",   2, 0, "none", 0, { cost: 0, power: 0, scramble: 2 });
+
+  S.cards.forEach(function (c) {
+    if (c.owner === "Red"  || c.owner === "Either") S.decks.Red[c.id]  = (S.decks.Red[c.id] || 0) + 2;
+    if (c.owner === "Gray" || c.owner === "Either") S.decks.Gray[c.id] = (S.decks.Gray[c.id] || 0) + 2;
+  });
+  S.rooms.forEach(function (r) { S.decks.floor[r.id] = (S.decks.floor[r.id] || 0) + 1; });
+  save(); render();
+};
+
+load();
+render();
+</script>
+</body>
+</html>

@@ -1,7 +1,7 @@
 # 17 — Design the last stand
 
 Type: grilling
-Status: open
+Status: resolved
 Blocked by: 04, 14
 Map: [core design map](../map.md)
 
@@ -51,3 +51,56 @@ and it ends immediately afterward.
   (ticket 03), so a character sitting at one card of deck can idle indefinitely while their partner
   solves the floor. If the last stand is *good*, that hole gets wider — reaching zero deliberately
   could become a play. Check the sign of that incentive.
+
+## Answer
+
+### The rule
+
+`[you, 2026-08-23]` The **first time** a character's deck is checked and found empty, **every card in
+their hand can be played at no cost until the end of that turn**. If the **room** is Cleared before
+that character is further Exhausted, they **survive**: at that cleanup, the cards that would have
+been exhausted are instead **shuffled back into their deck**. They carry on with a thin but
+now-known deck.
+
+So the last stand is not a doomed flourish. It is a real out — spend everything on the room in front
+of you and, if it falls, you keep what you spent.
+
+### How it reads at the table
+
+`[proposed by agent → you approved]` The trigger fires when the deck **becomes** empty — drawing its
+last card, or a punishment taking it — not when a draw from an already-empty deck is attempted. The
+other reading cannot work alongside the minimum draw: a character who begins a turn with no deck is
+already down, so the free-play window would never open.
+
+`[proposed by agent → you approved]` **Hold** cards in hand stay in hand rather than joining the
+shuffle-back — they were never going to be exhausted, so they are not among "the cards that would
+have been exhausted."
+
+`[proposed by agent → you approved]` Only the character in last stand plays free. Their partner pays
+costs normally.
+
+`[proposed by agent → you approved]` A last stand triggered by a **cleanup punishment** gives nothing
+that turn. The room was not Cleared — that is why the punishment landed — so there is no free play
+left to spend and no survival. The rule is consistent; it is simply harsh at that moment.
+
+### What this settles from the questions above
+
+- **Item 1 and 2** — the last stand does get special rules, and they are the human's instinct:
+  costs eliminated, plus a survival clause.
+- **Item 3** — the empty deck space is the signal. No component.
+- **Item 5** — **once per character per floor**, by the word *first*. Ascending resets it.
+- **Item 6** — untested. Solo, the same brain plans the last stand and the room it is spent on.
+
+### Left open
+
+- **Item 4 — the interaction with revive** is not answered here. [Ticket 14](14-down-and-revive.md)
+  owns it and is still open. State the ordering there, and check it against this rule rather than
+  assuming it.
+- **The incentive the Notes warned about has a sign, and it is the wrong one.** Because surviving
+  shuffles back everything that would have been exhausted, a character who draws their **whole
+  remaining deck** on an easy room and clears it loses nothing at all that turn. Emptying your deck
+  deliberately, on the cheapest room you meet, is currently a free turn rather than a crisis. It is
+  bounded — once per character per floor — but it is exactly the *reaching zero deliberately becomes
+  a play* failure this ticket was told to watch for. `[found by agent in the encounter simulator,
+  2026-08-23]` Not fixed here. The obvious levers are a maximum hand size (ticket 07, open), or
+  capping how much comes back.

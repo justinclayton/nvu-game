@@ -184,12 +184,18 @@ skin-of-your-teeth win. Noted as unusually safe from exploitation — it is unre
 nearly dying and ends immediately after. **Graduated to its own ticket (16)**, since "what happens at
 zero" is now a shared question with ticket 14.
 
-`[proposed by agent → you declined]` A mandatory minimum draw of one card per turn, to stop a
-character stalling at zero draw. Declined as an unnecessary rule, and correctly: because the hand
-empties at end of turn, a character who draws nothing has no cards and cannot act at all —
-stalling is spectating, not surviving. **One narrow hole remains and is logged rather than ruled on:**
-in co-op, one character could idle at one card of deck indefinitely while the other solves the floor,
-since ticket 03 ends the run only when both are down. To be watched at the table, not pre-empted.
+~~`[proposed by agent → you declined]` A mandatory minimum draw of one card per turn~~ —
+**reversed `[you, 2026-08-23]`. Each character must draw at least one card during the draw phase.**
+
+The hole this section logged is what closed it: in co-op a character could idle at one card of deck
+indefinitely while the other solved the floor, since ticket 03 ends the run only when both are down.
+A minimum draw removes the idle. It also means **declining a room is no longer free** — under
+[ticket 21](21-defeating-a-floor-card.md) you may still decline by spending nothing on it, but the
+turn itself costs the team two cards regardless. The drain has no off switch.
+
+The one exception is a character who is physically unable to draw: at a hand cap, if
+[ticket 07](07-turn-and-action-economy.md) adopts one. A character who begins a turn with an empty
+deck cannot meet the minimum and is **down**, exactly as this ticket already rules.
 
 ### 6. The deckbuilder conflict — **the inversion is the design**
 

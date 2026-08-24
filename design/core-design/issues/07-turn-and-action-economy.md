@@ -2,7 +2,7 @@
 
 Type: grilling
 Status: open
-Blocked by: 03, 04, 06, 18, 19
+Blocked by: 03, 04, 06, 18, 21
 Map: [core design map](../map.md)
 
 ## Question
@@ -19,8 +19,10 @@ Decide:
    same thing.
 5. **What ends a turn**, and in a multiplayer configuration, what the other players are doing
    while one player acts.
-6. **What ends a floor** — clearing every room, beating the boss, running out of a clock, or a
-   condition combining these.
+6. ~~**What ends a floor.**~~ **Struck by ticket 18.** `[you]` A floor ends when the floor deck has
+   been exhausted. What remains here is only where the **flip** sits in the phase order relative to
+   conversion — ticket 18 says the card is flipped at the **start of the turn**, before the draw
+   phase, so the players always see what they face before they spend. Fit that in and do not move it.
 7. **Interrupts and reactions.** Whether a player can act outside their own turn. This is a major
    lever on the frantic pillar and on downtime.
 8. **Upkeep.** The physical actions a human performs each turn: shuffling, flipping, sliding
@@ -40,13 +42,18 @@ character is down; and whether a full round is Red+Gray or something finer.
 
 - The player-count model settled in ticket 03.
 - The resource model settled in ticket 04.
-- The floor structure settled in ticket 05.
+- The floor structure settled in ticket 05, **as amended by ticket 18** — a floor is a deck played
+  against, not a plan moved around on.
+- The encounter loop settled in [ticket 18](18-floor-encounter-decisions.md), and the defeat check
+  settled in [ticket 21](21-defeating-a-floor-card.md). The turn's shape is now largely fixed by
+  them: flip, draw, try to beat the card, resolve. This ticket owns what happens inside that.
 - The pressure constraints from ticket 06 (*Decide what creates the frantic, in-over-your-head
   pressure*) — **there is no filter**. 06 rejected the one-liner it was asked for, so hold the turn
   structure up against its rulings by argument, and record the check.
-- The decision filter settled in ticket 18 and the topology settled in ticket 19. The phases
-  designed here must be the phases in which 13's choices actually get made — a phase sequence that
-  wraps no decisions has failed, however tidy it is. Record the check.
+- There is **no filter from ticket 18 and no topology from ticket 19** — 18 resolved on a structural
+  ruling and wrote no filter, and 19 was abandoned with the spatial floor. The phases designed here
+  must still be the phases in which real choices get made; a phase sequence that wraps no decisions
+  has failed, however tidy it is. Record the check by argument.
 
 ## Overlap to watch
 
@@ -77,19 +84,18 @@ What this ticket still owes, sharpened by the above:
 - **Hand size.** Is there a cap on conversion at all, or is cost the only limit? Ticket 04's finding
   is that a hand is *tools and fuel* simultaneously, so over-drawing is already self-limiting — a
   printed cap may be unnecessary.
-  - **Ticket 05 has since forced this.** `[you]` Scavenged items go to hand with Retain, and their
-    stated cost is that they *occupy hand space*. With no cap, that cost does not exist and item
-    pickups are free. So a **maximum hand size is now required**, not optional. What remains here is
-    the number, whether it applies to conversion or to holding, and how Retained cards count against
-    it. Note that the cap is what makes carrying an item a real decision, so it cannot be so generous
-    that nobody ever feels it.
-- **Whether movement, searching, and other floor actions cost stamina**, and how much. Ticket 04
-  ruled that exhausting is not a combat verb — sprinting, searching, forcing a door, tripping all
-  can cost. **Ticket 06 has since ruled the principle** `[you]`: **most moves cost stamina in some
-  form.** So "whether" is largely settled and this ticket decides **which and how much**, and whether
-  they cost from hand or deck. A design that makes most floor movement free contradicts ticket 06 and
-  needs to say so out loud. Note 06 produced **no filter** to check against — it rejected the
-  one-liner it was asked for, so its constraints are argued case by case.
+  - **The argument that forced a cap has lapsed.** Ticket 05 made a maximum hand size *required*
+    because scavenged items went to hand with Retain and their whole cost was occupying hand space.
+    Ticket 18 removed rooms and therefore scavenging, so that pressure is gone and the cap is an open
+    question again. Whether floor cards hand out anything that lives in hand is
+    [ticket 21](21-defeating-a-floor-card.md) item 6; wait for it, or rule the cap on its own merits.
+- **What still costs stamina, now that movement does not exist.** Ticket 04 ruled that exhausting is
+  not a combat verb, and **ticket 06 ruled the principle** `[you]`: **most moves cost stamina in some
+  form.** The price list that principle was heading for was written against rooms and doors and died
+  with them. This ticket now owes the honest answer to what a turn even contains beyond flipping,
+  converting, and playing — and if the answer is *nothing else*, whether ticket 06's principle has
+  been quietly reduced to ticket 04's drain. Say so out loud either way. Note 06 produced **no
+  filter** — its constraints are argued case by case.
 - **Actions per turn** — whether actions are a separate currency from card costs, or the same thing.
 - `[you]` **"Do nothing: recover 1 card" is a logged candidate turn action.** Explicitly unadopted;
   must survive playtest. Ticket 10 owns the number.

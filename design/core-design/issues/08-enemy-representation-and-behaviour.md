@@ -2,63 +2,48 @@
 
 Type: grilling
 Status: open
-Blocked by: 07
+Blocked by: 21, 22
 Map: [core design map](../map.md)
 
 ## Question
 
 What is an enemy, physically, and how does it act in a game with no computer to run it?
 
-Decide:
+**Most of this ticket was answered by [ticket 18](18-floor-encounter-decisions.md).** An enemy is a
+card in the floor deck. It arrives by being flipped at the start of a turn, it sits in one place on
+the table, it acts by what is printed on it, and it leaves by being exhausted. There is no
+positioning, no pursuit, and no enemy that follows you between rooms, because there are no rooms.
 
-1. **Representation.** Card, tile, standee, token, or its own deck. Where it physically sits
-   relative to the room and the player.
-2. **Arrival.** How enemies enter play — drawn on room entry, spawned by a threat deck, revealed
-   by a timer. This is a prime carrier of ticket 06's pressure.
-3. **Behaviour.** How an enemy decides what to do without a game AI: fixed rules on the card, an
-   initiative track, a shared behaviour deck, or a "they always do the worst thing" heuristic.
-   Weigh this against the upkeep budget from ticket 07 — enemy logic is where physical games get
-   slow.
-4. **Damage to the player.** How an enemy's attack resolves against ticket 04's model, and who
-   chooses which cards are lost.
-5. **Damage to the enemy.** How the player attacks, what tracks an enemy's remaining health, and
-   whether that tracking is a component or a card-state.
-6. **Persistence.** Whether unkilled enemies follow the player between rooms or are left behind —
-   a large lever on whether the player feels chased.
-7. ~~**Boss distinction.**~~ **Struck by ticket 05.** `[you]` There is one enemy per floor and killing
-   it grants passage, so boss and room enemy are the same thing and there is no structural distinction
-   left to draw. What replaces this item: enemies must **scale in difficulty floor to floor** (ticket
-   05's escalation axis), so decide *along which dimensions* an enemy gets harder — health, damage,
-   behaviour complexity, or how hard it is to disengage from — and keep the answer inside ticket 07's
-   upkeep budget at every point on the curve.
+What is left is what a card cannot answer by existing:
 
-## Routed here by ticket 05 — decide jointly with ticket 19
+1. **Behaviour beyond the flip.** Whether a floor card does anything other than present a defeat
+   condition — acts on a later turn, changes the next flip, stays in play after being met. Weigh
+   every candidate against per-turn upkeep: enemy logic is where physical games get slow, and the
+   flip is currently free.
+2. **Identity across a floor.** Whether the ten-or-so cards of a floor deck are ten faces of one
+   monster, a monster and its lesser company, or ten unrelated threats. Ticket 05's *one enemy per
+   floor* was written about a creature you cornered on a map, and it does not translate cleanly to a
+   deck. Settle jointly with [ticket 22](22-floor-deck-composition.md) item 2.
+3. **Escalation dimensions.** Along which axes an enemy gets harder floor to floor — what it takes
+   to defeat, what it costs to fail, or how it behaves — inside ticket 07's upkeep budget at every
+   point on the curve.
+4. **Whether this ticket still has a subject.** It may collapse entirely into 21 and 22. If a session
+   finds nothing here that those two do not already own, **rule it out of scope and close it** rather
+   than inventing enemy machinery to justify the node.
 
-**Does damage to the floor's enemy persist when the party breaks off contact?** `[you]` Left open
-deliberately, because it is downstream of items 1 and 5 above: how the enemy is represented determines
-how its damage is tracked, and if separate health tracking is fiddly at the table, "you have to take
-it down in one go" becomes the answer.
+## Settled elsewhere — do not relitigate
 
-This is not a small detail. Ticket 04's picture of a floor — dent it, flee, scavenge, come back —
-**only exists if damage persists.** Ticket 18 has been told not to assume it. Whichever way this goes,
-say so loudly and check it against 18's decision filter.
-
-The map's **minimise play zones** philosophy bears directly on item 5: an enemy health track is
-precisely the sort of thing this project would rather express with cards it already has.
+- **Representation, arrival, and persistence** — [ticket 18](18-floor-encounter-decisions.md). An
+  enemy is a floor card; it arrives on the flip; a card that beat you returns via the discard pile.
+- **Damage to the player, damage to the enemy, and who chooses what is lost** —
+  [ticket 21](21-defeating-a-floor-card.md).
+- **"You cannot simply leave"** `[you, ticket 06]` — now satisfied structurally: the floor deck must
+  be beaten to advance and failures come back around. This ticket no longer owes a pursuit mechanism.
+- **Boss distinction** — struck by ticket 05, and now owned as *the last card* by ticket 22 item 3.
 
 ## Must satisfy
 
+- The encounter loop settled in ticket 18.
 - The turn economy settled in ticket 07, including its upkeep budget.
-- **The constraints from ticket 06** (*Decide what creates the frantic, in-over-your-head
-  pressure*) — note that there is deliberately **no filter**. 06 rejected the one-line test it was
-  asked to produce, so its constraints are argued case by case. Two of them bind this ticket
-  directly. **(a) "You cannot simply leave" is a requirement** `[you, ticket 06]` — the enemy must
-  make breaking off cost something, so that disengaging is never a free way to switch the floor's
-  pressure off. Pursuit is the obvious mechanism and was the human's own suggestion, but this ticket
-  chooses how. **(b) Something must act on the player every turn** — the enemy is the primary source
-  of that, since 06 ruled hazards a tool rather than a requirement, so a floor may well have no
-  second threat.
-- The decision filter from ticket 18 and the topology from ticket 19. Items 1 (where the enemy
-  physically sits) and 6 (whether unkilled enemies follow the player) are only answerable against a
-  settled topology — and if ticket 18 made engagement optional, this ticket owns what an enemy does
-  when it is bypassed.
+- Ticket 06's constraint that **something acts on the player every turn** — carried by the flipped
+  card, so anything added here is on top of a bar already cleared.

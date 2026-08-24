@@ -12,9 +12,10 @@ and it collides directly with ticket 04's resource model.
 
 Decide:
 
-1. **The source.** Central market, per-room rewards, item pickups found while running through
-   rooms, or a combination. The pitch says players *"find items that help grow their deck's
-   abilities"* — decide whether that means a market, loot, or both.
+1. **The source.** Ticket 05 settled the **card reward on clearing a floor**, and ticket 18 settled
+   that a defeated **floor card may pay a reward**. Decide whether those are the only two sources —
+   whether a market exists, and whether the pitch's *"find items that help grow their deck's
+   abilities"* has any home left now that there are no rooms to find things in.
 2. **The cost.** Is acquisition free (a reward) or paid (a purchase)? If paid, paid with what —
    and if the currency is cards, this is the same resource as energy and HP, which makes every
    purchase a self-harm decision. Rule on whether that is the design.
@@ -54,11 +55,12 @@ Decide:
   declining rewards already provides thinning-by-omission at zero component cost, so a removal
   mechanism has to justify itself against that, and against the map's **minimise play zones**
   philosophy.
-- **In-floor pickups are not deckbuilding.** `[you]` Items scavenged during a floor go **straight to
-  hand with Retain** and are **gone on ascending** — they never enter the deck. So scavenging is never
-  a healing verb, and the deck stays a pure product of the ten reward decisions. A future exception
-  may let *some* items be carried onward; it is explicitly not the default, and it would be this
-  ticket's to design.
+- **In-floor pickups are not deckbuilding.** `[you]` The principle stands even though its mechanism
+  changed: anything a floor hands you mid-encounter is **temporary and gone on ascending** — it never
+  enters the deck — so the deck stays a pure product of the ten reward decisions. What is gone is
+  *scavenging* as the way you got such a thing; whether a defeated floor card pays one instead is
+  [ticket 21](21-defeating-a-floor-card.md) item 6. A future exception may let *some* items be carried
+  onward; it is explicitly not the default, and it would be this ticket's to design.
 - **Sub-question 6:** the deck does not reset between floors — acquired cards are permanent for the
   run. Between-runs persistence stays in the fog.
 - **A vocabulary warning.** Slay the Spire's *Status* was reached for as shorthand for the temporary

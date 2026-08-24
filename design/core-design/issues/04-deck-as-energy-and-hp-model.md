@@ -268,6 +268,11 @@ Recorded here for provenance; the owning ticket still decides the detail.
   denting it, fleeing when they are in over their heads, scavenging, doubling back, getting chased.
   The floor ends by ascending — a blocking enemy, a key to find, something. A run is many floors.
   **This is a load-bearing input to ticket 05**, which owns the detail.
+  - **Superseded 2026-08-23** `[you]` — *one continuous encounter* stands; the 2D floor plan does not.
+    A floor is a **deck of cards played against**; see
+    [ticket 18](18-floor-encounter-decisions.md). Everything else this ticket settled — deck as
+    stamina, convert, exhaust, the three zones, no discard pile, last stand — is untouched by that
+    change.
 - `[you]` **Persistent effects live in your hand.** A card granting an ongoing buff stays in hand via
   Retain and works as long as you keep it — but it occupies hand space you cannot refill for free,
   and it is always available to burn as fuel when you are desperate. Duration is never a rules

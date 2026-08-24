@@ -49,6 +49,10 @@ head, reacting to what's in front of you, with little time for deep strategy.*
   add a term still under argument.
 - **Previous attempts.** `previous-attempts-at-design/` is reference material, opened only when a
   ticket directs it. Its content and structure must not shape this map.
+- **Abandoned ideas.** [`abandoned/`](abandoned/README.md) holds design that was ruled on and then
+  dropped when the direction changed. **Nothing in it is current**, it is never linked from
+  *Decisions so far*, and a session opens it only when a ticket names a file in it. It exists so that
+  dropping an idea does not also drop the record of whose it was and why it went.
 
 **Tracker.** Local markdown, overridden to this directory. See `docs/agents/issue-tracker.md`.
 
@@ -143,87 +147,93 @@ head, reacting to what's in front of you, with little time for deep strategy.*
   doesn't. "Boss" and "room enemy" collapse into one thing: a floor *is* a monster plus a map you run
   around on. Stated as a default with design space left to deviate. **Ten floors, fixed**, at a hard
   budget of **5–7 minutes each** (~60–75 minute run) — adopted explicitly to stop the design
-  over-complicating itself, so tickets 19 and 07 must fit inside it. **Clearing a floor offers
+  over-complicating itself, so tickets 22 and 07 must fit inside it. **Clearing a floor offers
   permanent card rewards**, Slay the Spire style, and `[proposed by agent → you approved]` **declining
   is always allowed**, which makes the player set their own deck size and gives thinning-by-omission
   for free. Removal is not ruled out but is never a default. **Escalation scales enemy difficulty**;
-  floor size as a second axis waits on ticket 19. **Scavenged items go straight to hand with Retain
-  and do not leave the floor** — so scavenging is never a healing verb — which forces a **hand size
-  cap** onto ticket 07. **Nothing bad carries between floors except card-specific penalties**
-  (placeholder keyword *Curse*, name provisional). **Red and Gray move independently within a floor.**
-  Deliberately left open and routed to tickets 08 and 19: **whether damage to the floor's enemy
-  persists when you break off** — it depends on how the enemy is physically tracked, and ticket 18 may
-  not assume the dent-and-retreat loop exists until it lands. Surfaced here and promoted to the
-  standing Notes: **minimise play zones**, a designer philosophy rather than a game rule.
+  a second axis is open and waits on ticket 22. **Nothing bad carries between floors except
+  card-specific penalties** (placeholder keyword *Curse*, name provisional). Surfaced here and
+  promoted to the standing Notes: **minimise play zones**, a designer philosophy rather than a game
+  rule. **Four of this ticket's rulings were superseded by ticket 18's floor-deck model** — the 2D
+  floor plan, scavenged items, Red and Gray moving independently, and the open question of whether
+  damage to the enemy persists across a break-off. See the ticket's *Superseded in part* section.
 
 - [Decide what creates the frantic, in-over-your-head pressure](issues/06-source-of-frantic-pressure.md)
   — `[you]` The pillar is carried by two things at once, and neither is enough alone.
   **You get poorer every turn**: ticket 04's drain, ratified rather than chosen
   again, but **widened so that most moves cost stamina in some form**, not just card play (a
   constraint on ticket 07, *Define the turn and action economy within a floor*). And **something
-  acts on you every turn**, either the floor's enemy or a hazard, on the floors that use them. There
-  is **no wall clock** of any kind; that was rejected outright. **"You cannot simply leave" is
-  binding on ticket 08** (*Decide how enemies are represented and how they act*) as a requirement,
-  free in implementation; pursuit is the obvious way, but 08 picks the mechanism. **Hazards are a
+  acts on you every turn** — now carried structurally by the floor card flipped at the start of each
+  turn. There
+  is **no wall clock** of any kind; that was rejected outright. **"You cannot simply leave"** was a
+  requirement laid on ticket 08 and is **now satisfied by the encounter's shape**: the floor deck must
+  be beaten to advance and a card you failed against is shuffled back in. **Hazards are a
   tool, not a requirement** — how heavily to use them is a balance-time question, and the agent's
   recommendation to bind a weaker rule, that a floor's pressure must not come from the enemy alone,
-  was declined with the dissent recorded. The pressure is **both diegetic and structural**, and the
-  **pyramid tower** is what lets it be both at once: the tower narrows as it rises, so higher floors
-  are tighter, with fewer rooms worth scavenging and less space to keep away from enemies —
-  escalation you can see on the table instead of bigger numbers. That is a **strong candidate for
-  ticket 19** (*Decide the floor's topology and physical representation*), **explicitly not
-  binding**, and it is the leading proposal for the second axis of escalation that ticket 05 left
-  open. The squeeze works through **space and supply, not rate**: fewer places to scavenge falls out
-  of the geometry for free, and no rule makes a higher floor cost more per action. The pressure is
+  was declined with the dissent recorded. The pressure is **both diegetic and structural**. **The
+  pyramid tower was abandoned with the spatial floor**, so the second axis of escalation ticket 05
+  left open is open again and sits with ticket 22. What survives of that thread is the negative half:
+  **no rule makes a higher floor cost more per action.** The pressure is
   allowed to **close and kill you**, but the honest failure is *"I spent badly," never "I was
   slow"*, with **revive as the safety valve** at a cost ticket 14 (*Design the down and revive
   rules*) sets. **Instruction overridden** `[you]`: the ticket demanded a one-line testable filter
   that tickets 07, 08, 09, and 11 could be checked against, and the human rejected every draft —
   **no tests; these get decided when we talk specifics** — so 06 hands down constraints argued case
-  by case, not a formula. **Deferred:** whether you see the whole floor when you arrive, routed to
-  tickets 18 and 19. 06 resolved before 18, so **18 inherits** the obligation to reconcile the two
-  siblings.
+  by case, not a formula. **Whether you see the whole floor when you arrive** was deferred here and
+  has since been answered by ticket 18: you see one card, one turn ahead.
+
+- [Decide what a floor encounter is and what it presents to the player](issues/18-floor-encounter-decisions.md)
+  — `[you]` **A floor encounter is a deck of cards the players play against**, and beating the deck is
+  what grants passage to the next floor. The deck is shuffled at the start of the encounter. At the
+  **start of each turn** a **floor card** is flipped face up, telling the players what they face
+  before they spend anything; they then take their draw phase and try to **defeat** it. Defeat it and
+  it is **exhausted** from the floor deck and may pay a **reward**; fail and the players take a
+  **negative consequence** and it goes to the floor deck's **discard pile**, which is **shuffled back
+  in when the draw pile runs out**. That failure branch is the point — being outmatched, backing off,
+  and meeting the same thing again later is the **scrambling and fleeing** the frantic pillar wants,
+  and it falls out of the deck's structure instead of needing a chase rule. **This replaced the
+  floor-as-2D-plan model wholesale**: no rooms, no movement, no routing, no scavenging, and Red and
+  Gray no longer move independently because there is nowhere to move. Ticket 06's *"you cannot simply
+  leave"* is now satisfied structurally, and its deferred *do you see the whole floor on arrival* is
+  answered — you see one card, one turn ahead. **The pyramid tower went with the spatial floor**, so
+  ticket 05's second axis of escalation is open again. What defeating a card takes, what failing
+  costs, and what a floor deck holds are deliberately **not** decided here — they are tickets 21 and
+  22. The abandoned spatial model is preserved in
+  [`abandoned/`](abandoned/spatial-floor-model.md).
 
 ## Not yet specified
 
 <!-- In scope, but not sharp enough to ticket. Graduates into tickets as the frontier advances. -->
 
-- **Floors that deviate from the one-enemy default** — every floor holds one enemy, and killing it
-  grants passage. There is no separate boss encounter; the floor's enemy is the whole fight. The rule
-  may be broken later, and what a deviation would look like is open, as is whether the tower's last
-  floor is one. This stays fog until tickets 18, 19, and 08 establish what makes floors differ at all.
+- **Floors that deviate from the default** — every floor is a deck to be beaten, and beating it grants
+  passage. The rule may be broken later, and what a deviation would look like is open, as is whether
+  the tower's last floor is one. This stays fog until tickets 21, 22, and 08 establish what makes
+  floor decks differ at all.
 - **Roguelite meta-progression** — whether anything persists between runs at all, and whether it
   is even in scope for a core spec.
 - **Death and run failure** — what happens when a run ends badly. A run is ten floors and 60–75
   minutes, and the run-level arc is deckbuilding rather than wearing down, so what
   remains is only what failure costs and what, if anything, a failed run leaves behind. That last
   part may turn out to be meta-progression's question rather than this one's.
-- **Room contents and item pickups** — the "find items" half of the pitch. May resolve entirely
-  inside ticket 09; if it doesn't, it graduates. Searching a room can itself cost stamina, so
-  scavenging is a push-your-luck decision rather than a free pickup. A pickup goes to hand with
-  Retain and is gone on ascending. What remains open is what pickups
-  actually *are* and how a floor decides what's in a room. Two named threads remain: whether a floor
-  can hand you something that clutters rather than helps, and the later exception under which a
-  *few* items might be carried onward. If the pyramid proposal is adopted, **rooms worth scavenging
-  get scarcer the higher you climb**, which makes how generous a floor is an escalation dial in its
-  own right.
-- **What else costs stamina, beyond fighting** — **most moves cost stamina in some form**, so the
-  question is not whether but **which**. What remains is the specific price list for movement,
-  scavenging, and floor interactions, covering things like sprinting, tripping, falling, searching,
-  and banging your head on a pipe. Ticket 07 owns the turn-level part; the rest depends on ticket
-  19's floor plan.
-- **Hazard design** — hazards are a second thing that can act on the player each turn, alongside the
-  floor's enemy, and they are a **tool, not a requirement**; how heavily to use them is left to
-  balance time. What a hazard actually *is* remains open: it might be a fixed feature of the floor,
-  something that triggers, or something that acts on you every turn you stand near it. That cannot
-  sharpen until tickets 18 (*Decide what choices a floor actually presents to the player*) and 19
-  (*Decide the floor's topology and physical representation*) establish what a floor physically
-  contains. It may resolve inside 18 or 19; if it doesn't, it graduates.
+- **Finding things during a floor** — the "find items" half of the pitch, which lost its mechanism
+  when rooms did. Scavenging was a floor's supply of one-shot tools and a push-your-luck decision
+  about spending stamina to search; the floor-deck model has no searching in it. Whether that half of
+  the pitch comes back at all is open. If it does, the obvious home is a floor card that pays a tool
+  rather than a threat, which is ticket 21 item 6 — so this may resolve inside 21, and graduates only
+  if it doesn't. Two named threads survive the change: whether a floor can hand you something that
+  clutters rather than helps, and the later exception under which a *few* items might be carried
+  onward.
+- **What else costs stamina, beyond fighting** — ticket 06 ruled that **most moves cost stamina in
+  some form**, but the moves that ruling was about were movement, searching, and forcing doors, and
+  none of those exist now. The open question is sharper and more awkward than it was: whether a turn
+  contains anything at all beyond flipping, converting, and playing, and if it doesn't, whether 06's
+  principle has quietly collapsed into ticket 04's drain. Ticket 07 owns it and has been told to say
+  so out loud either way.
 - **Fixed duo or roster** — whether Red and Gray are the only two characters or one pairing drawn
   from a larger cast. Pending ticket 13; a roster would expand content scope considerably.
 - **Table footprint and component budget** — the physical constraints that will eventually bound
-  card count and per-turn upkeep. The *floor layout's* share belongs to ticket 19, which produces
-  the map's first hard footprint number; what remains here is everything else.
+  card count and per-turn upkeep. The *floor decks'* share belongs to ticket 22, which produces the
+  map's first hard component number; what remains here is everything else.
 - **Whether "North vs Up" means anything mechanical**, or is purely a title.
 
 ## Out of scope

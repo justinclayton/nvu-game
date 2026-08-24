@@ -39,9 +39,14 @@ Decide:
 
 - The resource model from ticket 04 and the acquisition model from ticket 09.
 - The reading-time implications of ticket 06.
-- The decision filter from ticket 18 — a card has to carry whatever information the player needs at
-  the moment they make the floor's primary choice. If ticket 19 made rooms out of cards, this
-  ticket also owns whether a room card and a player card share an anatomy.
+- The encounter loop from ticket 18 — a card has to carry whatever information the player needs at
+  the moment they make the floor's primary choice. 18 wrote **no filter**; check by argument.
+- **This ticket now also owns floor card anatomy.** A floor is a deck, so a floor card is a card and
+  has to be readable at a glance at the moment it is flipped: what it takes to defeat, what it costs
+  to fail, what it pays. Decide whether a floor card and a player card share an anatomy or are
+  deliberately distinct objects — they are never in the same hand, which is an argument for making
+  them look nothing alike. Wait on [ticket 21](21-defeating-a-floor-card.md) for what actually has to
+  be printed there.
 
 ## Notes for the session
 
@@ -62,10 +67,13 @@ Decide:
 
 Two more things a card can be, both of which this ticket must find room for in the anatomy:
 
-- **Scavenged item** — found during a floor, goes to hand with **Retain**, gone on ascending. It never
-  enters the deck. Decide whether "leaves at end of floor" is a printed keyword, a card kind, or a
-  property of where the card came from — and note the card must read as temporary at a glance, or
-  players will build plans around something that is about to vanish.
+- **A temporary in-floor card** — something a floor hands you that goes to hand with **Retain** and is
+  gone on ascending, never entering the deck. `[you, ticket 05]` The *scavenged item* was the original
+  case and died with rooms; whether floor cards pay one instead is
+  [ticket 21](21-defeating-a-floor-card.md) item 6. The anatomy question survives either way: decide
+  whether "leaves at end of floor" is a printed keyword, a card kind, or a property of where the card
+  came from — and note the card must read as temporary at a glance, or players will build plans
+  around something that is about to vanish.
 - **Curse** *(placeholder name — a thematic replacement is owed before the spec locks)* — a card that
   follows you between floors as a penalty, taking Slay the Spire's meaning. The default is that
   nothing bad carries; a Curse is a specific card breaking that default deliberately.

@@ -181,3 +181,27 @@ prior session's placement was overridden rather than merely moved. **Resolved du
 the move stands, and the underlying design question was answered outright — `[you]` **Red and Gray can
 move independently within a floor.** Ticket 18 carries it as settled upstream; ticket 19 must supply a
 topology that supports two separated characters.
+
+## Superseded in part
+
+`[you, 2026-08-23]` **A floor is a deck of cards played against, not a plan moved around on** — see
+[ticket 18](18-floor-encounter-decisions.md). Four rulings in the Answer above no longer hold:
+
+- **A floor is a 2D plan with rooms you run around.** Gone. A floor is a shuffled deck; a turn is a
+  flipped card.
+- **Scavenged items go to hand with Retain and do not leave the floor.** Gone with the rooms. Whether
+  floor cards hand out anything comparable is [ticket 21](21-defeating-a-floor-card.md) item 6.
+- **Red and Gray move independently within a floor.** There is nowhere to move. What the two
+  characters do separately is now a turn-economy question for ticket 07 and ticket 21 item 7.
+- **Whether damage to the floor's enemy persists when the party breaks off.** The question survives
+  in a new body — whether a floor card carries damage into the discard pile — and is ticket 21 item 3.
+
+**One enemy per floor** is now ambiguous rather than wrong: a deck of ten threat cards may or may not
+be one monster. Ticket 08 item 2 and [ticket 22](22-floor-deck-composition.md) item 2 settle it.
+
+What stands unchanged: **ten floors**, the **5–7 minute** floor budget, **card rewards on clearing
+with declining always allowed**, **escalation floor to floor**, and **nothing bad carrying between
+floors except card-specific penalties**.
+
+The abandoned material is preserved at
+[`abandoned/spatial-floor-model.md`](../abandoned/spatial-floor-model.md).

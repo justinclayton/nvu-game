@@ -1,9 +1,15 @@
-# 19 — Decide the floor's topology and physical representation
+# ABANDONED — 19 — Decide the floor's topology and physical representation
 
 Type: grilling
-Status: open
-Blocked by: 18
+Status: abandoned
+Superseded by: [ticket 18's floor-deck answer](../issues/18-floor-encounter-decisions.md), 2026-08-23
 Map: [core design map](../map.md)
+
+> **This ticket is dead and was never resolved.** It asked what a floor looks like as a 2D plan on a
+> table — rooms, movement, distance, reveal, footprint. The floor stopped being a plan and became a
+> deck, so the question no longer has a subject. The rulings it inherited are preserved in
+> [the spatial floor model](spatial-floor-model.md); the questions that survive the change were
+> rehomed onto tickets 21 and 22. Kept only for provenance.
 
 ## Question
 

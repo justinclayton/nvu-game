@@ -22,7 +22,7 @@ A single-file HTML simulator (via `/prototype`, logic branch) that plays out one
 - the acquisition rates from ticket 09,
 
 with every tuning number exposed as a control: starting deck size, draw per turn, energy cost
-curve, damage per enemy attack, enemies per room, rooms per floor, acquisition rate.
+curve, cost of defeating a floor card, cost of failing one, floor deck size, acquisition rate.
 
 It must support both free-play (step a floor manually and watch the piles move) and batch runs
 (simulate N floors and chart the distribution of outcomes).
@@ -73,9 +73,11 @@ attempts may be used):
 2. **Average conversion per turn** under pressure, and whether players systematically over- or
    under-convert.
 3. **Damage per hit** relative to deck size — how many hits a floor should be able to spend.
-4. **Whether fighting is dominated by fleeing and scavenging.** Ticket 04's answer is that fleeing
-   and searching also cost stamina, so avoidance is not free. Verify that this is actually true at
-   the table's numbers rather than merely true in principle.
+4. **Whether deliberately failing dominates fighting.** The floor-deck model replaces the old
+   flee-and-scavenge worry with a sharper one: a player who eats the consequence instead of spending
+   to win pays once and meets the card again later. Verify at real numbers whether that is ever the
+   better play, and how often — including how much the reshuffle punishes it, since a deck you keep
+   failing against gets *longer*.
 5. **Whether over-acquiring produces a bloated, unresponsive deck**, given that a bigger deck is both
    more floor-time and worse consistency on a single pass.
 6. **"Do nothing: recover 1 card"** — the candidate turn action from ticket 07. Does it exist, and at

@@ -150,3 +150,29 @@ this paragraph first.
   from turn one; that recommendation is recorded as unadopted input, not as a decision.
 - **Reconciliation with ticket 18.** 06 resolved first, so it owes no check. **Ticket 18 inherits
   the obligation** to check itself against this ticket and to record that check.
+
+## Superseded in part
+
+`[you, 2026-08-23]` **A floor is a deck of cards played against** — see
+[ticket 18](18-floor-encounter-decisions.md). The pillar and both of its carriers survive; the
+mechanisms three of them were reaching for do not.
+
+- **You get poorer every turn** — stands, unchanged. The drain is untouched by the new model.
+- **Something acts on you every turn** — stands, and is now *structural rather than a design
+  requirement*: the flipped floor card is that something, on every floor, for free.
+- **"You cannot simply leave"** — the requirement stands and is **satisfied by the encounter's
+  shape**. The deck must be beaten to advance, and a card you failed against is shuffled back in. It
+  is no longer a constraint ticket 08 must discharge with a pursuit rule.
+- **The pyramid tower.** Abandoned with the spatial floor. It was the leading candidate for ticket
+  05's second axis of escalation, so **that axis is open again** and is
+  [ticket 22](22-floor-deck-composition.md) item 4.
+- **The squeeze works through space and supply, not rate.** The space half is gone. What survives is
+  the negative half, which was the load-bearing part: **no rule makes a higher floor cost more per
+  action.** That still binds.
+- **Hazards as a tool, not a requirement.** A hazard no longer needs a floor plan to sit in — it can
+  simply be a kind of floor card. Ticket 22 item 2 owns whether the deck holds any.
+- **Whether the player sees the whole floor on arrival.** Answered by ticket 18: no. They see one
+  card, flipped at the start of the turn, before they spend anything.
+
+The abandoned material is preserved at
+[`abandoned/spatial-floor-model.md`](../abandoned/spatial-floor-model.md).

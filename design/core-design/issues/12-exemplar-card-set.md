@@ -66,3 +66,28 @@ ticket owes exemplars for alongside the Good Stuff in the floor deck's Item room
 **Also handed down:** the exemplar hazard rooms should print the standard reveal line — *"One
 character reveals reward. You may add it to the top of your deck or skip it."* — as their high
 threshold. Variations on which character reveals are a balance-time tool, not a starting point.
+
+## Handed down by ticket 11, 2026-08-25
+
+The anatomy is settled, so this ticket is unblocked. Three things it now owns.
+
+**The exemplars have to demonstrate one specific claim.** `[you, ticket 11]` Player cards are
+**effect-forward** and **Stuff carries the bulk of the raw stats** — a permanent deck is modifiers,
+and the base they act on is scavenged fresh each floor. The exemplar set is the first place anyone can
+see whether that is actually fun to hold in a hand, so it should include the whole loop: a couple of
+`Fine` starter cards that are near-pure stats, at least one `Woah` reward card whose text is genuinely
+complex, and enough Good Stuff to make the stat base visible.
+
+**Two cards this ticket may choose to print, or decline to.**
+
+- **An Enemy room with a reward tier.** `[you, ticket 11]` Raised while ratifying the room card format
+  and left open; a room is a list of `threshold: outcome` lines, so it costs the anatomy nothing.
+  Whether composition uses it belongs to ticket 22, but an exemplar is the cheapest way to see how it
+  reads.
+- **A card that carries Stuff past ascending** — *"if you are holding this when you clear a floor,
+  keep up to 2 Stuff for the next floor."* Handed from ticket 09 as *allowed, not owed*; ticket 11
+  confirmed it needs no new machinery, being `Hold` plus a static line. Note it is a **stronger card
+  than ticket 09 could have known**, because Stuff is now the stat engine.
+
+**Rarity is a complexity signal, never a quality one.** Ticket 11's item 6a died with ticket 15 —
+there is no culling, so there is no card *quality* to make legible. Do not use `Woah` to mean "good."

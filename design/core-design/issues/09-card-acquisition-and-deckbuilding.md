@@ -311,3 +311,35 @@ and specified it rather than layering on top of it. It retracted one of its own 
 fuel-capable junk in a punishment slot would be a punishment that helps you — the separation into
 two pools is what resolved it. It reopened no settled ticket, and where it touched ticket 21 and 22
 it did so as explicit amendments rather than silent contradiction.
+
+## Amended by ticket 11, 2026-08-25
+
+**Rarity tiers exist after all — as a complexity axis, not an escalation one.**
+
+This ticket ruled reward pools **flat**: "no rarity tiers, no escalation by floor," on the grounds
+that ticket 22 already put escalation on one dial and a second would reopen it.
+[Ticket 11](11-card-anatomy.md) introduced **`Fine` / `Cool` / `Woah`** `[you]` to signal **how hard a
+card is to read** — the most complex cards are always the highest rarity, so a player can decline a
+hand full of nested conditionals before ever taking one.
+
+**This ticket's actual concern is untouched.** `[you, ticket 11]` The pool **stays flat**: all three
+tiers are equally likely at every floor, so a floor-2 reward can be a `Woah` and a floor-9 reward can
+be `Fine`. **Nothing about floor number touches the reward pool**, and escalation stays on ticket 22's
+single dial. What this ticket banned and ticket 11 restores is a *tier*, not a *curve*.
+
+Rarity is **purely printed** and touches no rules. The agent proposed that an ascend offer be one card
+of each tier and the human **declined** — a real mechanic should not arrive as a side-effect of a
+presentation decision.
+
+**Also settled from this ticket's hand-downs:**
+
+- **The `Item room` naming debt is closed as `Stuff room`** `[you, ticket 11]`, against this ticket's
+  own guess that a good name would involve neither `Stuff` nor `Item`. Recorded as a knowing override,
+  not an oversight; `Cache` remains available later as flavour, not as the term.
+- **"Has no stats" is readable at a glance** — Bad Stuff simply has no stat field, and the type line
+  says `Bad Stuff` outright. Restricting a piece further, including forbidding its use as fuel, is
+  ordinary effect text and needs no mechanism.
+- **The character marking** this ticket required is the **type line** itself.
+- **The card that carries Stuff past ascending** — allowed, not owed — needs no new machinery: it is
+  `Hold` plus a static line. Whether it is printed belongs to ticket 12. Note it is a stronger card
+  than this ticket could have known, since ticket 11 made Stuff the stat engine.

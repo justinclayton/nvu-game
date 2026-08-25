@@ -276,3 +276,22 @@ one, reorganised this ticket's item rules. Three changes:
 
 Unchanged by this amendment: what Clearing a room takes, what failing it costs in stamina, the
 all-or-nothing threshold rule, and the Fled reshuffle.
+
+## Amended by ticket 11, 2026-08-25
+
+Two corrections from [ticket 11](11-card-anatomy.md), neither reopening anything decided here.
+
+**The punishment and the Flee cost are one field.** `[you, ticket 11]` This ticket called it a
+*punishment* and ticket 22 later added a *Flee cost* to combat rooms; they were always the same
+concept. A room card prints it once, as its **Flee line**.
+
+**"The deck's one always-safe decline" is now misleading.** This ticket described item rooms that way,
+and at the time it was true. Ticket 11 ruled that **Stuff supplies the bulk of the raw stats**, so a
+Stuff room is not a bonus — it is the supply line, and declining one is almost never correct. The
+*rule* is unchanged (a Stuff room still carries no punishment); what changed is that skipping it is
+now a real cost paid later.
+
+**Renames**, from ticket 11's ruling that the word printed on a card is canonical: **combat room →
+Enemy room**, **item room → Stuff room**. A Stuff room has nothing to defeat, so the "one card, two
+readings" problem this ticket flagged as ticket 11's hardest is gone — the card simply *is* the Stuff
+card.

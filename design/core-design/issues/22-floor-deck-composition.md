@@ -220,3 +220,31 @@ created but left unspecified, and renamed a term running through this ticket's c
 
 Unchanged: the win condition, the composition counts, escalation through scarcity, the reshuffle,
 and the combat room's untuned `Power`.
+
+## Amended by ticket 11, 2026-08-25
+
+**Your Stuff curve is now the primary escalation mechanism, not a generosity setting.**
+
+This ticket set Stuff count falling from 9 at floor 1 to 0 at floor 10, and framed escalation as
+*resource scarcity, not a harder fight*. It also handed down, undecided, that *floor rooms rather than
+player cards may be the primary stat source*.
+
+[Ticket 11](11-card-anatomy.md) took that up and ruled it `[you]`: **player cards are effect-forward,
+and Stuff always provides the bulk of the raw stats.** A permanent deck is modifiers; the base they
+act on is scavenged fresh every floor. So this ticket's 9 → 0 curve is not just fewer nice things —
+it is the steady removal of the thing a clever deck needs in order to function. Late floors starve the
+build the player spent the run assembling.
+
+Two consequences for this ticket:
+
+- **Floor 10's bottom-of-curve number needs verifying.** `[you, ticket 11]` The *shape* is ruled —
+  floor 10 is meant to be a desperate scrape — but it must be winnable, and 0 may prove impossible
+  rather than desperate. Handed to [ticket 10](10-sim-the-resource-economy.md); 2 or 3 is a one-number
+  fix if the sim says so.
+- **Whether Enemy rooms may also carry a reward tier is now open, and belongs here.** Raised by the
+  human while ratifying the room card format `[you, ticket 11]`. A room card is a list of
+  `threshold: outcome` lines, so the anatomy supports it for free — this ticket owns whether
+  composition uses it.
+
+**Rename**, per ticket 11: **combat room → Enemy room**, **item room → Stuff room**. And this ticket's
+**Flee cost** and ticket 21's **punishment** are one field, printed once as the room's **Flee line**.

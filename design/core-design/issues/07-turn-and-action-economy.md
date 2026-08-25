@@ -346,3 +346,21 @@ and it goes to ticket 20's tabletop prototype.
   neutral cards.
 - **[Ticket 03](03-solo-coop-or-both.md)** — everything it left open here is closed: no turn order,
   no lead character, no finer round than the floor's turn.
+
+## Amended by ticket 11, 2026-08-25
+
+**Neutral cards do not exist.**
+
+This ticket required Red's and Gray's own cards to be visually distinguished "because **neutral
+cards** cannot be sorted by sight at all." [Ticket 11](11-card-anatomy.md) found the premise stale:
+reward pools and starting decks are both per-character (ticket 09), so **every card a character owns
+is theirs**. The only cards belonging to neither are **Stuff**, which announces itself on its own type
+line.
+
+So the category the worry was about is empty, and the requirement is satisfied without a new field:
+the **type line** reads `Red`, `Gray`, `Good Stuff`, or `Bad Stuff`, doing the character marking's job
+as well as its own. The agent proposed a third value `Both` for neutral cards and the human rejected
+it on the grounds that the category does not exist.
+
+Nothing else in this ticket changes — the play zone still splits by character, for the cleanup reason
+this ticket gave.

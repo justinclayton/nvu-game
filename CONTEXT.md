@@ -17,8 +17,8 @@ floor to floor. A floor ends by **ascending**, and should play in **5–7 minute
 
 **Floor deck** — the deck of **rooms** the players face on a floor. Shuffled at the start of the
 encounter. It has a draw pile, a **Fled** pile, and a **Cleared** pile, and it belongs to the floor
-rather than to either character. It holds exactly one **combat room**; clearing that room ends the
-encounter, not exhausting the whole deck — hazard and item rooms are resources along the way, never
+rather than to either character. It holds exactly one **Enemy room**; clearing that room ends the
+encounter, not exhausting the whole deck — Hazard and Stuff rooms are resources along the way, never
 mandatory to clear. *(tickets 18, 21, 22)*
 
 **Room** — one card of the floor deck, and the whole of what the players face on a given turn.
@@ -34,11 +34,10 @@ progress: a room is Cleared or it is not, and it does not remember being attacke
 prints two thresholds rather than one; which is reached locks in only once play stops, not the
 instant either is first met. *(tickets 21, 22)*
 
-**Combat room** — a room holding an enemy. Its challenge is **`Power X`**, one stat standing in for
-combined attack and health. **Exactly one per floor deck; clearing it is the floor's win
-condition.** Always carries a punishment, printed on the card as its **Flee cost** — the same
-`Exhaust X from deck` punishment any room can carry, guaranteed here and framed diegetically: failing
-or declining is fleeing the fight, with a few scrapes to show. *(tickets 21, 22)*
+**Enemy room** — a room holding an enemy, and the word printed on its type line. Its challenge is
+**`Power X`**, one stat standing in for combined attack and health. **Exactly one per floor deck;
+clearing it is the floor's win condition.** Always carries a **Flee cost** — failing or declining is
+fleeing the fight, with a few scrapes to show. *(tickets 21, 22, 11)*
 
 **Hazard room** — a room with no enemy but something to get through. Its challenge is
 **`Scramble X`** — running, not falling, not braining yourself on a pipe. **Prints a second, higher
@@ -46,11 +45,11 @@ threshold**: the lower clears the room and moves the players on; the higher clea
 permanent **card reward**. Which is reached locks in only once the players declare the play phase
 done. *(tickets 21, 22)*
 
-**Item room** — a room holding a piece of **Stuff**. The card is **both things at once**: the room
-while it sits in the active room zone, and the Stuff itself once it is in a player's hand. **Prints
-no challenge** — flipping one sends the Stuff straight to a chosen character's hand with **Hold**,
-and the room is Cleared; it can never go to Fled. Only **Good Stuff** is found here. *The name is
-provisional* — a better one is owed that involves neither "Item" nor "Stuff". *(tickets 21, 22, 09)*
+**Stuff room** — a room holding a piece of **Stuff**, and the word printed on its type line. **Prints
+no challenge and no Flee line** — flipping one sends the Stuff straight to a chosen character's hand
+with **Hold**, and the room is Cleared; it can never go to Fled. Only **Good Stuff** is found here.
+Because it has nothing to defeat, the card **simply is the Stuff card**: there is no separate "room"
+face to read. *(tickets 21, 22, 09, 11)*
 
 **Stuff** — a card a floor hands you: a tool, a piece of junk, a faceful of slime. It goes to hand
 with **Hold**, it is **playable**, and it is **ordinary fuel** — it can be Exhausted from hand to pay
@@ -61,15 +60,38 @@ of the exhaust pile** before restoring it, so no Stuff survives a floor. It is a
 three Stuff."* *(tickets 21, 09, 07)*
 
 **Good Stuff** / **Bad Stuff** — where a piece of Stuff came from, and loosely how welcome it is.
-**Good Stuff** lives in the floor deck and is what an Item room hands you, so an Item room is never a
-disappointment. **Bad Stuff** lives in a pool **outside** the floor deck and reaches you only as a
-room's printed punishment; it contributes **no stats** toward a challenge, so it clutters your hand
-until you pay to play it. These are descriptions of the split, **not printed keywords** — nothing on
-a card says which it is. *(ticket 09)*
+**Good Stuff** lives in the floor deck and is what a Stuff room hands you, so a Stuff room is never a
+disappointment — and since Stuff supplies **the bulk of the raw stats**, it is the game's supply line
+rather than a bonus, and declining one is almost never correct. **Bad Stuff** lives in a pool
+**outside** the floor deck and reaches you only as a room's printed punishment; it contributes **no
+stats** toward a challenge, so it clutters your hand until you pay to play it. Both are **printed on
+the card's type line** — a player must see at a glance which cards in hand are dead weight. Good
+Stuff carries **rarity**; Bad Stuff does not. *(tickets 09, 11)*
 
 **Power** / **Scramble** — the two stat keywords at level 1. Both rooms and player cards carry them:
 a room prints how much is needed, a played card contributes what it has. More are expected as the
-design grows. *(ticket 21)*
+design grows. **The bulk of the raw stats come from Stuff**, not from a character's own deck: a
+permanent deck is mostly *modifiers*, and the base they act on is scavenged fresh each floor.
+*(tickets 21, 11)*
+
+**Type line** — the one line every card prints saying what it is. On a player card it reads `Red`,
+`Gray`, `Good Stuff`, or `Bad Stuff`; on a room card, `Enemy`, `Hazard`, or `Stuff`. It doubles as the
+character marking, so there is no separate ownership symbol — and there is **no neutral card**, since
+every card a character owns comes from their own pool and the only cards belonging to neither are
+Stuff. *(ticket 11)*
+
+**Rarity** — a card's complexity tier, shown as a border colour: **`Fine`**, **`Cool`**, **`Woah`**.
+Starter cards are all `Fine`. It signals **how hard a card will be to read**, not how strong it is:
+the most complex cards are always the highest rarity, so a player can decline a hand full of nested
+conditionals before ever taking one. Rarity is **purely printed** and touches no rules, and the reward
+**pool is flat** — every tier is equally likely at every floor, so rarity never becomes a second
+escalation dial. Good Stuff carries rarity; Bad Stuff does not. *(ticket 11)*
+
+**Flee cost** — the punishment a room prints, and the only punishment it has. Normally *"1 character
+Exhausts X from deck"*, with the team choosing who absorbs the whole amount. A room's punishment and
+its Flee cost were once described as two things; they are one field, printed once, under the word
+that already means *the room beat us and comes back around.* Stuff rooms have none. *(tickets 21, 22,
+11)*
 
 **Stat pool** — the total of the stats on every card in the **play zone**, shared across both
 characters. It is not a zone and has no tracker — it is simply what the face-up cards on the table
@@ -81,7 +103,7 @@ cleanup can return each card to the right exhaust pile without sorting. Everythi
 at cleanup, so nothing persists here between turns. *(tickets 21, 07)*
 
 **Cleared** — a room defeated and removed from the floor deck **permanently**; it is never
-reshuffled. Clearing the floor deck's one **combat room** ends the encounter; a hazard or item room
+reshuffled. Clearing the floor deck's one **Enemy room** ends the encounter; a Hazard or Stuff room
 being Cleared does not. Applies only to rooms — a character's cards are **exhausted**, never
 Cleared. The Cleared pile is a **heap, not a zone**: face up, unordered, never counted, and no rule
 ever asks it a question. *(tickets 18, 21, 22, 07)*
@@ -113,7 +135,9 @@ runs both, under identical rules. *(tickets 03, 04)*
 **Deck** — a character's face-down draw pile. **The deck is the character's stamina** — its height is
 the health bar, and nothing else tracks health. Each character has their own. *(ticket 04)*
 
-**Stamina** — a character's health, measured in cards remaining outside the exhaust pile. It is the
+**Stamina** — a character's health, measured in cards remaining outside the exhaust pile. **One card
+is exactly one stamina, always**, and no card ever prints a stamina value — which is what keeps the
+deckbuilding inversion legible without arithmetic. It is the
 same substance as the energy used to pay for cards; there is no separate resource and no number
 anywhere. *(ticket 04)*
 

@@ -2,7 +2,7 @@
 
 Type: prototype
 Status: open
-Blocked by: 04, 07, 09
+Blocked by: 04, 07, 09, 11
 Map: [core design map](../map.md)
 
 ## Question
@@ -103,3 +103,24 @@ weaker than ticket 04 claims and the map should know.
 **Also handed down:** starting deck size is **12–15 cards per character, provisional**, and is this
 ticket's number to settle — ticket 09 deliberately refused to pick it, because it cannot be chosen
 honestly before ticket 11 says what a card does.
+
+## Handed down by ticket 11, 2026-08-25
+
+Ticket 11 ruled that **player cards are effect-forward and Stuff carries the bulk of the raw stats**,
+which changes what this sim is actually measuring. A character's permanent deck grows over ten floors
+into a pile of *modifiers*; the base those modifiers act on is **Good Stuff**, scavenged fresh each
+floor and gone on ascending. Two measurements follow.
+
+1. **Does the stat base hold up?** The raw-stat supply is Good Stuff plus a fixed handful of starter
+   cards diluted across a deck growing from 12–15 toward 40. Measure how often a hand of five contains
+   a usable stat at floors 6–10 — the failure mode is a hand of powerful multipliers with nothing to
+   multiply.
+
+2. **Is floor 10 winnable at zero Stuff?** `[you, ticket 11]` The *shape* is ruled: floor 10 is meant
+   to be a desperate scrape, and softening the curve was rejected. But it must actually be winnable,
+   and ticket 22's Stuff count bottoming out at 0 is a number, not a shape. If 0 turns out to be
+   impossible rather than desperate, 2 or 3 is a one-number fix and this sim is what should say so.
+
+**Note on this ticket's blocking.** Ticket 11 is now listed as a blocker. This ticket's own brief
+already said starting deck size "cannot be chosen honestly before ticket 11 says what a card does" —
+the dependency existed and was simply never wired.

@@ -1,7 +1,7 @@
 # 11 — Define card anatomy
 
 Type: grilling
-Status: open
+Status: resolved
 Blocked by: 04, 09
 Map: [core design map](../map.md)
 
@@ -144,3 +144,223 @@ this off the map's fog and into this ticket's design space; it is not owed, only
 **A naming debt this ticket may want to take.** `[you, ticket 09]` **`Item room` is provisional** and
 survives only because nothing better was on the table. A good name for it probably involves neither
 `Stuff` nor `Item`. `Cache` and `Stash` are starting points, not decisions.
+
+---
+
+## Answer
+
+`[you, 2026-08-25]`
+
+### The ruling that shapes everything else
+
+**Player cards are effect-forward; Stuff carries the raw stats.** `[you]` Asked whether a typical
+player card's dominant content is a stat or a line of text, you chose text — with two carve-outs:
+**starter cards may be primarily raw stats**, so a new player is not overwhelmed, and **reward cards
+are definitely effects**. Then, asked where raw `Power` comes from late in a run, you ruled that
+**Stuff always provides the bulk of the raw stats**.
+
+Together those two give the run an arc nothing else on the map was providing, and it is worth stating
+plainly because several other tickets now depend on it:
+
+> **Your permanent deck is modifiers. Your stat base is scavenged fresh every floor.**
+
+Starter cards are a floor-1 crutch, diluted away as the deck grows. Every reward card is an effect
+acting on a base it does not itself supply. That base is **Good Stuff** — finite per floor, and gone
+on ascending. So ticket 22's item count falling from 9 at floor 1 to 0 at floor 10 stops being a
+generosity curve and becomes **the sharpest escalation dial on the map**: late floors starve a clever
+deck of the exact thing its cleverness multiplies.
+
+`[you]` **Floor 10 is meant to be a desperate scrape** — the option that it is the run's hardest
+moment by design was chosen over softening the curve — **and it must actually be winnable.** Whether
+the bottom of the item curve is 0 or 2 is a number, not a shape, and goes to ticket 10.
+
+### Player card anatomy
+
+Every field a player card carries:
+
+- **Name**
+- **Type line** — `Red`, `Gray`, `Good Stuff`, or `Bad Stuff`
+- **Cost** — a number of cards, in the corner
+- **Stat** — `Power 2`, `Scramble 3`. A **distinct field**, not merely text, because ticket 12 needs
+  `Power 3` and `Draw 2` to be visibly different kinds of thing: one feeds the stat pool, the other
+  does not. Many effect cards have none.
+- **Effect text** — including any **conditional** stat, such as *"Power equal to twice the cards Gray
+  played this turn."*
+- **`Hold`** where printed
+- **Rarity** — `Fine`, `Cool`, `Woah`, shown as a border colour
+- **Art**
+
+**A card is worth exactly 1 stamina, always, and never prints it.** `[you]` Cost and damage both count
+*cards*, so a stamina value would be a printed 1 on every card in the game — and it would reintroduce
+the energy field ticket 04 retired. This is what keeps the deckbuilding inversion legible without
+arithmetic: every card you add is one more stamina and one more card between you and the one you
+wanted.
+
+**Ticket 09 required "has no stats" to be a readable thing for a card to be.** It is, and it costs no
+new field: **Bad Stuff simply has no stat field**, and the type line says `Bad Stuff` outright. A
+player holding five cards under pressure can see which ones are dead weight without reading a word of
+text. Ticket 09 also required that per-card text be able to **restrict a piece further, including
+forbidding its use as fuel** — that is ordinary **effect text** and needs no mechanism of its own.
+
+**There is no third character.** `[you]` Ticket 07 worried that **neutral cards** could not be sorted
+by sight at cleanup. The worry was stale: reward pools and starting decks are both per-character
+(ticket 09), so every card a character owns is theirs, and the only cards belonging to neither are
+Stuff — which is visibly Stuff on its own type line. The type line and ticket 07's character mark are
+**one field, not two**, which also discharges ticket 09's requirement that the anatomy carry a
+character marking. The agent's proposed third value `Both` was **rejected by the human on the grounds
+that the category does not exist**.
+
+### Rarity
+
+`[you]` Three tiers: **`Fine`**, **`Cool`**, **`Woah`**. **Starter cards are all `Fine`.**
+
+Rarity's job is **complexity signalling** — it tells a player how hard a card will be to read before
+they take it. There is **no hard limit on clauses per tier**, but **the most complex cards are always
+the highest rarity**. It is **purely printed** `[you]`: it touches no rules. The agent's proposal that
+an ascend offer be one card of each tier was **declined** — that would be a real mechanic arriving as
+a side-effect of a presentation decision.
+
+**This amends [ticket 09](09-card-acquisition-and-deckbuilding.md), which ruled pools flat with "no
+rarity tiers, no escalation by floor."** `[you]` The pool **stays flat**: all three tiers are equally
+likely at every floor, so a floor-2 reward can be a `Woah` and a floor-9 reward can be `Fine`. Nothing
+about floor number touches the reward pool, which was 09's actual concern — escalation stays on the
+single dial ticket 22 owns. What 09 banned and this restores is a *tier*, not a *curve*.
+
+**Good Stuff carries rarity too** `[you]`, since it is now the most load-bearing card category in the
+game and a `Woah` Stuff should be an exciting flip. **Bad Stuff has no tier** — it has no stats to be
+good at.
+
+### Text load
+
+**How complex a card may be is gated on rarity, not on cost.** `[you]` The agent proposed cost-gating
+— expensive cards earn a second clause, so a hand is never five hard reads. The human replaced the
+gate: **rarity is the complexity axis**, and a border colour carries it.
+
+The problem this solves is real and was demonstrated with two mock hands at floor 6, one of
+single-idea cards and one of two-clause cards. The second is unreadable under ticket 06's pressure.
+Rarity-gating means the complicated cards are identifiable *before* you take them, so a player who
+does not want a hand full of nested conditionals can simply decline `Woah` cards — which is
+deckbuilding, not a rules limit.
+
+### Room card anatomy
+
+`[you]` A room card is a **list of `threshold: outcome` lines, plus one Flee line**:
+
+```
+    Sump Crawler                                     Enemy
+    [art]
+    Power 3: Clear
+    Flee: 1 character Exhausts 2 from deck
+```
+
+```
+    Collapsed Stair                                  Hazard
+    [art]
+    Scramble 2: Clear
+    Scramble 5: Reward — Gray reveals
+    Flee: 1 character Exhausts 1 from deck
+```
+
+Fields: **name**, **type line** (`Enemy`, `Hazard`, `Stuff`), one or more **threshold lines**, the
+**Flee line**, **art**.
+
+**The punishment and the Flee cost are the same thing** `[you]` — one field, not two. Ticket 21 called
+it a punishment and ticket 22 added a Flee cost to combat rooms; they were always one concept, and the
+card prints it once, under the word that already means *the room beat us and comes back around.*
+
+**The printed words are canonical and the glossary follows them** `[you]`: an **Enemy room**, not a
+combat room; a **Stuff room**, not an item room. "Item room" was doubly stale — ticket 09 renamed
+items to Stuff, and ticket 22 removed the room's challenge.
+
+**This discharges ticket 09's naming debt, against 09's own stated preference.** Ticket 09 marked
+`Item room` provisional and guessed that "a good name for it probably involves neither `Stuff` nor
+`Item`," offering `Cache` and `Stash` as starting points. `[you]` The human printed `Stuff` on the
+room's type line, so the room is a **Stuff room** and the debt is closed. Recorded as a knowing
+override rather than an oversight; `Cache` remains available later as flavour, not as the term.
+
+### The dual read dissolved
+
+This ticket called the item room "its hardest anatomy problem" — one face that must read as a room in
+the room zone and as an item in hand. `[proposed by agent → you approved]` **It is not a problem any
+more.** Ticket 22 made the item guaranteed on the flip, so a Stuff room has no challenge, no
+punishment and nothing to defeat: the "room" reading is empty. **A Stuff room simply is the Stuff
+card.** It carries no threshold line and no Flee line, and the type line reads `Stuff`; once it is in
+a hand the same card reads `Good Stuff`. Rotation and split faces were both considered and dropped.
+
+### Glanceability
+
+`[proposed by agent → you approved]` The reading-time budget the ticket demanded:
+
+- **A room card: ~3 seconds**, read cold, once, at the flip.
+- **A player card: ~1 second**, read comparatively in a fan of five.
+
+These are different reads and the anatomy is designed to the harder one. A card's **text box is
+allowed to be slower**, because you only read the text of cards you are actually considering — not all
+five.
+
+### Physical upkeep
+
+`[proposed by agent → you approved]` **A card's position never means anything. Only which zone it is
+in.** No rotating, no flipping, no sliding one card under another to mark state. Every state in this
+game is already which pile a card sits in, deliberately, and orientation would be the first exception
+and the first thing knocked askew on a real table.
+
+### Persistent effects
+
+`[you]` **Not a card type.** A persistent effect is an ordinary card printing **`Hold`** plus a static
+line — *"While holding this card, cards you play have +1 Power."* Inventing a type would add a word to
+the rules for something the keyword already fully explains, and Good Stuff prints `Hold` too, so a
+"persistent" frame would split a category the player does not need split.
+
+### What this ticket did *not* decide
+
+- **Layout and orientation — ruled out of scope.** `[you]` The ticket's item 3 asked where every field
+  sits and whether values stay readable fanned, stacked or rotated. The human cut the corner stat box
+  as premature and ruled that **field placement is card design's problem, not this map's**. It is
+  recorded in the map's *Out of scope*, not answered here. This anatomy says what a card *carries*;
+  it does not say where anything sits, beyond cost being in the corner.
+- **Item 6a is void.** It asked how to make card *quality* legible so a player could cull their weakest
+  cards under fire. [Ticket 15](15-damage-as-thinning-rubber-band.md) resolved against player-chosen
+  damage, so there is no culling and nothing to signal. Rarity is a complexity signal, not a quality
+  one, and must not be pressed into that role.
+- **Whether Enemy rooms may also carry a reward tier.** `[you]` Raised by the human while ratifying the
+  room format — *"heck, maybe Enemy rooms can have a reward tier sometimes too"* — and deliberately
+  left open. The anatomy supports it for free, since a room is already a list of threshold lines.
+  Whether it is used is composition, and belongs to [ticket 22](22-floor-deck-composition.md); the
+  exemplars in [ticket 12](12-exemplar-card-set.md) may test one.
+- **The card that carries Stuff past ascending.** Ticket 09 moved this into this ticket's design space
+  as *allowed, not owed* — something reading roughly *"if you are holding this when you clear a floor,
+  keep up to 2 Stuff for the next floor."* The anatomy **supports it with no new machinery**: it is
+  `Hold` plus a static line, exactly like any other persistent effect. Whether such a card is actually
+  printed is a card-design call and belongs to [ticket 12](12-exemplar-card-set.md) — though note it
+  is now a much stronger card than 09 could have known, because Q12 made Stuff the stat engine.
+- **The `Curse` naming debt is discharged, not paid.** Ticket 05 handed this ticket the job of naming
+  two opposite-valence lifecycle words apart. Ticket 09 retired `Curse` and replaced the good half with
+  Good Stuff, so there is nothing left to name.
+
+### Amends other tickets
+
+- **[Ticket 09](09-card-acquisition-and-deckbuilding.md)** — rarity tiers exist after all, as a
+  complexity axis. Pools stay flat; no floor number touches the pool. Its `Item room` naming debt is
+  closed as **Stuff room**.
+- **[Ticket 21](21-defeating-a-floor-card.md)** — twice. Its **punishment** and ticket 22's **Flee
+  cost** are one field, printed once as the Flee line. And its description of Stuff rooms as "the
+  deck's one always-safe decline" is now **misleading**: with Stuff supplying the bulk of raw stats,
+  declining Stuff is almost never correct. A Stuff room stopped being a bonus and became the supply
+  line.
+- **[Ticket 22](22-floor-deck-composition.md)** — its 9 → 0 item curve is now the primary escalation
+  mechanism rather than a generosity setting, and floor 10's bottom-of-curve number must be checked
+  for winnability.
+- **[Ticket 07](07-turn-and-action-economy.md)** — its **neutral cards** do not exist. The visual
+  distinction it required between Red's and Gray's cards is satisfied by the type line.
+
+### Handed to ticket 10
+
+Two measurements this ticket created, added to that ticket's brief:
+
+1. **Does the stat base hold up?** Permanent deck growth is all modifiers, so the raw-stat supply is
+   Good Stuff plus a fixed handful of starter cards diluted across ten floors. Measure whether a hand
+   of five contains a usable stat often enough to act at floors 6–10.
+2. **Is floor 10 winnable at zero Stuff?** The shape is ruled — floor 10 is the desperate scrape — but
+   the bottom of ticket 22's item curve is a number, and if 0 is impossible rather than desperate, 2
+   or 3 is a one-number fix.

@@ -216,7 +216,7 @@ head, reacting to what's in front of you, with little time for deep strategy.*
 - [Decide what defeating a floor card takes, and what failing it costs](issues/21-defeating-a-floor-card.md)
   — `[you]` **A floor deck is a deck of rooms** — rooms came back, not as geography but as cards met
   in the shuffle's order. Three kinds at level 1: **combat** (`Power X`), **hazard** (`Scramble X`),
-  and **item rooms**, whose card is the room in the room zone and the item once it is in hand. A room
+  and **Stuff rooms**, whose card is the room in the room zone and the item once it is in hand. A room
   prints a **named threshold** rather than a bare number, so the question at each flip is *do we have
   the right thing*, not *do we have enough*. **Cost and stats are separate, unrelated numbers**:
   playing a card Exhausts cards from hand equal to its cost, then puts it face up in the **play zone**
@@ -226,7 +226,7 @@ head, reacting to what's in front of you, with little time for deep strategy.*
   no memory — the reshuffle carries the chip-it-down feel instead of a damage track. Failure is
   **printed per room**, normally *"1 character Exhausts X from deck"* with the **team choosing who
   absorbs the whole amount**; **declining is failing without trying**, and you can bail mid-draw.
-  **Item rooms are the only reward**, pay into a chosen character's hand with `Hold`, and carry **no
+  **Stuff rooms are the only reward**, pay into a chosen character's hand with `Hold`, and carry **no
   punishment** — the deck's one always-safe decline. **An item never enters the deck**, ruled
   deliberately: the deck is stamina, so that would be the game's only heal and exactly the recursion
   that broke four games in tickets 01 and 16. **Rooms have no behaviour beyond the flip.** New
@@ -240,18 +240,18 @@ head, reacting to what's in front of you, with little time for deep strategy.*
 
 - [Decide what is in a floor deck, and how it escalates](issues/22-floor-deck-composition.md) —
   `[you]` **The win condition changed underneath this ticket.** A floor deck now holds exactly one
-  **combat room**, and clearing it ends the floor — not exhausting the whole deck, as ticket 18
+  **Enemy room**, and clearing it ends the floor — not exhausting the whole deck, as ticket 18
   first stated (see that ticket's *Superseded in part* note). Composition is fixed in shape and
   variable in generosity: **1 combat, 3 hazard flat every floor, and item count falling from 9 at
   floor 1 to 0 at floor 10** — the pyramid ticket 05 lost when the spatial tower died, recovered
   here through room count rather than topology. Escalation is **resource scarcity, not a harder
-  fight**; the combat room's `Power` requirement is deliberately left untuned pending ticket 11's
+  fight**; the Enemy room's `Power` requirement is deliberately left untuned pending ticket 11's
   card anatomy and ticket 12's exemplars. Floor decks are assembled at setup from **three shared
   pools** rather than ten bespoke printed decks, sized so repeats are *uncommon* within a single run
   rather than eliminated — full non-repetition would be 85 unique cards, against ticket 02's
-  low-complexity constraint. **Amends [ticket 21](issues/21-defeating-a-floor-card.md)**: item rooms
+  low-complexity constraint. **Amends [ticket 21](issues/21-defeating-a-floor-card.md)**: Stuff rooms
   lost their challenge (the item is now guaranteed on the flip), hazard rooms gained a second,
-  higher threshold paying a permanent card reward mid-floor, and every combat room now carries a
+  higher threshold paying a permanent card reward mid-floor, and every Enemy room now carries a
   punishment framed on the card as its **Flee cost**. **Handed down, not decided, for tickets 11 and
   13**: floor rooms, not player cards, may be the primary stat source, with starter decks doing
   effects instead.
@@ -279,7 +279,7 @@ head, reacting to what's in front of you, with little time for deep strategy.*
   card cannot go in your deck, because the deck is stamina — junk in the deck is a punishment that
   heals you. So **`Item` is renamed `Stuff`** — tools, junk, and slime under one plain word — and
   **Stuff splits by where it came from**: **Good Stuff** lives in the floor deck and is what an Item
-  room hands you, so an Item room is never a disappointment; **Bad Stuff** lives in a pool *outside*
+  room hands you, so a Stuff room is never a disappointment; **Bad Stuff** lives in a pool *outside*
   the floor deck and arrives only as a room's printed punishment. Bad Stuff behaves like any other
   Stuff — `Hold`, playable, ordinary fuel — and differs only in contributing **no stats**, so it is an
   effective cut to your hand size that you must pay to undo. **There is no keyword for it**; it is a
@@ -314,6 +314,42 @@ head, reacting to what's in front of you, with little time for deep strategy.*
   **Upkeep counted honestly:** zero counters, zero trackers, zero mid-floor shuffling — but **14
   table locations**, accepted `[you]` and handed to the footprint fog as its first real number.
 
+- [Define card anatomy](issues/11-card-anatomy.md) — `[you]` **The ruling that reorganised the run:
+  your permanent deck is modifiers, and your stat base is scavenged fresh every floor.** Player cards
+  are **effect-forward** — starter cards may be primarily raw stats so a new player is not
+  overwhelmed, but **reward cards are definitely effects** — and **Stuff always provides the bulk of
+  the raw stats**. That turns ticket 22's Stuff count falling 9 → 0 into **the sharpest escalation
+  dial on the map**: late floors starve a clever deck of the exact thing its cleverness multiplies,
+  and **floor 10 is meant to be a desperate scrape** — but it must actually be winnable, which is a
+  number handed to ticket 10. A **player card** carries name, **type line** (`Red` / `Gray` /
+  `Good Stuff` / `Bad Stuff`), **cost** in the corner, a **stat** as a distinct field, effect text,
+  `Hold`, **rarity** as a border colour, and art. **A card is worth exactly 1 stamina, always, and
+  never prints it.** **Ticket 07's neutral cards do not exist** — every card you own is Red's or
+  Gray's, so the only cards belonging to neither are Stuff, and the type line does the character
+  mark's job too. **Rarity is new and amends ticket 09**: three tiers, `Fine` / `Cool` / `Woah`,
+  starter cards all `Fine`. It gates **complexity, not power** — the most complex cards are always the
+  highest rarity, so a player can decline a hand full of nested conditionals *before* taking one — and
+  the **pool stays flat**, all tiers equally likely at every floor, so nothing about floor number
+  touches the reward pool and escalation stays on ticket 22's single dial. Rarity is **purely
+  printed** and touches no rules; the agent's proposal to make an ascend offer one card of each tier
+  was declined. **Good Stuff tiers too; Bad Stuff does not.** A **room card** is a list of
+  **`threshold: outcome`** lines plus one **Flee** line — *"Power 3: Clear"*, *"Scramble 5: Reward —
+  Gray reveals"*, *"Flee: 1 character Exhausts 2 from deck"* — which **amends tickets 21 and 22 by
+  collapsing the punishment and the Flee cost into one field**; they were always one concept. **The
+  printed words are canonical**, so the glossary now says **Enemy room** and **Stuff room**, closing
+  ticket 09's naming debt against 09's own guess that the word should involve neither `Stuff` nor
+  `Item` — a knowing override. **This ticket's self-declared hardest problem dissolved**: with ticket
+  22 making the Stuff guaranteed on the flip, a Stuff room has nothing to defeat, so it simply *is*
+  the Stuff card. **Persistent effects are not a type** — just `Hold` plus a static line, which is
+  also all the machinery ticket 09's carry-Stuff-past-ascending card would need. **A card's position
+  never means anything**, only which zone it is in: no rotating, no flipping, no overlapping. Reading
+  budget is **~3 seconds for a room, ~1 second for a player card in a fan**. **Two things ruled out
+  rather than answered:** field placement is card design's problem and went to *Out of scope*, and
+  item 6a died with ticket 15 — there is no culling, so there is no card *quality* to signal, and
+  rarity must never be pressed into that role. **Left deliberately open:** whether Enemy rooms may
+  also carry a reward tier — the anatomy supports it free, but it is composition and belongs to
+  ticket 22.
+
 ## Not yet specified
 
 <!-- In scope, but not sharp enough to ticket. Graduates into tickets as the frontier advances. -->
@@ -344,7 +380,10 @@ head, reacting to what's in front of you, with little time for deep strategy.*
 <!-- Ruled beyond the destination. Never graduates; returns only as a fresh effort. -->
 
 - Full card list, enemy roster, and balance numbers — beyond the 8–12 exemplars in ticket 12.
-- Art direction and visual design.
+- Art direction and visual design — including **card layout**: where each field physically sits on a
+  card, and whether values stay readable fanned, stacked or rotated. `[you, ticket 11]` Ruled out
+  while resolving card anatomy: the map says what a card *carries*, and placement is card design's
+  problem. The one exception already fixed is that **cost sits in the corner**.
 - Narrative and lore beyond the tower/alien premise.
 - Production, manufacturing, and component sourcing.
 - Any digital implementation of the game. (Throwaway simulators built to answer a design

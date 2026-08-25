@@ -91,3 +91,29 @@ complex, and enough Good Stuff to make the stat base visible.
 
 **Rarity is a complexity signal, never a quality one.** Ticket 11's item 6a died with ticket 15 —
 there is no culling, so there is no card *quality* to make legible. Do not use `Woah` to mean "good."
+
+## Handed down by ticket 10, 2026-08-25
+
+**The exemplar set is now the test of whether the run has a power curve at all.**
+
+[Ticket 10](10-sim-the-resource-economy.md) found that the stat pool a team can assemble is flat
+across a run — 5–7 on floor 1 and 5–7 on floor 10 — because the hand cap of 5, the cost-comes-out-of-
+hand rule, and ticket 11's ruling that reward cards are effects together bound throughput no matter
+what the deck has grown into. [Ticket 23](23-power-growth-across-a-run.md) owns what the design does
+about that.
+
+The sim could not model real build synergy, so its pools are a **floor** on what a good deck can do,
+not a ceiling. `[found by agent in the floor economy simulator]` **The exemplars are what settles it.**
+Two specific charges:
+
+1. **Print at least one card whose stat scales with the turn** — ticket 21's own example,
+   *"Power equal to twice the cards Gray plays this turn"* — and say what it is actually worth at
+   floors 1 and 10. If a card of that shape lifts late-run throughput on its own, ticket 23's answer
+   may be *nothing to do*, and that is worth knowing before 23 is grilled.
+2. **Say what a modifier multiplies late.** Ticket 10 measured the stat base falling from 6.2 on
+   floor 1 to 3.6 on floor 10, and a hand of five containing a usable stat only 57% of the time on
+   floor 10. Exemplar modifiers should be written against that base, not against a floor-1 one.
+
+**Also handed down:** ticket 10 measured a healthy run at roughly **22 cards per character** rather
+than ticket 09's provisional 12–15, which changes how many starter cards the exemplar set has to
+account for. The number itself belongs to [ticket 24](24-starting-deck-size.md).

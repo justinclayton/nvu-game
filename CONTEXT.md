@@ -54,8 +54,11 @@ provisional* — a better one is owed that involves neither "Item" nor "Stuff". 
 
 **Stuff** — a card a floor hands you: a tool, a piece of junk, a faceful of slime. It goes to hand
 with **Hold**, it is **playable**, and it is **ordinary fuel** — it can be Exhausted from hand to pay
-another card's cost like anything else. Stuff **never enters a deck** and is gone on ascending. It is
-a mass noun: *"I have three Stuff."* *(tickets 21, 09)*
+another card's cost like anything else. **A deck is not Stuff's entry route** — no reward or purchase
+ever puts Stuff in a deck — but the rule is a default, not an absolute: a **last stand** shuffles
+played Stuff back with everything else. Stuff Exhausts normally, and **ascending pulls all Stuff out
+of the exhaust pile** before restoring it, so no Stuff survives a floor. It is a mass noun: *"I have
+three Stuff."* *(tickets 21, 09, 07)*
 
 **Good Stuff** / **Bad Stuff** — where a piece of Stuff came from, and loosely how welcome it is.
 **Good Stuff** lives in the floor deck and is what an Item room hands you, so an Item room is never a
@@ -72,13 +75,16 @@ design grows. *(ticket 21)*
 characters. It is not a zone and has no tracker — it is simply what the face-up cards on the table
 add up to, and it evaporates at cleanup. *(ticket 21)*
 
-**Play zone** — where played cards sit face up during a turn, contributing their stats. Everything in
-it is exhausted at cleanup, so nothing persists here between turns. *(ticket 21)*
+**Play zone** — where played cards sit face up during a turn, contributing their stats. **Split into
+a side per character**, both feeding the one shared stat pool — the split is bookkeeping only, so that
+cleanup can return each card to the right exhaust pile without sorting. Everything in it is exhausted
+at cleanup, so nothing persists here between turns. *(tickets 21, 07)*
 
 **Cleared** — a room defeated and removed from the floor deck **permanently**; it is never
 reshuffled. Clearing the floor deck's one **combat room** ends the encounter; a hazard or item room
 being Cleared does not. Applies only to rooms — a character's cards are **exhausted**, never
-Cleared. *(tickets 18, 21, 22)*
+Cleared. The Cleared pile is a **heap, not a zone**: face up, unordered, never counted, and no rule
+ever asks it a question. *(tickets 18, 21, 22, 07)*
 
 **Fled** — the floor deck's discard pile, and the verb for going there. A room the players failed, or
 declined outright, is Fled. The Fled pile is shuffled back into the floor deck when its draw pile runs
@@ -111,10 +117,10 @@ the health bar, and nothing else tracks health. Each character has their own. *(
 same substance as the energy used to pay for cards; there is no separate resource and no number
 anywhere. *(ticket 04)*
 
-**Drain** — the rule that **most actions cost stamina**, not only playing cards. The drain runs one
-way for as long as an encounter lasts; **ascending** is what reverses it.
-*(tickets 04, 06; what else costs stamina, now that there is no floor to move around, is owned by
-ticket 07)*
+**Drain** — the one-way loss of stamina that runs for as long as an encounter lasts; **ascending** is
+what reverses it. It is charged **against turns, not against actions**: nothing in a turn costs
+stamina except drawing and paying card costs, but each standing character **must draw at least one**,
+so a turn costs the team two cards whether or not they engage the room. *(tickets 04, 06, 07)*
 
 **Hand** — the cards a character drew this turn. Simultaneously their available **tools** and
 the **fuel** those tools burn. The whole hand exhausts at end of turn unless a card has **Hold**.
@@ -132,8 +138,8 @@ didn't. A character's cards are exhausted; a **room** is **Cleared**. *(ticket 0
 
 **Exhaust pile** — a character's **face-up** pile of exhausted cards. Face up so the loss is felt as
 it happens and so the player can read what is no longer waiting in their deck. Returns to the deck on
-ascending. **A character has no discard pile** — only the floor deck has one, its **Fled** pile.
-*(tickets 04, 21)*
+ascending, **less any Stuff in it, which is pulled out first**. **A character has no discard pile** —
+only the floor deck has one, its **Fled** pile. *(tickets 04, 21, 07)*
 
 **Exhaust X cards from your hand** — how a chosen cost is written. A card's **cost** and its **stats**
 are separate, unrelated numbers: to play a card you Exhaust cards from hand equal to its cost, then
@@ -154,11 +160,31 @@ zone, where it is exhausted like anything else, so using a piece of Stuff spends
 design owned by ticket 11)*
 
 **Exhausted** (of a character) — down, not dead. A character is exhausted when they begin a turn and
-cannot draw. The run ends only when both characters are down. *(tickets 03, 04)*
+cannot draw. A down character is **skipped in the draw and play phases entirely**, and with no one
+else to absorb them **every room punishment falls on the survivor**. **Ascending heals them to full**
+like anyone else. The run ends only when both characters are down. *(tickets 03, 04, 07; mid-floor
+revival owned by ticket 14)*
 
-**Last stand** — what a character gets the **first time** their deck is found empty: every card in
-their hand can be played **at no cost** until the end of that turn. If the **room** is Cleared before
-they are further Exhausted they **survive**, and at that cleanup the cards that would have been
-exhausted are **shuffled back into their deck** instead — so they carry on with a thin but now-known
-deck. Once per character per floor. `Hold` cards in hand stay in hand rather than joining the
-shuffle-back. *(tickets 04, 17)*
+**Last stand** — what a character gets **whenever their deck is found empty**: every card in their
+hand can be played **at no cost** until the end of that turn. If the **room** is Cleared before they
+are further Exhausted they **survive**, and that turn ends in an **alternate cleanup** — the cards
+that would have been exhausted from **hand and play zone** are shuffled back into their deck instead,
+**less 2, the cost of exiting**. The exhaust pile is not involved. Enterable **once per turn**, and
+no more bounded than that: the 2-card exit cost is what stops it becoming a rotation, since each trip
+nets −2 cards permanently. `Hold` cards in hand stay in hand rather than joining the shuffle-back.
+*(tickets 04, 17, 07)*
+
+**Turn** — the unit of play, and it belongs to the **floor**, not to a character: one flip, one draw
+phase, one play phase, one cleanup, with **both characters acting throughout, simultaneously, in any
+order**. There is no turn order and no lead character, and *round* is not a separate thing — it is
+the same word. *(tickets 21, 07)*
+
+**Neutral card** — a card belonging to no character: **Stuff**, and anything else a floor hands out.
+Red's and Gray's own cards — starting decks and reward pools — are **visually distinguished** so they
+can be sorted by sight; neutral cards cannot be, which is why the play zone is split by character
+rather than shared. *(ticket 07; execution owned by ticket 11)*
+
+**Maximum hand size** — **5**, and **`Hold` cards count against it**, which is what gives `Hold` a
+price. It is a **draw-phase limit only**: you cannot draw while at or over 5, but **Stuff enters your
+hand regardless of how full it is**, so a punishment can shove you above the cap and lock your draw
+for turns. A floor begins with **empty hands**. *(ticket 07)*

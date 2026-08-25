@@ -1,7 +1,7 @@
 # 07 — Define the turn and action economy within a floor
 
 Type: grilling
-Status: open
+Status: resolved
 Blocked by: 03, 04, 06, 18, 21
 Map: [core design map](../map.md)
 
@@ -151,3 +151,198 @@ against the draw decision, not against junk alone — a cap changes what the dra
 ceiling on how much fuel a big turn can assemble, and prices `Hold` for every card that carries it.
 Ticket 09 deliberately did not decide this, because a rule with that much reach should not be set as
 a side-effect of designing junk.
+
+## Answer
+
+`[2026-08-25]` Grilling session, five rounds. Most of this ticket had already been eaten by tickets
+04, 18, 21 and 09 — the five phases, the flip's position, the draw rule and the forced minimum were
+all settled upstream and are not re-decided here. What follows is only what 07 actually owned.
+
+### Hand size
+
+**Maximum hand size is 5** `[proposed by agent → you approved]`, taking ticket 09's recommendation.
+The reason is not junk. `Hold` currently costs nothing — a held card sits in hand for free, so
+keeping a good tool is never weighed against anything. **`Hold` cards count against the cap**, which
+is the whole point of having one: every card you hold is one fewer fresh card you may draw. That
+prices `Hold`, prices Bad Stuff, and does it without a new zone or a new number on any card.
+
+**The cap is a draw-phase limit only** `[proposed by agent → you approved]`. Stuff enters your hand
+regardless of how full it is — from an Item room's flip or from a room's punishment — and you simply
+**cannot draw while at or over 5**. A hard ceiling was rejected because it lets a punishment fizzle:
+Bad Stuff bouncing off a full hand would fail to land on exactly the player it should hurt most.
+Being shoved to seven cards and unable to draw for two turns is the better punishment, and it needs
+no new rule — *"you may draw up to a hand of 5"* already says it.
+
+**A floor begins with empty hands** `[proposed by agent → you approved]`. Empty hands, empty play
+zone, empty room zone; turn 1 is an ordinary turn — flip, then draw. An opening hand would be a rule
+that fires once per floor and would hand the players their first room's answer before they had to
+decide anything.
+
+### Actions
+
+**There is no action currency** `[proposed by agent → you approved]`. Cost is the only currency and
+stamina is the only resource. In the play phase you play cards until you cannot or will not pay. A
+per-turn action allowance would be a second number to track and would compete with the draw decision
+for the turn's tension.
+
+### Interrupts
+
+**The question dissolves** `[proposed by agent → you approved]`. Ticket 21 made both characters act
+simultaneously in any order, and rooms have no behaviour beyond the flip — so there is no opponent
+turn and no window *outside* the turn to react in. The entire turn is already one shared open window.
+Ruled explicitly so a later ticket does not reinvent it. Note that this spends a lever the original
+question called "major" for the frantic pillar; the pillar is carried by the drain and the flip
+instead, per the check below.
+
+### The turn belongs to the floor
+
+`[proposed by agent → you approved]` **One flip, one draw phase, one play phase, one cleanup, both
+characters throughout.** A turn is not a character's; **"turn" and "round" are the same word**. There
+is no lead character, no fixed Red-then-Gray order, and nothing to decide about who goes first —
+which closes the last of what ticket 03 left open here. Glossary lines phrased for the alternating
+turns ticket 21 killed are corrected accordingly.
+
+### When a character is down
+
+`[proposed by agent → you approved]` A down character is **skipped in the draw and play phases
+entirely** — no minimum draw, no stats, no fuel. Room punishments still land, and with no one else to
+absorb them **every punishment falls on the survivor**. This is an explicit **death spiral** and is
+meant to be one: it is the moment the run is genuinely in trouble. Ticket 14 owns the revive that
+makes it survivable rather than automatic.
+
+`[you]` **Clearing the floor heals both characters to full, even one who was down.** Ascending
+restores the exhaust pile and the deck *is* the health, so revival on ascending is free and
+automatic. **This is handed to ticket 14**, which therefore owns only *mid-floor* revival — the
+floor boundary already solves the rest.
+
+### Drain: ticket 06's principle has collapsed into ticket 04's
+
+`[proposed by agent → you approved]` The honest answer to *what else costs stamina*: **nothing.**
+Ticket 06 ruled that most moves cost stamina in some form, but the moves that ruling was written
+against — movement, searching, forcing doors — all died with the spatial floor. Going through the
+five phases there is nothing left to price. **No price list was invented to rescue the principle**,
+and no hidden rules were added to give it something to charge for.
+
+What survives is a relocation rather than a loss. Ticket 04 now forces **each standing character to
+draw at least one card**, so a turn costs the team two cards *whether or not they engage the room*.
+**The drain is charged against turns, not against moves.** Same principle, moved from actions to
+time, and it is already part of the draw mechanic rather than a rule of its own.
+
+### The play zone splits by character
+
+Cleanup has to un-mix the play zone. Both characters play into a shared zone — that is what makes the
+stat pool shared and where synergy comes from — but at cleanup those cards must return to **two
+different exhaust piles**, and an exhaust pile is load-bearing: it is the record of what has left a
+character's deck, and deck height is health.
+
+`[proposed by agent → you approved]` **The play zone is split into Red's side and Gray's side, both
+feeding one shared stat pool.** This costs nothing: the stat pool was never a zone, only arithmetic
+over face-up cards, and it does not care which side of the table they sit on.
+
+`[you]` **Additionally, Red's and Gray's own cards — starting decks and reward pools — are visually
+distinguished** (backs, or a colour stripe; ticket 11 owns the execution). Not as an alternative to
+the split but alongside it, because **neutral cards** accumulate in hand throughout a floor and
+cannot be sorted by sight at all.
+
+A single shared exhaust pile was rejected: it would break ticket 04.
+
+### Cleared is a heap, not a zone
+
+`[proposed by agent → you approved]` Cleared rooms never return and are **never counted** — clearing
+the combat room ends the floor and nothing else asks how many are in there. It is face up, unordered,
+unread, and no rule ever asks it a question. Named that way so a later ticket does not mistake it for
+a resource.
+
+### Where spent Stuff goes
+
+`[you]` **Stuff is Exhausted normally, like any other card, and ascending has a step: pull all Stuff
+out of the exhaust pile before restoring it to the deck.** Simpler during play, and card art will
+make the sort easy enough at the one moment the game pauses anyway.
+
+`[proposed by agent → not adopted]` The agent recommended instead that Stuff be *discarded out of the
+game* rather than Exhausted, giving it its own never-read heap and a different word on its card face,
+so the anti-recursion guarantee was physical rather than remembered. Declined as more complexity than
+the problem is worth.
+
+### Last stand: once per turn, taxed on exit
+
+**Ticket 17's "once per character per floor" was an agent assumption, not a ruling** `[you]`. It read
+the trigger's word *first* as *first per floor*; nothing the human said carried that qualifier. It is
+**superseded here**.
+
+`[you]` **A character may enter last stand once per turn** — that is, whenever their deck is found
+empty, capped only so it cannot retrigger inside a single turn — **and exiting a last stand costs 2
+cards.**
+
+`[proposed by agent → you approved]` **The cost sits on exit, not entry.** On entry it would come out
+of a hand that has just been drained and could be **unpayable**, so the rule would silently vanish
+exactly when it is most dramatic, or need a second rule for the discount. On exit it is a discount on
+the shuffle-back: you survive, and 2 of the cards that were coming back to you do not. It is never
+unpayable — worst case you shuffle back nothing and go down next turn, which is the correct outcome.
+
+**The tax is the scarcity bound, which is why *once per turn* needs no further limit.** Ticket 17
+warned that surviving a last stand *rewards* running your deck to zero — the ticket 16 Undaunted
+failure in a different hat. Each trip through last stand now nets **−2 cards permanently**, so the
+exploit is a **loop that converges on death** rather than a rotation. The bound is arithmetic instead
+of an arbitrary reset.
+
+Correction to the session's own premise: the shuffle-back takes the **would-be-exhausted cards from
+hand and play zone** — an alternate cleanup — and never touches the exhaust pile. The agent misread
+it as drawing from the exhaust pile and raised a leak that does not exist.
+
+`[you]` **Stuff in the play zone during a last stand is shuffled back like any other card.** Ticket
+21's ruling is that a deck is not Stuff's *default* entry route, not that Stuff can never enter one;
+"never" overstated it and the glossary is corrected. **Recorded consequence:** this is a heal, and
+ticket 21 argued that rule against recursion. It is a narrow one — once per turn, taxed 2 cards, and
+ascending pulls the Stuff back out — so it is logged rather than reopened.
+
+### Upkeep, counted honestly
+
+Item 8 asked for an honest count.
+
+**Per turn:** one flip; one card-move per card drawn (2–10 typical); per card played, *cost*-many
+moves to an exhaust pile plus one to the play zone; at cleanup either a punishment (X cards off a
+deck top) or a reward, one move for the room, then a sweep of two hands and the play zone.
+**Zero counters, zero trackers, zero mid-floor shuffling, and nothing to remember between turns** —
+the stat pool is read off the table and health is a pile's height. That is unusually clean and it is
+the part worth protecting.
+
+**On the table:** 11 locations — floor draw, Fled, Cleared, active room, two play-zone sides — plus
+deck, hand and exhaust pile for each character — and 3 more off to the side (two reward pools, the
+Bad Stuff pool).
+
+`[you]` **Accepted; it is not that bad.** The count is recorded as an input to the map's *table
+footprint and component budget* fog rather than as a constraint on anything yet. Every location was
+bought by a ticket that argued for it, and none can be cut without reopening something load-bearing —
+the two exhaust piles *are* the health bars, the Fled pile *is* the scrambling.
+
+### The checks this ticket was required to record
+
+**Against ticket 06 (the frantic pillar), by argument, since 06 wrote no filter.** 06 ruled the
+pillar is carried by two things at once. *You get poorer every turn* is now charged against turns
+directly — the forced minimum draw means a turn costs two cards even if you engage nothing, so there
+is no way to stall and no way to play cheaply. *Something acts on you every turn* is the flip, which
+this ticket left at the head of the phase order untouched. What this ticket adds to the pillar is the
+hand cap: a ceiling on how much fuel a big turn can assemble means you cannot solve a hard room by
+banking, only by having drawn right. What it spends is interrupts — but 06 wanted no wall clock and
+got none, and the honest failure is still *"I spent badly."*
+
+**Against the requirement that phases wrap real decisions.** The draw phase carries nearly all of it
+and always did. The play phase is near-pure execution, which ticket 21 accepted knowingly with `Hold`
+as its saving grace — the hand cap now sharpens that, because holding is a real cost against a
+5-card ceiling rather than free storage. Cleanup and flip wrap no decisions and are not supposed to.
+The turn passes, but only because the draw phase is doing heroic work; that concentration is a risk
+and it goes to ticket 20's tabletop prototype.
+
+### Amendments this makes elsewhere
+
+- **[Ticket 17](17-last-stand.md)** — "once per character per floor" superseded by *once per turn,
+  exit costs 2*. Its reward-for-emptying warning is answered by the tax.
+- **[Ticket 14](14-down-and-revive.md)** — revive on ascending is free and automatic. 14 owns only
+  mid-floor revival.
+- **[Ticket 21](21-defeating-a-floor-card.md) / [09](09-card-acquisition-and-deckbuilding.md)** —
+  "Stuff never enters a deck" softened to *a deck is not Stuff's default entry route*.
+- **[Ticket 11](11-card-anatomy.md)** — owns how Red/Gray cards are visually distinguished from
+  neutral cards.
+- **[Ticket 03](03-solo-coop-or-both.md)** — everything it left open here is closed: no turn order,
+  no lead character, no finer round than the floor's turn.

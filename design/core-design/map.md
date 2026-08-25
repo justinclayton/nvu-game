@@ -288,6 +288,32 @@ head, reacting to what's in front of you, with little time for deep strategy.*
   rename and the two-pool split, and hands ticket 07 a recommendation of **max hand size 5** — which
   07 owns, because a rule with that reach should not be set as a side-effect of designing junk.
 
+- [Define the turn and action economy within a floor](issues/07-turn-and-action-economy.md) — `[you]`
+  Tickets 04, 18, 21 and 09 had already eaten most of this ticket, so what it decided is the
+  turn's remaining edges — and one of them reopened an upstream rule. **Maximum hand size is 5, and
+  `Hold` cards count against it**, which is the only thing that ever gives `Hold` a price; it is a
+  **draw-phase limit only**, so Stuff shoves you above the cap and locks your draw rather than
+  fizzling. **A floor begins with empty hands.** **No action currency** — cost is the only one.
+  **Interrupts dissolve**: both characters already act simultaneously against a room that has no
+  behaviour, so there is no window outside the turn to react in. **The turn belongs to the floor,
+  not to a character** — one flip, one draw, one play, one cleanup, both characters throughout, no
+  turn order and no lead, which closes the last of what ticket 03 left open. A **down** character is
+  skipped entirely and **every punishment falls on the survivor** — an explicit death spiral, with
+  ticket 14 as the valve; `[you]` **ascending heals a down character to full**, so 14 now owns only
+  *mid-floor* revival. The **play zone splits by character** into one shared stat pool so cleanup
+  never has to sort, and `[you]` Red's and Gray's own cards are visually distinguished besides,
+  because **neutral cards** cannot be sorted by sight at all. **Ticket 06's principle has collapsed
+  into ticket 04's drain** — the moves it was written against died with the spatial floor, no price
+  list was invented to rescue it, and what survives is a relocation: the forced minimum draw charges
+  the drain **against turns, not actions**. **The upstream reopening: ticket 17's "once per character
+  per floor" was an agent assumption**, and last stand is now **once per turn with a 2-card exit
+  cost** — which answers 17's own warning that surviving *rewards* emptying your deck, since each
+  trip nets −2 permanently and the exploit becomes a loop converging on death. `[you]` **Ticket 21's
+  "Stuff never enters a deck" was overstated** — a deck is not Stuff's entry *route*, but a last
+  stand shuffles played Stuff back like anything else; logged as a known heal, not reopened.
+  **Upkeep counted honestly:** zero counters, zero trackers, zero mid-floor shuffling — but **14
+  table locations**, accepted `[you]` and handed to the footprint fog as its first real number.
+
 ## Not yet specified
 
 <!-- In scope, but not sharp enough to ticket. Graduates into tickets as the frontier advances. -->
@@ -302,19 +328,15 @@ head, reacting to what's in front of you, with little time for deep strategy.*
   minutes, and the run-level arc is deckbuilding rather than wearing down, so what
   remains is only what failure costs and what, if anything, a failed run leaves behind. That last
   part may turn out to be meta-progression's question rather than this one's.
-- **What else costs stamina, beyond fighting** — ticket 06 ruled that **most moves cost stamina in
-  some form**, but the moves that ruling was about were movement, searching, and forcing doors, and
-  none of those exist now. Ticket 21 settled the turn's five phases and there is **nothing in them
-  that costs stamina except drawing and paying card costs** — so on the current design 06's principle
-  has collapsed back into ticket 04's drain. Ticket 07 owns saying that out loud, or finding
-  something else in a turn worth pricing.
 - **Fixed duo or roster** — whether Red and Gray are the only two characters or one pairing drawn
   from a larger cast. Pending ticket 13. A roster is now considerably more expensive than it was:
   ticket 09 gave each character their own reward pool, so every additional character is a whole pool
   of printed cards rather than a different starting deck.
 - **Table footprint and component budget** — the physical constraints that will eventually bound
   card count and per-turn upkeep. The *floor decks'* share belongs to ticket 22, which produces the
-  map's first hard component number; what remains here is everything else.
+  map's first hard component number; what remains here is everything else. Ticket 07 counted the
+  table at **14 locations** and the human accepted it, so this is no longer about whether the layout
+  is affordable — it is about the card *count* those locations will hold.
 - **Whether "North vs Up" means anything mechanical**, or is purely a title.
 
 ## Out of scope

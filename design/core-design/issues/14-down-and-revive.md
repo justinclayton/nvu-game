@@ -75,3 +75,19 @@ both characters are down, so in co-op a character sitting at one card of deck ca
 while their partner solves the floor. Ticket 04 declined to write a rule against it (a character who
 draws nothing has no cards and cannot act, so it is self-punishing) — but it is not *fatal*, and
 the down-and-revive rules are where it would bite.
+
+## Handed down by ticket 07, 2026-08-25
+
+`[you]` **Clearing a floor heals both characters to full, including one who was down.** Ascending
+restores the exhaust pile and the deck *is* the health, so **revival on ascending is free and
+automatic** and this ticket does not own it.
+
+What this ticket owns is therefore only **mid-floor revival** — whether a down character can come
+back before the floor ends, and at what cost. Note the shape ticket 07 left: a down character is
+skipped in the draw and play phases entirely, and with no one else to absorb them **every room
+punishment falls on the survivor**. That death spiral was adopted deliberately, on the understanding
+that this ticket is the safety valve.
+
+Also relevant: ticket 07 superseded ticket 17's last stand bound — it is now **once per turn with a
+2-card exit cost**. State the ordering between revive and last stand against *that* rule, not the
+retired one.

@@ -104,3 +104,22 @@ left to spend and no survival. The rule is consistent; it is simply harsh at tha
   a play* failure this ticket was told to watch for. `[found by agent in the encounter simulator,
   2026-08-23]` Not fixed here. The obvious levers are a maximum hand size (ticket 07, open), or
   capping how much comes back.
+
+## Superseded in part by ticket 07, 2026-08-25
+
+**Item 5 — "once per character per floor" — was an agent assumption, not a ruling** `[you]`. It read
+the trigger's word *first* as *first per floor*; nothing the human said carried that qualifier.
+
+`[you, ticket 07]` The rule is now **once per turn** — a character may enter last stand whenever
+their deck is found empty, capped only so it cannot retrigger inside a single turn — **and exiting a
+last stand costs 2 cards**, taken off the would-be-shuffled cards rather than paid on entry, so it is
+never unpayable.
+
+**This answers the *Left open* warning above.** Surviving a last stand rewards running your deck to
+zero; the 2-card exit tax makes each trip net **−2 cards permanently**, so the exploit is a loop that
+converges on death rather than a rotation. The bound is arithmetic, which is why *once per turn*
+needs no further cap.
+
+Also corrected there: the shuffle-back takes the **would-be-exhausted cards from hand and play zone**
+— an alternate cleanup — and never touches the exhaust pile. **Stuff in the play zone shuffles back
+like any other card**; see [ticket 07](07-turn-and-action-economy.md).

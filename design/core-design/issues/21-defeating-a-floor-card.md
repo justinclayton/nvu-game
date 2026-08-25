@@ -298,27 +298,26 @@ card.
 
 ## Handed down by ticket 10, 2026-08-25
 
-**The Flee line is close to an economically dead dial.** `[found by agent in the floor economy
-simulator]`
+**The Flee line may be a much weaker dial than this ticket assumed.** `[found by agent in the floor
+economy simulator]`
 
 This ticket bought the per-room punishment as *a second difficulty dial: a room can be easy to beat
 and brutal to fail, or the reverse, and that is most of what makes rooms feel different from each
-other.* [Ticket 10](10-sim-the-resource-economy.md) measured it and the economic half does not hold:
-changing an Enemy room's printed Flee cost from *Exhaust 1* to *Exhaust 8* moves the win rate from 36%
-to 31%, and barely changes how often players flee at all.
+other.* [Ticket 10](10-sim-the-resource-economy.md) found the economic half weak: changing a room's
+printed Flee cost across a wide range barely moved how often players fled or how runs ended.
 
-The reason is [ticket 07](07-turn-and-action-economy.md)'s forced minimum draw. **A turn costs the team
-two cards whether or not they engage the room**, and a floor runs five to seven turns, so the turn tax
-dwarfs anything a room prints. Failure is punished by the clock, not by the Flee line.
+The reason is [ticket 07](07-turn-and-action-economy.md)'s forced minimum draw. **A turn costs the
+team two cards whether or not they engage the room**, and a floor runs many turns, so the turn tax is
+a large multiple of what any single room prints. Failure is punished mostly by the clock.
 
-Two things this does **not** overturn. The Flee line's *diegetic* job — failing a room reads as
-fleeing it with a few scrapes to show — is untouched, and so is
-[ticket 22](22-floor-deck-composition.md)'s rule that an Enemy room always carries one. What is in
-question is only the claim that it is a difficulty dial worth tuning independently.
+**How much to trust this.** Ticket 10 was reopened because its card model was invented, and *how many
+turns a floor runs* does depend on the cards — so the size of the effect is not settled. The direction
+held across everything tried, which is why it is recorded, but the conclusion is owed a re-run once
+[ticket 12](12-exemplar-card-set.md) exists.
 
-Also measured, in this ticket's favour: **deliberate flight does not dominate fighting.** Runs flee
-the Enemy room 0.8 times per run — less than once — so declining is a real option rather than a
-strategy, which is what this ticket wanted from *declining is failing without trying*.
+Two things this does **not** touch. The Flee line's *diegetic* job — failing a room reads as fleeing
+it with a few scrapes to show — and [ticket 22](22-floor-deck-composition.md)'s rule that an Enemy
+room always carries one. What is in question is only whether it is worth tuning independently of the
+threshold.
 
-What to do about the dial belongs to [ticket 23](23-power-growth-across-a-run.md), which carries the
-other two findings from the same root.
+What to do about it belongs to [ticket 23](23-power-growth-across-a-run.md).

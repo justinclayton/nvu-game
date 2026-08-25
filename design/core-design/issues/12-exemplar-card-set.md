@@ -92,28 +92,32 @@ complex, and enough Good Stuff to make the stat base visible.
 **Rarity is a complexity signal, never a quality one.** Ticket 11's item 6a died with ticket 15 —
 there is no culling, so there is no card *quality* to make legible. Do not use `Woah` to mean "good."
 
-## Handed down by ticket 10, 2026-08-25
+## Handed down by ticket 10, 2026-08-25 — this ticket now unblocks two others
 
-**The exemplar set is now the test of whether the run has a power curve at all.**
+[Ticket 10](10-sim-the-resource-economy.md) built its simulator, found it had no cards to put in it,
+invented some, and was reopened once it was clear that every number it produced described the
+invention rather than the game. Both [ticket 10](10-sim-the-resource-economy.md) and
+[ticket 23](23-power-growth-across-a-run.md) are now **blocked on this ticket**, which makes the
+exemplar set the map's bottleneck rather than a late flourish.
 
-[Ticket 10](10-sim-the-resource-economy.md) found that the stat pool a team can assemble is flat
-across a run — 5–7 on floor 1 and 5–7 on floor 10 — because the hand cap of 5, the cost-comes-out-of-
-hand rule, and ticket 11's ruling that reward cards are effects together bound throughput no matter
-what the deck has grown into. [Ticket 23](23-power-growth-across-a-run.md) owns what the design does
-about that.
+**What is waiting for you.** The simulator survives as a rules engine with a card slot cut into it:
+[`prototype/floor-economy-sim.html`](../../../prototype/floor-economy-sim.html). Its `CARD_SET` block
+is one clearly marked place to drop this ticket's cards in. A card needs one function —
+`stats(ctx) -> {Power, Scramble}` — where `ctx` carries the whole play zone, so a conditional stat can
+read what else was played. Plus `cost`, `hold`, and `draw`. Nothing else.
 
-The sim could not model real build synergy, so its pools are a **floor** on what a good deck can do,
-not a ceiling. `[found by agent in the floor economy simulator]` **The exemplars are what settles it.**
-Two specific charges:
+**Two specific charges, beyond what this ticket already owed.**
 
-1. **Print at least one card whose stat scales with the turn** — ticket 21's own example,
-   *"Power equal to twice the cards Gray plays this turn"* — and say what it is actually worth at
-   floors 1 and 10. If a card of that shape lifts late-run throughput on its own, ticket 23's answer
-   may be *nothing to do*, and that is worth knowing before 23 is grilled.
-2. **Say what a modifier multiplies late.** Ticket 10 measured the stat base falling from 6.2 on
-   floor 1 to 3.6 on floor 10, and a hand of five containing a usable stat only 57% of the time on
-   floor 10. Exemplar modifiers should be written against that base, not against a floor-1 one.
+1. **Print at least one card whose stat scales with what else was played** — ticket 21's own example,
+   *"Power equal to twice the cards Gray plays this turn"* — and say what it is actually worth on
+   floor 1 and on floor 10. Ticket 23 argues that player throughput may be flat across a whole run,
+   bounded by the hand cap of 5 and the cost-from-hand rule, with ticket 11's effect-forward reward
+   cards leaving nothing to grow. **A scaling card is the one escape hatch**, and whether it works is
+   this ticket's to demonstrate. If it does, ticket 23 closes cheaply.
+2. **Say what a modifier multiplies late in a run.** Ticket 11 made Stuff the stat base and ticket 22
+   removes it, 9 down to 0. A modifier written against a floor-1 base may be worth nothing on floor 9.
+   Write the exemplar modifiers against the late-run base, not the early one.
 
-**Also handed down:** ticket 10 measured a healthy run at roughly **22 cards per character** rather
-than ticket 09's provisional 12–15, which changes how many starter cards the exemplar set has to
-account for. The number itself belongs to [ticket 24](24-starting-deck-size.md).
+**Also relevant:** starting deck size is back with ticket 10 (ticket 24 was folded into it and
+closed), still at ticket 09's provisional 12–15. How many starter cards this set has to account for
+moves with it, so the two are worth settling together.

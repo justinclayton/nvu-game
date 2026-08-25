@@ -251,31 +251,23 @@ Two consequences for this ticket:
 
 ## Handed down by ticket 10, 2026-08-25
 
-Three findings from [ticket 10](10-sim-the-resource-economy.md)'s simulator, all
-`[found by agent in the floor economy simulator]` and none of them rulings.
+[Ticket 10](10-sim-the-resource-economy.md) was resolved against this ticket's open numbers and then
+reopened the same day, because its card model was invented and the numbers described the invention.
+**Nothing it reported about this ticket stands as a measurement.** Two things are worth carrying
+anyway, both as questions rather than answers.
 
-**1. Floor 10 at zero Stuff is winnable, so this ticket's curve needs no change.** Ticket 11 asked
-whether the bottom of the 9 → 0 curve was desperate or impossible. Measured: zero Stuff on the last
-floor costs about six points of win rate against a floor 10 with two (28.6% versus 34.0%), and about
-fifteen against a generous nine. Expensive and survivable — which is what a desperate scrape should
-measure like. **The 0 stands as printed.** What made floor 10 look impossible in early sweeps was the
-Enemy `Power` slope, not the Stuff count.
+**1. Ticket 11's floor-10 question is still open.** Whether the bottom of the 9 → 0 Stuff curve is
+desperate or impossible was handed to ticket 10 and is not answered; the earlier note claiming zero
+is winnable is **withdrawn**. It returns once [ticket 12](12-exemplar-card-set.md) supplies cards.
 
-**2. This ticket's untuned Enemy `Power` cannot escalate steeply, and the reason is structural.**
-Player throughput is flat across a run — see [ticket 23](23-power-growth-across-a-run.md), which owns
-the problem. `Power` rising 4 → 18 over ten floors is unwinnable at *any* starting deck size; a run is
-only live at something like `Power 3` rising **0.7 a floor**. **The same applies to hazard
-thresholds**, which have the identical ceiling above them: a hazard clear threshold rising 2 → 10
-across the run makes hazards unclearable late, worth roughly twenty points of win rate against a
-shallow slope.
+**2. The gap between a hazard's two thresholds is probably a strong dial, and this ticket set no
+number for it.** The high threshold is the mid-floor reward, and the mid-floor reward is most of how a
+deck grows during a run, so the gap prices deck growth directly. Ticket 11 gave the room card a format
+that supports any gap; this ticket owns which one gets printed. Worth knowing it is likely
+load-bearing rather than flavour, even though the size of the effect is not settled.
 
-**3. The gap between a hazard's two thresholds is a strong economic dial, and this ticket set no
-number for it.** The high threshold is the mid-floor reward, and the mid-floor reward is the run's
-only growth engine, so the gap prices deck growth directly. Holding everything else fixed, a gap of
-**2** wins 55% of runs and a gap of **5** wins 24%. Ticket 11 gave the room card a format that
-supports any gap; this ticket owns which one gets printed, and should know the number is load-bearing
-rather than flavour.
-
-**Also relevant to this ticket's escalation ruling:** ticket 10 measured a floor taking **6.9 turns on
-floor 1 falling to 4.2 on floor 10**. The fall is this ticket's shrinking room count doing exactly
-what it was meant to — late floors are shorter as well as poorer.
+**Also still open, and now sharper:** this ticket's untuned Enemy `Power` cannot be picked without
+knowing whether player throughput grows at all over a run. That is
+[ticket 23](23-power-growth-across-a-run.md), and this ticket's escalation-through-scarcity ruling is
+one of its inputs — scarcity makes the player weaker, and if nothing makes them stronger, `Power`
+cannot rise either.

@@ -350,44 +350,6 @@ head, reacting to what's in front of you, with little time for deep strategy.*
   also carry a reward tier — the anatomy supports it free, but it is composition and belongs to
   ticket 22.
 
-- [Sim the resource economy across a floor](issues/10-sim-the-resource-economy.md) — `[found by agent
-  in the floor economy simulator]`, and **nothing here is a ruling**: a prototype produces
-  measurements, and what the design does about them is still the human's. The prototype is
-  [`prototype/floor-economy-sim.html`](../../prototype/floor-economy-sim.html). **The model did not
-  collapse** — ticket 04's fallback branch is not needed. Deck-as-stamina produces a real arc, an even
-  spread of deaths across all ten floors, a genuine draw decision with failing extremes on both sides,
-  and no dominant line. **What it does not produce is a reason for the player to get stronger.** The
-  headline finding is that **the stat pool a team can put on the table does not grow over a run** —
-  5–7 on floor 1 and 5–7 on floor 10, whatever the deck has become — because the hand cap of 5, the
-  cost-comes-out-of-hand rule, and ticket 11's effect-forward reward cards together bound throughput,
-  while ticket 22's Stuff curve removes the base underneath it. **Deckbuilding buys stamina, not
-  throughput.** Three things follow, all measured: room thresholds cannot escalate steeply (Enemy
-  `Power` rising 4 → 18 is unwinnable at *any* deck size; a live run needs `Power 3` rising ~0.7 a
-  floor, and hazard thresholds have the same ceiling); **the inversion does not govern greed** —
-  taking every reward wins 46% of runs against 0.4% for taking almost none, because consistency is
-  capped by the hand of 5 and stamina is capped by nothing, though there is also **no runaway**, so no
-  cap is needed, just not for ticket 04's reason; and **the Flee line is economically inert**, since
-  ticket 07's forced minimum draw already taxes two cards a turn. All of that graduates to
-  [ticket 23](issues/23-power-growth-across-a-run.md). **Starting deck size is the most powerful dial
-  in the game and 12–15 is far too small** — win rate runs 7% at 13 cards to 54% at 28 — which
-  graduates to [ticket 24](issues/24-starting-deck-size.md), because the trade against printing and
-  table feel is the human's, not the sim's. **The questions handed here by other tickets are
-  answered:** floor 10 at **zero Stuff is winnable**, costing about six points of win rate, so ticket
-  22's curve stands as printed and it was the `Power` slope that made it look impossible; **the stat
-  base erodes badly but does not collapse**, a hand holding a usable stat 90% of the time on floors 1–3
-  and 57% on floor 10, with the base's value falling 6.2 → 3.6 — ticket 11's *powerful multipliers with
-  nothing to multiply* is confirmed as the shape of the endgame; **"do nothing: recover 1 card" is
-  degenerate at any rate** and should be considered closed rather than pending; **hand cap 5 lands on
-  the peak** and **the last stand's exit tax of 2 works, with the exact figure free to be chosen for
-  feel**. One dial nobody had looked at turns out to matter: **the gap between a hazard's two
-  thresholds prices deck growth directly** — a gap of 2 wins 55% and a gap of 5 wins 24% — which goes
-  back to ticket 22. **How far to trust which finding:** the structural ones follow from the hand cap
-  and the cost structure rather than from any card's text and are robust; every specific number is
-  provisional and owed a re-run once [ticket 12](issues/12-exemplar-card-set.md) exists, because the
-  sim could not model real build synergy and its pools are therefore a floor on what a good deck can
-  do rather than a ceiling.
-
-
 ## Not yet specified
 
 <!-- In scope, but not sharp enough to ticket. Graduates into tickets as the frontier advances. -->
@@ -412,11 +374,12 @@ head, reacting to what's in front of you, with little time for deep strategy.*
   table at **14 locations** and the human accepted it, so this is no longer about whether the layout
   is affordable — it is about the card *count* those locations will hold.
 - **How hard the game wants to be, and what losing should feel like.** Nothing on the map has ruled
-  this, and ticket 10 made it awkward: the simulator can now report a win rate for any tuning, but it
-  has no target to tune toward, so it reports a *range* and leaves every number unchosen. Tickets 22,
-  23 and 24 all need this before their numbers can be picked rather than described. It stays fog
-  because it is not yet clear whether the answer is a number, a feeling ("most runs die on floor 6–8"),
-  or a rule about how a loss ends — that last part may belong with *Death and run failure* above.
+  this, and ticket 10 made it visible: once real cards exist the simulator can report a win rate for
+  any tuning, but it has no target to tune *toward*, so it can only describe a range and leaves every
+  number unchosen. Tickets 10, 22 and 23 all need this before their numbers can be picked rather than
+  described. It stays fog because it is not yet clear whether the answer is a number, a feeling ("most
+  runs die on floor 6–8"), or a rule about how a loss ends — that last part may belong with *Death and
+  run failure* above.
 - **Whether "North vs Up" means anything mechanical**, or is purely a title.
 
 ## Out of scope

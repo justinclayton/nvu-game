@@ -24,7 +24,6 @@
   button { background:var(--panel2); border:1px solid var(--line); color:var(--ink);
            padding:5px 10px; border-radius:5px; cursor:pointer; font:inherit; font-size:13px; }
   button:hover:not(:disabled) { border-color:#4d5666; }
-  button:disabled { opacity:.35; cursor:not-allowed; }
   button.primary { background:#2f4a6b; border-color:#3d608a; }
   input, select { background:#121418; border:1px solid var(--line); color:var(--ink);
            padding:4px 7px; border-radius:4px; font:inherit; font-size:13px; }
@@ -46,10 +45,11 @@
         overflow:auto; font-size:12px; max-height:560px; margin:0; white-space:pre-wrap; }
   .bar { height:9px; background:#2a2f38; border-radius:5px; overflow:hidden; min-width:80px; }
   .bar > i { display:block; height:100%; background:#3d608a; }
-  .good { color:var(--good); } .bad { color:var(--bad); } .gold { color:var(--gold); }
+  .good { color:var(--good); } .bad { color:var(--bad); }
   .note { border-left:3px solid #3d608a; padding-left:10px; color:var(--dim); font-size:12.5px; margin:8px 0; }
-  .verdict { border-left:3px solid var(--gold); padding-left:10px; margin:10px 0; }
-  .verdict b { color:var(--ink); }
+  .warn { background:#3a2a20; border:1px solid #6b4a2c; border-radius:8px; padding:10px 14px;
+          margin-bottom:14px; font-size:13px; }
+  .warn b { color:var(--gold); }
 </style>
 </head>
 <body>
@@ -65,12 +65,24 @@
 </header>
 <main>
 
+<div class="warn">
+  <b>The card set in this simulator is a placeholder, so no number it reports is a finding.</b>
+  Ticket 12 has not built the exemplar cards yet. Until it does, this tool is a rules engine
+  waiting for cards: win rates, deck sizes and threshold curves it prints are properties of the
+  stand-in cards in <code>CARD_SET</code>, not of North vs Up. What it is good for now is checking
+  that a <em>rule</em> behaves — see the Model tab.
+  <br><br>
+  Neither the cards nor the threshold dials have been tuned against each other, deliberately — tuning
+  placeholders to each other is how the last version produced numbers that looked like answers. So most
+  runs fail out around the middle floors. That is the untuned default, not a broken engine.
+</div>
+
 <section class="panel">
   <h2>Tuning</h2>
   <div class="grid" id="cfgGrid"></div>
   <div class="row" style="margin-top:12px">
     <button id="btnReset">Reset to defaults</button>
-    <span class="tiny muted">Every number the sim uses is here. Nothing is hard-coded elsewhere.</span>
+    <span class="tiny muted">Dials marked <b>unruled</b> are placeholders no ticket has decided.</span>
   </div>
 </section>
 
@@ -87,14 +99,13 @@
     <div class="panel"><h2>How far runs get</h2><div id="outDepth">—</div></div>
   </div>
   <div class="panel"><h2>Per floor</h2><div id="outFloors">—</div></div>
-  <div class="panel"><h2>The ticket's questions</h2><div id="outVerdict">—</div></div>
 </section>
 
 <section class="page" id="page-sweep">
   <div class="panel">
     <div class="row">
       <div class="field"><label>Dial</label><select id="sweepKey"></select></div>
-      <div class="field"><label>From</label><input type="number" id="sweepFrom" value="8" step="1"></div>
+      <div class="field"><label>From</label><input type="number" id="sweepFrom" value="10" step="1"></div>
       <div class="field"><label>To</label><input type="number" id="sweepTo" value="26" step="1"></div>
       <div class="field"><label>Step</label><input type="number" id="sweepStep" value="2" step="1"></div>
       <div class="field"><label>Runs each</label><input type="number" id="sweepRuns" value="600" step="200"></div>
@@ -124,8 +135,14 @@
 
 <script>
 // ==ENGINE-START==
-// Pure simulation engine — no DOM. The node sweep harness extracts everything between the
+// Pure simulation engine — no DOM. The node harness extracts everything between the
 // ENGINE-START and ENGINE-END markers and runs it as-is, so this block must stay pure.
+//
+// This file is a RULES ENGINE WITH A CARD SLOT CUT INTO IT. The turn structure, the zones, the
+// floor deck and the run loop are all transcribed from resolved tickets and are card-agnostic.
+// The cards themselves live in one clearly-marked block (CARD_SET) and are placeholders until
+// ticket 12 exists. Replace that block; do not treat its output as a finding.
+
 const NvU = (function () {
 "use strict";
 
@@ -146,44 +163,108 @@ function shuffle(arr, rng) {
 }
 const STATS = ["Power", "Scramble"];
 
+// ================================================================================
+// THE CARD SLOT — replace this whole block with ticket 12's exemplar set.
+// ================================================================================
+//
+// A card is data with one behavioural field:
+//
+//   stats(ctx) -> { Power, Scramble }
+//
+// `ctx` carries the whole play zone — { Red: [...], Gray: [...], all: [...], self } — so a
+// conditional stat can read what else was played this turn. That is the only thing the engine
+// needs from a card, and it is enough to express ticket 21's "Power equal to twice the cards
+// Gray plays this turn". Mark such a card `cond: true` so the solver knows it must evaluate
+// combinations jointly rather than card by card.
+//
+// Other fields: name, type (Red/Gray/Good Stuff/Bad Stuff), cost (cards Exhausted from hand),
+// hold (stays in hand at cleanup), draw (extra cards this turn's draw phase allows).
+//
+// Everything below is a STAND-IN chosen to exercise the engine, not to describe the game.
+
+function C(o) {
+  const c = { name: "?", type: "Red", cost: 0, hold: false, draw: 0, cond: false, stats: null };
+  for (const k in o) c[k] = o[k];
+  if (!c.stats) c.stats = () => ({ Power: 0, Scramble: 0 });
+  return c;
+}
+const flat = (P, S) => () => ({ Power: P || 0, Scramble: S || 0 });
+
+const CARD_SET = {
+  // --- starter decks. Ticket 11: starters may be primarily raw stats, all rarity `Fine`.
+  starter: owner => [
+    { n: 5, make: () => C({ owner, name: "Shove",     cost: 0, stats: flat(1, 0) }) },
+    { n: 5, make: () => C({ owner, name: "Duck",      cost: 0, stats: flat(0, 1) }) },
+    { n: 2, make: () => C({ owner, name: "Look Sharp", cost: 1, draw: 2 }) },
+  ],
+
+  // --- ascend and mid-floor rewards. Ticket 11: reward cards are effects, not stats.
+  reward: owner => [
+    () => C({ owner, name: "Press the Advantage", cost: 1, cond: true,
+              stats: ctx => ({ Power: Math.min(3, ctx.all.length - 1), Scramble: 0 }) }),
+    () => C({ owner, name: "Cover Me", cost: 1, cond: true,
+              stats: ctx => ({ Power: 0, Scramble: ctx[owner === "Red" ? "Gray" : "Red"].length }) }),
+    () => C({ owner, name: "Second Wind", cost: 1, draw: 2 }),
+    () => C({ owner, name: "Brace",  cost: 1, stats: flat(2, 0) }),
+    () => C({ owner, name: "Vault",  cost: 1, stats: flat(0, 2) }),
+  ],
+
+  // --- Good Stuff. Ticket 11: Stuff carries the bulk of the raw stats.
+  goodStuff: () => [
+    () => C({ type: "Good Stuff", name: "Pry Bar",   cost: 1, hold: true, stats: flat(3, 0) }),
+    () => C({ type: "Good Stuff", name: "Grapple",   cost: 1, hold: true, stats: flat(0, 3) }),
+    () => C({ type: "Good Stuff", name: "Stim",      cost: 1, hold: true, stats: flat(2, 2) }),
+  ],
+
+  // --- Bad Stuff. Ticket 09: no stats, has Hold, playable, ordinary fuel.
+  badStuff: () => C({ type: "Bad Stuff", name: "Slime", cost: 1, hold: true }),
+};
+
+function buildStarterDeck(cfg, owner, rng) {
+  const spec = CARD_SET.starter(owner), d = [];
+  const unit = spec.reduce((a, s) => a + s.n, 0);
+  const copies = Math.max(1, Math.round(cfg.startDeck / unit));
+  for (const s of spec) for (let i = 0; i < s.n * copies; i++) d.push(s.make());
+  while (d.length > Math.round(cfg.startDeck)) d.pop();
+  while (d.length < Math.round(cfg.startDeck)) d.push(spec[0].make());
+  return shuffle(d, rng);
+}
+const pick = (arr, rng) => arr[Math.floor(rng() * arr.length)];
+const rewardCard = (cfg, owner, rng) => pick(CARD_SET.reward(owner), rng)();
+const goodStuff = (cfg, rng) => pick(CARD_SET.goodStuff(), rng)();
+const badStuff = () => CARD_SET.badStuff();
+
+// ================================================================================
+// END OF THE CARD SLOT. Everything below is rules, transcribed from tickets.
+// ================================================================================
+
 // ---------------------------------------------------------------- configuration
 
 const DIALS = [
-  ["startDeck",       22,   "Starting deck size per character (ticket 09 guessed 12–15; this sim says that is far too small)"],
-  ["starterStatFrac", 0.70, "Fraction of starter cards that are raw-stat cards (ticket 11)"],
-  ["starterStatVal",  1,    "Stat value on a starter stat card"],
+  ["startDeck",       22,   "UNRULED — starting deck size per character. Ticket 09 guessed 12–15 and handed the number to ticket 10, which cannot pick it without cards."],
   ["handCap",         5,    "Maximum hand size at draw (ticket 07)"],
   ["minDraw",         1,    "Forced minimum draw per standing character per turn (ticket 04)"],
   ["floors",          10,   "Floors in a run (ticket 05)"],
   ["hazardPerFloor",  3,    "Hazard rooms per floor (ticket 22: flat 3)"],
   ["stuffStart",      9,    "Stuff rooms on floor 1 (ticket 22)"],
-  ["stuffEnd",        0,    "Stuff rooms on the last floor (ticket 11 asks whether 0 is winnable)"],
-  ["enemyPowerBase",  3,    "Enemy room Power on floor 1 (ticket 22 left it untuned)"],
-  ["enemyPowerStep",  0.7,  "Enemy Power added per floor — must stay shallow; player throughput does not grow"],
-  ["hazLowBase",      2,    "Hazard clear threshold on floor 1"],
-  ["hazLowStep",      0.9,  "Hazard clear threshold added per floor"],
-  ["hazHighDelta",    3,    "How far above the clear threshold the reward threshold sits"],
-  ["fleeEnemyBase",   2,    "Enemy Flee line on floor 1 — exhaust N from deck"],
-  ["fleeEnemyStep",   0.25, "Enemy Flee cost added per floor"],
-  ["fleeHazard",      1,    "Hazard Flee line — exhaust N from deck"],
-  ["fleeBadStuffP",   0.34, "Chance a Flee line hands over Bad Stuff instead of exhausting cards"],
-  ["stuffStatVal",    3,    "Stat value on a piece of Good Stuff (ticket 11: Stuff carries the stats)"],
-  ["stuffCost",       1,    "Cost to play a piece of Good Stuff"],
-  ["rewardStatFrac",  0.15, "Fraction of reward cards that are plain stat cards"],
-  ["rewardUtilFrac",  0.25, "Fraction of reward cards that are draw/utility effects"],
-  ["rewardModVal",    2,    "Modifier reward value — capped by the stat base actually in play"],
-  ["rewardUtilVal",   2,    "Extra draw a utility card grants"],
+  ["stuffEnd",        0,    "Stuff rooms on the last floor (ticket 22)"],
+  ["enemyPowerBase",  3,    "UNRULED — Enemy room Power on floor 1. Ticket 22 left it untuned."],
+  ["enemyPowerStep",  0.7,  "UNRULED — Enemy Power added per floor."],
+  ["hazLowBase",      2,    "UNRULED — hazard clear threshold on floor 1."],
+  ["hazLowStep",      0.5,  "UNRULED — hazard clear threshold added per floor."],
+  ["hazHighDelta",    3,    "UNRULED — gap from a hazard's clear threshold to its reward threshold."],
+  ["fleeEnemyBase",   2,    "UNRULED — Enemy Flee line on floor 1: exhaust N from deck."],
+  ["fleeEnemyStep",   0.25, "UNRULED — Enemy Flee cost added per floor."],
+  ["fleeHazard",      1,    "UNRULED — hazard Flee line: exhaust N from deck."],
+  ["fleeBadStuffP",   0.34, "UNRULED — chance a Flee line hands over Bad Stuff instead of exhausting cards."],
   ["ascendOffer",     3,    "Cards offered at ascend (ticket 09)"],
   ["policy",          "justEnough", "Draw policy: justEnough | greedy | miser"],
   ["greed",           "selective",  "Acquisition policy: greedy | selective | lean"],
   ["midfloorAcceptP", 0.5,  "Chance a selective player takes a mid-floor hazard reward"],
   ["reserve",         4,    "Deck size a player will not push below for a non-Enemy room"],
   ["chaseHighHazard", 1,    "Try for the hazard reward threshold when reachable (1/0)"],
-  ["useUtil",         1,    "Play draw/utility cards during the draw phase (1/0)"],
-  ["estPerCard",      1.2,  "Player's running estimate of stat per card drawn (decline heuristic)"],
-  ["optimism",        1.3,  "How optimistic the decline heuristic is before giving up on a room"],
   ["lastStandTax",    2,    "Cards lost on exiting a last stand (ticket 07)"],
-  ["recoverAction",   0,    "Enable 'do nothing: recover 1 card' as a turn action (1/0)"],
+  ["recoverAction",   0,    "'Do nothing: recover 1 card' as a turn action — logged by ticket 04, not adopted (1/0)"],
   ["leanCap",         20,   "Deck size a 'lean' player stops accepting rewards at"],
   ["maxTurns",        150,  "Safety cap on turns per floor"],
 ];
@@ -194,47 +275,7 @@ function defaultConfig() {
   return c;
 }
 
-// ---------------------------------------------------------------- cards
-
-let CID = 0;
-function card(o) {
-  const c = { id: ++CID, cost: 0, val: 0, stat: null, hold: false, kind: "stat", stuff: false, owner: null, name: "?" };
-  for (const k in o) c[k] = o[k];
-  return c;
-}
-
-function starterDeck(cfg, owner, rng) {
-  const n = Math.round(cfg.startDeck), d = [];
-  for (let i = 0; i < n; i++) {
-    if (rng() < cfg.starterStatFrac) {
-      d.push(card({ owner, kind: "stat", stat: STATS[i % 2], val: cfg.starterStatVal, cost: 0, name: "starter " + STATS[i % 2] }));
-    } else {
-      d.push(card({ owner, kind: "util", val: cfg.rewardUtilVal, cost: 1, name: "starter draw" }));
-    }
-  }
-  return shuffle(d, rng);
-}
-
-function rewardCard(cfg, owner, rng) {
-  const r = rng();
-  if (r < cfg.rewardStatFrac) {
-    return card({ owner, kind: "stat", stat: STATS[rng() < 0.5 ? 0 : 1], val: 2, cost: 1, name: "reward stat" });
-  }
-  if (r < cfg.rewardStatFrac + cfg.rewardUtilFrac) {
-    return card({ owner, kind: "util", val: cfg.rewardUtilVal, cost: 1, name: "reward draw" });
-  }
-  return card({ owner, kind: "mod", val: cfg.rewardModVal, cost: 1, name: "reward modifier" });
-}
-
-function goodStuff(cfg, rng) {
-  return card({ kind: "stat", stuff: true, hold: true, stat: STATS[rng() < 0.5 ? 0 : 1],
-                val: cfg.stuffStatVal, cost: cfg.stuffCost, name: "Good Stuff" });
-}
-function badStuff() {
-  return card({ kind: "bad", stuff: true, hold: true, val: 0, stat: null, cost: 1, name: "Bad Stuff" });
-}
-
-// ---------------------------------------------------------------- floor decks
+// ---------------------------------------------------------------- floor decks (ticket 22)
 
 function floorNumbers(cfg, f) {
   const span = Math.max(1, cfg.floors - 1), t = (f - 1) / span;
@@ -263,63 +304,131 @@ function buildFloorDeck(cfg, f, rng) {
 // ---------------------------------------------------------------- the play-phase solver
 //
 // Playing a card of cost C consumes C other cards from that character's OWN hand as fuel,
-// plus the card itself. So a chosen set P satisfies |P| + sum(cost) <= hand size.
-// Stats pool across both characters (ticket 21); fuel never crosses (ticket 04).
-// Modifier cards are worth min(printed, stat base in play) — ticket 11's "modifiers need a
-// base to act on" — so the solver runs twice: once without modifiers to find the base,
-// then again with the modifiers valued against it.
+// plus the card itself. So a chosen set P satisfies |P| + sum(cost) <= hand size (ticket 04/21).
+// Stats pool across both characters; fuel never crosses.
+//
+// This enumerates subsets rather than running a knapsack, because a knapsack assumes each card's
+// value is fixed and independent — which a conditional stat breaks by construction. With a hand
+// cap of 5 the enumeration is trivially small. When no conditional card is in play the two
+// characters are solved independently; when one is, the two hands are solved jointly, because a
+// conditional stat may read across the play zone.
 
-function knapsack(items, capacity) {
-  const best = new Array(capacity + 1).fill(0);
-  const pick = new Array(capacity + 1); for (let i = 0; i <= capacity; i++) pick[i] = [];
-  for (let i = 0; i < items.length; i++) {
-    const w = items[i].w, v = items[i].v;
-    if (w > capacity || v <= 0) continue;
-    for (let c = capacity; c >= w; c--) {
-      if (best[c - w] + v > best[c]) { best[c] = best[c - w] + v; pick[c] = pick[c - w].concat([i]); }
-    }
+const ENUM_CAP = 7;   // hands can exceed the draw cap when Stuff is pushed in; trim to the best few
+
+function legalSubsets(ch) {
+  const hand = ch.hand;
+  let idx = hand.map((c, i) => i);
+  if (idx.length > ENUM_CAP) {
+    idx.sort((a, b) => hand[a].cost - hand[b].cost);
+    idx = idx.slice(0, ENUM_CAP);
   }
-  return { value: best[capacity], chosen: pick[capacity].map(i => items[i]) };
-}
-
-function charItems(ch, statNeeded, modValue) {
-  const out = [];
-  for (let i = 0; i < ch.hand.length; i++) {
-    const c = ch.hand[i];
-    let v = 0;
-    if (c.kind === "stat" && c.stat === statNeeded) v = c.val;
-    else if (c.kind === "mod") v = modValue;
-    if (v <= 0) continue;
-    out.push({ w: 1 + (ch.lastStand ? 0 : c.cost), v, card: c });
+  const room = hand.length, out = [];
+  for (let m = 0; m < (1 << idx.length); m++) {
+    const set = [];
+    let cost = 0;
+    for (let b = 0; b < idx.length; b++) if (m & (1 << b)) { const c = hand[idx[b]]; set.push(c); cost += ch.lastStand ? 0 : c.cost; }
+    if (set.length + cost <= room) out.push(set);
   }
   return out;
 }
 
-function solvePool(cfg, chars, statNeeded) {
-  if (!statNeeded) return { total: 0, per: chars.map(() => ({ value: 0, chosen: [] })), base: 0 };
-  let base = 0;
-  for (const ch of chars) {
-    if (ch.down) continue;
-    base += knapsack(charItems(ch, statNeeded, 0), ch.hand.length).value;
+function poolOf(redSet, graySet, statNeeded) {
+  const all = redSet.concat(graySet);
+  const ctx = { Red: redSet, Gray: graySet, all };
+  let total = 0;
+  for (const c of all) {
+    ctx.self = c;
+    const s = c.stats(ctx);
+    total += (s && s[statNeeded]) || 0;
   }
-  const modV = Math.min(cfg.rewardModVal, base);
-  const per = chars.map(ch => ch.down ? { value: 0, chosen: [] }
-                                      : knapsack(charItems(ch, statNeeded, modV), ch.hand.length));
-  return { total: per.reduce((a, r) => a + r.value, 0), per, base, modV };
+  return total;
+}
+
+function bestPlay(chars, statNeeded, target) {
+  if (!statNeeded) return { total: 0, sets: [[], []] };
+  const sets = chars.map(ch => ch.down ? [[]] : legalSubsets(ch));
+  const conditional = chars.some(ch => !ch.down && ch.hand.some(c => c.cond));
+
+  if (!conditional) {
+    // independent: each character's best subset, summed
+    let best = [[], []], total = 0;
+    for (let i = 0; i < 2; i++) {
+      let bv = 0, bs = [];
+      for (const s of sets[i]) {
+        const v = poolOf(i === 0 ? s : [], i === 0 ? [] : s, statNeeded);
+        if (v > bv) { bv = v; bs = s; }
+      }
+      best[i] = bs; total += bv;
+    }
+    return { total, sets: best };
+  }
+
+  let bv = -1, best = [[], []];
+  for (const a of sets[0]) {
+    for (const b of sets[1]) {
+      const v = poolOf(a, b, statNeeded);
+      if (v > bv) { bv = v; best = [a, b]; }
+      if (target !== undefined && bv >= target) return { total: bv, sets: best };
+    }
+  }
+  return { total: Math.max(0, bv), sets: best };
+}
+
+// What a character can still expect per card drawn. This is not a guess: ticket 04 makes the
+// exhaust pile face up precisely so the player knows what is left in their deck, and ticket 03
+// makes information fully open. So the estimate is computed from the actual remaining deck.
+function expectedPerCard(ch, statNeeded) {
+  if (!ch.deck.length || !statNeeded) return 0;
+  let t = 0;
+  const ctx = { Red: [], Gray: [], all: [] };
+  for (const c of ch.deck) { ctx.self = c; const s = c.stats(ctx); t += (s && s[statNeeded]) || 0; }
+  return t / ch.deck.length;
+}
+
+// Commit a chosen play to the table. The card itself goes to that character's side of the play
+// zone; its cost is Exhausted from their own hand at the moment it is played (ticket 21), which is
+// why fuel goes straight to the exhaust pile and the played card does not — the last stand's
+// shuffle-back takes hand and play zone, never the exhaust pile (ticket 07).
+function applyPlay(ch, chosen) {
+  if (ch.down) return;
+  for (const c of chosen) {
+    const at = ch.hand.indexOf(c);
+    if (at < 0) continue;
+    ch.hand.splice(at, 1);
+    ch.play.push(c);
+    if (ch.lastStand) continue;
+    for (let k = 0; k < c.cost; k++) {
+      // burn the least useful card in hand that is not itself about to be played
+      let fuel = ch.hand.findIndex(x => chosen.indexOf(x) < 0 && x.type === "Bad Stuff");
+      if (fuel < 0) fuel = ch.hand.findIndex(x => chosen.indexOf(x) < 0 && !x.hold);
+      if (fuel < 0) fuel = ch.hand.findIndex(x => chosen.indexOf(x) < 0);
+      if (fuel < 0) break;
+      ch.exhaust.push(ch.hand.splice(fuel, 1)[0]);
+    }
+  }
+  // Bad Stuff is playable, and playing it is the printed way out of it (ticket 09). Do it with
+  // whatever hand capacity the real play left over.
+  let spare = ch.hand.length;
+  for (;;) {
+    const at = ch.hand.findIndex(x => x.type === "Bad Stuff");
+    if (at < 0 || spare < 1 + ch.hand[at].cost) break;
+    const c = ch.hand.splice(at, 1)[0];
+    ch.play.push(c);
+    spare -= 1;
+    for (let k = 0; k < c.cost && ch.hand.length; k++) {
+      let fuel = ch.hand.findIndex(x => !x.hold);
+      if (fuel < 0) fuel = 0;
+      ch.exhaust.push(ch.hand.splice(fuel, 1)[0]);
+      spare -= 1;
+    }
+  }
 }
 
 // ---------------------------------------------------------------- one run
 
 function newChar(cfg, name, rng) {
-  return { name, deck: starterDeck(cfg, name, rng), hand: [], exhaust: [],
+  return { name, deck: buildStarterDeck(cfg, name, rng), hand: [], play: [], exhaust: [],
            down: false, lastStand: false, lstTriggered: false, hurtSinceLS: false };
-}
-
-function drawOne(ch) {
-  if (ch.deck.length === 0) return null;
-  const c = ch.deck.pop();
-  ch.hand.push(c);
-  return c;
 }
 
 function exhaustFromDeck(ch, n, stats) {
@@ -330,8 +439,7 @@ function exhaustFromDeck(ch, n, stats) {
   return taken;
 }
 
-function simulateRun(cfgIn, seed, trace) {
-  const cfg = cfgIn;
+function simulateRun(cfg, seed, trace) {
   const rng = mulberry32((seed | 0) * 2654435761 + 12345);
   const log = trace ? [] : null;
   const say = trace ? (s => log.push(s)) : (() => {});
@@ -340,20 +448,17 @@ function simulateRun(cfgIn, seed, trace) {
   const stats = {
     turns: 0, floorsCleared: 0, cardsLostToFlee: 0, flees: 0, enemyFlees: 0,
     lastStands: 0, lastStandSurvivals: 0, downs: 0, rewardsTaken: 0, rewardsOffered: 0,
-    stuffTaken: 0, badStuff: 0, recoverTurns: 0,
-    handHadStat: 0, handChecks: 0, handHadStatLate: 0, handChecksLate: 0,
+    stuffTaken: 0, badStuff: 0, recoverTurns: 0, handHadStat: 0, handChecks: 0,
     perFloor: [], enemyPools: [],
   };
 
-  let f = 1;
-  for (; f <= cfg.floors; f++) {
+  for (let f = 1; f <= cfg.floors; f++) {
     const deckAtStart = (chars[0].deck.length + chars[1].deck.length) / 2;
     const res = simFloor(cfg, rng, chars, f, stats, say);
     stats.perFloor.push({
       floor: f, turns: res.turns, deckAtStart, result: res.result,
       enemyMeetings: res.enemyMeetings, stuffCollected: res.stuffCollected,
       handStatRate: res.handChecks ? res.handHadStat / res.handChecks : 1,
-      deckAtEnd: (chars[0].deck.length + chars[1].deck.length) / 2,
     });
     stats.turns += res.turns;
     if (res.result !== "clear") {
@@ -368,21 +473,17 @@ function simulateRun(cfgIn, seed, trace) {
 
 function ascend(cfg, rng, chars, stats, say, f) {
   for (const ch of chars) {
-    // Stuff is pulled out of the exhaust pile, then everything else returns. Full heal.
-    const back = ch.exhaust.filter(c => !c.stuff);
+    // Stuff is pulled out of the exhaust pile, everything else returns, full heal (tickets 04/07).
+    ch.deck = ch.deck.concat(ch.exhaust.filter(c => !c.type || c.type.indexOf("Stuff") < 0));
     ch.exhaust = [];
-    ch.deck = ch.deck.concat(back);
-    ch.hand = ch.hand.filter(c => !c.stuff);   // Stuff does not cross a floor boundary
-    ch.deck = ch.deck.concat(ch.hand);         // held permanents go back in before the shuffle
-    ch.hand = [];
+    ch.deck = ch.deck.concat(ch.hand.filter(c => !c.type || c.type.indexOf("Stuff") < 0));
+    ch.hand = []; ch.play = [];
     ch.down = false; ch.lastStand = false; ch.lstTriggered = false;
-    // ascend reward: choose 1 of N
     stats.rewardsOffered++;
-    const offer = [];
-    for (let i = 0; i < Math.round(cfg.ascendOffer); i++) offer.push(rewardCard(cfg, ch.name, rng));
     if (acceptReward(cfg, ch, true, rng)) {
-      offer.sort((a, b) => (b.val + (b.kind === "mod" ? 0.5 : 0)) - (a.val + (a.kind === "mod" ? 0.5 : 0)));
-      ch.deck.push(offer[0]);
+      const offer = [];
+      for (let i = 0; i < Math.round(cfg.ascendOffer); i++) offer.push(rewardCard(cfg, ch.name, rng));
+      ch.deck.push(offer[Math.floor(rng() * offer.length)]);
       stats.rewardsTaken++;
     }
     shuffle(ch.deck, rng);
@@ -393,91 +494,79 @@ function ascend(cfg, rng, chars, stats, say, f) {
 function acceptReward(cfg, ch, isAscend, rng) {
   if (cfg.greed === "greedy") return true;
   if (cfg.greed === "lean") return isAscend && ch.deck.length < cfg.leanCap;
-  return isAscend ? true : rng() < cfg.midfloorAcceptP;   // selective
+  return isAscend ? true : rng() < cfg.midfloorAcceptP;
 }
 
 // ---------------------------------------------------------------- one floor
 
 function simFloor(cfg, rng, chars, f, stats, say) {
   const fd = buildFloorDeck(cfg, f, rng);
-  const late = f >= 6;
-  let turn = 0, enemyMeetings = 0, stuffCollected = 0;
-  let handHadStat = 0, handChecks = 0;
-  for (const ch of chars) { ch.hand = []; ch.down = false; ch.lastStand = false; ch.lstTriggered = false; }
+  let turn = 0, enemyMeetings = 0, stuffCollected = 0, handHadStat = 0, handChecks = 0;
+  for (const ch of chars) { ch.hand = []; ch.play = []; ch.down = false; ch.lastStand = false; ch.lstTriggered = false; }
   say("=== floor " + f + " · Power " + fd.numbers.enemyPower + " · haz " + fd.numbers.hazLow + "/" + fd.numbers.hazHigh +
       " · Stuff " + fd.numbers.stuffCount + " · decks " + chars[0].deck.length + "/" + chars[1].deck.length);
 
   while (turn < cfg.maxTurns) {
     turn++;
-    // --- begin turn: a character who cannot draw is down (ticket 04)
     for (const ch of chars) {
       ch.lastStand = false; ch.lstTriggered = false; ch.hurtSinceLS = false;
       if (ch.deck.length === 0 && !ch.down) { ch.down = true; stats.downs++; say("  " + ch.name + " is DOWN"); }
     }
-    if (chars[0].down && chars[1].down) { say("  wipe on floor " + f); return { result: "wipe", turns: turn, enemyMeetings, stuffCollected, handHadStat, handChecks }; }
+    if (chars[0].down && chars[1].down) return { result: "wipe", turns: turn, enemyMeetings, stuffCollected, handHadStat, handChecks };
 
-    // --- flip
     if (fd.draw.length === 0) { fd.draw = shuffle(fd.fled, rng); fd.fled = []; say("  (floor deck reshuffles)"); }
-    if (fd.draw.length === 0) { return { result: "stuck", turns: turn, enemyMeetings, stuffCollected, handHadStat, handChecks }; }
+    if (fd.draw.length === 0) return { result: "stuck", turns: turn, enemyMeetings, stuffCollected, handHadStat, handChecks };
     const room = fd.draw.pop();
     if (room.type === "Enemy") enemyMeetings++;
 
-    // --- Stuff rooms are guaranteed on the flip (ticket 22) but the turn still costs the minimum draw
+    // Stuff rooms are guaranteed on the flip (ticket 22); the turn still costs the minimum draw.
     if (room.type === "Stuff") {
-      const target = chars[0].down ? chars[1] : (chars[1].down ? chars[0] :
+      const t = chars[0].down ? chars[1] : (chars[1].down ? chars[0] :
         (chars[0].hand.filter(c => c.hold).length <= chars[1].hand.filter(c => c.hold).length ? chars[0] : chars[1]));
-      target.hand.push(room.stuff);
+      t.hand.push(room.stuff);
       stuffCollected++; stats.stuffTaken++;
       drawPhase(cfg, chars, null, 0, 0, stats, say);
+      applyPlay(chars[0], []); applyPlay(chars[1], []);
       cleanup(cfg, rng, chars, fd, room, true, stats, say);
-      say("  t" + turn + " Stuff room → " + target.name);
+      say("  t" + turn + " Stuff room → " + t.name);
       continue;
     }
 
-    // --- draw phase against a real threshold
     const wantHigh = room.type === "Hazard" && cfg.chaseHighHazard &&
                      Math.min(chars[0].deck.length, chars[1].deck.length) > cfg.reserve;
-    const target = wantHigh ? room.high : room.low;
-    const floorTarget = room.low;
-    drawPhase(cfg, chars, room.stat, target, floorTarget, stats, say);
+    drawPhase(cfg, chars, room.stat, wantHigh ? room.high : room.low, room.low, stats, say);
 
-    // --- hand-quality metric (ticket 11's first measurement)
     for (const ch of chars) {
       if (ch.down) continue;
-      handChecks++;
-      const has = ch.hand.some(c => c.kind === "stat" && c.stat === room.stat && c.val > 0);
-      if (has) handHadStat++;
-      if (late) { stats.handChecksLate++; if (has) stats.handHadStatLate++; }
-      stats.handChecks++; if (has) stats.handHadStat++;
+      handChecks++; stats.handChecks++;
+      const ctx = { Red: [], Gray: [], all: [] };
+      const has = ch.hand.some(c => { ctx.self = c; const s = c.stats(ctx); return s && s[room.stat] > 0; });
+      if (has) { handHadStat++; stats.handHadStat++; }
     }
 
-    // --- play phase
-    const sol = solvePool(cfg, chars, room.stat);
+    const sol = bestPlay(chars, room.stat);
     let cleared = false, tier = "none";
     if (room.high !== null && sol.total >= room.high) { cleared = true; tier = "high"; }
     else if (sol.total >= room.low) { cleared = true; tier = "low"; }
 
     if (cleared && tier === "high") {
-      // hazard reward: reveal one card, take it or skip; goes on top of the deck
-      const ch = chars[rng() < 0.5 ? 0 : 1].down ? (chars[0].down ? chars[1] : chars[0]) : chars[rng() < 0.5 ? 0 : 1];
-      if (!ch.down) {
+      const ch = chars.filter(c => !c.down)[0];
+      if (ch) {
         stats.rewardsOffered++;
         if (acceptReward(cfg, ch, false, rng)) { ch.deck.push(rewardCard(cfg, ch.name, rng)); stats.rewardsTaken++; }
       }
     }
-    if (room.type === "Enemy") {
-      stats.enemyPools.push({ floor: f, pool: sol.total, base: sol.base, need: room.low, cleared });
-    }
+    applyPlay(chars[0], sol.sets[0]);
+    applyPlay(chars[1], sol.sets[1]);
+    if (room.type === "Enemy") stats.enemyPools.push({ floor: f, pool: sol.total, need: room.low, cleared });
+
     say("  t" + turn + " " + room.type + " " + room.stat + " " + room.low + (room.high ? "/" + room.high : "") +
         " · pool " + sol.total + " · " + (cleared ? "CLEAR(" + tier + ")" : "flee") +
         " · hands " + chars[0].hand.length + "/" + chars[1].hand.length +
         " · decks " + chars[0].deck.length + "/" + chars[1].deck.length);
 
     cleanup(cfg, rng, chars, fd, room, cleared, stats, say);
-
-    if (cleared && room.type === "Enemy") {
-      return { result: "clear", turns: turn, enemyMeetings, stuffCollected, handHadStat, handChecks };
-    }
+    if (cleared && room.type === "Enemy") return { result: "clear", turns: turn, enemyMeetings, stuffCollected, handHadStat, handChecks };
   }
   return { result: "timeout", turns: turn, enemyMeetings, stuffCollected, handHadStat, handChecks };
 }
@@ -485,33 +574,29 @@ function simFloor(cfg, rng, chars, f, stats, say) {
 // ---------------------------------------------------------------- draw phase
 //
 // Interleaved, one card at a time, both characters — ticket 21's simultaneous-in-any-order.
-// The player cannot see what is coming, so the decision is genuinely incremental: draw,
-// look, decide again.
+// The decision is genuinely incremental because the deck is face down: draw, look, decide again.
 
 function drawPhase(cfg, chars, statNeeded, target, floorTarget, stats, say) {
-  const done = [false, false];
-  const drawn = [0, 0];
-  const extraCap = [0, 0];
+  const done = [false, false], drawn = [0, 0], extraCap = [0, 0];
 
   const stop = i => {
     const ch = chars[i];
     if (ch.down) return true;
-    if (drawn[i] < cfg.minDraw && ch.deck.length > 0) return false;   // forced minimum
+    if (drawn[i] < cfg.minDraw && ch.deck.length > 0) return false;
     if (ch.hand.length >= cfg.handCap + extraCap[i]) return true;
     if (ch.deck.length === 0) return true;
     if (cfg.policy === "miser") return true;
     if (cfg.policy === "greedy") return false;
-    // justEnough
     if (!statNeeded) return true;
-    const sol = solvePool(cfg, chars, statNeeded);
+    const sol = bestPlay(chars, statNeeded, target);
     if (sol.total >= target) return true;
-    // conserve: don't push below the reserve for anything but the Enemy room
     if (ch.deck.length <= cfg.reserve && sol.total >= floorTarget) return true;
-    // decline heuristic: is the gap plausibly closable with the draws left?
+    // give up on a room the remaining deck cannot plausibly close the gap on
     const capLeft = (cfg.handCap + extraCap[i]) - ch.hand.length;
     const otherLeft = Math.max(0, (cfg.handCap + extraCap[1 - i]) - chars[1 - i].hand.length);
-    const gap = target - sol.total;
-    if (gap > (capLeft + otherLeft) * cfg.estPerCard * cfg.optimism) return true;
+    const reachable = capLeft * expectedPerCard(ch, statNeeded) +
+                      otherLeft * expectedPerCard(chars[1 - i], statNeeded);
+    if (target - sol.total > reachable) return true;
     return false;
   };
 
@@ -522,27 +607,24 @@ function drawPhase(cfg, chars, statNeeded, target, floorTarget, stats, say) {
       if (done[i]) continue;
       if (stop(i)) { done[i] = true; continue; }
       const ch = chars[i];
-      drawOne(ch); drawn[i]++;
-      acted = true;
+      ch.hand.push(ch.deck.pop());
+      drawn[i]++; acted = true;
       if (ch.deck.length === 0 && !ch.lstTriggered) {
         ch.lstTriggered = true; ch.lastStand = true; ch.hurtSinceLS = false;
         stats.lastStands++;
         say("    " + ch.name + " enters LAST STAND");
       }
-      // utility cards convert cost into extra draw during the draw phase
-      if (cfg.useUtil) {
-        const u = ch.hand.find(c => c.kind === "util");
-        if (u && ch.hand.length > u.cost && ch.deck.length > 0) {
-          // pay the cost out of hand, then raise this turn's cap
-          for (let k = 0; k < u.cost; k++) {
-            const fuel = ch.hand.findIndex(c => c !== u && !c.hold);
-            if (fuel < 0) break;
-            ch.exhaust.push(ch.hand.splice(fuel, 1)[0]);
-          }
-          ch.hand.splice(ch.hand.indexOf(u), 1);
-          ch.exhaust.push(u);
-          extraCap[i] += u.val;
+      // a card printing `draw` spends its cost to widen this turn's draw
+      const u = ch.hand.find(c => c.draw > 0);
+      if (u && ch.hand.length > u.cost && ch.deck.length > 0) {
+        for (let k = 0; k < u.cost; k++) {
+          const fuel = ch.hand.findIndex(c => c !== u && !c.hold);
+          if (fuel < 0) break;
+          ch.exhaust.push(ch.hand.splice(fuel, 1)[0]);
         }
+        ch.hand.splice(ch.hand.indexOf(u), 1);
+        ch.exhaust.push(u);
+        extraCap[i] += u.draw;
       }
     }
     if (!acted) break;
@@ -559,10 +641,10 @@ function cleanup(cfg, rng, chars, fd, room, cleared, stats, say) {
       stats.flees++;
       if (room.type === "Enemy") stats.enemyFlees++;
       if (rng() < cfg.fleeBadStuffP && room.type !== "Enemy") {
-        const t = chars[0].down ? chars[1] : chars[0];
-        if (!t.down) { t.hand.push(badStuff()); stats.badStuff++; }
+        const t = chars.filter(c => !c.down)[0];
+        if (t) { t.hand.push(badStuff()); stats.badStuff++; }
       } else {
-        // one character absorbs the whole amount; the team picks the healthier deck
+        // one character absorbs the whole amount; the team picks the healthier deck (ticket 21)
         const a = chars.filter(c => !c.down).sort((x, y) => y.deck.length - x.deck.length)[0];
         if (a) {
           exhaustFromDeck(a, room.flee, stats);
@@ -575,13 +657,14 @@ function cleanup(cfg, rng, chars, fd, room, cleared, stats, say) {
 
   for (const ch of chars) {
     if (ch.down) continue;
-    const sweep = ch.hand.filter(c => !c.hold).concat();   // Hold cards stay in hand
+    // the play zone and the hand both empty at cleanup; only Hold cards still in hand survive
+    const sweep = ch.play.concat(ch.hand.filter(c => !c.hold));
     const keep = ch.hand.filter(c => c.hold);
+    ch.play = [];
     if (ch.lstTriggered && cleared && !ch.hurtSinceLS) {
-      // survived the last stand: the would-be-exhausted cards shuffle back, minus the tax
+      // survived the last stand: would-be-exhausted cards shuffle back, minus the tax (ticket 07)
       const back = sweep.slice(Math.round(cfg.lastStandTax));
-      const lost = sweep.slice(0, Math.round(cfg.lastStandTax));
-      for (const c of lost) ch.exhaust.push(c);
+      for (const c of sweep.slice(0, Math.round(cfg.lastStandTax))) ch.exhaust.push(c);
       ch.deck = shuffle(ch.deck.concat(back), rng);
       ch.hand = keep;
       stats.lastStandSurvivals++;
@@ -590,7 +673,6 @@ function cleanup(cfg, rng, chars, fd, room, cleared, stats, say) {
       for (const c of sweep) ch.exhaust.push(c);
       ch.hand = keep;
       if (cfg.recoverAction && sweep.length <= cfg.minDraw && ch.exhaust.length > 0) {
-        // "do nothing: recover 1 card" — only meaningful if the turn spent nothing
         ch.deck.push(ch.exhaust.pop());
         shuffle(ch.deck, rng);
         stats.recoverTurns++;
@@ -600,27 +682,28 @@ function cleanup(cfg, rng, chars, fd, room, cleared, stats, say) {
   }
 }
 
-// ---------------------------------------------------------------- batch
+// ---------------------------------------------------------------- batch harness
 
 function batch(cfg, n) {
   const out = {
-    n, wins: 0, floorReached: [], turnsPerFloor: [], deckByFloor: [], handStatByFloor: [],
-    enemyMeetingsByFloor: [], stuffByFloor: [], turnsByFloor: [],
+    n, wins: 0, floorReached: [], deckByFloor: [], handStatByFloor: [], enemyMeetingsByFloor: [],
+    stuffByFloor: [], turnsByFloor: [], poolByFloor: [],
     lastStands: 0, lastStandSurvivals: 0, downs: 0, flees: 0, enemyFlees: 0,
     recoverTurns: 0, finalDeck: [], deathFloorHist: {}, reasons: {},
-    poolByFloor: [], baseByFloor: [], enemyTriesByFloor: [], enemyWinsByFloor: [],
+    enemyTriesByFloor: [], enemyWinsByFloor: [],
   };
   for (let f = 0; f <= cfg.floors; f++) {
     out.deckByFloor[f] = []; out.handStatByFloor[f] = []; out.enemyMeetingsByFloor[f] = [];
-    out.stuffByFloor[f] = []; out.turnsByFloor[f] = [];
-    out.poolByFloor[f] = []; out.baseByFloor[f] = [];
+    out.stuffByFloor[f] = []; out.turnsByFloor[f] = []; out.poolByFloor[f] = [];
     out.enemyTriesByFloor[f] = 0; out.enemyWinsByFloor[f] = 0;
   }
   for (let i = 0; i < n; i++) {
     const r = simulateRun(cfg, (cfg.seed | 0) + i * 7919, false);
     if (r.won) out.wins++;
     out.floorReached.push(r.floorReached);
-    out.deathFloorHist[r.won ? "win" : r.floorReached] = (out.deathFloorHist[r.won ? "win" : r.floorReached] || 0) + 1;
+    const key = r.won ? "win" : r.floorReached;
+    out.deathFloorHist[key] = (out.deathFloorHist[key] || 0) + 1;
+    if (!r.won) out.reasons[r.reason] = (out.reasons[r.reason] || 0) + 1;
     out.lastStands += r.stats.lastStands;
     out.lastStandSurvivals += r.stats.lastStandSurvivals;
     out.downs += r.stats.downs;
@@ -628,10 +711,9 @@ function batch(cfg, n) {
     out.enemyFlees += r.stats.enemyFlees;
     out.recoverTurns += r.stats.recoverTurns;
     out.finalDeck.push(r.deckSize);
-    if (!r.won) out.reasons[r.reason] = (out.reasons[r.reason] || 0) + 1;
     for (const e of r.stats.enemyPools) {
+      if (!e) continue;
       out.poolByFloor[e.floor].push(e.pool);
-      out.baseByFloor[e.floor].push(e.base);
       out.enemyTriesByFloor[e.floor]++;
       if (e.cleared) out.enemyWinsByFloor[e.floor]++;
     }
@@ -650,7 +732,7 @@ function batch(cfg, n) {
 const mean = a => a.length ? a.reduce((x, y) => x + y, 0) / a.length : 0;
 const median = a => { if (!a.length) return 0; const s = a.slice().sort((x, y) => x - y); return s[Math.floor(s.length / 2)]; };
 
-return { defaultConfig, DIALS, simulateRun, batch, floorNumbers, mean, median, mulberry32 };
+return { defaultConfig, DIALS, CARD_SET, simulateRun, batch, floorNumbers, bestPlay, mean, median };
 })();
 // ==ENGINE-END==
 
@@ -669,11 +751,13 @@ function buildCfgUI() {
     wrap.className = "field";
     const lab = document.createElement("label");
     lab.textContent = k; lab.title = help;
+    if (help.indexOf("UNRULED") === 0) lab.innerHTML = esc(k) + " <span style='color:#d9a441'>·unruled</span>";
     let inp;
     if (k === "policy" || k === "greed") {
       inp = document.createElement("select");
-      const opts = k === "policy" ? ["justEnough", "greedy", "miser"] : ["greedy", "selective", "lean"];
-      for (const o of opts) { const e = document.createElement("option"); e.value = o; e.textContent = o; inp.appendChild(e); }
+      for (const o of (k === "policy" ? ["justEnough", "greedy", "miser"] : ["greedy", "selective", "lean"])) {
+        const e = document.createElement("option"); e.value = o; e.textContent = o; inp.appendChild(e);
+      }
       inp.value = cfg[k];
       inp.onchange = () => { cfg[k] = inp.value; };
     } else {
@@ -701,24 +785,24 @@ function table(headers, rows) {
 }
 
 function renderBatch(b) {
-  const winPct = b.winRate;
   $("outSummary").innerHTML =
-    "<div style='font-size:30px;font-weight:600'>" + pct(winPct) + " <span class='tiny muted' style='font-weight:400'>win rate</span></div>" +
+    "<div style='font-size:30px;font-weight:600'>" + pct(b.winRate) +
+    " <span class='tiny muted' style='font-weight:400'>of runs clear the tower</span></div>" +
+    "<div class='note'>Placeholder cards. This number describes <code>CARD_SET</code>, not the game.</div>" +
     table(["", ""], [
       ["Runs", b.n],
       ["Median floor reached", NvU.median(b.floorReached)],
-      ["Mean floor reached", f1(NvU.mean(b.floorReached))],
-      ["Median final deck (both chars)", NvU.median(b.finalDeck)],
+      ["Median final deck (both)", NvU.median(b.finalDeck)],
       ["Last stands per run", f1(b.lastStands / b.n)],
-      ["…of which survived", b.lastStands ? pct(b.lastStandSurvivals / b.lastStands) : "—"],
+      ["…survived", b.lastStands ? pct(b.lastStandSurvivals / b.lastStands) : "—"],
       ["Downs per run", f1(b.downs / b.n)],
       ["Flees per run", f1(b.flees / b.n)],
-      ["…of which Enemy rooms", f1(b.enemyFlees / b.n)],
+      ["…Enemy rooms", f1(b.enemyFlees / b.n)],
       ["Recover-action turns per run", f1(b.recoverTurns / b.n)],
     ]);
 
   const rows = [];
-  const maxc = Math.max(...Object.values(b.deathFloorHist));
+  const maxc = Math.max(...Object.values(b.deathFloorHist), 1);
   for (let f = 1; f <= cfg.floors; f++) {
     const c = b.deathFloorHist[f] || 0;
     rows.push(["died on floor " + f, c, "<div class='bar'><i style='width:" + (100 * c / maxc) + "%'></i></div>"]);
@@ -730,47 +814,22 @@ function renderBatch(b) {
   const frows = [];
   for (let f = 1; f <= cfg.floors; f++) {
     const n = NvU.floorNumbers(cfg, f);
-    frows.push([
-      f, n.enemyPower, n.hazLow + "/" + n.hazHigh, n.stuffCount,
-      b.turnsByFloor[f].length,
-      f1(NvU.mean(b.turnsByFloor[f])),
-      f1(NvU.mean(b.deckByFloor[f])),
-      f1(NvU.mean(b.stuffByFloor[f])),
-      f1(NvU.mean(b.enemyMeetingsByFloor[f])),
-      pct(NvU.mean(b.handStatByFloor[f])),
-    ]);
+    frows.push([f, n.enemyPower, n.hazLow + "/" + n.hazHigh, n.stuffCount,
+      b.turnsByFloor[f].length, f1(NvU.mean(b.turnsByFloor[f])), f1(NvU.mean(b.deckByFloor[f])),
+      f1(NvU.mean(b.stuffByFloor[f])), f1(NvU.mean(b.poolByFloor[f])),
+      f1(NvU.mean(b.enemyMeetingsByFloor[f])), pct(NvU.mean(b.handStatByFloor[f]))]);
   }
   $("outFloors").innerHTML =
-    "<div class='note'>Deck is per character, at the floor's start. “Enemy meets” is how many times the Enemy room " +
-    "was flipped before it fell — 1.0 means it dies on first sight.</div>" +
-    table(["Floor", "Power", "Hazard", "Stuff", "runs reaching", "turns", "deck", "Stuff got", "Enemy meets", "hand has stat"], frows);
-
-  renderVerdict(b);
-}
-
-function renderVerdict(b) {
-  const lateHand = NvU.mean([6, 7, 8, 9, 10].flatMap(f => b.handStatByFloor[f] || []));
-  const earlyHand = NvU.mean([1, 2, 3].flatMap(f => b.handStatByFloor[f] || []));
-  const turns10 = NvU.mean(b.turnsByFloor[cfg.floors] || []);
-  const turns1 = NvU.mean(b.turnsByFloor[1] || []);
-  const reach10 = (b.turnsByFloor[cfg.floors] || []).length / b.n;
-  const items = [
-    ["Drain rate / win rate", pct(b.winRate) + " of runs clear all " + cfg.floors + " floors; the median run dies on floor " + NvU.median(b.floorReached) + "."],
-    ["Floor length", f1(turns1) + " turns on floor 1, " + f1(turns10) + " on floor " + cfg.floors + ". Ticket 05 wants a floor to read as one continuous encounter, not a campaign."],
-    ["The death spiral", f1(b.downs / b.n) + " downs per run, " + f1(b.lastStands / b.n) + " last stands (" + (b.lastStands ? pct(b.lastStandSurvivals / b.lastStands) : "—") + " survived)."],
-    ["Deck growth / the inversion", "Median final deck " + NvU.median(b.finalDeck) + " cards across both characters, from " + (2 * Math.round(cfg.startDeck)) + " at the start."],
-    ["Does the stat base hold up? (ticket 11)", "A hand contains a usable stat " + pct(earlyHand) + " of the time on floors 1–3, " + pct(lateHand) + " on floors 6–10."],
-    ["Is the last floor winnable? (ticket 11)", pct(reach10) + " of runs reach floor " + cfg.floors + "; " + (reach10 ? pct(b.winRate / reach10) : "—") + " of those that arrive clear it, at stuffEnd = " + cfg.stuffEnd + "."],
-  ];
-  $("outVerdict").innerHTML = items.map(([h, t]) => "<div class='verdict'><b>" + esc(h) + "</b><br>" + esc(t) + "</div>").join("");
+    "<div class='note'>Deck is per character at the floor's start. “Pool” is the stat total assembled against " +
+    "the Enemy room. “Enemy meets” is how many times it was flipped before it fell.</div>" +
+    table(["Floor", "Power", "Hazard", "Stuff", "runs reaching", "turns", "deck", "Stuff got", "pool", "Enemy meets", "hand has stat"], frows);
 }
 
 $("btnBatch").onclick = () => {
   $("batchStatus").textContent = "running…";
   setTimeout(() => {
     const t = performance.now();
-    const b = NvU.batch(cfg, Math.max(1, parseInt($("nRuns").value) || 500));
-    renderBatch(b);
+    renderBatch(NvU.batch(cfg, Math.max(1, parseInt($("nRuns").value) || 500)));
     $("batchStatus").textContent = "done in " + Math.round(performance.now() - t) + " ms";
   }, 10);
 };
@@ -786,23 +845,20 @@ $("btnSweep").onclick = () => {
     for (let v = from; v <= to + 1e-9; v += step) {
       cfg[key] = v;
       const b = NvU.batch(cfg, runs);
-      rows.push([f1(v), pct(b.winRate),
-        "<div class='bar'><i style='width:" + (100 * b.winRate) + "%'></i></div>",
-        NvU.median(b.floorReached), f1(NvU.mean(b.turnsByFloor[1])),
-        f1(NvU.mean(b.turnsByFloor[Math.min(cfg.floors, 8)])),
-        NvU.median(b.finalDeck)]);
+      rows.push([f1(v), pct(b.winRate), "<div class='bar'><i style='width:" + (100 * b.winRate) + "%'></i></div>",
+        NvU.median(b.floorReached), f1(NvU.mean(b.turnsByFloor[1])), NvU.median(b.finalDeck)]);
     }
     cfg[key] = saved;
     $("outSweep").innerHTML = "<h2>" + esc(key) + "</h2>" +
-      table([key, "win rate", "", "median floor", "turns f1", "turns f8", "final deck"], rows);
+      "<div class='note'>Placeholder cards — read the <em>shape</em> of the curve, never the values.</div>" +
+      table([key, "win rate", "", "median floor", "turns f1", "final deck"], rows);
     $("sweepStatus").textContent = "done";
   }, 10);
 };
 
 $("btnPlay").onclick = () => {
   const r = NvU.simulateRun(cfg, parseInt($("playSeed").value) || 1, true);
-  $("outTrace").textContent =
-    (r.won ? "*** CLEARED THE TOWER ***" : "*** run ended on floor " + r.floorReached + " ***") +
+  $("outTrace").textContent = (r.won ? "*** CLEARED THE TOWER ***" : "*** run ended on floor " + r.floorReached + " ***") +
     "\n\n" + r.log.join("\n");
 };
 
@@ -816,35 +872,49 @@ for (const b of document.querySelectorAll("nav button.tab")) {
 }
 
 $("outModel").innerHTML = `
-<h2>What this sim models, and what it assumes</h2>
-<div class="note">Every rule below traces to a resolved ticket. Everything under <b>Assumptions</b>
-is the sim inventing something no ticket has decided — read the findings with those in view.</div>
+<h2>What this is</h2>
+<div class="note">A rules engine with a card slot cut into it. The turn structure, the zones, the floor
+deck and the run loop are transcribed from resolved tickets and do not depend on what any card says.
+The cards are a placeholder marked <code>CARD_SET</code> in the source, to be replaced by ticket 12's
+exemplars.</div>
+
 <h3>Rules taken from the map</h3>
 <ul class="tiny">
-<li><b>04</b> — deck is stamina; three zones, no discard, no mid-floor reshuffle; a turn costs exactly what you drew;
-damage is random off the top; you are down when you begin a turn unable to draw.</li>
-<li><b>07</b> — hand cap 5 including Hold; forced minimum draw of 1 per standing character; no action currency;
-one shared turn; a down character is skipped entirely and every punishment falls on the survivor;
+<li><b>04</b> — deck is stamina; three zones, no discard, no mid-floor reshuffle; a turn costs exactly what
+you drew; damage is random off the top; you are down when you begin a turn unable to draw.</li>
+<li><b>07</b> — hand cap 5 including <code>Hold</code>; forced minimum draw of 1 per standing character; no
+action currency; one shared turn; a down character is skipped and every punishment falls on the survivor;
 clearing the floor heals both to full; last stand once per turn, exit costs 2.</li>
-<li><b>09 / 11</b> — per-character reward pools, 1 of 3 at ascend; the mid-floor hazard reward is a single reveal
-placed on top of the deck; no thinning; player cards are effect-forward and Stuff carries the raw stats.</li>
-<li><b>21 / 22</b> — rooms are all-or-nothing against a named threshold; stats pool across both characters but fuel
-never crosses; one Enemy room per floor is the win condition; 3 hazards a floor; Stuff falls 9 → 0;
-Fled reshuffles when the floor deck runs out; Stuff is pulled out of the exhaust pile on ascending.</li>
+<li><b>09 / 11</b> — per-character reward pools, 1 of 3 at ascend; the mid-floor hazard reward is a single
+reveal placed on top of the deck; no thinning.</li>
+<li><b>21 / 22</b> — rooms are all-or-nothing against a named threshold; stats pool across both characters
+but fuel never crosses; one Enemy room per floor is the win condition; 3 hazards a floor; Stuff falls
+9 → 0; Fled reshuffles when the floor deck runs out; Stuff is pulled from the exhaust pile on ascending.</li>
 </ul>
-<h3>Assumptions the sim had to make</h3>
+
+<h3>What a card has to provide</h3>
+<p class="tiny">One function: <code>stats(ctx) → {Power, Scramble}</code>. <code>ctx</code> carries the whole
+play zone, so a conditional stat can read what else was played — ticket 21's <em>"Power equal to twice the
+cards Gray plays this turn"</em> is expressible directly. Mark such a card <code>cond: true</code> and the
+solver evaluates both hands jointly instead of card by card. Other fields: <code>cost</code>,
+<code>hold</code>, <code>draw</code>.</p>
+
+<h3>What it can and cannot tell you</h3>
 <ul class="tiny">
-<li><b>Card contents.</b> No exemplar cards exist yet (ticket 12). A player card is one of three shapes:
-a raw stat, a modifier worth <code>min(printed, stat base in play)</code>, or a draw effect. Reward cards are
-mostly modifiers, per ticket 11.</li>
-<li><b>Perfect play within the turn.</b> The play phase is solved exactly (a knapsack over each hand), which
-ticket 21 says is close to the truth — playing everything legal is very nearly always right.</li>
-<li><b>The draw decision.</b> Modelled as incremental: draw one, re-evaluate, stop when the threshold is reachable
-or the gap looks unclosable. This is the game's central decision and the sim's biggest single assumption.</li>
-<li><b>Modifiers apply to whichever stat the room asks for.</b> Effect-forward cards are assumed flexible.</li>
-<li><b>No synergy beyond the modifier cap.</b> Real build synergy (ticket 21's "Power equal to twice the cards
-Gray played") is not modelled, so these numbers are a floor on what a good deck can do, not a ceiling.</li>
-</ul>`;
+<li><b>Can, now:</b> whether a <em>rule</em> misbehaves regardless of cards — a turn action that lets players
+stall, a last-stand loop that pays for itself, whether a printed punishment is large enough to matter against
+the per-turn drain. These come from the turn structure.</li>
+<li><b>Cannot, until ticket 12:</b> any number. Starting deck size, threshold curves, win rates and deck growth
+are all properties of the cards, and the cards here are invented.</li>
+</ul>
+
+<h3>What was deliberately removed</h3>
+<p class="tiny">An earlier version of this file shipped a generated card model — stat cards, modifiers worth
+<code>min(printed, base)</code>, fixed draw effects — and a knapsack solver that assumed each card's value was
+independent of the others. The card model produced numbers that read as findings but only described
+themselves, and the knapsack could not represent a synergy card at all. Both are gone. The solver now
+enumerates legal subsets, which is slower on paper, trivial at a hand of five, and exact for conditional
+stats.</p>`;
 
 buildCfgUI();
 </script>

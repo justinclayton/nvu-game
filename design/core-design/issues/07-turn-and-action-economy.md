@@ -365,32 +365,30 @@ it on the grounds that the category does not exist.
 Nothing else in this ticket changes — the play zone still splits by character, for the cleanup reason
 this ticket gave.
 
-## Checked by ticket 10, 2026-08-25
+## Checked by ticket 10, 2026-08-25, partially withdrawn the same day
 
-Two of this ticket's rulings were simulated. `[found by agent in the floor economy simulator]` Both
-hold; neither is reopened.
-
-**The hand cap of 5 lands on the peak.** This ticket took ticket 09's recommendation on the strength
-of pricing `Hold`, not on economics. The economics agree: win rate by cap runs 0% at 3, 0.8% at 4,
-**3.9% at 5**, 2.6% at 6, 1.7% at 8, and 1.7% uncapped. A bigger hand does raise throughput — the
-floor-10 pool nearly doubles uncapped — but it raises the stamina cost faster, because every card in
-that hand was drawn. This is ticket 04's *"drawing more does not linearly buy more plays"* confirmed
-at numbers.
-
-**The last stand's exit tax of 2 does its job, and the exact figure is not load-bearing.** With no
-tax, last stands rise from 2.0 to 8.9 per run and the win rate nearly triples — precisely the
-*reaching zero deliberately becomes a play* exploit [ticket 17](17-last-stand.md) warned about. With a
-tax of 1, 2 or 4 the win rate sits at 3.5%, 3.9% and 3.4%. The tax has to exist; **2 can be chosen for
-feel.**
+[Ticket 10](10-sim-the-resource-economy.md) simulated three of this ticket's rulings and was then
+reopened, because its card model was invented and most of its numbers described the invention rather
+than the game. What survives is what follows from the **turn structure** rather than from card values.
+`[found by agent in the floor economy simulator]`
 
 **"Do nothing: recover 1 card" is confirmed degenerate.** Ticket 04 logged it as a candidate turn
-action and handed the number here and to ticket 10; this ticket did not adopt it. Simulated, it turns
-the game into grinding at any rate: last stands go from 2.0 to 17.7 per run, Enemy rooms fled from 0.8
-to 12.0, and floor 10 stretches from 4.8 turns to 11.1. **The candidate does not survive contact and
-should be considered closed rather than pending.**
+action and handed the number here and to ticket 10; this ticket did not adopt it. Simulated, it makes
+players stop engaging rooms and farm the floor deck — last stands rose roughly eightfold and floor
+length more than doubled. The loop is *card in, card back, repeat*, so it does not depend on what the
+cards say. **The candidate should be considered closed rather than pending.**
 
-One finding that does bear on this ticket's rulings without overturning them: the forced minimum draw
-is doing far more work than expected. It taxes the team two cards a turn regardless of engagement,
-and against a floor of five to seven turns that dwarfs anything a room prints as its Flee line — see
-[ticket 21](21-defeating-a-floor-card.md) and [ticket 23](23-power-growth-across-a-run.md). This
-ticket's *"the drain is charged against turns, not against moves"* is, if anything, understated.
+**The last stand's exit tax does its job, and the exact figure is not load-bearing.** With no tax,
+deliberately running a deck to zero pays for itself and last stands multiply — precisely the
+*reaching zero deliberately becomes a play* exploit [ticket 17](17-last-stand.md) warned about. A tax
+of 1, 2 or 4 behaves materially the same. **The tax has to exist; 2 can be chosen for feel.**
+
+**The forced minimum draw is doing more work than expected.** It taxes the team two cards a turn
+regardless of engagement, and over a floor of many turns that dwarfs what a room prints as its Flee
+line — see [ticket 21](21-defeating-a-floor-card.md). This ticket's *"the drain is charged against
+turns, not against moves"* is, if anything, understated.
+
+**Withdrawn:** an earlier version of this note reported that the hand cap of 5 lands on a measured
+peak. It does not stand — the hand-cap curve was a property of the invented cards, not of the game.
+This ticket's reasoning for the cap was never economic in the first place, and is untouched. Ticket 10
+will re-check it once [ticket 12](12-exemplar-card-set.md) exists.

@@ -1160,26 +1160,65 @@ function autoTurn(opts) {
   var hoard = !!opts.holdStuff && d.kind !== "Enemy";
 
   /* ---- draw ---- */
+  /* Draw against what the room actually asks, pooled across both characters and
+     re-checked after every single draw. Halving the threshold per character
+     stopped a hand one card short and let a character with the wrong stat empty
+     its deck chasing a number it could never reach. */
+  var stuffRoom = d.kind === "Stuff";
+  var t = stuffRoom ? null : roomThreshold(d);
+  function drawStat(c) {
+    if (!stuffRoom) return t.stat;
+    var L = stuffLines(d).filter(function (x) { return x.who === c.name; })[0] || {};
+    return L.stat || "power";
+  }
+  /* Match the target to what the play stage will chase: on a Stuff room that is
+     tier 2 when chasing, tier 1 otherwise. */
+  function drawNeed(c) {
+    if (!stuffRoom) return t.n;
+    var L = stuffLines(d).filter(function (x) { return x.who === c.name; });
+    var target = (opts.chaseStuff && L[1]) ? L[1] : L[0];
+    return target ? target.need : CFG.stuffT1;
+  }
+  var live = [], got = {};
   for (i = 0; i < 2; i++) {
     c = G.chars[names[i]];
     if (c.down) { c.doneDrawing = true; continue; }
     payMinimum(c);
     if (opts.greed === "min") { c.doneDrawing = true; continue; }
-    var want = true, guard = 0;
-    while (want && canDraw(c) && guard++ < 20) {
-      if (opts.greed === "max") { drawOne(c); continue; }
-      /* draw until this character can plausibly contribute what the room asks */
-      var stat = d.kind === "Stuff"
-        ? (stuffLines(d).filter(function (L) { return L.who === c.name; })[0] || {}).stat || "power"
-        : roomThreshold(d).stat;
-      var need = d.kind === "Stuff"
-        ? CFG.stuffT1
-        : Math.ceil(roomThreshold(d).n / 2);
-      var b = bestPlays(c, stat, need, hoard);
-      if (b.meets) want = false; else drawOne(c);
-    }
-    c.doneDrawing = true;
+    got[c.name] = bestPlays(c, drawStat(c), drawNeed(c), hoard).got;
+    live.push(c);
   }
+  function pooled() {
+    if (stuffRoom) return 0;                  // Stuff lines are per-character
+    var sum = 0;
+    for (var k = 0; k < 2; k++) {
+      var ch = G.chars[names[k]];
+      if (ch.down || got[ch.name] == null) continue;
+      sum += got[ch.name];
+    }
+    return sum;
+  }
+  var guard = 0;
+  while (live.length && guard++ < 40) {
+    if (opts.greed !== "max" && !stuffRoom && pooled() >= t.n) break;
+    var next = [];
+    for (i = 0; i < live.length; i++) {
+      c = live[i];
+      if (!canDraw(c)) continue;
+      if (opts.greed !== "max" && !stuffRoom && pooled() >= t.n) break;
+      if (opts.greed === "max") { drawOne(c); next.push(c); continue; }
+      if (stuffRoom && got[c.name] >= drawNeed(c)) continue;   // this line is already met
+      drawOne(c);
+      var now = bestPlays(c, drawStat(c), drawNeed(c), hoard).got;
+      /* A character whose best play did not improve on its last draw is not
+         going to reach this stat: stop, and leave the room to the other one. */
+      var improved = now > got[c.name];
+      got[c.name] = now;
+      if (improved) next.push(c);
+    }
+    live = next;
+  }
+  for (i = 0; i < 2; i++) G.chars[names[i]].doneDrawing = true;
   maybeEndDraw();
   if (G.phase === "over") return;
 
@@ -1198,7 +1237,6 @@ function autoTurn(opts) {
       }
     }
   } else {
-    var t = roomThreshold(d);
     /* Try to clear with the combined pool: play Red's best, then Gray's. */
     var combined = 0, plans = [];
     for (i = 0; i < 2; i++) {

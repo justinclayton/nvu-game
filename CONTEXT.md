@@ -160,7 +160,10 @@ the **fuel** those tools burn. The whole hand exhausts at end of turn unless a c
 *(ticket 04)*
 
 **Draw** — the act, in the draw phase, of moving cards from deck to hand, one at a time, until the
-player declares they are done. Each character must draw **at least one** card. Drawing spends stamina
+player declares they are done. Each character must draw **at least one** card, and a full hand is no
+excuse: if your hand is full when you draw for the minimum, the card is **Exhausted instead of going
+into your hand**. So a standing character can always meet the minimum, and only an empty deck stops
+them. Drawing spends stamina
 whether or not the cards get used, which makes it the central decision of the game — and since the
 whole hand is exhausted at cleanup anyway, it is where nearly all of a turn's tension lives. A player
 cannot draw again once the play phase has begun. *(tickets 04, 21)*
@@ -195,8 +198,8 @@ design owned by ticket 11)*
 **Down** (of a character) — down, not dead. A character is **Down** when something would Exhaust a
 card from their **empty deck**, or when the team **Flees** the room while that character is in **last
 stand**. Reaching an empty deck is *not* itself Down — it is last stand, which is the state you have
-to fight out of. **Being unable to draw is not Down either**, whether from a full hand or an empty
-deck; the minimum draw simply goes unmet. A Down character is **skipped in the draw and play phases
+to fight out of. A **full hand** never causes any of this: you still draw for the minimum and the
+card is Exhausted instead. A Down character is **skipped in the draw and play phases
 entirely**, **takes no rewards**, and **cannot have cards put into their hand** — Stuff cannot be
 parked on them. With no one else to absorb them **every room Flee cost falls on the survivor**.
 **Ascending heals them to full** like anyone else. The run ends only when both characters are Down.
@@ -224,6 +227,8 @@ can be sorted by sight; neutral cards cannot be, which is why the play zone is s
 rather than shared. *(ticket 07; execution owned by ticket 11)*
 
 **Maximum hand size** — **5**, and **`Hold` cards count against it**, which is what gives `Hold` a
-price. It is a **draw-phase limit only**: you cannot draw while at or over 5, but **Stuff enters your
-hand regardless of how full it is**, so a punishment can shove you above the cap and lock your draw
-for turns. A floor begins with **empty hands**. *(ticket 07)*
+price. It is a **draw-phase limit only**: you cannot draw *up* while at or over 5. It never stops the
+**minimum draw** — with a full hand you still draw, and the card is **Exhausted instead of entering
+your hand**, so a full hand costs you a card a turn rather than saving you one. **Stuff enters your
+hand regardless of how full it is**, so a punishment can shove you above the cap and bleed you until
+you spend down. A floor begins with **empty hands**. *(tickets 07, 04)*

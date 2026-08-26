@@ -324,3 +324,34 @@ minimum draw simply goes unmet.
 
 Untouched: deck as stamina, the draw decision, the three zones, no discard pile, and the minimum draw
 itself.
+
+## Amended 2026-08-25 — a full hand no longer stops the draw
+
+`[you]` **You always draw for the minimum, even with a full hand. If your hand is full, the drawn
+card is Exhausted instead of going into your hand.**
+
+This closes the hole the `Down` ruling opened earlier the same day. Being unable to draw had become
+free, so a character could fill their hand with five `Hold` cards and stop paying stamina
+indefinitely — which is the co-op idling strategy this ticket wrote the minimum draw to prevent,
+arriving through a different door.
+
+It also removes a special case rather than adding one. This ticket's exception — *"the one exception
+is a character who is physically unable to draw: at a hand cap"* — no longer exists. **A standing
+character can always meet the minimum draw.** The only thing that stops them is an empty deck, which
+is last stand.
+
+**What it does to holding Stuff, which is the point.** Hoarding was free, and free hoarding was the
+exploit. Now a full hand costs you a card off the top of your deck every turn, so Stuff in hand is
+banked value you pay to sit on. This is the hand cap finally pricing `Hold`, which is what
+[ticket 11](11-card-anatomy.md) wanted it to do.
+
+**Bad Stuff gets meaningfully worse, and that is accepted.** `[you]` Bad Stuff is `Hold`, ignores the
+hand cap, and arrives as a room's punishment — so under this rule it no longer just clogs a hand, it
+bleeds a card a turn until you spend it down. The agent raised this as possibly bigger than the room
+cards were priced for. **Ruled acceptable**, because the bleed is always escapable by the player's own
+choice: Bad Stuff **can always be played to get it out of your hand**, and it is **ordinary fuel for a
+real card**. So it is a cost you can end whenever you decide to, not a bleed you are stuck under.
+
+`[you]` **Some Bad Stuff may need its value rebalanced** now that carrying it is more expensive. That
+is a tuning pass, not a rules problem, and belongs with the numbers in
+[ticket 10](10-sim-the-resource-economy.md).

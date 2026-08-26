@@ -104,7 +104,10 @@ retired one.
 Three things this ticket now inherits rather than decides:
 
 - **Down is no longer "unable to draw."** Ticket 04's loss condition is superseded; being unable to
-  draw, whether from a full hand or an empty deck, is simply not drawing.
+  draw is simply not drawing. *(Amended [you, ticket 04, 2026-08-25]: the full-hand half of this no
+  longer arises. A full hand does not stop the minimum draw — the card is Exhausted instead — so the
+  only way to fail to draw is an empty deck, which is last stand. That closed the hand-jam exploit,
+  where five `Hold` cards let a character stop paying stamina indefinitely.)*
 - **There is a whole state between full health and Down.** Last stand is now occupied for as long as
   the deck is empty, so "reaching zero" and "being Down" are two different events with real distance
   between them. Any mid-floor revive this ticket designs has to say which of the two it answers.

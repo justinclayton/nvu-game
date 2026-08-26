@@ -43,10 +43,13 @@ are facing before you spend anything.
 any order, each stopping when they say they are done.
 
 - **You must draw at least 1.** There is no way to sit a turn out.
-- **You may not draw while at 5 or more cards in hand.** `Hold` cards count. Stuff shoved into your
-  hand by a room ignores the cap — you simply cannot draw until you are back under it.
-- **If you are unable to draw, you simply do not.** A full hand or an empty deck means the minimum
-  goes unmet and nothing happens for it. **Being unable to draw is not, by itself, Down.**
+- **You may not draw *up* while at 5 or more cards in hand.** `Hold` cards count. Stuff shoved into
+  your hand by a room ignores the cap.
+- **A full hand does not excuse the minimum.** If your hand is full, you still draw your 1 — and that
+  card goes **straight to your exhaust pile** instead of into your hand. A full hand costs you a card
+  a turn; it does not save you one.
+- **The only thing that stops you drawing is an empty deck**, and that is last stand. **Being unable
+  to draw is not, by itself, Down.**
 - **This is the game's central decision.** Every card drawn is stamina spent whether you use it or
   not, because your whole hand is gone at the end of the turn anyway.
 

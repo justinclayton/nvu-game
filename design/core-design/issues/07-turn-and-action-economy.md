@@ -395,3 +395,28 @@ needed on top of that is a live question and belongs to the human.
 choose whose hand Stuff enters. Nothing stopped the team parking every unwanted piece of Bad Stuff on
 someone who could not act, permanently defusing the hand cap that this ticket introduced specifically
 to price `Hold` and Bad Stuff. *Cannot have cards added to their hand* ends it.
+
+## Amended by ticket 04, 2026-08-25 — a full hand blocks drawing *up*, not the minimum
+
+`[you, ticket 04]` **You always draw for the minimum, even with a full hand. With a full hand the
+drawn card is Exhausted instead of going into your hand.**
+
+This narrows this ticket's *"you simply cannot draw while at or over 5"*. The cap still stops you
+drawing **up** — you cannot assemble a bigger hand than five, which is the ceiling this ticket wanted.
+It no longer stops the **minimum**, which now always happens while you have a deck.
+
+**It sharpens the punishment this ticket was already reaching for.** This ticket rejected a hard
+ceiling so that Bad Stuff could not fizzle against a full hand, and said *"being shoved to seven cards
+and unable to draw for two turns is the better punishment."* Under the amendment those two turns are
+worse still: you are not merely unable to draw, you are **burning a card a turn off the top of your
+deck** until you spend your hand down. Bad Stuff went from dead weight to a bleed.
+
+`[you, ticket 04]` That is accepted, because the bleed is always escapable by the player's own choice
+— Bad Stuff can be played to clear it, and it is ordinary fuel for a real card. Some Bad Stuff may
+want rebalancing now that carrying it costs more, which is
+[ticket 10](10-sim-the-resource-economy.md)'s tuning pass.
+
+**And it retires the exploit this ticket's cap accidentally created.** Filling a hand with five `Hold`
+cards used to stop the drain entirely, which is the co-op idling strategy ticket 04's minimum draw
+exists to prevent. This ticket's own line that *"holding is a real cost against a five-card ceiling"*
+is now literally true rather than only figuratively.

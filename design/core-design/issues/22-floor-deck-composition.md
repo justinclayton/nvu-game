@@ -248,3 +248,76 @@ Two consequences for this ticket:
 
 **Rename**, per ticket 11: **combat room → Enemy room**, **item room → Stuff room**. And this ticket's
 **Flee cost** and ticket 21's **punishment** are one field, printed once as the room's **Flee line**.
+
+## Open finding from ticket 12, 2026-08-25 — the Stuff room turn
+
+**Nothing here is ruled.** This is a finding logged against a resolved ticket so it is not lost, and it
+belongs to this ticket because it is composition. Found by a reviewer given only
+[ticket 12's card sheet and rules summary](../prototypes/12-exemplar-card-set.md) — no tickets, no map
+— who set up floor 1 and played it out.
+
+### What happens
+
+**Six of ten turns were "draw one, throw it away," and Gray went Down on turn 7 without a single Enemy
+or Hazard touching them.**
+
+A Stuff room has no threshold and no Flee line, so there is nothing to beat and nothing to decline. But
+the turn still runs its full shape, and ticket 04's **minimum draw** means each standing character
+still spends a card. So a Stuff turn costs the team **2 cards of stamina** and asks one thin question:
+whose hand the Stuff goes into.
+
+At floor 1 that is **9 of 13 rooms — 69% of the deck**, and it is the most Stuff the curve ever holds,
+so the problem is at its worst exactly where a new player meets the game.
+
+### Why it happens: two well-reasoned rulings colliding
+
+Neither of these is wrong on its own.
+
+- **This ticket removed the Stuff room's challenge** so the room would never be a disappointment.
+- **Ticket 04 made the minimum draw mandatory** so declining a room would never be free and the drain
+  would have no off switch.
+
+Guaranteed payout plus mandatory cost equals a turn where you pay and choose nothing. Then
+[ticket 11](11-card-anatomy.md) made Stuff the stat engine, which raised the stakes in both
+directions: the room is now the supply line you cannot skip, *and* the most common thing you do.
+
+### Two complaints, not one — and they belong to different tickets
+
+The review ran them together and they should be split, because they have different fixes.
+
+1. **The turn has no decision.** Structural, and this ticket's. Ticket 06 put the frantic pillar on
+   *something acts on you every turn* — carried, per [ticket 07](07-turn-and-action-economy.md), by
+   the flip alone. On a Stuff room the flip acts on nobody.
+2. **The drain is lethal.** Numeric, and [ticket 10](10-sim-the-resource-economy.md)'s. Nine such turns
+   is 18 cards against a combined starting pool that ticket 09 left unsized. If 2 cards is a fair price
+   for a piece of Stuff worth 3–6 stats, this half evaporates on its own once decks are sized.
+
+**One mitigation already in the design, which the rules never state and this ticket should:** a Stuff
+room **leaves the floor deck permanently** — it becomes a card in a hand, so it is never Cleared and
+never Fled. The deck shrinks as you strip-mine it and the Enemy gets closer. The tax is also a clock.
+
+### The option space, none of them ruled
+
+1. **Do nothing; treat it as ticket 10's number.** A Stuff turn is a breather between hazards, and
+   paying 2 cards for the stat engine is a good trade. Cost: the game's most common turn stays empty
+   of agency, which is what ticket 06's pillar can least afford.
+2. **Lower the Stuff count.** One number, preserves every structure, keeps the 9 → 0 shape starting
+   from a lower top. Cost: narrows this ticket's only escalation dial, and does not fix complaint 1.
+3. **Exempt Stuff turns from the minimum draw.** Directly removes the tax. Cost: reintroduces the off
+   switch ticket 04 closed deliberately, on 69% of floor 1 — probably the worst option on the table.
+4. **Flip two Stuff, take one.** Gives the turn a real decision while keeping the guarantee, and reuses
+   the ascend offer's shape rather than inventing anything. Cost: burns the Stuff pool twice as fast,
+   and puts a small shopping moment inside the encounter — though no larger than the hazard reveal
+   ticket 09 already cleared on those grounds.
+5. **A Stuff room does not consume a turn: take the Stuff and flip again immediately.**
+   `[the agent's recommendation, labelled as such]` It preserves everything this ticket wanted — Stuff
+   guaranteed, never a disappointment, scarcity as the dial — and dissolves both complaints at once,
+   because there is no longer a Stuff *turn* to be empty or to charge for. It also sharpens this
+   ticket's escalation dial rather than blunting it: early floors are thick with free flips, late
+   floors have none, so the same 9 → 0 curve now controls **how many turns a floor costs** as well as
+   how much Stuff it yields. Cost: floor 1 gets substantially easier and shorter, which is a
+   ticket 10 number; and a run of Stuff rooms can hand one character several pieces at once, which the
+   hand cap turns into a real decision rather than a problem.
+
+**What this does not touch:** the win condition, the Enemy room's Flee cost, the reshuffle, or the fact
+that escalation runs on Stuff scarcity. Every option above leaves those alone.

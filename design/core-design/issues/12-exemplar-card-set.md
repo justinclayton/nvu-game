@@ -205,11 +205,11 @@ could not tell apart the game's most important card category.
 two of Gray's cards — a conditional cross-character read that never repaid the attention it demanded,
 which is precisely what the ruling forbids. It now reads *"Power equal to **twice** the number of cards
 Red has played into the play zone this turn"*, the shape ticket 21 used when it named this pattern.
-`[proposed by agent → awaiting your ruling]`; the alternative is to demote it to `Fine` and accept it
-as a minor card.
+`[proposed by agent → you approved, 2026-08-25]`. The alternative — demote it to `Fine` and accept it
+as a minor card — was put and **declined**: the card keeps its ceiling and earns its tier.
 
-**One open question this raises**, also `[proposed by agent → awaiting your ruling]`: **does "value"
-mean ceiling or rate?** They disagree in this set — `Pry Bar` is more efficient than `Cutting Torch`
-(3 stats per card against 2.5) while `Cutting Torch` is plainly the bigger card. The set reads it as
-**ceiling**, on the grounds that a five-card hand cap makes one big number worth more than two good
-ones.
+**And "value" means ceiling, not rate** `[proposed by agent → you approved, 2026-08-25]`. The two
+disagree in this set — `Pry Bar` is more efficient than `Cutting Torch` (3 stats per card against 2.5)
+while `Cutting Torch` is plainly the bigger card — and the border reports the **ceiling**, because a
+five-card hand cap means one big number clears thresholds that two good ones cannot reach. Recorded in
+full on [ticket 11](11-card-anatomy.md), which owns the axis.

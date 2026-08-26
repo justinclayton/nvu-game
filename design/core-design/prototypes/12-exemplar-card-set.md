@@ -83,15 +83,15 @@ question is unavoidable rather than quietly designed around.**
 
 > *Power equal to twice the number of cards Red has played into the play zone this turn.*
 
-**Doubled 2026-08-25** `[proposed by agent → awaiting your ruling]`, as a direct consequence of the
+**Doubled 2026-08-25** `[proposed by agent → you approved]`, as a direct consequence of the
 value ruling. At single value this card paid **Power 2–3 for two of Gray's cards** — a conditional,
 cross-character read that never repaid the attention it demanded, which is exactly what the new rule
 forbids: *a complex card should pay for its complexity in potential value when the synergy comes
 together.* Under the old complexity-only axis the honest response would have been to demote it to
 `Fine`; under the value axis the honest response is to make it worth its tier. Doubling is the shape
 ticket 21 itself used when it named this pattern — *"Power equal to twice the number of cards Gray
-plays this turn."* **The alternative, if you would rather not raise the ceiling, is to drop it to
-`Fine` and accept it as a minor card.**
+plays this turn."* The alternative — drop it to `Fine` and accept it as a minor card — was put and
+**declined**.
 
 **Wording fixed 2026-08-25.** It read *"the number of cards Red played this turn"*, which a new player
 reads as including the cards Red **Exhausted to pay costs** — a materially different and much larger
@@ -476,11 +476,15 @@ pool. Escalation stays on ticket 22's single dial.
 a player cull their weakest cards under fire. There is still no culling, so quality being legible pays
 for itself in *acquisition* — knowing what a reward is worth as you take it — not in deck management.
 
-**The measure is ceiling, not efficiency** `[proposed by agent → awaiting your ruling]`. The one place
-the ruling needs a tiebreak is that `Pry Bar` is more *efficient* than `Cutting Torch` (3 stats per
-card against 2.5) while `Cutting Torch` is plainly the bigger card. This set reads "value" as **what
-the card can do for you when things line up**, which is the human's own phrasing, and a five-card hand
-cap makes one big number worth more than two good ones. Say if you meant rate instead.
+**The measure is ceiling, not efficiency** `[proposed by agent → you approved]`. The tiebreak the
+ruling needed: `Pry Bar` is more *efficient* than `Cutting Torch` (3 stats per card against 2.5) while
+`Cutting Torch` is plainly the bigger card. The border reports **what the card can do for you when
+things line up**, because a five-card hand cap means one big number clears thresholds that two good
+ones cannot reach.
+
+**So a card can feel ordinary and still be `Woah`, and vice versa.** Efficiency is not what rarity
+reports — a cheap, repeatable, grindingly good card may sit at `Fine` while a swingy one-shot sits at
+`Woah`. That is the axis working, not a miscalibration.
 
 ### What the new axis did to the distribution
 

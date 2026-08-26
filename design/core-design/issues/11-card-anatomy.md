@@ -419,10 +419,14 @@ quality is legible again, but 6a wanted legible quality *so a player could cull 
 under fire*. There is still no culling. Quality now pays for itself at **acquisition** — knowing what a
 reward is worth as you take it — not in deck management.
 
-### Left for the human
+### Value means ceiling, not rate
 
-**Whether "value" means ceiling or rate** `[proposed by agent → awaiting your ruling]`. The two come
-apart in the exemplar set: `Pry Bar` gives 3 stats for one card while `Cutting Torch` gives 5 for two,
-so `Pry Bar` is the more *efficient* card and `Cutting Torch` the bigger one. Ticket 12 read the ruling
-as **ceiling** — "what the card can do for you when things line up", the human's own phrasing — on the
-grounds that a five-card hand cap makes one big number worth more than two good ones.
+`[proposed by agent → you approved, 2026-08-25]` The two come apart in the exemplar set: `Pry Bar`
+gives 3 stats for one card while `Cutting Torch` gives 5 for two, so `Pry Bar` is the more *efficient*
+card and `Cutting Torch` the bigger one. **Rarity tracks the ceiling** — what the card can do for you
+when things line up — because a five-card hand cap means one big number clears thresholds that two
+good ones cannot reach.
+
+**A consequence worth stating, since it will come up every time a card is tiered:** a card can be both
+common-feeling and high rarity. Efficiency is not what the border reports, so a cheap, repeatable,
+grindingly good card may sit at `Fine` while a swingy one-shot sits at `Woah`.

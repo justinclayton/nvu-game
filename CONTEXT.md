@@ -80,12 +80,20 @@ character marking, so there is no separate ownership symbol — and there is **n
 every card a character owns comes from their own pool and the only cards belonging to neither are
 Stuff. *(ticket 11)*
 
-**Rarity** — a card's complexity tier, shown as a border colour: **`Fine`**, **`Cool`**, **`Woah`**.
-Starter cards are all `Fine`. It signals **how hard a card will be to read**, not how strong it is:
-the most complex cards are always the highest rarity, so a player can decline a hand full of nested
-conditionals before ever taking one. Rarity is **purely printed** and touches no rules, and the reward
-**pool is flat** — every tier is equally likely at every floor, so rarity never becomes a second
-escalation dial. Good Stuff carries rarity; Bad Stuff does not. *(ticket 11)*
+**Rarity** — a card's **value** tier, shown as a border colour: **`Fine`**, **`Cool`**, **`Woah`**.
+Starter cards are all `Fine`. It is measured on a card's **ceiling** — the most it can do for you when
+things line up — not on its efficiency, because a five-card hand cap means one big number is worth
+more than two good ones. **Complexity rides along rather than setting the tier**: the most complex
+cards are still always the highest rarity, because **a complex card has to pay for its complexity in
+what it does when the synergy comes together**. A simple card can be `Woah` on power alone. Rarity is
+**purely printed** and touches no rules, and the reward **pool is flat** — every tier is equally likely
+at every floor, so rarity never becomes a second escalation dial. Good Stuff carries rarity; Bad Stuff
+does not. *(tickets 11, 12)*
+
+> **Reverses ticket 11's "a complexity signal, never a quality one"** `[you, 2026-08-25]`. The
+> protection ticket 11 wanted survives, because the implication that matters runs one way: every
+> complex card is high rarity, so a player who declines `Woah` still avoids every nested conditional
+> in the game. What they give up is also declining some simple bombs.
 
 **Flee cost** — the punishment a room prints, and the only punishment it has. Normally *"1 character
 Exhausts X from deck"*, with the team choosing who absorbs the whole amount. A room's punishment and

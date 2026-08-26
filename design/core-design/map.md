@@ -330,9 +330,11 @@ head, reacting to what's in front of you, with little time for deep strategy.*
   never prints it.** **Ticket 07's neutral cards do not exist** — every card you own is Red's or
   Gray's, so the only cards belonging to neither are Stuff, and the type line does the character
   mark's job too. **Rarity is new and amends ticket 09**: three tiers, `Fine` / `Cool` / `Woah`,
-  starter cards all `Fine`. It gates **complexity, not power** — the most complex cards are always the
-  highest rarity, so a player can decline a hand full of nested conditionals *before* taking one — and
-  the **pool stays flat**, all tiers equally likely at every floor, so nothing about floor number
+  starter cards all `Fine`. ~~It gates **complexity, not power**~~ — **superseded 2026-08-25**
+  `[you, ticket 12]`: **rarity tracks value above everything**, a more powerful card is a higher tier,
+  and complexity rides along because **a complex card must pay for its complexity in value**. The
+  protection survives one-directionally — every complex card is still high rarity, so declining `Woah`
+  still avoids every nested conditional — and the **pool stays flat**, all tiers equally likely at every floor, so nothing about floor number
   touches the reward pool and escalation stays on ticket 22's single dial. Rarity is **purely
   printed** and touches no rules; the agent's proposal to make an ascend offer one card of each tier
   was declined. **Good Stuff tiers too; Bad Stuff does not.** A **room card** is a list of
@@ -349,7 +351,9 @@ head, reacting to what's in front of you, with little time for deep strategy.*
   budget is **~3 seconds for a room, ~1 second for a player card in a fan**. **Two things ruled out
   rather than answered:** field placement is card design's problem and went to *Out of scope*, and
   item 6a died with ticket 15 — there is no culling, so there is no card *quality* to signal, and
-  rarity must never be pressed into that role. **Left deliberately open:** whether Enemy rooms may
+  ~~rarity must never be pressed into that role~~ — **the second half superseded 2026-08-25**
+  `[you, ticket 12]`: rarity *is* the quality signal now, but 6a stays void because it wanted quality
+  legible for **culling**, and there is still no culling. It pays off at acquisition instead. **Left deliberately open:** whether Enemy rooms may
   also carry a reward tier — the anatomy supports it free, but it is composition and belongs to
   ticket 22.
 

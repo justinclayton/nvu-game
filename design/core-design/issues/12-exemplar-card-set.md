@@ -184,3 +184,32 @@ turn), `Catch Your Breath` (strictly worse than the starter it replaces), `In St
   it ruled Good Stuff carries rarity because *"a `Woah` Stuff should be an exciting flip"* — which is
   quality, the reading it forbade three paragraphs earlier. One of those two lines has to go, and it
   is ticket 11's to lose.
+
+## Rarity re-ruled, 2026-08-25
+
+`[you]` **Rarity is based on card value above everything.** A more powerful card is a *higher* rarity,
+not a lower one; the most complex cards are still always the highest rarity, because a complex card
+has to pay for its complexity in potential value when the synergy comes together.
+
+This **reverses [ticket 11](11-card-anatomy.md)'s "a complexity signal, never a quality one"** and is
+recorded there as an amendment. It came out of this ticket's own finding 4: tiering a real set strictly
+on complexity put `Cutting Torch` at `Power 5` in the same tier as `Shove` at `Power 1`, because a card
+with no rules text has no complexity — and since ticket 11 also made Stuff the stat engine, the axis
+could not tell apart the game's most important card category.
+
+**All 15 rarity-bearing cards were re-tiered.** The distribution went from 9/3/2 to **7 `Fine` / 4
+`Cool` / 4 `Woah`**; the full table is in the
+[deliverable](../prototypes/12-exemplar-card-set.md#finding-4--the-rarity-axis-collapsed-under-its-own-rule-and-has-been-replaced).
+
+**One card changed to fit the new rule rather than being re-tiered.** `In Step` paid `Power 2–3` for
+two of Gray's cards — a conditional cross-character read that never repaid the attention it demanded,
+which is precisely what the ruling forbids. It now reads *"Power equal to **twice** the number of cards
+Red has played into the play zone this turn"*, the shape ticket 21 used when it named this pattern.
+`[proposed by agent → awaiting your ruling]`; the alternative is to demote it to `Fine` and accept it
+as a minor card.
+
+**One open question this raises**, also `[proposed by agent → awaiting your ruling]`: **does "value"
+mean ceiling or rate?** They disagree in this set — `Pry Bar` is more efficient than `Cutting Torch`
+(3 stats per card against 2.5) while `Cutting Torch` is plainly the bigger card. The set reads it as
+**ceiling**, on the grounds that a five-card hand cap makes one big number worth more than two good
+ones.

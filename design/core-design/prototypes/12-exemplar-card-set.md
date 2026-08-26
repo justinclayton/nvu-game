@@ -47,7 +47,7 @@ stamina to filter and made it **strictly worse than the starter it would replace
 also `Cost 0` and at least gives `Scramble 1`. Free look-at-two is worth real money in a game with one
 pass through the deck, and it no longer charges health for the privilege.
 
-### Reckless · Red · `Fine` · `Cost 0` · **Power 5**
+### Reckless · Red · `Cool` · `Cost 0` · **Power 5**
 
 > *At cleanup, Red Exhausts 3 from deck.*
 
@@ -59,11 +59,12 @@ the drawback was null when it mattered most. Under the ruling of 2026-08-25, som
 Exhaust from an empty deck puts that character Down**. Reckless is now the most dangerous card in the
 set to hold at low deck, which is the correct shape for it.
 
-**Rarity dropped `Cool` → `Fine`.** One clause, six words of trigger. It is *brutal*, not *complex*,
-and rarity is the complexity axis — leaving it at `Cool` was the axis quietly sliding back into
-meaning quality. See finding 4.
+**Rarity stays `Cool`, for the opposite reason it originally had.** Under the complexity-only rule this
+briefly dropped to `Fine` — one clause, six words of trigger. Under the **value ruling of 2026-08-25**
+it goes back to `Cool`: `Power 5` for free is more than Red's entire starting hand can assemble, and
+that is what the border is now measuring. It is *brutal*, not *complex*, and that is now allowed.
 
-### Second Wind · Red · `Fine` · `Cost 1` · *(no stat)*
+### Second Wind · Red · `Cool` · `Cost 1` · *(no stat)*
 
 > *Shuffle 3 cards from Red's exhaust pile into Red's deck.*
 
@@ -80,7 +81,17 @@ question is unavoidable rather than quietly designed around.**
 
 ### In Step · Gray · `Cool` · `Cost 1` · *(conditional stat, in text)*
 
-> *Power equal to the number of cards Red has played into the play zone this turn.*
+> *Power equal to twice the number of cards Red has played into the play zone this turn.*
+
+**Doubled 2026-08-25** `[proposed by agent → awaiting your ruling]`, as a direct consequence of the
+value ruling. At single value this card paid **Power 2–3 for two of Gray's cards** — a conditional,
+cross-character read that never repaid the attention it demanded, which is exactly what the new rule
+forbids: *a complex card should pay for its complexity in potential value when the synergy comes
+together.* Under the old complexity-only axis the honest response would have been to demote it to
+`Fine`; under the value axis the honest response is to make it worth its tier. Doubling is the shape
+ticket 21 itself used when it named this pattern — *"Power equal to twice the number of cards Gray
+plays this turn."* **The alternative, if you would rather not raise the ceiling, is to drop it to
+`Fine` and accept it as a minor card.**
 
 **Wording fixed 2026-08-25.** It read *"the number of cards Red played this turn"*, which a new player
 reads as including the cards Red **Exhausted to pay costs** — a materially different and much larger
@@ -93,7 +104,7 @@ is the cheapest demonstration that the shared stat pool is worth having: it is a
 works because Red is at the table. Solo, it is the same card — which is ticket 03's claim made
 concrete.
 
-### Pack Rat · Red · `Cool` · `Cost 2` · *(no stat)* · `Hold`
+### Pack Rat · Red · `Woah` · `Cost 2` · *(no stat)* · `Hold`
 
 > *When you clear a floor, keep up to 2 Stuff for the next floor.*
 
@@ -146,9 +157,9 @@ Type line `Good Stuff`, always `Hold`, carries rarity, carries the bulk of the r
 
 **Coil of Cable** · Good Stuff · `Fine` · `Cost 0` · **Scramble 3** · `Hold`
 
-**Cutting Torch** · Good Stuff · `Fine` · `Cost 1` · **Power 5** · `Hold`
+**Cutting Torch** · Good Stuff · `Cool` · `Cost 1` · **Power 5** · `Hold`
 
-**Grav Harness** · Good Stuff · `Cool` · `Cost 1` · **Power 3, Scramble 3** · `Hold`
+**Grav Harness** · Good Stuff · `Woah` · `Cost 1` · **Power 3, Scramble 3** · `Hold`
 > *When you play this, one character may draw 1 card, ignoring the hand cap.*
 
 > Four pieces, and the numbers dwarf everything in the player decks. That is the point: `Cutting
@@ -156,10 +167,16 @@ Type line `Good Stuff`, always `Hold`, carries rarity, carries the bulk of the r
 > the arrangement — a `Cost 1` piece of Stuff means you burn a card out of a five-card hand just to
 > put your stat base on the table.
 
-**Both rarities dropped, 2026-08-25, and doing it exposed a problem — see finding 4.** `Cutting Torch`
-has no text at all, so on a complexity axis it cannot be anything but `Fine`, however exciting a flip
-it is. `Grav Harness` has one clause and is a far easier read than `Scrap Sense`, so it cannot sit in
-the same tier.
+**These four are the clearest demonstration of the value ruling, and they are what prompted it.**
+Under a complexity-only axis `Cutting Torch` has no text at all, so it could not be anything but
+`Fine` — the single strongest raw number in the set wearing the same border as `Shove`. That is the
+result the human looked at and reversed the axis over. On value the four sort cleanly by **ceiling**:
+`Pry Bar` and `Coil` are the baseline 3, `Cutting Torch` is the biggest single number in the game at
+`Power 5`, and `Grav Harness` is six stats across two kinds plus a card that refunds its own fuel.
+
+**Note this contradicts efficiency, deliberately.** Per card spent, `Pry Bar` is *better* than
+`Cutting Torch` — 3 stats for one card against 5 for two. Rarity tracks the **ceiling**, not the rate,
+because a five-card hand cap means one big number clears thresholds that two good ones cannot reach.
 
 ## Bad Stuff
 
@@ -414,36 +431,69 @@ still needed on top of that is now a live question, and it is yours.
 
 | Card | Was | Now | Why |
 |---|---|---|---|
-| **Reckless** | `Cool` | `Fine` | one clause; rarity is complexity, not brutality |
+| **In Step** | Power = Red's plays | Power = **twice** Red's plays | complexity must pay for itself under the value ruling |
+| **Reckless** | `Cool` | `Cool` *(via `Fine`)* | briefly demoted on complexity, restored on value |
 | **Reckless** | drawback null at 0 deck | *(unchanged text)* | the Down ruling fixed it — exhausting an empty deck now puts you Down |
 | **Both Barrels** | "Clears an **Enemy** room" | "Clears **a** room" | the Enemy room ends the floor, so the upside deleted the card |
 | **Scrap Sense** | dies if Gray *plays* no Good Stuff | dies if Gray is *holding* none at cleanup | most turns nobody plays anything, so it reliably killed itself |
 | **Catch Your Breath** | "Exhaust one and put the other back" | "Put them back in either order" | it was strictly worse than the starter it replaces |
 | **In Step** | "cards Red played" | "cards Red has played into the play zone" | players counted cost payments as plays |
-| **Second Wind** | `Cool` | `Fine` | one clause |
-| **Cutting Torch** | `Cool` | `Fine` | no text at all |
-| **Grav Harness** | `Woah` | `Cool` | one clause; far easier than `Scrap Sense` |
+| **Second Wind** | `Cool` | `Cool` | unchanged in the end; the only heal in the game |
+| **Pack Rat** | `Cool` | `Woah` | Stuff is the stat engine, so carrying two onto floor 8 is enormous |
+| **Cutting Torch** | `Cool` | `Cool` *(via `Fine`)* | the biggest single number in the set; its demotion to `Fine` is what prompted the value ruling |
+| **Grav Harness** | `Woah` | `Woah` | six stats across two kinds, plus a card that refunds its own fuel |
 | **Collapsed Stair** | Flee 1 from deck | Flee 3 from deck | fleeing was cheaper than clearing, so the low tier was dead |
 
-### Finding 4 — the rarity axis collapses under its own rule
+### Finding 4 — the rarity axis collapsed under its own rule, and has been replaced
 
-Auditing every card strictly on *complexity, never quality* left **`Fine`** holding the four starters,
-Reckless, Second Wind, Catch Your Breath and Cutting Torch; **`Cool`** holding three cards; and
-**`Woah`** holding exactly two. A card with no rules text has no complexity, so **every vanilla card in
-the game is `Fine` regardless of how strong it is** — `Cutting Torch` at `Power 5` sits in the same
-tier as `Shove` at `Power 1`.
+Auditing every card strictly on *complexity, never quality* left **`Fine`** holding nine cards
+including `Cutting Torch`, **`Cool`** holding three, and **`Woah`** holding two. A card with no rules
+text has no complexity, so **every vanilla card in the game was `Fine` regardless of how strong it
+was** — `Cutting Torch` at `Power 5` wearing the same border as `Shove` at `Power 1`. Rarity could not
+differentiate Good Stuff at all, which is most of what the game's numbers come from.
 
-That is the rule working as written, and it makes two things visible:
+**Ruled 2026-08-25** `[you]`, looking at exactly that result:
 
-- **Rarity cannot differentiate Good Stuff at all**, because Stuff is mostly vanilla stats. This
-  contradicts ticket 11 in its own words: it ruled Good Stuff carries rarity because *"a `Woah` Stuff
-  should be an exciting flip"* — which is **quality**, the exact reading ticket 11 forbade three
-  paragraphs earlier. One of those two lines has to go, and it is the human's call which.
-- **The tiers are lopsided.** If `Woah` means "two or more interacting clauses" it will be a small
-  slice of any real pool, which may be correct — a player declining all `Woah` cards should be
-  declining a minority, not a third.
+> **Rarity is based on card *value* above everything.** If a card is objectively more powerful, it is a
+> **higher** rarity, not a lower one. The most complex cards are still always the highest rarity — but
+> **a complex card has to pay for its complexity in potential value when the synergy comes together.**
 
-**Not resolved here.** Recorded against ticket 11, which owns the axis.
+**This reverses ticket 11's *"a complexity signal, never a quality one"*, knowingly**, and resolves the
+contradiction this finding identified in ticket 11's favour of its own *"a `Woah` Stuff should be an
+exciting flip"* line. Recorded as an amendment on ticket 11, not edited into it.
+
+**Ticket 11's actual protection survives**, which is why the reversal costs less than it looks. The
+implication that matters runs one way: **every complex card is still high rarity**, because complexity
+must be paid for in value. So a player who declines `Woah` cards still avoids every nested conditional
+in the game. What they give up is that they now also decline some simple bombs.
+
+**Ticket 09's concern is also untouched.** Rarity signalling value does *not* make it an escalation
+dial, because the pool stays flat — every tier is equally likely at every floor, so a floor-2 reward
+can still be a `Woah` and a floor-9 reward can still be `Fine`. Nothing about floor number touches the
+pool. Escalation stays on ticket 22's single dial.
+
+**And ticket 15 is not reopened.** Legible card quality was ticket 11's item 6a, which existed to let
+a player cull their weakest cards under fire. There is still no culling, so quality being legible pays
+for itself in *acquisition* — knowing what a reward is worth as you take it — not in deck management.
+
+**The measure is ceiling, not efficiency** `[proposed by agent → awaiting your ruling]`. The one place
+the ruling needs a tiebreak is that `Pry Bar` is more *efficient* than `Cutting Torch` (3 stats per
+card against 2.5) while `Cutting Torch` is plainly the bigger card. This set reads "value" as **what
+the card can do for you when things line up**, which is the human's own phrasing, and a five-card hand
+cap makes one big number worth more than two good ones. Say if you meant rate instead.
+
+### What the new axis did to the distribution
+
+| Tier | Before (complexity) | After (value) |
+|---|---|---|
+| `Fine` | 9 | 7 — the four starters, `Catch Your Breath`, `Pry Bar`, `Coil of Cable` |
+| `Cool` | 3 | 4 — `Reckless`, `Second Wind`, `In Step`, `Cutting Torch` |
+| `Woah` | 2 | 4 — `Pack Rat`, `Scrap Sense`, `Both Barrels`, `Grav Harness` |
+
+The complexity axis had bunched two-thirds of the set into one border. The value axis spreads it, and —
+worth noting, because it is the thing that makes the tier informative — **`Woah` now contains a card
+with no conditional text at all** (`Grav Harness` is close, and a hypothetical `Power 8` piece of Stuff
+would be a pure case).
 
 ### What the review found that is *not* fixed here, because it is not the exemplars' to fix
 

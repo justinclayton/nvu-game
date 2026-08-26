@@ -364,3 +364,65 @@ Two measurements this ticket created, added to that ticket's brief:
 2. **Is floor 10 winnable at zero Stuff?** The shape is ruled — floor 10 is the desperate scrape — but
    the bottom of ticket 22's item curve is a number, and if 0 is impossible rather than desperate, 2
    or 3 is a one-number fix.
+
+## Amended by ticket 12's build session, 2026-08-25
+
+**Rarity is a value axis, not a complexity axis. This reverses this ticket's central ruling on the
+subject, knowingly.**
+
+`[you, 2026-08-25]`
+
+> **Rarity is based on card *value* above everything.** If a card is objectively more powerful, it is a
+> **higher** rarity, not a lower one. The most complex cards are still always the highest rarity — but
+> **a complex card has to pay for its complexity in potential value when the synergy comes together.**
+
+So this ticket's *"Rarity's job is complexity signalling"*, its *"Rarity is a complexity signal, never
+a quality one"*, and its instruction *"Do not use `Woah` to mean 'good'"* no longer hold. `Woah` means
+good. It also usually means complicated, but as a consequence rather than a definition.
+
+### What forced it
+
+[Ticket 12](12-exemplar-card-set.md) tiered a real card set strictly on complexity and the axis
+collapsed. **A card with no rules text has no complexity**, so every vanilla card came out `Fine`
+however strong it was — `Cutting Torch` at `Power 5` wearing the same border as `Shove` at `Power 1`,
+and two-thirds of the set bunched into one tier. Since this ticket also ruled that **Stuff carries the
+bulk of the raw stats**, and Stuff is mostly vanilla numbers, the complexity axis could not
+differentiate the most load-bearing card category in the game at all.
+
+**This ticket was already in contradiction with itself on exactly this point**, and the reversal
+resolves it in favour of the second line: it forbade quality-signalling, then justified Good Stuff
+carrying rarity on the grounds that *"a `Woah` Stuff should be an exciting flip"* — which is quality.
+
+### What survives
+
+**The protection this ticket actually wanted is intact.** Its reason for complexity-gating was that a
+player should be able to decline nested conditionals *before* taking them. The implication that
+delivers that runs one way and still holds: **every complex card is high rarity**, because complexity
+must be paid for in value. A player who declines `Woah` still avoids every hard read in the game. What
+they give up is that they now also decline some simple bombs — which is a real cost, and it is the
+price of the reversal.
+
+**Starter cards are all `Fine`** — unchanged, and now for a reason rather than by fiat: starters are
+weak.
+
+**Rarity is still purely printed and touches no rules**, and **Bad Stuff still has no tier**. Under a
+value axis that second one is more coherent than it was, not less.
+
+**[Ticket 09](09-card-acquisition-and-deckbuilding.md)'s concern is untouched.** Rarity signalling
+value does **not** make it an escalation dial, because **the pool stays flat**: every tier is equally
+likely at every floor, so a floor-2 reward can be a `Woah` and a floor-9 reward can be `Fine`. Nothing
+about floor number touches the reward pool. Escalation stays on ticket 22's single dial. What 09
+banned and this preserves is a *curve*, not a *tier*.
+
+**[Ticket 15](15-damage-as-thinning-rubber-band.md) is not reopened, and item 6a stays void.** Card
+quality is legible again, but 6a wanted legible quality *so a player could cull their weakest cards
+under fire*. There is still no culling. Quality now pays for itself at **acquisition** — knowing what a
+reward is worth as you take it — not in deck management.
+
+### Left for the human
+
+**Whether "value" means ceiling or rate** `[proposed by agent → awaiting your ruling]`. The two come
+apart in the exemplar set: `Pry Bar` gives 3 stats for one card while `Cutting Torch` gives 5 for two,
+so `Pry Bar` is the more *efficient* card and `Cutting Torch` the bigger one. Ticket 12 read the ruling
+as **ceiling** — "what the card can do for you when things line up", the human's own phrasing — on the
+grounds that a five-card hand cap makes one big number worth more than two good ones.

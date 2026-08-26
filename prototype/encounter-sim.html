@@ -174,6 +174,10 @@
       <div class="row">
         <input id="noteInput" placeholder="adjudicate rules text / note something…" style="width:340px">
         <button id="btnNote">Add note</button>
+        <span class="tiny muted">export:</span>
+        <button id="btnExportTxt">.txt</button>
+        <button id="btnExportCsv">.csv</button>
+        <button id="btnExportJson">.json</button>
       </div>
     </div>
     <div id="log"></div>
@@ -348,6 +352,17 @@
     <h3>Winning</h3>
     <p class="tiny muted">Clearing the <strong>Enemy room</strong> ends the floor. Hazard and Stuff
       rooms are resources on the way to the fight and a floor can end with either still in the deck.</p>
+
+    <h3>Exporting a play log</h3>
+    <p class="tiny muted">The Play tab exports the current floor three ways. <strong>.csv</strong> is one
+      row per turn — room, outcome, cards drawn by each character, both deck heights before and after,
+      Stuff taken, draws burnt to a full hand, last stand and Down flags — which is the one to open in a
+      spreadsheet. <strong>.json</strong> is the same rows plus the floor's totals, the settings that
+      produced them, and every log line. <strong>.txt</strong> is the human-readable transcript,
+      including any notes you typed while playing.</p>
+    <p class="tiny muted">The Batch tab exports one row per floor played across the whole batch, capped
+      at the first 2000 runs, plus a settings file recording the auto-player policy that produced it.
+      Every export stamps the settings, because a log without them cannot be compared to another one.</p>
 
     <h3>What this tool does not do</h3>
     <ul class="tiny muted">
@@ -591,7 +606,8 @@ function newFloor(floor, chars, goodPool, opts) {
     chars: chars || { Red: newChar("Red"), Gray: newChar("Gray") },
     goodPool: goodPool || goodStuffPool(),
     badTaken: 0, pending: null, punDone: false, stuffAwarded: false,
-    log: [], over: null, quiet: !!(opts && opts.quiet),
+    log: [], turnLog: [], startedAt: new Date().toISOString(),
+    over: null, quiet: !!(opts && opts.quiet),
     stats: {
       turns:0, forcedExhausts:0, minDraws:0, enemyFlees:0,
       enemyFledSinceTurn:-1, enemyWaitTurns:[], stuffTaken:0, stuffMissed:0,
@@ -623,6 +639,7 @@ function doFlip() {
   if (!G.draw.length) { finish("stalled"); return; }
 
   G.room = G.draw.pop();
+  openTurnRecord();
   if (G.room.def.kind === "Enemy" && G.stats.enemyFledSinceTurn >= 0) {
     G.stats.enemyWaitTurns.push(G.turn - G.stats.enemyFledSinceTurn);
     G.stats.enemyFledSinceTurn = -1;
@@ -933,6 +950,7 @@ function finishCleanup() {
     }
   }
   G.play = { Red: [], Gray: [] };
+  closeTurnRecord(cleared);
 
   if (!G.draw.length && G.fled.length) {
     G.draw = shuffle(G.fled); G.fled = [];
@@ -950,6 +968,156 @@ function finish(how) {
   if (how === "won") log("The Enemy room is Cleared — the floor is over. The characters ascend.", "g");
   else if (how === "wiped") log("Both characters are Down. The run ends here.", "b");
   else log("The floor deck is empty and nothing is left to flip.", "b");
+}
+
+/* ================================================================ play log
+
+   Two parallel records. `G.log` is the prose scrollback a human reads while
+   playing. `G.turnLog` is one row per turn, which is what you actually want
+   when you sit down to analyse a stack of floors.
+*/
+
+function openTurnRecord() {
+  var R = G.chars.Red, Y = G.chars.Gray, d = G.room.def;
+  G.turnLog.push({
+    turn: G.turn, floor: G.floor,
+    room: d.name, kind: d.kind, challenge: challengeText(d),
+    flee: d.kind === "Stuff" ? "" : fleeText(d).replace(/^Flee: /, ""),
+    floorDraw: G.draw.length, floorFled: G.fled.length, floorCleared: G.cleared.length,
+    redDeckIn: R.deck.length, grayDeckIn: Y.deck.length,
+    redHandIn: R.hand.length, grayHandIn: Y.hand.length,
+    redLastStandIn: inLastStand(R), grayLastStandIn: inLastStand(Y),
+    _stuffAt: G.stats.stuffTaken, _forcedAt: G.stats.forcedExhausts,
+    _exitsAt: G.stats.lastStandExits, _redDrawsAt: R.drawsMade, _grayDrawsAt: Y.drawsMade
+  });
+}
+function closeTurnRecord(cleared) {
+  var r = G.turnLog[G.turnLog.length - 1];
+  if (!r) return;
+  var R = G.chars.Red, Y = G.chars.Gray;
+  r.outcome = cleared ? "Cleared" : "Fled";
+  r.tier = G.tierGot;
+  r.redDrew = R.drawsMade - r._redDrawsAt;
+  r.grayDrew = Y.drawsMade - r._grayDrawsAt;
+  r.stuffTaken = G.stats.stuffTaken - r._stuffAt;
+  r.drawsBurnt = G.stats.forcedExhausts - r._forcedAt;
+  r.lastStandExits = G.stats.lastStandExits - r._exitsAt;
+  r.redDeckOut = R.deck.length; r.grayDeckOut = Y.deck.length;
+  r.redHandOut = R.hand.length; r.grayHandOut = Y.hand.length;
+  r.redDown = R.down; r.grayDown = Y.down;
+  r.redLastStandOut = inLastStand(R); r.grayLastStandOut = inLastStand(Y);
+  delete r._stuffAt; delete r._forcedAt; delete r._exitsAt;
+  delete r._redDrawsAt; delete r._grayDrawsAt;
+}
+
+var TURN_COLS = [
+  "floor","turn","room","kind","challenge","outcome","tier",
+  "redDrew","grayDrew","stuffTaken","drawsBurnt","lastStandExits",
+  "redDeckIn","redDeckOut","grayDeckIn","grayDeckOut",
+  "redHandIn","redHandOut","grayHandIn","grayHandOut",
+  "redLastStandIn","redLastStandOut","grayLastStandIn","grayLastStandOut",
+  "redDown","grayDown","floorDraw","floorFled","floorCleared","flee"
+];
+
+function logSettings() {
+  return {
+    deckRed: CFG.deckRed, deckGray: CFG.deckGray, deckRatio: CFG.deckRatio,
+    enemyRooms: CFG.enemyN, hazardRooms: CFG.hazardN,
+    stuffCurve: CFG.stuffBase + "->" + CFG.stuffTop,
+    stuffRoomsThisFloor: G ? stuffCount(G.floor) : null,
+    stuffT1: CFG.stuffT1, stuffP1: CFG.stuffP1,
+    stuffT2: CFG.stuffT2, stuffP2: CFG.stuffP2, secondTierPrinted: CFG.stuffTier2,
+    handCap: CFG.cap ? CFG.capN : "off", minimumDraw: CFG.mandatory,
+    fullHandStillDraws: CFG.fullHandExhaust,
+    lastStand: CFG.lastStand, lastStandExitCost: CFG.lsCost,
+    enemyPowerFloor1: CFG.enemyPow, enemyPowerPerFloor: CFG.enemyPowStep,
+    goodStuffPool: CFG.goodPool
+  };
+}
+
+function stamp() {
+  return new Date().toISOString().replace(/[:.]/g, "-").slice(0, 19);
+}
+function download(name, text, mime) {
+  var blob = new Blob([text], { type: mime + ";charset=utf-8" });
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement("a");
+  a.href = url; a.download = name;
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
+}
+
+function noFloorYet() {
+  el("log").innerHTML = '<div class="b">Nothing to export yet — start a floor first, ' +
+    'or use "Run 1 floor, verbose" on the Batch tab.</div>';
+  return true;
+}
+function exportText() {
+  if (!G) return noFloorYet();
+  var s = logSettings(), k;
+  var out = "North vs Up — encounter simulator play log\n";
+  out += "floor " + G.floor + " · " + G.turnLog.length + " turn(s) · " +
+         (G.over ? "ended: " + G.over : "in progress, phase " + G.phase) + "\n";
+  out += "started " + G.startedAt + ", exported " + new Date().toISOString() + "\n";
+  out += "\nRules as of the floor rules summary of 2026-08-25. Card effect text is NOT executed by\n" +
+         "this engine — stats, costs and Hold are all it understands.\n";
+  out += "\n--- settings ---\n";
+  for (k in s) out += "  " + k + ": " + s[k] + "\n";
+  out += "\n--- turns ---\n";
+  for (var i = 0; i < G.turnLog.length; i++) {
+    var r = G.turnLog[i];
+    out += "\nT" + r.turn + "  " + r.room + " (" + r.kind + ")  " + (r.outcome || "…") + "\n";
+    out += "     " + r.challenge + "\n";
+    out += "     drew " + r.redDrew + "/" + r.grayDrew + " (Red/Gray)" +
+           "  decks " + r.redDeckIn + "→" + r.redDeckOut + " / " + r.grayDeckIn + "→" + r.grayDeckOut +
+           "  Stuff +" + r.stuffTaken + "  draws burnt " + r.drawsBurnt + "\n";
+  }
+  out += "\n--- full log ---\n";
+  for (var j = 0; j < G.log.length; j++) out += "T" + G.log[j].t + "  " + G.log[j].msg + "\n";
+  download("nvu-playlog-floor" + G.floor + "-" + stamp() + ".txt", out, "text/plain");
+}
+
+function exportJson() {
+  if (!G) return noFloorYet();
+  var data = {
+    tool: "nvu-encounter-sim",
+    rulesAsOf: "2026-08-25 floor rules summary",
+    caveat: "Card effect text is not executed by this engine; stats, costs and Hold are.",
+    startedAt: G.startedAt, exportedAt: new Date().toISOString(),
+    floor: G.floor, outcome: G.over || ("in progress: " + G.phase),
+    turnsPlayed: G.turnLog.length,
+    settings: logSettings(),
+    totals: {
+      stuffTaken: G.stats.stuffTaken, stuffLinesMissed: G.stats.stuffMissed,
+      drawsBurntToFullHand: G.stats.forcedExhausts, minimumDraws: G.stats.minDraws,
+      enemyFlees: G.stats.enemyFlees, enemyReturnWaits: G.stats.enemyWaitTurns,
+      floorDeckReshuffles: G.stats.reshuffles,
+      lastStandTurns: G.stats.lastStandTurns, lastStandExits: G.stats.lastStandExits,
+      characterTurnsStartedOverCap: G.stats.overCapTurns, characterTurns: G.stats.charTurns
+    },
+    turns: G.turnLog,
+    log: G.log.map(function (e) { return { turn: e.t, message: e.msg }; })
+  };
+  download("nvu-playlog-floor" + G.floor + "-" + stamp() + ".json",
+           JSON.stringify(data, null, 2), "application/json");
+}
+
+function csvCell(v) {
+  var s = v === true ? "TRUE" : v === false ? "FALSE" : (v == null ? "" : String(v));
+  return /[",\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s;
+}
+function turnsCsv(rows) {
+  var out = TURN_COLS.join(",") + "\n";
+  for (var i = 0; i < rows.length; i++) {
+    var line = [];
+    for (var j = 0; j < TURN_COLS.length; j++) line.push(csvCell(rows[i][TURN_COLS[j]]));
+    out += line.join(",") + "\n";
+  }
+  return out;
+}
+function exportCsv() {
+  if (!G) return noFloorYet();
+  download("nvu-playlog-floor" + G.floor + "-" + stamp() + ".csv", turnsCsv(G.turnLog), "text/csv");
 }
 
 /* ================================================================ auto-player
@@ -1107,6 +1275,7 @@ function runBatch() {
     holdStuff: el("batchHoldStuff").checked,
     verbose: false
   };
+  BATCH_ROWS = [];
   var agg = {
     runs:N, floorsCleared:0, fullRuns:0,
     perFloor: [], deaths: { wiped:0, stalled:0 },
@@ -1123,6 +1292,21 @@ function runBatch() {
     for (f = 1; f <= floors && alive; f++) {
       var pool = goodStuffPool();
       var g = runFloorAuto(f, chars, pool, opts);
+      if (r < BATCH_ROW_CAP) {
+        BATCH_ROWS.push({
+          run: r + 1, floor: f, outcome: g.over, turns: g.stats.turns,
+          stuffRooms: stuffCount(f), stuffTaken: g.stats.stuffTaken,
+          stuffLinesMissed: g.stats.stuffMissed,
+          drawsBurnt: g.stats.forcedExhausts, minimumDraws: g.stats.minDraws,
+          charTurns: g.stats.charTurns, turnsStartedOverCap: g.stats.overCapTurns,
+          lastStandTurns: g.stats.lastStandTurns, lastStandExits: g.stats.lastStandExits,
+          enemyFlees: g.stats.enemyFlees,
+          longestEnemyWait: g.stats.enemyWaitTurns.length ? Math.max.apply(null, g.stats.enemyWaitTurns) : 0,
+          reshuffles: g.stats.reshuffles,
+          redDeckEnd: g.chars.Red.deck.length, grayDeckEnd: g.chars.Gray.deck.length,
+          redDown: g.chars.Red.down, grayDown: g.chars.Gray.down
+        });
+      }
       var pf = agg.perFloor[f - 1];
       pf.played++; pf.turns.push(g.stats.turns);
       pf.forced += g.stats.forcedExhausts; pf.charTurns += g.stats.charTurns;
@@ -1147,6 +1331,33 @@ function runBatch() {
     if (alive) agg.fullRuns++;
   }
   renderBatch(agg, floors);
+}
+
+var BATCH_ROWS = [];
+var BATCH_ROW_CAP = 2000;   // one row per floor played; enough to analyse, small enough to open
+
+var BATCH_COLS = ["run","floor","outcome","turns","stuffRooms","stuffTaken","stuffLinesMissed",
+  "drawsBurnt","minimumDraws","charTurns","turnsStartedOverCap","lastStandTurns","lastStandExits",
+  "enemyFlees","longestEnemyWait","reshuffles","redDeckEnd","grayDeckEnd","redDown","grayDown"];
+
+function exportBatchCsv() {
+  if (!BATCH_ROWS.length) return;
+  var out = BATCH_COLS.join(",") + "\n", i, j, line;
+  for (i = 0; i < BATCH_ROWS.length; i++) {
+    line = [];
+    for (j = 0; j < BATCH_COLS.length; j++) line.push(csvCell(BATCH_ROWS[i][BATCH_COLS[j]]));
+    out += line.join(",") + "\n";
+  }
+  download("nvu-batch-" + stamp() + ".csv", out, "text/csv");
+}
+function exportBatchSettings() {
+  download("nvu-batch-settings-" + stamp() + ".json",
+           JSON.stringify({ exportedAt: new Date().toISOString(), settings: logSettings(),
+                            autoPlayer: { greed: el("batchGreed").value,
+                                          chaseStuff: el("batchStuffGreed").checked,
+                                          hoardStuff: el("batchHoldStuff").checked },
+                            note: "The auto-player is an agent-written heuristic, not a ruling." },
+                          null, 2), "application/json");
 }
 
 function renderBatch(a, floors) {
@@ -1226,7 +1437,16 @@ function renderBatch(a, floors) {
        " · auto-player: " + el("batchGreed").value + (el("batchHoldStuff").checked ? ", hoarding Stuff" : ", spending Stuff freely") +
        "</p></div>";
 
+  h += '<div class="panel"><h2>Export</h2>' +
+       '<p class="note">One row per floor played — ' + BATCH_ROWS.length + ' row(s)' +
+       (a.runs > BATCH_ROW_CAP ? ", capped at the first " + BATCH_ROW_CAP + " runs of " + a.runs : "") +
+       '. The settings file records what produced them, including the auto-player policy.</p>' +
+       '<div class="row"><button id="btnBatchCsv">Download batch .csv</button>' +
+       '<button id="btnBatchSettings">Download settings .json</button></div></div>';
+
   el("batchOut").innerHTML = h;
+  el("btnBatchCsv").addEventListener("click", exportBatchCsv);
+  el("btnBatchSettings").addEventListener("click", exportBatchSettings);
 }
 function statBlock(label, big, sub) {
   return '<div class="panel" style="margin:0"><h3>' + esc(label) + "</h3>" +
@@ -1480,6 +1700,9 @@ el("btnNote").addEventListener("click", function () {
   var v = el("noteInput").value.trim();
   if (v && G) { log("NOTE — " + v, "hl"); el("noteInput").value = ""; renderLog(); }
 });
+el("btnExportTxt").addEventListener("click", exportText);
+el("btnExportCsv").addEventListener("click", exportCsv);
+el("btnExportJson").addEventListener("click", exportJson);
 el("btnBatch").addEventListener("click", runBatch);
 el("btnBatch1").addEventListener("click", runOneVerbose);
 

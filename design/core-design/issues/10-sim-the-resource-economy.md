@@ -1,7 +1,7 @@
 # 10 — Sim the resource economy across a floor
 
 Type: prototype
-Status: open
+Status: claimed
 Blocked by: 04, 07, 09, 11
 Map: [core design map](../map.md)
 
@@ -175,3 +175,158 @@ policy setting, and with **no card effect text executed** — so `Reckless`, `Se
    a character in last stand escapes on any Stuff room, without meeting a threshold or spending a card.
    On floor 1 that is up to nine free escapes sitting in the deck. This falls out of two separate
    rulings colliding and has not been ruled on either way.
+
+## Sweep results, 2026-08-26 — findings only, nothing ruled
+
+The simulator was driven headlessly across the whole plausible tuning range rather than a run at
+a time. The driver is [`prototype/sim-sweep.js`](../../../prototype/sim-sweep.js) — it loads the
+engine straight out of `encounter-sim.html`, so there is still exactly one engine and the HTML
+tool remains the thing a human plays with. `node prototype/sim-sweep.js` reproduces everything
+below; each figure is 600 ten-floor runs.
+
+Everything here is a **finding**. Not one number below is ruled — they are the agent's readings
+and its recommendations, and they are the human's to accept or reject.
+
+### The observation recorded on 2026-08-25 no longer holds
+
+That note said the scaffolding numbers were severely lethal — almost no run reaching floor 3.
+They are not. At 12-card decks, `Power 5`, and the 9 → 0 Stuff curve, **90% of runs now clear all
+ten floors**. The auto-player fixes since then — drawing against the pooled hands and the real
+threshold, and stopping on two dud draws — are the whole difference. The old reading was
+measuring a bad auto-player, not the rules.
+
+The finding it stated is also gone. **No run ever stalls**, in any configuration tested. A fled
+Enemy comes back around after a mean of 3–5 turns and never more than 11, so the reshuffle worry
+— a fled Enemy sitting unreachable — is not real at any numbers tried.
+
+### 1. The deck is not what kills you
+
+The relationship this ticket was built around — `floor length ≈ deck size ÷ draw per turn` — is
+real but is not the binding constraint. Floors run about 7 turns; a character does go near-empty
+and last stand does get entered, but only on **2–3% of character-turns**, and the loss is always
+a wipe rather than a deck-out. What decides a run is whether the party can **meet the threshold
+in front of it**, and that is a question about Good Stuff, not stamina.
+
+That reframes the whole ticket. The deck-as-energy-and-HP model produces a playable arc, but the
+arc's shape is set by the challenge curve, not by the drain.
+
+### 2. Good Stuff is the entire game, and that is a problem
+
+| line | clears all ten floors |
+|---|---|
+| meet Stuff-room thresholds when you can | **89%** |
+| never meet a Stuff-room threshold | **10%** |
+
+One toggle swings the run from near-certain to near-hopeless. Nothing else in the model comes
+close. `[finding]` **Good Stuff is currently load-bearing to the point of being the only real
+decision on a floor** — every other choice is noise beside it.
+
+Whether that is a flaw depends on what a floor is meant to be about, which is a ruling, not a
+measurement. If Stuff rooms are *supposed* to be the floor's spine, this is the model working.
+If they were meant to be one texture among several, it is not.
+
+### 3. No degenerate line — the sensible play is the best play
+
+Both greedy extremes are punished, without a rule saying so:
+
+| draw policy | clears |
+|---|---|
+| draw what you need to afford the room | **89%** |
+| draw to the hand cap every turn | 23% |
+| draw the minimum every turn | 2% |
+
+And **hoarding Stuff for the Enemy room halves the clear rate**, 89% → 48%. The natural miser's
+line loses. The hand-cap collision that the last note worried about barely exists — the cap binds
+on **1% of character-turns** — so it is not a live problem at these numbers.
+
+Sub-questions 4 and 6 of the original brief are answered by this: deliberately failing does not
+dominate, and no stalling strategy emerged.
+
+### 4. The Stuff curve is not a difficulty knob — enemy power is
+
+Ticket 22's escalation is currently expressed as *less Stuff per floor*. Alone, that does almost
+nothing:
+
+| escalation | clears | floor-10 win rate |
+|---|---|---|
+| flat `Power 5`, Stuff 9 → 0 | 91% | 98% |
+| flat `Power 5`, Stuff 9 → 2 | 93% | 100% |
+| `Power` +0.5/floor, Stuff 9 → 0 | 25% | 44% |
+| `Power` +0.5/floor, Stuff 9 → 2 | **62%** | **84%** |
+| `Power` +1/floor, Stuff 9 → 2 | 20% | 59% |
+
+`[finding]` **A flat enemy threshold produces no difficulty curve at all** — floor 10 is as
+winnable as floor 3. A rising threshold produces one immediately. `[agent recommends]` the Enemy
+threshold should rise with the floor, around **+0.5 per floor** (`Power 5` on floor 1 to about
+`Power 9–10` on floor 10). This is a genuinely new number the map does not yet have, and ruling
+it belongs to ticket 22 or a fresh ticket rather than to this one.
+
+There is a structural note underneath. With Stuff bottoming out at 0, floor 10 has only four
+rooms and takes under three turns — the finale is a **spike, not a scrape**. Ticket 11 asked for
+a desperate scrape; that is what a rising threshold gives, while the Stuff curve alone gives a
+short sharp shock. Worth knowing which was meant.
+
+### 5. Is floor 10 winnable at zero Stuff? — Yes, and that is the objection
+
+Ticket 11 handed down that floor 10 must be desperate but possible, and asked whether Stuff
+bottoming out at **0** makes it impossible rather than desperate. It does not: **at 0 Stuff and a
+flat threshold, floor 10 is won 98% of the time**. The starter deck alone is more than enough.
+
+So 0 is safe. `[agent recommends]` **leave the floor-10 Stuff count at 0** — the fix ticket 11
+anticipated (raising it to 2 or 3) is not needed to make floor 10 survivable, and raising it only
+makes an already-easy floor easier. Under a rising threshold, `top=2` becomes a real difficulty
+lever rather than a survivability one (84% vs 44% at floor 10), which is a different argument and
+should be made on its own terms.
+
+### 6. Starting deck size: the curve saturates around 15
+
+Under the escalating configuration, where deck size actually bites:
+
+| starting deck | 6 | 8 | 10 | 12 | 15 | 18 | 24 |
+|---|---|---|---|---|---|---|---|
+| clears all ten | 11% | 30% | 43% | 63% | 77% | 80% | 82% |
+
+Ticket 09's provisional **12–15** sits exactly on the shoulder. Below 10 the deck collapses;
+above 18 the extra cards buy nothing. `[agent recommends]` **15 per character** — the top of the
+provisional band, where the marginal card stops paying and before deck size stops mattering at
+all. 12 is defensible if the intent is that the early floors bite.
+
+### 7. Ticket 09's deck-growth question cannot be answered yet — the sim does not model it
+
+Ticket 09 asked whether ticket 04's inversion governs greed, on the arithmetic that three hazard
+rooms plus an ascend reward could add **forty cards over ten floors**.
+
+**The simulator adds one card per ascend and nothing else**, so a 12-card deck reaches floor 10
+at 21 cards. Good Stuff is set aside on ascending, and the sim's Stuff rooms pay Good Stuff rather
+than permanent cards, so the high-threshold permanent-card payout that ticket 09's arithmetic
+assumed **is not implemented**.
+
+`[finding]` **This is a gap in the instrument, not a finding about the design.** The honest answer
+to ticket 09's charge is *not measured*. Someone must first rule what a hazard room's high
+threshold actually pays — if it pays a permanent card, the sim needs it, and the question can then
+be asked properly.
+
+### 8. Ticket 11's stat-base worry does not appear — conditionally
+
+The failure mode ticket 11 named is a hand of multipliers with nothing to multiply. Across the run
+the permanent deck stays **80%+ raw-stat cards** and the chance of a full hand containing at least
+one usable stat is **1.000 at every floor**.
+
+But that is measured on a deck that grows from 12 to 21, for the reason in the section above. On
+the 40-card deck ticket 09 feared, dilution would be real. `[finding]` **The stat base holds at
+the deck sizes the sim actually produces**; the worry stands or falls with the unimplemented
+growth, and should be re-measured once section 7 is settled.
+
+### What is still needed from you
+
+Nothing above is a ruling. Four decisions would close this ticket:
+
+1. **Starting deck size.** Agent recommends 15; 12 is the other defensible pick.
+2. **The floor-10 Stuff count.** Agent recommends leaving it at 0.
+3. **Whether the Enemy threshold rises with the floor**, and at what rate — the sim says the
+   difficulty curve does not exist without this.
+4. **Whether Good Stuff being the near-sole determinant of a run is intended**, or a sign the
+   floor needs another axis.
+
+Question 3 arguably belongs to ticket 22 and question 4 may want a ticket of its own; both are
+noted rather than assumed.

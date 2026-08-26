@@ -295,3 +295,21 @@ now a real cost paid later.
 Enemy room**, **item room → Stuff room**. A Stuff room has nothing to defeat, so the "one card, two
 readings" problem this ticket flagged as ticket 11's hardest is gone — the card simply *is* the Stuff
 card.
+
+## Amended by ticket 22, 2026-08-25 — Stuff rooms get a threshold after all
+
+`[you, ticket 22]` **A Stuff room prints a threshold: pay stats or leave empty-handed.** It is the
+**lowest threshold in the deck**, below what Hazard and Enemy rooms ask.
+
+This reverses this ticket's *"Item rooms lost their challenge entirely — they print no threshold at
+all"*, and retires the phrase this ticket already flagged as misleading, *"the deck's one always-safe
+decline"*. The room still carries **no punishment and no Flee line**: failing costs you the Stuff,
+not stamina, and the room is Cleared either way.
+
+**What it does to this ticket's "one card, two readings" resolution:** a Stuff room now *does* have
+something to defeat, so the reasoning that collapsed the room card into the Stuff card no longer
+holds on its own terms. Whether the one-card form survives is
+[ticket 22](22-floor-deck-composition.md)'s open consequence 1, unruled — the agent's recommendation
+there is that it does, with the threshold line read only while the card is in the room zone.
+
+Full ruling and its four open consequences: [ticket 22](22-floor-deck-composition.md).

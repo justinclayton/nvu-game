@@ -230,7 +230,9 @@ head, reacting to what's in front of you, with little time for deep strategy.*
   **printed per room**, normally *"1 character Exhausts X from deck"* with the **team choosing who
   absorbs the whole amount**; **declining is failing without trying**, and you can bail mid-draw.
   **Stuff rooms are the only reward**, pay into a chosen character's hand with `Hold`, and carry **no
-  punishment** — the deck's one always-safe decline. **An item never enters the deck**, ruled
+  punishment** — ~~the deck's one always-safe decline~~ *(superseded 2026-08-25 [you, ticket 22]: a
+  Stuff room now prints a threshold below what Hazard and Enemy rooms ask — pay stats or leave
+  empty-handed. Still no punishment; the loss is only the Stuff you did not take.)* **An item never enters the deck**, ruled
   deliberately: the deck is stamina, so that would be the game's only heal and exactly the recursion
   that broke four games in tickets 01 and 16. **Rooms have no behaviour beyond the flip.** New
   vocabulary: **Cleared** (out of the floor deck for good; all rooms Cleared ends the encounter),
@@ -282,7 +284,9 @@ head, reacting to what's in front of you, with little time for deep strategy.*
   card cannot go in your deck, because the deck is stamina — junk in the deck is a punishment that
   heals you. So **`Item` is renamed `Stuff`** — tools, junk, and slime under one plain word — and
   **Stuff splits by where it came from**: **Good Stuff** lives in the floor deck and is what an Item
-  room hands you, so a Stuff room is never a disappointment; **Bad Stuff** lives in a pool *outside*
+  room hands you, so ~~a Stuff room is never a disappointment~~ *(superseded 2026-08-25 [you, ticket
+  22]: a Stuff room can now be failed, so the disappointment is self-inflicted rather than dealt)*;
+  **Bad Stuff** lives in a pool *outside*
   the floor deck and arrives only as a room's printed punishment. Bad Stuff behaves like any other
   Stuff — `Hold`, playable, ordinary fuel — and differs only in contributing **no stats**, so it is an
   effective cut to your hand size that you must pay to undo. **There is no keyword for it**; it is a
@@ -345,7 +349,10 @@ head, reacting to what's in front of you, with little time for deep strategy.*
   ticket 09's naming debt against 09's own guess that the word should involve neither `Stuff` nor
   `Item` — a knowing override. **This ticket's self-declared hardest problem dissolved**: with ticket
   22 making the Stuff guaranteed on the flip, a Stuff room has nothing to defeat, so it simply *is*
-  the Stuff card. **Persistent effects are not a type** — just `Hold` plus a static line, which is
+  the Stuff card. *(partly superseded 2026-08-25 [you, ticket 22]: the Stuff is no longer guaranteed
+  on the flip, so there is something to defeat after all. Whether the one-card form survives is
+  ticket 22's open consequence 1 — the agent's recommendation is that it does, with the threshold
+  line read only in the room zone.)* **Persistent effects are not a type** — just `Hold` plus a static line, which is
   also all the machinery ticket 09's carry-Stuff-past-ascending card would need. **A card's position
   never means anything**, only which zone it is in: no rotating, no flipping, no overlapping. Reading
   budget is **~3 seconds for a room, ~1 second for a player card in a fan**. **Two things ruled out

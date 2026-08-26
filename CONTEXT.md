@@ -46,10 +46,11 @@ permanent **card reward**. Which is reached locks in only once the players decla
 done. *(tickets 21, 22)*
 
 **Stuff room** — a room holding a piece of **Stuff**, and the word printed on its type line. **Prints
-no challenge and no Flee line** — flipping one sends the Stuff straight to a chosen character's hand
-with **Hold**, and the room is Cleared; it can never go to Fled. Only **Good Stuff** is found here.
-Because it has nothing to defeat, the card **simply is the Stuff card**: there is no separate "room"
-face to read. *(tickets 21, 22, 09, 11)*
+a threshold and no Flee line** — the **lowest threshold in the deck**, below what Hazard and Enemy
+rooms ask. Meet it and the Stuff goes to a chosen character's hand with **Hold**; fail it and you
+leave empty-handed. Either way the room is Cleared and it can never go to Fled. There is no
+punishment: the only loss is the Stuff you did not take. Only **Good Stuff** is found here.
+*(tickets 21, 22, 09, 11)*
 
 **Stuff** — a card a floor hands you: a tool, a piece of junk, a faceful of slime. It goes to hand
 with **Hold**, it is **playable**, and it is **ordinary fuel** — it can be Exhausted from hand to pay
@@ -60,9 +61,9 @@ of the exhaust pile** before restoring it, so no Stuff survives a floor. It is a
 three Stuff."* *(tickets 21, 09, 07)*
 
 **Good Stuff** / **Bad Stuff** — where a piece of Stuff came from, and loosely how welcome it is.
-**Good Stuff** lives in the floor deck and is what a Stuff room hands you, so a Stuff room is never a
-disappointment — and since Stuff supplies **the bulk of the raw stats**, it is the game's supply line
-rather than a bonus, and declining one is almost never correct. **Bad Stuff** lives in a pool
+**Good Stuff** lives in the floor deck and is what a Stuff room hands you *if you meet its
+threshold* — and since Stuff supplies **the bulk of the raw stats**, it is the game's supply line
+rather than a bonus, so paying the threshold is almost always correct. **Bad Stuff** lives in a pool
 **outside** the floor deck and reaches you only as a room's printed punishment; it contributes **no
 stats** toward a challenge, so it clutters your hand until you pay to play it. Both are **printed on
 the card's type line** — a player must see at a glance which cards in hand are dead weight. Good
@@ -98,8 +99,8 @@ does not. *(tickets 11, 12)*
 **Flee cost** — the punishment a room prints, and the only punishment it has. Normally *"1 character
 Exhausts X from deck"*, with the team choosing who absorbs the whole amount. A room's punishment and
 its Flee cost were once described as two things; they are one field, printed once, under the word
-that already means *the room beat us and comes back around.* Stuff rooms have none. *(tickets 21, 22,
-11)*
+that already means *the room beat us and comes back around.* Stuff rooms have none — failing one
+costs you the Stuff, not stamina, and the room is Cleared regardless. *(tickets 21, 22, 11)*
 
 **Stat pool** — the total of the stats on every card in the **play zone**, shared across both
 characters. It is not a zone and has no tracker — it is simply what the face-up cards on the table

@@ -321,3 +321,64 @@ never Fled. The deck shrinks as you strip-mine it and the Enemy gets closer. The
 
 **What this does not touch:** the win condition, the Enemy room's Flee cost, the reshuffle, or the fact
 that escalation runs on Stuff scarcity. Every option above leaves those alone.
+
+### Ruled 2026-08-25 — option 6: the Stuff room gets a real gate
+
+`[you]` **A Stuff room has a threshold. Pay stats or leave empty-handed.** The threshold sits
+**below** what Hazard and Enemy rooms ask, so the room is the cheapest challenge in the deck, but it
+is a challenge: you must draw and play to satisfy it.
+
+This **reverses this ticket's ruling that a Stuff room is "the deck's one always-safe flip"**, and
+the restatement of it under the ticket 09 amendment — *"what you find there is always worth
+finding."* That guarantee is withdrawn deliberately. The disappointment it was protecting against is
+now **self-inflicted rather than dealt**, and those are different feelings at a table.
+
+**What decided it** `[you]`: the mandatory draw is defensible as *acting on the room costs you* and
+indefensible as *walking between rooms costs you*. The earlier options 3 and 5 both fixed the
+diegetic problem by making the walk free, which reopens the off switch
+[ticket 04](04-deck-as-energy-and-hp-model.md) deliberately closed. This fixes it by making the turn
+not a walk. Ticket 04's rule survives intact.
+
+**It also answers complaint 1 outright.** The turn now has a decision — engage or bank the cards — so
+[ticket 06](06-the-frantic-pillar.md)'s *something acts on you every turn* is carried on a Stuff room
+by the threshold rather than by nothing.
+
+**And it does not make complaint 2 worse, which is the non-obvious part.** Meeting a threshold costs
+more cards than throwing one away, so this looks like it deepens the drain. It does not, because
+**declining is still available and costs exactly what today's Stuff turn costs**: draw your minimum
+one, play nothing, take nothing. The floor's floor price is unchanged and every card above it is
+opt-in. The lethality question stays exactly where it was —
+[ticket 10](10-sim-the-resource-economy.md)'s.
+
+#### What this ruling now owes
+
+Four consequences, none of them ruled, in the order they have to be settled.
+
+1. **A Stuff room is currently not a card.** `[finding]` Per ticket 11 the Stuff room *is* the Good
+   Stuff card — no threshold line, no Flee line — which is why [ticket 12](12-exemplar-card-set.md)
+   printed four Good Stuff cards and no Stuff rooms at all. A threshold has to print somewhere.
+   Either the Good Stuff card carries a threshold line **read only while it is in the room zone and
+   ignored in hand**, or Stuff rooms become separate cards and the Stuff pool roughly doubles.
+   `[the agent's recommendation, labelled as such]` the former: it costs no new components, and
+   ticket 12's finding 1 already established that this card reads differently in the room zone than
+   it does in hand.
+2. **Which stat does it ask for?** `[finding]` Red produces `Power` and Gray produces `Scramble`, so
+   a gate naming one stat taxes the other character a card for a threshold they cannot help meet —
+   the compounding factor behind the review's floor-1 death. Options: the gate accepts **either**
+   stat; the pool mixes both so the burden alternates; or the printed Stuff decides, so you pay in
+   the currency of the thing you are reaching for. Unruled.
+3. **Does a failed Stuff room leave the deck?** `[finding]` This ticket's own mitigation — *"the tax
+   is also a clock"* — rests on a Stuff room leaving permanently because it becomes a card in a hand.
+   Fail the gate and it is in nobody's hand. If it goes to the Fled pile it returns and re-pads the
+   deck, which worsens the reshuffle problem directly. `[the agent's recommendation]` it leaves
+   regardless: you looted the cache or you did not, and either way it is behind you. That keeps the
+   clock running and keeps Flee lines off the card.
+4. **How low is low?** A ticket 10 number. Ticket 12 needs a placeholder to reprint its rooms
+   against.
+
+#### What this does not fix
+
+- **The hand-jam hole.** Holding five `Hold` cards still makes a character unable to draw, which is
+  now free. A gate gives a reason to unjam but does not close the hole — it was opened by the `Down`
+  ruling, not by dull Stuff rooms. It belongs to [ticket 14](14-down-and-revive.md).
+- **The reshuffle lethality.** A fled Enemy on floor 1 cannot return for nine more turns. Ticket 10.

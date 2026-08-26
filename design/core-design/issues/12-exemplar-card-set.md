@@ -213,3 +213,22 @@ disagree in this set — `Pry Bar` is more efficient than `Cutting Torch` (3 sta
 while `Cutting Torch` is plainly the bigger card — and the border reports the **ceiling**, because a
 five-card hand cap means one big number clears thresholds that two good ones cannot reach. Recorded in
 full on [ticket 11](11-card-anatomy.md), which owns the axis.
+
+## Handed down by ticket 22, 2026-08-25 — the exemplar Stuff rooms need reprinting
+
+`[you, ticket 22]` **A Stuff room prints a threshold: pay stats or leave empty-handed**, below what
+Hazard and Enemy rooms ask. This is the ruling on the largest finding this ticket surfaced.
+
+**This set cannot be reprinted yet.** It currently prints four Good Stuff cards and *no* Stuff rooms,
+on ticket 11's reasoning that the room simply is the Stuff card. Two of ticket 22's four open
+consequences have to be ruled before the cards can change:
+
+- **Where the threshold prints** — a line on the Stuff card read only in the room zone, or a separate
+  room card. The second roughly doubles this ticket's Stuff pool count of 16.
+- **How low the threshold is** — a ticket 10 number; this set needs a placeholder to print against.
+
+Also unruled and relevant here: **which stat the gate asks for**. Red produces `Power` and Gray
+produces `Scramble`, so a gate naming one stat taxes the other character for a threshold they cannot
+help meet — which is the compounding factor behind the cold review's floor-1 death.
+
+Ticket 12 stays open regardless; the set as a whole is still unratified.

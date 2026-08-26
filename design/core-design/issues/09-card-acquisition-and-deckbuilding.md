@@ -343,3 +343,19 @@ presentation decision.
 - **The card that carries Stuff past ascending** — allowed, not owed — needs no new machinery: it is
   `Hold` plus a static line. Whether it is printed belongs to ticket 12. Note it is a stronger card
   than this ticket could have known, since ticket 11 made Stuff the stat engine.
+
+## Amended by ticket 22, 2026-08-25 — "never a disappointment" is withdrawn
+
+`[you, ticket 22]` **A Stuff room prints a threshold: pay stats or leave empty-handed**, set below
+what Hazard and Enemy rooms ask.
+
+This reverses this ticket's *"a Stuff room is the deck's one always-safe flip ... never a
+disappointment — what you find is always worth finding."* You can now fail to take it.
+
+**What survives, and it is most of what this ticket wanted.** Keeping punishments out of the Stuff
+pool still holds: there is **no punishment and no Flee line**, so a Stuff room can still never hurt
+you and can never go to Fled. What you find there is still always worth finding. What changed is only
+that finding it is no longer free — so the disappointment is **self-inflicted rather than dealt**,
+which is the distinction the ruling turns on.
+
+Full ruling and its four open consequences: [ticket 22](22-floor-deck-composition.md).

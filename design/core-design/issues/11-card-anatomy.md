@@ -430,3 +430,21 @@ good ones cannot reach.
 **A consequence worth stating, since it will come up every time a card is tiered:** a card can be both
 common-feeling and high rarity. Efficiency is not what the border reports, so a cheap, repeatable,
 grindingly good card may sit at `Fine` while a swingy one-shot sits at `Woah`.
+
+## Amended by ticket 22, 2026-08-25 — the Stuff room has a threshold line
+
+`[you, ticket 22]` **A Stuff room prints a threshold: pay stats or leave empty-handed**, set below
+what Hazard and Enemy rooms ask. No punishment and no Flee line — failing costs you the Stuff only.
+
+This contradicts this ticket's *"no punishment and nothing to defeat: the 'room' reading is empty"*,
+which is what justified **"a Stuff room simply is the Stuff card ... it carries no threshold line."**
+The room reading is no longer empty.
+
+**The anatomy question this reopens, and it is this ticket's:** where the threshold prints. Either
+the Stuff card carries a threshold line **read only in the room zone and ignored in hand** — which is
+this ticket's existing two-context reading extended by one field, and the agent's recommendation — or
+Stuff rooms become separate cards and the Stuff pool roughly doubles. Recorded as
+[ticket 22](22-floor-deck-composition.md)'s open consequence 1, **unruled**.
+
+[Ticket 12](12-exemplar-card-set.md)'s finding 1 already established that this card reads differently
+in the room zone than in hand, so the precedent exists either way.

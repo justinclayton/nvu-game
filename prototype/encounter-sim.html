@@ -760,7 +760,8 @@ function finishPlay(owner, iid, payIids) {
 }
 
 function sideStats(owner) {
-  var p = { power:0, scramble:0 }, z = G.play[owner];
+  /* Safe with no live floor: the Library tab renders room cards before a floor starts. */
+  var p = { power:0, scramble:0 }, z = G ? G.play[owner] : [];
   for (var i = 0; i < z.length; i++) {
     p.power += z[i].def.power || 0;
     p.scramble += z[i].def.scramble || 0;

@@ -203,6 +203,13 @@
           <option value="max">draw to the cap</option>
         </select>
       </label>
+      <label>Reward greed
+        <select id="batchReward">
+          <option value="better">take it if it beats your average card (default)</option>
+          <option value="always">take every reward offered</option>
+          <option value="never">never take a reward</option>
+        </select>
+      </label>
       <label><input type="checkbox" id="batchStuffGreed" checked> Chase Stuff rooms</label>
       <label><input type="checkbox" id="batchHoldStuff"> Hoard Stuff for the Enemy room</label>
       <button class="primary" id="btnBatch">Run batch</button>
@@ -461,8 +468,14 @@ var CFG = {
   stuffT1: 1, stuffP1: 1, stuffT2: 3, stuffP2: 2, stuffTier2: true,
   capN: 5, cap: true, mandatory: true, fullHandExhaust: true,
   lastStand: true, lsCost: 2,
-  enemyPow: 5, enemyPowStep: 0, goodPool: 40
+  enemyPow: 5, enemyPowStep: 0, goodPool: 40, rewardPool: 30
 };
+
+/* How the auto-player answers "take it or skip it" at a reward.
+   "better" (default) takes a card only if it carries at least as much raw stat
+   as the average card already in the deck; "always" is the greedy line ticket 09
+   declined to cap by rule; "never" is the control. An agent heuristic, not a ruling. */
+var REWARD_POLICY = "better";
 
 var FIELDS = {
   setDeckRed:"deckRed", setDeckGray:"deckGray", setDeckRatio:"deckRatio",
@@ -549,6 +562,18 @@ function goodStuffPool() {
   for (var i = 0; i < CFG.goodPool; i++) out.push(inst(GOOD_STUFF[i % GOOD_STUFF.length]));
   return shuffle(out);
 }
+
+/* A character's permanent reward pool: flat, no rarity tiers, no escalation by
+   floor (ticket 09). It is one ordered pile per character that lasts the whole
+   run — a declined card goes to the bottom of it, so the pool has a memory.
+   Starter cards are excluded; whether they belong in the pool is unstated. */
+function rewardPool(owner) {
+  var kinds = PLAYER_CARDS.filter(function (p) { return p.owner === owner && !p.starter; });
+  var out = [], i;
+  if (!kinds.length) return out;
+  for (i = 0; i < CFG.rewardPool; i++) out.push(inst(kinds[i % kinds.length]));
+  return shuffle(out);
+}
 function buildFloorDeck(floor) {
   var out = [], i;
   for (i = 0; i < CFG.enemyN; i++) {
@@ -607,7 +632,9 @@ function newChar(name) {
   return {
     name: name, deck: starterDeck(name), hand: [], exhaust: [],
     down: false, doneDrawing: false, drewThisTurn: 0,
-    forcedExhausts: 0, drawsMade: 0
+    forcedExhausts: 0, drawsMade: 0,
+    /* the reward pool belongs to the run, not the floor */
+    pool: rewardPool(name), rewardsTaken: 0, rewardsSkipped: 0
   };
 }
 function inLastStand(c) { return CFG.lastStand && !c.down && c.deck.length === 0; }
@@ -626,7 +653,8 @@ function newFloor(floor, chars, goodPool, opts) {
     stats: {
       turns:0, forcedExhausts:0, minDraws:0, enemyFlees:0,
       enemyFledSinceTurn:-1, enemyWaitTurns:[], stuffTaken:0, stuffMissed:0,
-      lastStandTurns:0, lastStandExits:0, reshuffles:0, overCapTurns:0, charTurns:0
+      lastStandTurns:0, lastStandExits:0, reshuffles:0, overCapTurns:0, charTurns:0,
+      rewardsTaken:0, rewardsSkipped:0
     }
   };
 }
@@ -853,7 +881,53 @@ function settleHazardTier() {
   if (d.kind !== "Hazard" || !G.roomCleared) return;
   if (d.t2 && pool()[d.stat] >= d.t2) {
     G.tierGot = 2;
-    log(d.name + " cleared at its second tier — a reward is revealed.", "g");
+    revealReward();
+  }
+}
+
+/* The mid-floor reward (ticket 22's amendment, specified by ticket 09).
+   The top card of one character's reward pool turns face up; the only decision
+   is take it or skip it, and a taken card goes on TOP of that character's deck
+   face down — so it is +1 stamina immediately and will be drawn this floor.
+   A skipped card goes to the bottom of the pool, as a declined ascend reward does.
+
+   Two things the rules leave open, resolved here as heuristics and flagged as such:
+   which character reveals (the printed line says "one character" and the team
+   chooses — this takes the one with the shorter deck, who needs the stamina most),
+   and whether to take it (the REWARD_POLICY setting). */
+function whoReveals() {
+  var r = G.chars.Red, g = G.chars.Gray;
+  if (r.down && g.down) return null;
+  if (r.down) return g;
+  if (g.down) return r;
+  return r.deck.length <= g.deck.length ? r : g;
+}
+function cardStat(def) { return Math.max(def.power || 0, def.scramble || 0); }
+function wantsReward(c, card) {
+  if (REWARD_POLICY === "never") return false;
+  if (REWARD_POLICY === "always") return true;
+  /* "better": take it only if it carries at least as much raw stat as the
+     average card already in the deck — the inversion says a weak card is a
+     real cost, so a picky player is the interesting one to model. */
+  var t = 0, i;
+  for (i = 0; i < c.deck.length; i++) t += cardStat(c.deck[i].def);
+  return cardStat(card.def) >= (c.deck.length ? t / c.deck.length : 0);
+}
+function revealReward() {
+  var c = whoReveals();
+  if (!c || !c.pool.length) {
+    log(G.room.def.name + " cleared at its second tier, but the reward pool is empty.", "b");
+    return;
+  }
+  var card = c.pool.shift();
+  if (wantsReward(c, card)) {
+    c.deck.push(card);            // top of the deck — the next card drawn
+    c.rewardsTaken++; G.stats.rewardsTaken++;
+    log(c.name + " reveals " + card.def.name + " and takes it — onto the top of their deck.", "g");
+  } else {
+    c.pool.push(card);            // declined goes to the bottom of its pool
+    c.rewardsSkipped++; G.stats.rewardsSkipped++;
+    log(c.name + " reveals " + card.def.name + " and skips it.", "");
   }
 }
 
@@ -1315,10 +1389,26 @@ function ascend(chars) {
     c.exhaust = []; c.hand = [];
     c.deck = shuffle(c.deck.concat(keep));
     c.down = false;
-    /* one reward taken, per the summary. Which pool a reveal draws from is
-       unstated, so the reward is a generic card of that character's own. */
-    var pool = PLAYER_CARDS.filter(function (p) { return p.owner === names[i]; });
-    c.deck.push(inst(pick(pool)));
+
+    /* The ascend reward: three cards off that character's own pool, take one or
+       decline, and a declined card goes to the bottom of the pool (ticket 09).
+       Both characters choose; it is not one shared decision. */
+    var offer = c.pool.splice(0, 3);
+    if (offer.length) {
+      var wantIdx = -1, k;
+      for (k = 0; k < offer.length; k++) {
+        if (wantsReward(c, offer[k]) &&
+            (wantIdx < 0 || cardStat(offer[k].def) > cardStat(offer[wantIdx].def))) wantIdx = k;
+      }
+      if (wantIdx >= 0) {
+        c.deck.push(offer[wantIdx]);
+        c.rewardsTaken++;
+        offer.splice(wantIdx, 1);
+      } else {
+        c.rewardsSkipped++;
+      }
+      for (k = 0; k < offer.length; k++) c.pool.push(offer[k]);   // the rest go back to the bottom
+    }
     shuffle(c.deck);
   }
 }
@@ -1326,6 +1416,7 @@ function ascend(chars) {
 function runBatch() {
   var N = parseInt(el("batchN").value, 10) || 100;
   var floors = parseInt(el("batchFloors").value, 10) || 10;
+  REWARD_POLICY = el("batchReward").value || "better";
   var opts = {
     turnCap: parseInt(el("batchTurnCap").value, 10) || 120,
     greed: el("batchGreed").value,
@@ -1413,7 +1504,8 @@ function exportBatchSettings() {
            JSON.stringify({ exportedAt: new Date().toISOString(), settings: logSettings(),
                             autoPlayer: { greed: el("batchGreed").value,
                                           chaseStuff: el("batchStuffGreed").checked,
-                                          hoardStuff: el("batchHoldStuff").checked },
+                                          hoardStuff: el("batchHoldStuff").checked,
+                                          rewardPolicy: el("batchReward").value },
                             note: "The auto-player is an agent-written heuristic, not a ruling." },
                           null, 2), "application/json");
 }
@@ -1514,6 +1606,7 @@ function statBlock(label, big, sub) {
 
 function runOneVerbose() {
   var floor = parseInt(el("playFloor").value, 10) || 1;
+  REWARD_POLICY = el("batchReward").value || "better";
   var opts = {
     turnCap: parseInt(el("batchTurnCap").value, 10) || 120,
     greed: el("batchGreed").value,

@@ -176,157 +176,174 @@ policy setting, and with **no card effect text executed** — so `Reckless`, `Se
    On floor 1 that is up to nine free escapes sitting in the deck. This falls out of two separate
    rulings colliding and has not been ruled on either way.
 
-## Sweep results, 2026-08-26 — findings only, nothing ruled
 
-The simulator was driven headlessly across the whole plausible tuning range rather than a run at
-a time. The driver is [`prototype/sim-sweep.js`](../../../prototype/sim-sweep.js) — it loads the
-engine straight out of `encounter-sim.html`, so there is still exactly one engine and the HTML
-tool remains the thing a human plays with. `node prototype/sim-sweep.js` reproduces everything
-below; each figure is 600 ten-floor runs.
+## Permanent rewards built into the simulator, 2026-08-26
 
-Everything here is a **finding**. Not one number below is ruled — they are the agent's readings
-and its recommendations, and they are the human's to accept or reject.
+`[you]` **The sim was reporting runs that beat floor 10 without permanent rewards ever being
+handed out. That had to be fixed before any number was tuned.** It was — and the numbers below
+are from the repaired instrument. An earlier version of this section, tuned against the broken
+one, is in git history and should not be read.
 
-### The observation recorded on 2026-08-25 no longer holds
+### What was missing, and it was built rather than ruled
 
-That note said the scaffolding numbers were severely lethal — almost no run reaching floor 3.
-They are not. At 12-card decks, `Power 5`, and the 9 → 0 Stuff curve, **90% of runs now clear all
-ten floors**. The auto-player fixes since then — drawing against the pooled hands and the real
-threshold, and stopping on two dud draws — are the whole difference. The old reading was
-measuring a bad auto-player, not the rules.
+None of this needed a new decision. It was all ruled already and simply never implemented:
 
-The finding it stated is also gone. **No run ever stalls**, in any configuration tested. A fled
-Enemy comes back around after a mean of 3–5 turns and never more than 11, so the reshuffle worry
-— a fled Enemy sitting unreachable — is not real at any numbers tried.
+- **The mid-floor reward.** Ticket 22's amendment to ticket 21 made a Hazard room's high
+  threshold pay a permanent card; ticket 09 specified it as a *reveal* — the top card of one
+  character's reward pool turns face up, the decision is take-or-skip, and a taken card goes on
+  **top of that character's deck**, so it is +1 stamina immediately. The simulator reached the
+  second tier, logged *"a reward is revealed"*, and then handed out nothing at all.
+- **The ascend reward.** Ticket 09 ruled three cards off that character's own pool, take one or
+  decline, declined to the bottom. The simulator took **one card at random and never declined**.
+- **The reward pools themselves.** There were none. Each character now carries one flat,
+  finite, ordered pool for the whole run, with no rarity tiers and no escalation by floor, per
+  ticket 09.
 
-### 1. The deck is not what kills you
+Three heuristics were needed to run it and **none of them is a ruling**, so all three are
+settings on the tool: which character reveals when a Hazard says "one character" (the shorter
+deck takes it — they need the stamina most), whether the auto-player takes a revealed card, and
+which of three offered cards it prefers. The take-or-skip policy is the interesting one and is
+swept below as `always` / `better` / `never`.
 
-The relationship this ticket was built around — `floor length ≈ deck size ÷ draw per turn` — is
-real but is not the binding constraint. Floors run about 7 turns; a character does go near-empty
-and last stand does get entered, but only on **2–3% of character-turns**, and the loss is always
-a wipe rather than a deck-out. What decides a run is whether the party can **meet the threshold
-in front of it**, and that is a question about Good Stuff, not stamina.
+Two limits still stand and matter when reading anything here. **Card effect text is still not
+executed**, so `Second Wind`, `Scrap Sense`, `In Step` and `Catch Your Breath` enter a deck as
+blanks and are worth only the stamina they add — the sim therefore *understates* what a reward
+is worth. And starter cards are excluded from the reward pools, which is unstated in the rules.
 
-That reframes the whole ticket. The deck-as-energy-and-HP model produces a playable arc, but the
-arc's shape is set by the challenge curve, not by the drain.
+### Why floor 10 was being beaten — it was never really about the rewards
 
-### 2. Good Stuff is the entire game, and that is a problem
+The rewards were missing, but they are not the reason. `[finding]` **The Enemy threshold sits
+below what a starting character produces unaided.**
 
-| line | clears all ten floors |
-|---|---|
-| meet Stuff-room thresholds when you can | **89%** |
-| never meet a Stuff-room threshold | **10%** |
+A 12-card Red starter deck is 7 `Shove` (`Power 1`, cost 0) and 5 `Charge In` (`Power 3`, cost 1).
+Enumerating every play from a full five-card hand:
 
-One toggle swings the run from near-certain to near-hopeless. Nothing else in the model comes
-close. `[finding]` **Good Stuff is currently load-bearing to the point of being the only real
-decision on a floor** — every other choice is noise beside it.
+| best Power from one full Red starter hand | 5 | 6 | 7 | 8+ |
+|---|---|---|---|---|
+| share of hands | 2.5% | 21.5% | 76.0% | **0%** |
 
-Whether that is a flaw depends on what a floor is meant to be about, which is a ruling, not a
-measurement. If Stuff rooms are *supposed* to be the floor's spine, this is the model working.
-If they were meant to be one texture among several, it is not.
+**Every possible starting hand meets `Power 5` on its own**, with no Good Stuff, no rewards, and
+no help from Gray — five `Shove` at cost 0 is exactly 5. So floor 10 at zero Stuff was won 98% of
+the time because floor 10 was never asking for anything. The missing rewards hid this rather
+than caused it.
 
-### 3. No degenerate line — the sensible play is the best play
+The same table shows something sharper. **A starter hand tops out at `Power 7`, and `Power 8` is
+flat-out impossible from one hand.** The model has a cliff, not a slope: up to 7 a character
+copes alone, and past 8 the threshold *must* be met from Good Stuff, a partner, or accumulated
+rewards. That cliff is why the escalation rate swings results so violently, and it is worth
+knowing before anyone picks a threshold curve.
 
-Both greedy extremes are punished, without a rule saying so:
+### 1. Rewards are worth much more than the difficulty curve was assuming
 
-| draw policy | clears |
-|---|---|
-| draw what you need to afford the room | **89%** |
-| draw to the hand cap every turn | 23% |
-| draw the minimum every turn | 2% |
+Adding the ruled rewards changes the tuning conclusions outright:
 
-And **hoarding Stuff for the Enemy room halves the clear rate**, 89% → 48%. The natural miser's
-line loses. The hand-cap collision that the last note worried about barely exists — the cap binds
-on **1% of character-turns** — so it is not a live problem at these numbers.
-
-Sub-questions 4 and 6 of the original brief are answered by this: deliberately failing does not
-dominate, and no stalling strategy emerged.
-
-### 4. The Stuff curve is not a difficulty knob — enemy power is
-
-Ticket 22's escalation is currently expressed as *less Stuff per floor*. Alone, that does almost
-nothing:
-
-| escalation | clears | floor-10 win rate |
+| escalation | clears, no rewards (broken sim) | clears, rewards built |
 |---|---|---|
-| flat `Power 5`, Stuff 9 → 0 | 91% | 98% |
-| flat `Power 5`, Stuff 9 → 2 | 93% | 100% |
-| `Power` +0.5/floor, Stuff 9 → 0 | 25% | 44% |
-| `Power` +0.5/floor, Stuff 9 → 2 | **62%** | **84%** |
-| `Power` +1/floor, Stuff 9 → 2 | 20% | 59% |
+| flat `Power 5` | 91% | 94% |
+| `Power` +0.5/floor | 25% | **85%** |
+| `Power` +1/floor | 1% | **57%** |
 
-`[finding]` **A flat enemy threshold produces no difficulty curve at all** — floor 10 is as
-winnable as floor 3. A rising threshold produces one immediately. `[agent recommends]` the Enemy
-threshold should rise with the floor, around **+0.5 per floor** (`Power 5` on floor 1 to about
-`Power 9–10` on floor 10). This is a genuinely new number the map does not yet have, and ruling
-it belongs to ticket 22 or a fresh ticket rather than to this one.
+`[finding]` **Permanent rewards are worth roughly a floor of enemy escalation each.** A rate that
+looked brutal without them is comfortable with them. Nothing about the escalation rate should be
+ruled off the earlier figures.
 
-There is a structural note underneath. With Stuff bottoming out at 0, floor 10 has only four
-rooms and takes under three turns — the finale is a **spike, not a scrape**. Ticket 11 asked for
-a desperate scrape; that is what a rising threshold gives, while the Stuff curve alone gives a
-short sharp shock. Worth knowing which was meant.
+The structural reading is unchanged and now firmer: a **flat threshold produces no difficulty
+curve at all** (floor 10 won ~100% of the time it is reached), and a rising one produces one
+immediately. `[agent recommends]` **+1 `Power` per floor** — `Power 5` on floor 1 to `Power 14` on
+floor 10 — which lands the run at about a 57% clear rate with floor 10 won 89% of the time it is
+reached. The earlier recommendation of +0.5 was made against the broken sim and is withdrawn.
 
-### 5. Is floor 10 winnable at zero Stuff? — Yes, and that is the objection
+### 2. Ticket 09's charge, answered: the inversion does not punish greed
 
-Ticket 11 handed down that floor 10 must be desperate but possible, and asked whether Stuff
-bottoming out at **0** makes it impossible rather than desperate. It does not: **at 0 Stuff and a
-flat threshold, floor 10 is won 98% of the time**. The starter deck alone is more than enough.
+This is the finding that most deserves a ruling. Ticket 09 declined to cap deck growth on the
+grounds that ticket 04's inversion — a card you add is +1 floor-time and −1 consistency — punishes
+greed without a rule saying so. With rewards actually handed out, that claim can now be tested,
+and it fails:
 
-So 0 is safe. `[agent recommends]` **leave the floor-10 Stuff count at 0** — the fix ticket 11
-anticipated (raising it to 2 or 3) is not needed to make floor 10 survivable, and raising it only
-makes an already-easy floor easier. Under a rising threshold, `top=2` becomes a real difficulty
-lever rather than a survivability one (84% vs 44% at floor 10), which is a different argument and
-should be made on its own terms.
+| take-or-skip policy | rewards taken/run | deck at floor 10 | clears all ten |
+|---|---|---|---|
+| **take everything** | 22.5 | **22.7 cards** | **94%** |
+| take only if better than your average card | 6.6 | 15.2 cards | **95%** |
+| never take anything | 0 | 12.0 cards | 88% |
 
-### 6. Starting deck size: the curve saturates around 15
+`[finding]` **Taking every card offered nearly doubles the deck and costs nothing measurable** —
+94% against 95% is inside the noise. The greedy player is not punished; they are merely not
+rewarded. Refusing everything *is* punished, so the inversion has a floor but no ceiling.
 
-Under the escalating configuration, where deck size actually bites:
+Under a real escalation curve the shape is the same — 82% for greed against 88% for discipline,
+a gap barely outside noise — while refusal collapses to 20%.
+
+Every figure on this page is 600 ten-floor runs and moves by a point or two between runs, so read
+differences under about three points as nothing.
+
+`[agent recommends]` **the inversion cannot govern deck growth on its own, and ticket 09's
+decision to leave growth uncapped should be reopened.** Two honest readings, and picking between
+them is yours: either the punishment for greed needs to be real — costlier rewards, a smaller
+hand, thinner decks — or growth needs the cap ticket 09 declined to write. What is not tenable is
+the current position, which assumes a self-correction the numbers do not show.
+
+One caveat, stated because it cuts against the finding: effect text is not executed, so every
+reward is currently valued at its raw stats alone. Cards that are *good* rather than merely
+*stat-bearing* would make greed look better still, not worse — so this understates the problem
+rather than manufacturing it.
+
+The forty-card deck ticket 09 feared does not appear even at maximum greed — about 23 cards per
+character — because second-tier Hazard clears are rarer than "three rooms a floor" suggests.
+The direction of the worry was right; the magnitude was not.
+
+### 3. Ticket 11's stat-base worry: real, but only for the greedy
+
+The failure mode ticket 11 named is a hand of modifiers with nothing to multiply. Now that decks
+actually grow, it can be seen:
+
+| entering floor | 2 | 4 | 6 | 8 | 10 |
+|---|---|---|---|---|---|
+| stat density, take everything | 0.94 | 0.86 | 0.79 | 0.75 | **0.72** |
+| stat density, take selectively | 1.00 | 0.99 | 0.99 | 0.99 | 0.99 |
+
+At maximum greed the chance of a full hand holding no usable stat at all reaches about **1 in
+125 hands** by floor 10 — present, but nowhere near the failure ticket 11 was bracing for.
+`[finding]` **The stat base holds.** It is worth re-measuring if the exemplar set gets more
+effect-only cards, since the pool is currently 4 Red and 3 Gray non-starter cards recycled.
+
+### 4. Starting deck size, remeasured
+
+Under `Power 5` +0.5/floor, with rewards live:
 
 | starting deck | 6 | 8 | 10 | 12 | 15 | 18 | 24 |
 |---|---|---|---|---|---|---|---|
-| clears all ten | 11% | 30% | 43% | 63% | 77% | 80% | 82% |
+| clears all ten | 20% | 41% | 68% | 87% | 96% | 98% | 100% |
 
-Ticket 09's provisional **12–15** sits exactly on the shoulder. Below 10 the deck collapses;
-above 18 the extra cards buy nothing. `[agent recommends]` **15 per character** — the top of the
-provisional band, where the marginal card stops paying and before deck size stops mattering at
-all. 12 is defensible if the intent is that the early floors bite.
+Rewards lift the whole curve and move the shoulder left: **12 is now the knee**, where 15 was
+before. Ticket 09's provisional 12–15 still brackets it. `[agent recommends]` **12 per character**
+— it keeps a real early-floor bite that 15 sands off, and it is already the scaffolding number in
+the floor rules summary, so ruling it changes nothing on the table.
 
-### 7. Ticket 09's deck-growth question cannot be answered yet — the sim does not model it
+### 5. Unchanged by the repair
 
-Ticket 09 asked whether ticket 04's inversion governs greed, on the arithmetic that three hazard
-rooms plus an ascend reward could add **forty cards over ten floors**.
+These held up and are restated only so it is clear they were re-run, not carried over:
 
-**The simulator adds one card per ascend and nothing else**, so a 12-card deck reaches floor 10
-at 21 cards. Good Stuff is set aside on ascending, and the sim's Stuff rooms pay Good Stuff rather
-than permanent cards, so the high-threshold permanent-card payout that ticket 09's arithmetic
-assumed **is not implemented**.
-
-`[finding]` **This is a gap in the instrument, not a finding about the design.** The honest answer
-to ticket 09's charge is *not measured*. Someone must first rule what a hazard room's high
-threshold actually pays — if it pays a permanent card, the sim needs it, and the question can then
-be asked properly.
-
-### 8. Ticket 11's stat-base worry does not appear — conditionally
-
-The failure mode ticket 11 named is a hand of multipliers with nothing to multiply. Across the run
-the permanent deck stays **80%+ raw-stat cards** and the chance of a full hand containing at least
-one usable stat is **1.000 at every floor**.
-
-But that is measured on a deck that grows from 12 to 21, for the reason in the section above. On
-the 40-card deck ticket 09 feared, dilution would be real. `[finding]` **The stat base holds at
-the deck sizes the sim actually produces**; the worry stands or falls with the unimplemented
-growth, and should be re-measured once section 7 is settled.
+- **No run ever stalls**, in any configuration. A fled Enemy returns in a mean of 5–7 turns, never
+  more than 12. The reshuffle worry recorded on 2026-08-25 is not real.
+- **The deck is not what kills you.** Last stand takes 2–4% of character-turns and every loss is a
+  wipe, never a deck-out. Runs are decided by meeting the threshold in front of you.
+- **No degenerate line.** Drawing what you need (89%) beats drawing to the cap (23%) and drawing
+  the minimum (2%); hoarding Stuff for the Enemy halves the clear rate. The hand cap binds on
+  ~1% of character-turns.
+- **Good Stuff remains close to the whole game**: chase Stuff rooms and you clear 89% of runs,
+  ignore them and you clear 10%.
 
 ### What is still needed from you
 
-Nothing above is a ruling. Four decisions would close this ticket:
-
-1. **Starting deck size.** Agent recommends 15; 12 is the other defensible pick.
-2. **The floor-10 Stuff count.** Agent recommends leaving it at 0.
-3. **Whether the Enemy threshold rises with the floor**, and at what rate — the sim says the
-   difficulty curve does not exist without this.
-4. **Whether Good Stuff being the near-sole determinant of a run is intended**, or a sign the
+1. **Reopen deck-growth governance, or accept it.** The inversion does not punish greed. Either
+   greed gets a real cost or growth gets a cap — ticket 09 assumed neither was needed.
+2. **Whether the Enemy threshold rises with the floor**, and at what rate. Agent recommends +1
+   `Power` per floor. There is no difficulty curve without this, and the starter-hand ceiling of
+   `Power 7` is the landmark the curve should be drawn against.
+3. **Starting deck size.** Agent recommends 12.
+4. **The floor-10 Stuff count.** 0 is survivable; leaving it there is recommended.
+5. **Whether Good Stuff being the near-sole determinant of a run is intended**, or a sign the
    floor needs another axis.
 
-Question 3 arguably belongs to ticket 22 and question 4 may want a ticket of its own; both are
-noted rather than assumed.
+Items 1, 2 and 5 look like they belong to tickets 09, 22 and a new ticket respectively, rather
+than to this one. Flagged, not assumed.

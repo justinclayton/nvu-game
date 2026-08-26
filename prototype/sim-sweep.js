@@ -59,14 +59,16 @@ function pStatInHand(n, k, h) {
 /* Run N ten-floor runs at one configuration and return everything measured. */
 function run(cfg, policy, N, floors) {
   N = N || 600; floors = floors || 10;
-  Object.keys(cfg).forEach(function (k) { E.CFG[k] = cfg[k]; });
+  Object.keys(cfg).forEach(function (k) { if (k !== "rewardPolicy") E.CFG[k] = cfg[k]; });
+  E.REWARD_POLICY = cfg.rewardPolicy || "better";
   var opts = { turnCap: 120, greed: "afford", chaseStuff: true, holdStuff: false, verbose: false };
   Object.keys(policy || {}).forEach(function (k) { opts[k] = policy[k]; });
 
   var a = { runs:N, fullRuns:0, lostOn:[], wiped:0, stalled:0,
             perFloor:[], turns:[], charTurns:0, overCap:0, lsTurns:0, lsExits:0,
             flees:0, waits:[], reshuffles:0, stuffTaken:0, stuffMissed:0,
-            deckAt:{}, densAt:{}, handStat:{}, lostEnemyFled:0 };
+            deckAt:{}, densAt:{}, handStat:{}, lostEnemyFled:0,
+            rewardsTaken:0, rewardsSkipped:0 };
   for (var f = 0; f < floors; f++) { a.perFloor.push({ played:0, won:0 }); a.turns.push([]); }
 
   for (var r = 0; r < N; r++) {
@@ -94,6 +96,12 @@ function run(cfg, policy, N, floors) {
         if (g.fled.some(function (x) { return x.def.kind === "Enemy"; })) a.lostEnemyFled++;
       }
     }
+    /* counted off the characters, not the floor stats: ascend rewards happen
+       between floors, so a per-floor counter would miss them entirely */
+    ["Red", "Gray"].forEach(function (nm) {
+      a.rewardsTaken += chars[nm].rewardsTaken;
+      a.rewardsSkipped += chars[nm].rewardsSkipped;
+    });
     if (alive) a.fullRuns++;
   }
   return a;
@@ -145,15 +153,38 @@ function sweepPolicy() {
 }
 
 function sweepDeckGrowth() {
-  console.log("\n=== deck growth and stat density across a run ===");
-  var a = run({ deckRed:12, deckGray:12, enemyPow:5, enemyPowStep:0.5, stuffTop:2 }, {});
-  console.log("entering floor  mean deck  stat density  P(stat in a full hand)");
-  for (var f = 2; f <= 10; f++) {
-    if (!a.deckAt[f]) continue;
-    console.log(String(f).padStart(14) + mean(a.deckAt[f]).toFixed(1).padStart(11) +
-                mean(a.densAt[f]).toFixed(3).padStart(14) +
-                mean(a.handStat[f]).toFixed(3).padStart(24));
-  }
+  ["always", "better", "never"].forEach(function (rp) {
+    console.log("\n=== deck growth and stat density, reward policy: " + rp + " ===");
+    var a = run({ deckRed:12, deckGray:12, enemyPow:5, enemyPowStep:0.5, stuffTop:2,
+                  rewardPolicy:rp }, {});
+    console.log("clears all ten: " + clearPct(a) + "%  ·  rewards taken/run " +
+                (a.rewardsTaken / a.runs).toFixed(1) + ", skipped " +
+                (a.rewardsSkipped / a.runs).toFixed(1));
+    console.log("entering floor  mean deck  stat density  P(stat in a full hand)");
+    for (var f = 2; f <= 10; f++) {
+      if (!a.deckAt[f]) continue;
+      console.log(String(f).padStart(14) + mean(a.deckAt[f]).toFixed(1).padStart(11) +
+                  mean(a.densAt[f]).toFixed(3).padStart(14) +
+                  mean(a.handStat[f]).toFixed(3).padStart(24));
+    }
+  });
+}
+
+/* Ticket 09's charge: does ticket 04's inversion punish greed on its own, or is
+   a cap on deck growth needed after all? Greed here is the reward policy. */
+function sweepGreed() {
+  console.log("\n=== does the inversion punish greed? ===");
+  console.log("reward policy  clears  taken/run  deck at floor 10");
+  [[0, 0], [0.5, 2]].forEach(function (p) {
+    console.log("  enemyPow +" + p[0] + "/floor, stuffTop " + p[1] + ":");
+    ["always", "better", "never"].forEach(function (rp) {
+      var a = run({ deckRed:12, deckGray:12, enemyPow:5, enemyPowStep:p[0], stuffTop:p[1],
+                    rewardPolicy:rp }, {});
+      console.log("  " + rp.padEnd(13) + clearPct(a).padStart(6) +
+                  (a.rewardsTaken / a.runs).toFixed(1).padStart(11) +
+                  mean(a.deckAt[10] || [0]).toFixed(1).padStart(18));
+    });
+  });
 }
 
 function sweepPressure() {
@@ -175,4 +206,5 @@ sweepDifficulty();
 sweepDeckSize();
 sweepPolicy();
 sweepDeckGrowth();
+sweepGreed();
 sweepPressure();

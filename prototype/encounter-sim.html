@@ -701,9 +701,10 @@ function drawOne(c) {
   }
 }
 function payMinimum(c) {
-  if (!owesMinimum(c)) return;
+  if (!owesMinimum(c)) return false;
   G.stats.minDraws++;
   drawOne(c);
+  return true;
 }
 function draw(c) { if (canDraw(c)) { drawOne(c); maybeEndDraw(); } }
 function declareDone(c) {
@@ -1171,6 +1172,10 @@ function autoTurn(opts) {
     var L = stuffLines(d).filter(function (x) { return x.who === c.name; })[0] || {};
     return L.stat || "power";
   }
+  function tier1Need(c) {
+    var L = stuffLines(d).filter(function (x) { return x.who === c.name; })[0];
+    return L ? L.need : CFG.stuffT1;
+  }
   /* Match the target to what the play stage will chase: on a Stuff room that is
      tier 2 when chasing, tier 1 otherwise. */
   function drawNeed(c) {
@@ -1179,13 +1184,17 @@ function autoTurn(opts) {
     var target = (opts.chaseStuff && L[1]) ? L[1] : L[0];
     return target ? target.need : CFG.stuffT1;
   }
-  var live = [], got = {};
+  var live = [], got = {}, miss = {};
   for (i = 0; i < 2; i++) {
     c = G.chars[names[i]];
     if (c.down) { c.doneDrawing = true; continue; }
-    payMinimum(c);
+    /* The minimum draw counts as a draw like any other, so a dud minimum is
+       already one strike against this character. */
+    var before = bestPlays(c, drawStat(c), drawNeed(c), hoard).got;
+    var drewMin = payMinimum(c);
     if (opts.greed === "min") { c.doneDrawing = true; continue; }
     got[c.name] = bestPlays(c, drawStat(c), drawNeed(c), hoard).got;
+    miss[c.name] = (drewMin && got[c.name] <= before) ? 1 : 0;
     live.push(c);
   }
   function pooled() {
@@ -1208,13 +1217,18 @@ function autoTurn(opts) {
       if (opts.greed !== "max" && !stuffRoom && pooled() >= t.n) break;
       if (opts.greed === "max") { drawOne(c); next.push(c); continue; }
       if (stuffRoom && got[c.name] >= drawNeed(c)) continue;   // this line is already met
+      /* Tier 2 pays one more Stuff than tier 1. That is not worth the deck:
+         once tier 1 is in hand, stop rather than draw into last stand for it. */
+      if (stuffRoom && got[c.name] >= tier1Need(c) && c.deck.length <= 1) continue;
       drawOne(c);
       var now = bestPlays(c, drawStat(c), drawNeed(c), hoard).got;
       /* A character whose best play did not improve on its last draw is not
          going to reach this stat: stop, and leave the room to the other one. */
-      var improved = now > got[c.name];
+      /* One dud draw is bad luck; two in a row means this character is not the
+         one this room is asking for. Stop, and leave the deck alone. */
+      miss[c.name] = now > got[c.name] ? 0 : miss[c.name] + 1;
       got[c.name] = now;
-      if (improved) next.push(c);
+      if (miss[c.name] < 2) next.push(c);
     }
     live = next;
   }

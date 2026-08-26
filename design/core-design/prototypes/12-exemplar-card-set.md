@@ -36,22 +36,34 @@ printed · rarity. Rarity is a complexity signal, never a quality one.
 
 ### Catch Your Breath · Gray · `Fine` · `Cost 0` · *(no stat)*
 
-> *Look at the top 2 cards of your deck. Exhaust one and put the other back.*
+> *Look at the top 2 cards of your deck. Put them back in either order.*
 
-**Stresses: energy use.** Its effect is real but small, and it is free. Most turns this card is a body
-you Exhaust to pay for something else — the clearest case in the set of a card whose value as fuel
-beats its value as an effect. Note the effect is itself self-harm: filtering your deck costs you a
-card of stamina, which is the inversion showing up inside a single card.
+**Stresses: energy use.** No stat, no board impact, and free. Most turns this card is a body you
+Exhaust to pay for something else — the clearest case in the set of a card whose value as fuel beats
+its value as an effect.
 
-### Reckless · Red · `Cool` · `Cost 0` · **Power 5**
+**Fixed 2026-08-25.** It previously read *"Exhaust one and put the other back"*, which cost a card of
+stamina to filter and made it **strictly worse than the starter it would replace** — Duck Under is
+also `Cost 0` and at least gives `Scramble 1`. Free look-at-two is worth real money in a game with one
+pass through the deck, and it no longer charges health for the privilege.
+
+### Reckless · Red · `Fine` · `Cost 0` · **Power 5**
 
 > *At cleanup, Red Exhausts 3 from deck.*
 
-**Stresses: health loss.** Five Power for free, and the bill arrives after the room is resolved. It is
-`Cool` rather than `Woah` because it is *brutal*, not *complex* — this is the set's test that the
-rarity axis is holding to complexity and not sliding into quality.
+**Stresses: health loss.** Five Power for free, and the bill arrives after the room is resolved.
 
-### Second Wind · Red · `Cool` · `Cost 1` · *(no stat)*
+**The bug here was fixed by the Down ruling, not by the card.** At an empty deck *"Exhaust 3 from
+deck"* used to exhaust nothing, so the game's biggest burst card became free exactly in last stand —
+the drawback was null when it mattered most. Under the ruling of 2026-08-25, something that **would
+Exhaust from an empty deck puts that character Down**. Reckless is now the most dangerous card in the
+set to hold at low deck, which is the correct shape for it.
+
+**Rarity dropped `Cool` → `Fine`.** One clause, six words of trigger. It is *brutal*, not *complex*,
+and rarity is the complexity axis — leaving it at `Cool` was the axis quietly sliding back into
+meaning quality. See finding 4.
+
+### Second Wind · Red · `Fine` · `Cost 1` · *(no stat)*
 
 > *Shuffle 3 cards from Red's exhaust pile into Red's deck.*
 
@@ -68,7 +80,13 @@ question is unavoidable rather than quietly designed around.**
 
 ### In Step · Gray · `Cool` · `Cost 1` · *(conditional stat, in text)*
 
-> *Power equal to the number of cards Red played this turn.*
+> *Power equal to the number of cards Red has played into the play zone this turn.*
+
+**Wording fixed 2026-08-25.** It read *"the number of cards Red played this turn"*, which a new player
+reads as including the cards Red **Exhausted to pay costs** — a materially different and much larger
+number. *Played into the play zone* is unambiguous and costs four words. The separate question of
+*when* the value is read is a rules answer, not a card fix, and is now printed in the rules summary:
+**a conditional stat is recalculated every time the pool is read, and nothing locks on play.**
 
 **Stresses: effect.** Ticket 21 named this exact shape as where build synergy is meant to live, and it
 is the cheapest demonstration that the shared stat pool is worth having: it is a Gray card that only
@@ -89,21 +107,34 @@ enormous.
 ### Scrap Sense · Gray · `Woah` · `Cost 1` · *(no stat)* · `Hold`
 
 > *The first piece of Good Stuff Gray plays each turn has +2 Power and +2 Scramble.*
-> *If Gray plays no Good Stuff during a turn, Exhaust this at that cleanup.*
+> *If Gray is holding no Good Stuff at cleanup, Exhaust this.*
 
 **Stresses: the `Woah` read.** Two clauses, one conditional, one upkeep trigger. This is ticket 11's
 central claim in a single card — *your permanent deck is modifiers, your stat base is scavenged fresh
-each floor* — and it is also the claim's stress test, because the card is worthless on a floor where
-the Stuff rooms did not come up.
+each floor*.
+
+**Fixed 2026-08-25.** The self-destruct used to fire *"if Gray plays no Good Stuff during a turn"* —
+and the majority of floor-1 turns are Stuff rooms where nobody plays anything at all, so the card
+reliably killed itself at the cleanup of the turn after you installed it. It now checks what Gray is
+**holding**, not what Gray played, which is a condition the player actually controls: it survives
+while you have Stuff in reserve and dies when you have burned through it. Same two clauses, same
+`Woah` read, no guaranteed death.
 
 ### Both Barrels · Red · `Woah` · `Cost 2` · **Power 2**
 
 > *If Gray has played at least one card this turn, Power 5 instead.*
-> *If this Clears an Enemy room, return this to Red's hand instead of Exhausting it.*
+> *If this Clears a room, return this to Red's hand instead of Exhausting it.*
 
 **A second `Woah`, so the two reward pools read as different pools.** Three clauses and a printed
 stat that its own text overrides — the hardest single read in the set, and included precisely so
 someone can time it.
+
+**Fixed 2026-08-25.** The return clause used to say *"if this Clears an **Enemy** room"* — and
+clearing the Enemy room is what ends the floor, so the clause could only ever fire on the last turn of
+a floor, returning the card to a zone that ascending never collects. **The upside on a `Woah` card
+deleted it from the deck.** It now triggers on clearing *any* room, so it is a card that keeps coming
+back through a floor's hazards. Note this does not close the underlying hole: **what happens to cards
+in hand when a floor ends is still unruled**, and it is listed in the rules summary as such.
 
 ---
 
@@ -115,15 +146,20 @@ Type line `Good Stuff`, always `Hold`, carries rarity, carries the bulk of the r
 
 **Coil of Cable** · Good Stuff · `Fine` · `Cost 0` · **Scramble 3** · `Hold`
 
-**Cutting Torch** · Good Stuff · `Cool` · `Cost 1` · **Power 5** · `Hold`
+**Cutting Torch** · Good Stuff · `Fine` · `Cost 1` · **Power 5** · `Hold`
 
-**Grav Harness** · Good Stuff · `Woah` · `Cost 1` · **Power 3, Scramble 3** · `Hold`
+**Grav Harness** · Good Stuff · `Cool` · `Cost 1` · **Power 3, Scramble 3** · `Hold`
 > *When you play this, one character may draw 1 card, ignoring the hand cap.*
 
 > Four pieces, and the numbers dwarf everything in the player decks. That is the point: `Cutting
 > Torch` alone is more Power than Red's entire starting hand can assemble. It also shows the cost of
 > the arrangement — a `Cost 1` piece of Stuff means you burn a card out of a five-card hand just to
 > put your stat base on the table.
+
+**Both rarities dropped, 2026-08-25, and doing it exposed a problem — see finding 4.** `Cutting Torch`
+has no text at all, so on a complexity axis it cannot be anything but `Fine`, however exciting a flip
+it is. `Grav Harness` has one clause and is a far easier read than `Scrap Sense`, so it cannot sit in
+the same tier.
 
 ## Bad Stuff
 
@@ -179,8 +215,17 @@ Format, per ticket 11: **name**, type line, one or more `threshold: outcome` lin
     Scramble 2: Clear
     Scramble 5: Clear — one character reveals reward.
                 You may add it to the top of your deck or skip it.
-    Flee: 1 character Exhausts 1 from deck
+    Flee: 1 character Exhausts 3 from deck
 ```
+
+> **Flee cost raised from 1 to 3, 2026-08-25.** At 1 the room was **strictly dominated by fleeing**:
+> clearing the low tier costs two cards of hand, fleeing cost one card of deck, and both outcomes give
+> you nothing — the room goes away either way. The low threshold was dead text.
+>
+> **The general rule this exposes, which belongs to ticket 22:** a room whose low tier pays no reward
+> is only worth engaging if its **Flee line costs more than the cheapest way to clear it**. Otherwise
+> the correct play is always to walk, and the threshold is decoration. `Ruptured Coolant Line` below
+> passes that test as printed and is the template.
 
 ```
     Ruptured Coolant Line                            Hazard
@@ -323,6 +368,95 @@ counting Red's plays, totalled against a printed threshold, across two hands. Th
 problem, not an anatomy-level one, and it belongs to ticket 20.
 
 ---
+
+---
+
+## Revision, 2026-08-25 — after a cold review
+
+The set was handed to a reviewer who was given **only the card sheet and the rules summary** — no
+tickets, no map, no access to any of the reasoning above. That is why the findings below are worth
+their weight: they are what the cards say to someone who cannot ask why.
+
+### The ruling that came out of it
+
+`[you, 2026-08-25]` **Down is no longer "unable to draw."**
+
+> When a character's deck is empty, that character enters **last stand**. A character is **Down** when
+> something would Exhaust a card from their empty deck, **or** when the team Flees the room while that
+> character is in last stand. While Down, a character gets no rewards, cannot act, and **cannot have
+> cards added to their hand.**
+
+This supersedes ticket 04's *"you are exhausted when you begin a turn and cannot draw"*, ticket 07's
+*once per turn* framing of last stand, and ticket 17's one-turn window. Last stand is now a **state**
+you occupy for as long as your deck is empty, not a window that opens and shuts.
+
+**It closes three separate holes at once**, which is why it is worth recording as one ruling rather
+than three patches:
+
+1. **You could be declared Down at full health.** Stuff ignores the hand cap and every Stuff room
+   pushes a `Hold` card into someone's hand. Five of them and that character could not draw — and
+   "cannot draw" meant Down. A character with a full deck could lose the run to prosperity. Now being
+   unable to draw is simply being unable to draw.
+2. **Last stand's own trigger was dead text.** Ticket 17 named "or a Flee cost taking it" as a way to
+   enter last stand, but Flee costs land in cleanup, after the play phase — so the free-play window
+   opened onto a phase that was already over. As a persistent state, the trigger works.
+3. **A Down character was a Stuff dumpster.** Nothing stopped the team parking every unwanted piece of
+   Bad Stuff in the hand of someone who could not act, permanently defusing hand-cap pressure.
+   *Cannot have cards added to their hand* ends it.
+
+**One knock-on worth naming:** last stand is now genuinely frightening rather than a free turn. Ticket
+17 logged the worry that surviving one *rewards* emptying your deck, and ticket 07 answered it with a
+2-card exit tax. This ruling answers it far harder — **in last stand, any Flee puts you Down.** You
+cannot coast; you have to keep clearing rooms or you are finished. Whether the 2-card exit tax is
+still needed on top of that is now a live question, and it is yours.
+
+### Cards changed
+
+| Card | Was | Now | Why |
+|---|---|---|---|
+| **Reckless** | `Cool` | `Fine` | one clause; rarity is complexity, not brutality |
+| **Reckless** | drawback null at 0 deck | *(unchanged text)* | the Down ruling fixed it — exhausting an empty deck now puts you Down |
+| **Both Barrels** | "Clears an **Enemy** room" | "Clears **a** room" | the Enemy room ends the floor, so the upside deleted the card |
+| **Scrap Sense** | dies if Gray *plays* no Good Stuff | dies if Gray is *holding* none at cleanup | most turns nobody plays anything, so it reliably killed itself |
+| **Catch Your Breath** | "Exhaust one and put the other back" | "Put them back in either order" | it was strictly worse than the starter it replaces |
+| **In Step** | "cards Red played" | "cards Red has played into the play zone" | players counted cost payments as plays |
+| **Second Wind** | `Cool` | `Fine` | one clause |
+| **Cutting Torch** | `Cool` | `Fine` | no text at all |
+| **Grav Harness** | `Woah` | `Cool` | one clause; far easier than `Scrap Sense` |
+| **Collapsed Stair** | Flee 1 from deck | Flee 3 from deck | fleeing was cheaper than clearing, so the low tier was dead |
+
+### Finding 4 — the rarity axis collapses under its own rule
+
+Auditing every card strictly on *complexity, never quality* left **`Fine`** holding the four starters,
+Reckless, Second Wind, Catch Your Breath and Cutting Torch; **`Cool`** holding three cards; and
+**`Woah`** holding exactly two. A card with no rules text has no complexity, so **every vanilla card in
+the game is `Fine` regardless of how strong it is** — `Cutting Torch` at `Power 5` sits in the same
+tier as `Shove` at `Power 1`.
+
+That is the rule working as written, and it makes two things visible:
+
+- **Rarity cannot differentiate Good Stuff at all**, because Stuff is mostly vanilla stats. This
+  contradicts ticket 11 in its own words: it ruled Good Stuff carries rarity because *"a `Woah` Stuff
+  should be an exciting flip"* — which is **quality**, the exact reading ticket 11 forbade three
+  paragraphs earlier. One of those two lines has to go, and it is the human's call which.
+- **The tiers are lopsided.** If `Woah` means "two or more interacting clauses" it will be a small
+  slice of any real pool, which may be correct — a player declining all `Woah` cards should be
+  declining a minority, not a third.
+
+**Not resolved here.** Recorded against ticket 11, which owns the axis.
+
+### What the review found that is *not* fixed here, because it is not the exemplars' to fix
+
+- **Stuff rooms are a decision-free tax, and they are most of floor 1.** Nine of thirteen rooms have
+  no threshold and no Flee line, yet the mandatory draw still charges both characters a card. In the
+  reviewer's playthrough **six of ten turns were "draw one, throw it away," and Gray went Down on turn
+  7 without a single enemy or hazard touching them.** This is ticket 22's composition and ticket 20's
+  table, not a card fix, and it is the single largest finding in the review.
+- **Rooms that leave the floor deck.** A Stuff room is never Cleared and never Fled — it becomes a
+  card in a hand. The rules summary now says so; nothing else on the map does.
+- **Four unstated rules** now listed at the foot of the rules summary: starting deck size, what
+  happens to cards in hand when a floor ends, which pool and whose deck a room's reveal line means,
+  and whether a skipped reveal goes to the bottom of its pool.
 
 ## What this does not do
 

@@ -125,8 +125,11 @@ head, reacting to what's in front of you, with little time for deep strategy.*
   an X-cost card **exhausts X cards from your hand**; damage **exhausts X cards from your deck**
   (chosen costs from hand, unchosen punishment from deck). **The whole hand exhausts at end of turn**,
   with **Hold** as the exception. Nothing returns during a floor; clearing a floor restores the
-  exhaust pile. You are **exhausted** — down, not dead — when you begin a turn and cannot draw,
-  which leaves you one **last stand** turn. **Stamina is per-character**, and solo is mechanically
+  exhaust pile. ~~You are **exhausted** — down, not dead — when you begin a turn and cannot draw,
+  which leaves you one **last stand** turn.~~ — **superseded 2026-08-25** `[you]`: an empty deck puts
+  you in **last stand**, a state you stay in until the deck is not empty; you are **Down** — down, not
+  dead — only when something would Exhaust from that empty deck, or when you Flee while in last stand.
+  **Stamina is per-character**, and solo is mechanically
   identical to co-op. **The deckbuilding inversion is the design**: a card you add is +1 floor-time
   and −1 consistency. **No structural anti-recursion rule** — declined deliberately, over the agent's
   recommendation, with the dissent recorded. Low-complexity adopted as a **strong preference**. Zero

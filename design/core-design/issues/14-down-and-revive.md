@@ -91,3 +91,25 @@ that this ticket is the safety valve.
 Also relevant: ticket 07 superseded ticket 17's last stand bound — it is now **once per turn with a
 2-card exit cost**. State the ordering between revive and last stand against *that* rule, not the
 retired one.
+
+## Handed down by ticket 12's build session, 2026-08-25
+
+**This ticket's subject was redefined before it opened.** `[you, 2026-08-25]`
+
+> When a character's deck is empty, that character enters **last stand**. A character is **Down** when
+> something would Exhaust a card from their empty deck, **or** when the team Flees the room while that
+> character is in last stand. While Down, a character gets no rewards, cannot act, and **cannot have
+> cards added to their hand.**
+
+Three things this ticket now inherits rather than decides:
+
+- **Down is no longer "unable to draw."** Ticket 04's loss condition is superseded; being unable to
+  draw, whether from a full hand or an empty deck, is simply not drawing.
+- **There is a whole state between full health and Down.** Last stand is now occupied for as long as
+  the deck is empty, so "reaching zero" and "being Down" are two different events with real distance
+  between them. Any mid-floor revive this ticket designs has to say which of the two it answers.
+- **What a Down character may receive is already ruled**: nothing. No rewards, no cards into hand.
+  A revive has to be something done *to* them by the other character, not something handed to them.
+
+Ticket 07 already settled the other half: **clearing the floor heals both characters to full, including
+one who is Down**, so this ticket owns only mid-floor revival.

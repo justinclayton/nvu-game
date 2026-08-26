@@ -138,3 +138,49 @@ as such, is to have **hazard reveals draw from a third shared pool** instead of 
 Not yet, and this ticket should not claim it. The destination needs this set *ruled on*, and
 [ticket 13](13-red-and-gray-asymmetry.md) is still open — the Red/Gray difference in this set is
 flavour standing in for a decision nobody has made.
+
+## Revised 2026-08-25, after a cold review
+
+The set was handed to a reviewer given **only the card sheet and the rules summary** — no tickets, no
+map, no access to any reasoning. It set up floor 1 and played ten turns.
+
+### The ruling this produced
+
+`[you, 2026-08-25]` **Down is redefined and last stand becomes a state.** Full text and consequences
+are recorded as amendments on [04](04-deck-as-energy-and-hp-model.md),
+[07](07-turn-and-action-economy.md) and [17](17-last-stand.md), and handed to
+[14](14-down-and-revive.md), which owns the subject:
+
+> When a character's deck is empty, that character enters **last stand**. A character is **Down** when
+> something would Exhaust a card from their empty deck, **or** when the team Flees the room while that
+> character is in last stand. While Down, a character gets no rewards, cannot act, and **cannot have
+> cards added to their hand.**
+
+It closes three holes the review found: a character could be declared **Down at full health** once
+five `Hold` cards jammed their hand against the cap; last stand's Flee-cost trigger opened a free-play
+window onto a phase that was already over; and a Down character was a **dumpster for unwanted Stuff**,
+defusing the hand cap that exists to price `Hold`.
+
+### Cards fixed
+
+`Reckless` (rarity, and its drawback was null at zero deck — fixed by the ruling, not the card),
+`Both Barrels` (its upside deleted the card), `Scrap Sense` (killed itself on the game's most common
+turn), `Catch Your Breath` (strictly worse than the starter it replaces), `In Step` (wording),
+`Collapsed Stair` (fleeing was cheaper than clearing), and four rarity corrections. Full table in the
+[deliverable](../prototypes/12-exemplar-card-set.md#revision-2026-08-25--after-a-cold-review).
+
+### Two findings that are not this ticket's to fix
+
+- **Stuff rooms are a decision-free tax and they are most of floor 1.** Nine of thirteen rooms have no
+  threshold and no Flee line, yet the mandatory draw still charges both characters a card. In the
+  reviewer's playthrough **six of ten turns were "draw one, throw it away", and Gray went Down on turn
+  7 without a single enemy or hazard touching them.** This is composition, and belongs to
+  [ticket 22](22-floor-deck-composition.md) and [ticket 20](20-encounter-tabletop-prototype.md). It is
+  the largest finding in the review.
+- **The rarity axis collapses under its own rule.** Auditing strictly on complexity left `Woah`
+  holding two cards and `Fine` holding nine, because **a card with no rules text has no complexity** —
+  `Cutting Torch` at `Power 5` lands in the same tier as `Shove` at `Power 1`. So rarity cannot
+  differentiate Good Stuff at all, which contradicts [ticket 11](11-card-anatomy.md) in its own words:
+  it ruled Good Stuff carries rarity because *"a `Woah` Stuff should be an exciting flip"* — which is
+  quality, the reading it forbade three paragraphs earlier. One of those two lines has to go, and it
+  is ticket 11's to lose.

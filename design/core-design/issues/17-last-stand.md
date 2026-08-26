@@ -123,3 +123,39 @@ needs no further cap.
 Also corrected there: the shuffle-back takes the **would-be-exhausted cards from hand and play zone**
 — an alternate cleanup — and never touches the exhaust pile. **Stuff in the play zone shuffles back
 like any other card**; see [ticket 07](07-turn-and-action-economy.md).
+
+## Amended by ticket 12's build session, 2026-08-25
+
+**`Down` is redefined, and last stand becomes a state rather than a window.**
+
+`[you, 2026-08-25]` Ruled while reviewing [ticket 12's exemplar set](../prototypes/12-exemplar-card-set.md):
+
+> When a character's deck is empty, that character enters **last stand**. A character is **Down** when
+> something would Exhaust a card from their empty deck, **or** when the team Flees the room while that
+> character is in last stand. While Down, a character gets no rewards, cannot act, and **cannot have
+> cards added to their hand.**
+
+So last stand is occupied for exactly as long as the deck is empty, and reaching zero is no longer
+itself the end — it is the beginning of a state you have to fight your way out of.
+
+**What this changes here.** This ticket's rule fired *"the first time a character's deck is checked and
+found empty"* and granted free play *"until the end of that turn"*. **The window is now a state.**
+
+**It repairs a trigger this ticket named that could never fire.** The rule says last stand begins when
+the deck becomes empty — "drawing its last card, **or a punishment taking it**" — and this ticket then
+noted, correctly, that a last stand triggered by a cleanup punishment "gives nothing that turn",
+accepting it as harsh but consistent. It was worse than harsh: Flee costs land in cleanup, *after* the
+play phase, so that half of the trigger opened a free-play window onto a phase that was already over.
+As a persistent state it works — the character is in last stand when the next turn begins.
+
+**And the incentive this ticket flagged has flipped sign.** Its *Left open* section warned that
+surviving a last stand rewards emptying your deck deliberately, calling it "exactly the *reaching zero
+deliberately becomes a play* failure this ticket was told to watch for." Under the new rule, reaching
+zero means **any Flee kills you** — there is no cheap turn to farm it on, and emptying your deck on the
+nearest easy room is now a commitment rather than a free ride.
+
+**One consequence to check at the table:** running out on a **Stuff room** is unsurvivable by
+construction. A Stuff room has no threshold, so it can never be Cleared, so there is no way out of last
+stand on that turn — and if anything exhausts you, you are Down. Whether that is good pressure or an
+arbitrary coin-flip on which room happened to flip is a question for
+[ticket 20](20-encounter-tabletop-prototype.md).

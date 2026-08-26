@@ -364,3 +364,34 @@ it on the grounds that the category does not exist.
 
 Nothing else in this ticket changes — the play zone still splits by character, for the cleanup reason
 this ticket gave.
+
+## Amended by ticket 12's build session, 2026-08-25
+
+**`Down` is redefined, and last stand becomes a state rather than a window.**
+
+`[you, 2026-08-25]` Ruled while reviewing [ticket 12's exemplar set](../prototypes/12-exemplar-card-set.md):
+
+> When a character's deck is empty, that character enters **last stand**. A character is **Down** when
+> something would Exhaust a card from their empty deck, **or** when the team Flees the room while that
+> character is in last stand. While Down, a character gets no rewards, cannot act, and **cannot have
+> cards added to their hand.**
+
+So last stand is occupied for exactly as long as the deck is empty, and reaching zero is no longer
+itself the end — it is the beginning of a state you have to fight your way out of.
+
+**What this changes here.** This ticket set last stand at **once per turn** with a **2-card exit tax**.
+The *once per turn* framing is superseded — there is nothing to re-trigger, because last stand is now
+a state you are in until your deck stops being empty. The **exit tax survives as written**: clearing
+the room while in last stand shuffles back the would-be-exhausted cards minus 2.
+
+**The scarcity bound this ticket argued for is now much harder.** Its reasoning was that each trip
+through last stand nets −2 cards, making the exploit "a loop that converges on death." The new ruling
+adds a second, sharper bound: **in last stand, any Flee puts you Down.** You cannot coast in it and you
+cannot bank it — you clear rooms or you are finished. `[open]` Whether the 2-card exit tax is still
+needed on top of that is a live question and belongs to the human.
+
+**It also closes a hole this ticket opened and did not see.** This ticket ruled a Down character is
+"skipped in the draw and play phases entirely" but left the flip alone, and ticket 21 lets the team
+choose whose hand Stuff enters. Nothing stopped the team parking every unwanted piece of Bad Stuff on
+someone who could not act, permanently defusing the hand cap that this ticket introduced specifically
+to price `Hold` and Bad Stuff. *Cannot have cards added to their hand* ends it.

@@ -299,3 +299,28 @@ mid-floor cycling — at the cost of the one-pass dilution tension that currentl
 interesting, and at the cost of mid-floor shuffling. A softer intermediate exists between the two:
 recovery of exhausted cards purchased with something else, such as a rest action in a cleared room
 that costs floor-time or position.
+
+## Amended by ticket 12's build session, 2026-08-25
+
+**`Down` is redefined, and last stand becomes a state rather than a window.**
+
+`[you, 2026-08-25]` Ruled while reviewing [ticket 12's exemplar set](../prototypes/12-exemplar-card-set.md):
+
+> When a character's deck is empty, that character enters **last stand**. A character is **Down** when
+> something would Exhaust a card from their empty deck, **or** when the team Flees the room while that
+> character is in last stand. While Down, a character gets no rewards, cannot act, and **cannot have
+> cards added to their hand.**
+
+So last stand is occupied for exactly as long as the deck is empty, and reaching zero is no longer
+itself the end — it is the beginning of a state you have to fight your way out of.
+
+**What this changes here.** Section 5's loss condition — *"you are exhausted when you begin a turn and
+cannot draw"* — no longer holds. **Being unable to draw is not Down.** That matters most for the
+exception this ticket already flagged: a character at the hand cap who is "physically unable to draw"
+was left as an open edge, and ticket 07 then adopted a cap of 5 while Stuff ignores it. Under the old
+rule a character could be pushed to five `Hold` cards, be unable to draw, and be declared Down **at
+full health with a full deck** — losing the run to prosperity. That is now impossible: an unmet
+minimum draw simply goes unmet.
+
+Untouched: deck as stamina, the draw decision, the three zones, no discard pile, and the minimum draw
+itself.

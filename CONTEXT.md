@@ -183,20 +183,26 @@ to Stuff. A Hold card survives cleanup only while it stays in hand — playing i
 zone, where it is exhausted like anything else, so using a piece of Stuff spends it. *(tickets 04, 21; card
 design owned by ticket 11)*
 
-**Exhausted** (of a character) — down, not dead. A character is exhausted when they begin a turn and
-cannot draw. A down character is **skipped in the draw and play phases entirely**, and with no one
-else to absorb them **every room punishment falls on the survivor**. **Ascending heals them to full**
-like anyone else. The run ends only when both characters are down. *(tickets 03, 04, 07; mid-floor
-revival owned by ticket 14)*
+**Down** (of a character) — down, not dead. A character is **Down** when something would Exhaust a
+card from their **empty deck**, or when the team **Flees** the room while that character is in **last
+stand**. Reaching an empty deck is *not* itself Down — it is last stand, which is the state you have
+to fight out of. **Being unable to draw is not Down either**, whether from a full hand or an empty
+deck; the minimum draw simply goes unmet. A Down character is **skipped in the draw and play phases
+entirely**, **takes no rewards**, and **cannot have cards put into their hand** — Stuff cannot be
+parked on them. With no one else to absorb them **every room Flee cost falls on the survivor**.
+**Ascending heals them to full** like anyone else. The run ends only when both characters are Down.
+*(tickets 03, 04, 07, 12; mid-floor revival owned by ticket 14)*
 
-**Last stand** — what a character gets **whenever their deck is found empty**: every card in their
-hand can be played **at no cost** until the end of that turn. If the **room** is Cleared before they
-are further Exhausted they **survive**, and that turn ends in an **alternate cleanup** — the cards
-that would have been exhausted from **hand and play zone** are shuffled back into their deck instead,
-**less 2, the cost of exiting**. The exhaust pile is not involved. Enterable **once per turn**, and
-no more bounded than that: the 2-card exit cost is what stops it becoming a rotation, since each trip
-nets −2 cards permanently. `Hold` cards in hand stay in hand rather than joining the shuffle-back.
-*(tickets 04, 17, 07)*
+> Supersedes ticket 04's *"exhausted when they begin a turn and cannot draw."* **Exhaust** is now
+> exclusively what happens to **cards**; a character is **Down**.
+
+**Last stand** — the state a character is in **for as long as their deck is empty**: every card in
+their hand can be played **at no cost**. Their partner pays costs normally. If the **room** is
+Cleared while they are in it they **survive**, and that turn ends in an **alternate cleanup** — the
+cards that would have been exhausted from **hand and play zone** are shuffled back into their deck
+instead, **less 2, the cost of exiting**. The exhaust pile is not involved; `Hold` cards in hand stay
+in hand rather than joining the shuffle-back. **Fleeing a room while in last stand puts that character
+Down**, so it cannot be coasted in — you clear rooms or you are finished. *(tickets 04, 17, 07, 12)*
 
 **Turn** — the unit of play, and it belongs to the **floor**, not to a character: one flip, one draw
 phase, one play phase, one cleanup, with **both characters acting throughout, simultaneously, in any

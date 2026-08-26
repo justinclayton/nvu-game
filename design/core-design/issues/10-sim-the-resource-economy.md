@@ -124,3 +124,54 @@ floor and gone on ascending. Two measurements follow.
 **Note on this ticket's blocking.** Ticket 11 is now listed as a blocker. This ticket's own brief
 already said starting deck size "cannot be chosen honestly before ticket 11 says what a card does" —
 the dependency existed and was simply never wired.
+
+## Simulator rebuilt against the current rules, 2026-08-25 — no numbers ruled
+
+[`prototype/encounter-sim.html`](../../../prototype/encounter-sim.html) was rebuilt from
+[the floor rules summary](../prototypes/12-floor-rules-summary.md), which is now the most current
+statement of how a floor plays. The version it replaced predated the 2026-08-25 rulings and was wrong
+about the win condition, Down, last stand, the hand cap, and Stuff rooms.
+
+**This ticket is not answered.** The simulator is the instrument, not the finding. The three numbers it
+was built to inform are **adjustable inputs with scaffolding defaults and no recommendation**: starting
+deck size, the Stuff room curve, and the Stuff room thresholds including the second tier.
+
+### What it now implements
+
+Two-object Stuff rooms with a **split per-character threshold** read against that character's own side
+of the play zone; Good Stuff drawn blind from a side pool; no choosing whose hand an item enters; the
+room Cleared either way. **Last stand as a state** held for as long as the deck is empty, with the
+2-card exit cost. **Down** only when something would Exhaust from an empty deck or the team Flees while
+you are in last stand. The **minimum draw at a full hand**, exhausted rather than drawn. **Clearing the
+Enemy room ends the floor.**
+
+### The two open findings are instrumented
+
+- **The reshuffle** — mean and longest wait for a fled Enemy to come back around, and the share of lost
+  runs that ended with the Enemy sitting unreachable in the Fled pile.
+- **The hand cap collision** — character-turns started at or over the cap, and the share of minimum
+  draws burnt straight to the exhaust pile, broken out by floor.
+
+### What the first runs show, as observations rather than answers
+
+All of it is at placeholder numbers, with an **agent-written auto-player** that the tool exposes as a
+policy setting, and with **no card effect text executed** — so `Reckless`, `Second Wind`, `In Step` and
+`Both Barrels` all contribute nothing. Read these as directional.
+
+1. **The scaffolding numbers are severely lethal.** At 12-card decks, Enemy `Power 5` and the 9 → 0
+   Stuff curve, almost no run reaches floor 3 and the mean loss is around floor 2. A 12-card deck lasts
+   roughly five or six turns against a floor-1 deck of thirteen rooms, so the deck runs out before the
+   floor does. Raising both decks to 24 still clears all ten floors only a few percent of the time.
+   **This is the reshuffle problem stated as a number**: you cannot outlast the deck, so a fled Enemy
+   is often unreachable in practice, and around half of all lost runs end with it stuck in the Fled
+   pile.
+2. **The hand-cap collision does not appear on its own.** Good Stuff is `Hold`, but *playing* it
+   exhausts it — so a player who spends Stuff as they get it never fills their hand and the cap never
+   binds. The collision only shows up when a character **hoards Stuff for the Enemy room**, which is
+   the natural play and is now a toggle in the tool. Whether the collision is real therefore depends
+   on a player policy, not on the rules alone, which is worth knowing before tuning anything.
+3. **A Stuff room is a free escape from last stand.** `[finding]` A Stuff room is Cleared whether or
+   not anyone meets anything, and getting out of last stand triggers on **the room being Cleared** — so
+   a character in last stand escapes on any Stuff room, without meeting a threshold or spending a card.
+   On floor 1 that is up to nine free escapes sitting in the deck. This falls out of two separate
+   rulings colliding and has not been ruled on either way.

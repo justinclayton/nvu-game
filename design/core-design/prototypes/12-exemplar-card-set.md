@@ -16,7 +16,8 @@ not because they are balanced. Ticket 10 owns all of them.
 ## The player cards
 
 Format, per ticket 11: **Name** · type line · `Cost N` · **Stat** · effect text · `Hold` where
-printed · rarity. Rarity is a complexity signal, never a quality one.
+printed · rarity. Rarity tracks a card's **value** — its ceiling — and complexity rides along,
+because a complex card has to pay for its complexity in value.
 
 ### Red — starters (`Fine`, near-pure stats)
 
@@ -258,9 +259,64 @@ Format, per ticket 11: **name**, type line, one or more `threshold: outcome` lin
 > `Ruptured Coolant Line` is where Bad Stuff enters play — ticket 21's ruling that a punishment may
 > hand out Bad Stuff instead of stamina, here doing *both*.
 
-**Stuff rooms are not listed separately.** Per ticket 11 a Stuff room simply *is* the Good Stuff card:
-no threshold line, no Flee line. The four Good Stuff cards above are the four Stuff rooms. See finding
-1 below — this is where the anatomy came closest to breaking.
+### Stuff rooms
+
+Added 2026-08-25, on ticket 22's ruling that **a Stuff room is its own card** and Good Stuff moved to a
+face-down side pool. The room and the item are two different objects, so the four Good Stuff cards
+above are pool contents and these four are the rooms.
+
+The challenge is **split per character**, and each line is read against **that character's own side of
+the play zone** — never the shared pool. You pay for your own item and never for your partner's. There
+is no Flee line and no punishment: the room is **Cleared either way**, and meeting nothing simply means
+leaving with nothing.
+
+**Every number on these four cards is a placeholder.** How low the gate sits, and what the second tier
+asks and pays, are [ticket 10](../issues/10-sim-the-resource-economy.md) numbers and are not decided.
+They are printed here so the cards can be cut and read. The
+[encounter simulator](../../../prototype/encounter-sim.html) exposes all four as controls.
+
+```
+    Sorting Room                                     Stuff
+    [art]
+    Power 1:     Red takes 1 Good Stuff.
+    Scramble 1:  Gray takes 1 Good Stuff.
+```
+
+```
+    Ration Locker                                    Stuff
+    [art]
+    Power 1:     Red takes 1 Good Stuff.
+    Scramble 1:  Gray takes 1 Good Stuff.
+    Power 3:     Red takes 2 instead.
+    Scramble 3:  Gray takes 2 instead.
+```
+
+```
+    Tool Cage                                        Stuff
+    [art]
+    Scramble 1:  Red takes 1 Good Stuff.
+    Power 1:     Gray takes 1 Good Stuff.
+```
+
+```
+    Spill of Cargo                                   Stuff
+    [art]
+    Scramble 1:  Red takes 1 Good Stuff.
+    Power 3:     Gray takes 1 Good Stuff.
+    Scramble 3:  Red takes 2 instead.
+    Power 3:     Gray takes 2 instead.
+```
+
+> **Two of the four ask each character for the stat they do not produce.** `Tool Cage` and `Spill of
+> Cargo` point Red at `Scramble` and Gray at `Power`, which the starting decks cannot make — so those
+> rooms can only be met with Stuff you are already holding, or not at all. That is deliberate here, to
+> put ticket 22's still-open *which stat* question on a physical card where it can be argued about.
+> It is not a proposal that half the pool should work that way.
+
+> **What the second tier costs.** `Ration Locker` and `Spill of Cargo` print one. The tier is where the
+> Stuff room stops being "take the thing" and becomes a real spend, and it is also the clearest thing
+> the simulator has no answer for: at threshold 3 against a five-card hand, leaning in usually costs
+> more stamina than the extra item is worth. A number, not a shape, and it is ticket 10's.
 
 ---
 
@@ -273,10 +329,24 @@ stated policies; the last one does not come out well.
 |---|---|---|---|
 | Enemy rooms | 10 | one per floor, each floor a different monster (t22) | **10** |
 | Hazard rooms | 30 | 1.5–2× largest single-floor draw of 3 (t22) | **16** |
-| Stuff rooms / Good Stuff | 45 | 1.5–2× largest single-floor draw of 9 (t22) | **16** |
+| Stuff rooms | 45 | 1.5–2× largest single-floor draw of 9 (t22) | **16** |
+| Good Stuff | see below | sized by how much is handed out per floor, not by room count | **not sized** |
 | Bad Stuff | punishment-driven | not policied anywhere | **8** *(proposed)* |
 | Red reward pool | ~40–50 | a declined card is essentially never seen again (t09) | **see below** |
 | Gray reward pool | ~40–50 | same | **see below** |
+
+**The Stuff row split in two on 2026-08-25**, when a Stuff room became its own card. The two rows now
+size on different rules. **Stuff rooms** are a room pool and follow ticket 22's room policy, exactly as
+the Enemy and Hazard rows do — 16 is unchanged, because the number of *rooms* per floor did not change.
+
+**Good Stuff is deliberately not sized here.** `[finding]` It is sized by how much is handed out per
+floor, and that roughly doubled: nine rooms paying **both** characters is **18 pieces on floor 1** where
+the old design paid 9. Ticket 22 flagged that the 9 → 0 Stuff curve probably has to come down as a
+result — each room is now worth about twice as much — and that recalibration is a
+[ticket 10](../issues/10-sim-the-resource-economy.md) number that has not landed. Sizing this pool
+before the curve moves would only have to be redone. The
+[encounter simulator](../../../prototype/encounter-sim.html) carries the curve as a control for exactly
+this reason.
 
 **The reward pools do not fit.** `[finding]` Ticket 09's target — a declined card goes to the bottom
 and is *essentially never seen again in that run* — is a statement about pool size relative to total
@@ -312,12 +382,17 @@ a person and a table, and is not answered.
 **Yes — no card in this set needed a field that does not exist.** Three findings, none fatal, all
 needing a ruling.
 
-**Finding 1 — the Stuff room's type line has to be one string, and ticket 11 named it two.**
-Ticket 11 says the type line "reads `Stuff`" in the room zone and the same card "reads `Good Stuff`"
-in hand. A physical card prints one line. This set prints **`Good Stuff`**, on the reasoning that the
-card spends one flip in the room zone and the rest of the floor in a hand — but that is the agent
-choosing, and the ruling is the human's. The alternative is printing `Stuff` and letting Good/Bad be
-what the presence or absence of a stat field tells you.
+**Finding 1 — dissolved 2026-08-25, not answered.** `[you, ticket 22]` A Stuff room is its own
+card and Good Stuff is a separate item in a side pool, so there are two cards: the room reads
+`Stuff` and the item reads `Good Stuff`, and nothing does double duty. The finding as originally
+written is below, and is now void.
+
+> **Finding 1 — the Stuff room's type line has to be one string, and ticket 11 named it two.**
+> Ticket 11 says the type line "reads `Stuff`" in the room zone and the same card "reads `Good Stuff`"
+> in hand. A physical card prints one line. This set prints **`Good Stuff`**, on the reasoning that the
+> card spends one flip in the room zone and the rest of the floor in a hand — but that is the agent
+> choosing, and the ruling is the human's. The alternative is printing `Stuff` and letting Good/Bad be
+> what the presence or absence of a stat field tells you.
 
 **Finding 2 — "no stat field" no longer reliably means "no stats."** Ticket 11 discharged ticket 09's
 requirement that *has no stats* be readable at a glance by giving Bad Stuff no stat field. But ticket

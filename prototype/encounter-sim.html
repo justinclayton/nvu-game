@@ -43,11 +43,15 @@
   th { text-align:left; color:var(--dim); font-weight:600; font-size:11px;
        text-transform:uppercase; letter-spacing:.06em; padding:4px 6px; border-bottom:1px solid var(--line); }
   td { padding:4px 6px; border-bottom:1px solid #262b34; }
+  td.num, th.num { text-align:right; font-variant-numeric:tabular-nums; }
   .muted { color:var(--dim); }
   .tiny { font-size:12px; }
   .note { color:var(--dim); font-size:12px; margin:0 0 10px; }
   .warnbox { background:#3a2f1c; border:1px solid #6b5426; color:#e7cf9a;
              padding:8px 10px; border-radius:6px; font-size:12px; margin-bottom:12px; }
+  .findbox { background:#1d2a33; border:1px solid #2f4a5b; color:#bcd8e6;
+             padding:8px 10px; border-radius:6px; font-size:12px; margin-bottom:12px; }
+  .unruled { color:var(--gold); font-size:11px; }
 
   .card { width:132px; min-height:96px; background:var(--panel2); border:1px solid var(--line);
           border-radius:7px; padding:7px 8px; display:flex; flex-direction:column; gap:4px;
@@ -55,6 +59,7 @@
   .card.sel { border-color:var(--gold); box-shadow:0 0 0 1px var(--gold) inset; }
   .card.click { cursor:pointer; }
   .card.click:hover { border-color:#5d6a80; }
+  .card.room { width:230px; }
   .card .nm { font-weight:600; font-size:12.5px; line-height:1.25; }
   .card .cost { position:absolute; top:6px; right:7px; font-size:11px; color:var(--gold); }
   .card .stats { display:flex; gap:6px; flex-wrap:wrap; margin-top:auto; }
@@ -62,9 +67,13 @@
   .pip.pw { color:#e79a8f; border-color:#5e3b36; }
   .pip.sc { color:#8fc6e7; border-color:#365060; }
   .pip.hold { color:var(--gold); border-color:#5e4a24; }
+  .pip.met { background:#24402c; color:#a8d6b3; border-color:#3c6247; }
   .card .txt { font-size:11px; color:var(--dim); font-style:italic; }
+  .card .line { font-size:11px; line-height:1.35; }
   .owner { font-size:10px; letter-spacing:.06em; text-transform:uppercase; }
-  .owner.Red { color:var(--red); } .owner.Gray { color:var(--gray); } .owner.Either { color:var(--dim); }
+  .owner.Red { color:var(--red); } .owner.Gray { color:var(--gray); }
+  .owner.GoodStuff { color:var(--good); } .owner.BadStuff { color:var(--bad); }
+  .owner.Enemy { color:var(--red); } .owner.Hazard { color:var(--gold); } .owner.Stuff { color:var(--good); }
   .hand { display:flex; gap:7px; flex-wrap:wrap; min-height:100px; }
 
   .zone { background:var(--panel); border:1px solid var(--line); border-radius:8px; padding:10px; }
@@ -88,25 +97,29 @@
   .badge.ls { background:#5a4520; color:#f0d79a; }
   .badge.dn { background:#4a2b2b; color:#f0b0ac; }
   .badge.done { background:#2c4030; color:#a8d6b3; }
-  #log { height:210px; overflow-y:auto; background:#101216; border:1px solid var(--line);
+  .badge.cap { background:#3c2f4a; color:#d6bce8; }
+  #log { height:230px; overflow-y:auto; background:#101216; border:1px solid var(--line);
          border-radius:6px; padding:8px; font:12px/1.55 ui-monospace, SFMono-Regular, Menlo, monospace; }
   #log div { border-bottom:1px solid #1a1d23; padding:1px 0; }
   #log .t { color:#6f7a8c; }
   #log .hl { color:var(--gold); } #log .g { color:var(--good); } #log .b { color:var(--bad); }
-  .actions { display:flex; gap:7px; flex-wrap:wrap; align-items:center; }
-  .stub { color:var(--gold); font-size:11px; }
+  .bar { height:14px; background:#101216; border:1px solid var(--line); border-radius:3px; overflow:hidden; }
+  .bar > i { display:block; height:100%; background:#3d608a; }
+  .bar > i.warn { background:#8a6a2f; }
+  .bar > i.bad { background:#8a3f39; }
 </style>
 </head>
 <body>
 
 <header>
   <h1>North vs Up — encounter simulator</h1>
-  <span class="tiny muted">rules as of tickets 04 / 18 / 21, phases per 07</span>
+  <span class="tiny muted">rules as of the floor rules summary, 2026-08-25</span>
   <nav>
     <button class="tab on" data-page="play">Play</button>
-    <button class="tab" data-page="decks">Decks</button>
+    <button class="tab" data-page="batch">Batch</button>
+    <button class="tab" data-page="setup">Setup &amp; unruled numbers</button>
     <button class="tab" data-page="library">Library</button>
-    <button class="tab" data-page="rules">Rules &amp; stubs</button>
+    <button class="tab" data-page="rules">Rules</button>
   </nav>
 </header>
 
@@ -123,6 +136,7 @@
 
   <div class="actions" style="margin-bottom:12px">
     <button class="primary" id="btnStart">Start floor</button>
+    <label>Floor <input type="number" id="playFloor" min="1" max="10" value="1"></label>
     <span id="turnActions" class="actions"></span>
   </div>
 
@@ -136,12 +150,17 @@
       </div>
       <div class="pile"><div class="n" id="nFled">0</div><div class="l">Fled</div></div>
       <div class="pile"><div class="n" id="nCleared">0</div><div class="l">Cleared</div></div>
+      <div class="pile"><div class="n" id="nGoodPool">0</div><div class="l">Good Stuff</div></div>
     </div>
+    <div class="tiny muted" id="enemyWatch" style="margin-top:8px"></div>
   </div>
 
   <div class="zone" style="margin-bottom:12px">
     <h2>Play zone <span class="muted tiny" id="poolReadout"></span></h2>
-    <div class="hand" id="playZone"></div>
+    <div class="grid2">
+      <div><h3>Red's side</h3><div class="hand" id="playZone-Red"></div></div>
+      <div><h3>Gray's side</h3><div class="hand" id="playZone-Gray"></div></div>
+    </div>
   </div>
 
   <div class="grid2" style="margin-bottom:12px">
@@ -161,147 +180,186 @@
   </div>
 </section>
 
-<!-- ============================ DECKS ============================ -->
-<section class="page" id="page-decks">
+<!-- ============================ BATCH ============================ -->
+<section class="page" id="page-batch">
   <div class="panel">
-    <h2>Settings</h2>
+    <h2>Batch runs</h2>
+    <p class="note">An auto-player plays whole runs at the current settings. <strong>The auto-player is
+      an agent-written heuristic, not a ruling</strong> — it draws until it can afford the room or hits
+      the cap, plays the cheapest subset that clears, and flees when it cannot. Change how greedy it is
+      below and watch the numbers move.</p>
     <div class="row">
-      <label><input type="checkbox" id="setMandatory"> Mandatory minimum draw of 1
-        <span class="stub">(amends ticket 04)</span></label>
-      <label><input type="checkbox" id="setCap"> Maximum hand size
-        <input type="number" id="setCapN" min="1" value="7"> <span class="stub">(ticket 07, open)</span></label>
-      <label><input type="checkbox" id="setLastStand"> Last stand
-        <span class="stub">(ticket 17)</span></label>
+      <label>Runs <input type="number" id="batchN" min="1" max="20000" value="2000"></label>
+      <label>Floors per run <input type="number" id="batchFloors" min="1" max="10" value="10"></label>
+      <label>Turn cap per floor <input type="number" id="batchTurnCap" min="5" max="500" value="120"></label>
+      <label>Draw greed
+        <select id="batchGreed">
+          <option value="afford">draw until affordable (default)</option>
+          <option value="min">draw the minimum only</option>
+          <option value="max">draw to the cap</option>
+        </select>
+      </label>
+      <label><input type="checkbox" id="batchStuffGreed" checked> Chase Stuff rooms</label>
+      <label><input type="checkbox" id="batchHoldStuff"> Hoard Stuff for the Enemy room</label>
+      <button class="primary" id="btnBatch">Run batch</button>
+      <button id="btnBatch1">Run 1 floor, verbose</button>
     </div>
   </div>
 
-  <div class="grid3">
-    <div class="panel"><h2>Red's deck <span class="muted tiny" id="cntRed"></span></h2><div id="deck-Red"></div></div>
-    <div class="panel"><h2>Gray's deck <span class="muted tiny" id="cntGray"></span></h2><div id="deck-Gray"></div></div>
-    <div class="panel"><h2>Floor deck <span class="muted tiny" id="cntFloor"></span></h2><div id="deck-floor"></div></div>
+  <div id="batchOut"></div>
+</section>
+
+<!-- ============================ SETUP ============================ -->
+<section class="page" id="page-setup">
+  <div class="warnbox">
+    <strong>Three numbers on this page are deliberately unruled.</strong> The map's prototyping policy
+    sends numeric questions here, and ticket 10 owns all three. The simulator ships them as controls
+    with scaffolding defaults and no opinion: <strong>starting deck size</strong>,
+    <strong>the Stuff room curve</strong>, and <strong>the Stuff room thresholds</strong>. Anything
+    marked <span class="unruled">unruled</span> below is one of them.
   </div>
 
   <div class="panel">
+    <h2>Starting decks <span class="unruled">unruled — ticket 10</span></h2>
+    <p class="note">The rules summary uses 12 each and marks it scaffolding. The split below is that
+      scaffolding: Red 7 Shove / 5 Charge In, Gray 7 Duck Under / 5 Pick The Lock. Scale the size and
+      the sim rebuilds both decks in the same ratio.</p>
     <div class="row">
-      <button id="btnExport">Export everything (JSON)</button>
-      <button id="btnImport">Import…</button>
-      <button class="warn" id="btnWipe">Wipe all content</button>
-      <input type="file" id="fileImport" accept="application/json" style="display:none">
+      <label>Red deck size <input type="number" id="setDeckRed" min="2" max="60" value="12"></label>
+      <label>Gray deck size <input type="number" id="setDeckGray" min="2" max="60" value="12"></label>
+      <label>Cheap:expensive ratio <input type="number" id="setDeckRatio" min="0" max="1" step="0.05" value="0.58"></label>
+      <span class="tiny muted">0.58 ≈ 7 of 12 cheap</span>
+    </div>
+  </div>
+
+  <div class="panel">
+    <h2>Floor deck composition</h2>
+    <p class="note">1 Enemy and 3 Hazard are fixed by ticket 22. The Stuff count is the escalation dial
+      and ticket 22 flagged that its curve probably has to come down now that a Stuff room pays both
+      characters.</p>
+    <div class="row">
+      <label>Enemy rooms <input type="number" id="setEnemyN" min="0" max="5" value="1"></label>
+      <label>Hazard rooms <input type="number" id="setHazardN" min="0" max="12" value="3"></label>
+      <label class="unruled">Stuff at floor 1 <input type="number" id="setStuffBase" min="0" max="20" value="9"></label>
+      <label class="unruled">Stuff at floor 10 <input type="number" id="setStuffTop" min="0" max="20" value="0"></label>
+      <span class="tiny muted" id="stuffCurveReadout"></span>
+    </div>
+    <p class="tiny muted" style="margin-top:8px">Ticket 22's original curve is 9 → 0, straight line.
+      Nine rooms paying both characters is 18 pieces of Stuff on floor 1 where the old design paid 9,
+      so pulling the base down to 5 or 6 is the obvious candidate. The sim has no opinion; the batch
+      tab will tell you what each curve does.</p>
+  </div>
+
+  <div class="panel">
+    <h2>Stuff room thresholds <span class="unruled">unruled — ticket 10</span></h2>
+    <p class="note">A Stuff room's challenge is <strong>split per character</strong> and read against
+      that character's own side of the play zone only. The second tier is richer and optional.</p>
+    <div class="row">
+      <label>Tier 1 threshold <input type="number" id="setStuffT1" min="0" max="12" value="1"></label>
+      <label>Tier 1 payout <input type="number" id="setStuffP1" min="0" max="5" value="1"></label>
+      <label>Tier 2 threshold <input type="number" id="setStuffT2" min="0" max="20" value="3"></label>
+      <label>Tier 2 payout <input type="number" id="setStuffP2" min="0" max="5" value="2"></label>
+      <label><input type="checkbox" id="setStuffTier2" checked> Second tier printed on half the rooms</label>
+    </div>
+  </div>
+
+  <div class="panel">
+    <h2>Rules toggles</h2>
+    <p class="note">These are <em>ruled</em>. They are exposed so you can turn a rule off and see what
+      it was carrying, not because they are open.</p>
+    <div class="row">
+      <label>Hand cap <input type="number" id="setCapN" min="1" max="12" value="5"></label>
+      <label><input type="checkbox" id="setCap" checked> Cap on</label>
+      <label><input type="checkbox" id="setMandatory" checked> Minimum draw of 1</label>
+      <label><input type="checkbox" id="setFullHandExhaust" checked> A full hand still draws — to the exhaust pile</label>
+      <label><input type="checkbox" id="setLastStand" checked> Last stand</label>
+      <label>Last stand exit cost <input type="number" id="setLSCost" min="0" max="6" value="2"></label>
+    </div>
+  </div>
+
+  <div class="panel">
+    <h2>Enemy and pool sizes</h2>
+    <div class="row">
+      <label>Enemy Power at floor 1 <input type="number" id="setEnemyPow" min="1" max="40" value="5"></label>
+      <label>+ per floor <input type="number" id="setEnemyPowStep" min="0" max="6" step="0.5" value="0"></label>
+      <label>Good Stuff pool size <input type="number" id="setGoodPool" min="4" max="120" value="40"></label>
+      <span class="tiny muted">Ticket 22 puts escalation on scarcity, not on a harder fight, so the
+        step defaults to 0.</span>
     </div>
   </div>
 </section>
 
 <!-- ============================ LIBRARY ============================ -->
 <section class="page" id="page-library">
-  <div class="warnbox">
-    Rules text is <strong>displayed but never executed</strong> — ticket 11 (card anatomy) is open, and
-    conditional stats such as <em>"Power equal to twice the cards Gray plays this turn"</em> have no
-    settled form yet. Adjudicate those by hand and record what you did in the log.
-  </div>
-
-  <div class="grid2">
-    <div class="panel">
-      <h2>New player card</h2>
-      <div class="row">
-        <div class="field"><label>Name</label><input id="pcName" style="width:170px"></div>
-        <div class="field"><label>Owner</label><select id="pcOwner">
-          <option>Either</option><option>Red</option><option>Gray</option></select></div>
-        <div class="field"><label>Cost</label><input type="number" id="pcCost" min="0" value="0"></div>
-        <div class="field"><label>Power</label><input type="number" id="pcPower" min="0" value="0"></div>
-        <div class="field"><label>Scramble</label><input type="number" id="pcScr" min="0" value="0"></div>
-        <div class="field"><label>&nbsp;</label><label><input type="checkbox" id="pcHold"> Hold</label></div>
-      </div>
-      <div class="row" style="margin-top:8px">
-        <div class="field" style="flex:1"><label>Rules text (not executed)</label>
-          <input id="pcText" style="width:100%"></div>
-        <button class="primary" id="btnAddCard">Add card</button>
-      </div>
-      <p class="note" style="margin-top:8px">Cost and stats are separate, unrelated numbers (ticket 21).
-        Paying a cost exhausts that many <em>other</em> cards from the same character's hand.</p>
-      <table style="margin-top:6px"><thead><tr><th>Name</th><th>Own</th><th>Cost</th><th>Pw</th><th>Sc</th><th>Hold</th><th></th></tr></thead>
-        <tbody id="tblCards"></tbody></table>
-    </div>
-
-    <div class="panel">
-      <h2>New room</h2>
-      <div class="row">
-        <div class="field"><label>Name</label><input id="rmName" style="width:170px"></div>
-        <div class="field"><label>Kind</label><select id="rmKind">
-          <option value="combat">Combat</option><option value="hazard">Hazard</option>
-          <option value="item">Item</option></select></div>
-        <div class="field"><label>Challenge Power</label><input type="number" id="rmPower" min="0" value="0"></div>
-        <div class="field"><label>Challenge Scramble</label><input type="number" id="rmScr" min="0" value="0"></div>
-      </div>
-      <div class="row" style="margin-top:8px">
-        <div class="field"><label>Punishment</label><select id="rmPunKind">
-          <option value="none">None</option>
-          <option value="one">1 character exhausts X from deck</option>
-          <option value="both">Both characters exhaust X from deck</option></select></div>
-        <div class="field"><label>X</label><input type="number" id="rmPunN" min="0" value="0"></div>
-      </div>
-      <div id="itemFields" style="display:none">
-        <h3 style="margin-top:10px">The item this room becomes (goes to a hand with Hold)</h3>
-        <div class="row">
-          <div class="field"><label>Cost</label><input type="number" id="rmICost" min="0" value="0"></div>
-          <div class="field"><label>Power</label><input type="number" id="rmIPower" min="0" value="0"></div>
-          <div class="field"><label>Scramble</label><input type="number" id="rmIScr" min="0" value="0"></div>
-        </div>
-      </div>
-      <div class="row" style="margin-top:8px">
-        <div class="field" style="flex:1"><label>Rules text (not executed)</label>
-          <input id="rmText" style="width:100%"></div>
-        <button class="primary" id="btnAddRoom">Add room</button>
-      </div>
-      <p class="note" style="margin-top:8px">Multi-stat challenges are legal but none are printed at
-        level 1 (ticket 21) — set both numbers only if you are deliberately testing that dial.
-        Item rooms carry no punishment by default.</p>
-      <table style="margin-top:6px"><thead><tr><th>Name</th><th>Kind</th><th>Challenge</th><th>Punishment</th><th></th></tr></thead>
-        <tbody id="tblRooms"></tbody></table>
-    </div>
-  </div>
-
   <div class="panel">
-    <button id="btnSample">Load scratch content</button>
-    <span class="note" style="margin-left:8px">Throwaway numbers so the tool is not empty on first open.
-      <strong>This is not an exemplar set</strong> — tickets 12 and 22 are open and nothing here is a proposal.</span>
+    <p class="note">The exemplar set from ticket 12, as printed. <strong>Unratified</strong> — every
+      number is a placeholder and the set is still awaiting your ruling.</p>
+    <div id="library"></div>
   </div>
 </section>
 
 <!-- ============================ RULES ============================ -->
 <section class="page" id="page-rules">
   <div class="panel">
-    <h2>What this implements, and where it is guessing</h2>
-    <p class="note">Everything below marked <span class="stub">stub</span> is a placeholder for an open
-      ticket, not a decision. Everything else is the rules as written today.</p>
-    <h3>The turn (ticket 07)</h3>
+    <h2>What this implements</h2>
+    <p class="note">This simulator follows
+      <code>design/core-design/prototypes/12-floor-rules-summary.md</code>, which is the most current
+      statement of how a floor plays. Where the summary and an older ticket disagree, the summary wins.</p>
+
+    <h3>The turn</h3>
     <ol class="tiny muted">
-      <li><strong>Flip</strong> — a room from the floor deck into the active room zone. If the draw pile is empty, the Fled pile shuffles back in first.</li>
-      <li><strong>Draw</strong> — both characters at once, one card at a time, each stopping when they declare they are done. <em>You cannot draw again once the play phase begins.</em></li>
-      <li><strong>Play</strong> — either character, any order. Paying a cost exhausts that many other cards from that character's hand. The room is Cleared the instant the shared pool meets its challenge; excess evaporates.</li>
-      <li><strong>Cleanup</strong> — if the room is still there, take its punishment and send it to Fled. Then exhaust every card in hand and in the play zone, except Hold cards still in hand.</li>
-      <li><strong>Turn end.</strong></li>
+      <li><strong>Flip</strong> — a room into the active room zone. If the draw pile is empty, the Fled pile shuffles back in first.</li>
+      <li><strong>Draw</strong> — both characters at once, each stopping when they say so. At least 1, always. You may not draw <em>up</em> at 5 or more in hand — but the minimum still happens, and that card goes straight to the exhaust pile.</li>
+      <li><strong>Play</strong> — either character, any order. Cost is paid in other cards from that character's own hand. Stats join one shared pool; a Stuff room reads each character's own side instead.</li>
+      <li><strong>Cleanup</strong> — an uncleared room applies its Flee line and goes to Fled. Then both hands and the whole play zone exhaust, except <code>Hold</code> cards in hand.</li>
+      <li><strong>Turn ends.</strong></li>
     </ol>
-    <h3>Last stand (ticket 17)</h3>
-    <p class="tiny muted">The first time a character's deck becomes empty — by drawing its last card or
-      by a punishment taking it — every card in their hand is free to play for the rest of that turn.
-      If the <strong>room</strong> is Cleared before that character goes down, they survive: at that
-      cleanup, the cards that would have been exhausted are shuffled back into their deck instead, and
-      they carry on with a thin but now-known deck. Once per character per floor.</p>
+
+    <h3>Stuff rooms</h3>
+    <p class="tiny muted">A Stuff room is <strong>its own card</strong>, and the item is a different
+      object drawn face down from the <strong>Good Stuff pool</strong> at the side of the table. The
+      challenge is <strong>split per character</strong> — Red's line is read against Red's side of the
+      play zone only — so you pay for your own item and never for your partner's. A Down character
+      earns nothing and cannot have Stuff parked on them. <strong>The room is Cleared either way</strong>
+      and never goes to Fled. Stuff ignores the hand cap on the way in.</p>
+    <p class="tiny muted">There is no step in which anyone chooses whose hand an item goes to. That
+      choice was deleted on 2026-08-25.</p>
+
+    <h3>Last stand, and going Down</h3>
+    <p class="tiny muted">An empty deck <strong>is</strong> last stand — a state, held for exactly as
+      long as the deck is empty, not a once-per-floor window. While in it every card in that
+      character's hand plays at no cost; their partner pays normally.</p>
+    <p class="tiny muted">A character goes <strong>Down</strong> when something would Exhaust a card
+      from their empty deck, or when the team Flees a room while they are in last stand. An empty deck
+      by itself is <em>not</em> Down.</p>
+    <p class="tiny muted">Clearing a room while in last stand gets you out: at that cleanup the cards
+      that would have exhausted from hand and play zone are shuffled back into the deck instead,
+      <strong>minus 2</strong>, which are exhausted as the price. <code>Hold</code> cards stay in hand
+      and are not part of the shuffle-back.</p>
+
+    <h3>Something the engine surfaced, not a ruling</h3>
+    <p class="tiny muted">A Stuff room is <strong>Cleared either way</strong>, and getting out of last
+      stand is triggered by <strong>the room being Cleared</strong>. Put together, a character in last
+      stand escapes it on any Stuff room they meet, <em>without meeting anything and without spending
+      a card</em> — they simply shuffle their hand back minus 2. On floor 1 that is up to nine free
+      escapes sitting in the deck. This falls out of two separate rulings and is not obviously wrong,
+      but nothing has ruled on it. Watch for it in the log.</p>
+
+    <h3>Winning</h3>
+    <p class="tiny muted">Clearing the <strong>Enemy room</strong> ends the floor. Hazard and Stuff
+      rooms are resources on the way to the fight and a floor can end with either still in the deck.</p>
+
+    <h3>What this tool does not do</h3>
     <ul class="tiny muted">
-      <li>Trigger fires when the deck <em>becomes</em> empty, not when a draw from an empty deck is attempted. <span class="stub">agent reading</span></li>
-      <li>Hold cards in hand stay in hand — they were never going to be exhausted. <span class="stub">agent reading</span></li>
-      <li>Only the character in last stand plays free; their partner pays costs normally. <span class="stub">agent reading</span></li>
-      <li>A last stand triggered by a cleanup punishment gives nothing that turn — the room was not cleared, so there is no free play left to use and no survival. <span class="stub">agent reading</span></li>
-    </ul>
-    <h3>Stubs for open tickets</h3>
-    <ul class="tiny muted">
-      <li><strong>Down (ticket 14)</strong> <span class="stub">stub</span> — a character who begins a turn unable to draw is down, takes no further part, and there is no revive. The floor ends when both are down.</li>
-      <li><strong>Hand cap (ticket 07)</strong> <span class="stub">open</span> — off by default; toggle it on the Decks tab.</li>
-      <li><strong>Mandatory draw (amends ticket 04)</strong> — on by default per your ruling. Ticket 04 had explicitly declined a minimum draw, so this reverses it: declining a room is no longer free.</li>
-      <li><strong>Card anatomy (ticket 11)</strong> <span class="stub">open</span> — level-1 fields only. Rules text is displayed, never executed.</li>
-      <li><strong>Asymmetry (ticket 13)</strong> <span class="stub">open</span> — an owner field only; no other difference between Red and Gray.</li>
-      <li><strong>Deck composition (ticket 22)</strong> <span class="stub">open</span> — the tool has no opinion. You author the floor deck.</li>
-      <li><strong>Ascending (ticket 05)</strong> — out of scope. This tool plays one floor.</li>
+      <li><strong>Ascending</strong> is modelled only as much as a multi-floor batch run needs: Stuff is
+        pulled out, exhaust piles shuffle back, a reward is taken. The reward is a generic card, because
+        which pool a reveal draws from is still unstated.</li>
+      <li><strong>Card effect text is displayed, never executed.</strong> Conditional stats, <code>Pack
+        Rat</code>, <code>Faceful of Slime</code> and the rest are read by a human at the table, not by
+        this engine. Stats, costs and <code>Hold</code> are all it understands.</li>
+      <li><strong>Red/Gray asymmetry</strong> is only what the exemplar cards print.</li>
+      <li>The <strong>reward pool problem</strong> from ticket 12 is a component-count question and is
+        not simulated.</li>
     </ul>
   </div>
 </section>
@@ -311,42 +369,132 @@
 <script>
 "use strict";
 
-/* ---------------------------------------------------------------- state */
+/* ================================================================ data
+   The exemplar set from ticket 12, as printed. Unratified.
+   Player card: {name, owner, cost, power, scramble, hold, rarity, text}
+   Room card:   {name, kind, ...}
+*/
 
-var LS = "nvu-encounter-sim-v1";
-var uidN = 0;
-function uid() { return "u" + (++uidN); }
+var PLAYER_CARDS = [
+  { name:"Shove",            owner:"Red",  cost:0, power:1, rarity:"Fine", starter:"cheap" },
+  { name:"Charge In",        owner:"Red",  cost:1, power:3, rarity:"Fine", starter:"dear" },
+  { name:"Duck Under",       owner:"Gray", cost:0, scramble:1, rarity:"Fine", starter:"cheap" },
+  { name:"Pick The Lock",    owner:"Gray", cost:1, scramble:3, rarity:"Fine", starter:"dear" },
+  { name:"Catch Your Breath",owner:"Gray", cost:0, rarity:"Fine",
+    text:"Look at the top 2 cards of your deck. Put them back in either order." },
+  { name:"Reckless",         owner:"Red",  cost:0, power:5, rarity:"Cool",
+    text:"Exhaust 1 card from your deck." },
+  { name:"Second Wind",      owner:"Red",  cost:1, rarity:"Cool",
+    text:"Draw 2 cards, ignoring the hand cap." },
+  { name:"In Step",          owner:"Gray", cost:1, rarity:"Cool", cond:true,
+    text:"Scramble equal to the number of cards Red has in the play zone." },
+  { name:"Pack Rat",         owner:"Red",  cost:2, rarity:"Woah", hold:true,
+    text:"Hold. Stuff you hold is not set aside when you ascend." },
+  { name:"Scrap Sense",      owner:"Gray", cost:1, rarity:"Woah", hold:true,
+    text:"Hold. When a Stuff room is Cleared, you may take 1 extra Good Stuff." },
+  { name:"Both Barrels",     owner:"Red",  cost:2, power:2, rarity:"Woah",
+    text:"Power 2 for each other Red card in the play zone." }
+];
 
-var S = {
-  cards: [],           // {id,name,owner,cost,power,scramble,hold,text}
-  rooms: [],           // {id,name,kind,power,scramble,punKind,punN,item,text}
-  decks: { Red: {}, Gray: {}, floor: {} },   // id -> count
-  settings: { mandatory: true, cap: false, capN: 7, lastStand: true }
+var GOOD_STUFF = [
+  { name:"Pry Bar",       owner:"GoodStuff", cost:0, power:3, hold:true, rarity:"Fine" },
+  { name:"Coil of Cable", owner:"GoodStuff", cost:0, scramble:3, hold:true, rarity:"Fine" },
+  { name:"Cutting Torch", owner:"GoodStuff", cost:1, power:5, hold:true, rarity:"Cool" },
+  { name:"Grav Harness",  owner:"GoodStuff", cost:1, power:3, scramble:3, hold:true, rarity:"Woah",
+    text:"When you play this, one character may draw 1 card, ignoring the hand cap." }
+];
+
+var BAD_STUFF = [
+  { name:"Faceful of Slime", owner:"BadStuff", cost:0, hold:true,
+    text:"While you hold this, you may not draw more than 1 card during your draw phase. Play this to be rid of it." },
+  { name:"Torn Seal",        owner:"BadStuff", cost:2, hold:true,
+    text:"This may not be Exhausted to pay a cost. Play this to be rid of it." }
+];
+
+/* Rooms. Enemy and Hazard read the SHARED pool. Stuff rooms read each
+   character's OWN side, and their numbers come from the settings, because
+   they are unruled. */
+var ENEMY_ROOMS = [
+  { name:"Sump Crawler", kind:"Enemy", stat:"power", basePower:5,
+    flee:{ who:"one", n:2 } },
+  { name:"The Thing In The Stairwell", kind:"Enemy", stat:"power", basePower:9,
+    tier2:{ add:3, reward:true }, flee:{ who:"both", n:3 } }
+];
+
+var HAZARD_ROOMS = [
+  { name:"Collapsed Stair", kind:"Hazard", stat:"scramble", t1:2, t2:5, t2reward:true,
+    flee:{ who:"one", n:3 } },
+  { name:"Ruptured Coolant Line", kind:"Hazard", stat:"scramble", t1:4, t2:7, t2reward:true,
+    flee:{ who:"both", n:1, badStuff:1 } }
+];
+
+/* Four Stuff rooms — new, per ticket 22's 2026-08-25 hand-down.
+   `swap` flips which character's line asks for which stat. `rich` marks the
+   rooms that print a second tier. */
+var STUFF_ROOMS = [
+  { name:"Sorting Room",    kind:"Stuff", swap:false, rich:false },
+  { name:"Ration Locker",   kind:"Stuff", swap:false, rich:true },
+  { name:"Tool Cage",       kind:"Stuff", swap:true,  rich:false },
+  { name:"Spill of Cargo",  kind:"Stuff", swap:true,  rich:true }
+];
+
+/* ================================================================ settings */
+
+var LS = "nvu-encounter-sim-v2";
+var CFG = {
+  deckRed: 12, deckGray: 12, deckRatio: 0.58,
+  enemyN: 1, hazardN: 3, stuffBase: 9, stuffTop: 0,
+  stuffT1: 1, stuffP1: 1, stuffT2: 3, stuffP2: 2, stuffTier2: true,
+  capN: 5, cap: true, mandatory: true, fullHandExhaust: true,
+  lastStand: true, lsCost: 2,
+  enemyPow: 5, enemyPowStep: 0, goodPool: 40
 };
-var G = null;          // live game
 
-function save() { try { localStorage.setItem(LS, JSON.stringify(S)); } catch (e) {} }
-function load() {
+var FIELDS = {
+  setDeckRed:"deckRed", setDeckGray:"deckGray", setDeckRatio:"deckRatio",
+  setEnemyN:"enemyN", setHazardN:"hazardN", setStuffBase:"stuffBase", setStuffTop:"stuffTop",
+  setStuffT1:"stuffT1", setStuffP1:"stuffP1", setStuffT2:"stuffT2", setStuffP2:"stuffP2",
+  setStuffTier2:"stuffTier2", setCapN:"capN", setCap:"cap", setMandatory:"mandatory",
+  setFullHandExhaust:"fullHandExhaust", setLastStand:"lastStand", setLSCost:"lsCost",
+  setEnemyPow:"enemyPow", setEnemyPowStep:"enemyPowStep", setGoodPool:"goodPool"
+};
+
+function saveCfg() { try { localStorage.setItem(LS, JSON.stringify(CFG)); } catch (e) {} }
+function loadCfg() {
   try {
     var raw = localStorage.getItem(LS);
-    if (raw) {
-      var p = JSON.parse(raw);
-      S.cards = p.cards || [];
-      S.rooms = p.rooms || [];
-      S.decks = p.decks || { Red: {}, Gray: {}, floor: {} };
-      if (p.settings) S.settings = Object.assign(S.settings, p.settings);
-      // keep uid() from colliding with loaded ids
-      var seen = S.cards.concat(S.rooms);
-      for (var i = 0; i < seen.length; i++) {
-        var n = parseInt(String(seen[i].id).replace(/^u/, ""), 10);
-        if (n > uidN) uidN = n;
-      }
-    }
+    if (raw) { var p = JSON.parse(raw); for (var k in CFG) if (k in p) CFG[k] = p[k]; }
   } catch (e) {}
 }
+function bindFields() {
+  for (var id in FIELDS) {
+    (function (id, key) {
+      var e = el(id); if (!e) return;
+      if (e.type === "checkbox") e.checked = !!CFG[key]; else e.value = CFG[key];
+      e.addEventListener("change", function () {
+        CFG[key] = e.type === "checkbox" ? e.checked : parseFloat(e.value);
+        saveCfg(); renderStuffCurve();
+      });
+    })(id, FIELDS[id]);
+  }
+}
+function renderStuffCurve() {
+  var bits = [];
+  for (var f = 1; f <= 10; f++) bits.push(stuffCount(f));
+  el("stuffCurveReadout").textContent =
+    "curve: " + bits.join(" ") + "  ·  floor 1 hands out up to " + (stuffCount(1) * 2) + " pieces";
+}
+function stuffCount(floor) {
+  var a = CFG.stuffBase, b = CFG.stuffTop;
+  return Math.max(0, Math.round(a + (b - a) * (floor - 1) / 9));
+}
+function enemyPower(floor) { return Math.round(CFG.enemyPow + CFG.enemyPowStep * (floor - 1)); }
 
-/* ---------------------------------------------------------------- utils */
+/* ================================================================ utils */
 
+var uidN = 0;
+function uid() { return "u" + (++uidN); }
+function el(id) { return document.getElementById(id); }
 function shuffle(a) {
   for (var i = a.length - 1; i > 0; i--) {
     var j = Math.floor(Math.random() * (i + 1));
@@ -354,166 +502,219 @@ function shuffle(a) {
   }
   return a;
 }
-function byId(list, id) { for (var i = 0; i < list.length; i++) if (list[i].id === id) return list[i]; return null; }
 function esc(s) {
   return String(s == null ? "" : s).replace(/[&<>"]/g, function (c) {
-    return ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c];
+    return ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;" })[c];
   });
 }
-function el(id) { return document.getElementById(id); }
+function inst(def) { return { iid: uid(), def: def }; }
+function pick(a) { return a[Math.floor(Math.random() * a.length)]; }
+function sum(a) { var t = 0; for (var i = 0; i < a.length; i++) t += a[i]; return t; }
+function pct(n, d) { return d ? (100 * n / d).toFixed(1) + "%" : "—"; }
+function mean(a) { return a.length ? sum(a) / a.length : 0; }
 
-/* ---------------------------------------------------------------- log */
+/* ================================================================ building a floor */
 
-function log(msg, cls) {
-  if (!G) return;
-  G.log.push({ t: G.turn, msg: msg, cls: cls || "" });
-  renderLog();
+function starterDeck(owner) {
+  var size = owner === "Red" ? CFG.deckRed : CFG.deckGray;
+  var cheap = owner === "Red" ? byName("Shove") : byName("Duck Under");
+  var dear  = owner === "Red" ? byName("Charge In") : byName("Pick The Lock");
+  var nCheap = Math.max(0, Math.round(size * CFG.deckRatio));
+  var out = [], i;
+  for (i = 0; i < nCheap; i++) out.push(inst(cheap));
+  for (i = nCheap; i < size; i++) out.push(inst(dear));
+  return shuffle(out);
 }
-function renderLog() {
-  var box = el("log");
-  var entries = G ? G.log : [];
-  box.innerHTML = entries.map(function (e) {
-    return '<div><span class="t">T' + e.t + '</span> <span class="' + e.cls + '">' + esc(e.msg) + "</span></div>";
-  }).join("");
-  box.scrollTop = box.scrollHeight;
+function byName(n) {
+  var all = PLAYER_CARDS.concat(GOOD_STUFF, BAD_STUFF);
+  for (var i = 0; i < all.length; i++) if (all[i].name === n) return all[i];
+  return null;
 }
-
-/* ---------------------------------------------------------------- game */
-
-function instantiate(def) { return { iid: uid(), def: def }; }
-
-function buildPile(map, source) {
+function goodStuffPool() {
   var out = [];
-  for (var id in map) {
-    var def = byId(source, id);
-    if (!def) continue;
-    for (var i = 0; i < map[id]; i++) out.push(instantiate(def));
-  }
-  return out;
+  for (var i = 0; i < CFG.goodPool; i++) out.push(inst(GOOD_STUFF[i % GOOD_STUFF.length]));
+  return shuffle(out);
 }
+function buildFloorDeck(floor) {
+  var out = [], i;
+  for (i = 0; i < CFG.enemyN; i++) {
+    var e = ENEMY_ROOMS[i % ENEMY_ROOMS.length];
+    out.push(inst(Object.assign({}, e, { power: enemyPower(floor) + (e.basePower - 5) })));
+  }
+  for (i = 0; i < CFG.hazardN; i++) out.push(inst(HAZARD_ROOMS[i % HAZARD_ROOMS.length]));
+  var n = stuffCount(floor);
+  for (i = 0; i < n; i++) out.push(inst(STUFF_ROOMS[i % STUFF_ROOMS.length]));
+  return shuffle(out);
+}
+
+/* A Stuff room's live challenge, built from the unruled settings. */
+function stuffLines(def) {
+  var redStat  = def.swap ? "scramble" : "power";
+  var grayStat = def.swap ? "power" : "scramble";
+  var lines = [
+    { who:"Red",  stat:redStat,  need:CFG.stuffT1, pay:CFG.stuffP1, tier:1 },
+    { who:"Gray", stat:grayStat, need:CFG.stuffT1, pay:CFG.stuffP1, tier:1 }
+  ];
+  if (CFG.stuffTier2 && def.rich) {
+    lines.push({ who:"Red",  stat:redStat,  need:CFG.stuffT2, pay:CFG.stuffP2, tier:2 });
+    lines.push({ who:"Gray", stat:grayStat, need:CFG.stuffT2, pay:CFG.stuffP2, tier:2 });
+  }
+  return lines;
+}
+function roomThreshold(def) {
+  if (def.kind === "Enemy") return { stat:"power", n:def.power };
+  if (def.kind === "Hazard") return { stat:def.stat, n:def.t1 };
+  return null;
+}
+
+/* ================================================================ engine
+
+   G is one live floor. The same engine runs the manual UI and the batch
+   auto-player; the auto-player just calls the same functions in order.
+*/
 
 function newChar(name) {
   return {
-    name: name,
-    deck: shuffle(buildPile(S.decks[name], S.cards)),
-    hand: [], exhaust: [],
+    name: name, deck: starterDeck(name), hand: [], exhaust: [],
     down: false, doneDrawing: false, drewThisTurn: 0,
-    lastStand: false, lastStandUsed: false, lastStandThisTurn: false
+    forcedExhausts: 0, drawsMade: 0
+  };
+}
+function inLastStand(c) { return CFG.lastStand && !c.down && c.deck.length === 0; }
+
+function newFloor(floor, chars, goodPool, opts) {
+  var deck = buildFloorDeck(floor);
+  return {
+    floor: floor, turn: 0, phase: "flip",
+    draw: deck, fled: [], cleared: [], room: null, roomCleared: false, tierGot: 0,
+    play: { Red: [], Gray: [] },
+    chars: chars || { Red: newChar("Red"), Gray: newChar("Gray") },
+    goodPool: goodPool || goodStuffPool(),
+    badTaken: 0, pending: null, punDone: false, stuffAwarded: false,
+    log: [], over: null, quiet: !!(opts && opts.quiet),
+    stats: {
+      turns:0, forcedExhausts:0, minDraws:0, enemyFlees:0,
+      enemyFledSinceTurn:-1, enemyWaitTurns:[], stuffTaken:0, stuffMissed:0,
+      lastStandTurns:0, lastStandExits:0, reshuffles:0, overCapTurns:0, charTurns:0
+    }
   };
 }
 
-function startFloor() {
-  var floor = shuffle(buildPile(S.decks.floor, S.rooms));
-  if (!floor.length) { alert("The floor deck is empty. Build one on the Decks tab."); return; }
-  G = {
-    turn: 0, phase: "flip",
-    floor: floor, fled: [], cleared: [], room: null, roomCleared: false,
-    play: [],
-    chars: { Red: newChar("Red"), Gray: newChar("Gray") },
-    pending: null, punDone: false,
-    log: [], over: null
-  };
-  if (!G.chars.Red.deck.length && !G.chars.Gray.deck.length) {
-    alert("Both character decks are empty. Build them on the Decks tab."); G = null; return;
-  }
-  log("Floor begins — " + floor.length + " rooms, Red " + G.chars.Red.deck.length +
-      " cards, Gray " + G.chars.Gray.deck.length + " cards.", "hl");
-  doFlip();
+var G = null;
+
+function log(msg, cls) {
+  if (!G || G.quiet) return;
+  G.log.push({ t: G.turn, msg: msg, cls: cls || "" });
 }
 
-/* --- phase 1: flip ------------------------------------------------ */
+/* --- 1. flip ------------------------------------------------------ */
 
 function doFlip() {
-  G.turn++;
-  G.roomCleared = false;
-  G.play = [];
-  G.pending = null;
-  G.punDone = false;
+  G.turn++; G.stats.turns++;
+  G.roomCleared = false; G.tierGot = 0; G.stuffAwarded = false;
+  G.play = { Red: [], Gray: [] };
+  G.pending = null; G.punDone = false;
 
-  if (!G.floor.length && G.fled.length) {
-    G.floor = shuffle(G.fled); G.fled = [];
-    log("Draw pile empty — " + G.floor.length + " Fled room(s) shuffled back in.", "b");
+  if (!G.draw.length && G.fled.length) {
+    G.draw = shuffle(G.fled); G.fled = [];
+    G.stats.reshuffles++;
+    log("Draw pile empty — " + G.draw.length + " Fled room(s) shuffled back in.", "b");
   }
-  if (!G.floor.length) { finish("cleared"); return; }
+  if (!G.draw.length) { finish("stalled"); return; }
 
-  G.room = G.floor.pop();
+  G.room = G.draw.pop();
+  if (G.room.def.kind === "Enemy" && G.stats.enemyFledSinceTurn >= 0) {
+    G.stats.enemyWaitTurns.push(G.turn - G.stats.enemyFledSinceTurn);
+    G.stats.enemyFledSinceTurn = -1;
+  }
   log("Flip: " + G.room.def.name + " — " + challengeText(G.room.def) + ".");
 
-  var names = ["Red", "Gray"], i, c;
+  var names = ["Red","Gray"], i, c;
   for (i = 0; i < 2; i++) {
     c = G.chars[names[i]];
-    c.doneDrawing = false; c.drewThisTurn = 0; c.lastStandThisTurn = false;
-    if (!c.down && !c.deck.length) {
-      c.down = true; c.lastStand = false;
-      log(c.name + " begins the turn unable to draw — down.", "b");
+    c.doneDrawing = false; c.drewThisTurn = 0;
+    if (c.down) c.doneDrawing = true;
+    if (!c.down) {
+      G.stats.charTurns++;
+      if (CFG.cap && c.hand.length >= CFG.capN) G.stats.overCapTurns++;
+      if (inLastStand(c)) G.stats.lastStandTurns++;
     }
   }
-  if (G.chars.Red.down && G.chars.Gray.down) { finish("wiped"); return; }
-
   G.phase = "draw";
-  for (i = 0; i < 2; i++) {
-    c = G.chars[names[i]];
-    if (c.down || !c.deck.length) c.doneDrawing = true;
-  }
   maybeEndDraw();
-  render();
 }
 
-/* --- phase 2: draw ------------------------------------------------ */
+/* --- 2. draw ------------------------------------------------------ */
 
+function atCap(c) { return CFG.cap && c.hand.length >= CFG.capN; }
+
+/* Can this character voluntarily draw a card up into their hand? */
 function canDraw(c) {
-  if (G.phase !== "draw" || c.down || c.doneDrawing || !c.deck.length) return false;
-  if (atCap(c)) return false;
+  if (G.phase !== "draw" || c.down || c.doneDrawing) return false;
+  if (!c.deck.length) return false;          // empty deck is last stand, not a draw
+  if (atCap(c)) return false;                // may not draw UP at the cap
   return true;
 }
-function atCap(c) { return S.settings.cap && c.hand.length >= S.settings.capN; }
+/* The minimum draw still happens at a full hand — the card is exhausted. */
+function owesMinimum(c) {
+  return CFG.mandatory && !c.down && c.drewThisTurn === 0 && c.deck.length > 0;
+}
 function canDeclareDone(c) {
   if (G.phase !== "draw" || c.down || c.doneDrawing) return false;
-  // the minimum draw cannot be enforced against someone who is physically unable to draw —
-  // a hand already at the cap (Hold cards carried over) would otherwise deadlock the turn
-  if (S.settings.mandatory && c.drewThisTurn === 0 && c.deck.length && !atCap(c)) return false;
-  return true;
+  return !owesMinimum(c);
 }
-function draw(c) {
-  if (!canDraw(c)) return;
+function drawOne(c) {
+  if (!c.deck.length) return;
   var card = c.deck.pop();
-  c.hand.push(card); c.drewThisTurn++;
-  log(c.name + " draws " + card.def.name + ". Deck " + c.deck.length + ".");
+  c.drewThisTurn++; c.drawsMade++;
+  if (atCap(c) && CFG.fullHandExhaust) {
+    c.exhaust.push(card);
+    c.forcedExhausts++; G.stats.forcedExhausts++;
+    log(c.name + " has a full hand — the minimum draw goes straight to the exhaust pile (" +
+        card.def.name + "). Deck " + c.deck.length + ".", "b");
+  } else {
+    c.hand.push(card);
+    log(c.name + " draws " + card.def.name + ". Deck " + c.deck.length + ".");
+  }
   if (!c.deck.length) {
     c.doneDrawing = true;
-    triggerLastStand(c, "drew their last card");
-  } else if (S.settings.cap && c.hand.length >= S.settings.capN) {
+    log(c.name + "'s deck is empty — LAST STAND. Their hand plays free until it is not.", "hl");
+  } else if (atCap(c)) {
     c.doneDrawing = true;
-    log(c.name + " is at the hand cap.");
   }
-  maybeEndDraw(); render();
 }
+function payMinimum(c) {
+  if (!owesMinimum(c)) return;
+  G.stats.minDraws++;
+  drawOne(c);
+}
+function draw(c) { if (canDraw(c)) { drawOne(c); maybeEndDraw(); } }
 function declareDone(c) {
   if (!canDeclareDone(c)) return;
   c.doneDrawing = true;
   log(c.name + " stops drawing with " + c.hand.length + " in hand.");
-  maybeEndDraw(); render();
+  maybeEndDraw();
 }
 function maybeEndDraw() {
   if (G.phase !== "draw") return;
-  if (G.chars.Red.doneDrawing && G.chars.Gray.doneDrawing) {
+  var names = ["Red","Gray"], i, c, allDone = true;
+  for (i = 0; i < 2; i++) {
+    c = G.chars[names[i]];
+    if (c.down) { c.doneDrawing = true; continue; }
+    if (owesMinimum(c)) { allDone = false; continue; }
+    if (!c.deck.length) c.doneDrawing = true;
+    if (!c.doneDrawing) allDone = false;
+  }
+  if (allDone) {
     G.phase = "play";
     log("Draw phase closes. No more drawing this turn.");
-    checkChallenge();   // a room with no challenge is already met
+    checkChallenge();
   }
 }
 
-/* --- last stand (ticket 17) --------------------------------------- */
+/* --- 3. play ------------------------------------------------------ */
 
-function triggerLastStand(c, why) {
-  if (!S.settings.lastStand || c.lastStandUsed || c.down) return;
-  c.lastStand = true; c.lastStandUsed = true; c.lastStandThisTurn = true;
-  log("LAST STAND — " + c.name + " " + why + ". Their whole hand is free to play this turn.", "hl");
-}
-
-/* --- phase 3: play ------------------------------------------------ */
-
-function costOf(c, card) { return c.lastStandThisTurn ? 0 : (card.def.cost || 0); }
+function costOf(c, card) { return inLastStand(c) ? 0 : (card.def.cost || 0); }
 function canPlay(c, card) {
   if (G.phase !== "play" || c.down || G.pending) return false;
   return c.hand.length - 1 >= costOf(c, card);
@@ -523,9 +724,8 @@ function beginPlay(owner, iid) {
   for (i = 0; i < c.hand.length; i++) if (c.hand[i].iid === iid) card = c.hand[i];
   if (!card || !canPlay(c, card)) return;
   var need = costOf(c, card);
-  if (need === 0) { finishPlay(owner, iid, []); return; }
+  if (!need) { finishPlay(owner, iid, []); return; }
   G.pending = { owner: owner, iid: iid, need: need, chosen: [] };
-  render();
 }
 function togglePay(iid) {
   var p = G.pending;
@@ -533,146 +733,523 @@ function togglePay(iid) {
   var i = p.chosen.indexOf(iid);
   if (i >= 0) p.chosen.splice(i, 1);
   else if (p.chosen.length < p.need) p.chosen.push(iid);
-  render();
 }
 function confirmPay() {
   var p = G.pending;
-  if (!p || p.chosen.length !== p.need) return;
-  finishPlay(p.owner, p.iid, p.chosen.slice());
+  if (p && p.chosen.length === p.need) finishPlay(p.owner, p.iid, p.chosen.slice());
 }
-function cancelPay() { G.pending = null; render(); }
-
 function finishPlay(owner, iid, payIids) {
-  var c = G.chars[owner], paid = [], i, k;
+  var c = G.chars[owner], paid = [], i, j, k;
   for (i = 0; i < payIids.length; i++) {
     k = -1;
-    for (var j = 0; j < c.hand.length; j++) if (c.hand[j].iid === payIids[i]) k = j;
+    for (j = 0; j < c.hand.length; j++) if (c.hand[j].iid === payIids[i]) k = j;
     if (k < 0) continue;
     var gone = c.hand.splice(k, 1)[0];
     c.exhaust.push(gone); paid.push(gone.def.name);
   }
   k = -1;
   for (i = 0; i < c.hand.length; i++) if (c.hand[i].iid === iid) k = i;
+  if (k < 0) { G.pending = null; return; }
   var card = c.hand.splice(k, 1)[0];
-  G.play.push({ iid: card.iid, def: card.def, owner: owner });
+  G.play[owner].push(card);
   G.pending = null;
   log(owner + " plays " + card.def.name +
       (paid.length ? " — exhausting " + paid.join(", ") + " from hand."
-                   : (c.lastStandThisTurn ? " for free (last stand)." : ".")));
+                   : (inLastStand(c) ? " for free (last stand)." : ".")));
   checkChallenge();
-  render();
 }
-function pool() {
-  var p = { power: 0, scramble: 0 };
-  for (var i = 0; i < G.play.length; i++) {
-    p.power += G.play[i].def.power || 0;
-    p.scramble += G.play[i].def.scramble || 0;
+
+function sideStats(owner) {
+  var p = { power:0, scramble:0 }, z = G.play[owner];
+  for (var i = 0; i < z.length; i++) {
+    p.power += z[i].def.power || 0;
+    p.scramble += z[i].def.scramble || 0;
   }
   return p;
 }
+function pool() {
+  var r = sideStats("Red"), g = sideStats("Gray");
+  return { power: r.power + g.power, scramble: r.scramble + g.scramble };
+}
+/* Enemy and Hazard clear the instant the shared pool meets the threshold.
+   Stuff rooms are settled when the play phase is declared over. */
 function checkChallenge() {
-  if (G.roomCleared || !G.room) return;
-  var p = pool(), d = G.room.def;
-  if (p.power >= (d.power || 0) && p.scramble >= (d.scramble || 0)) {
+  if (!G.room || G.roomCleared) return;
+  var d = G.room.def;
+  if (d.kind === "Stuff") return;
+  var t = roomThreshold(d), p = pool();
+  if (p[t.stat] >= t.n) {
     G.roomCleared = true;
+    G.tierGot = 1;
     log(d.name + " is CLEARED. Excess evaporates.", "g");
-    if (d.kind === "item") G.phase = "award";
   }
 }
-function awardItem(owner) {
-  var d = G.room.def, it = d.item || { cost: 0, power: 0, scramble: 0 };
-  var item = { id: d.id + "-item", name: d.name, owner: "Either",
-               cost: it.cost || 0, power: it.power || 0, scramble: it.scramble || 0,
-               hold: true, text: d.text };
-  G.chars[owner].hand.push(instantiate(item));
-  log(d.name + " goes to " + owner + "'s hand with Hold.", "g");
-  G.phase = "play";
-  render();
+
+function awardGoodStuff(who, n) {
+  var c = G.chars[who], i;
+  if (c.down) { log(who + " is Down and earns nothing.", "b"); return; }
+  for (i = 0; i < n; i++) {
+    if (!G.goodPool.length) { log("The Good Stuff pool is empty.", "b"); return; }
+    var s = G.goodPool.pop();
+    c.hand.push(s);                       // Stuff ignores the cap on the way in
+    G.stats.stuffTaken++;
+    log(who + " takes " + s.def.name + " — to hand with Hold, ignoring the cap.", "g");
+  }
+}
+/* Settle a Stuff room: each character's own side, own line, own item. */
+function settleStuffRoom() {
+  if (G.stuffAwarded || !G.room || G.room.def.kind !== "Stuff") return;
+  var lines = stuffLines(G.room.def), best = { Red:null, Gray:null }, i;
+  for (i = 0; i < lines.length; i++) {
+    var L = lines[i], side = sideStats(L.who);
+    if (side[L.stat] >= L.need) {
+      if (!best[L.who] || L.pay > best[L.who].pay) best[L.who] = L;
+    }
+  }
+  var names = ["Red","Gray"];
+  for (i = 0; i < 2; i++) {
+    var who = names[i];
+    if (best[who]) awardGoodStuff(who, best[who].pay);
+    else if (!G.chars[who].down) {
+      G.stats.stuffMissed++;
+      log(who + " met nothing and leaves empty-handed.", "b");
+    }
+  }
+  G.stuffAwarded = true;
+  G.roomCleared = true;   // a Stuff room is Cleared either way
+}
+/* Hazard second tier locks when the play phase is declared over. */
+function settleHazardTier() {
+  var d = G.room.def;
+  if (d.kind !== "Hazard" || !G.roomCleared) return;
+  if (d.t2 && pool()[d.stat] >= d.t2) {
+    G.tierGot = 2;
+    log(d.name + " cleared at its second tier — a reward is revealed.", "g");
+  }
 }
 
-/* --- phase 4: cleanup --------------------------------------------- */
+/* --- 4. cleanup --------------------------------------------------- */
 
 function exhaustFromDeck(c, n) {
+  if (c.down) return;
   var taken = 0;
-  for (var i = 0; i < n && c.deck.length; i++) { c.exhaust.push(c.deck.pop()); taken++; }
-  log(c.name + " exhausts " + taken + " from deck" +
-      (taken < n ? " (only " + taken + " were left)." : ".") + " Deck " + c.deck.length + ".", "b");
-  if (!c.deck.length) triggerLastStand(c, "was emptied by a punishment");
+  for (var i = 0; i < n; i++) {
+    if (!c.deck.length) {
+      goDown(c, "something would Exhaust from their empty deck");
+      return;
+    }
+    c.exhaust.push(c.deck.pop()); taken++;
+  }
+  log(c.name + " Exhausts " + taken + " from deck. Deck " + c.deck.length + ".", "b");
+  if (!c.deck.length) log(c.name + " is in LAST STAND — empty deck.", "hl");
 }
-function needsPunishmentChoice() {
-  return G.phase === "cleanup" && !G.roomCleared && G.room && !G.punDone &&
-         G.room.def.punKind === "one" && G.room.def.punN > 0 &&
-         (!G.chars.Red.down || !G.chars.Gray.down);
+function goDown(c, why) {
+  if (c.down) return;
+  c.down = true;
+  log(c.name + " is DOWN — " + why + ".", "b");
+}
+function giveBadStuff(who) {
+  var c = G.chars[who];
+  if (c.down) return;
+  c.hand.push(inst(pick(BAD_STUFF)));
+  G.badTaken++;
+  log(who + " takes a Bad Stuff.", "b");
+}
+function fleeTarget() {
+  /* The team chooses who absorbs a "1 character" line. The heuristic: the one
+     who can afford it — never someone in last stand, since that is a Down. */
+  var R = G.chars.Red, Y = G.chars.Gray;
+  var cand = [];
+  if (!R.down) cand.push(R);
+  if (!Y.down) cand.push(Y);
+  if (!cand.length) return null;
+  cand.sort(function (a, b) { return b.deck.length - a.deck.length; });
+  return cand[0];
 }
 function enterCleanup() {
   if (G.phase !== "play") return;
-  G.phase = "cleanup"; G.punDone = false; G.pending = null;
-  if (!G.roomCleared) log(G.room.def.name + " was not cleared.", "b");
-  if (!needsPunishmentChoice()) applyPunishment(null);
-  render();
-}
-function applyPunishment(who) {
-  var d = G.room.def, names = ["Red", "Gray"], i;
-  if (!G.roomCleared && d.punKind !== "none" && d.punN > 0) {
-    if (d.punKind === "both") {
-      for (i = 0; i < 2; i++) if (!G.chars[names[i]].down) exhaustFromDeck(G.chars[names[i]], d.punN);
-    } else if (who && !G.chars[who].down) {
-      exhaustFromDeck(G.chars[who], d.punN);
+  G.phase = "cleanup";
+  if (G.room.def.kind === "Stuff") settleStuffRoom();
+  else settleHazardTier();
+
+  var d = G.room.def, names = ["Red","Gray"], i, c;
+
+  if (!G.roomCleared) {
+    log(d.name + " was not cleared — the team Flees.", "b");
+    if (d.kind === "Enemy") {
+      G.stats.enemyFlees++;
+      G.stats.enemyFledSinceTurn = G.turn;
+    }
+    var f = d.flee || { who:"none", n:0 };
+    if (f.who === "both") {
+      for (i = 0; i < 2; i++) exhaustFromDeck(G.chars[names[i]], f.n);
+    } else if (f.who === "one") {
+      var t = fleeTarget();
+      if (t) exhaustFromDeck(t, f.n);
+    }
+    if (f.badStuff) { var b = fleeTarget(); if (b) giveBadStuff(b.name); }
+    /* Fleeing while in last stand puts you Down. */
+    for (i = 0; i < 2; i++) {
+      c = G.chars[names[i]];
+      if (!c.down && inLastStand(c)) goDown(c, "the team Fled while they were in last stand");
     }
   }
-  G.punDone = true;
-  render();
+  finishCleanup();
 }
 function finishCleanup() {
-  if (G.phase !== "cleanup" || !G.punDone) return;
+  var d = G.room.def, names = ["Red","Gray"], i, j;
 
   if (G.roomCleared) G.cleared.push(G.room);
-  else { G.fled.push(G.room); log(G.room.def.name + " is Fled."); }
+  else G.fled.push(G.room);
+  var wasEnemy = d.kind === "Enemy", cleared = G.roomCleared;
   G.room = null;
 
-  var names = ["Red", "Gray"], i, j;
   for (i = 0; i < 2; i++) {
     var c = G.chars[names[i]];
-    var mine = [], held = [], loose = [];
-    for (j = 0; j < G.play.length; j++) if (G.play[j].owner === c.name) mine.push(G.play[j]);
+    var held = [], loose = [], zone = G.play[c.name];
     for (j = 0; j < c.hand.length; j++) (c.hand[j].def.hold ? held : loose).push(c.hand[j]);
 
-    var survives = c.lastStandThisTurn && G.roomCleared && !c.down;
+    var escaping = CFG.lastStand && !c.down && c.deck.length === 0 && cleared;
 
-    if (survives) {
-      var back = loose.slice();
-      for (j = 0; j < mine.length; j++) back.push({ iid: mine[j].iid, def: mine[j].def });
+    if (escaping) {
+      var back = loose.concat(zone), pay = [];
+      for (j = 0; j < CFG.lsCost && back.length; j++) pay.push(back.pop());
+      for (j = 0; j < pay.length; j++) c.exhaust.push(pay[j]);
       c.deck = shuffle(c.deck.concat(back));
       c.hand = held;
-      c.lastStand = false;
-      log(c.name + " SURVIVES the last stand — " + back.length +
-          " card(s) shuffled back into their deck." +
-          (held.length ? " " + held.length + " Hold card(s) stay in hand." : ""), "g");
+      if (c.deck.length) {
+        G.stats.lastStandExits++;
+        log(c.name + " gets OUT of last stand — " + back.length +
+            " card(s) shuffled back, " + pay.length + " exhausted as the price.", "g");
+      } else {
+        log(c.name + " clears the room in last stand but has nothing to shuffle back — " +
+            "still in last stand" + (pay.length ? ", and " + pay.length + " card(s) went to pay the price." : "."), "b");
+      }
     } else {
       for (j = 0; j < loose.length; j++) c.exhaust.push(loose[j]);
-      for (j = 0; j < mine.length; j++) c.exhaust.push({ iid: mine[j].iid, def: mine[j].def });
+      for (j = 0; j < zone.length; j++) c.exhaust.push(zone[j]);
       c.hand = held;
-      var n = loose.length + mine.length;
-      if (n) log(c.name + " exhausts " + n + " card(s) at cleanup" +
-                 (held.length ? "; " + held.length + " Hold card(s) stay in hand." : "."));
-      if (c.lastStandThisTurn) log(c.name + "'s last stand ends without the room being cleared.", "b");
     }
   }
-  G.play = [];
+  G.play = { Red: [], Gray: [] };
+
+  if (!G.draw.length && G.fled.length) {
+    G.draw = shuffle(G.fled); G.fled = [];
+    G.stats.reshuffles++;
+    log("Fled pile shuffled back into the floor deck (" + G.draw.length + ").", "b");
+  }
+
+  if (wasEnemy && cleared) { finish("won"); return; }
+  if (G.chars.Red.down && G.chars.Gray.down) { finish("wiped"); return; }
   doFlip();
 }
 
 function finish(how) {
-  G.phase = "over";
-  G.over = how;
-  if (how === "cleared") log("Every room is Cleared — the floor is over. The characters ascend.", "g");
-  else log("Both characters are down. The run ends here.", "b");
+  G.phase = "over"; G.over = how;
+  if (how === "won") log("The Enemy room is Cleared — the floor is over. The characters ascend.", "g");
+  else if (how === "wiped") log("Both characters are Down. The run ends here.", "b");
+  else log("The floor deck is empty and nothing is left to flip.", "b");
+}
+
+/* ================================================================ auto-player
+   An agent-written heuristic, exposed so it can be argued with. It is not a
+   ruling about how the game should be played.
+*/
+
+/* Enumerate what one character can put on the table from their hand.
+   Returns {stat totals, cards played, cards spent}. Hand is <= ~7, so brute
+   force over subsets is fine. */
+function isGoodStuff(card) { return card.def.owner === "GoodStuff"; }
+
+function bestPlays(c, stat, need, hoard) {
+  var hand = c.hand, n = Math.min(hand.length, 16), free = inLastStand(c);
+  var best = null;   // n is capped: Stuff ignores the hand cap, so a hoarding hand can grow
+  for (var mask = 0; mask < (1 << n); mask++) {
+    var play = [], cost = 0, p = 0, s = 0, i, skip = false;
+    for (i = 0; i < n; i++) if (mask & (1 << i)) {
+      if (hoard && isGoodStuff(hand[i])) { skip = true; break; }
+      play.push(hand[i]);
+      cost += free ? 0 : (hand[i].def.cost || 0);
+      p += hand[i].def.power || 0;
+      s += hand[i].def.scramble || 0;
+    }
+    if (skip) continue;                                // hoarding: this subset spends Stuff
+    if (play.length + cost > n) continue;              // not enough cards to pay
+    var got = stat === "power" ? p : s;
+    var spend = play.length + cost;
+    var meets = got >= need;
+    var score = meets ? (1000 - spend) : got * 10 - spend;
+    if (!best || score > best.score) best = { score:score, play:play, got:got, meets:meets, spend:spend };
+  }
+  return best || { score:0, play:[], got:0, meets:false, spend:0 };
+}
+
+function autoTurn(opts) {
+  var d = G.room.def, names = ["Red","Gray"], i, c;
+  /* Hoarding: keep Good Stuff in hand for the Enemy room instead of spending it
+     on a Stuff or Hazard room. This is the play the hand-cap finding assumes. */
+  var hoard = !!opts.holdStuff && d.kind !== "Enemy";
+
+  /* ---- draw ---- */
+  for (i = 0; i < 2; i++) {
+    c = G.chars[names[i]];
+    if (c.down) { c.doneDrawing = true; continue; }
+    payMinimum(c);
+    if (opts.greed === "min") { c.doneDrawing = true; continue; }
+    var want = true, guard = 0;
+    while (want && canDraw(c) && guard++ < 20) {
+      if (opts.greed === "max") { drawOne(c); continue; }
+      /* draw until this character can plausibly contribute what the room asks */
+      var stat = d.kind === "Stuff"
+        ? (stuffLines(d).filter(function (L) { return L.who === c.name; })[0] || {}).stat || "power"
+        : roomThreshold(d).stat;
+      var need = d.kind === "Stuff"
+        ? CFG.stuffT1
+        : Math.ceil(roomThreshold(d).n / 2);
+      var b = bestPlays(c, stat, need, hoard);
+      if (b.meets) want = false; else drawOne(c);
+    }
+    c.doneDrawing = true;
+  }
+  maybeEndDraw();
+  if (G.phase === "over") return;
+
+  /* ---- play ---- */
+  if (d.kind === "Stuff") {
+    if (opts.chaseStuff) {
+      for (i = 0; i < 2; i++) {
+        c = G.chars[names[i]];
+        if (c.down) continue;
+        var L = stuffLines(d).filter(function (x) { return x.who === c.name; });
+        var lo = L[0], hi = L[1];
+        var target = hi ? hi : lo;
+        var b = bestPlays(c, target.stat, target.need, hoard);
+        if (!b.meets && lo !== target) b = bestPlays(c, lo.stat, lo.need, hoard);
+        if (b.meets) playSubset(c, b.play, hoard);
+      }
+    }
+  } else {
+    var t = roomThreshold(d);
+    /* Try to clear with the combined pool: play Red's best, then Gray's. */
+    var combined = 0, plans = [];
+    for (i = 0; i < 2; i++) {
+      c = G.chars[names[i]];
+      if (c.down) { plans.push(null); continue; }
+      var bp = bestPlays(c, t.stat, t.n, hoard);
+      plans.push(bp); combined += bp.got;
+    }
+    if (combined >= t.n) {
+      for (i = 0; i < 2; i++) if (plans[i]) playSubset(G.chars[names[i]], plans[i].play, hoard);
+    }
+    /* else: decline. Fleeing is the printed alternative and costs the Flee line. */
+  }
+  if (G.phase === "play") enterCleanup();
+}
+function playSubset(c, cards, hoard) {
+  for (var i = 0; i < cards.length; i++) {
+    var card = cards[i];
+    var need = costOf(c, card);
+    var pay = [], j;
+    for (j = 0; j < c.hand.length && pay.length < need; j++) {
+      var h = c.hand[j];
+      if (h.iid === card.iid) continue;
+      if (cards.indexOf(h) >= 0) continue;      // don't burn a card we mean to play
+      if (h.def.name === "Torn Seal") continue; // printed: may not be Exhausted to pay
+      if (hoard && isGoodStuff(h)) continue;    // hoarding: Stuff is not burnt as fuel either
+      pay.push(h.iid);
+    }
+    if (pay.length < need) continue;
+    finishPlay(c.name, card.iid, pay);
+  }
+}
+
+/* ================================================================ batch */
+
+function runFloorAuto(floor, chars, goodPool, opts) {
+  G = newFloor(floor, chars, goodPool, { quiet: !opts.verbose });
+  doFlip();
+  var guard = 0;
+  while (G.phase !== "over" && guard++ < opts.turnCap) autoTurn(opts);
+  if (G.phase !== "over") finish("stalled");
+  return G;
+}
+
+function ascend(chars) {
+  var names = ["Red","Gray"], i, j;
+  for (i = 0; i < 2; i++) {
+    var c = chars[names[i]];
+    var keep = [];
+    var all = c.exhaust.concat(c.hand);
+    for (j = 0; j < all.length; j++) {
+      var o = all[j].def.owner;
+      if (o === "GoodStuff" || o === "BadStuff") continue;   // Stuff is set aside
+      keep.push(all[j]);
+    }
+    c.exhaust = []; c.hand = [];
+    c.deck = shuffle(c.deck.concat(keep));
+    c.down = false;
+    /* one reward taken, per the summary. Which pool a reveal draws from is
+       unstated, so the reward is a generic card of that character's own. */
+    var pool = PLAYER_CARDS.filter(function (p) { return p.owner === names[i]; });
+    c.deck.push(inst(pick(pool)));
+    shuffle(c.deck);
+  }
+}
+
+function runBatch() {
+  var N = parseInt(el("batchN").value, 10) || 100;
+  var floors = parseInt(el("batchFloors").value, 10) || 10;
+  var opts = {
+    turnCap: parseInt(el("batchTurnCap").value, 10) || 120,
+    greed: el("batchGreed").value,
+    chaseStuff: el("batchStuffGreed").checked,
+    holdStuff: el("batchHoldStuff").checked,
+    verbose: false
+  };
+  var agg = {
+    runs:N, floorsCleared:0, fullRuns:0,
+    perFloor: [], deaths: { wiped:0, stalled:0 },
+    turns: [], forced:0, minDraws:0, stuffTaken:0, stuffMissed:0,
+    enemyWaits: [], lastStandTurns:0, charTurns:0, overCapTurns:0,
+    lostWithEnemyFled:0, lostOnFloor: []
+  };
+  var f;
+  for (f = 0; f < floors; f++) agg.perFloor.push({ played:0, won:0, turns:[], forced:0, charTurns:0, overCap:0, stuff:0 });
+
+  for (var r = 0; r < N; r++) {
+    var chars = { Red: newChar("Red"), Gray: newChar("Gray") };
+    var alive = true;
+    for (f = 1; f <= floors && alive; f++) {
+      var pool = goodStuffPool();
+      var g = runFloorAuto(f, chars, pool, opts);
+      var pf = agg.perFloor[f - 1];
+      pf.played++; pf.turns.push(g.stats.turns);
+      pf.forced += g.stats.forcedExhausts; pf.charTurns += g.stats.charTurns;
+      pf.overCap += g.stats.overCapTurns; pf.stuff += g.stats.stuffTaken;
+      agg.turns.push(g.stats.turns);
+      agg.forced += g.stats.forcedExhausts; agg.minDraws += g.stats.minDraws;
+      agg.stuffTaken += g.stats.stuffTaken; agg.stuffMissed += g.stats.stuffMissed;
+      agg.lastStandTurns += g.stats.lastStandTurns; agg.charTurns += g.stats.charTurns;
+      agg.overCapTurns += g.stats.overCapTurns;
+      agg.enemyWaits = agg.enemyWaits.concat(g.stats.enemyWaitTurns);
+      if (g.over === "won") { pf.won++; agg.floorsCleared++; ascend(chars); }
+      else {
+        alive = false;
+        agg.deaths[g.over === "wiped" ? "wiped" : "stalled"]++;
+        agg.lostOnFloor.push(f);
+        /* was the Enemy sitting in the Fled pile, unreachable, when they died? */
+        var stuck = false, i;
+        for (i = 0; i < g.fled.length; i++) if (g.fled[i].def.kind === "Enemy") stuck = true;
+        if (stuck) agg.lostWithEnemyFled++;
+      }
+    }
+    if (alive) agg.fullRuns++;
+  }
+  renderBatch(agg, floors);
+}
+
+function renderBatch(a, floors) {
+  var h = "";
+
+  h += '<div class="panel"><h2>Headline</h2><div class="grid3">';
+  h += statBlock("Runs that cleared all " + floors + " floors", pct(a.fullRuns, a.runs),
+                 a.fullRuns + " of " + a.runs);
+  h += statBlock("Mean turns per floor", mean(a.turns).toFixed(1),
+                 "5–7 minutes is the budget (ticket 05)");
+  h += statBlock("Floors cleared per run", (a.floorsCleared / a.runs).toFixed(2), "");
+  h += "</div></div>";
+
+  /* --- finding 1: the reshuffle --------------------------------- */
+  h += '<div class="findbox"><strong>Open finding — the reshuffle.</strong> A fled Enemy cannot come ' +
+       'back until every remaining room has been flipped. These are the numbers ticket 22 asked for.</div>';
+  h += '<div class="panel"><div class="grid3">';
+  h += statBlock("Mean turns waiting for a fled Enemy to return",
+                 a.enemyWaits.length ? mean(a.enemyWaits).toFixed(1) : "—",
+                 a.enemyWaits.length + " observed waits");
+  h += statBlock("Longest wait", a.enemyWaits.length ? Math.max.apply(null, a.enemyWaits) : "—", "turns");
+  h += statBlock("Losses with the Enemy stuck in Fled", pct(a.lostWithEnemyFled, a.runs - a.fullRuns),
+                 a.lostWithEnemyFled + " of " + (a.runs - a.fullRuns) + " lost runs");
+  h += "</div></div>";
+
+  /* --- finding 2: the hand cap ---------------------------------- */
+  h += '<div class="findbox"><strong>Open finding — the hand cap collision.</strong> Stuff ignores the ' +
+       'cap on the way in, so a character holding Stuff sits over it — and every minimum draw is then ' +
+       'exhausted instead of drawn. Your own deck switches off.</div>';
+  h += '<div class="panel"><div class="grid3">';
+  h += statBlock("Character-turns started over the cap", pct(a.overCapTurns, a.charTurns),
+                 a.overCapTurns + " of " + a.charTurns);
+  h += statBlock("Minimum draws burnt to the exhaust pile", pct(a.forced, a.minDraws),
+                 a.forced + " of " + a.minDraws + " minimum draws");
+  h += statBlock("Good Stuff taken per run", (a.stuffTaken / a.runs).toFixed(1),
+                 a.stuffMissed + " lines missed in total");
+  h += "</div></div>";
+
+  /* --- per floor ------------------------------------------------ */
+  h += '<div class="panel"><h2>By floor</h2><table><tr>' +
+       "<th>Floor</th><th class='num'>Reached</th><th class='num'>Cleared</th>" +
+       "<th class='num'>Mean turns</th><th class='num'>Stuff rooms</th>" +
+       "<th class='num'>Stuff taken</th><th class='num'>Turns over cap</th>" +
+       "<th class='num'>Draws burnt</th><th>Deck switched off</th></tr>";
+  for (var f = 0; f < floors; f++) {
+    var p = a.perFloor[f];
+    if (!p.played) continue;
+    var offRate = p.charTurns ? p.overCap / p.charTurns : 0;
+    h += "<tr><td>" + (f + 1) + "</td>" +
+         "<td class='num'>" + p.played + "</td>" +
+         "<td class='num'>" + pct(p.won, p.played) + "</td>" +
+         "<td class='num'>" + mean(p.turns).toFixed(1) + "</td>" +
+         "<td class='num'>" + stuffCount(f + 1) + "</td>" +
+         "<td class='num'>" + (p.stuff / p.played).toFixed(1) + "</td>" +
+         "<td class='num'>" + pct(p.overCap, p.charTurns) + "</td>" +
+         "<td class='num'>" + p.forced + "</td>" +
+         "<td><div class='bar'><i class='" + (offRate > .5 ? "bad" : offRate > .25 ? "warn" : "") +
+         "' style='width:" + (offRate * 100).toFixed(0) + "%'></i></div></td></tr>";
+  }
+  h += "</table></div>";
+
+  h += '<div class="panel"><h2>How runs ended</h2><table>' +
+       "<tr><th>Ending</th><th class='num'>Count</th><th class='num'>Share</th></tr>" +
+       "<tr><td>Cleared every floor</td><td class='num'>" + a.fullRuns + "</td><td class='num'>" + pct(a.fullRuns, a.runs) + "</td></tr>" +
+       "<tr><td>Both characters Down</td><td class='num'>" + a.deaths.wiped + "</td><td class='num'>" + pct(a.deaths.wiped, a.runs) + "</td></tr>" +
+       "<tr><td>Stalled — floor deck exhausted or turn cap</td><td class='num'>" + a.deaths.stalled + "</td><td class='num'>" + pct(a.deaths.stalled, a.runs) + "</td></tr>" +
+       "</table>";
+  h += '<p class="tiny muted">A stall means the auto-player could never afford the Enemy and ran the ' +
+       'floor deck dry, or hit the turn cap. Both are real outcomes of the current numbers, not engine ' +
+       'failures — but read them as "these settings do not work" rather than "the players died".</p></div>';
+
+  h += '<div class="panel"><h2>Settings this run used</h2><p class="tiny muted">' +
+       "Decks " + CFG.deckRed + "/" + CFG.deckGray + " · Stuff curve " + CFG.stuffBase + "→" + CFG.stuffTop +
+       " · Stuff thresholds " + CFG.stuffT1 + "/" + CFG.stuffT2 + " paying " + CFG.stuffP1 + "/" + CFG.stuffP2 +
+       " · hand cap " + (CFG.cap ? CFG.capN : "off") + " · Enemy Power " + enemyPower(1) +
+       " (+" + CFG.enemyPowStep + "/floor) · last stand exit " + CFG.lsCost +
+       " · auto-player: " + el("batchGreed").value + (el("batchHoldStuff").checked ? ", hoarding Stuff" : ", spending Stuff freely") +
+       "</p></div>";
+
+  el("batchOut").innerHTML = h;
+}
+function statBlock(label, big, sub) {
+  return '<div class="panel" style="margin:0"><h3>' + esc(label) + "</h3>" +
+         '<div style="font-size:26px;line-height:1.2">' + esc(big) + "</div>" +
+         '<div class="tiny muted">' + esc(sub || "") + "</div></div>";
+}
+
+function runOneVerbose() {
+  var floor = parseInt(el("playFloor").value, 10) || 1;
+  var opts = {
+    turnCap: parseInt(el("batchTurnCap").value, 10) || 120,
+    greed: el("batchGreed").value,
+    chaseStuff: el("batchStuffGreed").checked,
+    holdStuff: el("batchHoldStuff").checked,
+    verbose: true
+  };
+  runFloorAuto(floor, null, null, opts);
+  showPage("play");
   render();
 }
 
-/* ---------------------------------------------------------------- render */
+/* ================================================================ render */
 
-function statPips(d) {
+function statPips(d, met) {
   var h = "";
   if (d.power)    h += '<span class="pip pw">Power ' + d.power + "</span>";
   if (d.scramble) h += '<span class="pip sc">Scramble ' + d.scramble + "</span>";
@@ -680,373 +1257,234 @@ function statPips(d) {
   return h;
 }
 function challengeText(d) {
-  var bits = [];
-  if (d.power)    bits.push("Power " + d.power);
-  if (d.scramble) bits.push("Scramble " + d.scramble);
-  return bits.length ? bits.join(", ") : "no challenge";
+  if (d.kind === "Enemy") return "Power " + d.power + ": Clear";
+  if (d.kind === "Hazard") return d.stat === "power" ? "Power " + d.t1 + ": Clear" : "Scramble " + d.t1 + ": Clear";
+  var L = stuffLines(d);
+  return L.map(function (x) {
+    return capitalize(x.stat) + " " + x.need + ": " + x.who + " takes " + x.pay;
+  }).join(" · ");
 }
-function punishText(d) {
-  if (d.kind === "item" && (d.punKind === "none" || !d.punN)) return "none — missing the item is the loss";
-  if (d.punKind === "none" || !d.punN) return "none";
-  return (d.punKind === "both" ? "both characters exhaust " : "1 character exhausts ") +
-         d.punN + " from deck";
+function capitalize(s) { return s.charAt(0).toUpperCase() + s.slice(1); }
+function fleeText(d) {
+  var f = d.flee;
+  if (!f || f.who === "none") return "Flee: none";
+  var s = "Flee: " + (f.who === "both" ? "both characters Exhaust " : "1 character Exhausts ") + f.n + " from deck";
+  if (f.badStuff) s += ", and 1 character takes a Bad Stuff";
+  return s;
 }
 
 function cardHTML(d, o) {
   o = o || {};
   var cls = "card" + (o.click ? " click" : "") + (o.sel ? " sel" : "");
+  var own = d.owner || "";
   return '<div class="' + cls + '" ' + (o.attr || "") + ">" +
     (d.cost ? '<span class="cost">' + (o.free ? "<s>" + d.cost + "</s> 0" : d.cost) + "</span>" : "") +
     '<div class="nm">' + esc(d.name) + "</div>" +
-    (d.owner && d.owner !== "Either" ? '<div class="owner ' + d.owner + '">' + d.owner + "</div>" : "") +
-    (d.text ? '<div class="txt">' + esc(d.text) + " ⚠</div>" : "") +
+    '<div class="owner ' + own + '">' + esc(own === "GoodStuff" ? "Good Stuff" : own === "BadStuff" ? "Bad Stuff" : own) +
+      (d.rarity ? " · " + d.rarity : "") + "</div>" +
+    (d.text ? '<div class="txt">' + esc(d.text) + "</div>" : "") +
     '<div class="stats">' + statPips(d) + "</div></div>";
 }
 function roomHTML(d) {
-  return '<div class="card" style="width:180px;min-height:112px">' +
-    '<div class="nm">' + esc(d.name) + "</div>" +
-    '<div class="owner">' + d.kind + "</div>" +
-    (d.text ? '<div class="txt">' + esc(d.text) + " ⚠</div>" : "") +
-    '<div class="stats"><span class="pip ' + (d.power ? "pw" : "sc") + '">' +
-      esc(challengeText(d)) + "</span></div>" +
-    '<div class="tiny muted">fail: ' + esc(punishText(d)) + "</div></div>";
+  var p = pool(), lines = "", i;
+  if (d.kind === "Stuff") {
+    var L = stuffLines(d);
+    for (i = 0; i < L.length; i++) {
+      var side = G ? sideStats(L[i].who) : { power:0, scramble:0 };
+      var met = side[L[i].stat] >= L[i].need;
+      lines += '<div class="line"><span class="pip ' + (met ? "met" : L[i].stat === "power" ? "pw" : "sc") + '">' +
+        capitalize(L[i].stat) + " " + L[i].need + "</span> " + L[i].who + " takes " + L[i].pay +
+        " Good Stuff" + (L[i].tier === 2 ? " <span class='muted'>(second tier)</span>" : "") + "</div>";
+    }
+    lines += '<div class="line muted">Cleared either way. Never Fled.</div>';
+  } else {
+    var t = roomThreshold(d);
+    var met1 = p[t.stat] >= t.n;
+    lines += '<div class="line"><span class="pip ' + (met1 ? "met" : t.stat === "power" ? "pw" : "sc") + '">' +
+      capitalize(t.stat) + " " + t.n + "</span> Clear</div>";
+    if (d.t2) {
+      var met2 = p[d.stat] >= d.t2;
+      lines += '<div class="line"><span class="pip ' + (met2 ? "met" : "sc") + '">' +
+        capitalize(d.stat) + " " + d.t2 + "</span> Clear — one character reveals reward</div>";
+    }
+    lines += '<div class="line muted">' + esc(fleeText(d)) + "</div>";
+  }
+  return '<div class="card room"><div class="nm">' + esc(d.name) + "</div>" +
+    '<div class="owner ' + d.kind + '">' + d.kind + "</div>" + lines + "</div>";
 }
 
-function render() { renderBoard(); renderLibrary(); renderDecks(); }
+function render() {
+  if (!G) { el("phaseName").textContent = "Not started"; renderLog(); return; }
+  var names = ["Red","Gray"], i;
 
-function renderBoard() {
-  var phases = ["flip", "draw", "play", "cleanup"];
-  el("steps").innerHTML = phases.map(function (p) {
-    var on = G && (G.phase === p || (G.phase === "award" && p === "play"));
-    return '<span class="' + (on ? "on" : "") + '">' + p + "</span>";
+  el("phaseName").textContent = G.phase === "over" ? ("Floor over — " + G.over) : G.phase;
+  el("turnNo").textContent = "turn " + G.turn + " · floor " + G.floor;
+  el("steps").innerHTML = ["flip","draw","play","cleanup"].map(function (s) {
+    return '<span class="' + (G.phase === s ? "on" : "") + '">' + s + "</span>";
   }).join("");
+  el("phaseHelp").textContent =
+    G.phase === "draw" ? "each character draws at least 1, then stops when they choose"
+    : G.phase === "play" ? "play into your own side; a Stuff room reads your side alone"
+    : G.phase === "cleanup" ? "flee line, then the hands and the play zone exhaust" : "";
 
-  if (!G) {
-    el("phaseName").textContent = "Not started";
-    el("turnNo").textContent = "";
-    el("phaseHelp").textContent = "Build decks, then start a floor.";
-    el("nFloor").textContent = el("nFled").textContent = el("nCleared").textContent = "0";
-    el("activeRoom").innerHTML = "";
-    el("playZone").innerHTML = "";
-    el("poolReadout").textContent = "";
-    el("turnActions").innerHTML = "";
-    ["Red", "Gray"].forEach(function (w) {
-      el("panel-" + w).innerHTML = '<div class="chead"><span class="who">' + w +
-        '</span></div><div class="muted tiny">—</div>';
-    });
-    return;
-  }
-
-  el("phaseName").textContent = G.phase === "award" ? "play — award item" : G.phase;
-  el("turnNo").textContent = "turn " + G.turn;
-  el("nFloor").textContent = G.floor.length;
+  el("nFloor").textContent = G.draw.length;
   el("nFled").textContent = G.fled.length;
   el("nCleared").textContent = G.cleared.length;
+  el("nGoodPool").textContent = G.goodPool.length;
   el("activeRoom").innerHTML = G.room ? roomHTML(G.room.def) : '<div class="muted tiny">—</div>';
 
-  var p = pool();
-  el("poolReadout").textContent = G.room
-    ? "— pool Power " + p.power + ", Scramble " + p.scramble + " vs " + challengeText(G.room.def) +
-      (G.roomCleared ? "   ✓ CLEARED" : "")
+  var stuck = false;
+  for (i = 0; i < G.fled.length; i++) if (G.fled[i].def.kind === "Enemy") stuck = true;
+  el("enemyWatch").innerHTML = stuck
+    ? "<span style='color:var(--bad)'>The Enemy room is in the Fled pile.</span> It cannot return " +
+      "until the draw pile empties — " + G.draw.length + " room(s) to flip first."
     : "";
-  el("playZone").innerHTML = G.play.length
-    ? G.play.map(function (x) {
-        return cardHTML(Object.assign({}, x.def, { owner: x.owner }));
-      }).join("")
-    : '<div class="muted tiny">empty</div>';
 
-  var help = {
-    draw: "Both characters draw one card at a time, in any order, each stopping when they declare they are done.",
-    play: "Either character, any order. You cannot draw again this turn.",
-    award: "Choose whose hand takes the item.",
-    cleanup: "Take the punishment if the room is still there, then exhaust everything.",
-    over: ""
-  }[G.phase] || "";
-  el("phaseHelp").textContent = help;
-
-  var A = [];
-  if (G.phase === "play") {
-    A.push('<button class="primary" onclick="enterCleanup()">Stop playing → cleanup</button>');
-    if (G.pending) {
-      var pe = G.pending;
-      A.push('<span class="tiny hl">Choose ' + pe.need + " card(s) from " + pe.owner +
-             "'s hand to exhaust as the cost (" + pe.chosen.length + "/" + pe.need + ")</span>");
-      A.push("<button " + (pe.chosen.length === pe.need ? "" : "disabled") +
-             ' onclick="confirmPay()">Confirm</button>');
-      A.push('<button onclick="cancelPay()">Cancel</button>');
-    }
-  } else if (G.phase === "award") {
-    A.push('<span class="tiny hl">' + esc(G.room.def.name) + " → whose hand?</span>");
-    ["Red", "Gray"].forEach(function (w) {
-      if (!G.chars[w].down) A.push('<button onclick="awardItem(\'' + w + '\')">' + w + "</button>");
-    });
-  } else if (G.phase === "cleanup") {
-    if (needsPunishmentChoice()) {
-      A.push('<span class="tiny b">' + esc(punishText(G.room.def)) + " — who absorbs it?</span>");
-      ["Red", "Gray"].forEach(function (w) {
-        if (!G.chars[w].down)
-          A.push('<button class="warn" onclick="applyPunishment(\'' + w + '\')">' + w + " takes it</button>");
-      });
-    } else {
-      A.push('<button class="primary" onclick="finishCleanup()">Finish cleanup → next turn</button>');
-    }
-  } else if (G.phase === "over") {
-    A.push('<span class="tiny ' + (G.over === "cleared" ? "g" : "b") + '">' +
-           (G.over === "cleared" ? "Floor cleared." : "Both characters down.") + "</span>");
+  var p = pool();
+  el("poolReadout").textContent = "shared pool: Power " + p.power + ", Scramble " + p.scramble;
+  for (i = 0; i < 2; i++) {
+    var who = names[i], z = G.play[who], side = sideStats(who);
+    el("playZone-" + who).innerHTML =
+      (z.length ? z.map(function (c) { return cardHTML(c.def); }).join("")
+                : '<div class="muted tiny">—</div>') +
+      '<div class="tiny muted" style="width:100%">' + who + "'s side: Power " + side.power +
+      ", Scramble " + side.scramble + "</div>";
   }
-  el("turnActions").innerHTML = A.join(" ");
 
-  renderChar("Red"); renderChar("Gray");
+  for (i = 0; i < 2; i++) renderChar(G.chars[names[i]]);
+  renderActions();
+  renderLog();
 }
 
-function renderChar(w) {
-  var c = G.chars[w], box = el("panel-" + w);
-  box.className = "charpanel " + w + (c.down ? " down" : "");
-
+function renderChar(c) {
+  var panel = el("panel-" + c.name);
+  panel.className = "charpanel " + c.name + (c.down ? " down" : "");
   var badges = "";
-  if (c.down) badges += '<span class="badge dn">down</span>';
-  if (c.lastStand) badges += '<span class="badge ls">last stand</span>';
-  if (G.phase === "draw" && c.doneDrawing && !c.down) badges += '<span class="badge done">done drawing</span>';
+  if (c.down) badges += '<span class="badge dn">Down</span>';
+  else if (inLastStand(c)) badges += '<span class="badge ls">Last stand — hand is free</span>';
+  if (atCap(c) && !c.down) badges += '<span class="badge cap">Over the cap</span>';
+  if (c.doneDrawing && G.phase === "draw" && !c.down) badges += '<span class="badge done">done drawing</span>';
 
-  var acts = "";
-  if (G.phase === "draw" && !c.down) {
-    acts = "<button " + (canDraw(c) ? "" : "disabled") +
-           ' onclick="draw(G.chars[\'' + w + '\'])">Draw 1</button>' +
-           "<button " + (canDeclareDone(c) ? "" : "disabled") +
-           ' onclick="declareDone(G.chars[\'' + w + '\'])">Done</button>';
-    if (S.settings.mandatory && c.drewThisTurn === 0 && c.deck.length)
-      acts += ' <span class="tiny muted">must draw at least 1</span>';
-  }
-
-  var pe = G.pending;
-  var hand = c.hand.map(function (x) {
-    var free = c.lastStandThisTurn && (x.def.cost || 0) > 0;
-    if (pe && pe.owner === w) {
-      var isTarget = pe.iid === x.iid;
-      return cardHTML(x.def, {
-        click: !isTarget,
-        sel: pe.chosen.indexOf(x.iid) >= 0,
-        free: free,
-        attr: isTarget ? 'style="outline:2px solid #3d608a"'
-                       : 'onclick="togglePay(\'' + x.iid + '\')"'
-      });
-    }
-    var ok = canPlay(c, x);
-    return cardHTML(x.def, {
-      click: ok, free: free,
-      attr: ok ? 'onclick="beginPlay(\'' + w + "','" + x.iid + '\')"' : ""
+  var pend = G.pending && G.pending.owner === c.name ? G.pending : null;
+  var hand = c.hand.map(function (card) {
+    var isTarget = pend && pend.iid === card.iid;
+    var chosen = pend && pend.chosen.indexOf(card.iid) >= 0;
+    var clickable = pend ? !isTarget : (G.phase === "play" && !c.down && canPlay(c, card));
+    return cardHTML(card.def, {
+      click: clickable, sel: isTarget || chosen, free: !pend && inLastStand(c) && card.def.cost,
+      attr: 'data-act="' + (pend ? "pay" : "play") + '" data-owner="' + c.name + '" data-iid="' + card.iid + '"'
     });
-  }).join("") || '<div class="muted tiny">empty</div>';
+  }).join("") || '<div class="muted tiny">empty hand</div>';
 
-  box.innerHTML =
-    '<div class="chead"><span class="who ' + w + '">' + w + "</span>" + badges +
-    '<span class="tiny muted" style="margin-left:auto">deck ' + c.deck.length +
-    " · hand " + c.hand.length + " · exhausted " + c.exhaust.length + "</span></div>" +
-    '<div class="actions" style="margin-bottom:8px">' + acts + "</div>" +
+  panel.innerHTML =
+    '<div class="chead"><span class="who">' + c.name + "</span>" + badges + "</div>" +
+    '<div class="row" style="margin-bottom:8px">' +
+      '<div class="pile"><div class="n">' + c.deck.length + '</div><div class="l">Deck</div></div>' +
+      '<div class="pile"><div class="n">' + c.exhaust.length + '</div><div class="l">Exhaust</div></div>' +
+      '<div class="tiny muted">drew ' + c.drewThisTurn + " this turn · " + c.forcedExhausts +
+        " draw(s) burnt to a full hand this floor</div>" +
+    "</div>" +
+    (pend ? '<div class="warnbox">Choose ' + pend.need + ' card(s) to Exhaust as the cost — ' +
+            pend.chosen.length + " of " + pend.need + " chosen. " +
+            '<button data-act="confirmpay">Confirm</button> ' +
+            '<button data-act="cancelpay">Cancel</button></div>' : "") +
     '<div class="hand">' + hand + "</div>";
 }
 
-/* ---------------------------------------------------------------- library UI */
+function renderActions() {
+  var box = el("turnActions"), h = "", names = ["Red","Gray"], i;
+  if (!G || G.phase === "over") { box.innerHTML = ""; return; }
+  if (G.phase === "draw") {
+    for (i = 0; i < 2; i++) {
+      var c = G.chars[names[i]];
+      if (c.down) continue;
+      var owes = owesMinimum(c);
+      h += '<button data-act="draw" data-owner="' + c.name + '"' +
+           ((canDraw(c) || owes) ? "" : " disabled") + ">" +
+           (owes && atCap(c) ? c.name + ": take the forced draw (burns it)" : c.name + ": draw 1") + "</button>";
+      h += '<button data-act="done" data-owner="' + c.name + '"' +
+           (canDeclareDone(c) ? "" : " disabled") + ">" + c.name + ": done</button>";
+    }
+  } else if (G.phase === "play") {
+    h += '<button class="warn" data-act="cleanup">End play phase</button>';
+    h += '<span class="tiny muted">an uncleared Enemy or Hazard is a Flee; a Stuff room settles here</span>';
+  }
+  box.innerHTML = h;
+}
+
+function renderLog() {
+  var box = el("log");
+  var entries = G ? G.log : [];
+  box.innerHTML = entries.map(function (e) {
+    return '<div><span class="t">T' + e.t + '</span> <span class="' + e.cls + '">' + esc(e.msg) + "</span></div>";
+  }).join("");
+  box.scrollTop = box.scrollHeight;
+}
 
 function renderLibrary() {
-  el("tblCards").innerHTML = S.cards.map(function (c) {
-    return "<tr><td>" + esc(c.name) + (c.text ? ' <span class="muted">⚠</span>' : "") + "</td>" +
-      '<td class="owner ' + c.owner + '">' + c.owner + "</td><td>" + c.cost + "</td>" +
-      "<td>" + (c.power || "") + "</td><td>" + (c.scramble || "") + "</td>" +
-      "<td>" + (c.hold ? "✓" : "") + "</td>" +
-      '<td><button onclick="delCard(\'' + c.id + '\')">×</button></td></tr>';
-  }).join("") || '<tr><td colspan="7" class="muted tiny">no cards yet</td></tr>';
-
-  el("tblRooms").innerHTML = S.rooms.map(function (r) {
-    return "<tr><td>" + esc(r.name) + (r.text ? ' <span class="muted">⚠</span>' : "") + "</td>" +
-      '<td class="muted">' + r.kind + "</td><td>" + esc(challengeText(r)) + "</td>" +
-      '<td class="muted tiny">' + esc(punishText(r)) + "</td>" +
-      '<td><button onclick="delRoom(\'' + r.id + '\')">×</button></td></tr>';
-  }).join("") || '<tr><td colspan="5" class="muted tiny">no rooms yet</td></tr>';
-}
-
-function delCard(id) {
-  S.cards = S.cards.filter(function (c) { return c.id !== id; });
-  delete S.decks.Red[id]; delete S.decks.Gray[id];
-  save(); render();
-}
-function delRoom(id) {
-  S.rooms = S.rooms.filter(function (r) { return r.id !== id; });
-  delete S.decks.floor[id];
-  save(); render();
-}
-
-/* ---------------------------------------------------------------- deck UI */
-
-function deckRows(which, source, map) {
-  var rows = source.filter(function (d) {
-    return which === "floor" || d.owner === "Either" || d.owner === which;
-  }).map(function (d) {
-    var n = map[d.id] || 0;
-    var sub = which === "floor"
-      ? challengeText(d)
-      : "cost " + d.cost + " · " + challengeText(d) + (d.hold ? " · Hold" : "");
-    return "<tr><td>" + esc(d.name) + "</td>" +
-      '<td class="muted tiny">' + esc(sub) + "</td>" +
-      '<td><button onclick="bump(\'' + which + "','" + d.id + '\',-1)">−</button>' +
-      '<span style="display:inline-block;min-width:22px;text-align:center">' + n + "</span>" +
-      '<button onclick="bump(\'' + which + "','" + d.id + '\',1)">+</button></td></tr>';
+  function group(title, list, note) {
+    return "<h3>" + title + "</h3>" + (note ? '<p class="tiny muted">' + note + "</p>" : "") +
+      '<div class="hand" style="margin-bottom:14px">' +
+      list.map(function (d) { return cardHTML(d); }).join("") + "</div>";
+  }
+  var rooms = ENEMY_ROOMS.concat(HAZARD_ROOMS).map(function (d) {
+    return roomHTML(d.kind === "Enemy" ? Object.assign({}, d, { power: d.basePower }) : d);
   }).join("");
-  return "<table>" + (rows || '<tr><td class="muted tiny">nothing in the library</td></tr>') + "</table>";
-}
-function bump(which, id, d) {
-  var map = which === "floor" ? S.decks.floor : S.decks[which];
-  map[id] = Math.max(0, (map[id] || 0) + d);
-  if (!map[id]) delete map[id];
-  save(); renderDecks();
-}
-function total(map) { var t = 0; for (var k in map) t += map[k]; return t; }
-
-function renderDecks() {
-  el("deck-Red").innerHTML   = deckRows("Red", S.cards, S.decks.Red);
-  el("deck-Gray").innerHTML  = deckRows("Gray", S.cards, S.decks.Gray);
-  el("deck-floor").innerHTML = deckRows("floor", S.rooms, S.decks.floor);
-  el("cntRed").textContent   = total(S.decks.Red) + " cards";
-  el("cntGray").textContent  = total(S.decks.Gray) + " cards";
-  el("cntFloor").textContent = total(S.decks.floor) + " rooms";
-  el("setMandatory").checked = S.settings.mandatory;
-  el("setCap").checked       = S.settings.cap;
-  el("setCapN").value        = S.settings.capN;
-  el("setLastStand").checked = S.settings.lastStand;
+  var stuffRooms = STUFF_ROOMS.map(function (d) { return roomHTML(d); }).join("");
+  el("library").innerHTML =
+    group("Red", PLAYER_CARDS.filter(function (c) { return c.owner === "Red"; })) +
+    group("Gray", PLAYER_CARDS.filter(function (c) { return c.owner === "Gray"; })) +
+    group("Good Stuff", GOOD_STUFF, "A side pool at the edge of the table, drawn face down.") +
+    group("Bad Stuff", BAD_STUFF, "A separate side pool. No stats. Dealt by a room's Flee line.") +
+    "<h3>Enemy and Hazard rooms</h3><div class='hand' style='margin-bottom:14px'>" + rooms + "</div>" +
+    "<h3>Stuff rooms</h3><p class='tiny muted'>Four rooms, new on 2026-08-25. Their numbers come from " +
+    "the Setup tab because they are unruled.</p><div class='hand'>" + stuffRooms + "</div>";
 }
 
-/* ---------------------------------------------------------------- wiring */
+/* ================================================================ wiring */
 
-Array.prototype.forEach.call(document.querySelectorAll("nav .tab"), function (b) {
-  b.onclick = function () {
-    Array.prototype.forEach.call(document.querySelectorAll("nav .tab"), function (x) {
-      x.classList.toggle("on", x === b);
-    });
-    Array.prototype.forEach.call(document.querySelectorAll(".page"), function (p) {
-      p.classList.toggle("on", p.id === "page-" + b.dataset.page);
-    });
-  };
+function showPage(p) {
+  var pages = document.querySelectorAll(".page"), tabs = document.querySelectorAll(".tab"), i;
+  for (i = 0; i < pages.length; i++) pages[i].classList.toggle("on", pages[i].id === "page-" + p);
+  for (i = 0; i < tabs.length; i++) tabs[i].classList.toggle("on", tabs[i].dataset.page === p);
+  if (p === "library") renderLibrary();
+}
+
+document.addEventListener("click", function (ev) {
+  var t = ev.target.closest("[data-page]");
+  if (t) { showPage(t.dataset.page); return; }
+  var a = ev.target.closest("[data-act]");
+  if (!a || !G) return;
+  var act = a.dataset.act, owner = a.dataset.owner, iid = a.dataset.iid;
+  if (act === "draw") { var c = G.chars[owner]; if (owesMinimum(c)) payMinimum(c); else draw(c); maybeEndDraw(); }
+  else if (act === "done") declareDone(G.chars[owner]);
+  else if (act === "play") beginPlay(owner, iid);
+  else if (act === "pay") togglePay(iid);
+  else if (act === "confirmpay") confirmPay();
+  else if (act === "cancelpay") G.pending = null;
+  else if (act === "cleanup") enterCleanup();
+  render();
 });
 
-el("rmKind").onchange = function (e) {
-  var isItem = e.target.value === "item";
-  el("itemFields").style.display = isItem ? "" : "none";
-  if (isItem) { el("rmPunKind").value = "none"; el("rmPunN").value = 0; }
-};
-
-el("btnAddCard").onclick = function () {
-  var name = el("pcName").value.trim();
-  if (!name) { alert("Give the card a name."); return; }
-  S.cards.push({
-    id: uid(), name: name, owner: el("pcOwner").value,
-    cost: +el("pcCost").value || 0, power: +el("pcPower").value || 0,
-    scramble: +el("pcScr").value || 0, hold: el("pcHold").checked,
-    text: el("pcText").value.trim()
-  });
-  el("pcName").value = ""; el("pcText").value = "";
-  save(); render();
-};
-
-el("btnAddRoom").onclick = function () {
-  var name = el("rmName").value.trim();
-  if (!name) { alert("Give the room a name."); return; }
-  var kind = el("rmKind").value;
-  S.rooms.push({
-    id: uid(), name: name, kind: kind,
-    power: +el("rmPower").value || 0, scramble: +el("rmScr").value || 0,
-    punKind: el("rmPunKind").value, punN: +el("rmPunN").value || 0,
-    item: kind === "item" ? { cost: +el("rmICost").value || 0,
-      power: +el("rmIPower").value || 0, scramble: +el("rmIScr").value || 0 } : null,
-    text: el("rmText").value.trim()
-  });
-  el("rmName").value = ""; el("rmText").value = "";
-  save(); render();
-};
-
-[["setMandatory", "mandatory"], ["setCap", "cap"], ["setLastStand", "lastStand"]]
-  .forEach(function (pair) {
-    el(pair[0]).onchange = function (e) { S.settings[pair[1]] = e.target.checked; save(); render(); };
-  });
-el("setCapN").onchange = function (e) {
-  S.settings.capN = Math.max(1, +e.target.value || 1); save(); render();
-};
-
-el("btnStart").onclick = function () {
-  if (G && G.phase !== "over" && !confirm("Abandon the floor in progress and start a new one?")) return;
-  startFloor(); render();
-};
-el("btnNote").onclick = function () {
+el("btnStart").addEventListener("click", function () {
+  var floor = parseInt(el("playFloor").value, 10) || 1;
+  G = newFloor(floor, null, null, { quiet:false });
+  log("Floor " + floor + " begins — " + G.draw.length + " rooms (" + CFG.enemyN + " Enemy, " +
+      CFG.hazardN + " Hazard, " + stuffCount(floor) + " Stuff). Red " + G.chars.Red.deck.length +
+      ", Gray " + G.chars.Gray.deck.length + ". Both hands empty.", "hl");
+  doFlip();
+  render();
+});
+el("btnNote").addEventListener("click", function () {
   var v = el("noteInput").value.trim();
-  if (!v || !G) return;
-  log("NOTE: " + v, "hl");
-  el("noteInput").value = "";
-};
-el("noteInput").onkeydown = function (e) { if (e.key === "Enter") el("btnNote").click(); };
+  if (v && G) { log("NOTE — " + v, "hl"); el("noteInput").value = ""; renderLog(); }
+});
+el("btnBatch").addEventListener("click", runBatch);
+el("btnBatch1").addEventListener("click", runOneVerbose);
 
-el("btnExport").onclick = function () {
-  var blob = new Blob([JSON.stringify(S, null, 2)], { type: "application/json" });
-  var a = document.createElement("a");
-  a.href = URL.createObjectURL(blob);
-  a.download = "nvu-encounter-content.json";
-  a.click();
-};
-el("btnImport").onclick = function () { el("fileImport").click(); };
-el("fileImport").onchange = function (e) {
-  var f = e.target.files[0];
-  if (!f) return;
-  var r = new FileReader();
-  r.onload = function () {
-    try {
-      var p = JSON.parse(r.result);
-      S.cards = p.cards || []; S.rooms = p.rooms || [];
-      S.decks = p.decks || { Red: {}, Gray: {}, floor: {} };
-      if (p.settings) S.settings = Object.assign(S.settings, p.settings);
-      save(); render();
-    } catch (err) { alert("Could not read that file."); }
-  };
-  r.readAsText(f);
-};
-el("btnWipe").onclick = function () {
-  if (!confirm("Delete every card, room and deck?")) return;
-  S.cards = []; S.rooms = []; S.decks = { Red: {}, Gray: {}, floor: {} };
-  save(); render();
-};
-
-el("btnSample").onclick = function () {
-  if (S.cards.length && !confirm("Add scratch content on top of what is already here?")) return;
-  function C(name, owner, cost, power, scramble, hold) {
-    S.cards.push({ id: uid(), name: name, owner: owner, cost: cost, power: power,
-                   scramble: scramble, hold: !!hold, text: "" });
-  }
-  C("Swing",         "Red",    0, 1, 0);
-  C("Shoulder",      "Red",    1, 3, 0);
-  C("Haymaker",      "Red",    2, 5, 0);
-  C("Vault",         "Red",    0, 0, 1);
-  C("Dart",          "Gray",   0, 0, 1);
-  C("Slip Past",     "Gray",   1, 0, 3);
-  C("Read the Room", "Gray",   1, 1, 2);
-  C("Jab",           "Either", 0, 1, 0);
-  C("Scrap Pipe",    "Either", 1, 2, 0, true);
-  function R(name, kind, power, scramble, punKind, punN, item) {
-    S.rooms.push({ id: uid(), name: name, kind: kind, power: power, scramble: scramble,
-                   punKind: punKind, punN: punN, item: item || null, text: "" });
-  }
-  R("Skitterer",       "combat", 3, 0, "one",  2);
-  R("Bulkhead Brute",  "combat", 6, 0, "one",  3);
-  R("Collapsed Stair", "hazard", 0, 3, "one",  2);
-  R("Steam Vent",      "hazard", 0, 4, "both", 1);
-  R("Supply Locker",   "item",   0, 2, "none", 0, { cost: 1, power: 3, scramble: 0 });
-  R("Toolbelt",        "item",   2, 0, "none", 0, { cost: 0, power: 0, scramble: 2 });
-
-  S.cards.forEach(function (c) {
-    if (c.owner === "Red"  || c.owner === "Either") S.decks.Red[c.id]  = (S.decks.Red[c.id] || 0) + 2;
-    if (c.owner === "Gray" || c.owner === "Either") S.decks.Gray[c.id] = (S.decks.Gray[c.id] || 0) + 2;
-  });
-  S.rooms.forEach(function (r) { S.decks.floor[r.id] = (S.decks.floor[r.id] || 0) + 1; });
-  save(); render();
-};
-
-load();
+loadCfg();
+bindFields();
+renderStuffCurve();
 render();
 </script>
 </body>

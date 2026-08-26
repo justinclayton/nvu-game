@@ -265,3 +265,23 @@ row, *Stuff rooms / Good Stuff — 16*. That becomes two rows on two different r
   number back. Do not size it until that lands.
 
 This does not touch the reward-pool problem, which is still the one number this ticket cannot make fit.
+
+## Hand-down executed, 2026-08-25 — the four Stuff rooms are printed
+
+The two hand-downs above are now reflected in the deliverable. **Nothing here is ruled and the set is
+still unratified.**
+
+- **Four Stuff room cards** — `Sorting Room`, `Ration Locker`, `Tool Cage`, `Spill of Cargo` — printed
+  in both the [card set](../prototypes/12-exemplar-card-set.md#stuff-rooms) and the
+  [cutting sheet](../../../prototype/12-exemplar-cards.html). The four Good Stuff cards survive
+  unchanged as pool contents, as the hand-down said they would.
+- **Every threshold on them is a placeholder**, including the second tier. That is the remaining
+  blocker and it is [ticket 10](10-sim-the-resource-economy.md)'s.
+- **Two of the four ask each character for the stat they do not produce**, deliberately, to put
+  ticket 22's still-open *which stat* question on a physical card. That is a probe, not a proposal.
+- **The pool table is split.** Stuff rooms keep the room policy at 16. **Good Stuff is left unsized**,
+  because ticket 22 flagged that the 9 → 0 curve has to come down first and sizing it now would only
+  have to be redone.
+- **Finding 1 is marked dissolved** rather than deleted, with the original text kept as a quote.
+
+The reward-pool problem is untouched and still the one number this ticket cannot make fit.

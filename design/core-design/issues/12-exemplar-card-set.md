@@ -91,3 +91,50 @@ complex, and enough Good Stuff to make the stat base visible.
 
 **Rarity is a complexity signal, never a quality one.** Ticket 11's item 6a died with ticket 15 —
 there is no culling, so there is no card *quality* to make legible. Do not use `Woah` to mean "good."
+
+## Built 2026-08-25 — awaiting your ruling
+
+The set exists and is on paper. **Nothing in it is adopted and this ticket stays open**, because the
+map's standing rule is that the agent surfaces options and the human rules. Everything below is
+`[proposed by agent → awaiting your ruling]`.
+
+- **[The exemplar card set](../prototypes/12-exemplar-card-set.md)** — 21 cards: 4 starters, 7 reward
+  cards, 4 Good Stuff, 2 Bad Stuff, 4 rooms. Every card is annotated with which of this ticket's
+  requirements it stresses and why.
+- **[The one-page rules summary](../prototypes/12-floor-rules-summary.md)** — enough to play a floor
+  with them, assembled only from closed tickets.
+- **[The printable sheet](../../../prototype/12-exemplar-cards.html)** — poker-size, cut on the
+  borders, border colour is rarity.
+
+### The findings, in short
+
+1. **The anatomy holds.** No card needed a field that does not exist. Three smaller findings, all
+   belonging to [ticket 11](11-card-anatomy.md) rather than being amended here: the **Stuff room's
+   type line has to be one printed string** and ticket 11 named it two; **"no stat field" no longer
+   reliably means "no stats"** now that conditional stats live in effect text; and **player cards
+   want a cleanup timing hook**, which ticket 21 ruled on for rooms but never for player cards.
+2. **One thing the rules could not express: healing.** `Second Wind` recovers cards from the exhaust
+   pile, which ticket 04 authorised and then made impossible by banning mid-floor shuffling. The set
+   prints it deliberately so the question cannot be designed around quietly. It is also the first
+   mechanic that has to be judged under ticket 04's decision to have no structural recursion guard
+   rail.
+3. **Reading time is not answered and cannot be from here** — it needs a person and a timer, which is
+   [ticket 20](20-encounter-tabletop-prototype.md)'s table. The set names the three cards to time,
+   the control to time them against, and predicts that `Both Barrels` misses the budget on purpose.
+4. **The triple read is a double read.** Health is the height of a pile, not a property of a card, so
+   the third read never appears. A card is only ever read in hand, where it asks one question: *fuel
+   or play?* This is a simplification of the hardest problem ticket 11 thought it had.
+
+### The one number this ticket owes and cannot make fit
+
+Ticket 09's target — a declined reward card is **essentially never seen again in that run** — implies
+**45–55 cards per character pool**, because a run draws each pool 40–50 times (30 at the ascend, up to
+30 more from hazard reveals). That is 90–110 unique player cards, and about **175 cards total** with
+the rooms and Stuff. Four ways out are laid out in the deliverable; the agent's recommendation, marked
+as such, is to have **hazard reveals draw from a third shared pool** instead of the character pools.
+
+### On reaching the destination
+
+Not yet, and this ticket should not claim it. The destination needs this set *ruled on*, and
+[ticket 13](13-red-and-gray-asymmetry.md) is still open — the Red/Gray difference in this set is
+flavour standing in for a decision nobody has made.

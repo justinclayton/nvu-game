@@ -1,0 +1,318 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>North vs Up — ticket 12 exemplar cards (print &amp; cut)</title>
+<style>
+  :root {
+    --fine: #8a8f98;
+    --cool: #2f7bd6;
+    --woah: #b8860b;
+    --none: #444;
+  }
+  * { box-sizing: border-box; }
+  body {
+    font-family: "Helvetica Neue", Arial, sans-serif;
+    margin: 12mm;
+    color: #111;
+    background: #fff;
+  }
+  h1 { font-size: 16pt; margin: 0 0 2mm; }
+  .note { font-size: 8pt; color: #555; max-width: 170mm; margin: 0 0 6mm; line-height: 1.4; }
+  h2 {
+    font-size: 10pt; text-transform: uppercase; letter-spacing: .08em;
+    color: #555; margin: 8mm 0 3mm; border-bottom: 1px solid #ccc; padding-bottom: 1mm;
+  }
+  .sheet { display: flex; flex-wrap: wrap; gap: 4mm; }
+
+  .card {
+    width: 63mm; height: 88mm;
+    border: 0.4mm solid #222;
+    border-radius: 3mm;
+    padding: 3mm;
+    display: flex; flex-direction: column;
+    page-break-inside: avoid; break-inside: avoid;
+    position: relative;
+  }
+  .card.fine { border-color: var(--fine); }
+  .card.cool { border-color: var(--cool); }
+  .card.woah { border-color: var(--woah); }
+
+  .rarity-bar { height: 2mm; border-radius: 1mm; margin: -1mm -1mm 2mm; }
+  .fine .rarity-bar { background: var(--fine); }
+  .cool .rarity-bar { background: var(--cool); }
+  .woah .rarity-bar { background: var(--woah); }
+  .norarity .rarity-bar { background: var(--none); }
+
+  .top { display: flex; justify-content: space-between; align-items: flex-start; gap: 2mm; }
+  .name { font-size: 11pt; font-weight: 700; line-height: 1.1; }
+  .cost {
+    flex: 0 0 auto;
+    font-size: 12pt; font-weight: 700;
+    border: 0.4mm solid #222; border-radius: 50%;
+    width: 8mm; height: 8mm;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .typeline {
+    font-size: 8pt; text-transform: uppercase; letter-spacing: .06em;
+    color: #333; margin-top: 1mm; font-weight: 600;
+  }
+  .art {
+    flex: 1 1 auto; margin: 2mm 0;
+    border: 0.3mm dashed #bbb; border-radius: 1.5mm;
+    display: flex; align-items: center; justify-content: center;
+    color: #bbb; font-size: 8pt; letter-spacing: .1em;
+    min-height: 18mm;
+  }
+  .stat {
+    font-size: 12pt; font-weight: 700; margin-bottom: 1.5mm;
+  }
+  .nostat { font-size: 8pt; color: #999; font-style: italic; margin-bottom: 1.5mm; }
+  .text { font-size: 8.5pt; line-height: 1.35; }
+  .text em { color: #444; }
+  .hold {
+    font-size: 8pt; font-weight: 700; letter-spacing: .08em;
+    text-transform: uppercase; margin-bottom: 1.5mm;
+  }
+  .rarity-word {
+    position: absolute; bottom: 2mm; right: 3mm;
+    font-size: 7pt; letter-spacing: .1em; text-transform: uppercase; color: #999;
+  }
+
+  /* room cards */
+  .card.room { border-color: #222; }
+  .card.room .rarity-bar { background: #222; }
+  .thresholds { font-size: 9pt; line-height: 1.4; }
+  .thresholds .th { margin-bottom: 1.5mm; }
+  .thresholds .th b { font-weight: 700; }
+  .flee {
+    margin-top: auto; padding-top: 2mm; border-top: 0.3mm solid #999;
+    font-size: 8.5pt; line-height: 1.3;
+  }
+  .flee b { text-transform: uppercase; letter-spacing: .06em; font-size: 8pt; }
+
+  @media print {
+    body { margin: 8mm; }
+    .note, h1, h2 { }
+  }
+</style>
+</head>
+<body>
+
+<h1>North vs Up — exemplar cards, ticket 12</h1>
+<p class="note">
+  Print at 100% (no “fit to page”) and cut on the borders — cards are 63&times;88mm, standard poker
+  size, so they fit ordinary sleeves. Border colour is <b>rarity</b>, which signals how hard a card is
+  to read and <i>never</i> how good it is. Every number here is a placeholder for ticket 10.
+  Nothing on this sheet is adopted design — see
+  <code>design/core-design/prototypes/12-exemplar-card-set.md</code>.
+</p>
+
+<h2>Red — starters</h2>
+<div class="sheet">
+
+  <div class="card fine"><div class="rarity-bar"></div>
+    <div class="top"><div><div class="name">Shove</div><div class="typeline">Red</div></div><div class="cost">0</div></div>
+    <div class="art">ART</div>
+    <div class="stat">Power 1</div>
+    <div class="rarity-word">Fine</div>
+  </div>
+
+  <div class="card fine"><div class="rarity-bar"></div>
+    <div class="top"><div><div class="name">Charge In</div><div class="typeline">Red</div></div><div class="cost">1</div></div>
+    <div class="art">ART</div>
+    <div class="stat">Power 3</div>
+    <div class="rarity-word">Fine</div>
+  </div>
+
+</div>
+
+<h2>Gray — starters</h2>
+<div class="sheet">
+
+  <div class="card fine"><div class="rarity-bar"></div>
+    <div class="top"><div><div class="name">Duck Under</div><div class="typeline">Gray</div></div><div class="cost">0</div></div>
+    <div class="art">ART</div>
+    <div class="stat">Scramble 1</div>
+    <div class="rarity-word">Fine</div>
+  </div>
+
+  <div class="card fine"><div class="rarity-bar"></div>
+    <div class="top"><div><div class="name">Pick The Lock</div><div class="typeline">Gray</div></div><div class="cost">1</div></div>
+    <div class="art">ART</div>
+    <div class="stat">Scramble 3</div>
+    <div class="rarity-word">Fine</div>
+  </div>
+
+</div>
+
+<h2>Reward cards</h2>
+<div class="sheet">
+
+  <div class="card fine"><div class="rarity-bar"></div>
+    <div class="top"><div><div class="name">Catch Your Breath</div><div class="typeline">Gray</div></div><div class="cost">0</div></div>
+    <div class="art">ART</div>
+    <div class="nostat">no stat</div>
+    <div class="text">Look at the top 2 cards of your deck. Exhaust one and put the other back.</div>
+    <div class="rarity-word">Fine</div>
+  </div>
+
+  <div class="card cool"><div class="rarity-bar"></div>
+    <div class="top"><div><div class="name">Reckless</div><div class="typeline">Red</div></div><div class="cost">0</div></div>
+    <div class="art">ART</div>
+    <div class="stat">Power 5</div>
+    <div class="text">At cleanup, Red Exhausts 3 from deck.</div>
+    <div class="rarity-word">Cool</div>
+  </div>
+
+  <div class="card cool"><div class="rarity-bar"></div>
+    <div class="top"><div><div class="name">Second Wind</div><div class="typeline">Red</div></div><div class="cost">1</div></div>
+    <div class="art">ART</div>
+    <div class="nostat">no stat</div>
+    <div class="text">Shuffle 3 cards from Red’s exhaust pile into Red’s deck.</div>
+    <div class="rarity-word">Cool</div>
+  </div>
+
+  <div class="card cool"><div class="rarity-bar"></div>
+    <div class="top"><div><div class="name">In Step</div><div class="typeline">Gray</div></div><div class="cost">1</div></div>
+    <div class="art">ART</div>
+    <div class="nostat">no stat</div>
+    <div class="text">Power equal to the number of cards Red played this turn.</div>
+    <div class="rarity-word">Cool</div>
+  </div>
+
+  <div class="card cool"><div class="rarity-bar"></div>
+    <div class="top"><div><div class="name">Pack Rat</div><div class="typeline">Red</div></div><div class="cost">2</div></div>
+    <div class="art">ART</div>
+    <div class="hold">Hold</div>
+    <div class="nostat">no stat</div>
+    <div class="text">When you clear a floor, keep up to 2 Stuff for the next floor.</div>
+    <div class="rarity-word">Cool</div>
+  </div>
+
+  <div class="card woah"><div class="rarity-bar"></div>
+    <div class="top"><div><div class="name">Scrap Sense</div><div class="typeline">Gray</div></div><div class="cost">1</div></div>
+    <div class="art">ART</div>
+    <div class="hold">Hold</div>
+    <div class="nostat">no stat</div>
+    <div class="text">The first piece of Good Stuff Gray plays each turn has +2 Power and +2 Scramble.<br><br>
+      If Gray plays no Good Stuff during a turn, Exhaust this at that cleanup.</div>
+    <div class="rarity-word">Woah</div>
+  </div>
+
+  <div class="card woah"><div class="rarity-bar"></div>
+    <div class="top"><div><div class="name">Both Barrels</div><div class="typeline">Red</div></div><div class="cost">2</div></div>
+    <div class="art">ART</div>
+    <div class="stat">Power 2</div>
+    <div class="text">If Gray has played at least one card this turn, Power 5 instead.<br><br>
+      If this Clears an Enemy room, return this to Red’s hand instead of Exhausting it.</div>
+    <div class="rarity-word">Woah</div>
+  </div>
+
+</div>
+
+<h2>Good Stuff — these cards are also the Stuff rooms</h2>
+<div class="sheet">
+
+  <div class="card fine"><div class="rarity-bar"></div>
+    <div class="top"><div><div class="name">Pry Bar</div><div class="typeline">Good Stuff</div></div><div class="cost">0</div></div>
+    <div class="art">ART</div>
+    <div class="hold">Hold</div>
+    <div class="stat">Power 3</div>
+    <div class="rarity-word">Fine</div>
+  </div>
+
+  <div class="card fine"><div class="rarity-bar"></div>
+    <div class="top"><div><div class="name">Coil of Cable</div><div class="typeline">Good Stuff</div></div><div class="cost">0</div></div>
+    <div class="art">ART</div>
+    <div class="hold">Hold</div>
+    <div class="stat">Scramble 3</div>
+    <div class="rarity-word">Fine</div>
+  </div>
+
+  <div class="card cool"><div class="rarity-bar"></div>
+    <div class="top"><div><div class="name">Cutting Torch</div><div class="typeline">Good Stuff</div></div><div class="cost">1</div></div>
+    <div class="art">ART</div>
+    <div class="hold">Hold</div>
+    <div class="stat">Power 5</div>
+    <div class="rarity-word">Cool</div>
+  </div>
+
+  <div class="card woah"><div class="rarity-bar"></div>
+    <div class="top"><div><div class="name">Grav Harness</div><div class="typeline">Good Stuff</div></div><div class="cost">1</div></div>
+    <div class="art">ART</div>
+    <div class="hold">Hold</div>
+    <div class="stat">Power 3, Scramble 3</div>
+    <div class="text">When you play this, one character may draw 1 card, ignoring the hand cap.</div>
+    <div class="rarity-word">Woah</div>
+  </div>
+
+</div>
+
+<h2>Bad Stuff — no stat field, no rarity</h2>
+<div class="sheet">
+
+  <div class="card norarity"><div class="rarity-bar"></div>
+    <div class="top"><div><div class="name">Faceful of Slime</div><div class="typeline">Bad Stuff</div></div><div class="cost">0</div></div>
+    <div class="art">ART</div>
+    <div class="hold">Hold</div>
+    <div class="text">While you hold this, you may not draw more than 1 card during your draw phase.<br><br>
+      Play this to be rid of it.</div>
+  </div>
+
+  <div class="card norarity"><div class="rarity-bar"></div>
+    <div class="top"><div><div class="name">Torn Seal</div><div class="typeline">Bad Stuff</div></div><div class="cost">2</div></div>
+    <div class="art">ART</div>
+    <div class="hold">Hold</div>
+    <div class="text">This may not be Exhausted to pay a cost.<br><br>
+      Play this to be rid of it.</div>
+  </div>
+
+</div>
+
+<h2>Rooms</h2>
+<div class="sheet">
+
+  <div class="card room"><div class="rarity-bar"></div>
+    <div class="top"><div><div class="name">Sump Crawler</div><div class="typeline">Enemy</div></div></div>
+    <div class="art">ART</div>
+    <div class="thresholds">
+      <div class="th"><b>Power 5:</b> Clear</div>
+    </div>
+    <div class="flee"><b>Flee:</b> 1 character Exhausts 2 from deck</div>
+  </div>
+
+  <div class="card room"><div class="rarity-bar"></div>
+    <div class="top"><div><div class="name">The Thing In The Stairwell</div><div class="typeline">Enemy</div></div></div>
+    <div class="art">ART</div>
+    <div class="thresholds">
+      <div class="th"><b>Power 9:</b> Clear</div>
+      <div class="th"><b>Power 12:</b> Clear — one character reveals reward. You may add it to the top of your deck or skip it.</div>
+    </div>
+    <div class="flee"><b>Flee:</b> both characters Exhaust 3 from deck</div>
+  </div>
+
+  <div class="card room"><div class="rarity-bar"></div>
+    <div class="top"><div><div class="name">Collapsed Stair</div><div class="typeline">Hazard</div></div></div>
+    <div class="art">ART</div>
+    <div class="thresholds">
+      <div class="th"><b>Scramble 2:</b> Clear</div>
+      <div class="th"><b>Scramble 5:</b> Clear — one character reveals reward. You may add it to the top of your deck or skip it.</div>
+    </div>
+    <div class="flee"><b>Flee:</b> 1 character Exhausts 1 from deck</div>
+  </div>
+
+  <div class="card room"><div class="rarity-bar"></div>
+    <div class="top"><div><div class="name">Ruptured Coolant Line</div><div class="typeline">Hazard</div></div></div>
+    <div class="art">ART</div>
+    <div class="thresholds">
+      <div class="th"><b>Scramble 4:</b> Clear</div>
+      <div class="th"><b>Scramble 7:</b> Clear — one character reveals reward. You may add it to the top of your deck or skip it.</div>
+    </div>
+    <div class="flee"><b>Flee:</b> both characters Exhaust 1 from deck, and 1 character takes a Bad Stuff</div>
+  </div>
+
+</div>
+
+</body>
+</html>

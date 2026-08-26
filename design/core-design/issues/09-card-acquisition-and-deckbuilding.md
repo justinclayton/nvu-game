@@ -384,3 +384,13 @@ makes the reward swingier, and ticket 22 logged it as unruled.
 
 **One thing to hand on:** [ticket 13](13-red-and-gray-asymmetry.md) had this ticket's routing rule
 written down as one of its cheap asymmetry levers. It loses that lever. Noted there.
+
+## Its charge to ticket 10, answered 2026-08-26
+
+`[you]` **This ticket's decision not to cap deck growth stands.** The answer to the charge, and the
+sweep it rests on, live on [ticket 10](10-sim-the-resource-economy.md) and are not restated here.
+
+The short of it: the inversion does not punish greed *yet*, but that is because the Enemy threshold is
+low enough that any hand clears it, not because the inversion is weak. It is expected to bite once
+enemies scale with the floor — now ruled on [ticket 22](22-floor-deck-composition.md) — and greed is
+to be re-tested at that point rather than capped now.

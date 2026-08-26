@@ -285,3 +285,19 @@ still unratified.**
 - **Finding 1 is marked dissolved** rather than deleted, with the original text kept as a quote.
 
 The reward-pool problem is untouched and still the one number this ticket cannot make fit.
+
+## Ruled 2026-08-26 — hazard reveals draw from the character pools
+
+`[you]` **A hazard room's high threshold reveals from that character's own reward pool.** The agent's
+recommendation on this ticket — a third shared pool for mid-floor reveals — is **declined**.
+
+This keeps ticket 09's reasoning intact: a character can only build toward something if the cards they
+are offered are theirs, and a shared mid-floor pool would have handed them cards that are not.
+
+**The consequence is that this ticket's unfittable number stays unfitted.** The pool requirement
+remains what this ticket costed it at — **45–55 cards per character**, because a run draws each pool
+40–50 times once hazard reveals are counted alongside the ascend offers. That is roughly 90–110 unique
+player cards and about 175 cards in total. The four ways out are still listed in the deliverable; the
+one the agent recommended is now closed, and the remaining three are untouched by this ruling.
+
+Sizing the pools is therefore still open, and is not answered by knowing where reveals draw from.

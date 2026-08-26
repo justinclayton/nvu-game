@@ -1,8 +1,8 @@
 # 10 — Sim the resource economy across a floor
 
 Type: prototype
-Status: claimed
-Blocked by: 04, 07, 09, 11
+Status: open
+Blocked by: 04, 07, 09, 11, 12
 Map: [core design map](../map.md)
 
 ## Question
@@ -347,3 +347,60 @@ These held up and are restated only so it is clear they were re-run, not carried
 
 Items 1, 2 and 5 look like they belong to tickets 09, 22 and a new ticket respectively, rather
 than to this one. Flagged, not assumed.
+
+## Ruled 2026-08-26 — deck growth stays uncapped, and why
+
+`[you]` **Ticket 09's decision not to cap deck growth stands, untouched.** The deck-growth question is
+held open rather than settled by a new rule, because the thing that makes greed cost something is the
+Enemy threshold rising with the floor — and that rate is not set yet. Re-test greed once it is.
+
+`[you]` **Enemies scale with the floor.** Recorded in full as an amendment on
+[ticket 22](22-floor-deck-composition.md), which owns escalation. The rate remains this ticket's
+number to find.
+
+### The finding this ruling rests on, corrected
+
+An earlier reading on this ticket said the inversion was simply too weak — that taking every reward
+offered nearly doubles the deck and costs nothing. That was measured **only at a flat threshold**, and
+it does not survive sweeping the escalation rate underneath it:
+
+| enemies scale by | take everything | take selectively | cost of greed |
+|---|---|---|---|
+| nothing (flat) | 94% | 93% | none — greed is slightly *better* |
+| +0.5 `Power`/floor | 84% | 85% | about 1 point |
+| **+1 `Power`/floor** | **46%** | **56%** | **10 points** |
+| +1.5 `Power`/floor | 5% | 9% | shrinking again |
+
+`[finding]` **The inversion is not broken, it is dormant.** Ticket 04's claim — a card you add makes
+you last longer and makes you worse — only has teeth once thresholds are high enough to strain a
+five-card hand. While almost any hand clears the bar, it does not matter which cards you drew, so
+diluting the deck costs nothing. Raise the bar and it matters a great deal, and the greedy deck starts
+missing.
+
+This is the same arithmetic as the starter-hand ceiling: `Power 5` is met by every possible starting
+hand, so at that threshold there is nothing for dilution to spoil.
+
+`[finding]` **So the difficulty curve and the deckbuilding decision are one question, not two.** The
+scaling rate is not only what makes floor 10 hard; it is what makes taking a card a choice at all. It
+should be ruled as a design number, not turned as a dial.
+
+**One caveat, recorded because it cuts against the ruling.** At +1.5 and +2 per floor the gap closes
+again — runs collapse early enough that no deck survives long enough to suffer from being bloated. So
+greed only costs something inside a band, and +1/floor sits in it. A steeper curve is not simply a
+stronger version of the same effect.
+
+### What this ticket still owes
+
+Unchanged and still open, all of them waiting on [ticket 12](12-exemplar-card-set.md)'s cards being
+ruled:
+
+1. **The Enemy threshold's scaling rate.** Now known to be load-bearing twice over. Drawn against the
+   `Power 7` starter-hand ceiling.
+2. **Starting deck size.** 12 and 15 both defensible; the knee moves with the reward strength, so this
+   cannot be honestly picked before the cards are ruled.
+3. **The Stuff room thresholds**, including the second tier — which ticket 12 is holding a placeholder
+   for so its cards can be cut.
+4. **The floor-10 Stuff count.** 0 is survivable on the current numbers.
+
+**Ticket 12 is now wired as a blocker**, which it should have been all along: every number left here
+depends on what a reward card is actually worth.

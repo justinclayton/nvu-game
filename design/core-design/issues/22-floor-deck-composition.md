@@ -456,3 +456,30 @@ Consequences 2 and 4 change shape rather than closing. See the new open list bel
 - **How low is low**, still a ticket 10 number, now with a second tier to price as well.
 - **Blind draw from the Good Stuff pool** is new. It removes the old flip's known prize and makes the
   reward swingier. Unremarked on so far and not ruled.
+
+## Amended 2026-08-26 — enemies scale with the floor after all
+
+`[you]` **The Enemy room's threshold rises with the floor.** This reverses item 4's *"escalation is
+resource scarcity, not a harder fight"*. Stuff scarcity stays as a second dial; it is no longer the
+only one.
+
+**Why it was reversed.** [Ticket 10](10-sim-the-resource-economy.md)'s simulator, once it was handing
+out the permanent rewards this ticket's amendment created, showed that a flat threshold produces no
+difficulty curve at all — floor 10 is won about as often as floor 3, and the run has no arc. Two
+findings underneath that:
+
+- **The threshold sat below what a starting character produces unaided.** Every possible five-card
+  hand from a 12-card Red starter deck meets `Power 5` on its own, with no Good Stuff and no partner.
+  A starter hand tops out at `Power 7` and cannot reach `Power 8` at all, so that ceiling is the
+  landmark any threshold curve has to be drawn against.
+- **Shrinking the floor deck shortens the floor rather than tightening it.** With Stuff at 0, floor 10
+  is four rooms and under three turns — a spike, not the desperate scrape ticket 11 asked for.
+
+**The rate is still ticket 10's to set**, exactly as item 4 already said, and still waits on
+[ticket 12](12-exemplar-card-set.md)'s cards being ruled. What has changed is only that the curve must
+*exist*; its steepness is unruled.
+
+**One consequence beyond difficulty**, recorded here because it is the reason the ruling matters more
+than a tuning knob would: the scaling rate is what makes deckbuilding a real decision. See
+[ticket 10](10-sim-the-resource-economy.md)'s ruling of the same date — greed costs a player nothing
+while thresholds stay low, and starts costing about ten points of clear rate once they rise.

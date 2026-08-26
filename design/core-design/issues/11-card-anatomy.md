@@ -448,3 +448,30 @@ Stuff rooms become separate cards and the Stuff pool roughly doubles. Recorded a
 
 [Ticket 12](12-exemplar-card-set.md)'s finding 1 already established that this card reads differently
 in the room zone than in hand, so the precedent exists either way.
+
+## Amended by ticket 22, 2026-08-25 — the Stuff room is a card again
+
+`[you, ticket 22]` **A Stuff room is its own card, with its own name and flavour.** Good Stuff moves
+to a pool at the side of the table, like Bad Stuff. The room prints a challenge; meeting it draws
+Good Stuff from that pool.
+
+This **reverses this ticket's "a Stuff room simply is the Stuff card"**, and the reasoning under it —
+*"no punishment and nothing to defeat: the 'room' reading is empty."* The room reading is not empty
+any more. It has a challenge, a flavour name, and outcomes that can differ per character.
+
+**So the anatomy question this ticket reopened two amendments ago is answered, and answered the other
+way.** The threshold prints on a **room card**, not as a room-zone-only line on the Stuff card. The
+two-card answer costs more components — ticket 22 item 3 — but it removes the two-context reading
+problem entirely rather than extending it: a room card is only ever read in the room zone, and a Good
+Stuff card is only ever read in hand.
+
+**It also dissolves this ticket's finding 1 from [ticket 12](12-exemplar-card-set.md)** — that the
+Stuff room's type line had to be one printed string while this ticket named it two. There are two
+cards now, so there are two type lines: the room reads `Stuff`, the item reads `Good Stuff`. Nothing
+has to do double duty.
+
+**One new thing a room card can now do:** name a character in an outcome, as in *"Power 1: Red takes 1
+Good Stuff."* This ticket's format already allows it — a room is a list of `threshold: outcome` lines
+and an outcome may say anything — but no room had used it before. The reading it requires is per
+character rather than table-wide, which is recorded on
+[ticket 21](21-defeating-a-floor-card.md), the stat pool's owner.

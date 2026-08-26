@@ -47,10 +47,12 @@ done. *(tickets 21, 22)*
 
 **Stuff room** — a room holding a piece of **Stuff**, and the word printed on its type line. **Prints
 a threshold and no Flee line** — the **lowest threshold in the deck**, below what Hazard and Enemy
-rooms ask. Meet it and the Stuff goes to a chosen character's hand with **Hold**; fail it and you
-leave empty-handed. Either way the room is Cleared and it can never go to Fled. There is no
-punishment: the only loss is the Stuff you did not take. Only **Good Stuff** is found here.
-*(tickets 21, 22, 09, 11)*
+rooms ask. The challenge is **split per character**, so each one pays for their own item and nobody
+pays for anyone else: *"Power 1: Red takes 1 Good Stuff. Scramble 1: Gray takes 1 Good Stuff."* Some
+rooms print a **richer second tier** worth leaning into. Whatever you earn is drawn **blind from the
+Good Stuff pool**. The room is **Cleared either way** and can never go to Fled; there is no
+punishment, and the only loss is the Stuff you did not take. It is **its own card** with its own name
+and flavour — the room and the item are two different objects. *(tickets 21, 22, 09, 11)*
 
 **Stuff** — a card a floor hands you: a tool, a piece of junk, a faceful of slime. It goes to hand
 with **Hold**, it is **playable**, and it is **ordinary fuel** — it can be Exhausted from hand to pay
@@ -61,10 +63,11 @@ of the exhaust pile** before restoring it, so no Stuff survives a floor. It is a
 three Stuff."* *(tickets 21, 09, 07)*
 
 **Good Stuff** / **Bad Stuff** — where a piece of Stuff came from, and loosely how welcome it is.
-**Good Stuff** lives in the floor deck and is what a Stuff room hands you *if you meet its
-threshold* — and since Stuff supplies **the bulk of the raw stats**, it is the game's supply line
-rather than a bonus, so paying the threshold is almost always correct. **Bad Stuff** lives in a pool
-**outside** the floor deck and reaches you only as a room's printed punishment; it contributes **no
+Both now live in **pools at the side of the table**, and what separates them is how they reach you.
+**Good Stuff** is **earned**, drawn blind from its pool when you meet a Stuff room's challenge — and
+since Stuff supplies **the bulk of the raw stats**, it is the game's supply line rather than a bonus,
+so paying the threshold is almost always correct. **Bad Stuff** is **dealt**, reaching you only as a
+room's printed punishment; it contributes **no
 stats** toward a challenge, so it clutters your hand until you pay to play it. Both are **printed on
 the card's type line** — a player must see at a glance which cards in hand are dead weight. Good
 Stuff carries **rarity**; Bad Stuff does not. *(tickets 09, 11)*
@@ -104,11 +107,14 @@ costs you the Stuff, not stamina, and the room is Cleared regardless. *(tickets 
 
 **Stat pool** — the total of the stats on every card in the **play zone**, shared across both
 characters. It is not a zone and has no tracker — it is simply what the face-up cards on the table
-add up to, and it evaporates at cleanup. *(ticket 21)*
+add up to, and it evaporates at cleanup. Most thresholds read the shared total, but a **Stuff room's
+split challenge** reads **one character's side alone**, so that a character pays for their own item.
+*(tickets 21, 22)*
 
 **Play zone** — where played cards sit face up during a turn, contributing their stats. **Split into
-a side per character**, both feeding the one shared stat pool — the split is bookkeeping only, so that
-cleanup can return each card to the right exhaust pile without sorting. Everything in it is exhausted
+a side per character**, both feeding the one shared stat pool. The split was originally bookkeeping,
+so that cleanup could return each card to the right exhaust pile without sorting; a Stuff room's split
+challenge now reads it as well. Everything in it is exhausted
 at cleanup, so nothing persists here between turns. *(tickets 21, 07)*
 
 **Cleared** — a room defeated and removed from the floor deck **permanently**; it is never

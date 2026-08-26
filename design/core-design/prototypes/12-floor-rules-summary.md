@@ -34,10 +34,13 @@ whatever order they like.
 **1 — Flip.** Turn the top card of the floor deck face up into the active room zone. You see what you
 are facing before you spend anything.
 
-- A **Stuff room** has no threshold and no Flee line. The Stuff goes straight to a hand — the team
-  chooses whose, and it cannot be given to a Down character — and stays there with `Hold`. There is
-  nothing to beat. **The card has left the floor deck for good**; it is now a piece of Stuff, and it
-  never returns to the room zone.
+- A **Stuff room** has a low threshold and no Flee line, and its threshold is **split per character**:
+  *"Power 1: Red takes 1 Good Stuff. Scramble 1: Gray takes 1 Good Stuff."* Each character is measured
+  on **their own side of the play zone only**, so you pay for your own item and never for your
+  partner's. Some rooms print a richer second tier. What you earn is drawn **face down from the Good
+  Stuff pool** at the side of the table and goes to that character's hand with `Hold`; a Down
+  character earns nothing. **The room is Cleared either way** — meet nothing and you simply leave with
+  nothing — and it never goes to Fled.
 
 **2 — Draw.** Each standing character draws cards from their deck into their hand, one at a time, in
 any order, each stopping when they say they are done.

@@ -313,3 +313,28 @@ holds on its own terms. Whether the one-card form survives is
 there is that it does, with the threshold line read only while the card is in the room zone.
 
 Full ruling and its four open consequences: [ticket 22](22-floor-deck-composition.md).
+
+## Amended by ticket 22, 2026-08-25 — the stat pool gets a per-character read
+
+`[you, ticket 22]` **A Stuff room is its own card again and prints a split challenge**, for example
+*"Power 1: Red takes 1 Good Stuff. Scramble 1: Gray takes 1 Good Stuff."* Good Stuff now lives in a
+pool at the side of the table, so the room and the item are two different objects.
+
+**This ticket's shared stat pool is no longer read only as a total.** A split line asks what **one
+character's** side of the play zone adds up to, not what the table adds up to. If it read as the
+shared total, one player could pay and both would be paid, which is the free-rider outcome ticket 22
+declined.
+
+**It needs no new machinery, which is why it was affordable.** This ticket already split the play zone
+into **a side per character** and called the split *"bookkeeping only, so that cleanup can return each
+card to the right exhaust pile without sorting."* That physical structure is exactly what a
+per-character read needs. What changes is only that the split now **carries rules weight** rather than
+being a tidiness convention. Worth noting because this ticket wrote the line the other way round on
+purpose.
+
+**Also retired here:** this ticket's *"a Stuff room has nothing to defeat"*, and the phrase it already
+flagged as misleading, *"the deck's one always-safe decline."* A Stuff room has a challenge, is
+**Cleared whether or not you meet it**, carries **no punishment and no Flee line**, and can never go
+to Fled.
+
+Full ruling, and the three costs it leaves unruled: [ticket 22](22-floor-deck-composition.md).

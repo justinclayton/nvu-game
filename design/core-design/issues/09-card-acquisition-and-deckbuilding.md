@@ -359,3 +359,28 @@ that finding it is no longer free — so the disappointment is **self-inflicted 
 which is the distinction the ruling turns on.
 
 Full ruling and its four open consequences: [ticket 22](22-floor-deck-composition.md).
+
+## Amended by ticket 22, 2026-08-25 — Good Stuff moves out of the floor deck, and the routing choice is deleted
+
+`[you, ticket 22]` **Good Stuff now sits in a pool at the side of the table, like Bad Stuff.** A Stuff
+room is its own card in the floor deck; meeting its challenge draws Good Stuff from that pool.
+
+Two things this ticket ruled are withdrawn.
+
+**Good Stuff no longer "lives in the floor deck."** Both kinds of Stuff now live in side pools, and
+what separates them is only how they reach you: **Good Stuff is earned from a room's challenge, Bad
+Stuff is dealt by a room's punishment.** That is a cleaner line than *where the card lives* and it
+keeps this ticket's actual intent intact — Good Stuff is still the thing you go looking for, Bad Stuff
+is still the thing that happens to you.
+
+**Choosing whose hand the item lands in is gone.** `[you]` This ticket let the team route a cleared
+item to whichever character its stats suit. Ticket 22's rooms pay each character separately — *"Power
+1: Red takes 1 Good Stuff. Scramble 1: Gray takes 1 Good Stuff"* — so there is nothing to route. It
+was **never a real decision**: either one player has an opinion and says so, or the table alternates
+to spread the stamina drain evenly. Both are solved loops, and the first is quarterbacking.
+
+**Good Stuff is now drawn blind** from the pool rather than revealed on the flip. That is new, it
+makes the reward swingier, and ticket 22 logged it as unruled.
+
+**One thing to hand on:** [ticket 13](13-red-and-gray-asymmetry.md) had this ticket's routing rule
+written down as one of its cheap asymmetry levers. It loses that lever. Noted there.

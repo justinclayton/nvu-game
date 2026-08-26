@@ -232,3 +232,36 @@ produces `Scramble`, so a gate naming one stat taxes the other character for a t
 help meet — which is the compounding factor behind the cold review's floor-1 death.
 
 Ticket 12 stays open regardless; the set as a whole is still unratified.
+
+## Handed down by ticket 22, 2026-08-25 — Stuff rooms are cards now, and the pool table changes
+
+`[you, ticket 22]` **A Stuff room is its own card** with its own flavour, printing a split challenge —
+*"Power 1: Red takes 1 Good Stuff. Scramble 1: Gray takes 1 Good Stuff"* — and optionally a richer
+second tier. **Good Stuff moves to a pool at the side of the table**, drawn blind when a challenge is
+met.
+
+**This set now owes four Stuff room cards it does not have.** It currently prints four Good Stuff
+cards and treats them *as* the rooms, on ticket 11's since-reversed reasoning. The four Good Stuff
+cards survive unchanged as pool contents; four room cards have to be written alongside them.
+
+**Two of the three blockers noted in the previous hand-down are cleared.** Where the threshold prints
+is settled — on the room card. Whether a failed Stuff room leaves the deck is settled — it is Cleared
+either way. What remains is **how low the threshold is**, still a
+[ticket 10](10-sim-the-resource-economy.md) number, now with a second tier to price as well. A
+placeholder is fine for cutting cards.
+
+**This ticket's finding 1 is dissolved rather than answered.** It reported that the Stuff room's type
+line had to be one printed string while ticket 11 named it two. There are two cards now, so the room
+reads `Stuff` and the item reads `Good Stuff`, and nothing does double duty.
+
+**The pool table needs redoing, and one row roughly doubles.** The current table has a single combined
+row, *Stuff rooms / Good Stuff — 16*. That becomes two rows on two different rules:
+
+- **Stuff rooms** — a room pool, sized by ticket 22's room policy against the largest single-floor
+  draw, as the Enemy and Hazard rows already are.
+- **Good Stuff** — sized by how much is handed out per floor, which ticket 22 just **roughly doubled**:
+  nine rooms paying both characters is 18 pieces on floor 1 where it used to be 9. Ticket 22 flagged
+  that the 9 → 0 Stuff curve probably needs recalibrating downward as a result, which would pull this
+  number back. Do not size it until that lands.
+
+This does not touch the reward-pool problem, which is still the one number this ticket cannot make fit.

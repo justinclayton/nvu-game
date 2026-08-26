@@ -382,3 +382,77 @@ Four consequences, none of them ruled, in the order they have to be settled.
   now free. A gate gives a reason to unjam but does not close the hole — it was opened by the `Down`
   ruling, not by dull Stuff rooms. It belongs to [ticket 14](14-down-and-revive.md).
 - **The reshuffle lethality.** A fled Enemy on floor 1 cannot return for nine more turns. Ticket 10.
+
+### Ruled 2026-08-25 — the Stuff room becomes a real room, and pays both characters
+
+`[you]` **A Stuff room is its own card again, with its own flavour, and Good Stuff moves to a pool at
+the side of the table like Bad Stuff.** The room prints a challenge; meeting it draws Good Stuff from
+that pool. The room and the item are two different objects.
+
+`[proposed by agent → you approved]` **The threshold is split per character**, not shared:
+
+```
+Sorting Room                    Stuff
+Power 1:     Red takes 1 Good Stuff.
+Scramble 1:  Gray takes 1 Good Stuff.
+```
+
+Rooms may also print a **second, richer tier** — *"Power or Scramble 3: that character takes 2 Good
+Stuff"* — so a Stuff room can be worth leaning into.
+
+**Why split rather than shared.** The alternative wording, *"Power 1 or Scramble 1: each character
+takes 1 Good Stuff"*, was put and **declined**: one player pays and both get paid, so the table is
+back to deciding who spends. That is the quarterbacking conversation in a new outfit. Under the split
+form each character decides alone whether their own stamina is worth their own item, and nobody
+else's outcome depends on the answer. It is the least quarterbackable structure in the game so far.
+
+**What it kills, deliberately** `[you]`. Choosing whose hand the item lands in was never a real
+decision — either one player has an opinion and says so, or the table alternates to even out the
+stamina drain. Both are solved loops. Removing the choice loses nothing and removes the pressure.
+
+**What it fixes that the threshold alone did not.** The original complaint was that most rooms are
+"take the thing", which is dull, and floor 1 is mostly those rooms. A threshold made the turn cost
+honest but left the room featureless. Giving the room its own card gives it a name, a flavour, and a
+challenge **that is not tied to what you get** — the pool is drawn blind — so rooms can vary and the
+gate stops telegraphing the prize.
+
+#### Two of this ticket's open consequences are now answered
+
+- **Where the threshold prints** — on the room card. Consequence 1 is closed. It is the two-card
+  answer, so the pool counts change; see below.
+- **Whether a failed Stuff room leaves the deck** — yes. Consequence 3 is closed, and it closes
+  itself: the room and the item are different objects, so the room is **Cleared either way** and can
+  never go to Fled. The clock this ticket wanted still runs.
+
+Consequences 2 and 4 change shape rather than closing. See the new open list below.
+
+#### What this costs, and none of it is ruled
+
+1. **Stuff volume roughly doubles.** `[finding]` Nine rooms paying both characters is **18 pieces on
+   floor 1** where the old design paid 9. Stuff scarcity is this ticket's escalation dial, so the
+   9 → 0 curve has to be recalibrated — probably **fewer Stuff rooms**, since each is now worth about
+   twice as much. A [ticket 10](10-sim-the-resource-economy.md) number, but a large one: it moves the
+   primary escalation mechanism, not a detail.
+2. **It collides with the hand cap, and the collision is interesting rather than obviously bad.**
+   `[finding]` Eighteen pieces into two five-card hands means both characters sit **permanently over
+   the cap**, so under the same-day amendment to [ticket 04](04-deck-as-energy-and-hp-model.md) every
+   minimum draw is Exhausted instead of drawn. Floor 1 would be played almost entirely off scavenged
+   gear, with your own deck switched off. That may be exactly the intended feeling. But it switches
+   off the **modifiers** — the permanent cards the whole deckbuilding inversion is about — on the
+   floor where you hold the most Stuff, which is the wrong way round. Worth watching at
+   [ticket 20](20-encounter-tabletop-prototype.md)'s table before tuning it.
+3. **Two pools where there was one.** A Stuff **room** pool sized by this ticket's room policy, plus a
+   Good Stuff pool sized by how much is handed out per floor — which item 1 just doubled. Exact counts
+   are [ticket 12](12-exemplar-card-set.md)'s, as this ticket ruled for the other room pools.
+
+#### Still open after this
+
+- **Which stat, revisited.** `[you]` The earlier ruling — the gate accepts **either** stat — survives
+  in substance, because a character can meet a Power line with Power Stuff they are holding regardless
+  of which stat their own deck leans toward. What the split form adds is *whose* stats are counted,
+  not which. But the exact wording of a line like `Power 1: Red takes 1` needs settling: it must mean
+  **the Power on Red's own side of the play zone**, or the free-rider returns. Marked precise by the
+  agent, not yet confirmed.
+- **How low is low**, still a ticket 10 number, now with a second tier to price as well.
+- **Blind draw from the Good Stuff pool** is new. It removes the old flip's known prize and makes the
+  reward swingier. Unremarked on so far and not ruled.

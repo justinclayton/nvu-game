@@ -76,3 +76,31 @@ Still this ticket's to answer, unchanged: what the difference *is*, and whether 
 the card pools — different starting deck contents, different stat leanings, or different roles
 entirely. Ticket 22's handed-down note that **stats may live on floor rooms rather than on player
 cards** is still live and bears directly on this.
+
+## Handed down 2026-08-25 — one input gained, one lever lost
+
+**The input.** `[you]` **Each character leans toward one stat without being locked to it.** Red leans
+`Power`, Gray leans `Scramble`, but each can supply the other — especially since either can be holding
+Stuff that provides it.
+
+This softens what this ticket inherited from ticket 21. That inheritance read *"a character whose deck
+leans Power is genuinely bad at hazard rooms and vice versa"*, offered as asymmetry with real teeth.
+The teeth stay, but they are **a matter of what is in each starting deck, not a wall in the rules**.
+Ticket 21's keyword rule is untouched — a card still only counts toward the stat it carries — so this
+costs nothing and needs no new machinery. It is a statement about deck composition, which is this
+ticket's to make.
+
+It matters more than it looks, because [ticket 11](11-card-anatomy.md) made Stuff the stat base. A
+character locked out of a stat entirely would be locked out by their **scavenged gear** as much as by
+their deck, which is not a difference anyone chose.
+
+**The lever lost.** This ticket had ticket 09's routing rule written down as a cheap asymmetry tool —
+*"the team chooses whose hand a cleared item lands in, so an item can be routed to whichever character
+its stats suit."* [Ticket 22](22-floor-deck-composition.md) deleted that choice: Stuff rooms now pay
+each character separately, so there is nothing to route. Recorded as an amendment on
+[ticket 09](09-card-acquisition-and-deckbuilding.md).
+
+**What replaces it is arguably better for this ticket.** A Stuff room's split challenge — *"Power 1:
+Red takes 1. Scramble 1: Gray takes 1"* — makes the Red/Gray difference **visible on a card in the
+floor deck**, not just in two decklists. Whatever this ticket decides the difference is, the room
+cards will be printing it every floor.

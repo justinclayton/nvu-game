@@ -229,10 +229,12 @@ head, reacting to what's in front of you, with little time for deep strategy.*
   no memory — the reshuffle carries the chip-it-down feel instead of a damage track. Failure is
   **printed per room**, normally *"1 character Exhausts X from deck"* with the **team choosing who
   absorbs the whole amount**; **declining is failing without trying**, and you can bail mid-draw.
-  **Stuff rooms are the only reward**, pay into a chosen character's hand with `Hold`, and carry **no
-  punishment** — ~~the deck's one always-safe decline~~ *(superseded 2026-08-25 [you, ticket 22]: a
-  Stuff room now prints a threshold below what Hazard and Enemy rooms ask — pay stats or leave
-  empty-handed. Still no punishment; the loss is only the Stuff you did not take.)* **An item never enters the deck**, ruled
+  **Stuff rooms are the only reward**, ~~pay into a chosen character's hand with `Hold`~~, and carry
+  **no punishment** — ~~the deck's one always-safe decline~~ *(superseded 2026-08-25 [you, ticket 22]:
+  a Stuff room is its own card printing a **split challenge** below what Hazard and Enemy rooms ask —
+  each character pays their own stats for their own item, drawn blind from a Good Stuff pool at the
+  side of the table. Nobody chooses whose hand it lands in any more. Still no punishment; the loss is
+  only the Stuff you did not take.)* **An item never enters the deck**, ruled
   deliberately: the deck is stamina, so that would be the game's only heal and exactly the recursion
   that broke four games in tickets 01 and 16. **Rooms have no behaviour beyond the flip.** New
   vocabulary: **Cleared** (out of the floor deck for good; all rooms Cleared ends the encounter),
@@ -285,7 +287,9 @@ head, reacting to what's in front of you, with little time for deep strategy.*
   heals you. So **`Item` is renamed `Stuff`** — tools, junk, and slime under one plain word — and
   **Stuff splits by where it came from**: **Good Stuff** lives in the floor deck and is what an Item
   room hands you, so ~~a Stuff room is never a disappointment~~ *(superseded 2026-08-25 [you, ticket
-  22]: a Stuff room can now be failed, so the disappointment is self-inflicted rather than dealt)*;
+  22]: a Stuff room can now be failed, so the disappointment is self-inflicted rather than dealt — and
+  Good Stuff has moved out of the floor deck into a side pool of its own, so what separates the two
+  kinds is now how they reach you: Good Stuff is earned, Bad Stuff is dealt)*;
   **Bad Stuff** lives in a pool *outside*
   the floor deck and arrives only as a room's printed punishment. Bad Stuff behaves like any other
   Stuff — `Hold`, playable, ordinary fuel — and differs only in contributing **no stats**, so it is an
@@ -349,10 +353,10 @@ head, reacting to what's in front of you, with little time for deep strategy.*
   ticket 09's naming debt against 09's own guess that the word should involve neither `Stuff` nor
   `Item` — a knowing override. **This ticket's self-declared hardest problem dissolved**: with ticket
   22 making the Stuff guaranteed on the flip, a Stuff room has nothing to defeat, so it simply *is*
-  the Stuff card. *(partly superseded 2026-08-25 [you, ticket 22]: the Stuff is no longer guaranteed
-  on the flip, so there is something to defeat after all. Whether the one-card form survives is
-  ticket 22's open consequence 1 — the agent's recommendation is that it does, with the threshold
-  line read only in the room zone.)* **Persistent effects are not a type** — just `Hold` plus a static line, which is
+  the Stuff card. *(superseded 2026-08-25 [you, ticket 22]: the Stuff is no longer guaranteed on the
+  flip, so there is something to defeat after all — and the one-card form did **not** survive. A Stuff
+  room is its own card with its own flavour, and Good Stuff sits in a side pool. Two cards, two type
+  lines, no double duty.)* **Persistent effects are not a type** — just `Hold` plus a static line, which is
   also all the machinery ticket 09's carry-Stuff-past-ascending card would need. **A card's position
   never means anything**, only which zone it is in: no rotating, no flipping, no overlapping. Reading
   budget is **~3 seconds for a room, ~1 second for a player card in a fan**. **Two things ruled out

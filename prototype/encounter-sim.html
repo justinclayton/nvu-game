@@ -444,13 +444,12 @@ var HAZARD_ROOMS = [
 ];
 
 /* Four Stuff rooms — new, per ticket 22's 2026-08-25 hand-down.
-   `swap` flips which character's line asks for which stat. `rich` marks the
-   rooms that print a second tier. */
+   `rich` marks the rooms that print a second tier. */
 var STUFF_ROOMS = [
-  { name:"Sorting Room",    kind:"Stuff", swap:false, rich:false },
-  { name:"Ration Locker",   kind:"Stuff", swap:false, rich:true },
-  { name:"Tool Cage",       kind:"Stuff", swap:true,  rich:false },
-  { name:"Spill of Cargo",  kind:"Stuff", swap:true,  rich:true }
+  { name:"Sorting Room",    kind:"Stuff", rich:false },
+  { name:"Ration Locker",   kind:"Stuff", rich:true },
+  { name:"Tool Cage",       kind:"Stuff", rich:false },
+  { name:"Spill of Cargo",  kind:"Stuff", rich:true }
 ];
 
 /* ================================================================ settings */
@@ -563,18 +562,34 @@ function buildFloorDeck(floor) {
 }
 
 /* A Stuff room's live challenge, built from the unruled settings. */
+/* A Stuff room prints one Power line and one Scramble line. Which character
+   fills which is not printed: either may take either, one line each. */
 function stuffLines(def) {
-  var redStat  = def.swap ? "scramble" : "power";
-  var grayStat = def.swap ? "power" : "scramble";
   var lines = [
-    { who:"Red",  stat:redStat,  need:CFG.stuffT1, pay:CFG.stuffP1, tier:1 },
-    { who:"Gray", stat:grayStat, need:CFG.stuffT1, pay:CFG.stuffP1, tier:1 }
+    { stat:"power",    need:CFG.stuffT1, pay:CFG.stuffP1, tier:1 },
+    { stat:"scramble", need:CFG.stuffT1, pay:CFG.stuffP1, tier:1 }
   ];
   if (CFG.stuffTier2 && def.rich) {
-    lines.push({ who:"Red",  stat:redStat,  need:CFG.stuffT2, pay:CFG.stuffP2, tier:2 });
-    lines.push({ who:"Gray", stat:grayStat, need:CFG.stuffT2, pay:CFG.stuffP2, tier:2 });
+    lines.push({ stat:"power",    need:CFG.stuffT2, pay:CFG.stuffP2, tier:2 });
+    lines.push({ stat:"scramble", need:CFG.stuffT2, pay:CFG.stuffP2, tier:2 });
   }
   return lines;
+}
+/* What one character's side is worth on one of the two lines: the best tier
+   of that stat they meet. */
+function stuffPay(side, stat, def) {
+  var L = stuffLines(def), best = 0, i;
+  for (i = 0; i < L.length; i++)
+    if (L[i].stat === stat && side[stat] >= L[i].need && L[i].pay > best) best = L[i].pay;
+  return best;
+}
+/* One character to each line, whichever way round pays the pair more. */
+function stuffAssign(def) {
+  var r = sideStats("Red"), g = sideStats("Gray");
+  var straight = stuffPay(r, "power", def)    + stuffPay(g, "scramble", def);
+  var crossed  = stuffPay(r, "scramble", def) + stuffPay(g, "power", def);
+  return crossed > straight ? { Red:"scramble", Gray:"power" }
+                            : { Red:"power",    Gray:"scramble" };
 }
 function roomThreshold(def) {
   if (def.kind === "Enemy") return { stat:"power", n:def.power };
@@ -815,20 +830,15 @@ function awardGoodStuff(who, n) {
     log(who + " takes " + s.def.name + " — to hand with Hold, ignoring the cap.", "g");
   }
 }
-/* Settle a Stuff room: each character's own side, own line, own item. */
+/* Settle a Stuff room: each character's own side, own item, but the two lines
+   are not addressed to anyone — take whichever of them your side can fill. */
 function settleStuffRoom() {
   if (G.stuffAwarded || !G.room || G.room.def.kind !== "Stuff") return;
-  var lines = stuffLines(G.room.def), best = { Red:null, Gray:null }, i;
-  for (i = 0; i < lines.length; i++) {
-    var L = lines[i], side = sideStats(L.who);
-    if (side[L.stat] >= L.need) {
-      if (!best[L.who] || L.pay > best[L.who].pay) best[L.who] = L;
-    }
-  }
-  var names = ["Red","Gray"];
+  var def = G.room.def, assign = stuffAssign(def), names = ["Red","Gray"], i;
   for (i = 0; i < 2; i++) {
     var who = names[i];
-    if (best[who]) awardGoodStuff(who, best[who].pay);
+    var pay = stuffPay(sideStats(who), assign[who], def);
+    if (pay) awardGoodStuff(who, pay);
     else if (!G.chars[who].down) {
       G.stats.stuffMissed++;
       log(who + " met nothing and leaves empty-handed.", "b");
@@ -1167,22 +1177,19 @@ function autoTurn(opts) {
      its deck chasing a number it could never reach. */
   var stuffRoom = d.kind === "Stuff";
   var t = stuffRoom ? null : roomThreshold(d);
+  /* Either character may take either line, so each one draws toward the stat
+     its own deck is built for and the settle picks the better pairing. */
   function drawStat(c) {
     if (!stuffRoom) return t.stat;
-    var L = stuffLines(d).filter(function (x) { return x.who === c.name; })[0] || {};
-    return L.stat || "power";
+    return c.name === "Red" ? "power" : "scramble";
   }
-  function tier1Need(c) {
-    var L = stuffLines(d).filter(function (x) { return x.who === c.name; })[0];
-    return L ? L.need : CFG.stuffT1;
-  }
+  function tier1Need(c) { return CFG.stuffT1; }
   /* Match the target to what the play stage will chase: on a Stuff room that is
      tier 2 when chasing, tier 1 otherwise. */
   function drawNeed(c) {
     if (!stuffRoom) return t.n;
-    var L = stuffLines(d).filter(function (x) { return x.who === c.name; });
-    var target = (opts.chaseStuff && L[1]) ? L[1] : L[0];
-    return target ? target.need : CFG.stuffT1;
+    var rich = CFG.stuffTier2 && d.rich;
+    return (opts.chaseStuff && rich) ? CFG.stuffT2 : CFG.stuffT1;
   }
   var live = [], got = {}, miss = {};
   for (i = 0; i < 2; i++) {
@@ -1242,11 +1249,10 @@ function autoTurn(opts) {
       for (i = 0; i < 2; i++) {
         c = G.chars[names[i]];
         if (c.down) continue;
-        var L = stuffLines(d).filter(function (x) { return x.who === c.name; });
-        var lo = L[0], hi = L[1];
-        var target = hi ? hi : lo;
-        var b = bestPlays(c, target.stat, target.need, hoard);
-        if (!b.meets && lo !== target) b = bestPlays(c, lo.stat, lo.need, hoard);
+        var stat = c.name === "Red" ? "power" : "scramble";
+        var rich = CFG.stuffTier2 && d.rich;
+        var b = bestPlays(c, stat, rich ? CFG.stuffT2 : CFG.stuffT1, hoard);
+        if (!b.meets && rich) b = bestPlays(c, stat, CFG.stuffT1, hoard);
         if (b.meets) playSubset(c, b.play, hoard);
       }
     }
@@ -1534,7 +1540,7 @@ function challengeText(d) {
   if (d.kind === "Hazard") return d.stat === "power" ? "Power " + d.t1 + ": Clear" : "Scramble " + d.t1 + ": Clear";
   var L = stuffLines(d);
   return L.map(function (x) {
-    return capitalize(x.stat) + " " + x.need + ": " + x.who + " takes " + x.pay;
+    return capitalize(x.stat) + " " + x.need + ": a character takes " + x.pay;
   }).join(" · ");
 }
 function capitalize(s) { return s.charAt(0).toUpperCase() + s.slice(1); }
@@ -1562,11 +1568,16 @@ function roomHTML(d) {
   var p = pool(), lines = "", i;
   if (d.kind === "Stuff") {
     var L = stuffLines(d);
+    /* Who is on which line is worked out from what is on the table, so the
+       panel names the character the line is currently going to. */
+    var assign = G ? stuffAssign(d) : { Red:"power", Gray:"scramble" };
+    var onLine = {}; onLine[assign.Red] = "Red"; onLine[assign.Gray] = "Gray";
     for (i = 0; i < L.length; i++) {
-      var side = G ? sideStats(L[i].who) : { power:0, scramble:0 };
+      var who = onLine[L[i].stat];
+      var side = G ? sideStats(who) : { power:0, scramble:0 };
       var met = side[L[i].stat] >= L[i].need;
       lines += '<div class="line"><span class="pip ' + (met ? "met" : L[i].stat === "power" ? "pw" : "sc") + '">' +
-        capitalize(L[i].stat) + " " + L[i].need + "</span> " + L[i].who + " takes " + L[i].pay +
+        capitalize(L[i].stat) + " " + L[i].need + "</span> " + who + " takes " + L[i].pay +
         " Good Stuff" + (L[i].tier === 2 ? " <span class='muted'>(second tier)</span>" : "") + "</div>";
     }
     lines += '<div class="line muted">Cleared either way. Never Fled.</div>';

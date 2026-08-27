@@ -219,3 +219,11 @@ lingers and costs you to be rid of — entirely within a single floor. So this t
 absolute: **nothing bad crosses a floor boundary.**
 
 Everything else this ticket ruled stands.
+
+## Amended by ticket 24, 2026-08-27 — one thing crosses a floor boundary
+
+`[you]` **"Nothing bad crosses a floor boundary" is narrowed, not withdrawn.** Ascending now shuffles
+**Stuff still in a character's hand** into their deck, and it does not sort by kind, so held **Bad
+Stuff** crosses. `Curse` stays retired and ascending stays the full heal: what crosses is a blank card
+in a deck of stamina — a card of health that does nothing — rather than a punishment that follows you
+up the tower. See [ticket 24](24-the-scrap-mechanic.md).

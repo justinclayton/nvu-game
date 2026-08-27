@@ -2,7 +2,8 @@
 
 One page, enough to run a floor with the [exemplar cards](12-exemplar-card-set.md) on a table.
 Assembled from tickets 03, 04, 05, 07, 09, 17, 21 and 22, plus the **Down and last stand ruling of
-2026-08-25** `[you]`, which supersedes what 04, 07 and 17 said about reaching zero.
+2026-08-25** `[you]`, which supersedes what 04, 07 and 17 said about reaching zero, and the **Scrap
+mechanic of 2026-08-27** `[you, ticket 24]`, which rewrites Ascending.
 
 ## What you have
 
@@ -18,7 +19,13 @@ discard pile, and you shuffle mid-floor only when a card or the last stand rule 
 
 **On the table**: the floor deck (draw pile, **Fled** pile, **Cleared** heap), the **active room
 zone**, and a **play zone** split into Red's side and Gray's side. Off to the side: the two reward
-pools and the Bad Stuff pool.
+pools, the Bad Stuff pool, and **the Scrapyard** — one shared heap, face up, for cards removed from
+the run for good. Nothing ever comes out of it.
+
+**Exhausted is for the floor; Scrapped is for the run.** A card that Exhausts comes back when you
+ascend. A card that is **Scrapped** goes to the Scrapyard and is gone until the run ends. Some cards
+print *"Scrap a card from your hand to [X]"* as their cost — that is what makes a hand full of junk
+worth having.
 
 ## Setting up a floor
 
@@ -117,10 +124,18 @@ characters are Down.**
 
 ## Ascending
 
-- **Pull all Stuff out of both exhaust piles and set it aside.** Stuff does not carry to the next
-  floor unless a card says so.
+- **Pull all Stuff out of both exhaust piles** and return it to its pool. Stuff you *played* does not
+  carry to the next floor.
 - **Shuffle each exhaust pile back into its deck.** Both characters are now at full health, including
-  one who was Down. Ascending is a full heal and a clean slate; nothing bad crosses a floor boundary.
+  one who was Down. Ascending is a full heal.
+- **Shuffle whatever Stuff is still in hand into that character's deck.** It is one more card of
+  stamina next floor, and it is still Stuff: play it and it exhausts, and the next ascension pulls it
+  out. Held **Bad Stuff** carries too — as a blank card in a deck that is measured by height, which is
+  the one bad thing that now crosses a floor boundary.
+- **The Scrap tax, if you want it.** A character may keep **one piece of Stuff permanently** — it stops
+  being pulled out at every ascension and stays in the deck for the rest of the run. **The price is one
+  card of their starter deck, Scrapped.** This is the only way to make your deck smaller, and a smaller
+  deck is less health.
 - **Each character is offered 3 cards from their own reward pool and takes one, or declines.** A taken
   card is shuffled into the deck. **A declined card goes to the bottom of its pool.** Declining is a
   real play: a card you skip is consistency you keep.
@@ -143,8 +158,8 @@ fresh every floor and gone when you ascend — and there is less of it on every 
 - **Starting deck size and composition.** Ticket 09 left the number to ticket 10 and it is genuinely
   not decided. For the prototype, use **12 cards each** — Red: 7 Shove, 5 Charge In; Gray: 7 Duck
   Under, 5 Pick The Lock — and treat that as scaffolding, not a decision.
-- **What happens to cards left in hand when the floor ends.** Ascending collects the exhaust piles and
-  never mentions hands. Affects `Both Barrels`, `Pack Rat`, and any held Stuff.
+- **What happens to non-Stuff cards left in hand when the floor ends.** Ticket 24 answered this for
+  Stuff — it shuffles into the deck — and said nothing about a held `Both Barrels` or `Pack Rat`.
 - **Which character's reward pool a room's reveal line draws from**, and whose deck it goes on top of.
   The printed line says "your deck" and the game has two.
 - **Whether a skipped reveal goes to the bottom of its pool**, as a declined ascension reward does.

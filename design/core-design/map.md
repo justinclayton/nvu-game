@@ -120,7 +120,8 @@ head, reacting to what's in front of you, with little time for deep strategy.*
 - [Design the deck-as-energy-and-HP model](issues/04-deck-as-energy-and-hp-model.md) — `[you]` The
   hypothesis **survives in its pure form**. Your deck **is** your **stamina**; there is no energy
   number and the word "energy" is retired. Three zones, no discard pile: **deck**, **hand**, face-up
-  **exhaust pile**. At the start of your turn you decide how many cards to **draw** from deck to
+  **exhaust pile** *(amended 2026-08-27 [you, ticket 24]: three zones and two **heaps** — the floor's
+  Cleared pile and the run's **Scrapyard**)*. At the start of your turn you decide how many cards to **draw** from deck to
   hand — the core decision, since every card drawn is stamina spent whether used or not. Playing
   an X-cost card **exhausts X cards from your hand**; damage **exhausts X cards from your deck**
   (chosen costs from hand, unchosen punishment from deck). **The whole hand exhausts at end of turn**,
@@ -234,9 +235,12 @@ head, reacting to what's in front of you, with little time for deep strategy.*
   a Stuff room is its own card printing a **split challenge** below what Hazard and Enemy rooms ask —
   each character pays their own stats for their own item, drawn blind from a Good Stuff pool at the
   side of the table. Nobody chooses whose hand it lands in any more. Still no punishment; the loss is
-  only the Stuff you did not take.)* **An item never enters the deck**, ruled
+  only the Stuff you did not take.)* ~~**An item never enters the deck**, ruled
   deliberately: the deck is stamina, so that would be the game's only heal and exactly the recursion
-  that broke four games in tickets 01 and 16. **Rooms have no behaviour beyond the flip.** New
+  that broke four games in tickets 01 and 16.~~ *(superseded 2026-08-27 [you, ticket 24]: Stuff still
+  in hand when a floor is cleared is shuffled into the deck, and the Scrap tax can keep a piece there
+  permanently. The recursion objection is not answered, it is accepted — judged per mechanic against a
+  finite supply, on the footing ticket 09 gave the mid-floor reward.)* **Rooms have no behaviour beyond the flip.** New
   vocabulary: **Cleared** (out of the floor deck for good; all rooms Cleared ends the encounter),
   **Fled** (the discard that shuffles back), plus two renames of ticket 04's keywords — **`Convert` →
   `Draw`** and **`Retain` → `Hold`**. Settled here but owned elsewhere: **the turn's five phases**
@@ -275,9 +279,12 @@ head, reacting to what's in front of you, with little time for deep strategy.*
   it, onto the **top of the deck**, with which character reveals **printed on the hazard card**. That
   mid-floor card **is +1 stamina immediately**, which is the first mechanic judged under ticket 04's
   *no guard rail, balance per-mechanic* ruling; it is **accepted**, because the source is finite and
-  every use permanently worsens the deck it heals. **No voluntary thinning**, deliberately: declining
+  every use permanently worsens the deck it heals. ~~**No voluntary thinning**, deliberately: declining
   already thins for free, a trash pile is a new zone, and under deck-as-stamina removal is
-  *self-damage that makes you better* — the exact Undaunted failure ticket 16 found in the wild.
+  *self-damage that makes you better* — the exact Undaunted failure ticket 16 found in the wild.~~
+  *(superseded 2026-08-27 [you, ticket 24]: the **Scrap tax** is voluntary thinning — Scrap a starter
+  card to keep a piece of Stuff permanently. The new-zone objection is answered by the Scrapyard being
+  a heap; the other two stand and are accepted as the price.)*
   Starting decks are **per character and allowed to differ**; **12–15 cards is provisional and owned
   by ticket 10**, and there is **no ceiling**. **Deck growth is left uncapped on purpose** — the
   inversion is supposed to govern it, which is a claim nothing has tested, so ticket 10 is **charged
@@ -295,7 +302,9 @@ head, reacting to what's in front of you, with little time for deep strategy.*
   Stuff — `Hold`, playable, ordinary fuel — and differs only in contributing **no stats**, so it is an
   effective cut to your hand size that you must pay to undo. **There is no keyword for it**; it is a
   design concept, and per-card text does the rest. **`Curse` is retired** and its naming debt
-  discharged by deletion: nothing bad crosses a floor boundary. **Amends tickets 21 and 22** with the
+  discharged by deletion: ~~nothing bad crosses a floor boundary~~ *(narrowed 2026-08-27 [you, ticket
+  24]: held **Bad Stuff** now crosses, since ascending shuffles held Stuff into the deck without
+  sorting by kind — but it crosses as a blank card in a deck of stamina, not as a curse)*. **Amends tickets 21 and 22** with the
   rename and the two-pool split, and hands ticket 07 a recommendation of **max hand size 5** — which
   07 owns, because a rule with that reach should not be set as a side-effect of designing junk.
 
@@ -322,8 +331,12 @@ head, reacting to what's in front of you, with little time for deep strategy.*
   trip nets −2 permanently and the exploit becomes a loop converging on death. `[you]` **Ticket 21's
   "Stuff never enters a deck" was overstated** — a deck is not Stuff's entry *route*, but a last
   stand shuffles played Stuff back like anything else; logged as a known heal, not reopened.
+  *(overtaken 2026-08-27 [you, ticket 24]: a deck is now Stuff's entry route outright — held Stuff
+  shuffles in on ascending, and the Scrap tax can keep a piece there for the run. The last stand is no
+  longer the exception it was.)*
   **Upkeep counted honestly:** zero counters, zero trackers, zero mid-floor shuffling — but **14
-  table locations**, accepted `[you]` and handed to the footprint fog as its first real number.
+  table locations**, accepted `[you]` and handed to the footprint fog as its first real number
+  *(**15** from 2026-08-27 [you, ticket 24] — the **Scrapyard** is the fifteenth)*.
 
 - [Define card anatomy](issues/11-card-anatomy.md) — `[you]` **The ruling that reorganised the run:
   your permanent deck is modifiers, and your stat base is scavenged fresh every floor.** Player cards
@@ -367,6 +380,28 @@ head, reacting to what's in front of you, with little time for deep strategy.*
   legible for **culling**, and there is still no culling. It pays off at acquisition instead. **Left deliberately open:** whether Enemy rooms may
   also carry a reward tier — the anatomy supports it free, but it is composition and belongs to
   ticket 22.
+
+- [The Scrap mechanic](issues/24-the-scrap-mechanic.md) — `[you]` **Handed to the map as finished
+  canon on 2026-08-27, not grilled into being.** A card that leaves play now goes to one of two
+  places. The **exhaust pile** is temporary and comes back on ascending, unchanged. The **Scrapyard**
+  is permanent: **Scrap** means *move this card there*, and it is gone for the rest of the run. It is
+  one shared pile, and it is a **heap, not a zone** — face up, unordered, never counted, no rule ever
+  asks it a question — which is how it sits inside the minimise-play-zones rule. Two uses.
+  **In play**, a card can print *"Scrap a card from your hand to [X]"* for an outsized one-off
+  payoff, which is finally **what Bad Stuff is for**: junk that contributes no stats becomes fuel, so
+  clearing a clogged hand and hitting hard are the same action. **On ascending**, the phase gains a
+  middle step — Stuff in exhaust piles goes back to its pool as before, but **Stuff still in hand is
+  shuffled into that character's deck** as a card of stamina for the next floor, and a character may
+  pay the **Scrap tax**: keep one piece of Stuff in the deck permanently by **Scrapping one card of
+  their starter deck**. That is the run's deckbuilding engine — decks get leaner, stronger, and
+  smaller, and smaller is less health. **Reverses two of ticket 09's deliberate rulings** — *no
+  voluntary thinning* and *a deck is not Stuff's entry route* — and narrows *nothing bad crosses a
+  floor boundary*, since held Bad Stuff now crosses. The recursion objection behind them is **not
+  answered but accepted**, on the per-mechanic footing ticket 09 gave the mid-floor reward.
+  **Three consequences are flagged and unresolved, all handed to ticket 10**: the heal now runs on two
+  dials, the tax flattens ticket 22's Stuff-count escalation curve, and it is the first mechanic that
+  lets a player grow power while shrinking the deck — escaping the inversion that deck growth was
+  left uncapped on the strength of.
 
 ## Not yet specified
 

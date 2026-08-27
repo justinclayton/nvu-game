@@ -404,3 +404,25 @@ ruled:
 
 **Ticket 12 is now wired as a blocker**, which it should have been all along: every number left here
 depends on what a reward card is actually worth.
+
+## New input from ticket 24, 2026-08-27 — the Scrap mechanic, and three things it breaks
+
+`[you]` The **Scrap mechanic** landed after the simulator was rebuilt, and it changes rules the
+simulator implements. It must be modelled before this ticket can answer anything, and it brings three
+open questions of its own — all three are this ticket's now.
+
+**What the simulator must add:** the **Scrapyard**, a run-long shared heap nothing ever leaves;
+**Scrap** as a printable card cost that removes a card permanently instead of exhausting it; **held
+Stuff shuffled into the deck on ascending** rather than returned to its pool; and the **Scrap tax** —
+one piece of Stuff made permanent per ascension, paid for with one Scrapped starter card.
+
+1. **The heal now runs on two dials.** Held Stuff is +1 stamina per character per floor, and a taxed
+   card is a permanent one. The runs already swept predate both and no longer describe this game.
+2. **The tax cuts against ticket 22's escalation.** The whole escalation curve is Stuff room count
+   falling 9 → 0 across the tower. The tax converts early-floor generosity into permanent late-floor
+   power, which is the flattening that curve was built to prevent. Ticket 11 also ruled **floor 10
+   must actually be winnable at zero Stuff** — with the tax, floor 10 is no longer at zero Stuff.
+3. **It is the first escape from the inversion.** Deck growth was left uncapped on the claim that
+   *+1 card is −1 consistency* governs it. The tax lets a player grow power while shrinking the deck.
+   This ticket was already charged with proving the inversion governs growth; it now has to prove it
+   against a mechanic designed to sidestep it.

@@ -56,10 +56,11 @@ and flavour — the room and the item are two different objects. *(tickets 21, 2
 
 **Stuff** — a card a floor hands you: a tool, a piece of junk, a faceful of slime. It goes to hand
 with **Hold**, it is **playable**, and it is **ordinary fuel** — it can be Exhausted from hand to pay
-another card's cost like anything else. **A deck is not Stuff's entry route** — no reward or purchase
-ever puts Stuff in a deck — but the rule is a default, not an absolute: a **last stand** shuffles
-played Stuff back with everything else. Stuff Exhausts normally, and **ascending pulls all Stuff out
-of the exhaust pile** before restoring it, so no Stuff survives a floor. It is a mass noun: *"I have
+another card's cost like anything else. Stuff Exhausts normally, and **ascending pulls all Stuff out
+of the exhaust pile** before restoring it, so no Stuff survives a floor *by that route*. Two routes do
+put Stuff in a deck: **Stuff still in hand** when the floor is cleared is shuffled in, and the **Scrap
+tax** can keep a piece there permanently. A **last stand** also shuffles played Stuff back with
+everything else. It is a mass noun: *"I have
 three Stuff."* *(tickets 21, 09, 07)*
 
 **Good Stuff** / **Bad Stuff** — where a piece of Stuff came from, and loosely how welcome it is.
@@ -68,7 +69,8 @@ Both now live in **pools at the side of the table**, and what separates them is 
 since Stuff supplies **the bulk of the raw stats**, it is the game's supply line rather than a bonus,
 so paying the threshold is almost always correct. **Bad Stuff** is **dealt**, reaching you only as a
 room's printed punishment; it contributes **no
-stats** toward a challenge, so it clutters your hand until you pay to play it. Both are **printed on
+stats** toward a challenge, so it clutters your hand until you pay to play it — or until you **Scrap**
+it to pay a card's printed Scrap cost, which is the use it was waiting for. Both are **printed on
 the card's type line** — a player must see at a glance which cards in hand are dead weight. Good
 Stuff carries **rarity**; Bad Stuff does not. *(tickets 09, 11)*
 
@@ -128,9 +130,12 @@ declined outright, is Fled. The Fled pile is shuffled back into the floor deck w
 out, so a room you could not handle comes back around — which is how the game says *you were
 outmatched and had to scramble.* *(tickets 18, 21)*
 
-**Ascend** — to leave a floor for the next one. Ascending restores every card in a character's
-exhaust pile to their deck: a floor cleared is a full heal. It also offers a **card reward**.
-*(tickets 04, 05)*
+**Ascend** — to leave a floor for the next one, in three steps. **Exhaust piles come back**: any
+**Stuff** in them returns to its pool, everything else shuffles into the deck, so a floor cleared is a
+full heal. **Held Stuff is kept**: Stuff still in hand when the floor is cleared is shuffled into that
+character's deck, one more card of stamina for the next floor — it is still Stuff, so playing it
+exhausts it and the next ascension returns it to the pool. **The Scrap tax is offered**, and so is a
+**card reward**. *(tickets 04, 05, 24)*
 
 **Card reward** — a card added permanently to a character's deck for the rest of the run. It arrives
 two ways. **On ascending**, each character chooses one of **three** cards drawn from their own
@@ -176,12 +181,32 @@ cannot draw again once the play phase has begun. *(tickets 04, 21)*
 
 **Exhaust** — to move a character's card to their exhaust pile. Takes Slay the Spire's meaning: the
 card is gone for the rest of the floor. Used both for costs the player chose and for damage they
-didn't. A character's cards are exhausted; a **room** is **Cleared**. *(ticket 04)*
+didn't. A character's cards are exhausted; a **room** is **Cleared**. Gone **for the floor**, which is
+the whole of what separates it from **Scrap**. *(tickets 04, 24)*
+
+**Scrap** — to move a card to the **Scrapyard**, where it is gone for the rest of the **run**. Works
+from hand, from the play zone, or from a deck, and a Scrapped card never passes through the exhaust
+pile, so ascending does not bring it back. The fiction is physical: a pipe broken over something's
+head, a device overcharged until it comes apart. Two things Scrap. A card may **print** it as a cost —
+*"Scrap a card from your hand to [X]"* — for an outsized one-off payoff, which is what makes **Bad
+Stuff** useful. And the **Scrap tax** spends a starter card on ascending. *(ticket 24)*
+
+**Scrapyard** — the single shared pile of Scrapped cards, at the side of the table, persisting for the
+whole run. Like the **Cleared** pile it is a **heap, not a zone**: face up, unordered, never counted,
+and no rule ever asks it a question. Nothing ever leaves it. *(ticket 24)*
+
+**Scrap tax** — the price of keeping a piece of **Stuff** for good. On ascending, a character may
+choose one piece of Stuff to make **permanent** — it stops being pulled out at each ascension and
+stays in the deck for the rest of the run — by **Scrapping one card of their own starter deck**. It is
+the game's only voluntary thinning, and its deckbuilding engine: decks get leaner and stronger and
+smaller, and a smaller deck is less stamina. The preserved Stuff is still spent the moment it is
+finally played. *(ticket 24)*
 
 **Exhaust pile** — a character's **face-up** pile of exhausted cards. Face up so the loss is felt as
 it happens and so the player can read what is no longer waiting in their deck. Returns to the deck on
 ascending, **less any Stuff in it, which is pulled out first**. **A character has no discard pile** —
-only the floor deck has one, its **Fled** pile. *(tickets 04, 21, 07)*
+only the floor deck has one, its **Fled** pile — and no personal Scrapyard either; the **Scrapyard** is
+shared. *(tickets 04, 21, 07, 24)*
 
 **Exhaust X cards from your hand** — how a chosen cost is written. A card's **cost** and its **stats**
 are separate, unrelated numbers: to play a card you Exhaust cards from hand equal to its cost, then

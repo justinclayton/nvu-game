@@ -394,3 +394,25 @@ The short of it: the inversion does not punish greed *yet*, but that is because 
 low enough that any hand clears it, not because the inversion is weak. It is expected to bite once
 enemies scale with the floor — now ruled on [ticket 22](22-floor-deck-composition.md) — and greed is
 to be re-tested at that point rather than capped now.
+
+## Amended by ticket 24, 2026-08-27 — voluntary thinning arrives, and Stuff enters the deck
+
+`[you]` **Section 5 is reversed.** The **Scrap tax** is voluntary thinning: on ascending, a character
+may keep one piece of **Stuff** permanently by **Scrapping** one card of their own starter deck. Of
+the three objections above, only the first is answered — the **Scrapyard** is a **heap, not a zone**,
+the same standing the Cleared pile already has, so it costs the *minimise play zones* rule nothing.
+The other two stand exactly as written and are **accepted as the price**: declining still thins for
+free, and removal under deck-as-stamina is still self-damage that makes you better. Ticket 05's *rare
+and special if it exists at all* is honoured by the price rather than by absence — a trade is once per
+floor at most, and it costs a card of health.
+
+**Held Stuff now enters the deck too.** Stuff still in a character's hand when a floor is cleared is
+shuffled into their deck as a card of stamina for the next floor. That is a **heal**, and it is judged
+on the same footing this ticket gave the mid-floor reward: per mechanic, no guard rail, finite supply.
+
+**"Nothing bad crosses a floor boundary" narrows.** Held **Bad Stuff** crosses, since the shuffle-in
+does not sort by kind. `Curse` stays retired: what crosses is a blank card in a deck of stamina, not a
+punishment that follows you.
+
+The three consequences this creates for the economy are recorded in
+[ticket 24](24-the-scrap-mechanic.md) and handed to [ticket 10](10-sim-the-resource-economy.md).

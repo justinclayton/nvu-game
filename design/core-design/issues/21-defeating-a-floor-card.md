@@ -338,3 +338,15 @@ flagged as misleading, *"the deck's one always-safe decline."* A Stuff room has 
 to Fled.
 
 Full ruling, and the three costs it leaves unruled: [ticket 22](22-floor-deck-composition.md).
+
+## Amended by ticket 24, 2026-08-27 — an item may enter the deck after all
+
+`[you]` **"An item never enters the deck" is superseded.** Two routes now put Stuff in a deck:
+**Stuff still in hand** when the floor is cleared is shuffled in, and the **Scrap tax** can keep a
+piece there permanently. The reason this ticket ruled it out — a card entering the deck is a heal, and
+a heal is the recursion that broke four games in tickets 01 and 16 — is **not answered, it is
+accepted**, on the per-mechanic footing ticket 09 gave the mid-floor reward.
+
+**Bad Stuff gains its intended use.** A card may print *"Scrap a card from your hand to [X]"*, so junk
+that contributes no stats becomes fuel for an outsized payoff. Clearing a clogged hand and hitting hard
+are the same action. See [ticket 24](24-the-scrap-mechanic.md).

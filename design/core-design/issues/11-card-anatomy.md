@@ -475,3 +475,12 @@ Good Stuff."* This ticket's format already allows it — a room is a list of `th
 and an outcome may say anything — but no room had used it before. The reading it requires is per
 character rather than table-wide, which is recorded on
 [ticket 21](21-defeating-a-floor-card.md), the stat pool's owner.
+
+## Amended by ticket 24, 2026-08-27 — Scrap is a printable cost
+
+`[you]` The anatomy gains one printable cost: **`Scrap a card from your hand to [X]`**, which moves the
+named card to the **Scrapyard** for the rest of the run rather than to the exhaust pile for the rest of
+the floor. It is a card's cost line, not a keyword on the card that pays.
+
+The *"nothing bad crosses a floor boundary, full stop"* note above narrows: held **Bad Stuff** crosses
+now, as a blank card in the deck. `Curse` stays retired. See [ticket 24](24-the-scrap-mechanic.md).

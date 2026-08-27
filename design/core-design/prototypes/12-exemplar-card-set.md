@@ -6,6 +6,7 @@ that the agent surfaces options and the human rules; this file is the option.
 
 Printable version for cutting: [`prototype/12-exemplar-cards.html`](../../../prototype/12-exemplar-cards.html).
 One-page rules summary: [`12-floor-rules-summary.md`](12-floor-rules-summary.md).
+The rest of the cards, as they accumulate: [`12-card-bank.md`](12-card-bank.md).
 
 **Every number is a placeholder.** Ticket 22 left the Enemy room's `Power` untuned and ticket 09 left
 starting deck size to ticket 10. Costs, stats and thresholds here exist so the cards can be *read*,

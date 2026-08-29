@@ -484,3 +484,23 @@ the floor. It is a card's cost line, not a keyword on the card that pays.
 
 The *"nothing bad crosses a floor boundary, full stop"* note above narrows: held **Bad Stuff** crosses
 now, as a blank card in the deck. `Curse` stays retired. See [ticket 24](24-the-scrap-mechanic.md).
+
+
+## Amended 2026-08-29 — every `Stuff` card carries `Scrap`
+
+`[you]` **`Scrap` belongs on all `Stuff`.** A piece of Stuff can be consumed for a one-off effect
+larger than what it does as an ordinary play. This is the archetype Stuff occupies: scavenged gear is
+temporary by nature, and breaking it open is what it is for.
+
+**And `Scrap` stays off almost all reward cards.** `[you]` It is not ruled out — a character-specific
+`Woah` bomb, overpowered but usable exactly once, is a shape the design wants available. It is simply
+not where thinning normally lives.
+
+**The consequence for the inversion** `[proposed by agent → you approved, 2026-08-29]`: thinning is
+only ever a **swap**, never a plain removal. A player cannot decide to shed a weak card; they can only
+trade one away to keep something scavenged. That keeps ticket 09's *"removal is never a default"*
+intact while giving ticket 24's Scrapyard something to hold.
+
+**Open, and handed on:** whether *all Stuff* includes **Bad Stuff**. Bad Stuff is Stuff by type, but
+ticket 24 casts it as the fuel other cards Scrap, and a self-Scrap line would let a player shed junk
+at will. See [ticket 12](12-exemplar-card-set.md).

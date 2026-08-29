@@ -106,3 +106,21 @@ other Stuff, or stays in the deck permanently, is the difference between those c
 being permanent upgrades.
 
 Unruled.
+
+
+## Raised 2026-08-29 — the tax's name, and whether it is net zero
+
+Two questions from [ticket 12](12-exemplar-card-set.md), neither ruled.
+
+**The name.** The ascend's third step was described as needing "an official name". It already has one
+here — **the Scrap tax** — but that was the agent's coinage while recording the rule, not a chosen
+term. Confirming it or replacing it is open.
+
+**Net −1 or net 0.** The section above calls the tax the game's deck-thinning engine and says decks
+"get leaner and better and smaller". That is only true if the Stuff being kept was already in the deck
+from step 2, so the Scrapped starter is a straight subtraction. If instead the tax *adds* the Stuff
+while removing the starter, deck size is unchanged and the tax buys quality, not leanness.
+
+`[you, ticket 12]` described thinning as happening "only in a swap sense", which points at net 0 — but
+the two readings differ on whether a player can ever escape ticket 04's inversion by shrinking, which
+is the question ticket 09 cared most about.

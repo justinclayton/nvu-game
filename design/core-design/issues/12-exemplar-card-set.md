@@ -349,3 +349,33 @@ the same shape.
 and says nothing about Stuff sitting **in a deck** — which is where these two cards put it. Whether it
 returns to the pool or stays a permanent deck card decides whether they are tempo cards or permanent
 upgrades. That is ticket 24's to answer, not this ticket's.
+
+
+## Ruled 2026-08-29 — where `Scrap` lives
+
+`[you]` **`Scrap` goes on all `Stuff`**, and **stays off almost all reward cards** — not ruled out,
+but reserved for something like a character-specific `Woah` bomb that is overpowered because it can
+only be used once. Recorded as an anatomy amendment on [ticket 11](11-card-anatomy.md).
+
+The effect on this ticket's Scrap gap: the set does not need a new Scrap *reward* card. It needs its
+**Good Stuff reprinted**, because all four exemplar pieces — `Pry Bar`, `Coil of Cable`,
+`Cutting Torch`, `Grav Harness` — currently print no Scrap line at all. The card bank's Good Stuff
+already does this (`Crowbar`, `Stitch-Kit`, `Overcharged Battery` all Scrap themselves), so the
+exemplars are the ones out of step.
+
+**The acquisition-inversion slot is still uncovered** and this ruling does not fill it. If anything it
+narrows the options: the obvious candidate was a Scrap-costed reward card, and those are now meant to
+be rare.
+
+### Two things this raises
+
+- **Does "all Stuff" include Bad Stuff?** `[finding]` Bad Stuff is Stuff by type, but ticket 24 casts
+  it as the fuel that *other* cards Scrap. If Bad Stuff carries its own Scrap line, a player sheds
+  junk whenever they like and Bad Stuff stops being a burden. The two exemplar pieces already print
+  *"Play this to be rid of it"*, so an escape hatch exists; whether Scrap is a second, cheaper one is
+  unruled.
+- **Is the ascension swap net −1 card or net 0?** `[finding]` You described thinning as happening
+  "only in a swap sense", which reads as net 0 — a starter out, a piece of Stuff in. Ticket 24 instead
+  says decks *"get leaner and better and smaller"*, which is only true if the kept Stuff was already
+  counted in the deck from the held-Stuff step. Which one it is decides whether the inversion is ever
+  escapable. Raised on [ticket 24](24-the-scrap-mechanic.md).

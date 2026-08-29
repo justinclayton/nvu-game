@@ -155,7 +155,7 @@ Either a small stat, or the fuel that deploys Red's heavy cards free.
 
 No stat field, **no rarity** `[you, 2026-08-29]`, always `Hold`, playable to be rid of it.
 
-**Thick Slime** · Bad Stuff · `Cost 1` · `Hold`
+**Sluggish** · Bad Stuff · `Cost 1` · `Hold`
 > *When you draw this, choose another card in your hand. It costs +1 this turn.*
 
 **Rust** · Bad Stuff · `Cost 2` · `Hold`
@@ -218,8 +218,11 @@ Recorded, not fixed. Each is the human's call.
 - **~~`Zen Mode` and `I Know Kung Fu` have no cost.~~ Ruled 2026-08-29: both print one.** `[you]`
   `Zen Mode` is `Cost 0` with its play line removed; `I Know Kung Fu` is `Cost 3` and pays `Power 5`.
   **No card has an empty cost field**, so ticket 11's anatomy is not departed from after all.
-- **`Thick Slime` near-duplicates `Faceful of Slime`**, and three cards now carry `Scrap` in the name
-  alongside the exemplar `Scrap Sense`. A naming pass is owed before print.
+- **~~`Thick Slime` near-duplicates `Faceful of Slime`.~~ Renamed `Sluggish`, 2026-08-29** `[you]`, so
+  only one card in the set is named for slime.
+
+  **The three `Scrap`-named cards are still open** — `Scrap Metal`, `Scrap Salvage` and the exemplar
+  `Scrap Sense`, all sharing a prefix with the keyword while only two of them Scrap anything.
 - **~~`Spore Cloud` is rarity `Woah`.~~ Ruled 2026-08-29: Bad Stuff carries no rarity.** `[you]`
   Rarity reports what a card is worth to the player holding it, and nobody wants any of these. All
   four entries above have had their rarity stripped, which puts the bank in line with the exemplar Bad

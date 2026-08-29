@@ -516,3 +516,14 @@ they can only trade one away at the ascend to keep something scavenged.
 **This supersedes the first version of this amendment**, written earlier the same day, which recorded
 Scrap as an optional consume-for-a-bigger-effect ability printed on each Stuff card. That was wrong in
 both directions: it is not optional and it is not printed.
+
+
+## Amended 2026-08-29 — `Bad Stuff` carries no rarity
+
+`[you]` Rarity reports a card's **value to the player holding it**, per the value axis this ticket
+adopted on 2026-08-25. Bad Stuff has no value to its holder — it is junk dealt out as punishment — so
+it carries **no rarity at all**, and no border colour.
+
+The exemplar Bad Stuff already printed none and the cutting sheet already renders them with a
+`norarity` border; the [card bank](../prototypes/12-card-bank.md)'s four entries were the only place
+rarity had crept onto Bad Stuff, and they have been stripped.

@@ -134,18 +134,18 @@ Either a small stat, or the fuel that deploys Red's heavy cards free.
 
 ## Bad Stuff
 
-No stat field, always `Hold`, playable to be rid of it.
+No stat field, **no rarity** `[you, 2026-08-29]`, always `Hold`, playable to be rid of it.
 
-**Thick Slime** · Bad Stuff · `Fine` · `Cost 1` · `Hold`
+**Thick Slime** · Bad Stuff · `Cost 1` · `Hold`
 > *When you draw this, choose another card in your hand. It costs +1 this turn.*
 
-**Rust** · Bad Stuff · `Fine` · `Cost 2` · `Hold`
+**Rust** · Bad Stuff · `Cost 2` · `Hold`
 > *While you hold this, Good Stuff you play has −1 Power.*
 
-**Spore Cloud** · Bad Stuff · `Woah` · `Cost 1` · `Hold`
+**Spore Cloud** · Bad Stuff · `Cost 1` · `Hold`
 > *While you hold this, cards you draw go to your exhaust pile instead of your hand.*
 
-**Panic** · Bad Stuff · `Fine` · `Cost 1` · `Hold`
+**Panic** · Bad Stuff · `Cost 1` · `Hold`
 > *While you hold this, you must be the character who resolves the room's Flee line.*
 > *When you play this, Exhaust 2 cards from your deck.*
 
@@ -202,6 +202,8 @@ Recorded, not fixed. Each is the human's call.
   real departure.
 - **`Thick Slime` near-duplicates `Faceful of Slime`**, and three cards now carry `Scrap` in the name
   alongside the exemplar `Scrap Sense`. A naming pass is owed before print.
-- **`Spore Cloud` is rarity `Woah`.** Under the value axis, rarity reports a card's ceiling for the
-  player holding it, and a Bad Stuff card's ceiling is its nastiness. Whether Bad Stuff carries
-  rarity on the same axis at all is unruled — the exemplar Bad Stuff prints none.
+- **~~`Spore Cloud` is rarity `Woah`.~~ Ruled 2026-08-29: Bad Stuff carries no rarity.** `[you]`
+  Rarity reports what a card is worth to the player holding it, and nobody wants any of these. All
+  four entries above have had their rarity stripped, which puts the bank in line with the exemplar Bad
+  Stuff, which never printed one, and with the cutting sheet, which already renders them with a
+  `norarity` border. Recorded as an anatomy ruling on [ticket 11](../issues/11-card-anatomy.md).

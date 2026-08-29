@@ -67,7 +67,15 @@ Gray draws, moves cards between zones, and manages hand congestion for both char
 **Hack the Doors** · Gray · `Fine` · `Cost 1` · **Scramble 1**
 > *Look at the top 3 cards of the floor deck. You may put them back in any order.*
 
-Scouting, so the team knows what it is drawing into before it commits. Written as a starter.
+Scouting, so the team knows what it is drawing into before it commits. `[you, 2026-08-29]` **A reward
+card, not a starter** — three rooms and free reordering is too much to begin every run with. Its
+`Fine` rarity is untouched and unruled.
+
+**[unnamed starter]** · Gray · `Fine` *(by starter precedent, not ruled)* · *(cost unset)* · *(stat unset)*
+> *Look at the top card of the floor deck. Put it back on top.*
+
+`[you, 2026-08-29]` The starter-tier version of `Hack the Doors`. Information with no control: one card
+cannot be reordered. **Needs a name**, and its cost and stat are unset.
 
 **Hand Off** · Gray · `Fine` · `Cost 0` · **Scramble 1**
 > *Move 1 card from your hand to Red's hand.*
@@ -162,9 +170,15 @@ Recorded, not fixed. Each is the human's call.
   that is all the players know; this card is a deliberate exception, and the new name gives the
   exception a fiction — Gray works the door controls and sees what the next rooms hold. Scouting the
   floor deck is now granted, on a card, to Gray.
-- **`Overdrive` and `Hack the Doors` are written as starters.** The starting deck's shape belongs to
-  tickets 09 and 10, and the exemplar set already names four starters. They are listed here as pool
-  cards.
+- **~~`Overdrive` and `Hack the Doors` are written as starters.~~ Ruled 2026-08-29 for
+  `Hack the Doors`: it is a reward card.** `[you]` Looking at three rooms and reordering them is too
+  much for a card every run begins with.
+
+  `[you]` **A starter version of the same idea exists**, and it is weaker in a specific way: *peek at
+  the next 1 room and put it back on top.* With one card there is nothing to reorder, so the starter
+  buys **information only** and the reward card buys **control**. It is unnamed — see the Gray section.
+
+  **`Overdrive` is still open.**
 - **`Heavy Pockets` and `Pack Away` shuffle Stuff into a deck — ruled to survive, 2026-08-29.**
   `[you]` Ticket 24 does this for free at the ascend, which is what killed `Pack Rat`. These two are
   different because they act **mid-floor**: a card shuffled into the deck partway through a floor is

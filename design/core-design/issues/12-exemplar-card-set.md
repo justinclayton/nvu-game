@@ -415,3 +415,12 @@ quality, not leanness, and **no mechanic shrinks a deck**. Recorded on
 For this ticket: ticket 04's inversion has no escape hatch, so a card that stresses the acquisition
 inversion is stressing something with no relief valve anywhere in the game. That raises what the still
 empty inversion slot has to carry.
+
+
+## Ruled 2026-08-29 — the Bad Stuff pool is 8
+
+`[you]` **Eight cards, for now.** Provisional rather than settled — four are designed, in the
+[card bank](../prototypes/12-card-bank.md). It is the one pool with no sizing policy behind it: the
+room pools follow ticket 22's largest-single-floor-draw rule and the reward pools follow ticket 09's
+never-seen-again target, while Bad Stuff is handed out by punishments whose frequency ticket 10 has not
+settled.

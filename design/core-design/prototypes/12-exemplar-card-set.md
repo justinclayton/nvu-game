@@ -321,7 +321,7 @@ stated policies; the last one does not come out well.
 | Hazard rooms | 30 | 1.5–2× largest single-floor draw of 3 (t22) | **16** |
 | Stuff rooms | 45 | 1.5–2× largest single-floor draw of 9 (t22) | **16** |
 | Good Stuff | see below | sized by how much is handed out per floor, not by room count | **not sized** |
-| Bad Stuff | punishment-driven | not policied anywhere | **8** *(proposed)* |
+| Bad Stuff | punishment-driven | not policied anywhere | **8** `[you, 2026-08-29]` *(for now)* |
 | Red reward pool | ~40–50 | a declined card is essentially never seen again (t09) | **see below** |
 | Gray reward pool | ~40–50 | same | **see below** |
 

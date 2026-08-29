@@ -150,10 +150,13 @@ their partner, and clearing their head costs stamina.
 
 Recorded, not fixed. Each is the human's call.
 
-- **`Scrap Salvage` draws from a reward pool mid-floor.** Ticket 09 settled that the reward pools are
-  drawn at the ascend — three cards, one chosen — and that acquired cards are permanent. A card that
-  pulls from the pool into hand mid-floor is a third source, and it needs a ruling on whether what it
-  pulls is permanent or ends with the floor.
+- **`Scrap Salvage` draws from a reward pool mid-floor — ruled permanent, 2026-08-29.** `[you]` What
+  it pulls stays in the deck for the rest of the run, exactly like an ascend reward. This makes it a
+  **third acquisition source** alongside the ascend offer and the floor card's reward, which ticket 09
+  should record.
+
+  Note it is also **one-for-one**: a card Scrapped, a card gained, deck size unchanged — the same shape
+  ticket 24's ascend tax was ruled to have on the same day.
 - **`Scrounge` looks at the floor deck.** Ticket 18 settled that a room flips face up at the start of
   the turn and that is all the players know. Scouting the floor deck is new information the map has
   not granted anywhere.

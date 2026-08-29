@@ -416,3 +416,15 @@ punishment that follows you.
 
 The three consequences this creates for the economy are recorded in
 [ticket 24](24-the-scrap-mechanic.md) and handed to [ticket 10](10-sim-the-resource-economy.md).
+
+
+## Amended 2026-08-29 — a third acquisition source
+
+`[you]` **`Scrap Salvage` pulls a card from a character's reward pool mid-floor, and what it pulls is
+permanent.** The card reads *"Scrap a card from your hand. If you do, draw 1 card from your reward pool
+into your hand."* It sits in the [card bank](../prototypes/12-card-bank.md).
+
+This ticket's sub-question 1 settled the sources as the ascend offer plus the floor card's reward. This
+is a third, and unlike the other two it is **paid for** — one card Scrapped for one card gained — which
+leaves deck size unchanged, matching the ascend tax ruled one-for-one the same day on
+[ticket 24](24-the-scrap-mechanic.md).

@@ -151,12 +151,17 @@ a piece of Stuff consumes it for the run.
 
 ### Two things unruled
 
-- **One Scrapyard or one pile per character?** `[finding]` The rule above says *"the character's Scrap
-  pile"*; the section at the top of this ticket says *"there is one Scrapyard, shared, at the side of
-  the table."* The shared heap was justified as staying inside the map's minimise-play-zones rule, and
-  per-character piles add two.
+- **~~One Scrapyard or one pile per character?~~ Ruled 2026-08-29: one shared Scrapyard.** `[you]`
+  Essentially the Stuff discard pile. The keyword's *"the character's Scrap pile"* is superseded by
+  this; the shared heap at the top of this ticket stands, and the table gains no zones.
+
+  It also holds the non-Stuff cards that get Scrapped — the ascend tax's starter card, and anything a
+  card Scraps from hand — but Stuff is the bulk of it. Nothing reads the heap, so mixing them costs
+  nothing.
 - **The Good Stuff pool now drains across a run.** `[finding]` Recycling played Stuff back to the pool
   was what kept the supply topped up. Without it the pool is consumed, which changes how it must be
-  sized — a number [ticket 10](10-sim-the-resource-economy.md) and
+  sized. `[you, 2026-08-29]` **Printing duplicates of a Stuff card is an accepted way to make the pool
+  big enough**, deferred rather than decided — a sizing problem for later, not a reason to change the
+  keyword. Sized — a number [ticket 10](10-sim-the-resource-economy.md) and
   [ticket 22](22-floor-deck-composition.md) both depend on, and which
   [ticket 12](12-exemplar-card-set.md) had already left deliberately unsized.

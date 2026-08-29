@@ -496,6 +496,10 @@ type.**
 > play for the remainder of the encounter. The difference is at ascension, where **Exhausted cards
 > shuffle back into the character's deck** and Scrapped cards do not.
 
+`[you, 2026-08-29]` The Scrap pile is **one shared Scrapyard**, essentially the Stuff discard pile —
+not one per character, as the keyword's wording suggested. Ruled on
+[ticket 24](24-the-scrap-mechanic.md).
+
 So no Stuff card needs to print anything. Scavenged gear is used up by being used, automatically and
 unavoidably, and that is the whole of the mechanic. A card *may* still print `Scrap` as a deliberate
 cost — Scrapping something from hand without playing it, or Scrapping a card that is not Stuff — and

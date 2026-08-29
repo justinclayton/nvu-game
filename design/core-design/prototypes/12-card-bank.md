@@ -64,7 +64,7 @@ A state card. One of Red's five hand slots buys immunity to the self-damage on `
 
 Gray draws, moves cards between zones, and manages hand congestion for both characters.
 
-**Scrounge** · Gray · `Fine` · `Cost 1` · **Scramble 1**
+**Hack the Doors** · Gray · `Fine` · `Cost 1` · **Scramble 1**
 > *Look at the top 3 cards of the floor deck. You may put them back in any order.*
 
 Scouting, so the team knows what it is drawing into before it commits. Written as a starter.
@@ -157,10 +157,12 @@ Recorded, not fixed. Each is the human's call.
 
   Note it is also **one-for-one**: a card Scrapped, a card gained, deck size unchanged — the same shape
   ticket 24's ascend tax was ruled to have on the same day.
-- **`Scrounge` looks at the floor deck.** Ticket 18 settled that a room flips face up at the start of
-  the turn and that is all the players know. Scouting the floor deck is new information the map has
-  not granted anywhere.
-- **`Overdrive` and `Scrounge` are written as starters.** The starting deck's shape belongs to
+- **~~`Scrounge` looks at the floor deck.~~ Ruled 2026-08-29: the card stays, renamed
+  `Hack the Doors`.** `[you]` Ticket 18 settled that a room flips face up at the start of the turn and
+  that is all the players know; this card is a deliberate exception, and the new name gives the
+  exception a fiction — Gray works the door controls and sees what the next rooms hold. Scouting the
+  floor deck is now granted, on a card, to Gray.
+- **`Overdrive` and `Hack the Doors` are written as starters.** The starting deck's shape belongs to
   tickets 09 and 10, and the exemplar set already names four starters. They are listed here as pool
   cards.
 - **`Heavy Pockets` and `Pack Away` shuffle Stuff into a deck — ruled to survive, 2026-08-29.**

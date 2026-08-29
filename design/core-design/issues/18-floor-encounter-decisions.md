@@ -83,3 +83,15 @@ themselves against the rules above, argued case by case.
 
 `[proposed by agent → you approved, 2026-08-15]` The ticket itself did not exist during charting; it
 was added when the encounter turned out to have no node on the map.
+
+
+## Amended 2026-08-29 — one card may look ahead
+
+`[you]` This ticket settled that a room flips face up at the start of the turn and that is all the
+players know. **`Hack the Doors`** — a Gray card in the [card bank](../prototypes/12-card-bank.md) —
+is a deliberate exception: *"Look at the top 3 cards of the floor deck. You may put them back in any
+order."*
+
+The card was kept and renamed from `Scrounge` so the exception carries a fiction: Gray works the door
+controls and sees what the next rooms hold. Looking ahead is now a thing the game permits, on a card,
+to one character.

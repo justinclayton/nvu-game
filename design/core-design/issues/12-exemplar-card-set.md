@@ -331,3 +331,21 @@ Nothing replaces it, and the set is short one exemplar until something does.
 **It also exposed a duplication problem, now [ticket 25](25-single-source-for-the-card-list.md).**
 Dropping one card was a five-place edit, and the three copies of the card list had already drifted —
 the simulator ticket 10 depends on is running cards that do not exist. Ticket 25 blocks ticket 10.
+
+
+## Ruled 2026-08-29 — `Heavy Pockets` and `Pack Away` survive ticket 24
+
+`[you]` Both cards shuffle Stuff into a deck, which [ticket 24](24-the-scrap-mechanic.md) does for
+free at the ascend. They **survive** where `Pack Rat` did not, because they act **mid-floor**: a card
+shuffled in partway through a floor is stamina you can still draw and spend this floor, where the free
+version only arrives once the floor is over.
+
+**The general principle** `[proposed by agent → you approved]`: a card that does at the ascend what
+ticket 24 already gives away is dead weight; a card that does it mid-floor is buying tempo and earns
+its slot. This is the test `Pack Rat` failed and these two pass, and it applies to any future card in
+the same shape.
+
+**It exposes a gap in ticket 24.** `[finding]` Ticket 24's ascend sorts the exhaust pile and the hand,
+and says nothing about Stuff sitting **in a deck** — which is where these two cards put it. Whether it
+returns to the pool or stays a permanent deck card decides whether they are tempo cards or permanent
+upgrades. That is ticket 24's to answer, not this ticket's.

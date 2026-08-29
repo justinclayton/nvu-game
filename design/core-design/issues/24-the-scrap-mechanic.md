@@ -91,3 +91,18 @@ preserved Stuff is itself spent the moment it is finally played.
   inversion rather than pay it.
 
 All three belong to ticket 10, which is charged with re-running against these rules.
+
+
+## Gap found 2026-08-29 — Stuff sitting in a deck at the ascend
+
+`[finding, from ticket 12](12-exemplar-card-set.md)` The ascend above sorts two places: the **exhaust
+pile** (Stuff returns to the pool, everything else shuffles back) and the **hand** (held Stuff shuffles
+into the deck). It says nothing about Stuff sitting **in a deck** when the floor is cleared.
+
+That is not a hypothetical. `Heavy Pockets` and `Pack Away` in the
+[card bank](../prototypes/12-card-bank.md) both shuffle Stuff into a deck mid-floor, and were ruled to
+survive on 2026-08-29 precisely because they do. Whether that Stuff is pulled back to the pool like
+other Stuff, or stays in the deck permanently, is the difference between those cards being tempo and
+being permanent upgrades.
+
+Unruled.

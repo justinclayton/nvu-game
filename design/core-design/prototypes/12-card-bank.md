@@ -160,9 +160,20 @@ Recorded, not fixed. Each is the human's call.
 - **`Overdrive` and `Scrounge` are written as starters.** The starting deck's shape belongs to
   tickets 09 and 10, and the exemplar set already names four starters. They are listed here as pool
   cards.
-- **`Heavy Pockets` and `Pack Away` shuffle Stuff into a deck.** Ticket 24 already does that for free
-  at the ascend for any Stuff still in hand, and pulls it back out at the next ascend. Whether these
-  cards make that happen early, or make it permanent, changes what they are worth.
+- **`Heavy Pockets` and `Pack Away` shuffle Stuff into a deck — ruled to survive, 2026-08-29.**
+  `[you]` Ticket 24 does this for free at the ascend, which is what killed `Pack Rat`. These two are
+  different because they act **mid-floor**: a card shuffled into the deck partway through a floor is
+  stamina you can still draw and spend *this* floor, where the free version only ever arrives after
+  the floor is over. That is a heal, not an early copy of a free effect.
+
+  **The principle, stated once:** a card that does at the ascend what ticket 24 already gives away is
+  dead weight; a card that does it mid-floor is buying tempo and earns its slot. `[proposed by agent
+  → you approved, 2026-08-29]`
+
+  **This exposes a gap in ticket 24.** `[finding]` Ticket 24's ascend sorts the *exhaust pile* and the
+  *hand*, and says nothing about Stuff sitting **in a deck** — which is exactly where these two cards
+  put it. Whether it is pulled back to the pool like other Stuff, or stays as a permanent deck card,
+  decides whether these are tempo cards or permanent upgrades. Ticket 24's.
 - **`Zen Mode` and `I Know Kung Fu` have no cost and are played for a stat.** The anatomy in ticket
   11 has one cost field; a card that is free to play but pays a hand slot to hold is a shape that
   field cannot say. `Scrap Sense` prints a cost and `Hold` together, so this is a

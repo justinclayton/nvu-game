@@ -106,7 +106,7 @@ is the cheapest demonstration that the shared stat pool is worth having: it is a
 works because Red is at the table. Solo, it is the same card — which is ticket 03's claim made
 concrete.
 
-### One Man's Junk · Gray · `Woah` · `Cost 0` · *(conditional stat, in text)*
+### One Man's Junk · Gray · `Cool` · `Cost 0` · *(conditional stat, in text)*
 
 > *If any Bad Stuff is played this turn, Power 2 and Scramble 2.*
 
@@ -119,9 +119,8 @@ to play Bad Stuff this turn. That turns the junk rooms hand out as punishment in
 free swing, and it is the first card in the set that makes Bad Stuff something a player might *want*
 to hold onto for a moment.
 
-`[finding]` **Its rarity was not re-ruled.** It carries `Woah` from the card it replaced, and the new
-card is far simpler — one conditional clause, `Cost 0`, a ceiling of four stats. Under the value axis
-adopted on 2026-08-25 that looks like a lower tier, but re-tiering is not the agent's call.
+`[you, 2026-08-29]` **`Cool`.** It inherited `Woah` from the card it replaced, which was wrong under the
+value axis — one conditional clause, `Cost 0`, and a ceiling of four stats does not reach the top tier.
 
 `[finding]` **`Hold` and the no-stat field are gone**, read from the text supplied rather than ruled
 explicitly: the new wording is a play effect with a conditional stat, the shape `In Step` uses, so
@@ -564,8 +563,20 @@ reports — a cheap, repeatable, grindingly good card may sit at `Fine` while a 
 | `Cool` | 3 | 4 — `Reckless`, `Second Wind`, `In Step`, `Cutting Torch` |
 | `Woah` | 2 | 4 — `Pack Rat`, `Scrap Sense`, `Both Barrels`, `Grav Harness` |
 
-**`Pack Rat` was dropped on 2026-08-29**, so `Woah` now holds three. The table above is the
-2026-08-25 re-tiering as it happened and is left standing as the record of it.
+The table above is the 2026-08-25 re-tiering as it happened and is left standing as the record of it.
+**Two 2026-08-29 changes moved it since:** `Pack Rat` was dropped, and `Scrap Sense` became
+`One Man's Junk` at `Cool`. The live distribution across 14 rarity-bearing cards is now:
+
+| Tier | Count | Cards |
+|---|---|---|
+| `Fine` | 7 | the four starters, `Catch Your Breath`, `Pry Bar`, `Coil of Cable` |
+| `Cool` | 5 | `Reckless`, `Second Wind`, `In Step`, `One Man's Junk`, `Cutting Torch` |
+| `Woah` | 2 | `Both Barrels`, `Grav Harness` |
+
+`[finding]` **`Woah` is now down to two cards of fourteen**, from four. The tier the value axis was
+adopted to make meaningful is the thinnest it has been, and neither remaining card is a piece of the
+Stuff the axis was reversed to describe. Whether that is fine or wants another top-tier exemplar is
+open.
 
 The complexity axis had bunched two-thirds of the set into one border. The value axis spreads it, and —
 worth noting, because it is the thing that makes the tier informative — **`Woah` now contains a card
@@ -633,8 +644,8 @@ of them now describe a card that no longer exists.
   clauses plus an upkeep trigger". The replacement is a single conditional line, so it is no longer a
   hard read and [ticket 20](../issues/20-encounter-tabletop-prototype.md) should time something else.
   `[finding]`
-- **The rarity distribution** lists `Scrap Sense` under `Woah`. `One Man's Junk` inherited that border
-  and it has not been re-ruled — see the card's own entry.
+- **The rarity distribution** lists `Scrap Sense` under `Woah`. `[you, 2026-08-29]` `One Man's Junk` is
+  **`Cool`**; the live distribution is tabulated under that section.
 
 The stat-arithmetic example that adds `Scrap Sense`'s +2 to `Grav Harness` no longer computes, since
 the +2 came from the modifier clause that is gone.

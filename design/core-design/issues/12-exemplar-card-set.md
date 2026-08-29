@@ -379,3 +379,28 @@ be rare.
   says decks *"get leaner and better and smaller"*, which is only true if the kept Stuff was already
   counted in the deck from the held-Stuff step. Which one it is decides whether the inversion is ever
   escapable. Raised on [ticket 24](24-the-scrap-mechanic.md).
+
+
+## Corrected 2026-08-29 — `Scrap` is automatic, so the exemplars need no new lines
+
+`[you]` clarified the keyword: **when any `Stuff` card would be Exhausted, it is Scrapped instead.**
+Full text on [ticket 24](24-the-scrap-mechanic.md), anatomy on [ticket 11](11-card-anatomy.md).
+
+**This reverses the finding recorded above it.** That section said the four exemplar Good Stuff were
+out of step because they print no Scrap line. They are not — **no Stuff card should print one**.
+Scrapping happens by type, on play, automatically. `Pry Bar`, `Coil of Cable`, `Cutting Torch` and
+`Grav Harness` are correct exactly as they stand.
+
+**The card bank's Good Stuff is the side that needs a pass, not the exemplars.** `Stitch-Kit` ends with
+*"Then Scrap this"*, which is now redundant — playing it Scraps it anyway. `Crowbar` and
+`Overcharged Battery` Scrap themselves **from hand**, without playing, which is still a real ability
+and stands.
+
+**The Bad Stuff question is answered.** Bad Stuff is Stuff, so it Scraps on play, and *"Play this to be
+rid of it"* means rid of it for the run. No separate ruling needed.
+
+**The set's remaining Scrap gap is smaller than stated.** What it lacks is a card that prints Scrap as
+a *deliberate cost* — Scrapping from hand, or Scrapping something that is not Stuff. Whether the
+exemplars owe one at all is open, given the ruling that such cards are rare.
+
+**The acquisition-inversion slot is still empty.** Nothing in this clarification fills it.

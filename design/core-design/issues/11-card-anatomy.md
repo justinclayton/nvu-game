@@ -486,21 +486,29 @@ The *"nothing bad crosses a floor boundary, full stop"* note above narrows: held
 now, as a blank card in the deck. `Curse` stays retired. See [ticket 24](24-the-scrap-mechanic.md).
 
 
-## Amended 2026-08-29 — every `Stuff` card carries `Scrap`
+## Amended 2026-08-29 — `Scrap` is a property of the `Stuff` type
 
-`[you]` **`Scrap` belongs on all `Stuff`.** A piece of Stuff can be consumed for a one-off effect
-larger than what it does as an ordinary play. This is the archetype Stuff occupies: scavenged gear is
-temporary by nature, and breaking it open is what it is for.
+`[you]` **`Scrap` is not an ability a Stuff card prints. It is a replacement effect carried by the
+type.**
 
-**And `Scrap` stays off almost all reward cards.** `[you]` It is not ruled out — a character-specific
-`Woah` bomb, overpowered but usable exactly once, is a shape the design wants available. It is simply
-not where thinning normally lives.
+> When any `Stuff` card would be **Exhausted** — the act of moving a card to the character's Exhaust
+> pile — it is instead **Scrapped**: moved to the character's Scrap pile. Both remove the card from
+> play for the remainder of the encounter. The difference is at ascension, where **Exhausted cards
+> shuffle back into the character's deck** and Scrapped cards do not.
 
-**The consequence for the inversion** `[proposed by agent → you approved, 2026-08-29]`: thinning is
-only ever a **swap**, never a plain removal. A player cannot decide to shed a weak card; they can only
-trade one away to keep something scavenged. That keeps ticket 09's *"removal is never a default"*
-intact while giving ticket 24's Scrapyard something to hold.
+So no Stuff card needs to print anything. Scavenged gear is used up by being used, automatically and
+unavoidably, and that is the whole of the mechanic. A card *may* still print `Scrap` as a deliberate
+cost — Scrapping something from hand without playing it, or Scrapping a card that is not Stuff — and
+that is a real ability. Being consumed on play is not.
 
-**Open, and handed on:** whether *all Stuff* includes **Bad Stuff**. Bad Stuff is Stuff by type, but
-ticket 24 casts it as the fuel other cards Scrap, and a self-Scrap line would let a player shed junk
-at will. See [ticket 12](12-exemplar-card-set.md).
+**`Scrap` stays off almost all reward cards.** `[you]` Not ruled out — a character-specific `Woah`
+bomb, overpowered but usable exactly once, is a shape the design wants available. It is simply not
+where thinning normally lives.
+
+**The consequence for the inversion** `[proposed by agent → you approved, 2026-08-29]`: thinning a
+*deck* is only ever a **swap**, never a plain removal. A player cannot decide to shed a weak card;
+they can only trade one away at the ascend to keep something scavenged.
+
+**This supersedes the first version of this amendment**, written earlier the same day, which recorded
+Scrap as an optional consume-for-a-bigger-effect ability printed on each Stuff card. That was wrong in
+both directions: it is not optional and it is not printed.

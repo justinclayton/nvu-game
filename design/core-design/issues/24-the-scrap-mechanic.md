@@ -124,3 +124,39 @@ while removing the starter, deck size is unchanged and the tax buys quality, not
 `[you, ticket 12]` described thinning as happening "only in a swap sense", which points at net 0 — but
 the two readings differ on whether a player can ever escape ticket 04's inversion by shrinking, which
 is the question ticket 09 cared most about.
+
+
+## Clarified 2026-08-29 — `Scrap` is what `Exhaust` becomes for `Stuff`
+
+`[you]` The keyword, stated exactly:
+
+> When any `Stuff` card would be **Exhausted** (the act of moving a card to the character's Exhaust
+> pile), it is instead **Scrapped** (the act of moving a card to the character's Scrap pile). Both
+> Exhausted and Scrapped cards remove it from play for the remainder of the encounter. However, during
+> ascension, Exhausted cards are shuffled back into the character's deck.
+
+This is a replacement effect on the type, not something a card prints, and it is not optional. Playing
+a piece of Stuff consumes it for the run.
+
+### What it changes above
+
+- **Ascend step 1 is wrong as written.** It says Stuff in the exhaust pile goes back to its pool. Under
+  this keyword **Stuff never reaches the exhaust pile** — it is Scrapped on the way. Played Stuff is
+  gone for the run, not recycled.
+- **"It exhausts like anything else" is wrong.** Step 2's held Stuff, once shuffled into a deck, is
+  still Stuff: draw it, play it, and it Scraps. It is one use, whenever that use comes.
+- **Bad Stuff's escape hatch is now permanent.** Bad Stuff is Stuff, so *"Play this to be rid of it"*
+  is rid of it for the whole run rather than until the next ascend. This answers the question ticket 12
+  raised about whether Bad Stuff carries Scrap: it does, by type.
+
+### Two things unruled
+
+- **One Scrapyard or one pile per character?** `[finding]` The rule above says *"the character's Scrap
+  pile"*; the section at the top of this ticket says *"there is one Scrapyard, shared, at the side of
+  the table."* The shared heap was justified as staying inside the map's minimise-play-zones rule, and
+  per-character piles add two.
+- **The Good Stuff pool now drains across a run.** `[finding]` Recycling played Stuff back to the pool
+  was what kept the supply topped up. Without it the pool is consumed, which changes how it must be
+  sized — a number [ticket 10](10-sim-the-resource-economy.md) and
+  [ticket 22](22-floor-deck-composition.md) both depend on, and which
+  [ticket 12](12-exemplar-card-set.md) had already left deliberately unsized.

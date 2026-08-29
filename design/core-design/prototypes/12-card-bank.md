@@ -64,12 +64,12 @@ A state card. One of Red's five hand slots buys immunity to the self-damage on `
 
 Gray draws, moves cards between zones, and manages hand congestion for both characters.
 
-**Hack the Doors** · Gray · `Fine` · `Cost 1` · **Scramble 1**
+**Hack the Doors** · Gray · `Cool` · `Cost 1` · **Scramble 1**
 > *Look at the top 3 cards of the floor deck. You may put them back in any order.*
 
 Scouting, so the team knows what it is drawing into before it commits. `[you, 2026-08-29]` **A reward
-card, not a starter** — three rooms and free reordering is too much to begin every run with. Its
-`Fine` rarity is untouched and unruled.
+card, not a starter** — three rooms and free reordering is too much to begin every run with, and
+`[you]` **`Cool`** on the value axis.
 
 **[unnamed starter]** · Gray · `Fine` *(by starter precedent, not ruled)* · *(cost unset)* · *(stat unset)*
 > *Look at the top card of the floor deck. Put it back on top.*
@@ -178,7 +178,10 @@ Recorded, not fixed. Each is the human's call.
   the next 1 room and put it back on top.* With one card there is nothing to reorder, so the starter
   buys **information only** and the reward card buys **control**. It is unnamed — see the Gray section.
 
-  **`Overdrive` is still open.**
+  `[you]` **`Overdrive` stays a starter, for now** — provisional, not settled. Note the consequence:
+  Red would begin a run with three distinct starters rather than two, which moves the starting deck
+  composition the [rules summary](12-floor-rules-summary.md) currently scaffolds as 7 `Shove` and
+  5 `Charge In`. That number is tickets 09 and 10's.
 - **`Heavy Pockets` and `Pack Away` shuffle Stuff into a deck — ruled to survive, 2026-08-29.**
   `[you]` Ticket 24 does this for free at the ascend, which is what killed `Pack Rat`. These two are
   different because they act **mid-floor**: a card shuffled into the deck partway through a floor is

@@ -106,21 +106,26 @@ is the cheapest demonstration that the shared stat pool is worth having: it is a
 works because Red is at the table. Solo, it is the same card — which is ticket 03's claim made
 concrete.
 
-### Scrap Sense · Gray · `Woah` · `Cost 1` · *(no stat)* · `Hold`
+### One Man's Junk · Gray · `Woah` · `Cost 0` · *(conditional stat, in text)*
 
-> *The first piece of Good Stuff Gray plays each turn has +2 Power and +2 Scramble.*
-> *If Gray is holding no Good Stuff at cleanup, Exhaust this.*
+> *If any Bad Stuff is played this turn, Power 2 and Scramble 2.*
 
-**Stresses: the `Woah` read.** Two clauses, one conditional, one upkeep trigger. This is ticket 11's
-central claim in a single card — *your permanent deck is modifiers, your stat base is scavenged fresh
-each floor*.
+**Replaced `Scrap Sense` on 2026-08-29** `[you]`, as part of clearing the keyword out of card names.
+This is a different card, not a rename: `Scrap Sense` was a `Cost 1` `Hold` modifier that boosted the
+first Good Stuff Gray played each turn and Exhausted itself if Gray held none at cleanup.
 
-**Fixed 2026-08-25.** The self-destruct used to fire *"if Gray plays no Good Stuff during a turn"* —
-and the majority of floor-1 turns are Stuff rooms where nobody plays anything at all, so the card
-reliably killed itself at the cleanup of the turn after you installed it. It now checks what Gray is
-**holding**, not what Gray played, which is a condition the player actually controls: it survives
-while you have Stuff in reserve and dies when you have burned through it. Same two clauses, same
-`Woah` read, no guaranteed death.
+**What it does now.** It pays four stats across both kinds for nothing, on one condition: somebody has
+to play Bad Stuff this turn. That turns the junk rooms hand out as punishment into the trigger for a
+free swing, and it is the first card in the set that makes Bad Stuff something a player might *want*
+to hold onto for a moment.
+
+`[finding]` **Its rarity was not re-ruled.** It carries `Woah` from the card it replaced, and the new
+card is far simpler — one conditional clause, `Cost 0`, a ceiling of four stats. Under the value axis
+adopted on 2026-08-25 that looks like a lower tier, but re-tiering is not the agent's call.
+
+`[finding]` **`Hold` and the no-stat field are gone**, read from the text supplied rather than ruled
+explicitly: the new wording is a play effect with a conditional stat, the shape `In Step` uses, so
+there is nothing to hold and nothing to trigger at cleanup.
 
 ### Both Barrels · Red · `Woah` · `Cost 2` · **Power 2**
 
@@ -611,3 +616,25 @@ it. `[finding]`
 **Removed from all three copies** — this page, the [cutting sheet](../../../prototype/12-exemplar-cards.html)
 and the [encounter simulator](../../../prototype/encounter-sim.html) — which is the duplication
 [ticket 25](../issues/25-single-source-for-the-card-list.md) exists to end.
+
+
+---
+
+## `One Man's Junk` replaced `Scrap Sense`, 2026-08-29 — what it left behind
+
+The sections above dated 2026-08-25 are the record of what happened then and are left standing. Three
+of them now describe a card that no longer exists.
+
+- **Finding 3 — "player cards want a cleanup timing hook"** rested on `Reckless` and `Scrap Sense`
+  both acting at cleanup. `One Man's Junk` has no cleanup clause, so **`Reckless` is the only remaining
+  evidence** for that finding. It is not withdrawn — one card still wants the hook — but it is thinner
+  than when it was written. `[finding]`
+- **The reading-time list** named `Scrap Sense` as one of three cards to time, on the strength of "two
+  clauses plus an upkeep trigger". The replacement is a single conditional line, so it is no longer a
+  hard read and [ticket 20](../issues/20-encounter-tabletop-prototype.md) should time something else.
+  `[finding]`
+- **The rarity distribution** lists `Scrap Sense` under `Woah`. `One Man's Junk` inherited that border
+  and it has not been re-ruled — see the card's own entry.
+
+The stat-arithmetic example that adds `Scrap Sense`'s +2 to `Grav Harness` no longer computes, since
+the +2 came from the modifier clause that is gone.

@@ -424,3 +424,25 @@ empty inversion slot has to carry.
 room pools follow ticket 22's largest-single-floor-draw rule and the reward pools follow ticket 09's
 never-seen-again target, while Bad Stuff is handed out by punishments whose frequency ticket 10 has not
 settled.
+
+
+## Ruled 2026-08-29 — the `Scrap`-named cards
+
+`[you]` The keyword is out of card names.
+
+- **`Scrap Metal` is cut entirely** — a weak card, not worth renaming.
+- **`Scrap Salvage` → `Spot Salvage`.** Same card; the mid-floor pull it makes was ruled permanent
+  earlier the same day, recorded on [ticket 09](09-card-acquisition-and-deckbuilding.md).
+- **`Scrap Sense` → `One Man's Junk`, and rewritten.** `Cost 0`, no `Hold`, reading *"If any Bad Stuff
+  is played this turn, Power 2 and Scramble 2."* This is a different card, not a rename — it makes the
+  junk rooms hand out into the trigger for a free swing.
+- **`Thick Slime` → `Sluggish`**, so only one card is named for slime.
+
+**`One Man's Junk` is an exemplar, so it changed in all three copies** — deliverable, cutting sheet and
+simulator. That is the fourth multi-place card edit today and the case
+[ticket 25](25-single-source-for-the-card-list.md) exists to end.
+
+**Two things left unruled by this** `[finding]`: the new card kept `Woah` from the card it replaced and
+is much simpler, so its tier looks wrong under the value axis; and three dated findings above now
+describe a card that no longer exists — most notably finding 3's cleanup-timing-hook evidence, which
+is down to `Reckless` alone.

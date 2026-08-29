@@ -420,7 +420,7 @@ The three consequences this creates for the economy are recorded in
 
 ## Amended 2026-08-29 — a third acquisition source
 
-`[you]` **`Scrap Salvage` pulls a card from a character's reward pool mid-floor, and what it pulls is
+`[you]` **`Spot Salvage` pulls a card from a character's reward pool mid-floor, and what it pulls is
 permanent.** The card reads *"Scrap a card from your hand. If you do, draw 1 card from your reward pool
 into your hand."* It sits in the [card bank](../prototypes/12-card-bank.md).
 

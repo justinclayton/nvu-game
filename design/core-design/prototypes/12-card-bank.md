@@ -27,11 +27,6 @@ Fast tempo that pays no card out of hand, and 2 stamina off the top of the deck 
 starter; the exemplar set already has two Red starters, so treat this as a third candidate rather
 than a settled one.
 
-**Scrap Metal** · Red · `Fine` · `Cost 1` · **Power 3**
-> *Scrap a Stuff card from your hand.*
-
-An early swing that destroys a scavenged item outright. The cleanest use is vaporising Bad Stuff.
-
 **Reckless Swing** · Red · `Fine` · `Cost 1` · **Power 3**
 > *Put the top card of your deck into your exhaust pile.*
 
@@ -102,7 +97,7 @@ Gray as quartermaster, healing Red by stowing his heavy gear.
 
 The mirror of `Fast Follow`: Red draws attention, Gray scrounges.
 
-**Scrap Salvage** · Gray · `Woah` · `Cost 2` · **Scramble 2**
+**Spot Salvage** · Gray · `Woah` · `Cost 2` · **Scramble 2**
 > *Scrap a card from your hand. If you do, draw 1 card from your reward pool into your hand.*
 
 High-stakes thinning: trade a starter permanently for a premium card, mid-floor.
@@ -177,7 +172,7 @@ their partner, and clearing their head costs stamina.
 
 Recorded, not fixed. Each is the human's call.
 
-- **`Scrap Salvage` draws from a reward pool mid-floor — ruled permanent, 2026-08-29.** `[you]` What
+- **`Spot Salvage` draws from a reward pool mid-floor — ruled permanent, 2026-08-29.** `[you]` What
   it pulls stays in the deck for the rest of the run, exactly like an ascend reward. This makes it a
   **third acquisition source** alongside the ascend offer and the floor card's reward, which ticket 09
   should record.
@@ -221,8 +216,9 @@ Recorded, not fixed. Each is the human's call.
 - **~~`Thick Slime` near-duplicates `Faceful of Slime`.~~ Renamed `Sluggish`, 2026-08-29** `[you]`, so
   only one card in the set is named for slime.
 
-  **The three `Scrap`-named cards are still open** — `Scrap Metal`, `Scrap Salvage` and the exemplar
-  `Scrap Sense`, all sharing a prefix with the keyword while only two of them Scrap anything.
+  **The three `Scrap`-named cards were resolved 2026-08-29** `[you]`: `Scrap Metal` is **cut entirely**
+  as a weak card, `Scrap Salvage` becomes **`Spot Salvage`**, and the exemplar `Scrap Sense` becomes
+  **`One Man's Junk`** and is rewritten. No card now shares a prefix with the keyword.
 - **~~`Spore Cloud` is rarity `Woah`.~~ Ruled 2026-08-29: Bad Stuff carries no rarity.** `[you]`
   Rarity reports what a card is worth to the player holding it, and nobody wants any of these. All
   four entries above have had their rarity stripped, which puts the bank in line with the exemplar Bad

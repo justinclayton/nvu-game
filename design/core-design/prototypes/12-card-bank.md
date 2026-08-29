@@ -127,9 +127,18 @@ everywhere else in the set, so this is a Gray card whose cash-out is Red's stat.
 Small utility that can be broken open for double loot.
 
 **Stitch-Kit** · Good Stuff · `Fine` · `Cost 1` · *(no stat)* · `Hold`
-> *Move 2 cards from your exhaust pile to the bottom of your deck. Then Scrap this.*
+> *Move 2 cards from your exhaust pile to the bottom of your deck.*
 
 An emergency bandage: one card from hand for two back into the deck, net +1 stamina, consumed.
+
+`[you, 2026-08-29]` **The "Then Scrap this" line was dropped** — the keyword already Scraps it when it
+would be Exhausted at cleanup. **The general rule this sets:** a card never restates the keyword, so
+played Stuff **stays in the play zone for the rest of the turn** and is counted by anything that counts
+the play zone, such as `In Step` and `Junk Launcher`. Immediate removal would have taken it off the
+table early. `[proposed by agent → you approved]`
+
+This was the only card in the bank restating the keyword. `Crowbar` and `Overcharged Battery` both
+Scrap themselves **from hand**, without playing, which the keyword does not cover.
 
 **Riot Shield** · Good Stuff · `Cool` · `Cost 1` · **Scramble 3** · `Hold`
 > *At the end of the turn, if this is in the play zone, you may return it to your hand instead of

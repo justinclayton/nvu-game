@@ -538,3 +538,17 @@ lost its play line entirely, so it is a card that only ever works by being held.
 
 **Every card prints a cost.** The shape this ticket worried it could not express — free to play, paid
 for with a hand slot — is expressed as `Cost 0` plus `Hold`, and needs no new field.
+
+
+## Amended 2026-08-29 — cards do not restate the `Scrap` keyword
+
+`[you]` A Stuff card never prints *"Scrap this"* for the ordinary case of being played. The keyword
+handles it at cleanup, when the card would be Exhausted.
+
+**The consequence is a timing rule** `[proposed by agent → you approved]`: played Stuff **remains in
+the play zone for the rest of the turn**, and is counted by anything that counts the play zone —
+`In Step` reads Red's played cards, `Junk Launcher` reads what was spent. A card that Scrapped itself
+immediately would leave the play zone early and quietly change those counts.
+
+A card may still print `Scrap` for what the keyword does *not* cover: Scrapping from hand without
+playing (`Crowbar`, `Overcharged Battery`), or Scrapping a card that is not Stuff.

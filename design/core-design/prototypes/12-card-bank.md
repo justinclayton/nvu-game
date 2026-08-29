@@ -71,11 +71,11 @@ Scouting, so the team knows what it is drawing into before it commits. `[you, 20
 card, not a starter** — three rooms and free reordering is too much to begin every run with, and
 `[you]` **`Cool`** on the value axis.
 
-**[unnamed starter]** · Gray · `Fine` *(by starter precedent, not ruled)* · *(cost unset)* · *(stat unset)*
+**Peek Around Corner** · Gray · `Fine` *(by starter precedent, not ruled)* · *(cost unset)* · *(stat unset)*
 > *Look at the top card of the floor deck. Put it back on top.*
 
 `[you, 2026-08-29]` The starter-tier version of `Hack the Doors`. Information with no control: one card
-cannot be reordered. **Needs a name**, and its cost and stat are unset.
+cannot be reordered. Cost and stat are unset.
 
 **Hand Off** · Gray · `Fine` · `Cost 0` · **Scramble 1**
 > *Move 1 card from your hand to Red's hand.*
@@ -176,7 +176,7 @@ Recorded, not fixed. Each is the human's call.
 
   `[you]` **A starter version of the same idea exists**, and it is weaker in a specific way: *peek at
   the next 1 room and put it back on top.* With one card there is nothing to reorder, so the starter
-  buys **information only** and the reward card buys **control**. It is unnamed — see the Gray section.
+  buys **information only** and the reward card buys **control**. Printed as `Peek Around Corner`.
 
   `[you]` **`Overdrive` stays a starter, for now** — provisional, not settled. Note the consequence:
   Red would begin a run with three distinct starters rather than two, which moves the starting deck

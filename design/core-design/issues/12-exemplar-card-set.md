@@ -306,7 +306,7 @@ Sizing the pools is therefore still open, and is not answered by knowing where r
 
 `[you]` Card designs for both reward pools, Good Stuff and Bad Stuff, handed to the map in
 `north-vs-up-card-designs.md`. They live in the [card bank](../prototypes/12-card-bank.md), which is
-where the pools fill up from here; the exemplar set stays the twelve cards that tested the anatomy.
+where the pools fill up from here; the exemplar set stays the twenty-five cards that tested the anatomy.
 
 The bank ends with the places these cards sit against rulings already made — a mid-floor draw from a
 reward pool, a card that scouts the floor deck, and two cards with no cost field. Those are open, not

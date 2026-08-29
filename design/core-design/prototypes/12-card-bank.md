@@ -2,7 +2,7 @@
 
 The growing list of designed cards for the two per-character reward pools, for Good Stuff, and for
 Bad Stuff. Ticket 12 sized those pools at **45–55 cards per character**; the
-[exemplar set](12-exemplar-card-set.md) holds the twenty-five cards built to test the anatomy — 11
+[exemplar set](12-exemplar-card-set.md) holds the twenty-four cards built to test the anatomy — 10
 player cards, 4 Good Stuff, 2 Bad Stuff, 4 rooms and 4 Stuff rooms — and this file is where the rest
 accumulate.
 
@@ -165,7 +165,7 @@ Recorded, not fixed. Each is the human's call.
   cards make that happen early, or make it permanent, changes what they are worth.
 - **`Zen Mode` and `I Know Kung Fu` have no cost and are played for a stat.** The anatomy in ticket
   11 has one cost field; a card that is free to play but pays a hand slot to hold is a shape that
-  field cannot say. `Pack Rat` and `Scrap Sense` both print a cost and `Hold` together, so this is a
+  field cannot say. `Scrap Sense` prints a cost and `Hold` together, so this is a
   real departure.
 - **`Thick Slime` near-duplicates `Faceful of Slime`**, and three cards now carry `Scrap` in the name
   alongside the exemplar `Scrap Sense`. A naming pass is owed before print.

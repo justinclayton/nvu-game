@@ -159,7 +159,7 @@ fresh every floor and gone when you ascend — and there is less of it on every 
   not decided. For the prototype, use **12 cards each** — Red: 7 Shove, 5 Charge In; Gray: 7 Duck
   Under, 5 Pick The Lock — and treat that as scaffolding, not a decision.
 - **What happens to non-Stuff cards left in hand when the floor ends.** Ticket 24 answered this for
-  Stuff — it shuffles into the deck — and said nothing about a held `Both Barrels` or `Pack Rat`.
+  Stuff — it shuffles into the deck — and said nothing about a held `Both Barrels`.
 - **Which character's reward pool a room's reveal line draws from**, and whose deck it goes on top of.
   The printed line says "your deck" and the game has two.
 - **Whether a skipped reveal goes to the bottom of its pool**, as a declined ascension reward does.

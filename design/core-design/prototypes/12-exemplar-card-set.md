@@ -106,17 +106,6 @@ is the cheapest demonstration that the shared stat pool is worth having: it is a
 works because Red is at the table. Solo, it is the same card — which is ticket 03's claim made
 concrete.
 
-### Pack Rat · Red · `Woah` · `Cost 2` · *(no stat)* · `Hold`
-
-> *When you clear a floor, keep up to 2 Stuff for the next floor.*
-
-**Stresses: the acquisition inversion.** This is the carry-Stuff-onward card ticket 09 left as
-*allowed, not owed* and ticket 11 confirmed needs no new machinery. Taking it is a hard call in three
-directions at once: it is +1 card diluting a deck that gets one pass; it occupies one of five hand
-slots for an entire floor before it pays anything; and `Cost 2` means deploying it burns two more
-cards. Against that, ticket 11 made Stuff the stat engine, so carrying two pieces onto floor 8 is
-enormous.
-
 ### Scrap Sense · Gray · `Woah` · `Cost 1` · *(no stat)* · `Hold`
 
 > *The first piece of Good Stuff Gray plays each turn has +2 Power and +2 Scramble.*
@@ -570,6 +559,9 @@ reports — a cheap, repeatable, grindingly good card may sit at `Fine` while a 
 | `Cool` | 3 | 4 — `Reckless`, `Second Wind`, `In Step`, `Cutting Torch` |
 | `Woah` | 2 | 4 — `Pack Rat`, `Scrap Sense`, `Both Barrels`, `Grav Harness` |
 
+**`Pack Rat` was dropped on 2026-08-29**, so `Woah` now holds three. The table above is the
+2026-08-25 re-tiering as it happened and is left standing as the record of it.
+
 The complexity axis had bunched two-thirds of the set into one border. The value axis spreads it, and —
 worth noting, because it is the thing that makes the tier informative — **`Woah` now contains a card
 with no conditional text at all** (`Grav Harness` is close, and a hypothetical `Power 8` piece of Stuff
@@ -598,3 +590,24 @@ would be a pure case).
 - **Ticket 13 is untouched.** Red and Gray differ here only by flavour — Red pushes, Gray finesses,
   Red's cards lean `Power` and Gray's lean `Scramble`. That is a guess dressed as an exemplar, and
   ticket 13 owns the real answer.
+
+---
+
+## Dropped 2026-08-29 — `Pack Rat`
+
+`[you]` **`Pack Rat` is dropped from the exemplar set.** It read *"When you clear a floor, keep up to
+2 Stuff for the next floor"* at `Cost 2`, `Woah`, `Hold`, and it was priced as the only way to carry
+Stuff between floors. [Ticket 24](../issues/24-the-scrap-mechanic.md) made carrying Stuff forward free
+for everyone: held Stuff shuffles into the deck at the ascend, and the Scrap tax keeps one piece
+permanently. What `Pack Rat` still did that the free version does not — keep Stuff as *playable Stuff*
+rather than as deck stamina — was not worth a `Woah` slot at `Cost 2`.
+
+**The set is 24 cards.** Player cards fall from 11 to 10, and `Woah` from 4 to 3.
+
+**The acquisition-inversion requirement is now uncovered.** This ticket's brief asks for a card whose
+purchase is a genuinely hard call under ticket 09, and `Pack Rat` was that card. Nothing has replaced
+it. `[finding]`
+
+**Removed from all three copies** — this page, the [cutting sheet](../../../prototype/12-exemplar-cards.html)
+and the [encounter simulator](../../../prototype/encounter-sim.html) — which is the duplication
+[ticket 25](../issues/25-single-source-for-the-card-list.md) exists to end.

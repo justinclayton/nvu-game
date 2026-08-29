@@ -306,8 +306,28 @@ Sizing the pools is therefore still open, and is not answered by knowing where r
 
 `[you]` Card designs for both reward pools, Good Stuff and Bad Stuff, handed to the map in
 `north-vs-up-card-designs.md`. They live in the [card bank](../prototypes/12-card-bank.md), which is
-where the pools fill up from here; the exemplar set stays the twenty-five cards that tested the anatomy.
+where the pools fill up from here; the exemplar set stays the twenty-four cards that tested the anatomy.
 
 The bank ends with the places these cards sit against rulings already made — a mid-floor draw from a
 reward pool, a card that scouts the floor deck, and two cards with no cost field. Those are open, not
 fixed.
+
+
+## Ruled 2026-08-29 — `Pack Rat` is dropped
+
+`[you]` **`Pack Rat` is dropped from the exemplar set.** It was priced as the only way to carry Stuff
+between floors, and [ticket 24](24-the-scrap-mechanic.md) made carrying Stuff forward free for
+everyone. The difference it still made — keeping Stuff as playable Stuff rather than as deck stamina —
+did not justify a `Woah` slot at `Cost 2`. Removed from the
+[deliverable](../prototypes/12-exemplar-card-set.md#dropped-2026-08-29--pack-rat), the cutting sheet
+and the simulator.
+
+**The set is now 24 cards** — 10 player cards, 4 Good Stuff, 2 Bad Stuff, 4 rooms, 4 Stuff rooms.
+
+**This leaves one of the brief's requirements uncovered.** `[finding]` The brief asks for a card whose
+purchase is a genuinely hard call under ticket 09's acquisition rules, and `Pack Rat` was that card.
+Nothing replaces it, and the set is short one exemplar until something does.
+
+**It also exposed a duplication problem, now [ticket 25](25-single-source-for-the-card-list.md).**
+Dropping one card was a five-place edit, and the three copies of the card list had already drifted —
+the simulator ticket 10 depends on is running cards that do not exist. Ticket 25 blocks ticket 10.

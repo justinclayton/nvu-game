@@ -2,7 +2,7 @@
 
 Type: prototype
 Status: open
-Blocked by: 04, 07, 09, 11, 12
+Blocked by: 04, 07, 09, 11, 12, 25
 Map: [core design map](../map.md)
 
 ## Question
@@ -426,3 +426,11 @@ one piece of Stuff made permanent per ascension, paid for with one Scrapped star
    *+1 card is −1 consistency* governs it. The tax lets a player grow power while shrinking the deck.
    This ticket was already charged with proving the inversion governs growth; it now has to prove it
    against a mechanic designed to sidestep it.
+
+
+## Blocked by ticket 25, 2026-08-29
+
+[Ticket 25](25-single-source-for-the-card-list.md) found that the
+[encounter simulator](../../../prototype/encounter-sim.html) is running card text that does not match
+the cards — `Scrap Sense` is a different card in the simulator, and `Pack Rat` had no limit on it.
+This ticket's numbers come out of that simulator, so it cannot run until the card list is one thing.

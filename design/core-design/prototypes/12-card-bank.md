@@ -2,8 +2,9 @@
 
 The growing list of designed cards for the two per-character reward pools, for Good Stuff, and for
 Bad Stuff. Ticket 12 sized those pools at **45–55 cards per character**; the
-[exemplar set](12-exemplar-card-set.md) holds the twelve cards built to test the anatomy, and this
-file is where the rest accumulate.
+[exemplar set](12-exemplar-card-set.md) holds the twenty-five cards built to test the anatomy — 11
+player cards, 4 Good Stuff, 2 Bad Stuff, 4 rooms and 4 Stuff rooms — and this file is where the rest
+accumulate.
 
 Everything on this page is `[you, 2026-08-27]` — handed to the map in
 `north-vs-up-card-designs.md`. The exemplar set's cards are not repeated here.

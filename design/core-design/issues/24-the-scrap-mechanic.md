@@ -116,6 +116,17 @@ Two questions from [ticket 12](12-exemplar-card-set.md), neither ruled.
 here — **the Scrap tax** — but that was the agent's coinage while recording the rule, not a chosen
 term. Confirming it or replacing it is open.
 
+**Ruled 2026-08-29: net 0.** `[you]` The tax is **one-for-one** — a starter out, the kept piece of
+Stuff in, and the deck is the same size it was. The tax buys **quality, not leanness**.
+
+This corrects the section at the top of this ticket, which calls the tax "the game's deck-thinning
+engine" and says decks "get leaner and better and smaller". They get better, not smaller. It also
+settles what [ticket 09](09-card-acquisition-and-deckbuilding.md) cared about: **there is no way to
+shrink out of ticket 04's inversion.** Declining a reward is still the only thing that keeps a deck
+small, and that remains a decision not to grow rather than a way to shed.
+
+The original framing of the question, kept for the record:
+
 **Net −1 or net 0.** The section above calls the tax the game's deck-thinning engine and says decks
 "get leaner and better and smaller". That is only true if the Stuff being kept was already in the deck
 from step 2, so the Scrapped starter is a straight subtraction. If instead the tax *adds* the Stuff

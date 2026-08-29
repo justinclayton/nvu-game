@@ -404,3 +404,14 @@ a *deliberate cost* — Scrapping from hand, or Scrapping something that is not 
 exemplars owe one at all is open, given the ruling that such cards are rare.
 
 **The acquisition-inversion slot is still empty.** Nothing in this clarification fills it.
+
+
+## Ruled 2026-08-29 — the ascend swap is one-for-one
+
+`[you]` Scrapping a starter to keep a piece of Stuff leaves the deck **the same size**. The tax buys
+quality, not leanness, and **no mechanic shrinks a deck**. Recorded on
+[ticket 24](24-the-scrap-mechanic.md), which had said the opposite.
+
+For this ticket: ticket 04's inversion has no escape hatch, so a card that stresses the acquisition
+inversion is stressing something with no relief valve anywhere in the game. That raises what the still
+empty inversion slot has to carry.

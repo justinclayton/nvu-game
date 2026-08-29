@@ -53,12 +53,17 @@ face up.
 
 Packs gear away: +1 stamina now, and the weapon comes back later in the run.
 
-**Zen Mode** · Red · `Woah` · *(no cost)* · `Hold`
+**Zen Mode** · Red · `Woah` · `Cost 0` · `Hold`
 > *While you hold this, you do not exhaust cards from your deck to pay deck-exhaustion costs.*
-> *Play this to gain Power 4.*
 
-A state card. One of Red's five hand slots buys immunity to the self-damage on `Overdrive` and
-`Reckless Swing`, until he cashes it in for a big number.
+`[you, 2026-08-29]` A pure state card. One of Red's five hand slots buys immunity to the self-damage on
+`Overdrive` and `Reckless Swing`, and there is no cash-out — the *"Play this to gain Power 4"* line was
+removed, so the card only ever does its job by being held.
+
+**The way out of it is Exhausting it from hand to pay a cost**, which is what `Torn Seal` exists to
+forbid for itself, so the route is established. `[finding]` Worth watching against the cold review's
+finding that `Hold` cards jam a five-card hand: a card with no play line is one a player cannot
+voluntarily spend.
 
 ## Gray — the attuned logistician
 
@@ -102,12 +107,17 @@ The mirror of `Fast Follow`: Red draws attention, Gray scrounges.
 
 High-stakes thinning: trade a starter permanently for a premium card, mid-floor.
 
-**I Know Kung Fu** · Gray · `Woah` · *(no cost)* · `Hold`
-> *While you hold this, other cards you play that have Scramble also read "Draw 1 card."*
-> *Play this to gain Scramble 3.*
+**I Know Kung Fu** · Gray · `Woah` · `Cost 3` · `Hold`
+> *While `Holding` this, when you play a card with `Scramble`, draw 1 card.*
+> *Play: Power 5*
 
-The other state card. A permanent −1 hand size turns every basic Scramble play into a cantrip, until
-Gray breaks the state for an emergency escape.
+`[you, 2026-08-29]` The other state card, rewritten. A permanent −1 hand size turns every Scramble play
+into a cantrip, until Gray breaks the state for an emergency escape — and at `Cost 3` out of a five-card
+hand, breaking it is expensive.
+
+`[finding]` **It pays `Power 5`, not Scramble.** Red produces Power and Gray produces Scramble
+everywhere else in the set, so this is a Gray card whose cash-out is Red's stat. Recorded as written.
+[Ticket 13](../issues/13-red-and-gray-asymmetry.md) owns whether that crossing is intended.
 
 ## Good Stuff
 
@@ -196,10 +206,9 @@ Recorded, not fixed. Each is the human's call.
   *hand*, and says nothing about Stuff sitting **in a deck** — which is exactly where these two cards
   put it. Whether it is pulled back to the pool like other Stuff, or stays as a permanent deck card,
   decides whether these are tempo cards or permanent upgrades. Ticket 24's.
-- **`Zen Mode` and `I Know Kung Fu` have no cost and are played for a stat.** The anatomy in ticket
-  11 has one cost field; a card that is free to play but pays a hand slot to hold is a shape that
-  field cannot say. `Scrap Sense` prints a cost and `Hold` together, so this is a
-  real departure.
+- **~~`Zen Mode` and `I Know Kung Fu` have no cost.~~ Ruled 2026-08-29: both print one.** `[you]`
+  `Zen Mode` is `Cost 0` with its play line removed; `I Know Kung Fu` is `Cost 3` and pays `Power 5`.
+  **No card has an empty cost field**, so ticket 11's anatomy is not departed from after all.
 - **`Thick Slime` near-duplicates `Faceful of Slime`**, and three cards now carry `Scrap` in the name
   alongside the exemplar `Scrap Sense`. A naming pass is owed before print.
 - **~~`Spore Cloud` is rarity `Woah`.~~ Ruled 2026-08-29: Bad Stuff carries no rarity.** `[you]`

@@ -527,3 +527,14 @@ it carries **no rarity at all**, and no border colour.
 The exemplar Bad Stuff already printed none and the cutting sheet already renders them with a
 `norarity` border; the [card bank](../prototypes/12-card-bank.md)'s four entries were the only place
 rarity had crept onto Bad Stuff, and they have been stripped.
+
+
+## Confirmed 2026-08-29 — the cost field is never empty
+
+`[you]` The two cards that had no cost — `Zen Mode` and `I Know Kung Fu` in the
+[card bank](../prototypes/12-card-bank.md) — were rewritten to print one. `Zen Mode` is `Cost 0` and
+lost its play line entirely, so it is a card that only ever works by being held. `I Know Kung Fu` is
+`Cost 3`.
+
+**Every card prints a cost.** The shape this ticket worried it could not express — free to play, paid
+for with a hand slot — is expressed as `Cost 0` plus `Hold`, and needs no new field.

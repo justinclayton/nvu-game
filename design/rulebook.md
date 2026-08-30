@@ -1,66 +1,31 @@
-# NORTH vs UP
-## Rulebook — draft
+# *NORTH vs UP*
 
-*This is a drafting exercise, not a decision document. Every rule below is transcribed from a
-resolved ticket on the [core design map](core-design/map.md); nothing here was invented at writing
-time. Where a rule genuinely does not exist yet, the text says so in a box marked **NOT YET RULED**
-rather than guessing. — `[assembled by agent from your rulings]`*
+## Rulebook
 
 ---
 
-## The tower
+## Intro
 
-Something came down on the tower and moved in. **Red** and **Gray** are going up it anyway.
+Something came down on Pyramid Tower and moved in. **Red** and **Gray** are going in to find out what it is.
 
 Ten floors. On each one you land in the dark, run through whatever is in front of you, grab
-whatever is not nailed down, and kill the thing that is guarding the stairs. Then you do it again,
-higher up, with less to scavenge.
+whatever is not nailed down, and kill the thing that is guarding the stairs. If you're not prepared, you can always run -- but it'll keep rearing its ugly head until you take it down.
 
-You are not going to feel prepared. That is the game.
+To succeed, **Red and Gray must work together**. Each have their own strengths, and only through communication and teamwork will you be able to avoid doom.
 
----
-
-## 1. What you need to know first
-
-Read this part twice. Everything else is procedure.
-
-**Your deck is your health.** There is no health track, no counters, no numbers to write down. The
-stack of cards in front of you *is* how much fight you have left. When cards leave it, you are
-hurt. When it is empty, you are in trouble.
-
-**Your deck is also your fuel.** Playing a card costs other cards. Spending and bleeding are the
-same substance, so there is never a moment where you are healthy but broke.
-
-**So a bigger deck is a longer life and a worse one.** You get roughly one pass through your deck
-per floor. Every extra card you add is one more turn you survive — and one more card that comes up
-instead of the one you needed. Nothing in these rules stops you from taking every reward you are
-offered. It simply does not go well.
-
-**And your own deck is mostly tricks, not muscle.** The raw numbers come from **Stuff** you pick up
-on the floor, and almost all of it is gone by the time you climb the stairs — only what you are
-still holding comes with you. There is less of it on every floor.
+When you clear a floor, you move up. Because it's a pyramid, there will be fewer rooms to scavenge before you hit trouble all over again. When the final floor has been cleared and you reach the rooftop, you WIN!
 
 ---
 
-## 2. Players
+## About the game
 
-**Two characters are always in play.** Red is stocky, aggressive and headstrong. Gray is careful,
-attuned and resourceful.
+*North vs Up* is a cooperative roguelike deckbuilding card game intended for **two players**. One player plays as the aggressive and headstrong `Red`, while the other plays as the scrambling and resourceful `Gray`. Each character has their own deck that reflects these traits. As you ascend the tower, you will have opportunities to add new `Red`/`Gray`-specific cards to your deck. In addition, most floors will be littered with `Stuff` that you will need to collect and use in tandem with the other cards in your deck to progress.
 
-**The difference between them is their cards, and only their cards.** Red's cards carry `Power`;
-Gray's carry `Scramble`. Neither character has a special ability, and neither pays more or less than
-the other for what they do — Red turns a card into Power, Gray turns a card into Scramble. That is
-the whole of it. Each draws rewards from their own pool, so the two decks grow further apart as the
-run goes on. Neither is stronger.
+XXXXX
 
-Neither is locked out of the other's stat, either: **Stuff carries stats too**, so a character can
-be holding exactly what they are bad at.
+**Your deck is your HP total, called `Stamina`.** Be careful to not go through your deck too quickly, because if you run out of `Stamina`, you'll risk going `Down`. If at any time both players are `Down`, 
 
-- **Two players:** one of you runs Red, the other runs Gray.
-- **One player:** you run both.
-
-The rules are identical either way — there is no solo variant. **Everything is open information.**
-Hands are played face up on the table; hold nothing back from your partner.
+**Playing a card costs other cards.**
 
 ---
 
@@ -68,11 +33,12 @@ Hands are played face up on the table; hold nothing back from your partner.
 
 Each character has **three piles of their own**:
 
-| | |
-|---|---|
-| **Deck** | Face down. This is your health and your fuel. |
-| **Hand** | What you drew this turn. Maximum **5**. |
-| **Exhaust pile** | Face up. Cards you have spent or lost. |
+
+|                  |                                                 |
+| ---------------- | ----------------------------------------------- |
+| **Deck**         | Face down. This is your health and your energy. |
+| **Hand**         | What you drew this turn. Maximum **5**.          |
+| **Exhaust pile** | Face up. Cards you have spent or lost.          |
 
 There is **no discard pile** for a character, and **no shuffling during a floor** unless a rule
 explicitly says to.
@@ -238,7 +204,7 @@ can lose here is the Stuff you did not take.
 
 **Stuff** is what the floor hands you: a tool, a length of pipe, a faceful of slime. Stuff has
 `Hold`, so it stays in your hand across turns. It is playable like any card, and it is **ordinary
-fuel** — you may Exhaust it from hand to pay another card's cost.
+energy** — you may Exhaust it from hand to pay another card's cost.
 
 **Good Stuff** is earned. It is where **the bulk of your raw stats come from**, so paying a Stuff
 room's threshold is almost always the right call. It carries a rarity border.
@@ -377,16 +343,14 @@ up the stairs, Stuff included.
 
 **You lose** when both characters are Down at the start of a turn.
 
-Floor 10 has no Stuff rooms at all. Everything you bring to it, you brought from downstairs.
-
 ---
 
-## Appendix — open questions this draft could not answer
+## Appendix
 
-These are live tickets, listed so nobody mistakes a placeholder for a rule.
+## Playing Solo
 
-| Question | Ticket |
-|---|---|
-| Starting deck size and composition | 10 |
-| Whether a skipped reveal goes to the bottom of its pool | 09 |
-| The Enemy room's `Power` requirement per floor | 22 / 10 |
+*North vs Up* is intended to be a two-player cooperative experience. However, because nothing is hidden between players, this makes it also playable as a solo experience with almost no differences.
+
+When playing solo, you play as both `Red` and `Gray`. All decks, piles and other play spaces remain the same as the two-player version, but characters' hands are instead combined into one. When you draw, you can draw from the `Red` or `Gray` deck in any order, and when you play, you may play cards from your combined hand in any order. **However, when a `Red` card is being played, you may NOT pay for it using a `Gray` card, and vice versa**. Consider each action to be performed by one character, and all of it should make sense.
+
+**If you have more than two hands**, you may ignore this rule change and play as normal.

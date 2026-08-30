@@ -101,7 +101,7 @@ Nothing ever leaves the Scrapyard.
 That is the whole of setup. The floor gets no harder to fight as you climb — it gets emptier.
 
 > **NOT YET RULED — starting deck size and composition.** For prototype play, use **12 cards each**.
-> This is scaffolding, not a decision (ticket 10).
+> Treat this as a placeholder, not a ruling (ticket 10).
 
 ---
 
@@ -249,11 +249,11 @@ size that you have to pay to undo.
 
 Both kinds say which they are on the type line. Learn to read it at a glance.
 
-**Spent Stuff is exhausted like anything else** — it goes to the pile of whoever spent it, and
+**Spent Stuff is Exhausted like anything else** — it goes to the pile of whoever spent it, and
 sits there with the rest. The difference comes at ascension: Stuff in the exhaust piles is moved
 to the **Scrapyard**, for good, instead of shuffling back in. Stuff still held in hand is
 different: `Hold` carries it across the floor boundary like any other turn. And the Scrap tax
-(section 10) can save one exhausted piece from the Scrapyard, at a price.
+(section 10) can save one Exhausted piece from the Scrapyard, at a price.
 
 ---
 
@@ -273,9 +273,9 @@ equally likely at every floor.
 
 **Keywords:**
 
-- **`Hold`** — this card is not exhausted at end of turn. It stays in your hand, taking up one of
+- **`Hold`** — this card is not Exhausted at end of turn. It stays in your hand, taking up one of
   your five slots, until you play it or spend it. Playing it moves it to the play zone, where it is
-  exhausted like anything else.
+  Exhausted like anything else.
 - **`Exhaust X cards from your hand`** — a cost *you chose*. Pick which.
 - **`Exhaust X cards from your deck`** — a loss you *did not* choose. Off the top, face up, no
   choices.
@@ -306,7 +306,7 @@ partner still draws and pays normally.
 character's play-zone cleanup this turn with the **last stand cleanup** rules: **all cards in the
 character's play zone are shuffled into their deck, then 2 cards are Exhausted from the top of
 that deck** as the price of getting out. At that point, the character is no longer in last stand.
-Their hand is cleaned up as normal — unplayed cards are exhausted, `Hold` cards stay.
+Their hand is cleaned up as normal — unplayed cards are Exhausted, `Hold` cards stay.
 
 Every trip through last stand costs you two cards. You cannot live there — and if fewer than 2
 cards went into that shuffle, the tax meets an empty deck and sends you Down. Clearing the room is
@@ -347,7 +347,7 @@ Clearing the Enemy room ends the floor. Then, in order:
 1. **Move all Stuff in both exhaust piles to the Scrapyard.** It is out of the run for good —
    nothing ever leaves the Scrapyard. **This is the moment of the Scrap tax:** each character may
    keep **one** Stuff card from their own exhaust pile instead, by Scrapping **another card from
-   that exhaust pile in its place**. Kept Stuff stays ordinary Stuff — it will be spent, exhausted,
+   that exhaust pile in its place**. Kept Stuff stays ordinary Stuff — it will be spent, Exhausted,
    and facing the Scrapyard again a floor from now. There is nothing to track.
 2. **Shuffle each exhaust pile back into its deck.** Both characters are now at full health —
    including one who was Down. **A floor cleared is a full heal**, and nothing bad crosses a floor

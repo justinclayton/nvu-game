@@ -1,7 +1,7 @@
 # 10 — Sim the resource economy across a floor
 
 Type: prototype
-Status: open
+Status: resolved
 Blocked by: 04, 07, 09, 11, 12
 Map: [core design map](../map.md)
 
@@ -445,3 +445,31 @@ any card. It renders and runs `design/cards.yaml` through the generated `prototy
 The reconciliation changed **only displayed text** — every field the engine reads was verified
 byte-identical to what it read before — so the numbers already recorded above still stand, and the runs
 this ticket still owes are now run against the designed cards.
+
+## Answer — ruled satisfied, 2026-08-30
+
+`[you]` **The ticket's question is answered: the model is possible.** Enough simming has been done
+with the current state of `encounter-sim.html` to establish that deck-as-stamina produces a playable
+arc — pressure without unavoidable death, no stalls, no dominant degenerate line. That is what this
+ticket existed to find out, and it is found.
+
+`[you]` **The numbers this ticket still listed as owed are deliberately not ruled here.** The
+power-level of encounters and cards will be tuned **in tandem, over time, post-map** — they are
+balance work, which the map's destination already places out of scope. That disposition covers the
+enemy scaling rate, starting deck size, the Stuff room thresholds, and the floor-10 Stuff count (all
+remain placeholders in `design/cards.yaml`), and likewise the three Scrap-era questions the
+2026-08-27 entry handed here — the two-dial heal, the tax's effect on the escalation curve, and the
+tax as an escape from the inversion. They go to post-map tuning, not to another ticket on this map.
+
+**What stands from the work, for the record** (all detailed above): the structural findings are
+card-pool-independent and were the basis of rulings already made — the `Power 7` starter-hand
+ceiling, the inversion being dormant until thresholds strain a hand, the reshuffle never stalling,
+runs dying to thresholds rather than deck-out. The tuning sweeps are directional only, because the
+simulator never executed effect text; that caveat is why final numbers belong with the real card
+pool.
+
+**A limitation, recorded rather than fixed:** the simulator does not model the Scrap mechanic. The
+newer `prototype/rules-core-ts/` engine does, but is a rules-correctness prototype, not a batch
+instrument. If post-map tuning wants sweeps, `[agent recommends]` building the batch harness on the
+rules core rather than teaching the old simulator Scrap — one engine, the way ticket 25 made one
+card list.

@@ -456,6 +456,19 @@ head, reacting to what's in front of you, with little time for deep strategy.*
   judgement calls are flagged in the ticket for you to reverse if you disagree: the prose staying
   hand-written, and the bank staying out of the simulation. **Ticket 10 is unblocked.**
 
+- [Sim the resource economy across a floor](issues/10-sim-the-resource-economy.md) — `[you]` **Ruled
+  satisfied 2026-08-30: the model is possible.** Enough simming with `encounter-sim.html` established
+  that deck-as-stamina produces a playable arc — pressure without unavoidable death, no stalls, no
+  dominant degenerate line. The structural findings that rulings already rest on stand (the `Power 7`
+  starter-hand ceiling; the inversion dormant until thresholds strain a hand; the reshuffle never
+  stalling; runs dying to thresholds, not deck-out). **The numbers the ticket still owed are
+  deliberately not ruled**: the power-level of encounters and cards will be tuned **in tandem,
+  post-map** — that covers the enemy scaling rate, starting deck size, Stuff room thresholds, the
+  floor-10 Stuff count, and the three Scrap-era questions ticket 24 handed down. All stay
+  placeholders in `design/cards.yaml`. Recorded limitation: the simulator never modelled Scrap; the
+  newer `prototype/rules-core-ts/` engine does, and the ticket records the agent's recommendation to
+  build any post-map batch harness on it.
+
 ## Not yet specified
 
 <!-- In scope, but not sharp enough to ticket. Graduates into tickets as the frontier advances. -->

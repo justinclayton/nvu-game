@@ -2,7 +2,7 @@
 
 The growing list of designed cards for the two per-character reward pools, for Good Stuff, and for
 Bad Stuff. Ticket 12 sized those pools at **45–55 cards per character**; the
-[exemplar set](12-exemplar-card-set.md) holds the twenty-four cards built to test the anatomy — 10
+[exemplar set](12-exemplar-card-set.md) holds the twenty-five cards built to test the anatomy — 11
 player cards, 4 Good Stuff, 2 Bad Stuff, 4 rooms and 4 Stuff rooms — and this file is where the rest
 accumulate.
 
@@ -96,6 +96,21 @@ Gray as quartermaster, healing Red by stowing his heavy gear.
 > *If Red played a card this turn, draw 1 card.*
 
 The mirror of `Fast Follow`: Red draws attention, Gray scrounges.
+
+**All At Once** · Gray · `Woah` · `Cost 1` · *(conditional stat, in text)*
+> *Scramble equal to twice the number of other cards Gray played this turn.*
+
+`[you, 2026-08-29]` A ceiling card: on a stacked turn it clears a Hazard's top tier alone, and on an
+ordinary turn it is a blank that cost a card to draw and a card to play. It is worst exactly when Gray
+is short of cards, which is most of a late floor.
+
+`[you]` **A card of this kind should eventually exist in each character's pool**, because the balance
+of it may differ between Red and Gray. One instance is enough to test the concept, so the Red
+counterpart is **owed, not written**.
+
+Note it is **not** a duplicate of the exemplar `In Step`, which is also a Gray card with a conditional
+stat: `In Step` counts what **Red** played, this counts what **Gray** played. Cross-character against
+self-scaling.
 
 **Spot Salvage** · Gray · `Woah` · `Cost 2` · **Scramble 2**
 > *Scrap a card from your hand. If you do, draw 1 card from your reward pool into your hand.*

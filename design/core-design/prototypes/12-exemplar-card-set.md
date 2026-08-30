@@ -106,6 +106,26 @@ is the cheapest demonstration that the shared stat pool is worth having: it is a
 works because Red is at the table. Solo, it is the same card — which is ticket 03's claim made
 concrete.
 
+### Deadweight Grip · Red · `Woah` · `Cost 0` · *(no stat)* · `Hold`
+
+> *While you hold this, cards Red plays have +1 Power.*
+> *While you hold this, Red may not draw more than 2 cards on a turn.*
+
+**Stresses: the acquisition inversion.** Added 2026-08-29 `[you]` to fill the slot `Pack Rat` left when
+it was dropped. Taking it is a hard call in three directions: it is +1 card diluting a deck that gets
+one pass per floor; it occupies one of five hand slots for the rest of the run; and it caps Red's
+biggest lever, drawing wide on the turn the Enemy room lands. Against that, +1 Power on every card Red
+plays is permanent and needs no upkeep.
+
+`[finding]` **It has no play line, so it cannot be voluntarily spent.** The only exit is Exhausting it
+from hand to pay a cost, which throws the buff away for good. This is the same shape as `Zen Mode` in
+the card bank, and the same thing the cold review warned about — `Hold` cards jamming a five-card hand.
+Two cards now share that property.
+
+`[finding]` **Its draw cap is a Bad Stuff effect on a reward card.** `Faceful of Slime` limits drawing
+as a punishment; this card charges the same price for a benefit. Whether that reads as clever or as
+confusing is a table question for [ticket 20](../issues/20-encounter-tabletop-prototype.md).
+
 ### One Man's Junk · Gray · `Cool` · `Cost 0` · *(conditional stat, in text)*
 
 > *If any Bad Stuff is played this turn, Power 2 and Scramble 2.*
@@ -565,15 +585,17 @@ reports — a cheap, repeatable, grindingly good card may sit at `Fine` while a 
 
 The table above is the 2026-08-25 re-tiering as it happened and is left standing as the record of it.
 **Two 2026-08-29 changes moved it since:** `Pack Rat` was dropped, and `Scrap Sense` became
-`One Man's Junk` at `Cool`. The live distribution across 14 rarity-bearing cards is now:
+`One Man's Junk` at `Cool`. A third change added `Deadweight Grip` at `Woah`. The live distribution across 15
+rarity-bearing cards is now:
 
 | Tier | Count | Cards |
 |---|---|---|
 | `Fine` | 7 | the four starters, `Catch Your Breath`, `Pry Bar`, `Coil of Cable` |
 | `Cool` | 5 | `Reckless`, `Second Wind`, `In Step`, `One Man's Junk`, `Cutting Torch` |
-| `Woah` | 2 | `Both Barrels`, `Grav Harness` |
+| `Woah` | 3 | `Deadweight Grip`, `Both Barrels`, `Grav Harness` |
 
-`[finding]` **`Woah` is now down to two cards of fourteen**, from four. The tier the value axis was
+`[finding]` **`Woah` holds three of fifteen.** It fell to two when `Pack Rat` went and
+`One Man's Junk` was re-tiered, and `Deadweight Grip` brought it back to three. The tier the value axis was
 adopted to make meaningful is the thinnest it has been, and neither remaining card is a piece of the
 Stuff the axis was reversed to describe. Whether that is fine or wants another top-tier exemplar is
 open.

@@ -306,7 +306,7 @@ Sizing the pools is therefore still open, and is not answered by knowing where r
 
 `[you]` Card designs for both reward pools, Good Stuff and Bad Stuff, handed to the map in
 `north-vs-up-card-designs.md`. They live in the [card bank](../prototypes/12-card-bank.md), which is
-where the pools fill up from here; the exemplar set stays the twenty-four cards that tested the anatomy.
+where the pools fill up from here; the exemplar set stays the twenty-five cards that tested the anatomy.
 
 The bank ends with the places these cards sit against rulings already made — a mid-floor draw from a
 reward pool, a card that scouts the floor deck, and two cards with no cost field. Those are open, not
@@ -446,3 +446,25 @@ simulator. That is the fourth multi-place card edit today and the case
 is much simpler, so its tier looks wrong under the value axis; and three dated findings above now
 describe a card that no longer exists — most notably finding 3's cleanup-timing-hook evidence, which
 is down to `Reckless` alone.
+
+
+## Ruled 2026-08-29 — the acquisition-inversion slot is filled
+
+`[you]` **`Deadweight Grip`** joins the exemplar set — Red, `Woah`, `Cost 0`, no stat, `Hold`:
+
+> *While you hold this, cards Red plays have +1 Power.*
+> *While you hold this, Red may not draw more than 2 cards on a turn.*
+
+Chosen from three options an agent drafted. It fills the slot `Pack Rat` left: a permanent, upkeep-free
+buff on every Power card, paid for with a hand slot for the rest of the run and a cap on Red's biggest
+lever. **The set is 25 cards**, 11 of them player cards, and `Woah` is back to 3 of 15.
+
+**Also ruled** `[you]`: a card of the *ceiling* kind — a conditional stat that scales off the cards
+that character played this turn — **should eventually exist in both pools**, since the balance may
+differ between Red and Gray. One instance is enough to test the concept, so `All At Once` (Gray) is
+written into the [card bank](../prototypes/12-card-bank.md) and the Red counterpart is owed, not
+written.
+
+`[finding]` **Two exemplars now have no play line** — `Deadweight Grip` here and `Zen Mode` in the
+bank. Neither can be voluntarily spent out of a jammed hand; the only exit is Exhausting from hand to
+pay a cost. The cold review's hand-jam warning now has two cards behind it rather than none.

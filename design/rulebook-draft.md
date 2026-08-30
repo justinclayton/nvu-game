@@ -37,7 +37,8 @@ instead of the one you needed. Nothing in these rules stops you from taking ever
 offered. It simply does not go well.
 
 **And your own deck is mostly tricks, not muscle.** The raw numbers come from **Stuff** you pick up
-on the floor, which is gone the moment you climb the stairs. There is less of it on every floor.
+on the floor, and almost all of it is gone by the time you climb the stairs — only what you are
+still holding comes with you. There is less of it on every floor.
 
 ---
 
@@ -82,8 +83,9 @@ In the middle of the table:
 - The **active room zone** — one card, the room you are in right now.
 - The **play zone** — split into Red's side and Gray's side.
 
-Off to one side: **Red's reward pool**, **Gray's reward pool**, the **Good Stuff pool**, and the
-**Bad Stuff pool**.
+Off to one side: **Red's reward pool**, **Gray's reward pool**, the **Good Stuff pool**, the
+**Bad Stuff pool**, and the **Scrapyard** — a face-up heap where spent Stuff goes. Stuff never
+enters a character's exhaust pile.
 
 ---
 
@@ -92,7 +94,8 @@ Off to one side: **Red's reward pool**, **Gray's reward pool**, the **Good Stuff
 1. **Build the floor deck.** Take **1 Enemy room**, **3 Hazard rooms**, and **Stuff rooms equal to
    10 minus the floor number** — nine on floor 1, five on floor 5, none on floor 10. Shuffle them
    together face down.
-2. **Both characters start with empty hands.**
+2. **Hands stay as cleanup left them.** At the start of the game that means empty; on later
+   floors it means whatever `Hold` cards survived the last cleanup.
 3. Clear the play zone and the active room zone.
 
 That is the whole of setup. The floor gets no harder to fight as you climb — it gets emptier.
@@ -113,7 +116,7 @@ Turn the top card of the floor deck **face up** into the active room zone.
 
 You always see what you are facing **before you spend anything**.
 
-A room card prints a list of **`threshold: outcome`** lines, and — on most rooms — one **Flee** line.
+A room card prints a list of **`threshold: outcome`** lines and one **Flee** line.
 A room has no other behaviour. It does not act, move, or do anything but sit there being a problem.
 
 ### Phase 2 — Draw
@@ -121,13 +124,15 @@ A room has no other behaviour. It does not act, move, or do anything but sit the
 Each standing character draws cards from their deck into their hand, one at a time, stopping when
 they say they are done.
 
-- **You must draw at least 1.** There is no sitting a turn out.
+- **You must draw at least 1.** There is no sitting a turn out. (The one exception: a character in
+  last stand does not draw at all — see section 9.)
 - **You may not draw up while holding 5 or more cards.** `Hold` cards count against the cap. Stuff
   pushed into your hand by a room ignores it entirely.
 - **A full hand does not excuse the minimum.** Draw your one card anyway — and put it **straight
   into your exhaust pile** instead of your hand. A full hand costs you a card a turn; it never
   saves you one.
-- **Once anyone has begun playing cards, nobody may draw again.**
+- **The draw phase ends for both characters at once.** Nobody plays until everyone has finished
+  drawing, and once play begins, nobody draws.
 
 **This is the decision the game is made of.** Your whole hand is thrown away at the end of the turn
 regardless, so every card you draw is health spent whether you use it or not. Draw shallow and you
@@ -144,27 +149,31 @@ Both characters play cards into **their own side** of the play zone, in any orde
   characters** — Red's `Power 2` next to Gray's `Power 1, Scramble 2` gives the team 3 Power and 2
   Scramble.
 - **Conditional stats are recalculated every time the pool is read.** Nothing locks in on play.
-- **The instant the pool meets a room's threshold, that outcome happens.** Meeting `Power 3` with a
-  pool of 5 is exactly as good as meeting it with 3; the excess evaporates. There is no partial
-  progress and nothing carries to the next turn.
+- **Nothing resolves while you play.** The room is checked once, at the end of the phase. Play
+  everything you mean to play first.
 - **Declining is failing without trying.** You may spend nothing at all. You still had to draw.
 
-> **Hazard rooms are the exception to "the instant."** A Hazard prints two thresholds, and which one
-> you reached is settled when you **declare the play phase over** — not the moment the lower one is
-> met. Play everything you mean to play first.
+**When both characters have stopped, the play phase ends, and the room is checked.** Every room
+card prints one or more challenges, each a **`threshold: outcome`** line.
+
+- **If any challenge's threshold is met, the room is Cleared.** Resolve the card text of **every**
+  challenge you met. Meeting `Power 3` with a pool of 5 is exactly as good as meeting it with 3;
+  the excess evaporates. There is no partial progress and nothing carries to the next turn.
+- **If no threshold is met, the characters Flee.** Resolve the room's **Flee** line immediately.
+  Where a Flee line says *1 character*, the team chooses which one — they take all of it. There is
+  no splitting.
 
 ### Phase 4 — Cleanup
 
 Resolve these in order.
 
-1. **If the room is still in the active room zone**, you failed it. Apply its **Flee** line, then put
-   the card in the **Fled** pile. Where a Flee line says *1 character*, the team chooses which one —
-   they take all of it. There is no splitting.
+1. **If the characters Fled the room**, its Flee line has already been resolved; put the card in
+   the **Fled** pile — unless the Flee text itself Cleared the room, as a Stuff room's does.
 2. **If the room was Cleared**, put it in the **Cleared** heap. It is out of the game. Nobody ever
    counts that heap or asks it a question.
 3. **Exhaust both hands and the entire play zone.** Each card goes to the exhaust pile of the
-   character who owns it; Stuff goes to the pile of whoever played it. **`Hold` cards still in hand
-   are the only survivors.**
+   character who owns it; Stuff goes to the **Scrapyard**. **`Hold` cards still in hand are the
+   only survivors.**
 4. **If the floor draw pile is empty**, shuffle the **Fled** pile back into it.
 
 ### Phase 5 — Flip again
@@ -192,8 +201,8 @@ fight with a few scrapes to show. It will come back around when the Fled pile sh
 
 `Scramble X`. Running, not falling, not braining yourself on a pipe.
 
-A Hazard prints **two thresholds**. The lower one clears the room and moves you on. The higher one
-clears it **and pays a permanent card reward**: turn the top card of the named character's reward
+A Hazard prints **two challenges**. The lower threshold clears the room and moves you on. The
+higher one **also pays a permanent card reward**: turn the top card of the named character's reward
 pool face up, and take it or skip it. A taken card goes **on top of that character's deck** —
 nothing shuffles during a floor, so it is the very next card they draw.
 
@@ -204,7 +213,9 @@ A Hazard carries a **Flee** line.
 
 ### Stuff room
 
-The lowest thresholds in the deck, and **no Flee line at all**.
+The lowest thresholds in the deck, and a Flee line with no teeth:
+
+> *Flee: Clear the room, but leave empty-handed.*
 
 A Stuff room's challenge is **split per character**:
 
@@ -217,9 +228,9 @@ and never for your partner's. Some Stuff rooms print a richer second tier worth 
 What you earn is drawn **blind from the Good Stuff pool** and goes to that character's hand. A Down
 character earns nothing.
 
-**A Stuff room is Cleared either way.** It never goes to Fled and it never punishes you. Meet
-nothing and you simply walk out with nothing. The only thing you can lose here is the Stuff you did
-not take.
+**So a Stuff room is Cleared either way.** Its own Flee line clears it, so it never goes to Fled
+and it never punishes you. Meet nothing and you simply walk out with nothing. The only thing you
+can lose here is the Stuff you did not take.
 
 ---
 
@@ -238,8 +249,10 @@ size that you have to pay to undo.
 
 Both kinds say which they are on the type line. Learn to read it at a glance.
 
-**No Stuff survives a floor.** When you ascend, all Stuff is pulled out of the exhaust piles and set
-aside before anything is shuffled back — unless a card says otherwise.
+**Spent Stuff goes to the Scrapyard.** Whenever Stuff leaves your hand or the play zone — played
+and cleaned up, exhausted as fuel, lost to an effect — it lands in the Scrapyard, never in a
+character's exhaust pile. Stuff still held in hand at floor end is different: `Hold` carries it
+across the floor boundary like any other turn.
 
 ---
 
@@ -274,32 +287,41 @@ That distinction is deliberate. The wording alone tells you whether you had any 
 
 ### Last stand
 
-**When a character's deck is empty, that character is in last stand.** It is a state, not a timer.
-They are in it for exactly as long as their deck is empty.
+**When a character's deck runs out, last stand activates as the last step of the phase that
+emptied it.** Whatever else that phase does — a room check, a Flee line — resolves first, before
+the character is in last stand.
 
-**While in last stand, every card in that character's hand may be played at no cost.** Their partner
-still pays normally.
+**Last stand lasts until the end of the next play phase.** It resolves there, at that phase's room
+check, one way or the other: the room ends up Cleared and the character gets out (below), or it
+does not, and the team's Flee — taken while the character is in last stand — sends them Down. What
+matters is how the room ends, not how it got there: a Flee whose own text Clears the room, as a
+Stuff room's does, still counts as a Clear.
 
-**Getting out.** If the room is Cleared while a character is in last stand, then at that cleanup the
-cards that would have been exhausted from their **hand and play zone** are **shuffled back into
-their deck instead — minus 2, which are exhausted as the price of getting out.** The exhaust pile is
-not involved. `Hold` cards stay in hand and take no part in the shuffle.
+**While in last stand, a character does not draw** — there is nothing left to draw, and the
+mandatory draw does not apply — **and every card in their hand may be played at no cost.** Their
+partner still draws and pays normally.
 
-Their deck is no longer empty, so they are no longer in last stand.
+**Getting out.** If the room is Cleared while a character is in last stand, replace that
+character's play-zone cleanup this turn with the **last stand cleanup** rules: **all cards in the
+character's play zone are shuffled into their deck, then 2 cards are Exhausted from the top of
+that deck** as the price of getting out. At that point, the character is no longer in last stand.
+Their hand is cleaned up as normal — unplayed cards are exhausted, `Hold` cards stay.
 
-Every trip through last stand costs you two cards permanently. You cannot live there.
+Every trip through last stand costs you two cards. You cannot live there — and if fewer than 2
+cards went into that shuffle, the tax meets an empty deck and sends you Down. Clearing the room is
+not enough; you have to clear it with a board worth keeping.
 
 ### Going Down
 
 **A character goes Down when either of these happens:**
 
-- **something would Exhaust a card from their empty deck** — a Flee line, a card's own cost, anything
-  at all; or
+- **a card would be moved from the top of their deck, but the deck is empty**; or
 - **the team Flees the room while that character is in last stand.**
 
 In last stand you have to keep clearing rooms. Walking away is what finishes you.
 
-**Going Down discards your hand.** That is how you tell the two states apart on sight: a character in
+**Going Down empties your hand into your exhaust pile** — Stuff to the Scrapyard, as always. That
+is how you tell the two states apart on sight: a character in
 last stand has an empty deck but is still holding cards; a Down character has an empty deck *and* an
 empty hand. Nothing is flipped over and nothing is tracked.
 
@@ -321,7 +343,8 @@ Down when a turn begins, there is no flip. The game ends there.
 
 Clearing the Enemy room ends the floor. Then, in order:
 
-1. **Pull all Stuff out of both exhaust piles** and set it aside.
+1. **Empty the Scrapyard back into the Stuff pools** — Good Stuff to the Good Stuff pool, Bad
+   Stuff to the Bad Stuff pool. It starts every floor empty.
 2. **Shuffle each exhaust pile back into its deck.** Both characters are now at full health —
    including one who was Down. **A floor cleared is a full heal**, and nothing bad crosses a floor
    boundary. There are no lasting wounds in this game.
@@ -333,8 +356,9 @@ Clearing the Enemy room ends the floor. Then, in order:
 **Declining is a real play, not a forfeit.** A card you skip is consistency you keep. Read section 1
 again if that sounds wrong.
 
-> **NOT YET RULED —** what happens to cards left in a character's hand when the floor ends. Ascending
-> collects the exhaust piles and does not mention hands.
+**Hands follow the normal cleanup rules and nothing more.** The turn that cleared the Enemy room
+still gets its cleanup, so by the time you ascend a hand holds only `Hold` cards — and those carry
+up the stairs, Stuff included.
 
 ---
 
@@ -355,7 +379,5 @@ These are live tickets, listed so nobody mistakes a placeholder for a rule.
 | Question | Ticket |
 |---|---|
 | Starting deck size and composition | 10 |
-| Cards left in hand when a floor ends | 07 / 09 |
-| Which reward pool a Hazard's reveal line draws from, and whose deck it tops | 09 |
 | Whether a skipped reveal goes to the bottom of its pool | 09 |
 | The Enemy room's `Power` requirement per floor | 22 / 10 |

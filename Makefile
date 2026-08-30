@@ -10,7 +10,7 @@
 #   make sheet      open the print-and-cut card sheet
 #   make sim        open the encounter simulator
 
-.PHONY: help build check sweep sheet sim all
+.PHONY: help build check sweep sheet sim rules-core rules-core-check all
 
 help:
 	@echo "make build   regenerate prototype/cards.js from design/cards.yaml"
@@ -19,6 +19,8 @@ help:
 	@echo "make sweep   run the headless parameter sweep over the simulator"
 	@echo "make sheet   open the print-and-cut card sheet in a browser"
 	@echo "make sim     open the encounter simulator in a browser"
+	@echo "make rules-core        build and open the TypeScript rules-core prototype"
+	@echo "make rules-core-check  run its seeded smoke run and walkthrough check"
 	@echo ""
 	@echo "Change a card in design/cards.yaml, then: make build check"
 
@@ -39,5 +41,17 @@ sheet: build
 
 sim: build
 	open prototype/encounter-sim.html
+
+# The rules-core prototype (throwaway; see prototype/rules-core-ts/README.md).
+# Node strips the TypeScript itself, so there is still nothing to install.
+prototype/rules-core-demo.html: prototype/cards.js prototype/rules-core-ts/*.ts prototype/rules-core-ts/build.mjs
+	node prototype/rules-core-ts/build.mjs
+
+rules-core: prototype/rules-core-demo.html
+	open prototype/rules-core-demo.html
+
+rules-core-check: prototype/rules-core-demo.html
+	node prototype/rules-core-ts/smoke.ts
+	node prototype/rules-core-ts/verify.mjs
 
 all: check sweep

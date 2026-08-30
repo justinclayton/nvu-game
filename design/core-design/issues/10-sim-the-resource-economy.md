@@ -2,7 +2,7 @@
 
 Type: prototype
 Status: open
-Blocked by: 04, 07, 09, 11, 12, 25
+Blocked by: 04, 07, 09, 11, 12
 Map: [core design map](../map.md)
 
 ## Question
@@ -434,3 +434,14 @@ one piece of Stuff made permanent per ascension, paid for with one Scrapped star
 [encounter simulator](../../../prototype/encounter-sim.html) is running card text that does not match
 the cards — `Scrap Sense` is a different card in the simulator, and `Pack Rat` had no limit on it.
 This ticket's numbers come out of that simulator, so it cannot run until the card list is one thing.
+
+
+## Unblocked, 2026-08-29
+
+[Ticket 25](25-single-source-for-the-card-list.md) is resolved: the simulator no longer holds a copy of
+any card. It renders and runs `design/cards.yaml` through the generated `prototype/cards.js`, and
+`node tools/cards.mjs check` fails if that stops being true.
+
+The reconciliation changed **only displayed text** — every field the engine reads was verified
+byte-identical to what it read before — so the numbers already recorded above still stand, and the runs
+this ticket still owes are now run against the designed cards.

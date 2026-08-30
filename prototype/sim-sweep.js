@@ -33,6 +33,9 @@ function loadEngine() {
                    addEventListener:function(){} };
   ctx.window = ctx;
   vm.createContext(ctx);
+  /* The card list, exactly as the page loads it — one source (design/cards.yaml)
+     for the sheet, the page and this driver. Ticket 25. */
+  vm.runInContext(fs.readFileSync(path.join(__dirname, "cards.js"), "utf8"), ctx);
   vm.runInContext(src, ctx);
   return ctx;
 }

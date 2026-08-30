@@ -9,6 +9,17 @@
 #   exemplars  -> design/core-design/prototypes/12-exemplar-card-set.md
 #   bank       -> design/core-design/prototypes/12-card-bank.md
 #
+# Everything else that shows a card reads this file.
+#
+#   node tools/cards.mjs build    regenerates prototype/cards.js, which the cutting
+#                                 sheet, the simulator and sim-sweep.js all load
+#   node tools/cards.mjs check    fails if cards.js is stale, if either prose file
+#                                 disagrees with a card here, or if a prototype
+#                                 stops rendering the whole list
+#
+# So: change a card HERE, then run build. Never edit prototype/cards.js, and never
+# hand-write a card into a prototype again — that is what ticket 25 undid.
+#
 # EVERY NUMBER IS A PLACEHOLDER. Costs, stats and thresholds are ticket 10's.
 #
 # Fields

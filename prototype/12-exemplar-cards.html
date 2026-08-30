@@ -99,269 +99,172 @@
 </head>
 <body>
 
-<h1>North vs Up — exemplar cards, ticket 12</h1>
+<h1>North vs Up — the card list (print &amp; cut)</h1>
 <p class="note">
   Print at 100% (no “fit to page”) and cut on the borders — cards are 63&times;88mm, standard poker
   size, so they fit ordinary sleeves. Border colour is <b>rarity</b>, which signals a card's <b>value</b> — its ceiling when things
   line up. The most complex cards are always the highest rarity, because complexity has to pay for
   itself in what the card does. Every number here is a placeholder for ticket 10.
-  Nothing on this sheet is adopted design — see
-  <code>design/core-design/prototypes/12-exemplar-card-set.md</code>.
+  Every card here is rendered from <code>design/cards.yaml</code>, the one place a card is written down;
+  the design reasoning lives in <code>design/core-design/prototypes/12-exemplar-card-set.md</code> and
+  <code>12-card-bank.md</code>.
 </p>
 
-<h2>Red — starters</h2>
-<div class="sheet">
+<div id="sheets"></div>
 
-  <div class="card fine"><div class="rarity-bar"></div>
-    <div class="top"><div><div class="name">Shove</div><div class="typeline">Red</div></div><div class="cost">0</div></div>
-    <div class="art">ART</div>
-    <div class="stat">Power 1</div>
-    <div class="rarity-word">Fine</div>
-  </div>
+<script src="cards.js"></script>
+<script>
+"use strict";
+/* Every card on this sheet is rendered from design/cards.yaml, via the generated
+   prototype/cards.js. Nothing here is hand-written per card — that is ticket 25:
+   the card list has one source, and this sheet is a view of it. To change a card,
+   edit design/cards.yaml and run `node tools/cards.mjs build`. */
 
-  <div class="card fine"><div class="rarity-bar"></div>
-    <div class="top"><div><div class="name">Charge In</div><div class="typeline">Red</div></div><div class="cost">1</div></div>
-    <div class="art">ART</div>
-    <div class="stat">Power 3</div>
-    <div class="rarity-word">Fine</div>
-  </div>
+function esc(s) {
+  return String(s).replace(/[&<>]/g, function (c) {
+    return c === "&" ? "&amp;" : c === "<" ? "&lt;" : "&gt;";
+  });
+}
 
-</div>
+var TYPE_LINE = {
+  good_stuff: "Good Stuff",
+  bad_stuff: "Bad Stuff",
+  enemy_room: "Enemy",
+  hazard_room: "Hazard",
+  stuff_room: "Stuff"
+};
 
-<h2>Gray — starters</h2>
-<div class="sheet">
+function statLine(c) {
+  var parts = [];
+  if (c.power) parts.push("Power " + c.power);
+  if (c.scramble) parts.push("Scramble " + c.scramble);
+  if (parts.length) return '<div class="stat">' + parts.join(", ") + "</div>";
+  if (c.conditional_stat) return "";
+  return '<div class="nostat">no stat</div>';
+}
 
-  <div class="card fine"><div class="rarity-bar"></div>
-    <div class="top"><div><div class="name">Duck Under</div><div class="typeline">Gray</div></div><div class="cost">0</div></div>
-    <div class="art">ART</div>
-    <div class="stat">Scramble 1</div>
-    <div class="rarity-word">Fine</div>
-  </div>
+/* The YAML holds a card's text as one string; the sheet wants its clauses as
+   separate paragraphs, which is how they are printed. */
+function textBlock(c) {
+  if (!c.text) return "";
+  var clauses = c.text.split(/(?<=\.)\s+(?=[A-Z])/);
+  return '<div class="text">' + clauses.map(esc).join("<br><br>") + "</div>";
+}
 
-  <div class="card fine"><div class="rarity-bar"></div>
-    <div class="top"><div><div class="name">Pick The Lock</div><div class="typeline">Gray</div></div><div class="cost">1</div></div>
-    <div class="art">ART</div>
-    <div class="stat">Scramble 3</div>
-    <div class="rarity-word">Fine</div>
-  </div>
+function costPip(c) {
+  if (c.cost === null || c.cost === undefined) return '<div class="cost">?</div>';
+  return '<div class="cost">' + c.cost + "</div>";
+}
 
-</div>
+function playerCardHTML(c) {
+  var rarityClass = c.rarity ? c.rarity.toLowerCase() : "norarity";
+  return '<div class="card ' + rarityClass + '"><div class="rarity-bar"></div>' +
+    '<div class="top"><div><div class="name">' + esc(c.name) + "</div>" +
+    '<div class="typeline">' + esc(c.owner || TYPE_LINE[c.kind]) + "</div></div>" +
+    costPip(c) + "</div>" +
+    '<div class="art">ART</div>' +
+    (c.hold ? '<div class="hold">Hold</div>' : "") +
+    statLine(c) +
+    textBlock(c) +
+    (c.rarity ? '<div class="rarity-word">' + esc(c.rarity) + "</div>" : "") +
+    "</div>";
+}
 
-<h2>Reward cards</h2>
-<div class="sheet">
+function roomCardHTML(c) {
+  var lines = (c.thresholds || []).map(function (t) {
+    return '<div class="th"><b>' + esc(t.stat) + " " + t.value + ":</b> " + esc(t.outcome) + "</div>";
+  }).join("");
+  var foot = c.flee
+    ? '<div class="flee"><b>Flee:</b> ' + esc(c.flee) + "</div>"
+    : '<div class="flee"><b>No Flee line.</b> Cleared either way.</div>';
+  return '<div class="card room"><div class="rarity-bar"></div>' +
+    '<div class="top"><div><div class="name">' + esc(c.name) + "</div>" +
+    '<div class="typeline">' + esc(TYPE_LINE[c.kind]) + "</div></div></div>" +
+    '<div class="art">ART</div>' +
+    '<div class="thresholds">' + lines + "</div>" + foot + "</div>";
+}
 
-  <div class="card fine"><div class="rarity-bar"></div>
-    <div class="top"><div><div class="name">Catch Your Breath</div><div class="typeline">Gray</div></div><div class="cost">0</div></div>
-    <div class="art">ART</div>
-    <div class="nostat">no stat</div>
-    <div class="text">Look at the top 2 cards of your deck. Put them back in either order.</div>
-    <div class="rarity-word">Fine</div>
-  </div>
+function cardHTML(c) {
+  return c.kind.indexOf("room") !== -1 ? roomCardHTML(c) : playerCardHTML(c);
+}
 
-  <div class="card cool"><div class="rarity-bar"></div>
-    <div class="top"><div><div class="name">Reckless</div><div class="typeline">Red</div></div><div class="cost">0</div></div>
-    <div class="art">ART</div>
-    <div class="stat">Power 5</div>
-    <div class="text">At cleanup, Red Exhausts 3 from deck.</div>
-    <div class="rarity-word">Cool</div>
-  </div>
+/* The sheet's sections, in cutting order. Each is a filter over the one list. */
+function is(set, fn) {
+  return function (c) { return c.set === set && fn(c); };
+}
+function player(owner, starter) {
+  return function (c) {
+    return c.kind === "player" && c.owner === owner && Boolean(c.starter) === starter;
+  };
+}
+function kind(k) {
+  return function (c) { return c.kind === k; };
+}
 
-  <div class="card cool"><div class="rarity-bar"></div>
-    <div class="top"><div><div class="name">Second Wind</div><div class="typeline">Red</div></div><div class="cost">1</div></div>
-    <div class="art">ART</div>
-    <div class="nostat">no stat</div>
-    <div class="text">Shuffle 3 cards from Red’s exhaust pile into Red’s deck.</div>
-    <div class="rarity-word">Cool</div>
-  </div>
+var SECTIONS = [
+  { h: "Red — starters", pick: is("exemplar", player("Red", true)) },
+  { h: "Gray — starters", pick: is("exemplar", player("Gray", true)) },
+  { h: "Reward cards", pick: is("exemplar", function (c) {
+      return c.kind === "player" && !c.starter;
+    }) },
+  { h: "Good Stuff — a face-down side pool, drawn blind when a Stuff room pays out",
+    pick: is("exemplar", kind("good_stuff")) },
+  { h: "Bad Stuff — no stat field, no rarity", pick: is("exemplar", kind("bad_stuff")) },
+  { h: "Rooms", pick: is("exemplar", function (c) {
+      return c.kind === "enemy_room" || c.kind === "hazard_room";
+    }) },
+  { h: "Stuff rooms — the room and the item are different cards",
+    note: "Each line is read against <b>one character's own side of the play zone</b>, never the " +
+      "shared pool, so you pay for your own item and never for your partner's. <b>Every threshold " +
+      "number on these four cards is a placeholder</b> — how low the gate sits, and what the second " +
+      "tier costs, are ticket 10 numbers and are not decided. The room is Cleared whether or not " +
+      "anyone meets anything; what you lose by meeting nothing is only the Stuff. What you earn is " +
+      "drawn face down from the Good Stuff pool.",
+    pick: is("exemplar", kind("stuff_room")) },
 
-  <div class="card cool"><div class="rarity-bar"></div>
-    <div class="top"><div><div class="name">In Step</div><div class="typeline">Gray</div></div><div class="cost">1</div></div>
-    <div class="art">ART</div>
-    <div class="nostat">no stat</div>
-    <div class="text">Power equal to twice the number of cards Red has played into the play zone this turn.</div>
-    <div class="rarity-word">Cool</div>
-  </div>
+  { divider: "The card bank — designed, not in the exemplar set",
+    note: "These are the cards accumulating in <code>design/core-design/prototypes/12-card-bank.md</code>. " +
+      "They are candidates for the reward pools, not ratified design, and they are printed here so the " +
+      "sheet holds the whole designed set. Cut them into a separate pile." },
+  { h: "Bank — Red", pick: is("bank", function (c) {
+      return c.kind === "player" && c.owner === "Red";
+    }) },
+  { h: "Bank — Gray", pick: is("bank", function (c) {
+      return c.kind === "player" && c.owner === "Gray";
+    }) },
+  { h: "Bank — Good Stuff", pick: is("bank", kind("good_stuff")) },
+  { h: "Bank — Bad Stuff", pick: is("bank", kind("bad_stuff")) }
+];
 
-  <div class="card woah"><div class="rarity-bar"></div>
-    <div class="top"><div><div class="name">Deadweight Grip</div><div class="typeline">Red</div></div><div class="cost">0</div></div>
-    <div class="art">ART</div>
-    <div class="hold">Hold</div>
-    <div class="nostat">no stat</div>
-    <div class="text">While you hold this, cards Red plays have +1 Power.<br><br>
-      While you hold this, Red may not draw more than 2 cards on a turn.</div>
-    <div class="rarity-word">Woah</div>
-  </div>
+(function render() {
+  var out = "", seen = 0;
+  SECTIONS.forEach(function (s) {
+    if (s.divider) {
+      out += '<h1 style="margin-top:12mm">' + esc(s.divider) + "</h1>";
+      if (s.note) out += '<p class="note">' + s.note + "</p>";
+      return;
+    }
+    var cards = NVU_CARDS.cards.filter(s.pick);
+    if (!cards.length) return;
+    seen += cards.length;
+    out += "<h2>" + esc(s.h) + " <span style='font-weight:400;text-transform:none;letter-spacing:0'>(" +
+      cards.length + ")</span></h2>";
+    if (s.note) out += '<p class="note">' + s.note + "</p>";
+    out += '<div class="sheet">' + cards.map(cardHTML).join("") + "</div>";
+  });
+  document.getElementById("sheets").innerHTML = out;
 
-  <div class="card cool"><div class="rarity-bar"></div>
-    <div class="top"><div><div class="name">One Man's Junk</div><div class="typeline">Gray</div></div><div class="cost">0</div></div>
-    <div class="art">ART</div>
-    <div class="text">If any Bad Stuff is played this turn, Power 2 and Scramble 2.</div>
-    <div class="rarity-word">Cool</div>
-  </div>
-
-  <div class="card woah"><div class="rarity-bar"></div>
-    <div class="top"><div><div class="name">Both Barrels</div><div class="typeline">Red</div></div><div class="cost">2</div></div>
-    <div class="art">ART</div>
-    <div class="stat">Power 2</div>
-    <div class="text">If Gray has played at least one card this turn, Power 5 instead.<br><br>
-      If this Clears a room, return this to Red’s hand instead of Exhausting it.</div>
-    <div class="rarity-word">Woah</div>
-  </div>
-
-</div>
-
-<h2>Good Stuff — a face-down side pool, drawn blind when a Stuff room pays out</h2>
-<div class="sheet">
-
-  <div class="card fine"><div class="rarity-bar"></div>
-    <div class="top"><div><div class="name">Pry Bar</div><div class="typeline">Good Stuff</div></div><div class="cost">0</div></div>
-    <div class="art">ART</div>
-    <div class="hold">Hold</div>
-    <div class="stat">Power 3</div>
-    <div class="rarity-word">Fine</div>
-  </div>
-
-  <div class="card fine"><div class="rarity-bar"></div>
-    <div class="top"><div><div class="name">Coil of Cable</div><div class="typeline">Good Stuff</div></div><div class="cost">0</div></div>
-    <div class="art">ART</div>
-    <div class="hold">Hold</div>
-    <div class="stat">Scramble 3</div>
-    <div class="rarity-word">Fine</div>
-  </div>
-
-  <div class="card cool"><div class="rarity-bar"></div>
-    <div class="top"><div><div class="name">Cutting Torch</div><div class="typeline">Good Stuff</div></div><div class="cost">1</div></div>
-    <div class="art">ART</div>
-    <div class="hold">Hold</div>
-    <div class="stat">Power 5</div>
-    <div class="rarity-word">Cool</div>
-  </div>
-
-  <div class="card woah"><div class="rarity-bar"></div>
-    <div class="top"><div><div class="name">Grav Harness</div><div class="typeline">Good Stuff</div></div><div class="cost">1</div></div>
-    <div class="art">ART</div>
-    <div class="hold">Hold</div>
-    <div class="stat">Power 3, Scramble 3</div>
-    <div class="text">When you play this, one character may draw 1 card, ignoring the hand cap.</div>
-    <div class="rarity-word">Woah</div>
-  </div>
-
-</div>
-
-<h2>Bad Stuff — no stat field, no rarity</h2>
-<div class="sheet">
-
-  <div class="card norarity"><div class="rarity-bar"></div>
-    <div class="top"><div><div class="name">Faceful of Slime</div><div class="typeline">Bad Stuff</div></div><div class="cost">0</div></div>
-    <div class="art">ART</div>
-    <div class="hold">Hold</div>
-    <div class="text">While you hold this, you may not draw more than 1 card during your draw phase.<br><br>
-      Play this to be rid of it.</div>
-  </div>
-
-  <div class="card norarity"><div class="rarity-bar"></div>
-    <div class="top"><div><div class="name">Torn Seal</div><div class="typeline">Bad Stuff</div></div><div class="cost">2</div></div>
-    <div class="art">ART</div>
-    <div class="hold">Hold</div>
-    <div class="text">This may not be Exhausted to pay a cost.<br><br>
-      Play this to be rid of it.</div>
-  </div>
-
-</div>
-
-<h2>Rooms</h2>
-<div class="sheet">
-
-  <div class="card room"><div class="rarity-bar"></div>
-    <div class="top"><div><div class="name">Sump Crawler</div><div class="typeline">Enemy</div></div></div>
-    <div class="art">ART</div>
-    <div class="thresholds">
-      <div class="th"><b>Power 5:</b> Clear</div>
-    </div>
-    <div class="flee"><b>Flee:</b> 1 character Exhausts 2 from deck</div>
-  </div>
-
-  <div class="card room"><div class="rarity-bar"></div>
-    <div class="top"><div><div class="name">The Thing In The Stairwell</div><div class="typeline">Enemy</div></div></div>
-    <div class="art">ART</div>
-    <div class="thresholds">
-      <div class="th"><b>Power 9:</b> Clear</div>
-      <div class="th"><b>Power 12:</b> Clear — one character reveals reward. You may add it to the top of your deck or skip it.</div>
-    </div>
-    <div class="flee"><b>Flee:</b> both characters Exhaust 3 from deck</div>
-  </div>
-
-  <div class="card room"><div class="rarity-bar"></div>
-    <div class="top"><div><div class="name">Collapsed Stair</div><div class="typeline">Hazard</div></div></div>
-    <div class="art">ART</div>
-    <div class="thresholds">
-      <div class="th"><b>Scramble 2:</b> Clear</div>
-      <div class="th"><b>Scramble 5:</b> Clear — one character reveals reward. You may add it to the top of your deck or skip it.</div>
-    </div>
-    <div class="flee"><b>Flee:</b> 1 character Exhausts 3 from deck</div>
-  </div>
-
-  <div class="card room"><div class="rarity-bar"></div>
-    <div class="top"><div><div class="name">Ruptured Coolant Line</div><div class="typeline">Hazard</div></div></div>
-    <div class="art">ART</div>
-    <div class="thresholds">
-      <div class="th"><b>Scramble 4:</b> Clear</div>
-      <div class="th"><b>Scramble 7:</b> Clear — one character reveals reward. You may add it to the top of your deck or skip it.</div>
-    </div>
-    <div class="flee"><b>Flee:</b> both characters Exhaust 1 from deck, and 1 character takes a Bad Stuff</div>
-  </div>
-
-</div>
-
-<h2>Stuff rooms — the room and the item are different cards</h2>
-<p class="note">Each line is read against <b>one character's own side of the play zone</b>, never the shared pool, so you pay for your own item and never for your partner's. The lines are <b>not addressed to Red or Gray</b>: the room prints a Power line and a Scramble line, and the pair decide between them who takes which, one line each. <b>Every threshold number on these four cards is a placeholder</b> — how low the gate sits, and what the second tier costs, are ticket 10 numbers and are not decided. The room is Cleared whether or not anyone meets anything; what you lose by meeting nothing is only the Stuff. What you earn is drawn face down from the Good Stuff pool.</p>
-<div class="sheet">
-
-  <div class="card room"><div class="rarity-bar"></div>
-    <div class="top"><div><div class="name">Sorting Room</div><div class="typeline">Stuff</div></div></div>
-    <div class="art">ART</div>
-    <div class="thresholds">
-      <div class="th"><b>Power 1:</b> A character takes 1 Good Stuff.</div>
-      <div class="th"><b>Scramble 1:</b> The other takes 1 Good Stuff.</div>
-    </div>
-    <div class="flee"><b>No Flee line.</b> Cleared either way.</div>
-  </div>
-
-  <div class="card room"><div class="rarity-bar"></div>
-    <div class="top"><div><div class="name">Ration Locker</div><div class="typeline">Stuff</div></div></div>
-    <div class="art">ART</div>
-    <div class="thresholds">
-      <div class="th"><b>Power 1:</b> A character takes 1 Good Stuff.</div>
-      <div class="th"><b>Scramble 1:</b> The other takes 1 Good Stuff.</div>
-      <div class="th"><b>Power 3:</b> That character takes 2 instead.</div>
-      <div class="th"><b>Scramble 3:</b> The other takes 2 instead.</div>
-    </div>
-    <div class="flee"><b>No Flee line.</b> Cleared either way.</div>
-  </div>
-
-  <div class="card room"><div class="rarity-bar"></div>
-    <div class="top"><div><div class="name">Tool Cage</div><div class="typeline">Stuff</div></div></div>
-    <div class="art">ART</div>
-    <div class="thresholds">
-      <div class="th"><b>Power 1:</b> A character takes 1 Good Stuff.</div>
-      <div class="th"><b>Scramble 1:</b> The other takes 1 Good Stuff.</div>
-    </div>
-    <div class="flee"><b>No Flee line.</b> Cleared either way.</div>
-  </div>
-
-  <div class="card room"><div class="rarity-bar"></div>
-    <div class="top"><div><div class="name">Spill of Cargo</div><div class="typeline">Stuff</div></div></div>
-    <div class="art">ART</div>
-    <div class="thresholds">
-      <div class="th"><b>Power 1:</b> A character takes 1 Good Stuff.</div>
-      <div class="th"><b>Scramble 1:</b> The other takes 1 Good Stuff.</div>
-      <div class="th"><b>Power 3:</b> That character takes 2 instead.</div>
-      <div class="th"><b>Scramble 3:</b> The other takes 2 instead.</div>
-    </div>
-    <div class="flee"><b>No Flee line.</b> Cleared either way.</div>
-  </div>
-
-</div>
+  /* Loud, on the page, if a card in the list reaches no section. */
+  if (seen !== NVU_CARDS.cards.length) {
+    var missed = NVU_CARDS.cards.filter(function (c) {
+      return !SECTIONS.some(function (s) { return s.pick && s.pick(c); });
+    }).map(function (c) { return c.name; });
+    document.getElementById("sheets").insertAdjacentHTML("afterbegin",
+      '<p class="note" style="color:#b00"><b>' + missed.length +
+      " card(s) in cards.yaml are on no section of this sheet:</b> " + esc(missed.join(", ")) + "</p>");
+  }
+})();
+</script>
 
 </body>
 </html>

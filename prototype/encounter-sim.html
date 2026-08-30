@@ -376,9 +376,11 @@
       <li><strong>Ascending</strong> is modelled only as much as a multi-floor batch run needs: Stuff is
         pulled out, exhaust piles shuffle back, a reward is taken. The reward is a generic card, because
         which pool a reveal draws from is still unstated.</li>
-      <li><strong>Card effect text is displayed, never executed.</strong> Conditional stats, <code>Pack
-        Rat</code>, <code>Faceful of Slime</code> and the rest are read by a human at the table, not by
-        this engine. Stats, costs and <code>Hold</code> are all it understands.</li>
+      <li><strong>Card effect text is displayed, never executed.</strong> Conditional stats,
+        <code>Deadweight Grip</code>, <code>Faceful of Slime</code> and the rest are read by a human at
+        the table, not by this engine. Stats, costs and <code>Hold</code> are all it understands.</li>
+      <li><strong>Only the exemplar set is simulated.</strong> The card bank is shown on the Cards tab
+        for reference, but nothing in it enters a deck, a reward pool or a floor deck.</li>
       <li><strong>Red/Gray asymmetry</strong> is only what the exemplar cards print.</li>
       <li>The <strong>reward pool problem</strong> from ticket 12 is a component-count question and is
         not simulated.</li>
@@ -388,76 +390,100 @@
 
 </main>
 
+<script src="cards.js"></script>
 <script>
 "use strict";
 
 /* ================================================================ data
-   The exemplar set from ticket 12, as printed. Unratified.
-   Player card: {name, owner, cost, power, scramble, hold, rarity, text}
-   Room card:   {name, kind, ...}
-*/
+   Every card comes from design/cards.yaml, through the generated cards.js
+   loaded above — ticket 25. No card is written down here.
 
-var PLAYER_CARDS = [
-  { name:"Shove",            owner:"Red",  cost:0, power:1, rarity:"Fine", starter:"cheap" },
-  { name:"Charge In",        owner:"Red",  cost:1, power:3, rarity:"Fine", starter:"dear" },
-  { name:"Duck Under",       owner:"Gray", cost:0, scramble:1, rarity:"Fine", starter:"cheap" },
-  { name:"Pick The Lock",    owner:"Gray", cost:1, scramble:3, rarity:"Fine", starter:"dear" },
-  { name:"Catch Your Breath",owner:"Gray", cost:0, rarity:"Fine",
-    text:"Look at the top 2 cards of your deck. Put them back in either order." },
-  { name:"Reckless",         owner:"Red",  cost:0, power:5, rarity:"Cool",
-    text:"Exhaust 1 card from your deck." },
-  { name:"Second Wind",      owner:"Red",  cost:1, rarity:"Cool",
-    text:"Draw 2 cards, ignoring the hand cap." },
-  { name:"In Step",          owner:"Gray", cost:1, rarity:"Cool", cond:true,
-    text:"Scramble equal to the number of cards Red has in the play zone." },
-  { name:"Deadweight Grip",  owner:"Red",  cost:0, rarity:"Woah", hold:true,
-    text:"Hold. Cards Red plays have +1 Power. Red may not draw more than 2 cards on a turn." },
-  { name:"One Man's Junk",   owner:"Gray", cost:0, rarity:"Cool", cond:true,
-    text:"If any Bad Stuff is played this turn, Power 2 and Scramble 2." },
-  { name:"Both Barrels",     owner:"Red",  cost:2, power:2, rarity:"Woah",
-    text:"Power 2 for each other Red card in the play zone." }
-];
+   What this section does is *shape* that data for the engine, which needs a
+   few things a printed card does not carry: which starter is the cheap one, a
+   room's threshold as a number it can compare, and a Flee line as an
+   instruction rather than a sentence. Anything it cannot shape throws, loudly,
+   rather than quietly simulating a card that is not the designed one.
 
-var GOOD_STUFF = [
-  { name:"Pry Bar",       owner:"GoodStuff", cost:0, power:3, hold:true, rarity:"Fine" },
-  { name:"Coil of Cable", owner:"GoodStuff", cost:0, scramble:3, hold:true, rarity:"Fine" },
-  { name:"Cutting Torch", owner:"GoodStuff", cost:1, power:5, hold:true, rarity:"Cool" },
-  { name:"Grav Harness",  owner:"GoodStuff", cost:1, power:3, scramble:3, hold:true, rarity:"Woah",
-    text:"When you play this, one character may draw 1 card, ignoring the hand cap." }
-];
+   The simulator runs the ratified exemplar set only. The bank cards are
+   candidates, not adopted design, so they are in no pool here — adding them
+   would change the numbers ticket 10 is asking this simulator for. */
 
-var BAD_STUFF = [
-  { name:"Faceful of Slime", owner:"BadStuff", cost:0, hold:true,
-    text:"While you hold this, you may not draw more than 1 card during your draw phase. Play this to be rid of it." },
-  { name:"Torn Seal",        owner:"BadStuff", cost:2, hold:true,
-    text:"This may not be Exhausted to pay a cost. Play this to be rid of it." }
-];
+function exemplarsOfKind(k) {
+  return NVU_CARDS.exemplars.filter(function (c) { return c.kind === k; });
+}
+
+/* Stats, costs and Hold are all the engine understands. Rules text is carried
+   through for display only — it is read by a human at the table. */
+function playerShape(c, owner) {
+  return {
+    name: c.name,
+    owner: owner || c.owner,
+    cost: c.cost === null ? 0 : c.cost,
+    rarity: c.rarity,
+    power: c.power,
+    scramble: c.scramble,
+    hold: c.hold,
+    cond: c.conditional_stat,
+    text: c.text,
+    /* Both characters start with a cheap card and a dear one; which is which
+       is the cost the card prints. */
+    starter: c.starter ? (c.cost === 0 ? "cheap" : "dear") : undefined
+  };
+}
+
+var PLAYER_CARDS = exemplarsOfKind("player").map(function (c) { return playerShape(c); });
+var GOOD_STUFF = exemplarsOfKind("good_stuff").map(function (c) { return playerShape(c, "GoodStuff"); });
+var BAD_STUFF = exemplarsOfKind("bad_stuff").map(function (c) { return playerShape(c, "BadStuff"); });
+
+/* A Flee line is printed as a sentence. The engine needs who pays and how much,
+   so the sentence is read back — and if a card ever prints a Flee line in a
+   shape this does not know, that is drift, and it stops the simulator. */
+function parseFlee(sentence, name) {
+  if (!sentence) return { who: "none", n: 0 };
+  var m = sentence.match(
+    /^(1 character Exhausts|both characters Exhaust) (\d+) from deck(, and 1 character takes a Bad Stuff)?\.?$/
+  );
+  if (!m) throw new Error('cards.yaml: cannot read the Flee line on "' + name + '": ' + sentence);
+  var f = { who: m[1].indexOf("both") === 0 ? "both" : "one", n: Number(m[2]) };
+  if (m[3]) f.badStuff = 1;
+  return f;
+}
 
 /* Rooms. Enemy and Hazard read the SHARED pool. Stuff rooms read each
    character's OWN side, and their numbers come from the settings, because
-   they are unruled. */
-var ENEMY_ROOMS = [
-  { name:"Sump Crawler", kind:"Enemy", stat:"power", basePower:5,
-    flee:{ who:"one", n:2 } },
-  { name:"The Thing In The Stairwell", kind:"Enemy", stat:"power", basePower:9,
-    tier2:{ add:3, reward:true }, flee:{ who:"both", n:3 } }
-];
+   they are unruled — so a Stuff room needs only whether it prints a second
+   tier (`rich`). */
+function roomShape(c) {
+  var th = c.thresholds || [];
+  if (!th.length) throw new Error('cards.yaml: room "' + c.name + '" prints no thresholds');
+  var d = { name: c.name };
+  if (c.kind !== "stuff_room") {
+    /* A Stuff room has no single stat and no Flee line: it prints one line of
+       each stat, and it is Cleared either way. */
+    d.stat = th[0].stat.toLowerCase();
+    d.flee = parseFlee(c.flee, c.name);
+  }
 
-var HAZARD_ROOMS = [
-  { name:"Collapsed Stair", kind:"Hazard", stat:"scramble", t1:2, t2:5, t2reward:true,
-    flee:{ who:"one", n:3 } },
-  { name:"Ruptured Coolant Line", kind:"Hazard", stat:"scramble", t1:4, t2:7, t2reward:true,
-    flee:{ who:"both", n:1, badStuff:1 } }
-];
+  if (c.kind === "enemy_room") {
+    d.kind = "Enemy";
+    d.basePower = th[0].value;
+    if (th[1]) d.tier2 = { add: th[1].value - th[0].value, reward: /reward/.test(th[1].outcome) };
+  } else if (c.kind === "hazard_room") {
+    d.kind = "Hazard";
+    d.t1 = th[0].value;
+    if (th[1]) { d.t2 = th[1].value; d.t2reward = /reward/.test(th[1].outcome); }
+  } else if (c.kind === "stuff_room") {
+    d.kind = "Stuff";
+    d.rich = th.length > 2;
+  } else {
+    throw new Error('cards.yaml: unknown room kind "' + c.kind + '" on ' + c.name);
+  }
+  return d;
+}
 
-/* Four Stuff rooms — new, per ticket 22's 2026-08-25 hand-down.
-   `rich` marks the rooms that print a second tier. */
-var STUFF_ROOMS = [
-  { name:"Sorting Room",    kind:"Stuff", rich:false },
-  { name:"Ration Locker",   kind:"Stuff", rich:true },
-  { name:"Tool Cage",       kind:"Stuff", rich:false },
-  { name:"Spill of Cargo",  kind:"Stuff", rich:true }
-];
+var ENEMY_ROOMS = exemplarsOfKind("enemy_room").map(roomShape);
+var HAZARD_ROOMS = exemplarsOfKind("hazard_room").map(roomShape);
+var STUFF_ROOMS = exemplarsOfKind("stuff_room").map(roomShape);
 
 /* ================================================================ settings */
 
@@ -1815,7 +1841,15 @@ function renderLibrary() {
     group("Bad Stuff", BAD_STUFF, "A separate side pool. No stats. Dealt by a room's Flee line.") +
     "<h3>Enemy and Hazard rooms</h3><div class='hand' style='margin-bottom:14px'>" + rooms + "</div>" +
     "<h3>Stuff rooms</h3><p class='tiny muted'>Four rooms, new on 2026-08-25. Their numbers come from " +
-    "the Setup tab because they are unruled.</p><div class='hand'>" + stuffRooms + "</div>";
+    "the Setup tab because they are unruled.</p><div class='hand' style='margin-bottom:14px'>" + stuffRooms + "</div>" +
+    "<h2 style='margin-top:22px'>The card bank</h2>" +
+    "<p class='tiny muted'>The rest of the designed set, from <code>design/cards.yaml</code>. These are " +
+    "candidates for the reward pools, not ratified design, so <b>nothing below is simulated</b> — they " +
+    "are here so this page shows the whole card list.</p>" +
+    group("Bank — Red", NVU_CARDS.bank.filter(function (c) { return c.owner === "Red"; }).map(function (c) { return playerShape(c); })) +
+    group("Bank — Gray", NVU_CARDS.bank.filter(function (c) { return c.owner === "Gray"; }).map(function (c) { return playerShape(c); })) +
+    group("Bank — Good Stuff", NVU_CARDS.bank.filter(function (c) { return c.kind === "good_stuff"; }).map(function (c) { return playerShape(c, "GoodStuff"); })) +
+    group("Bank — Bad Stuff", NVU_CARDS.bank.filter(function (c) { return c.kind === "bad_stuff"; }).map(function (c) { return playerShape(c, "BadStuff"); }));
 }
 
 /* ================================================================ wiring */

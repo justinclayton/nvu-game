@@ -443,6 +443,19 @@ head, reacting to what's in front of you, with little time for deep strategy.*
   Solo load falls out for free: one rule set, two decklists. Starting deck contents belong to ticket
   10 with the rest of the numbers.
 
+- [Put the card list in one place](issues/25-single-source-for-the-card-list.md) — `[agent, under
+  your instruction to work autonomously]` **`design/cards.yaml` is the source, and the two prototypes
+  are now views of it.** The cutting sheet and the encounter simulator hold no card of their own: both
+  load a generated `prototype/cards.js`, as does `sim-sweep.js`, so there is one card list the way
+  there is already one engine. The prose deliverables keep hand-written copies, because a card is worth
+  reading next to its reasoning — but `node tools/cards.mjs check` compares them to the list, card by
+  card, and fails on any disagreement, on a stale `cards.js`, or on a prototype that has stopped
+  rendering the whole set. The simulator's drifted card text is reconciled to the deliverable, and
+  **every field its engine reads is byte-identical to before**, so no measured number moved. The bank's
+  cards appear in both prototypes for the first time, printed and displayed but **not simulated**. Two
+  judgement calls are flagged in the ticket for you to reverse if you disagree: the prose staying
+  hand-written, and the bank staying out of the simulation. **Ticket 10 is unblocked.**
+
 ## Not yet specified
 
 <!-- In scope, but not sharp enough to ticket. Graduates into tickets as the frontier advances. -->

@@ -84,8 +84,8 @@ In the middle of the table:
 - The **play zone** — split into Red's side and Gray's side.
 
 Off to one side: **Red's reward pool**, **Gray's reward pool**, the **Good Stuff pool**, the
-**Bad Stuff pool**, and the **Scrapyard** — a face-up heap where spent Stuff goes. Stuff never
-enters a character's exhaust pile.
+**Bad Stuff pool**, and the **Scrapyard** — a face-up heap of everything the run has used up.
+Nothing ever leaves the Scrapyard.
 
 ---
 
@@ -172,8 +172,8 @@ Resolve these in order.
 2. **If the room was Cleared**, put it in the **Cleared** heap. It is out of the game. Nobody ever
    counts that heap or asks it a question.
 3. **Exhaust both hands and the entire play zone.** Each card goes to the exhaust pile of the
-   character who owns it; Stuff goes to the **Scrapyard**. **`Hold` cards still in hand are the
-   only survivors.**
+   character who owns it; Stuff goes to the pile of whoever played it. **`Hold` cards still in
+   hand are the only survivors.**
 4. **If the floor draw pile is empty**, shuffle the **Fled** pile back into it.
 
 ### Phase 5 — Flip again
@@ -249,10 +249,11 @@ size that you have to pay to undo.
 
 Both kinds say which they are on the type line. Learn to read it at a glance.
 
-**Spent Stuff goes to the Scrapyard.** Whenever Stuff leaves your hand or the play zone — played
-and cleaned up, exhausted as fuel, lost to an effect — it lands in the Scrapyard, never in a
-character's exhaust pile. Stuff still held in hand at floor end is different: `Hold` carries it
-across the floor boundary like any other turn.
+**Spent Stuff is exhausted like anything else** — it goes to the pile of whoever spent it, and
+sits there with the rest. The difference comes at ascension: Stuff in the exhaust piles is moved
+to the **Scrapyard**, for good, instead of shuffling back in. Stuff still held in hand is
+different: `Hold` carries it across the floor boundary like any other turn. And the Scrap tax
+(section 10) can save one exhausted piece from the Scrapyard, at a price.
 
 ---
 
@@ -320,7 +321,7 @@ not enough; you have to clear it with a board worth keeping.
 
 In last stand you have to keep clearing rooms. Walking away is what finishes you.
 
-**Going Down empties your hand into your exhaust pile** — Stuff to the Scrapyard, as always. That
+**Going Down empties your hand into your exhaust pile.** That
 is how you tell the two states apart on sight: a character in
 last stand has an empty deck but is still holding cards; a Down character has an empty deck *and* an
 empty hand. Nothing is flipped over and nothing is tracked.
@@ -343,8 +344,11 @@ Down when a turn begins, there is no flip. The game ends there.
 
 Clearing the Enemy room ends the floor. Then, in order:
 
-1. **Empty the Scrapyard back into the Stuff pools** — Good Stuff to the Good Stuff pool, Bad
-   Stuff to the Bad Stuff pool. It starts every floor empty.
+1. **Move all Stuff in both exhaust piles to the Scrapyard.** It is out of the run for good —
+   nothing ever leaves the Scrapyard. **This is the moment of the Scrap tax:** each character may
+   keep **one** Stuff card from their own exhaust pile instead, by Scrapping **another card from
+   that exhaust pile in its place**. Kept Stuff stays ordinary Stuff — it will be spent, exhausted,
+   and facing the Scrapyard again a floor from now. There is nothing to track.
 2. **Shuffle each exhaust pile back into its deck.** Both characters are now at full health —
    including one who was Down. **A floor cleared is a full heal**, and nothing bad crosses a floor
    boundary. There are no lasting wounds in this game.
@@ -352,6 +356,11 @@ Clearing the Enemy room ends the floor. Then, in order:
    one — or declines. A taken card is shuffled into their deck. A declined card goes to the bottom
    of its pool.
 4. **Build the next floor's deck** (section 4), with one fewer Stuff room than last time.
+
+**The Scrap tax is the game's deck-thinning engine, and its only voluntary one.** A run trades a
+weak card — often a starter — for a strong scavenged one, over and over, and decks get leaner and
+better and smaller. They also get more fragile: a deck is stamina, so every trade is a card of
+health given up, and the preserved Stuff is itself spent the moment it is finally played.
 
 **Declining is a real play, not a forfeit.** A card you skip is consistency you keep. Read section 1
 again if that sounds wrong.

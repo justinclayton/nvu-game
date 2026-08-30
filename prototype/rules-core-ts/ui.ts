@@ -65,7 +65,7 @@ function cardChip(c: Card, opts: { pick?: Character; on?: () => void; dim?: bool
   const ticked = opts.pick && view.selected[opts.pick].includes(c.id);
   return `<span class="chip ${c.kind} ${ticked ? "ticked" : ""} ${opts.dim ? "dim" : ""}"
     data-id="${c.id}" title="${esc(c.text)}">
-    <b>${esc(c.name)}</b><i>${kind}${c.hold ? " · Hold" : ""}${c.permanent ? " · permanent" : ""}</i>
+    <b>${esc(c.name)}</b><i>${kind}${c.hold ? " · Hold" : ""}</i>
     <u>${c.cost}</u>${stats ? `<em>${stats}</em>` : ""}</span>`;
 }
 

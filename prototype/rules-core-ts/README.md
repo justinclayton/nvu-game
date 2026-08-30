@@ -55,10 +55,10 @@ The engine follows the ticket, not the RFC.
 | Red has `AdrenalineRush`, Gray has `TacticalBackpack` and a backpack slot | *Neither character has a special ability.* The difference between them is their cards and only their cards. | rulebook §2, ticket 13 |
 | A `Downed` character can be brought back, and `state` cycles Standing → LastStand → Downed → Standing | Down is out. No revive action, no cost, until the floor is cleared. | rulebook §9, ticket 14 |
 | Flee damage is split between characters, `Math.ceil(d/2)` and `Math.floor(d/2)` | Where a Flee line says 1 character, the team chooses which one and *they take all of it. There is no splitting.* | rulebook §5 |
-| Down is a stored tri-state | Last stand is *derived*: a character is in it for exactly as long as their deck is empty. Only Down needs a flag. | rulebook §9 |
+| A `Downed` tri-state cycling back to Standing | Down and last stand are two flags: last stand activates at the end of the phase that emptied the deck and resolves at the next room check; Down is out. | rulebook §9 |
 | `HAND_OFF` — pass a card to your partner | No such action exists. Red never pays for Gray, and nothing moves between hands. | rulebook §5 |
 | Enemy rooms are the only rooms with thresholds worth evaluating | Three room kinds, each reading the play zone differently — and Stuff rooms read one character's own side, not the shared pool. | rulebook §6 |
-| Ascension retypes kept Stuff to `'Class'` to preserve it | The Scrap tax keeps it as Stuff; the price is a starter card to the Scrapyard. | ticket 24 |
+| Ascension retypes kept Stuff to `'Class'` to preserve it | The Scrap tax keeps it as ordinary Stuff for one more floor; the price is another exhausted card to the Scrapyard. Nothing is tracked. | rulebook §10 |
 | A per-character `scrapPile` | One shared Scrapyard at the side of the table. | ticket 24 |
 | Rarity is on the card and read by nothing in particular | Correct, and worth keeping: rarity is purely printed. | rulebook §8 |
 
@@ -68,27 +68,13 @@ model to work.
 
 ## Open questions the rules do not answer
 
-The engine does not paper over these. It picks a behaviour, emits an `OPEN_QUESTION` event saying so,
-and the demo prints it in yellow. All four are live tickets, not prototype bugs.
+The rulebook has since ruled almost everything this prototype once had to guess at: the last-stand
+draw, the resolution timing, the Scrapyard, the reward pool, and hands at ascension are all §-cited
+in the engine now. One gap remains:
 
-1. **`last-stand-minimum-draw`** — You must draw at least 1 every turn (§5). An empty deck is last
-   stand (§9). A character in last stand has nothing to draw, and no rule says which of the two gives
-   way. Excused here, because the alternative is a state that no legal move leaves. *This one is not
-   theoretical — the engine deadlocked on it until it was decided, and it fires in every seeded run.*
-2. **`stuff-exhaust-vs-ascension`** — `design/cards.yaml` rules that Stuff Exhausted is **Scrapped**
-   instead. Rulebook §7 and ticket 24 both say Stuff is pulled out of the **exhaust piles** at
-   ascension. If Stuff never reaches an exhaust pile, that step can never do anything. The YAML is
-   newer, so it wins here — which means *spending a Pry Bar as fuel destroys it*, and the ascension
-   step is dead code. Watch the "Spending Stuff destroys it" walkthrough and decide.
-3. **`permanent-stuff-exhaust`** — Following on: if all Stuff is Scrapped when Exhausted, then Stuff
-   made permanent by the Scrap tax is destroyed the first time it is played, and the tax buys
-   nothing. The engine exempts permanent Stuff from the Scrap-on-exhaust rule so the tax means
-   something. That exemption is invented and needs a ruling.
-4. **`hazard-reward-pool`** — The reward tier says "one character reveals reward" without saying
-   whose pool, whose deck it tops, or where a skipped card goes (ticket 09 leaves all three open).
-   Red is assumed.
-5. **`own-cards-left-in-hand`** — Ascending collects the exhaust piles and never mentions hands, so a
-   character's own held cards have nowhere to go. Shuffled back in here.
+1. **Skipped reveals** — whether a Hazard's skipped reward reveal goes to the bottom of its pool, as
+   a declined ascension reward does, is NOT YET RULED (ticket 09). The engine sidesteps it by always
+   taking the reveal.
 
 ## What the seeded runs showed
 
@@ -107,9 +93,8 @@ escape does. All the numbers involved are placeholders belonging to tickets 10 a
 data point for those, not a verdict.
 
 The second thing the runs showed: the Scrapyard fills up fast (up to 14 cards in a single short run)
-purely from Stuff being spent as fuel. That is open question 2 showing its teeth — the permanent
-graveyard is doing far more work than the "one voluntary thinning decision per floor" that ticket 24
-describes.
+purely from spent Stuff moving there at ascension. The permanent graveyard does far more work than
+the one voluntary thinning decision per floor that the Scrap tax describes.
 
 ## Invariants the engine holds
 

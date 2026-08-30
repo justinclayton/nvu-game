@@ -8,9 +8,8 @@
  * mutation, no clock, no Math.random. The seed is part of the state, so a run
  * replays exactly from its seed and its command list.
  *
- * Rules transcribed from design/rulebook-draft.md and, where the two disagree,
- * design/core-design/issues/24-the-scrap-mechanic.md. Section numbers in the
- * comments below point at the rulebook.
+ * Rules transcribed from design/rulebook-draft.md, which is the authority.
+ * Section numbers in the comments below point at the rulebook.
  */
 
 import { shuffle } from "./rng.ts";
@@ -37,7 +36,7 @@ export const TOP_FLOOR = 10;
 
 export function statusOf(p: PlayerState): CharacterStatus {
   if (p.down) return "Down";
-  return p.deck.length === 0 ? "LastStand" : "Standing";
+  return p.lastStand ? "LastStand" : "Standing";
 }
 
 export function playerOf(s: GameState, c: Character): PlayerState {
@@ -79,31 +78,33 @@ export function pool(s: GameState, side?: Character): { power: number; scramble:
 /* ------------------------------------------------------- moving cards around */
 
 /**
- * Section 7 note in design/cards.yaml: when any Stuff card would be Exhausted
- * it is Scrapped instead. Permanent Stuff (bought with the ascension Scrap tax)
- * is the exception — see OPEN QUESTION `permanent-stuff-exhaust` in README.md.
+ * Section 7: spent Stuff is exhausted like anything else, to the pile of
+ * whoever spent it. The Scrapyard only comes into it at ascension.
  */
 function exhaust(s: GameState, c: Character, card: Card, ev: DomainEvent[]): GameState {
   const p = playerOf(s, c);
-  if (card.kind !== "player" && !card.permanent) {
-    ev.push({ type: "CARD_SCRAPPED", character: c, card });
-    return { ...s, scrapyard: [...s.scrapyard, card] };
-  }
   ev.push({ type: "CARD_EXHAUSTED", character: c, card });
   return withPlayer(s, c, { ...p, exhaust: [...p.exhaust, card] });
 }
 
-/** Section 9: going Down discards the hand. That is how you tell it from last stand. */
+/** Section 9: going Down empties the hand into the exhaust pile. */
 function goDown(s: GameState, c: Character, cause: string, ev: DomainEvent[]): GameState {
   const p = playerOf(s, c);
   if (p.down) return s;
   ev.push({ type: "WENT_DOWN", character: c, cause });
-  return withPlayer(s, c, { ...p, down: true, hand: [] });
+  return withPlayer(s, c, {
+    ...p,
+    down: true,
+    lastStand: false,
+    hand: [],
+    exhaust: [...p.exhaust, ...p.hand],
+  });
 }
 
 /**
  * Section 8: `Exhaust X cards from your deck` — off the top, no choices.
- * Section 9: exhausting from an empty deck is what puts a character Down.
+ * Section 9: a card that would be moved from an empty deck puts the character
+ * Down. Last stand itself activates later, at the end of the phase (section 9).
  */
 function exhaustFromDeck(
   s: GameState,
@@ -120,9 +121,21 @@ function exhaustFromDeck(
     const card = p.deck[0];
     state = withPlayer(state, c, { ...p, deck: p.deck.slice(1) });
     state = exhaust(state, c, card, ev);
-    if (playerOf(state, c).deck.length === 0) {
-      ev.push({ type: "LAST_STAND", character: c });
-    }
+  }
+  return state;
+}
+
+/**
+ * Section 9: last stand activates as the last step of the phase that emptied
+ * the deck. Called at the end of each phase that can touch a deck.
+ */
+function activateLastStand(s: GameState, ev: DomainEvent[]): GameState {
+  let state = s;
+  for (const c of ["Red", "Gray"] as const) {
+    const p = playerOf(state, c);
+    if (p.down || p.lastStand || p.deck.length > 0) continue;
+    ev.push({ type: "LAST_STAND", character: c });
+    state = withPlayer(state, c, { ...p, lastStand: true });
   }
   return state;
 }
@@ -141,7 +154,7 @@ export function execute(state: GameState, command: Command): [GameState, DomainE
     case "PLAY_CARD":
       return playCard(state, command.character, command.cardId, command.payWith, ev);
     case "END_PLAY":
-      return endPlay(state, command.fleeTarget, ev);
+      return endPlay(state, command.fleeTarget, command.rewardTarget, ev);
     case "ASCEND":
       return ascend(state, command.red, command.gray, ev);
     default:
@@ -201,18 +214,10 @@ function draw(s: GameState, c: Character, ev: DomainEvent[]): [GameState, Domain
     throw new RuleError(`${c} may not draw more than ${cap} cards this turn.`);
   }
 
-  if (p.deck.length === 0) {
-    // OPEN QUESTION: last stand vs. the compulsory draw. The rules say you must
-    // draw at least 1 and that an empty deck is last stand, and never say what
-    // the two do to each other. Treated here as a no-op that still satisfies
-    // the minimum. See README.md `last-stand-minimum-draw`.
-    ev.push({
-      type: "OPEN_QUESTION",
-      id: "last-stand-minimum-draw",
-      note: `${c} is in last stand and cannot draw; the compulsory draw is treated as satisfied.`,
-    });
-    return [withPlayer(s, c, { ...p, drewThisTurn: p.drewThisTurn + 1 }), ev];
-  }
+  // Section 9: a character in last stand does not draw — there is nothing left
+  // to draw, and the mandatory draw does not apply.
+  if (p.lastStand) throw new RuleError(`${c} is in last stand and does not draw.`);
+  if (p.deck.length === 0) throw new RuleError(`${c} has no deck to draw from.`);
 
   const card = p.deck[0];
   const rest = p.deck.slice(1);
@@ -223,12 +228,10 @@ function draw(s: GameState, c: Character, ev: DomainEvent[]): [GameState, Domain
     ev.push({ type: "DRAW_BURNED", character: c, card });
     let state = withPlayer(s, c, { ...p, deck: rest, drewThisTurn: p.drewThisTurn + 1 });
     state = exhaust(state, c, card, ev);
-    if (rest.length === 0) ev.push({ type: "LAST_STAND", character: c });
     return [state, ev];
   }
 
   ev.push({ type: "CARD_DRAWN", character: c, card });
-  if (rest.length === 0) ev.push({ type: "LAST_STAND", character: c });
   return [
     withPlayer(s, c, {
       ...p,
@@ -242,25 +245,17 @@ function draw(s: GameState, c: Character, ev: DomainEvent[]): [GameState, Domain
 
 function endDraw(s: GameState, ev: DomainEvent[]): [GameState, DomainEvent[]] {
   if (s.phase !== "Draw") throw new RuleError(`Not in the draw phase.`);
-  // Section 5: you must draw at least 1. There is no sitting a turn out.
+  // Section 5: you must draw at least 1. There is no sitting a turn out. The
+  // one exception is a character in last stand, who does not draw at all.
   for (const c of ["Red", "Gray"] as const) {
     const p = playerOf(s, c);
-    if (p.down || p.drewThisTurn >= 1) continue;
-    if (statusOf(p) === "LastStand") {
-      // OPEN QUESTION `last-stand-minimum-draw`: an empty deck cannot satisfy a
-      // compulsory draw, and the rules never say which of the two gives way.
-      // Excused here, because the alternative is a state no legal move leaves.
-      ev.push({
-        type: "OPEN_QUESTION",
-        id: "last-stand-minimum-draw",
-        note: `${c} is in last stand with nothing to draw; the compulsory draw is excused.`,
-      });
-      continue;
-    }
+    if (p.down || p.lastStand || p.drewThisTurn >= 1) continue;
     throw new RuleError(`${c} must draw at least 1 card.`);
   }
-  // Section 5: once anyone has begun playing cards, nobody may draw again.
-  return [{ ...s, phase: "Play" }, ev];
+  // Section 9: a deck emptied by drawing puts its character in last stand as
+  // the last step of the draw phase.
+  const state = activateLastStand(s, ev);
+  return [{ ...state, phase: "Play" }, ev];
 }
 
 /* Phase 3 — Play (section 5) */
@@ -281,7 +276,7 @@ function playCard(
 
   // Section 9: while in last stand, every card in that hand may be played at no
   // cost. Their partner still pays normally.
-  const free = statusOf(p) === "LastStand";
+  const free = p.lastStand;
   const cost = free ? 0 : card.cost;
 
   if (payWith.length !== cost) {
@@ -307,20 +302,8 @@ function playCard(
   state = { ...state, playZone: [...state.playZone, { owner: c, card }] };
   ev.push({ type: "CARD_PLAYED", character: c, card });
 
-  // Section 5: the instant the pool meets a room's threshold, that outcome
-  // happens — except on a Hazard, which is settled when play is declared over.
-  return evaluateInstant(state, ev);
-}
-
-/** Enemy rooms only. Hazard and Stuff rooms settle at the end of the play phase. */
-function evaluateInstant(s: GameState, ev: DomainEvent[]): [GameState, DomainEvent[]] {
-  const room = s.activeRoom;
-  if (!room || room.kind !== "enemy") return [s, ev];
-  const met = bestMet(s, room);
-  if (!met) return [s, ev];
-  ev.push({ type: "THRESHOLD_MET", room, threshold: met });
-  let state: GameState = { ...s, ...clearRoom(s, room, ev) };
-  if (met.reward) state = payReward(state, ev);
+  // Section 5: nothing resolves while you play. The room is checked once, at
+  // the end of the play phase.
   return [state, ev];
 }
 
@@ -343,24 +326,28 @@ function clearRoom(s: GameState, room: Room, ev: DomainEvent[]): Partial<GameSta
 function endPlay(
   s: GameState,
   fleeTarget: Character | undefined,
+  rewardTarget: Character | undefined,
   ev: DomainEvent[],
 ): [GameState, DomainEvent[]] {
   if (s.phase !== "Play") throw new RuleError(`Not in the play phase.`);
   let state = s;
   const room = state.activeRoom;
 
-  // A Hazard's two thresholds are settled now, not the moment the lower is met.
-  if (room && room.kind === "hazard") {
+  // Section 5: when the play phase ends the room is checked once. If any
+  // challenge's threshold is met the room is Cleared and every met challenge's
+  // text resolves; if none is, the characters Flee.
+  if (room && (room.kind === "enemy" || room.kind === "hazard")) {
     const met = bestMet(state, room);
     if (met) {
       ev.push({ type: "THRESHOLD_MET", room, threshold: met });
       state = { ...state, ...clearRoom(state, room, ev) };
-      if (met.reward) state = payReward(state, ev);
+      if (met.reward) state = payReward(state, rewardTarget ?? "Red", ev);
     }
   }
 
-  // A Stuff room is measured per character, on their own side of the play zone,
-  // and is Cleared either way. It has no Flee line and never punishes you.
+  // A Stuff room is measured per character, on their own side of the play zone.
+  // Its Flee line clears the room and does nothing else, so it is Cleared
+  // either way and never punishes you (section 6).
   if (room && room.kind === "stuff") {
     for (const c of ["Red", "Gray"] as const) {
       const side = pool(state, c);
@@ -375,20 +362,26 @@ function endPlay(
     state = { ...state, ...clearRoom(state, room, ev) };
   }
 
-  // Who was in last stand at the moment the room resolved? That is what decides
-  // whether they get the shuffle-back, and it has to be read before the flee.
+  // Section 9: what decides a last stand is how the room ends. Cleared — even
+  // by a Flee line whose own text clears it — means the character gets out;
+  // anything else means the team fled and they go Down.
+  const roomCleared = state.activeRoom === null;
   const lastStandAtClear = {
-    Red: state.activeRoom === null && statusOf(state.red) === "LastStand",
-    Gray: state.activeRoom === null && statusOf(state.gray) === "LastStand",
+    Red: roomCleared && state.red.lastStand,
+    Gray: roomCleared && state.gray.lastStand,
   };
 
-  // 1. If the room is still in the active room zone, you failed it.
+  // If no threshold was met, the characters Flee (section 5).
   if (state.activeRoom) {
     state = applyFlee(state, state.activeRoom, fleeTarget, ev);
   }
 
-  // 3. Exhaust both hands and the entire play zone. `Hold` cards survive.
+  // Cleanup: exhaust both hands and the entire play zone. `Hold` cards survive.
   state = cleanupPiles(state, lastStandAtClear, ev);
+
+  // Section 9: a deck emptied this phase puts its character in last stand as
+  // the phase's last step — after the room check and the Flee have resolved.
+  state = activateLastStand(state, ev);
 
   // 4. If the floor draw pile is empty, shuffle the Fled pile back into it.
   if (state.floorDeck.length === 0 && state.fled.length > 0) {
@@ -431,28 +424,26 @@ function takeGoodStuff(s: GameState, c: Character, n: number, ev: DomainEvent[])
 }
 
 /**
- * The reward tier on a Hazard (and on one Enemy room): reveal the top card of a
- * reward pool and take it on top of your deck, or skip it.
+ * The reward tier on a Hazard (and on one Enemy room): turn the top card of the
+ * named character's reward pool face up; it goes on top of that character's
+ * deck (section 6). The exemplar rooms print "one character", so the choice
+ * arrives on the END_PLAY command.
  *
- * OPEN QUESTION `hazard-reward-pool`: the rulebook does not say whose pool is
- * read or whose deck it tops, and does not say where a skipped card goes.
- * Modelled here as always taken, by Red, because a prototype has to do
- * something. See README.md.
+ * Always taken here: whether a skipped reveal goes to the bottom of its pool is
+ * NOT YET RULED (ticket 09), so the prototype does not offer the skip.
  */
-function payReward(s: GameState, ev: DomainEvent[]): GameState {
-  ev.push({
-    type: "OPEN_QUESTION",
-    id: "hazard-reward-pool",
-    note: "Which pool the reveal reads and whose deck it tops is unruled (ticket 09); Red is assumed.",
-  });
-  if (s.pools.red.length === 0) return s;
-  const card = s.pools.red[0];
-  ev.push({ type: "REWARD_TAKEN", character: "Red", card });
+function payReward(s: GameState, c: Character, ev: DomainEvent[]): GameState {
+  const poolKey = c === "Red" ? "red" : "gray";
+  const pool = s.pools[poolKey];
+  if (pool.length === 0) return s;
+  const card = pool[0];
+  ev.push({ type: "REWARD_TAKEN", character: c, card });
   // Nothing shuffles during a floor, so it is the very next card they draw.
-  return withPlayer({ ...s, pools: { ...s.pools, red: s.pools.red.slice(1) } }, "Red", {
-    ...s.red,
-    deck: [card, ...s.red.deck],
-  });
+  return withPlayer(
+    { ...s, pools: { ...s.pools, [poolKey]: pool.slice(1) } as GameState["pools"] },
+    c,
+    { ...playerOf(s, c), deck: [card, ...playerOf(s, c).deck] },
+  );
 }
 
 /**
@@ -492,9 +483,11 @@ function applyFlee(
     state = dealBadStuff(state, targets[0], ev);
   }
 
-  // Section 9: the team Fleeing while a character is in last stand puts them Down.
+  // Section 9: the team Fleeing while a character is in last stand puts them
+  // Down. A character whose deck emptied only this phase is not yet in last
+  // stand — activation is the phase's last step — so the flag decides.
   for (const c of ["Red", "Gray"] as const) {
-    if (statusOf(playerOf(state, c)) === "LastStand") {
+    if (playerOf(state, c).lastStand) {
       state = goDown(state, c, `fled ${room.name} while in last stand`, ev);
     }
   }
@@ -521,10 +514,13 @@ function dealBadStuff(s: GameState, c: Character, ev: DomainEvent[]): GameState 
 /**
  * Cleanup step 3, and the last-stand escape from section 9.
  *
- * Normally hand and play zone both go to the exhaust pile. But if the room was
- * Cleared while a character was in last stand, those same cards are shuffled
- * back into their deck instead — minus 2, exhausted as the price of getting
- * out. The exhaust pile is not involved and `Hold` cards take no part.
+ * Normally hand and play zone both go to the exhaust pile. But if the room
+ * ended Cleared while a character was in last stand, the last stand cleanup
+ * replaces their play-zone cleanup: all cards in their play zone — Stuff
+ * included — are shuffled into their deck, then 2 cards are Exhausted from the
+ * top of that deck as the price of getting out. Fewer than 2 cards in the
+ * shuffle means the price meets an empty deck and sends them Down. The hand is
+ * cleaned up as normal either way.
  */
 function cleanupPiles(
   s: GameState,
@@ -539,25 +535,18 @@ function cleanupPiles(
     const dropped = p.hand.filter((x) => !x.hold);
 
     state = withPlayer(state, c, { ...p, hand: held });
+    for (const card of dropped) state = exhaust(state, c, card, ev);
 
-    if (lastStandAtClear[c]) {
-      const recovering = [...played, ...dropped];
-      // Stuff is Scrapped rather than exhausted, so it cannot come back either.
-      const stuff = recovering.filter((x) => x.kind !== "player" && !x.permanent);
-      const own = recovering.filter((x) => x.kind === "player" || x.permanent);
-      for (const card of stuff) state = exhaust(state, c, card, ev);
-
-      const price = own.slice(0, LAST_STAND_PRICE);
-      const back = own.slice(LAST_STAND_PRICE);
-      for (const card of price) state = exhaust(state, c, card, ev);
-      const [deck, seed] = shuffle([...playerOf(state, c).deck, ...back], state.seed);
-      state = { ...state, seed };
-      state = withPlayer(state, c, { ...playerOf(state, c), deck });
-      ev.push({ type: "LAST_STAND_ESCAPED", character: c, price });
+    if (lastStandAtClear[c] && !playerOf(state, c).down) {
+      const [deck, seed] = shuffle([...playerOf(state, c).deck, ...played], state.seed);
+      state = withPlayer({ ...state, seed }, c, { ...playerOf(state, c), deck, lastStand: false });
+      const before = playerOf(state, c).deck.slice(0, LAST_STAND_PRICE);
+      state = exhaustFromDeck(state, c, LAST_STAND_PRICE, "the price of getting out", ev);
+      ev.push({ type: "LAST_STAND_ESCAPED", character: c, price: before });
       continue;
     }
 
-    for (const card of [...played, ...dropped]) state = exhaust(state, c, card, ev);
+    for (const card of played) state = exhaust(state, c, card, ev);
   }
   return { ...state, playZone: [] };
 }
@@ -593,43 +582,40 @@ function ascendOne(s: GameState, c: Character, choice: AscendChoice, ev: DomainE
   let state = s;
   const p = playerOf(state, c);
 
-  // 1. Exhaust piles are picked up. Stuff in them goes back to its pool; the
-  //    rest shuffles into the deck. (Ticket 24, step 1.) A floor cleared is a
-  //    full heal, including for a character who was Down.
-  const returning = p.exhaust.filter((x) => x.kind === "player" || x.permanent);
-  const spentStuff = p.exhaust.filter((x) => x.kind !== "player" && !x.permanent);
-
-  // 2. Stuff still in hand is shuffled into the deck as next floor's stamina.
-  const heldStuff = p.hand.filter((x) => x.kind !== "player");
-  const heldOwn = p.hand.filter((x) => x.kind === "player");
-  if (heldOwn.length > 0) {
-    ev.push({
-      type: "OPEN_QUESTION",
-      id: "own-cards-left-in-hand",
-      note: `Ascending does not say what happens to ${c}'s own ${heldOwn.length} held card(s); shuffled back in here.`,
-    });
-  }
-
-  let deck = [...p.deck, ...returning, ...heldStuff, ...heldOwn];
-  let scrapyard = [...state.scrapyard];
-  let goodStuff = [...state.pools.goodStuff, ...spentStuff.filter((x) => x.kind === "good_stuff")];
-  let badStuff = [...state.pools.badStuff, ...spentStuff.filter((x) => x.kind === "bad_stuff")];
-
-  // 3. The Scrap tax: keep one piece of Stuff for the rest of the run, and pay
-  //    for it with one starter card from this deck, Scrapped for good.
+  // 1. All Stuff in the exhaust pile moves to the Scrapyard, for good — nothing
+  //    ever leaves the Scrapyard. This is the moment of the Scrap tax: keep one
+  //    Stuff card from your own exhaust pile by Scrapping another card from
+  //    that pile in its place.
+  let exhaustPile = [...p.exhaust];
+  const scrapyard = [...state.scrapyard];
   if (choice.keepStuffId && choice.scrapId) {
-    const keep = deck.find((x) => x.id === choice.keepStuffId && x.kind !== "player");
-    const pay = deck.find((x) => x.id === choice.scrapId && x.starter);
-    if (!keep) throw new RuleError(`${choice.keepStuffId} is not Stuff in ${c}'s deck.`);
-    if (!pay) throw new RuleError(`${choice.scrapId} is not a starter card in ${c}'s deck.`);
-    deck = deck.filter((x) => x.id !== pay.id).map((x) => (x.id === keep.id ? { ...x, permanent: true } : x));
+    const keep = exhaustPile.find((x) => x.id === choice.keepStuffId && x.kind !== "player");
+    const pay = exhaustPile.find((x) => x.id === choice.scrapId && x.id !== choice.keepStuffId);
+    if (!keep) throw new RuleError(`${choice.keepStuffId} is not Stuff in ${c}'s exhaust pile.`);
+    if (!pay) throw new RuleError(`${choice.scrapId} is not another card in ${c}'s exhaust pile.`);
+    exhaustPile = exhaustPile.filter((x) => x.id !== pay.id);
     scrapyard.push(pay);
     ev.push({ type: "CARD_SCRAPPED", character: c, card: pay });
+    // `keep` stays in the exhaust pile and shuffles into the deck with the rest.
+    // It is still ordinary Stuff; nothing is tracked.
   } else if (choice.keepStuffId || choice.scrapId) {
     throw new RuleError(`The Scrap tax is both halves or neither.`);
   }
+  const kept = new Set(choice.keepStuffId ? [choice.keepStuffId] : []);
+  const scrappedStuff = exhaustPile.filter((x) => x.kind !== "player" && !kept.has(x.id));
+  for (const card of scrappedStuff) {
+    scrapyard.push(card);
+    ev.push({ type: "CARD_SCRAPPED", character: c, card });
+  }
+  exhaustPile = exhaustPile.filter((x) => x.kind === "player" || kept.has(x.id));
 
-  // 4. The ascension reward: three from your own pool, take one or decline.
+  // 2. The exhaust pile shuffles back into the deck: a floor cleared is a full
+  //    heal, including for a character who was Down. The hand follows the
+  //    normal cleanup rules and nothing more — `Hold` cards carry up the
+  //    stairs, Stuff included (section 10).
+  let deck = [...p.deck, ...exhaustPile];
+
+  // 3. The ascension reward: three from your own pool, take one or decline.
   const poolKey = c === "Red" ? "red" : "gray";
   let ownPool = [...state.pools[poolKey]];
   const offered = ownPool.slice(0, 3);
@@ -651,13 +637,14 @@ function ascendOne(s: GameState, c: Character, choice: AscendChoice, ev: DomainE
     ...state,
     seed,
     scrapyard,
-    pools: { ...state.pools, goodStuff, badStuff, [poolKey]: ownPool } as GameState["pools"],
+    pools: { ...state.pools, [poolKey]: ownPool } as GameState["pools"],
   };
   return withPlayer(state, c, {
     deck: shuffled,
-    hand: [],
+    hand: p.hand,
     exhaust: [],
     down: false,
+    lastStand: false,
     drewThisTurn: 0,
   });
 }
@@ -711,6 +698,7 @@ export function createInitialState(seed: number, raw?: RawCard[]): [GameState, D
     hand: [],
     exhaust: [],
     down: false,
+    lastStand: false,
     drewThisTurn: 0,
   });
 

@@ -34,8 +34,9 @@
 #   starter true                 part of a starting deck rather than a reward pool
 #   text    string               the literal printed rules text
 #
-# Scrap is a property of the Stuff type, not a printed line: when any Stuff card
-# would be Exhausted it is Scrapped instead. No Stuff card restates it.
+# Stuff exhausts like any other card, to the pile of whoever spent it. At
+# ascension, Stuff in the exhaust piles moves to the Scrapyard for good unless
+# the Scrap tax saves it (rulebook sections 7 and 10). No Stuff card restates it.
 
 meta:
   ratified: 2026-08-29

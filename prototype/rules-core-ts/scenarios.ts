@@ -46,7 +46,7 @@ export function roomNamed(content: Content, name: string): Room {
 }
 
 function player(over: Partial<PlayerState> = {}): PlayerState {
-  return { deck: [], hand: [], exhaust: [], down: false, drewThisTurn: 0, ...over };
+  return { deck: [], hand: [], exhaust: [], down: false, lastStand: false, drewThisTurn: 0, ...over };
 }
 
 /** A bare state with nothing in it, so a scenario only has to fill in what it means. */
@@ -117,7 +117,7 @@ export function scenarios(): Scenario[] {
         }),
       steps: [
         {
-          note: "Red draws their last card. The deck is now empty, which IS last stand — no marker, no timer.",
+          note: "Red draws their last card. The deck is now empty; last stand activates as the last step of this draw phase.",
           command: { type: "DRAW", character: "Red" },
         },
         { note: "Gray draws to have something to spend.", command: { type: "DRAW", character: "Gray" } },
@@ -142,26 +142,34 @@ export function scenarios(): Scenario[] {
       id: "last-stand-escape",
       title: "The escape that actually works",
       question:
-        "Same state, but the room is cleared. Two cards are the price. Watch what comes back and what does not.",
+        "Same state, but the room is cleared. The play zone shuffles into the deck and 2 cards off the top are the price. Watch what comes back and what does not.",
       setup: (c) =>
         rig(c, {
           activeRoom: roomNamed(c, "Sorting Room"),
           floorDeck: [roomNamed(c, "Sump Crawler")],
-          red: player({ deck: [], hand: deckOf("Shove", 4) }),
+          red: player({ deck: [], hand: deckOf("Shove", 4), lastStand: true }),
           gray: player({ deck: deckOf("Duck Under", 4) }),
         }),
       steps: [
         {
-          note: "Red's deck is already empty and their hand is full of cards — that is last stand, not Down. Red cannot draw at all, which the rules never actually address.",
+          note: "Red begins the turn in last stand: empty deck, cards in hand. A character in last stand does not draw — only Gray does.",
           command: { type: "DRAW", character: "Gray" },
         },
         { note: "", command: { type: "END_DRAW" } },
         {
-          note: "Red plays free. A Stuff room clears either way, so the escape is guaranteed here.",
+          note: "Red plays free — every card in a last-stand hand costs nothing.",
           command: { type: "PLAY_CARD", character: "Red", cardId: "", payWith: [] },
         },
         {
-          note: "End play. The Stuff room clears, Red was in last stand at that moment, so hand + play zone shuffle back into Red's deck minus 2 — and the 2 are gone for good. Count the deck.",
+          note: "A second free card. The escape shuffles the play zone into the deck and then exhausts 2 off the top, so clearing with fewer than 2 played would send Red Down instead.",
+          command: { type: "PLAY_CARD", character: "Red", cardId: "", payWith: [] },
+        },
+        {
+          note: "And a third, so something is left over after the price.",
+          command: { type: "PLAY_CARD", character: "Red", cardId: "", payWith: [] },
+        },
+        {
+          note: "End play. The Stuff room clears either way, Red was in last stand, so the 3 played cards shuffle into Red's deck and 2 are exhausted off the top. Count the deck: 1.",
           command: { type: "END_PLAY" },
         },
       ],
@@ -169,9 +177,9 @@ export function scenarios(): Scenario[] {
 
     {
       id: "stuff-is-scrapped",
-      title: "Spending Stuff destroys it",
+      title: "Spending Stuff spends it for good",
       question:
-        "design/cards.yaml rules that Stuff Exhausted is Scrapped instead. So paying a cost with a Pry Bar puts it in the Scrapyard, not the exhaust pile — it never comes back at ascension. Is that the intent, or does it collide with section 7?",
+        "Section 7: spent Stuff exhausts like anything else, but at ascension it moves to the Scrapyard instead of shuffling back. So a Pry Bar burned as fuel sits in the exhaust pile looking recoverable — and is not, unless the Scrap tax saves it. Does that read at the table?",
       setup: (c) =>
         rig(c, {
           phase: "Play",
@@ -184,18 +192,18 @@ export function scenarios(): Scenario[] {
         }),
       steps: [
         {
-          note: "Red plays Charge In (Cost 1) and pays with the Pry Bar. Watch the Pry Bar land in the Scrapyard, not in Red's exhaust pile. Three Power of Good Stuff, burned as fuel, gone for the run.",
+          note: "Red plays Charge In (Cost 1) and pays with the Pry Bar. The Pry Bar lands in Red's exhaust pile like any card — but it will move to the Scrapyard at ascension, not back into the deck.",
           command: { type: "PLAY_CARD", character: "Red", cardId: "", payWith: [] },
         },
-        { note: "End play and flee — the point was the Scrapyard.", command: { type: "END_PLAY", fleeTarget: "Gray" } },
+        { note: "End play and flee — the point was where the Pry Bar went.", command: { type: "END_PLAY", fleeTarget: "Gray" } },
       ],
     },
 
     {
       id: "hazard-settles-late",
-      title: "A Hazard does not resolve the instant you clear it",
+      title: "Nothing resolves until play is declared over",
       question:
-        "Enemy rooms fire the moment the pool crosses the line. Hazards wait for you to declare play over, so you can push for the reward tier. Does the split feel arbitrary at the table?",
+        "Section 5: the room is checked once, at the end of the play phase, and every met challenge resolves. On a Hazard that means you can keep pushing for the reward tier past the clear line. Does the single check feel right at the table?",
       setup: (c) =>
         rig(c, {
           phase: "Play",
@@ -216,8 +224,8 @@ export function scenarios(): Scenario[] {
           command: { type: "PLAY_CARD", character: "Gray", cardId: "", payWith: [] },
         },
         {
-          note: "NOW declare play over. Only the higher tier is taken — the excess evaporates and nothing carries.",
-          command: { type: "END_PLAY" },
+          note: "NOW declare play over. Both tiers are met and the higher one pays; the excess evaporates and nothing carries. The reward tops Gray's deck.",
+          command: { type: "END_PLAY", rewardTarget: "Gray" },
         },
       ],
     },
@@ -280,7 +288,7 @@ export function scenarios(): Scenario[] {
       id: "ascend",
       title: "Ascending: full heal, Scrap tax, reward",
       question:
-        "Clearing the Enemy room is a total reset except for the Scrapyard. Is the Scrap tax — one permanent piece of Stuff for one starter card, gone forever — a choice anyone would actually make?",
+        "Clearing the Enemy room is a total reset except for the Scrapyard. Is the Scrap tax — keep one exhausted piece of Stuff by scrapping another exhausted card in its place — a choice anyone would actually make?",
       setup: (c) => {
         const s = rig(c, {
           phase: "Play",
@@ -324,7 +332,7 @@ export function resolveStep(state: GameState, step: Step): Command | null {
   if (cmd.type !== "PLAY_CARD" || cmd.cardId !== "") return cmd;
 
   const p = cmd.character === "Red" ? state.red : state.gray;
-  const free = p.deck.length === 0 && !p.down;
+  const free = p.lastStand;
   for (const c of p.hand) {
     const cost = free ? 0 : c.cost;
     const fodder = p.hand

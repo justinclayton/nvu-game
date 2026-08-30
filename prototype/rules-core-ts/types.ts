@@ -14,7 +14,11 @@ export type Rarity = "Fine" | "Cool" | "Woah";
 /** What a card is. `player` cards belong to a character; Stuff belongs to the floor. */
 export type CardKind = "player" | "good_stuff" | "bad_stuff";
 
-/** Derived, never stored: a character is in last stand while their deck is empty. */
+/**
+ * Section 9: last stand activates as the last step of the phase that emptied
+ * the deck and lasts until the end of the next play phase, so it is a stored
+ * flag, not something derived from deck length.
+ */
 export type CharacterStatus = "Standing" | "LastStand" | "Down";
 
 export type Phase =
@@ -36,8 +40,6 @@ export interface Card {
   readonly hold: boolean;
   readonly starter: boolean;
   readonly text: string;
-  /** Set by the ascension Scrap tax: this Stuff now stays in the deck for the run. */
-  readonly permanent?: boolean;
 }
 
 export type RoomKind = "enemy" | "hazard" | "stuff";
@@ -71,7 +73,9 @@ export interface Room {
   readonly name: string;
   readonly kind: RoomKind;
   readonly thresholds: readonly Threshold[];
-  readonly flee: FleeLine | null;   // Stuff rooms have none
+  /** Every room prints a Flee line. A Stuff room's clears the room and does
+   *  nothing else, which the engine models as null. */
+  readonly flee: FleeLine | null;
 }
 
 export interface PlayerState {
@@ -80,6 +84,9 @@ export interface PlayerState {
   readonly exhaust: readonly Card[];
   /** Down is a real flag: a last-stand character who empties their hand is not Down. */
   readonly down: boolean;
+  /** Section 9: set at the end of the phase that emptied the deck, cleared on
+   *  getting out or going Down. */
+  readonly lastStand: boolean;
   /** Reset every Draw phase; the minimum-1 draw is checked against it. */
   readonly drewThisTurn: number;
 }
@@ -130,7 +137,13 @@ export type Command =
       readonly cardId: string;
       readonly payWith: readonly string[];
     }
-  | { readonly type: "END_PLAY"; readonly fleeTarget?: Character }
+  | {
+      readonly type: "END_PLAY";
+      readonly fleeTarget?: Character;
+      /** Section 6: whose reward pool a "reveals reward" tier reads, and whose
+       *  deck the taken card tops. */
+      readonly rewardTarget?: Character;
+    }
   | {
       readonly type: "ASCEND";
       readonly red: AscendChoice;
@@ -138,9 +151,9 @@ export type Command =
     };
 
 export interface AscendChoice {
-  /** Scrap tax: keep this Stuff card for the rest of the run... */
+  /** Scrap tax: keep this exhausted Stuff card in the deck for the next floor... */
   readonly keepStuffId?: string;
-  /** ...at the price of this starter card, Scrapped. Both or neither. */
+  /** ...by Scrapping this other exhausted card in its place. Both or neither. */
   readonly scrapId?: string;
   /** Reward: one of the three offered cards, or null to decline. */
   readonly takeRewardId?: string | null;

@@ -55,10 +55,10 @@ Ascending gains a middle step. In order:
    and returns it to the pool.
 3. **The Scrap tax is offered.** A character may choose to keep one piece of **Stuff permanently** —
    it stops being pulled out at ascension and stays in the deck for the rest of the run. **The price
-   is one card from that character's starter deck, Scrapped.**
+   is another card from that character's deck, Scrapped.**
 
-The tax is the game's deck-thinning engine and its only voluntary one. A run trades a weak starter
-card for a strong scavenged one, over and over, and decks get leaner and better and smaller. They
+The tax is the game's deck-thinning engine and its only voluntary one. A run trades a weak
+card (often a starter card) for a strong scavenged one, over and over, and decks get leaner and better and smaller. They
 also get more fragile: a deck is stamina, so every trade is a card of health given up, and the
 preserved Stuff is itself spent the moment it is finally played.
 

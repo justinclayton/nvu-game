@@ -468,3 +468,16 @@ written.
 `[finding]` **Two exemplars now have no play line** — `Deadweight Grip` here and `Zen Mode` in the
 bank. Neither can be voluntarily spent out of a jammed hand; the only exit is Exhausting from hand to
 pay a cost. The cold review's hand-jam warning now has two cards behind it rather than none.
+
+
+## Ruled 2026-08-29 — the exemplar set prints no deliberate `Scrap` cost
+
+`[you]` **Left to the [card bank](../prototypes/12-card-bank.md).** Scrapping happens automatically to
+Stuff and needs no printed line; a card that Scraps *deliberately* — from hand without playing, or a
+card that is not Stuff — was ruled rare earlier the same day, and the exemplar set does not owe an
+example of a rare shape.
+
+The bank carries three: `Crowbar` and `Overcharged Battery`, which Scrap themselves from hand, and
+`Spot Salvage`, which Scraps a card to pull a permanent reward.
+
+This closes the last of the Scrap gaps this ticket opened.

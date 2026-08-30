@@ -47,15 +47,6 @@
   .kind-good_stuff .type-bar { background: var(--good-stuff); }
   .kind-bad_stuff .type-bar { background: var(--bad-stuff); }
 
-  /* Title colour is rarity; the thin black outline keeps the lighter inks readable. */
-  .fine .name, .cool .name, .woah .name {
-    -webkit-text-stroke: 0.15mm #000;
-    text-shadow: 0 0 0.2mm #000;
-  }
-  .fine .name { color: var(--fine); }
-  .cool .name { color: var(--cool); }
-  .woah .name { color: var(--woah); }
-
   .top { display: flex; justify-content: space-between; align-items: flex-start; gap: 2mm; }
   .name { font-size: 11pt; font-weight: 700; line-height: 1.1; }
   .cost {
@@ -111,17 +102,6 @@
 <body>
 
 <h1>North vs Up — the card list (print &amp; cut)</h1>
-<p class="note">
-  Print at 100% (no “fit to page”) and cut on the borders — cards are 63&times;88mm, standard poker
-  size, so they fit ordinary sleeves. The bar across the top is the card's <b>type</b> — Red, Gray,
-  green for Good Stuff, plum for Bad Stuff, black for floor cards. The title colour is <b>rarity</b>, which signals a card's
-  <b>value</b> — its ceiling when things line up. The most complex cards are always the highest rarity, because complexity has to pay for
-  itself in what the card does. Every number here is a placeholder for ticket 10.
-  Every card here is rendered from <code>design/cards.yaml</code>, the one place a card is written down;
-  the design reasoning lives in <code>design/core-design/prototypes/12-exemplar-card-set.md</code> and
-  <code>12-card-bank.md</code>.
-</p>
-
 <div id="sheets"></div>
 
 <script src="cards.js"></script>

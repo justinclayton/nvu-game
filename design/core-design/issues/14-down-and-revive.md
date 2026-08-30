@@ -1,7 +1,7 @@
 # 14 — Design the down and revive rules
 
 Type: grilling
-Status: open
+Status: closed
 Blocked by: 04, 07
 Map: [core design map](../map.md)
 
@@ -116,3 +116,52 @@ Three things this ticket now inherits rather than decides:
 
 Ticket 07 already settled the other half: **clearing the floor heals both characters to full, including
 one who is Down**, so this ticket owns only mid-floor revival.
+
+## Answer, 2026-08-29
+
+`[you]` **There is no down-and-revive subsystem.** The ticket asked how to make one cheap; the
+ruling is that it costs nothing because it does not exist. Down is terminal for the floor, and the
+free heal on ascending is the only route back.
+
+**Down is out.** `[you]` A Down character is out for the rest of the floor. No general revive rule
+exists. The only way a character comes back mid-floor is a card that explicitly says so.
+
+**A reviving card defines its own effect.** `[you]` The rules say nothing about what a revive
+returns — cards into the deck, into the hand, a partial restore. Whatever card grants it says what
+it gives. Nothing here constrains that card in advance.
+
+**Going Down discards the hand.** `[you]` This is what makes the state legible with no components:
+a Down character has an empty deck *and* an empty hand, which is exactly what distinguishes them from
+a character in last stand, who has an empty deck but is still holding cards. Asked how Down is shown
+at the table, the answer was that it is obvious on sight. Nothing is flipped, tokened or tracked.
+
+**While Down, a character does nothing at all.** `[you]` No draws, no plays, no costs paid, no
+punishments taken. They are skipped completely, and per ticket 07 every room punishment falls on the
+survivor.
+
+**The run ends at the start of a turn.** `[you]` If both characters are Down at the beginning of a
+turn, there is no flip — the game ends there. It is a start-of-turn check, not an instant one, so
+the second character going Down does not end the run in the middle of resolving something.
+
+## What this closes
+
+- **Sub-questions 1–5 and 7** are all answered above or dissolved by the ruling. Sub-question 6
+  (recovery on ascending) was already settled by ticket 07 and is untouched: clearing a floor heals
+  both characters to full, including one who is Down.
+- **Ordering against last stand** is now a straight line with no interaction to specify: full deck →
+  last stand (empty deck, still holding a hand) → Down (hand discarded, out) → run ends at the next
+  start-of-turn check if both are Down. Ticket 17 owns the last stand half and this answer does not
+  touch it.
+- **Ticket 04's idling hole** — a character sitting at one card of deck while their partner solves
+  the floor — closes on its own. The minimum draw is mandatory and Exhausts from an empty deck, so
+  there is no way to hold at one card and coast.
+- **The rules budget.** The ticket allowed roughly one paragraph. The subsystem came in at zero
+  rules text beyond the definition of Down itself.
+
+## The tension this leaves
+
+Ticket 06 made revive the safety valve that keeps the frantic pillar survivable — one bad break from
+a hazard must not end the run on the spot. That valve is now gone from the rules and lives entirely
+in the card pool. Whether a bad break is survivable is therefore a **card availability** question:
+if no reviving card is in the pool, or none is reachable when it matters, ticket 06's constraint is
+unmet. This is the thing to watch in ticket 20's tabletop play and in ticket 10's win rates.

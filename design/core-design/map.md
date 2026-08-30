@@ -423,6 +423,16 @@ head, reacting to what's in front of you, with little time for deep strategy.*
   09's *never seen again* target implies **45–55 cards per character**, and the levers to shrink that
   are still the human's to pull.
 
+- [Design the down and revive rules](issues/14-down-and-revive.md) — `[you]` **There is no
+  down-and-revive subsystem.** Down is out: a Down character is out for the rest of the floor, and no
+  general revive rule exists — only a card that explicitly says otherwise, and that card defines its
+  own effect. **Going Down discards the hand**, which is what makes the state readable with no
+  components: an empty deck *and* an empty hand, versus last stand's empty deck with cards still in
+  hand. While Down a character does nothing at all — no draws, plays, costs or punishments. The run
+  ends at the **start of a turn**: if both are Down there is no flip, the game ends there. Zero rules
+  text spent, but ticket 06's safety valve now lives entirely in the card pool, so whether one bad
+  break is survivable is a **card availability** question for tickets 20 and 10 to watch.
+
 ## Not yet specified
 
 <!-- In scope, but not sharp enough to ticket. Graduates into tickets as the frontier advances. -->
@@ -433,10 +443,10 @@ head, reacting to what's in front of you, with little time for deep strategy.*
   floor decks differ at all.
 - **Roguelite meta-progression** — whether anything persists between runs at all, and whether it
   is even in scope for a core spec.
-- **Death and run failure** — what happens when a run ends badly. A run is ten floors and 60–75
-  minutes, and the run-level arc is deckbuilding rather than wearing down, so what
-  remains is only what failure costs and what, if anything, a failed run leaves behind. That last
-  part may turn out to be meta-progression's question rather than this one's.
+- **Death and run failure** — what a failed run costs and what, if anything, it leaves behind.
+  Ticket 14 fixed the *trigger* — both characters Down at the start of a turn, checked before the
+  flip — so what remains here is only the consequence. That last part may turn out to be
+  meta-progression's question rather than this one's.
 - **Fixed duo or roster** — whether Red and Gray are the only two characters or one pairing drawn
   from a larger cast. Pending ticket 13. A roster is now considerably more expensive than it was:
   ticket 09 gave each character their own reward pool, so every additional character is a whole pool

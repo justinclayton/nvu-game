@@ -290,16 +290,21 @@ Every trip through last stand costs you two cards permanently. You cannot live t
 
 In last stand you have to keep clearing rooms. Walking away is what finishes you.
 
-**A Down character** does nothing at all. They are skipped in the draw and play phases, they take no
-rewards, and **no card may be put into their hand** — you cannot park Stuff on a partner who is out.
-Flee lines still land on the team, and with nobody left to share them, **every one of them falls on
-the survivor**.
+**Going Down discards your hand.** That is how you tell the two states apart on sight: a character in
+last stand has an empty deck but is still holding cards; a Down character has an empty deck *and* an
+empty hand. Nothing is flipped over and nothing is tracked.
 
-**The run ends when both characters are Down.**
+**A Down character** does nothing at all. They are skipped in the draw and play phases, they pay no
+costs, they take no punishments, they take no rewards, and **no card may be put into their hand** —
+you cannot park Stuff on a partner who is out. Flee lines still land on the team, and with nobody
+left to share them, **every one of them falls on the survivor**.
 
-> **NOT YET RULED — mid-floor revival.** Whether a standing character can bring their partner back
-> before the floor ends, and at what cost, is ticket 14 and is genuinely open. Until it is settled,
-> a Down character stays Down until the floor is cleared.
+**Down is out.** A Down character stays Down until the floor is cleared. There is no revive action,
+no cost you can pay to bring a partner back. The only exception is **a card that explicitly says
+otherwise**, and such a card says for itself what it gives back.
+
+**The run ends when both characters are Down** — checked at the **start of a turn**. If both are
+Down when a turn begins, there is no flip. The game ends there.
 
 ---
 
@@ -328,7 +333,7 @@ again if that sounds wrong.
 
 **You win** by clearing the Enemy room on floor 10.
 
-**You lose** when both characters are Down.
+**You lose** when both characters are Down at the start of a turn.
 
 Floor 10 has no Stuff rooms at all. Everything you bring to it, you brought from downstairs.
 
@@ -341,7 +346,6 @@ These are live tickets, listed so nobody mistakes a placeholder for a rule.
 | Question | Ticket |
 |---|---|
 | Starting deck size and composition | 10 |
-| Mid-floor revival of a Down character | 14 |
 | Cards left in hand when a floor ends | 07 / 09 |
 | Which reward pool a Hazard's reveal line draws from, and whose deck it tops | 09 |
 | Whether a skipped reveal goes to the bottom of its pool | 09 |

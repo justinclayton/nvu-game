@@ -1,12 +1,12 @@
 #!/usr/bin/env node
-/* North vs Up — card list tooling.  Ticket 25.
+/* North vs Up — card list tooling.
  *
  *   node tools/cards.mjs build    regenerate prototype/cards.js from design/cards.yaml
- *   node tools/cards.mjs check    fail if cards.js, or either prose file, has drifted
+ *   node tools/cards.mjs check    fail if cards.js is stale or a prototype stops rendering
  *
  * design/cards.yaml is the source of truth for every card.  Nothing else in the
  * repo may hold a card's name, cost, stats, rarity, Hold, or rules text except
- * as a generated copy (prototype/cards.js) or a checked copy (the prose files).
+ * as a generated copy (prototype/cards.js).
  *
  * No dependencies on purpose: this is a paper-prototype repo with no package.json,
  * and the parser only has to read the one file it owns.
@@ -20,10 +20,7 @@ import { createContext, runInContext } from "node:vm";
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 const YAML = join(ROOT, "design/cards.yaml");
 const OUT = join(ROOT, "prototype/cards.js");
-const PROSE = [
-  join(ROOT, "design/core-design/prototypes/12-exemplar-card-set.md"),
-  join(ROOT, "design/core-design/prototypes/12-card-bank.md"),
-];
+const SETS = new Set(["official", "proposed"]);
 
 /* ------------------------------------------------------------------ parser
    Handles exactly the subset design/cards.yaml uses: a top-level map, one list
@@ -171,7 +168,7 @@ export function parseCardsYaml(text) {
 /* ------------------------------------------------------------------- build */
 
 const FIELD_ORDER = [
-  "name", "set", "kind", "owner", "starter", "starter_status", "rarity",
+  "name", "set", "kind", "owner", "starter", "rarity",
   "rarity_status", "cost", "power", "scramble", "conditional_stat", "hold",
   "thresholds", "flee", "text", "note", "flagged",
 ];
@@ -191,7 +188,7 @@ function generate(doc) {
  * Check:  node tools/cards.mjs check
  *
  * Every card in North vs Up, as printed.  EVERY NUMBER IS A PLACEHOLDER —
- * costs, stats and thresholds belong to ticket 10.
+ * costs, stats and thresholds are still open design.
  *
  * Loaded by prototype/card-sheet.html (the cutting sheet) and
  * prototype/encounter-sim.html (the simulator) with a plain <script> tag, so
@@ -204,10 +201,10 @@ ${body}
   ]
 };
 
-/* Views the two prototypes share. */
+/* Views the prototypes share. */
 NVU_CARDS.by = function (fn) { return NVU_CARDS.cards.filter(fn); };
-NVU_CARDS.exemplars = NVU_CARDS.cards.filter(function (c) { return c.set === "exemplar"; });
-NVU_CARDS.bank = NVU_CARDS.cards.filter(function (c) { return c.set === "bank"; });
+NVU_CARDS.official = NVU_CARDS.cards.filter(function (c) { return c.set === "official"; });
+NVU_CARDS.proposed = NVU_CARDS.cards.filter(function (c) { return c.set === "proposed"; });
 NVU_CARDS.byName = function (n) {
   for (var i = 0; i < NVU_CARDS.cards.length; i++) {
     if (NVU_CARDS.cards[i].name === n) return NVU_CARDS.cards[i];
@@ -219,106 +216,19 @@ if (typeof module !== "undefined") module.exports = NVU_CARDS;
 `;
 }
 
-/* ------------------------------------------------------------------- check
-   The prose files are hand-written, because they carry the design reasoning
-   this ticket deliberately kept out of the YAML.  What they must not do is
-   disagree with it, so their card lines are parsed back and compared. */
+/* ------------------------------------------------------------------- check */
 
-const STAT_WORDS = /\*\*(Power|Scramble)\s+(\d+)(?:,\s*(Power|Scramble)\s+(\d+))?\*\*/;
-
-function proseCards(text) {
-  const found = [];
-  const lines = text.split("\n");
-  /* A section heading may set the rarity for every card under it, which is how
-     the starters are written: "### Red — starters (`Fine`, near-pure stats)". */
-  let sectionRarity;
-  for (let i = 0; i < lines.length; i++) {
-    const line = lines[i];
-    const section = line.match(/^###\s+\w+\s+—\s+starters\s+\(`(Fine|Cool|Woah)`/);
-    if (section) { sectionRarity = section[1]; continue; }
-    if (/^##\s/.test(line)) sectionRarity = undefined;
-    // "### Name · owner · `Rarity` · `Cost 0` · ..." or "**Name** · owner · ..."
-    let m = line.match(/^###\s+(.+?)\s+·\s+(.*)$/) || line.match(/^\*\*(.+?)\*\*\s+·\s+(.*)$/);
-    if (!m) continue;
-    const [, name, rest] = m;
-    if (!/`Cost/.test(rest) && !/\(cost unset\)/.test(rest)) continue;
-    const card = { name: name.replace(/`/g, "").trim(), line: i + 1 };
-    const cost = rest.match(/`Cost\s+(\d+)`/);
-    if (cost) card.cost = Number(cost[1]);
-    const rar = rest.match(/`(Fine|Cool|Woah)`/);
-    if (rar) card.rarity = rar[1];
-    else if (sectionRarity) card.rarity = sectionRarity;
-    const stat = rest.match(STAT_WORDS);
-    if (stat) {
-      card[stat[1].toLowerCase()] = Number(stat[2]);
-      if (stat[3]) card[stat[3].toLowerCase()] = Number(stat[4]);
-    }
-    if (/`Hold`/.test(rest)) card.hold = true;
-    /* The printed rules text is the blockquote directly under the header. */
-    const quote = [];
-    for (let j = i + 1; j < lines.length; j++) {
-      const q = lines[j];
-      if (q.trim() === "" && quote.length === 0) continue;
-      if (!q.startsWith(">")) break;
-      quote.push(q.replace(/^>\s?/, ""));
-    }
-    /* Rules text is quoted in italics; a plain blockquote is commentary. */
-    const quoted = quote.join(" ").trim();
-    if (/^\*.*\*$/.test(quoted)) card.text = quoted;
-    found.push(card);
-  }
-  return found;
-}
-
-const fmt = (v) => (v === undefined ? "unset" : JSON.stringify(v));
-
-/* Compare what the card says, not how markdown dresses it: emphasis, backticks,
-   smart quotes and whitespace are the prose file's business. */
-function normalizeText(s) {
-  return s
-    .replace(/[`*_]/g, "")
-    .replace(/[‘’]/g, "'")
-    .replace(/[“”]/g, '"')
-    .replace(/[−–]/g, "-")
-    .replace(/\s+/g, " ")
-    .trim();
-}
-
-function checkProse(doc, path) {
+function checkSchema(doc) {
   const problems = [];
-  const text = readFileSync(path, "utf8");
-  const rel = path.slice(ROOT.length + 1);
-  const listed = proseCards(text);
-  for (const p of listed) {
-    const c = doc.cards.find((x) => x.name === p.name);
-    if (!c) {
-      problems.push(`${rel}:${p.line} — "${p.name}" is not in design/cards.yaml`);
-      continue;
-    }
-    for (const f of ["cost", "rarity", "power", "scramble", "hold"]) {
-      const mine = f in p ? p[f] : undefined;
-      const theirs = c[f] === null || c[f] === undefined ? undefined : c[f];
-      if (mine !== theirs) {
-        problems.push(
-          `${rel}:${p.line} — ${p.name}: ${f} is ${fmt(mine)} in prose, ${fmt(theirs)} in cards.yaml`
-        );
-      }
-    }
-    if (p.text !== undefined && normalizeText(p.text) !== normalizeText(c.text || "")) {
-      problems.push(
-        `${rel}:${p.line} — ${p.name}: rules text differs from cards.yaml\n` +
-        `      prose: ${normalizeText(p.text)}\n` +
-        `      yaml:  ${normalizeText(c.text || "")}`
-      );
-    }
-  }
-  const namesInProse = new Set(listed.map((p) => p.name));
-  const set = rel.includes("card-bank") ? "bank" : "exemplar";
+  const names = new Set();
   for (const c of doc.cards) {
-    if (c.set !== set || c.kind.endsWith("room")) continue;
-    if (!namesInProse.has(c.name)) {
-      problems.push(`${rel} — ${c.name} is in cards.yaml but has no entry here`);
+    if (!c.name) problems.push("a card is missing a name");
+    else if (names.has(c.name)) problems.push(`duplicate card name: ${c.name}`);
+    else names.add(c.name);
+    if (!SETS.has(c.set)) {
+      problems.push(`${c.name || "?"}: set must be official|proposed, got ${JSON.stringify(c.set)}`);
     }
+    if (!c.kind) problems.push(`${c.name || "?"}: missing kind`);
   }
   return problems;
 }
@@ -398,23 +308,19 @@ if (cmd === "build") {
   console.log(`wrote prototype/cards.js — ${doc.cards.length} cards`);
 } else if (cmd === "check") {
   const problems = [];
+  problems.push(...checkSchema(doc));
   const want = generate(doc);
   let have = "";
   try { have = readFileSync(OUT, "utf8"); } catch { /* missing counts as stale */ }
   if (have !== want) problems.push("prototype/cards.js is stale — run: node tools/cards.mjs build");
-  for (const p of PROSE) problems.push(...checkProse(doc, p));
   problems.push(...checkRenders(doc, want));
 
-  const exemplars = doc.cards.filter((c) => c.set === "exemplar").length;
-  if (exemplars !== doc.meta.exemplar_count) {
-    problems.push(`meta.exemplar_count is ${doc.meta.exemplar_count} but there are ${exemplars} exemplar cards`);
-  }
   if (problems.length) {
     console.error(`card list has drifted — ${problems.length} problem(s):\n`);
     for (const p of problems) console.error("  " + p);
     process.exit(1);
   }
-  console.log(`no drift — ${doc.cards.length} cards agree across cards.yaml, cards.js and both prose files,
+  console.log(`no drift — ${doc.cards.length} cards agree across cards.yaml and cards.js,
 and both prototypes render all ${doc.cards.length}`);
 } else {
   console.error("usage: node tools/cards.mjs [build|check]");

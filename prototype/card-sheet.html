@@ -23,7 +23,6 @@
     background: #fff;
   }
   h1 { font-size: 16pt; margin: 0 0 2mm; }
-  .note { font-size: 8pt; color: #555; max-width: 170mm; margin: 0 0 6mm; line-height: 1.4; }
   h2 {
     font-size: 10pt; text-transform: uppercase; letter-spacing: .08em;
     color: #555; margin: 8mm 0 3mm; border-bottom: 1px solid #ccc; padding-bottom: 1mm;
@@ -95,7 +94,6 @@
 
   @media print {
     body { margin: 8mm; }
-    .note, h1, h2 { }
   }
 </style>
 </head>
@@ -107,10 +105,6 @@
 <script src="cards.js"></script>
 <script>
 "use strict";
-/* Every card on this sheet is rendered from design/cards.yaml, via the generated
-   prototype/cards.js. Nothing here is hand-written per card — that is ticket 25:
-   the card list has one source, and this sheet is a view of it. To change a card,
-   edit design/cards.yaml and run `node tools/cards.mjs build`. */
 
 function esc(s) {
   return String(s).replace(/[&<>]/g, function (c) {
@@ -183,9 +177,6 @@ function cardHTML(c) {
 }
 
 /* The sheet's sections, in cutting order. Each is a filter over the one list. */
-function is(set, fn) {
-  return function (c) { return c.set === set && fn(c); };
-}
 function player(owner, starter) {
   return function (c) {
     return c.kind === "player" && c.owner === owner && Boolean(c.starter) === starter;
@@ -194,56 +185,32 @@ function player(owner, starter) {
 function kind(k) {
   return function (c) { return c.kind === k; };
 }
+function rooms(c) {
+  return c.kind === "enemy_room" || c.kind === "hazard_room";
+}
+function rewards(c) {
+  return c.kind === "player" && !c.starter;
+}
 
 var SECTIONS = [
-  { h: "Red — starters", pick: is("exemplar", player("Red", true)) },
-  { h: "Gray — starters", pick: is("exemplar", player("Gray", true)) },
-  { h: "Reward cards", pick: is("exemplar", function (c) {
-      return c.kind === "player" && !c.starter;
-    }) },
-  { h: "Good Stuff — a face-down side pool, drawn blind when a Stuff room pays out",
-    pick: is("exemplar", kind("good_stuff")) },
-  { h: "Bad Stuff — no stat field, no rarity", pick: is("exemplar", kind("bad_stuff")) },
-  { h: "Rooms", pick: is("exemplar", function (c) {
-      return c.kind === "enemy_room" || c.kind === "hazard_room";
-    }) },
-  { h: "Stuff rooms — the room and the item are different cards",
-    note: "Each line is read against <b>one character's own side of the play zone</b>, never the " +
-      "shared pool, so you pay for your own item and never for your partner's. <b>Every threshold " +
-      "number on these four cards is a placeholder</b> — how low the gate sits, and what the second " +
-      "tier costs, are ticket 10 numbers and are not decided. The room is Cleared whether or not " +
-      "anyone meets anything; what you lose by meeting nothing is only the Stuff. What you earn is " +
-      "drawn face down from the Good Stuff pool.",
-    pick: is("exemplar", kind("stuff_room")) },
-
-  { divider: "The card bank — designed, not in the exemplar set",
-    note: "These are the cards accumulating in <code>design/core-design/prototypes/12-card-bank.md</code>. " +
-      "They are candidates for the reward pools, not ratified design, and they are printed here so the " +
-      "sheet holds the whole designed set. Cut them into a separate pile." },
-  { h: "Bank — Red", pick: is("bank", function (c) {
-      return c.kind === "player" && c.owner === "Red";
-    }) },
-  { h: "Bank — Gray", pick: is("bank", function (c) {
-      return c.kind === "player" && c.owner === "Gray";
-    }) },
-  { h: "Bank — Good Stuff", pick: is("bank", kind("good_stuff")) },
-  { h: "Bank — Bad Stuff", pick: is("bank", kind("bad_stuff")) }
+  { h: "Red — starters", pick: player("Red", true) },
+  { h: "Gray — starters", pick: player("Gray", true) },
+  { h: "Red — rewards", pick: function (c) { return rewards(c) && c.owner === "Red"; } },
+  { h: "Gray — rewards", pick: function (c) { return rewards(c) && c.owner === "Gray"; } },
+  { h: "Good Stuff", pick: kind("good_stuff") },
+  { h: "Bad Stuff", pick: kind("bad_stuff") },
+  { h: "Rooms", pick: rooms },
+  { h: "Stuff rooms", pick: kind("stuff_room") }
 ];
 
 (function render() {
   var out = "", seen = 0;
   SECTIONS.forEach(function (s) {
-    if (s.divider) {
-      out += '<h1 style="margin-top:12mm">' + esc(s.divider) + "</h1>";
-      if (s.note) out += '<p class="note">' + s.note + "</p>";
-      return;
-    }
     var cards = NVU_CARDS.cards.filter(s.pick);
     if (!cards.length) return;
     seen += cards.length;
     out += "<h2>" + esc(s.h) + " <span style='font-weight:400;text-transform:none;letter-spacing:0'>(" +
       cards.length + ")</span></h2>";
-    if (s.note) out += '<p class="note">' + s.note + "</p>";
     out += '<div class="sheet">' + cards.map(cardHTML).join("") + "</div>";
   });
   document.getElementById("sheets").innerHTML = out;
@@ -251,11 +218,11 @@ var SECTIONS = [
   /* Loud, on the page, if a card in the list reaches no section. */
   if (seen !== NVU_CARDS.cards.length) {
     var missed = NVU_CARDS.cards.filter(function (c) {
-      return !SECTIONS.some(function (s) { return s.pick && s.pick(c); });
+      return !SECTIONS.some(function (s) { return s.pick(c); });
     }).map(function (c) { return c.name; });
     document.getElementById("sheets").insertAdjacentHTML("afterbegin",
-      '<p class="note" style="color:#b00"><b>' + missed.length +
-      " card(s) in cards.yaml are on no section of this sheet:</b> " + esc(missed.join(", ")) + "</p>");
+      "<h2 style=\"color:#b00\">" + missed.length +
+      " card(s) on no section: " + esc(missed.join(", ")) + "</h2>");
   }
 })();
 </script>

@@ -303,8 +303,6 @@
 <!-- ============================ LIBRARY ============================ -->
 <section class="page" id="page-library">
   <div class="panel">
-    <p class="note">The exemplar set from ticket 12, as printed. <strong>Unratified</strong> — every
-      number is a placeholder and the set is still awaiting your ruling.</p>
     <div id="library"></div>
   </div>
 </section>
@@ -313,9 +311,8 @@
 <section class="page" id="page-rules">
   <div class="panel">
     <h2>What this implements</h2>
-    <p class="note">This simulator follows
-      <code>design/core-design/prototypes/12-floor-rules-summary.md</code>, which is the most current
-      statement of how a floor plays. Where the summary and an older ticket disagree, the summary wins.</p>
+    <p class="note">This simulator follows the floor rules as currently written. Card data comes from
+      <code>design/cards.yaml</code>.</p>
 
     <h3>The turn</h3>
     <ol class="tiny muted">
@@ -379,9 +376,7 @@
       <li><strong>Card effect text is displayed, never executed.</strong> Conditional stats,
         <code>Deadweight Grip</code>, <code>Faceful of Slime</code> and the rest are read by a human at
         the table, not by this engine. Stats, costs and <code>Hold</code> are all it understands.</li>
-      <li><strong>Only the exemplar set is simulated.</strong> The card bank is shown on the Cards tab
-        for reference, but nothing in it enters a deck, a reward pool or a floor deck.</li>
-      <li><strong>Red/Gray asymmetry</strong> is only what the exemplar cards print.</li>
+      <li><strong>Red/Gray asymmetry</strong> is only what the cards print.</li>
       <li>The <strong>reward pool problem</strong> from ticket 12 is a component-count question and is
         not simulated.</li>
     </ul>
@@ -396,20 +391,16 @@
 
 /* ================================================================ data
    Every card comes from design/cards.yaml, through the generated cards.js
-   loaded above — ticket 25. No card is written down here.
+   loaded above. No card is written down here.
 
    What this section does is *shape* that data for the engine, which needs a
    few things a printed card does not carry: which starter is the cheap one, a
    room's threshold as a number it can compare, and a Flee line as an
    instruction rather than a sentence. Anything it cannot shape throws, loudly,
-   rather than quietly simulating a card that is not the designed one.
+   rather than quietly simulating a card that is not the designed one. */
 
-   The simulator runs the ratified exemplar set only. The bank cards are
-   candidates, not adopted design, so they are in no pool here — adding them
-   would change the numbers ticket 10 is asking this simulator for. */
-
-function exemplarsOfKind(k) {
-  return NVU_CARDS.exemplars.filter(function (c) { return c.kind === k; });
+function cardsOfKind(k) {
+  return NVU_CARDS.cards.filter(function (c) { return c.kind === k; });
 }
 
 /* Stats, costs and Hold are all the engine understands. Rules text is carried
@@ -431,9 +422,9 @@ function playerShape(c, owner) {
   };
 }
 
-var PLAYER_CARDS = exemplarsOfKind("player").map(function (c) { return playerShape(c); });
-var GOOD_STUFF = exemplarsOfKind("good_stuff").map(function (c) { return playerShape(c, "GoodStuff"); });
-var BAD_STUFF = exemplarsOfKind("bad_stuff").map(function (c) { return playerShape(c, "BadStuff"); });
+var PLAYER_CARDS = cardsOfKind("player").map(function (c) { return playerShape(c); });
+var GOOD_STUFF = cardsOfKind("good_stuff").map(function (c) { return playerShape(c, "GoodStuff"); });
+var BAD_STUFF = cardsOfKind("bad_stuff").map(function (c) { return playerShape(c, "BadStuff"); });
 
 /* A Flee line is printed as a sentence. The engine needs who pays and how much,
    so the sentence is read back — and if a card ever prints a Flee line in a
@@ -481,9 +472,9 @@ function roomShape(c) {
   return d;
 }
 
-var ENEMY_ROOMS = exemplarsOfKind("enemy_room").map(roomShape);
-var HAZARD_ROOMS = exemplarsOfKind("hazard_room").map(roomShape);
-var STUFF_ROOMS = exemplarsOfKind("stuff_room").map(roomShape);
+var ENEMY_ROOMS = cardsOfKind("enemy_room").map(roomShape);
+var HAZARD_ROOMS = cardsOfKind("hazard_room").map(roomShape);
+var STUFF_ROOMS = cardsOfKind("stuff_room").map(roomShape);
 
 /* ================================================================ settings */
 
@@ -1825,8 +1816,8 @@ function renderLog() {
 }
 
 function renderLibrary() {
-  function group(title, list, note) {
-    return "<h3>" + title + "</h3>" + (note ? '<p class="tiny muted">' + note + "</p>" : "") +
+  function group(title, list) {
+    return "<h3>" + title + "</h3>" +
       '<div class="hand" style="margin-bottom:14px">' +
       list.map(function (d) { return cardHTML(d); }).join("") + "</div>";
   }
@@ -1837,19 +1828,10 @@ function renderLibrary() {
   el("library").innerHTML =
     group("Red", PLAYER_CARDS.filter(function (c) { return c.owner === "Red"; })) +
     group("Gray", PLAYER_CARDS.filter(function (c) { return c.owner === "Gray"; })) +
-    group("Good Stuff", GOOD_STUFF, "A side pool at the edge of the table, drawn face down.") +
-    group("Bad Stuff", BAD_STUFF, "A separate side pool. No stats. Dealt by a room's Flee line.") +
+    group("Good Stuff", GOOD_STUFF) +
+    group("Bad Stuff", BAD_STUFF) +
     "<h3>Enemy and Hazard rooms</h3><div class='hand' style='margin-bottom:14px'>" + rooms + "</div>" +
-    "<h3>Stuff rooms</h3><p class='tiny muted'>Four rooms, new on 2026-08-25. Their numbers come from " +
-    "the Setup tab because they are unruled.</p><div class='hand' style='margin-bottom:14px'>" + stuffRooms + "</div>" +
-    "<h2 style='margin-top:22px'>The card bank</h2>" +
-    "<p class='tiny muted'>The rest of the designed set, from <code>design/cards.yaml</code>. These are " +
-    "candidates for the reward pools, not ratified design, so <b>nothing below is simulated</b> — they " +
-    "are here so this page shows the whole card list.</p>" +
-    group("Bank — Red", NVU_CARDS.bank.filter(function (c) { return c.owner === "Red"; }).map(function (c) { return playerShape(c); })) +
-    group("Bank — Gray", NVU_CARDS.bank.filter(function (c) { return c.owner === "Gray"; }).map(function (c) { return playerShape(c); })) +
-    group("Bank — Good Stuff", NVU_CARDS.bank.filter(function (c) { return c.kind === "good_stuff"; }).map(function (c) { return playerShape(c, "GoodStuff"); })) +
-    group("Bank — Bad Stuff", NVU_CARDS.bank.filter(function (c) { return c.kind === "bad_stuff"; }).map(function (c) { return playerShape(c, "BadStuff"); }));
+    "<h3>Stuff rooms</h3><div class='hand' style='margin-bottom:14px'>" + stuffRooms + "</div>";
 }
 
 /* ================================================================ wiring */

@@ -13,7 +13,7 @@ import type { Card, Character, FleeLine, Room, Stat, Threshold } from "./types.t
 /** The shape of one entry in the generated prototype/cards.js. */
 export interface RawCard {
   name: string;
-  set: "exemplar" | "bank";
+  set: "official" | "proposed";
   kind: string;
   owner?: Character;
   rarity?: "Fine" | "Cool" | "Woah";
@@ -66,7 +66,7 @@ export function copies(raw: RawCard, n: number): Card[] {
 
 /**
  * The Flee lines in design/cards.yaml are printed prose. The engine wants
- * structure, so parse the four shapes the exemplar set actually prints and
+ * structure, so parse the shapes the card list actually prints and
  * refuse anything else rather than silently dropping a punishment.
  */
 export function parseFlee(text: string | undefined): FleeLine | null {
@@ -112,7 +112,7 @@ function toRoom(raw: RawCard, kind: Room["kind"], index: number): Room {
 /**
  * Conditional stats. The rulebook says these are recalculated every time the
  * pool is read, so they are functions of state rather than numbers on a card.
- * Only the exemplar conditionals are implemented; everything else falls back
+ * Only the known conditionals are implemented; everything else falls back
  * to what the card prints.
  */
 export type StatFn = (ctx: {

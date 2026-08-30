@@ -1,29 +1,18 @@
 ---
-# North vs Up — the card list
+# North vs Up — card list
 #
-# The single source of truth for every designed card. Created 2026-08-29 when the
-# exemplar set was ratified, to end the three hand-maintained copies described in
-# ticket 25 (design/core-design/issues/25-single-source-for-the-card-list.md).
+# Everything that shows a card should read this file.
 #
-# The design reasoning for each card stays in prose, not here:
-#   exemplars  -> design/core-design/prototypes/12-exemplar-card-set.md
-#   bank       -> design/core-design/prototypes/12-card-bank.md
-#
-# Everything else that shows a card reads this file.
-#
-#   node tools/cards.mjs build    regenerates prototype/cards.js, which the cutting
-#                                 sheet, the simulator and sim-sweep.js all load
-#   node tools/cards.mjs check    fails if cards.js is stale, if either prose file
-#                                 disagrees with a card here, or if a prototype
+#   node tools/cards.mjs build    regenerates prototype/cards.js (used by `prototype/card-sheet.html`,
+#                                 the simulator, and sim-sweep.js
+#   node tools/cards.mjs check    fails if cards.js is stale, or if a prototype
 #                                 stops rendering the whole list
 #
-# So: change a card HERE, then run build. Never edit prototype/cards.js, and never
-# hand-write a card into a prototype again — that is what ticket 25 undid.
-#
-# EVERY NUMBER IS A PLACEHOLDER. Costs, stats and thresholds are ticket 10's.
+# Change a card HERE, then run build. Never edit prototype/cards.js. Never
+# hand-write a card into a prototype.
 #
 # Fields
-#   set     exemplar | bank      exemplar = the 25 ratified cards; bank = pool candidates
+#   set     official | proposed
 #   kind    player | good_stuff | bad_stuff | enemy_room | hazard_room | stuff_room
 #   owner   Red | Gray           player cards only
 #   rarity  Fine | Cool | Woah   omitted entirely for bad_stuff and all rooms
@@ -39,17 +28,13 @@
 # the Scrap tax saves it (rulebook sections 7 and 10). No Stuff card restates it.
 
 meta:
-  ratified: 2026-08-29
-  exemplar_count: 25
-  source_tickets: [11, 12, 21, 22, 24]
+  updated: 2026-08-30
 
 cards:
 
-  # ---------------------------------------------------------------- exemplars
-  # Player cards (11)
-
+  # Player cards
   - name: Shove
-    set: exemplar
+    set: proposed
     kind: player
     owner: Red
     starter: true
@@ -58,7 +43,7 @@ cards:
     power: 1
 
   - name: Charge In
-    set: exemplar
+    set: proposed
     kind: player
     owner: Red
     starter: true
@@ -67,7 +52,7 @@ cards:
     power: 3
 
   - name: Duck Under
-    set: exemplar
+    set: proposed
     kind: player
     owner: Gray
     starter: true
@@ -76,7 +61,7 @@ cards:
     scramble: 1
 
   - name: Pick The Lock
-    set: exemplar
+    set: proposed
     kind: player
     owner: Gray
     starter: true
@@ -85,7 +70,7 @@ cards:
     scramble: 3
 
   - name: Catch Your Breath
-    set: exemplar
+    set: proposed
     kind: player
     owner: Gray
     rarity: Fine
@@ -93,7 +78,7 @@ cards:
     text: Look at the top 2 cards of your deck. Put them back in either order.
 
   - name: Reckless
-    set: exemplar
+    set: proposed
     kind: player
     owner: Red
     rarity: Cool
@@ -102,7 +87,7 @@ cards:
     text: At cleanup, Red Exhausts 3 from deck.
 
   - name: Second Wind
-    set: exemplar
+    set: proposed
     kind: player
     owner: Red
     rarity: Cool
@@ -114,7 +99,7 @@ cards:
       a-floor rule. Unruled on purpose.
 
   - name: In Step
-    set: exemplar
+    set: proposed
     kind: player
     owner: Gray
     rarity: Cool
@@ -123,7 +108,7 @@ cards:
     text: Power equal to twice the number of cards Red has played into the play zone this turn.
 
   - name: Deadweight Grip
-    set: exemplar
+    set: proposed
     kind: player
     owner: Red
     rarity: Woah
@@ -134,7 +119,7 @@ cards:
       While you hold this, Red may not draw more than 2 cards on a turn.
 
   - name: One Man's Junk
-    set: exemplar
+    set: proposed
     kind: player
     owner: Gray
     rarity: Cool
@@ -143,7 +128,7 @@ cards:
     text: If any Bad Stuff is played this turn, Power 2 and Scramble 2.
 
   - name: Both Barrels
-    set: exemplar
+    set: proposed
     kind: player
     owner: Red
     rarity: Woah
@@ -156,7 +141,7 @@ cards:
   # Good Stuff (4)
 
   - name: Pry Bar
-    set: exemplar
+    set: proposed
     kind: good_stuff
     rarity: Fine
     cost: 0
@@ -164,7 +149,7 @@ cards:
     hold: true
 
   - name: Coil of Cable
-    set: exemplar
+    set: proposed
     kind: good_stuff
     rarity: Fine
     cost: 0
@@ -172,7 +157,7 @@ cards:
     hold: true
 
   - name: Cutting Torch
-    set: exemplar
+    set: proposed
     kind: good_stuff
     rarity: Cool
     cost: 1
@@ -180,7 +165,7 @@ cards:
     hold: true
 
   - name: Grav Harness
-    set: exemplar
+    set: proposed
     kind: good_stuff
     rarity: Woah
     cost: 1
@@ -192,7 +177,7 @@ cards:
   # Bad Stuff (2) — no rarity, by ruling of 2026-08-29
 
   - name: Faceful of Slime
-    set: exemplar
+    set: proposed
     kind: bad_stuff
     cost: 0
     hold: true
@@ -201,7 +186,7 @@ cards:
       Play this to be rid of it.
 
   - name: Torn Seal
-    set: exemplar
+    set: proposed
     kind: bad_stuff
     cost: 2
     hold: true
@@ -212,14 +197,14 @@ cards:
   # Rooms (4)
 
   - name: Sump Crawler
-    set: exemplar
+    set: proposed
     kind: enemy_room
     thresholds:
       - {stat: Power, value: 5, outcome: Clear}
     flee: 1 character Exhausts 2 from deck
 
   - name: The Thing In The Stairwell
-    set: exemplar
+    set: proposed
     kind: enemy_room
     thresholds:
       - {stat: Power, value: 9, outcome: Clear}
@@ -228,7 +213,7 @@ cards:
     note: The floor deck's hardest card, and the set's probe of whether an Enemy room may carry a reward tier.
 
   - name: Collapsed Stair
-    set: exemplar
+    set: proposed
     kind: hazard_room
     thresholds:
       - {stat: Scramble, value: 2, outcome: Clear}
@@ -236,26 +221,24 @@ cards:
     flee: 1 character Exhausts 3 from deck
 
   - name: Ruptured Coolant Line
-    set: exemplar
+    set: proposed
     kind: hazard_room
     thresholds:
       - {stat: Scramble, value: 4, outcome: Clear}
       - {stat: Scramble, value: 7, outcome: "Clear — one character reveals reward. You may add it to the top of your deck or skip it."}
     flee: both characters Exhaust 1 from deck, and 1 character takes a Bad Stuff
 
-  # Stuff rooms (4) — no Flee line; Cleared either way.
-  # Tool Cage and Spill of Cargo deliberately ask each character for the stat they
-  # do not produce. That is a probe, not a proposal.
+  # Stuff rooms (4)
 
   - name: Sorting Room
-    set: exemplar
+    set: proposed
     kind: stuff_room
     thresholds:
       - {stat: Power, value: 1, outcome: Red takes 1 Good Stuff.}
       - {stat: Scramble, value: 1, outcome: Gray takes 1 Good Stuff.}
 
   - name: Ration Locker
-    set: exemplar
+    set: proposed
     kind: stuff_room
     thresholds:
       - {stat: Power, value: 1, outcome: Red takes 1 Good Stuff.}
@@ -264,14 +247,14 @@ cards:
       - {stat: Scramble, value: 3, outcome: Gray takes 2 instead.}
 
   - name: Tool Cage
-    set: exemplar
+    set: proposed
     kind: stuff_room
     thresholds:
       - {stat: Scramble, value: 1, outcome: Red takes 1 Good Stuff.}
       - {stat: Power, value: 1, outcome: Gray takes 1 Good Stuff.}
 
   - name: Spill of Cargo
-    set: exemplar
+    set: proposed
     kind: stuff_room
     thresholds:
       - {stat: Scramble, value: 1, outcome: Red takes 1 Good Stuff.}
@@ -279,22 +262,20 @@ cards:
       - {stat: Scramble, value: 3, outcome: Red takes 2 instead.}
       - {stat: Power, value: 3, outcome: Gray takes 2 instead.}
 
-  # --------------------------------------------------------------------- bank
   # Red
 
   - name: Overdrive
-    set: bank
+    set: proposed
     kind: player
     owner: Red
     starter: true
-    starter_status: provisional
     rarity: Fine
     cost: 0
     power: 2
     text: Exhaust 2 cards from your deck.
 
   - name: Reckless Swing
-    set: bank
+    set: proposed
     kind: player
     owner: Red
     rarity: Fine
@@ -303,7 +284,7 @@ cards:
     text: Put the top card of your deck into your exhaust pile.
 
   - name: Fast Follow
-    set: bank
+    set: proposed
     kind: player
     owner: Red
     rarity: Fine
@@ -312,7 +293,7 @@ cards:
     text: If Gray played a card this turn, this costs 0.
 
   - name: Junk Launcher
-    set: bank
+    set: proposed
     kind: player
     owner: Red
     rarity: Cool
@@ -321,7 +302,7 @@ cards:
     text: This gains Power +2 for each card you Scrapped or Exhausted from hand to pay a cost this turn.
 
   - name: Heavy Pockets
-    set: bank
+    set: proposed
     kind: player
     owner: Red
     rarity: Cool
@@ -330,7 +311,7 @@ cards:
     text: Shuffle a Stuff card from your hand into your deck.
 
   - name: Zen Mode
-    set: bank
+    set: proposed
     kind: player
     owner: Red
     rarity: Woah
@@ -342,7 +323,7 @@ cards:
   # Gray
 
   - name: Peek Around Corner
-    set: bank
+    set: proposed
     kind: player
     owner: Gray
     starter: true
@@ -353,7 +334,7 @@ cards:
     note: Cost and stat are unset. The starter-tier counterpart to Hack the Doors — information, not control.
 
   - name: Hack the Doors
-    set: bank
+    set: proposed
     kind: player
     owner: Gray
     rarity: Cool
@@ -363,7 +344,7 @@ cards:
     note: A deliberate exception to ticket 18's rule that the face-up room is all the players know.
 
   - name: Hand Off
-    set: bank
+    set: proposed
     kind: player
     owner: Gray
     rarity: Fine
@@ -372,7 +353,7 @@ cards:
     text: Move 1 card from your hand to Red's hand.
 
   - name: Patch Up
-    set: bank
+    set: proposed
     kind: player
     owner: Gray
     rarity: Fine
@@ -381,7 +362,7 @@ cards:
     text: Move 1 card from your exhaust pile to the top of your deck.
 
   - name: Pack Away
-    set: bank
+    set: proposed
     kind: player
     owner: Gray
     rarity: Fine
@@ -390,7 +371,7 @@ cards:
     text: Choose a Stuff card in Red's hand. Shuffle it into Red's deck.
 
   - name: Covering Fire
-    set: bank
+    set: proposed
     kind: player
     owner: Gray
     rarity: Cool
@@ -399,7 +380,7 @@ cards:
     text: If Red played a card this turn, draw 1 card.
 
   - name: All At Once
-    set: bank
+    set: proposed
     kind: player
     owner: Gray
     rarity: Woah
@@ -409,7 +390,7 @@ cards:
     note: A Red counterpart of this kind is owed but not written.
 
   - name: Spot Salvage
-    set: bank
+    set: proposed
     kind: player
     owner: Gray
     rarity: Woah
@@ -419,7 +400,7 @@ cards:
     note: A third acquisition source. What it pulls is permanent.
 
   - name: I Know Kung Fu
-    set: bank
+    set: proposed
     kind: player
     owner: Gray
     rarity: Woah
@@ -433,7 +414,7 @@ cards:
   # Good Stuff
 
   - name: Crowbar
-    set: bank
+    set: proposed
     kind: good_stuff
     rarity: Fine
     cost: 0
@@ -443,7 +424,7 @@ cards:
     text: When you play this to clear a Stuff room, you may Scrap it to draw 2 Good Stuff instead of 1.
 
   - name: Stitch-Kit
-    set: bank
+    set: proposed
     kind: good_stuff
     rarity: Fine
     cost: 1
@@ -451,7 +432,7 @@ cards:
     text: Move 2 cards from your exhaust pile to the bottom of your deck.
 
   - name: Riot Shield
-    set: bank
+    set: proposed
     kind: good_stuff
     rarity: Cool
     cost: 1
@@ -460,7 +441,7 @@ cards:
     text: At the end of the turn, if this is in the play zone, you may return it to your hand instead of Exhausting it.
 
   - name: Overcharged Battery
-    set: bank
+    set: proposed
     kind: good_stuff
     rarity: Cool
     cost: 0
@@ -471,28 +452,28 @@ cards:
   # Bad Stuff — no rarity
 
   - name: Sluggish
-    set: bank
+    set: proposed
     kind: bad_stuff
     cost: 1
     hold: true
     text: When you draw this, choose another card in your hand. It costs +1 this turn.
 
   - name: Rust
-    set: bank
+    set: proposed
     kind: bad_stuff
     cost: 2
     hold: true
     text: While you hold this, Good Stuff you play has -1 Power.
 
   - name: Spore Cloud
-    set: bank
+    set: proposed
     kind: bad_stuff
     cost: 1
     hold: true
     text: While you hold this, cards you draw go to your exhaust pile instead of your hand.
 
   - name: Panic
-    set: bank
+    set: proposed
     kind: bad_stuff
     cost: 1
     hold: true

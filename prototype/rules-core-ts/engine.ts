@@ -177,7 +177,7 @@ function flipRoom(s: GameState, ev: DomainEvent[]): [GameState, DomainEvent[]] {
   let state = s;
   if (state.floorDeck.length === 0) {
     // Cleanup already reshuffles Fled; reaching here means the floor is empty
-    // of everything, which the exemplar floor cannot do while the Enemy lives.
+    // of everything, which a normal floor cannot do while the Enemy lives.
     throw new RuleError("The floor deck and the Fled pile are both empty.");
   }
 
@@ -426,8 +426,8 @@ function takeGoodStuff(s: GameState, c: Character, n: number, ev: DomainEvent[])
 /**
  * The reward tier on a Hazard (and on one Enemy room): turn the top card of the
  * named character's reward pool face up; it goes on top of that character's
- * deck (section 6). The exemplar rooms print "one character", so the choice
- * arrives on the END_PLAY command.
+ * deck (section 6). Rooms that print "one character" leave the choice
+ * on the END_PLAY command.
  *
  * Always taken here: whether a skipped reveal goes to the bottom of its pool is
  * NOT YET RULED (ticket 09), so the prototype does not offer the skip.

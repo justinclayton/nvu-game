@@ -1,7 +1,7 @@
 # 13 — Define how Red and Gray actually differ in play
 
 Type: grilling
-Status: open
+Status: closed
 Blocked by: 04, 09
 Map: [core design map](../map.md)
 
@@ -104,3 +104,60 @@ each character separately, so there is nothing to route. Recorded as an amendmen
 Red takes 1. Scramble 1: Gray takes 1"* — makes the Red/Gray difference **visible on a card in the
 floor deck**, not just in two decklists. Whatever this ticket decides the difference is, the room
 cards will be printing it every floor.
+
+## Answer, 2026-08-29
+
+`[you]` **The asymmetry is entirely card-level, and it is entirely the stat lean.** Red's cards
+carry `Power`, Gray's carry `Scramble`. There is nothing else. No unique ability, no different
+relationship to the resource model, no rule either character has that the other does not.
+
+**No permanent abilities.** `[you]` Neither character gets a rules block of their own. Explicitly
+*for now* rather than forever — the door is open to add one later, but nothing in the core spec
+waits on it.
+
+**No designed interdependence.** `[you]` Asked whether anything exists that Red simply cannot get
+past without Gray, the ruling was that it depends on what Stuff he is holding, and there is nothing
+to design for at this stage. Since [ticket 11](11-card-anatomy.md) made Stuff the stat base and
+either character can be holding any of it, a hard lock could not be guaranteed anyway. The
+characters are different, not codependent.
+
+**Equally capable.** `[you]` Neither is deliberately stronger. Balance posture is parity.
+
+**Same spend rate.** `[you]` Red does not burn through his deck faster to pay for bigger numbers.
+Both characters spend stamina at the same rate; the difference is *which stat* the spend produces,
+never *how much* it costs.
+
+**Starting deck contents are not this ticket's.** `[you]` The decklists are settled with the numbers
+— [ticket 10](10-sim-the-resource-economy.md) owns starting deck size and composition, and how
+strongly each list leans is part of that. This ticket says only that the lean exists.
+
+## What this closes
+
+- **Sub-question 1 (where the asymmetry lives)**: the card pools, and nothing else.
+- **Sub-question 2 (the one-sentence test)**: *Red turns a card into `Power`; Gray turns a card into
+  `Scramble`.* Both sentences are easy to write, which was the test.
+- **Sub-questions 3, 4 and 5**: no, no, and parity, as above.
+- **Sub-question 6 (solo load)**: answered by construction. With zero per-character rules, a solo
+  player holds **one** rule set and two decklists, not two rule sets. This was the ticket's stated
+  worry and the ruling removes it entirely.
+
+## The risk this ticket was created to manage
+
+The ticket opened by naming the failure mode: *"aggressive vs. resourceful" is the most generic
+pairing in game design, and it is very easy to end up with two characters who differ only in flavour
+text and a damage number.* The ruling accepts a version of that deliberately, and it is worth being
+honest about why it is not the failure mode:
+
+- **The stat lean is not flavour.** Rooms print a *named* threshold and a card only counts toward the
+  stat it carries `[you, ticket 21]`, so a Power card is not a bigger Scramble card — it does nothing
+  at all against a hazard. The two characters are not on one axis at different magnitudes.
+- **The difference is printed on the floor deck, not just on two decklists.** Ticket 22's split
+  challenge — *"Power 1: Red takes 1. Scramble 1: Gray takes 1"* — puts the Red/Gray distinction on a
+  card the team flips every floor.
+- **Nothing here is load-bearing against a later addition.** The lean costs no rules, so a permanent
+  ability could be added on top without unpicking anything.
+
+**What to watch:** whether the two decks feel like different characters or like one deck cut in half.
+That is a table question, not a spec question — [ticket 20](20-encounter-tabletop-prototype.md)
+already carries it, and ticket 12 flagged that the Red/Gray difference in the exemplar set is
+currently flavour standing in for this ruling. It no longer is: the lean is the ruling.

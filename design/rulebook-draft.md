@@ -46,6 +46,15 @@ on the floor, which is gone the moment you climb the stairs. There is less of it
 **Two characters are always in play.** Red is stocky, aggressive and headstrong. Gray is careful,
 attuned and resourceful.
 
+**The difference between them is their cards, and only their cards.** Red's cards carry `Power`;
+Gray's carry `Scramble`. Neither character has a special ability, and neither pays more or less than
+the other for what they do — Red turns a card into Power, Gray turns a card into Scramble. That is
+the whole of it. Each draws rewards from their own pool, so the two decks grow further apart as the
+run goes on. Neither is stronger.
+
+Neither is locked out of the other's stat, either: **Stuff carries stats too**, so a character can
+be holding exactly what they are bad at.
+
 - **Two players:** one of you runs Red, the other runs Gray.
 - **One player:** you run both.
 
@@ -350,4 +359,3 @@ These are live tickets, listed so nobody mistakes a placeholder for a rule.
 | Which reward pool a Hazard's reveal line draws from, and whose deck it tops | 09 |
 | Whether a skipped reveal goes to the bottom of its pool | 09 |
 | The Enemy room's `Power` requirement per floor | 22 / 10 |
-| How Red and Gray differ at card level | 13 |

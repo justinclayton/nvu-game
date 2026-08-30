@@ -433,6 +433,16 @@ head, reacting to what's in front of you, with little time for deep strategy.*
   text spent, but ticket 06's safety valve now lives entirely in the card pool, so whether one bad
   break is survivable is a **card availability** question for tickets 20 and 10 to watch.
 
+- [Define how Red and Gray actually differ in play](issues/13-red-and-gray-asymmetry.md) — `[you]`
+  **The asymmetry is the stat lean and nothing else.** Red's cards carry `Power`, Gray's carry
+  `Scramble`; neither gets a permanent ability, a different spend rate, or any rule the other lacks.
+  *Red turns a card into Power; Gray turns a card into Scramble* is the whole difference. **No
+  designed interdependence** — a hard lock could not be guaranteed anyway now that Stuff is the stat
+  base and either character may hold any of it. **Equally capable**, and both spend stamina at the
+  same rate. Unique abilities are ruled out *for now*, not forever, and cost nothing to add later.
+  Solo load falls out for free: one rule set, two decklists. Starting deck contents belong to ticket
+  10 with the rest of the numbers.
+
 ## Not yet specified
 
 <!-- In scope, but not sharp enough to ticket. Graduates into tickets as the frontier advances. -->
@@ -448,9 +458,9 @@ head, reacting to what's in front of you, with little time for deep strategy.*
   flip — so what remains here is only the consequence. That last part may turn out to be
   meta-progression's question rather than this one's.
 - **Fixed duo or roster** — whether Red and Gray are the only two characters or one pairing drawn
-  from a larger cast. Pending ticket 13. A roster is now considerably more expensive than it was:
-  ticket 09 gave each character their own reward pool, so every additional character is a whole pool
-  of printed cards rather than a different starting deck.
+  from a larger cast. No longer pending ticket 13, which ruled that a character *is* a stat lean and
+  a card pool and nothing more. That makes a third character conceptually trivial and physically
+  expensive: it is a whole pool of printed cards, and there are only two stats for it to lean on.
 - **Table footprint and component budget** — the physical constraints that will eventually bound
   card count and per-turn upkeep. The *floor decks'* share belongs to ticket 22, which produces the
   map's first hard component number; what remains here is everything else. Ticket 07 counted the

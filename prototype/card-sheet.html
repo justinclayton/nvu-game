@@ -2,13 +2,16 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<title>North vs Up — ticket 12 exemplar cards (print &amp; cut)</title>
+<title>North vs Up — the card sheet (print &amp; cut)</title>
 <style>
   :root {
-    --fine: #8a8f98;
-    --cool: #2f7bd6;
-    --woah: #b8860b;
+    --fine: #0fa3a8;   /* robin egg blue */
+    --cool: #8f6fc4;   /* lavender */
+    --woah: #daa520;   /* goldenrod */
     --none: #444;
+    --red-owner: #b52d24;
+    --gray-owner: #7a7f87;
+    --neutral-owner: #111;
   }
   * { box-sizing: border-box; }
   body {
@@ -34,9 +37,10 @@
     page-break-inside: avoid; break-inside: avoid;
     position: relative;
   }
-  .card.fine { border-color: var(--fine); }
-  .card.cool { border-color: var(--cool); }
-  .card.woah { border-color: var(--woah); }
+  /* Border colour is whose card it is: Red, Gray, or neutral (floor and stuff). */
+  .card.owner-red { border-color: var(--red-owner); }
+  .card.owner-gray { border-color: var(--gray-owner); }
+  .card.owner-neutral { border-color: var(--neutral-owner); }
 
   .rarity-bar { height: 2mm; border-radius: 1mm; margin: -1mm -1mm 2mm; }
   .fine .rarity-bar { background: var(--fine); }
@@ -80,8 +84,8 @@
   }
 
   /* room cards */
-  .card.room { border-color: #222; }
-  .card.room .rarity-bar { background: #222; }
+  .card.room { border-color: var(--neutral-owner); }
+  .card.room .rarity-bar { background: var(--neutral-owner); }
   .thresholds { font-size: 9pt; line-height: 1.4; }
   .thresholds .th { margin-bottom: 1.5mm; }
   .thresholds .th b { font-weight: 700; }
@@ -102,8 +106,9 @@
 <h1>North vs Up — the card list (print &amp; cut)</h1>
 <p class="note">
   Print at 100% (no “fit to page”) and cut on the borders — cards are 63&times;88mm, standard poker
-  size, so they fit ordinary sleeves. Border colour is <b>rarity</b>, which signals a card's <b>value</b> — its ceiling when things
-  line up. The most complex cards are always the highest rarity, because complexity has to pay for
+  size, so they fit ordinary sleeves. Border colour is <b>whose card it is</b> — Red, Gray, or black
+  for floor and stuff cards. The bar across the top is <b>rarity</b>, which signals a card's
+  <b>value</b> — its ceiling when things line up. The most complex cards are always the highest rarity, because complexity has to pay for
   itself in what the card does. Every number here is a placeholder for ticket 10.
   Every card here is rendered from <code>design/cards.yaml</code>, the one place a card is written down;
   the design reasoning lives in <code>design/core-design/prototypes/12-exemplar-card-set.md</code> and
@@ -158,7 +163,9 @@ function costPip(c) {
 
 function playerCardHTML(c) {
   var rarityClass = c.rarity ? c.rarity.toLowerCase() : "norarity";
-  return '<div class="card ' + rarityClass + '"><div class="rarity-bar"></div>' +
+  var ownerClass = c.owner === "Red" ? "owner-red"
+    : c.owner === "Gray" ? "owner-gray" : "owner-neutral";
+  return '<div class="card ' + rarityClass + " " + ownerClass + '"><div class="rarity-bar"></div>' +
     '<div class="top"><div><div class="name">' + esc(c.name) + "</div>" +
     '<div class="typeline">' + esc(c.owner || TYPE_LINE[c.kind]) + "</div></div>" +
     costPip(c) + "</div>" +

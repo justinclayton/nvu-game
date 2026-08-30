@@ -193,7 +193,7 @@ function generate(doc) {
  * Every card in North vs Up, as printed.  EVERY NUMBER IS A PLACEHOLDER —
  * costs, stats and thresholds belong to ticket 10.
  *
- * Loaded by prototype/12-exemplar-cards.html (the cutting sheet) and
+ * Loaded by prototype/card-sheet.html (the cutting sheet) and
  * prototype/encounter-sim.html (the simulator) with a plain <script> tag, so
  * both keep working from file:// with no build step and no server.
  */
@@ -361,16 +361,16 @@ function checkRenders(doc, cardsJs) {
   const total = doc.cards.length;
 
   try {
-    const sheet = readFileSync(join(ROOT, "prototype/12-exemplar-cards.html"), "utf8");
+    const sheet = readFileSync(join(ROOT, "prototype/card-sheet.html"), "utf8");
     const { ctx, store } = baseContext(cardsJs);
     runInContext(sheet.match(/<script>\n"use strict";([\s\S]*?)<\/script>/)[1], ctx);
     const html = store.sheets.innerHTML;
     const drawn = (html.match(/class="card /g) || []).length;
     if (drawn !== total) {
-      problems.push(`prototype/12-exemplar-cards.html renders ${drawn} cards, not ${total}`);
+      problems.push(`prototype/card-sheet.html renders ${drawn} cards, not ${total}`);
     }
   } catch (e) {
-    problems.push(`prototype/12-exemplar-cards.html failed to render: ${e.message}`);
+    problems.push(`prototype/card-sheet.html failed to render: ${e.message}`);
   }
 
   try {

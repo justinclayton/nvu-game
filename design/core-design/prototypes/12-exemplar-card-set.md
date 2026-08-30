@@ -4,7 +4,7 @@ Built 2026-08-25 for [ticket 12](../issues/12-exemplar-card-set.md). **Everythin
 `[proposed by agent → awaiting your ruling]`.** No card here is adopted. The map's standing rule is
 that the agent surfaces options and the human rules; this file is the option.
 
-Printable version for cutting: [`prototype/12-exemplar-cards.html`](../../../prototype/12-exemplar-cards.html).
+Printable version for cutting: [`prototype/card-sheet.html`](../../../prototype/card-sheet.html).
 One-page rules summary: [`12-floor-rules-summary.md`](12-floor-rules-summary.md).
 The rest of the cards, as they accumulate: [`12-card-bank.md`](12-card-bank.md).
 
@@ -646,7 +646,7 @@ rather than as deck stamina — was not worth a `Woah` slot at `Cost 2`.
 purchase is a genuinely hard call under ticket 09, and `Pack Rat` was that card. Nothing has replaced
 it. `[finding]`
 
-**Removed from all three copies** — this page, the [cutting sheet](../../../prototype/12-exemplar-cards.html)
+**Removed from all three copies** — this page, the [cutting sheet](../../../prototype/card-sheet.html)
 and the [encounter simulator](../../../prototype/encounter-sim.html) — which is the duplication
 [ticket 25](../issues/25-single-source-for-the-card-list.md) exists to end.
 

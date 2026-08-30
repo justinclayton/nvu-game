@@ -14,7 +14,7 @@ The three copies are:
 
 - **[The exemplar card set](../prototypes/12-exemplar-card-set.md)** — prose, one section per card,
   with the design reasoning attached.
-- **[The cutting sheet](../../../prototype/12-exemplar-cards.html)** — hand-written HTML, one `div`
+- **[The cutting sheet](../../../prototype/card-sheet.html)** — hand-written HTML, one `div`
   per card, which is what actually gets printed and cut.
 - **[The encounter simulator](../../../prototype/encounter-sim.html)** — a JavaScript array of card
   objects, which is what ticket 10 runs its numbers on.
@@ -91,7 +91,7 @@ simulator are views of it, and the prose is checked against it.** One command,
 
 ### 3 — what happened to the three copies
 
-**The cutting sheet is generated.** `prototype/12-exemplar-cards.html` no longer contains a single
+**The cutting sheet is generated.** `prototype/card-sheet.html` no longer contains a single
 hand-written card. It loads `prototype/cards.js` and renders every card in the list, sorting them
 into the cutting sections by filter. A card in the list that lands in no section is reported in red
 at the top of the page, so a new card can never silently fail to print.

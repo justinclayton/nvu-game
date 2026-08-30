@@ -6,7 +6,7 @@
  * Every card in North vs Up, as printed.  EVERY NUMBER IS A PLACEHOLDER —
  * costs, stats and thresholds belong to ticket 10.
  *
- * Loaded by prototype/12-exemplar-cards.html (the cutting sheet) and
+ * Loaded by prototype/card-sheet.html (the cutting sheet) and
  * prototype/encounter-sim.html (the simulator) with a plain <script> tag, so
  * both keep working from file:// with no build step and no server.
  */

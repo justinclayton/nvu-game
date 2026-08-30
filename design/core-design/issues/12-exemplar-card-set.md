@@ -103,7 +103,7 @@ map's standing rule is that the agent surfaces options and the human rules. Ever
   requirements it stresses and why.
 - **[The one-page rules summary](../prototypes/12-floor-rules-summary.md)** — enough to play a floor
   with them, assembled only from closed tickets.
-- **[The printable sheet](../../../prototype/12-exemplar-cards.html)** — poker-size, cut on the
+- **[The printable sheet](../../../prototype/card-sheet.html)** — poker-size, cut on the
   borders, border colour is rarity.
 
 ### The findings, in short
@@ -273,7 +273,7 @@ still unratified.**
 
 - **Four Stuff room cards** — `Sorting Room`, `Ration Locker`, `Tool Cage`, `Spill of Cargo` — printed
   in both the [card set](../prototypes/12-exemplar-card-set.md#stuff-rooms) and the
-  [cutting sheet](../../../prototype/12-exemplar-cards.html). The four Good Stuff cards survive
+  [cutting sheet](../../../prototype/card-sheet.html). The four Good Stuff cards survive
   unchanged as pool contents, as the hand-down said they would.
 - **Every threshold on them is a placeholder**, including the second tier. That is the remaining
   blocker and it is [ticket 10](10-sim-the-resource-economy.md)'s.

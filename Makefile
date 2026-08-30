@@ -35,7 +35,7 @@ sweep: build
 	node prototype/sim-sweep.js
 
 sheet: build
-	open prototype/12-exemplar-cards.html
+	open prototype/card-sheet.html
 
 sim: build
 	open prototype/encounter-sim.html

@@ -64,3 +64,18 @@ and the simulator represent the whole designed set for the first time.
 ## Not this ticket
 
 Card design, costs, stats and thresholds. This ticket moves text; it does not change any card.
+
+
+## Part done 2026-08-29 — the YAML exists
+
+`[you]` **[`design/cards.yaml`](../../cards.yaml) is the source**, written while ratifying
+[ticket 12](12-exemplar-card-set.md). It holds all 48 designed cards — 25 exemplars, 23 bank — with a
+documented field set, and the card bank's twenty-two are represented for the first time. Design
+reasoning stays in prose, per this ticket's question 2.
+
+**What is left:** questions 3 and 4. The cutting sheet and the encounter simulator still carry their own
+hand-written copies, so the drift this ticket exists to stop is still possible. They have to be made to
+read the YAML, or checked against it.
+
+**This ticket still blocks [ticket 10](10-sim-the-resource-economy.md)**, because the simulator is the
+copy that was wrong and it has not been reconciled yet.

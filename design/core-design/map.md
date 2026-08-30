@@ -390,11 +390,18 @@ head, reacting to what's in front of you, with little time for deep strategy.*
   **In play**, a card can print *"Scrap a card from your hand to [X]"* for an outsized one-off
   payoff, which is finally **what Bad Stuff is for**: junk that contributes no stats becomes fuel, so
   clearing a clogged hand and hitting hard are the same action. **On ascending**, the phase gains a
-  middle step — Stuff in exhaust piles goes back to its pool as before, but **Stuff still in hand is
-  shuffled into that character's deck** as a card of stamina for the next floor, and a character may
-  pay the **Scrap tax**: keep one piece of Stuff in the deck permanently by **Scrapping one card of
-  their starter deck**. That is the run's deckbuilding engine — decks get leaner, stronger, and
-  smaller, and smaller is less health. **Reverses two of ticket 09's deliberate rulings** — *no
+  middle step — **Stuff still in hand is shuffled into that character's deck** as a card of stamina for
+  the next floor, and a character may pay the **Scrap tax**: keep one piece of Stuff in the deck
+  permanently by **Scrapping one card of their starter deck**. That is the run's deckbuilding engine —
+  decks get **stronger but not smaller**: the tax is **one-for-one** `[you, ticket 12, 2026-08-29]`, so
+  it buys quality, not leanness, and **nothing shrinks a deck**. Declining a reward stays the only way
+  to keep one small.
+
+  **Scrap is a property of the `Stuff` type, not a printed line** `[you, ticket 12, 2026-08-29]`: when
+  any Stuff card *would be Exhausted*, it is Scrapped instead. So played Stuff never reaches the
+  exhaust pile and is **gone for the run** rather than recycled to its pool, Bad Stuff's *"play this to
+  be rid of it"* is permanent, and no card restates the keyword — which keeps played Stuff in the play
+  zone until cleanup, where cards that count the play zone can see it. **Reverses two of ticket 09's deliberate rulings** — *no
   voluntary thinning* and *a deck is not Stuff's entry route* — and narrows *nothing bad crosses a
   floor boundary*, since held Bad Stuff now crosses. The recursion objection behind them is **not
   answered but accepted**, on the per-mechanic footing ticket 09 gave the mid-floor reward.
@@ -402,6 +409,19 @@ head, reacting to what's in front of you, with little time for deep strategy.*
   dials, the tax flattens ticket 22's Stuff-count escalation curve, and it is the first mechanic that
   lets a player grow power while shrinking the deck — escaping the inversion that deck growth was
   left uncapped on the strength of.
+
+- [The exemplar card set](issues/12-exemplar-card-set.md) — `[you]` **Ratified 2026-08-29** as "as
+  ratified as it needs to be" so the effort can reach playtesting and simulation. **25 cards**: 11
+  player cards, 4 Good Stuff, 2 Bad Stuff, 4 rooms, 4 Stuff rooms, at `Fine` 7 / `Cool` 5 / `Woah` 3.
+  **The anatomy holds** — no card needed a field that does not exist — and the *triple* read turned out
+  to be a **double** read, because health is the height of a pile rather than a property of a card, so
+  in hand a card only ever asks *fuel or play?* Every cost, stat and threshold in it is a **placeholder**
+  for ticket 10. The whole list, exemplars and card bank together, now lives in
+  [`design/cards.yaml`](../cards.yaml) as the single source of truth. **Three things it could not
+  answer and did not fake:** reading time needs a person and a timer (ticket 20), the Red/Gray
+  difference in the set is flavour standing in for ticket 13, and the reward pools do not fit — ticket
+  09's *never seen again* target implies **45–55 cards per character**, and the levers to shrink that
+  are still the human's to pull.
 
 ## Not yet specified
 

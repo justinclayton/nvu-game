@@ -1,7 +1,7 @@
 # 12 — Build the exemplar card set
 
 Type: prototype
-Status: open
+Status: resolved
 Blocked by: 11, 21, 22
 Map: [core design map](../map.md)
 
@@ -481,3 +481,27 @@ The bank carries three: `Crowbar` and `Overcharged Battery`, which Scrap themsel
 `Spot Salvage`, which Scraps a card to pull a permanent reward.
 
 This closes the last of the Scrap gaps this ticket opened.
+
+
+## Ratified and closed 2026-08-29
+
+`[you]` **"It's as ratified as it needs to be so far."** The set is adopted so the effort can get to
+playtesting and simulation. 25 cards, `Fine` 7 / `Cool` 5 / `Woah` 3, every number a placeholder for
+[ticket 10](10-sim-the-resource-economy.md).
+
+**The card list is now a YAML file** — [`design/cards.yaml`](../../cards.yaml) — holding all 48
+designed cards, the 25 exemplars and the 23 in the card bank, with the design prose left where it is.
+That is [ticket 25](25-single-source-for-the-card-list.md)'s deliverable, done early because this
+ticket's closing needed a list something could actually run. **Ticket 25 is not closed**: the cutting
+sheet and the simulator still carry their own hand-written copies and have to be made to read the YAML.
+
+**What this ticket could not answer, carried forward rather than faked:**
+
+- **Reading time** — needs a person and a timer, [ticket 20](20-encounter-tabletop-prototype.md).
+- **Red and Gray** differ in this set by flavour only, [ticket 13](13-red-and-gray-asymmetry.md).
+- **The reward pools do not fit** — 45–55 cards per character, three levers left, none pulled.
+- **`Second Wind`'s recursion and mid-floor shuffle**, printed deliberately so the question cannot be
+  designed around quietly.
+- **Two cards have no play line** and cannot be spent out of a jammed hand.
+
+**The destination is not reached.** The map's spec needs ticket 13, and the numbers need ticket 10.

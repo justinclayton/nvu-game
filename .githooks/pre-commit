@@ -1,0 +1,4 @@
+#!/bin/sh
+# Refuse to commit while the card list has drifted (stale cards.js, schema
+# problems, or a prototype that stops rendering the whole list).
+exec node tools/cards.mjs check

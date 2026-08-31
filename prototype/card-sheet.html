@@ -22,11 +22,6 @@
     color: #111;
     background: #fff;
   }
-  h1 { font-size: 16pt; margin: 0 0 2mm; }
-  h2 {
-    font-size: 10pt; text-transform: uppercase; letter-spacing: .08em;
-    color: #555; margin: 8mm 0 3mm; border-bottom: 1px solid #ccc; padding-bottom: 1mm;
-  }
   .sheet { display: flex; flex-wrap: wrap; gap: 4mm; }
 
   .card {
@@ -98,7 +93,6 @@
 </head>
 <body>
 
-<h1>North vs Up — the card list (print &amp; cut)</h1>
 <div id="sheets"></div>
 
 <script src="cards.js"></script>
@@ -175,7 +169,8 @@ function cardHTML(c) {
   return c.kind.indexOf("room") !== -1 ? roomCardHTML(c) : playerCardHTML(c);
 }
 
-/* The sheet's sections, in cutting order. Each is a filter over the one list. */
+/* The sheet's groupings, in cutting order — the cards print as one unbroken
+   grid, but stay grouped so like cards land near each other. */
 function player(owner, starter) {
   return function (c) {
     return c.kind === "player" && c.owner === owner && Boolean(c.starter) === starter;
@@ -192,27 +187,24 @@ function rewards(c) {
 }
 
 var SECTIONS = [
-  { h: "Red — starters", pick: player("Red", true) },
-  { h: "Gray — starters", pick: player("Gray", true) },
-  { h: "Red — rewards", pick: function (c) { return rewards(c) && c.owner === "Red"; } },
-  { h: "Gray — rewards", pick: function (c) { return rewards(c) && c.owner === "Gray"; } },
-  { h: "Good Stuff", pick: kind("good_stuff") },
-  { h: "Bad Stuff", pick: kind("bad_stuff") },
-  { h: "Rooms", pick: rooms },
-  { h: "Stuff rooms", pick: kind("stuff_room") }
+  { pick: player("Red", true) },
+  { pick: player("Gray", true) },
+  { pick: function (c) { return rewards(c) && c.owner === "Red"; } },
+  { pick: function (c) { return rewards(c) && c.owner === "Gray"; } },
+  { pick: kind("good_stuff") },
+  { pick: kind("bad_stuff") },
+  { pick: rooms },
+  { pick: kind("stuff_room") }
 ];
 
 (function render() {
   var out = "", seen = 0;
   SECTIONS.forEach(function (s) {
     var cards = NVU_CARDS.cards.filter(s.pick);
-    if (!cards.length) return;
     seen += cards.length;
-    out += "<h2>" + esc(s.h) + " <span style='font-weight:400;text-transform:none;letter-spacing:0'>(" +
-      cards.length + ")</span></h2>";
-    out += '<div class="sheet">' + cards.map(cardHTML).join("") + "</div>";
+    out += cards.map(cardHTML).join("");
   });
-  document.getElementById("sheets").innerHTML = out;
+  document.getElementById("sheets").innerHTML = '<div class="sheet">' + out + "</div>";
 
   /* Loud, on the page, if a card in the list reaches no section. */
   if (seen !== NVU_CARDS.cards.length) {

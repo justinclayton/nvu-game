@@ -114,9 +114,9 @@ function esc(s) {
 var TYPE_LINE = {
   good_stuff: "Good Stuff",
   bad_stuff: "Bad Stuff",
-  enemy_room: "Enemy",
-  hazard_room: "Hazard",
-  stuff_room: "Stuff"
+  enemy_room: "Enemy Room",
+  hazard_room: "Hazard Room",
+  stuff_room: "Stuff Room"
 };
 
 function statLine(c) {
@@ -144,9 +144,10 @@ function playerCardHTML(c) {
   var rarityClass = c.rarity ? c.rarity.toLowerCase() : "norarity";
   var ownerClass = c.owner === "Red" ? "owner-red"
     : c.owner === "Gray" ? "owner-gray" : "owner-neutral";
+  var ownerTypeLine = c.starter === true ? c.owner + " (Starter)" : c.owner
   return '<div class="card ' + rarityClass + " " + ownerClass + " kind-" + c.kind + '"><div class="type-bar"></div>' +
     '<div class="top"><div><div class="name">' + esc(c.name) + "</div>" +
-    '<div class="typeline">' + esc(c.owner || TYPE_LINE[c.kind]) + "</div></div>" +
+    '<div class="typeline">' + esc(ownerTypeLine || TYPE_LINE[c.kind]) + "</div></div>" +
     costPip(c) + "</div>" +
     '<div class="art"></div>' +
     (c.hold ? '<div class="hold">Hold</div>' : "") +

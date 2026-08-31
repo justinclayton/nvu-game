@@ -317,7 +317,7 @@ cards:
     power: 1
     scramble: 1
     hold: true
-    text: If you get any Good Stuff this turn, scrap this card get an additional one.
+    text: If you get any Good Stuff this turn, get an additional one.
 
   - name: A Pair Of Stich-Em-Ups
     set: proposed

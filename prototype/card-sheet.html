@@ -197,12 +197,22 @@ var SECTIONS = [
   { pick: kind("stuff_room") }
 ];
 
+/* Physical playtesting needs duplicates: a card with `count` prints that many copies. */
+function expand(cards) {
+  var out = [];
+  cards.forEach(function (c) {
+    var n = c.count || 1;
+    for (var i = 0; i < n; i++) out.push(c);
+  });
+  return out;
+}
+
 (function render() {
   var out = "", seen = 0;
   SECTIONS.forEach(function (s) {
     var cards = NVU_CARDS.cards.filter(s.pick);
     seen += cards.length;
-    out += cards.map(cardHTML).join("");
+    out += expand(cards).map(cardHTML).join("");
   });
   document.getElementById("sheets").innerHTML = '<div class="sheet">' + out + "</div>";
 

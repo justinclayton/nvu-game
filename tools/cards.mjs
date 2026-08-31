@@ -286,6 +286,7 @@ function baseContext(cardsJs) {
 function checkRenders(doc, cardsJs) {
   const problems = [];
   const total = doc.cards.length;
+  const totalWithCopies = doc.cards.reduce((sum, c) => sum + (c.count || 1), 0);
 
   try {
     const sheet = readFileSync(join(ROOT, "prototype/card-sheet.html"), "utf8");
@@ -293,8 +294,8 @@ function checkRenders(doc, cardsJs) {
     runInContext(sheet.match(/<script>\n"use strict";([\s\S]*?)<\/script>/)[1], ctx);
     const html = store.sheets.innerHTML;
     const drawn = (html.match(/class="card /g) || []).length;
-    if (drawn !== total) {
-      problems.push(`prototype/card-sheet.html renders ${drawn} cards, not ${total}`);
+    if (drawn !== totalWithCopies) {
+      problems.push(`prototype/card-sheet.html renders ${drawn} cards, not ${totalWithCopies}`);
     }
   } catch (e) {
     problems.push(`prototype/card-sheet.html failed to render: ${e.message}`);

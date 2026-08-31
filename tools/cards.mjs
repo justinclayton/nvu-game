@@ -24,8 +24,9 @@ const SETS = new Set(["official", "proposed"]);
 
 /* ------------------------------------------------------------------ parser
    Handles exactly the subset design/cards.yaml uses: a top-level map, one list
-   of maps under `cards:`, scalars, `>-` folded blocks, and flow maps in a
-   nested list.  Anything outside that subset is an error, not a silent skip. */
+   of maps under `cards:`, scalars, `>-` folded blocks, and flow or block maps
+   in a nested list.  Anything outside that subset is an error, not a silent
+   skip. */
 
 function parseScalar(raw) {
   const s = raw.trim();
@@ -89,6 +90,7 @@ export function parseCardsYaml(text) {
   const lines = text.split("\n");
   const doc = { meta: {}, cards: [] };
   let card = null, section = null;
+  let nested = null; // {item, indent}: a block map open inside a nested list
   let fold = null; // {target, key, indent, parts}
 
   const flushFold = () => {
@@ -134,6 +136,7 @@ export function parseCardsYaml(text) {
     if (t.startsWith("- ")) {
       const rest = t.slice(2);
       if (indent === 2) {
+        nested = null;
         card = {};
         doc.cards.push(card);
         const m = rest.match(/^([A-Za-z_]+):\s*(.*)$/);
@@ -144,7 +147,16 @@ export function parseCardsYaml(text) {
       // an item of a nested list (thresholds)
       const key = card && card.__list;
       if (!key) throw new Error(`line ${n + 1}: nested list item with no list key`);
-      card[key].push(parseScalar(rest));
+      const bm = rest.match(/^([A-Za-z_]+):\s*(.*)$/);
+      if (bm) {
+        // `- stat: Power` opens a block map; its later keys sit indented past the dash
+        const item = { [bm[1]]: parseScalar(bm[2]) };
+        card[key].push(item);
+        nested = { item, indent };
+      } else {
+        card[key].push(parseScalar(rest));
+        nested = null;
+      }
       continue;
     }
 
@@ -152,6 +164,11 @@ export function parseCardsYaml(text) {
     if (!m) throw new Error(`line ${n + 1}: unparsed line: ${t}`);
     const [, key, value] = m;
     if (!card) throw new Error(`line ${n + 1}: key outside a card: ${t}`);
+
+    if (nested) {
+      if (indent > nested.indent) { nested.item[key] = parseScalar(value); continue; }
+      nested = null;
+    }
 
     if (value === ">-" || value === ">" || value === "|" || value === "|-") {
       fold = { target: card, key, indent, parts: [] };

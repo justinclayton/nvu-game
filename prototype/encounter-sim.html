@@ -432,10 +432,10 @@ var BAD_STUFF = cardsOfKind("bad_stuff").map(function (c) { return playerShape(c
 function parseFlee(sentence, name) {
   if (!sentence) return { who: "none", n: 0 };
   var m = sentence.match(
-    /^(1 character Exhausts|both characters Exhaust) (\d+) from deck(, and 1 character takes a Bad Stuff)?\.?$/
+    /^(One of you Exhausts|Both of you Exhausts?) (\d+)(, and one of you gets Bad Stuff)?\.?$/
   );
   if (!m) throw new Error('cards.yaml: cannot read the Flee line on "' + name + '": ' + sentence);
-  var f = { who: m[1].indexOf("both") === 0 ? "both" : "one", n: Number(m[2]) };
+  var f = { who: m[1].indexOf("Both") === 0 ? "both" : "one", n: Number(m[2]) };
   if (m[3]) f.badStuff = 1;
   return f;
 }

@@ -421,7 +421,7 @@ cards:
       - stat: Power
         value: 5
         outcome: Ascend
-    flee: Both of you Exhausts 1.
+    flee: Both of you Exhaust 1.
 
   - name: Coney, The Thing In The Stairwell
     set: proposed
@@ -511,7 +511,7 @@ cards:
         value: 3
         outcome: Both of you get Good Stuff.
       - stat: Power
-        value: 3
+        value: 5
         outcome: Red gets 2 instead.
 
   - name: Spill Of Cargo

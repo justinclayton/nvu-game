@@ -54,14 +54,14 @@ var NVU_CARDS = {
     {"name":"Rust","set":"proposed","kind":"bad_stuff","cost":2,"hold":true,"text":"Holding: Stuff you play has -1 Power."},
     {"name":"Spore Cloud","set":"proposed","kind":"bad_stuff","cost":2,"hold":true,"text":"Holding: You can't have more than 3 cards in your hand."},
     {"name":"Panic","set":"proposed","kind":"bad_stuff","cost":1,"hold":true,"text":"Holding: ALL rooms require an additional 2 `Scramble` to clear. Play: Exhaust 2."},
-    {"name":"Gross Thing That Looks Like A Cherry","set":"proposed","kind":"enemy_room","thresholds":[{"stat":"Power","value":5,"outcome":"Ascend"}],"flee":"Both of you Exhausts 1.","floor":1},
+    {"name":"Gross Thing That Looks Like A Cherry","set":"proposed","kind":"enemy_room","thresholds":[{"stat":"Power","value":5,"outcome":"Ascend"}],"flee":"Both of you Exhaust 1.","floor":1},
     {"name":"Coney, The Thing In The Stairwell","set":"proposed","kind":"enemy_room","thresholds":[{"stat":"Power","value":9,"outcome":"Ascend"}],"flee":"Both of you Exhaust 1.","floor":2},
     {"name":"Villy, Coney's Work Husband","set":"proposed","kind":"enemy_room","thresholds":[{"stat":"Power","value":9,"outcome":"Ascend"},{"stat":"Scramble","value":9,"outcome":"Flee this room for free."}],"flee":"Both of you Exhaust 2.","floor":3},
     {"name":"Collapsed Stairwell","set":"proposed","kind":"hazard_room","thresholds":[{"stat":"Scramble","value":2,"outcome":"Clear, but both of you Exhaust 1."},{"stat":"Scramble","value":5,"outcome":"Clear"}],"flee":"One of you Exhausts 3.","count":3},
     {"name":"Ruptured Coolant Line","set":"proposed","kind":"hazard_room","thresholds":[{"stat":"Scramble","value":4,"outcome":"Clear, but both of you get Bad Stuff."},{"stat":"Scramble","value":7,"outcome":"Clear"}],"flee":"Both of you Exhaust 1, and one of you gets Bad Stuff.","count":3},
     {"name":"Sorting Room","set":"proposed","kind":"stuff_room","thresholds":[{"stat":"Power","value":2,"outcome":"Red gets Good Stuff."},{"stat":"Scramble","value":2,"outcome":"Gray gets Good Stuff."}],"count":3},
     {"name":"Ration Locker","set":"proposed","kind":"stuff_room","thresholds":[{"stat":"Power","value":2,"outcome":"Red gets Good Stuff."},{"stat":"Scramble","value":2,"outcome":"Gray gets Good Stuff."},{"stat":"Power","value":4,"outcome":"Red gets 2 instead."},{"stat":"Scramble","value":4,"outcome":"Gray gets 2 instead."}],"count":2},
-    {"name":"Tool Cage","set":"proposed","kind":"stuff_room","thresholds":[{"stat":"Scramble","value":3,"outcome":"Both of you get Good Stuff."},{"stat":"Power","value":3,"outcome":"Red gets 2 instead."}],"count":2},
+    {"name":"Tool Cage","set":"proposed","kind":"stuff_room","thresholds":[{"stat":"Scramble","value":3,"outcome":"Both of you get Good Stuff."},{"stat":"Power","value":5,"outcome":"Red gets 2 instead."}],"count":2},
     {"name":"Spill Of Cargo","set":"proposed","kind":"stuff_room","thresholds":[{"stat":"Scramble","value":3,"outcome":"Both of you get Good Stuff."},{"stat":"Scramble","value":5,"outcome":"Gray gets 2 instead."}],"count":2}
   ]
 };

@@ -148,7 +148,7 @@ function playerCardHTML(c) {
     '<div class="top"><div><div class="name">' + esc(c.name) + "</div>" +
     '<div class="typeline">' + esc(c.owner || TYPE_LINE[c.kind]) + "</div></div>" +
     costPip(c) + "</div>" +
-    '<div class="art">ART</div>' +
+    '<div class="art"></div>' +
     (c.hold ? '<div class="hold">Hold</div>' : "") +
     statLine(c) +
     textBlock(c) +
@@ -166,7 +166,7 @@ function roomCardHTML(c) {
   return '<div class="card room"><div class="type-bar"></div>' +
     '<div class="top"><div><div class="name">' + esc(c.name) + "</div>" +
     '<div class="typeline">' + esc(TYPE_LINE[c.kind]) + "</div></div></div>" +
-    '<div class="art">ART</div>' +
+    '<div class="art"></div>' +
     '<div class="thresholds">' + lines + "</div>" + foot + "</div>";
 }
 

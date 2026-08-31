@@ -69,7 +69,6 @@
   .stat {
     font-size: 12pt; font-weight: 700; margin-bottom: 1.5mm;
   }
-  .nostat { font-size: 8pt; color: #999; font-style: italic; margin-bottom: 1.5mm; }
   .text { font-size: 8.5pt; line-height: 1.35; }
   .text em { color: #444; }
   .hold {
@@ -125,8 +124,7 @@ function statLine(c) {
   if (c.power) parts.push("Power " + c.power);
   if (c.scramble) parts.push("Scramble " + c.scramble);
   if (parts.length) return '<div class="stat">' + parts.join(", ") + "</div>";
-  if (c.conditional_stat) return "";
-  return '<div class="nostat">no stat</div>';
+  return "";
 }
 
 /* The YAML holds a card's text as one string; the sheet wants its clauses as

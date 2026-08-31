@@ -162,7 +162,7 @@ function roomCardHTML(c) {
   }).join("");
   var foot = c.flee
     ? '<div class="flee"><b>Flee:</b> ' + esc(c.flee) + "</div>"
-    : '<div class="flee"><b>No Flee line.</b> Cleared either way.</div>';
+    : '<div class="flee"><b>Flee:</b> Leave empty handed.</div>';
   return '<div class="card room"><div class="type-bar"></div>' +
     '<div class="top"><div><div class="name">' + esc(c.name) + "</div>" +
     '<div class="typeline">' + esc(TYPE_LINE[c.kind]) + "</div></div></div>" +

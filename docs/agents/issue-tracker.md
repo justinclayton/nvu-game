@@ -42,4 +42,6 @@ Used by `/wayfinder`. The **map** is a file with one **child** file per ticket.
 
 ## Active efforts
 
+- [`design/web-game/`](../../design/web-game/map.md) — architecture spec and skeleton for the official React web version.
+
 - [`design/core-design/`](../../design/core-design/map.md) — North vs Up core design spec.

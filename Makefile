@@ -4,18 +4,22 @@
 # shows a card is generated from it or checked against it.
 #
 #   make            what each target does
-#   make build      regenerate prototype/cards.js from design/cards.yaml
+#   make build      regenerate the generated card modules from design/cards.yaml
 #   make check      fail if anything has drifted from the card list
+#   make app        run the web game's dev server
+#   make app-check  lint, typecheck and test the web game
 #   make sweep      run the headless parameter sweep over the simulator
 #   make sheet      open the print-and-cut card sheet
 #   make sim        open the encounter simulator
 
-.PHONY: help build check sweep sheet sim rules-core rules-core-check all
+.PHONY: help build check app app-check app-install sweep sheet sim rules-core rules-core-check all
 default: build
 
 help:
-	@echo "make build   regenerate prototype/cards.js from design/cards.yaml"
-	@echo "make check   fail if cards.js is stale or a prototype stops rendering it"
+	@echo "make build   regenerate the generated card modules from design/cards.yaml"
+	@echo "make check   fail if a generated card module is stale or a prototype stops rendering it"
+	@echo "make app        run the web game's dev server"
+	@echo "make app-check  lint, typecheck and test the web game"
 	@echo "make sweep   run the headless parameter sweep over the simulator"
 	@echo "make sheet   open the print-and-cut card sheet in a browser"
 	@echo "make sim     open the encounter simulator in a browser"
@@ -32,6 +36,19 @@ prototype/cards.js: design/cards.yaml tools/cards.mjs
 
 check: build
 	node tools/cards.mjs check
+
+# The web game (app/). See design/web-game/spec.md.
+app/node_modules: app/package.json
+	cd app && npm install
+	@touch app/node_modules
+
+app-install: app/node_modules
+
+app: app/node_modules build
+	cd app && npm run dev
+
+app-check: app/node_modules build
+	cd app && npm run check
 
 sweep: build
 	node prototype/sim-sweep.js

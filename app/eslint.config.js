@@ -15,11 +15,12 @@ import tseslint from "typescript-eslint";
  */
 const LAYERS = ["domain", "content", "application", "infrastructure", "ui"];
 
-function forbidLayers(layer, allowed, extraPackages = []) {
+function forbidLayers(path, allowed, extraPackages = []) {
+  const layer = path.split("/")[0];
   const banned = LAYERS.filter((l) => l !== layer && !allowed.includes(l));
   const patterns = banned.flatMap((l) => [`@${l}/*`, `**/${l}/*`, `**/${l}`]);
   return {
-    files: [`src/${layer}/**/*.{ts,tsx}`],
+    files: path.includes("*") ? [`src/${path}.{ts,tsx}`] : [`src/${path}/**/*.{ts,tsx}`],
     rules: {
       "no-restricted-imports": [
         "error",
@@ -59,6 +60,10 @@ export default tseslint.config(
   },
 
   forbidLayers("domain", [], ["react", "react-dom", "zustand"]),
+  // A rules test may read the real card list — testing a rule against the cards
+  // the game actually prints is the point of it. The direction that matters is
+  // still shut: no test in domain knows about the store, an adapter, or React.
+  forbidLayers("domain/**/*.test", ["content"], ["react", "react-dom", "zustand"]),
   forbidLayers("content", ["domain"]),
   forbidLayers("application", ["domain", "content"]),
   forbidLayers("infrastructure", ["domain", "application"]),

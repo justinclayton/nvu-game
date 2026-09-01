@@ -146,9 +146,10 @@ describe("walkthrough 4 — spending Stuff spends it for good", () => {
 });
 
 describe("walkthrough 5 — nothing resolves until play is declared over", () => {
-  it("lets the higher Hazard tier replace the lower one it already passed", () => {
-    // Collapsed Stairwell: Scramble 2 clears but costs both a card; Scramble 5
-    // clears clean. Passing the low line does nothing until play ends.
+  it("checks the room once, and resolves every line the pool met", () => {
+    // Collapsed Stairwell: Scramble 2 clears and costs both a card; Scramble 5
+    // clears too. Passing the low line does nothing until play ends, and when
+    // it does, both lines resolve — §5 says every challenge you met.
     const state = rig({
       phase: "Play",
       activeRoom: room("Collapsed Stairwell"),
@@ -168,10 +169,14 @@ describe("walkthrough 5 — nothing resolves until play is declared over", () =>
     expect(low.state.activeRoom).not.toBeNull();
 
     const high = play(low.state, [free("Gray", g[1] as CardId), { type: "END_PLAY" }]);
-    // Scramble 7 clears clean: nobody Exhausts anything for the room.
     expect(eventTypes(high.events)).toContain("ROOM_CLEARED");
-    expect(high.state.Red.exhaust).toEqual([]);
     expect(high.state.cleared).toHaveLength(1);
+    // Both lines were met, so both were announced — and the lower one's "both of
+    // you Exhaust 1" is still owed, because the higher tier adds to it rather
+    // than replacing it.
+    expect(high.events.filter((e) => e.type === "THRESHOLD_MET")).toHaveLength(2);
+    expect(high.state.Red.exhaust).toHaveLength(1);
+    expect(high.state.Red.deck).toHaveLength(4);
   });
 });
 

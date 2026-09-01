@@ -4,27 +4,37 @@ Rules the implementation had to read one way when more than one reading was avai
 says what the code does, and why that reading fits the rulebook better than the alternative. An
 entry tagged `[you]` has been ruled on and is settled; the rest are the list of things to rule on.
 
+**`design/rulebook.md` is the authority.** Where `CONTEXT.md` disagrees with it, `CONTEXT.md` is
+stale and the rulebook wins. `[you, 2026-09-01]`
+
 The reading is marked in a comment beside the code, so a ruling here has one place to land.
 
 ---
 
-## 1. A Hazard's higher tier resolves instead of the lower, not as well as it
+## 1. Every challenge the pool met resolves
 
-**Where:** `app/src/domain/engine.ts`, the room check.
+`[you, 2026-09-01]`
 
-Rulebook §5 says *"If any challenge's threshold is met, the room is Cleared. Resolve the card text
-of **every** challenge you met."* Read literally, a Scramble 6 pool against Collapsed Stairwell
-(`Scramble 2: Clear, but both of you Exhaust 1` / `Scramble 5: Clear`) meets both lines, so the team
-clears the room *and* takes the lower line's punishment — the higher tier is a downgrade.
+**Where:** `roomOutcome` in `app/src/domain/engine.ts`.
 
-`CONTEXT.md` says the opposite in the singular: *"which is reached locks in only once the players
-declare the play phase done"*, and *"the lower clears the room and moves the players on; the higher
-clears it and pays a permanent card reward."*
+§5: *"If any challenge's threshold is met, the room is Cleared. Resolve the card text of **every**
+challenge you met."* §6 agrees for Hazards — the higher tier *"**also** pays a permanent card
+reward"*, on top of the lower rather than instead of it.
 
-**What the code does.** On an Enemy or a Hazard room, exactly one threshold resolves: the highest
-met line, preferring a line that Clears over one that does not, then the higher printed value, then
-printed order. On a Stuff room every met line still resolves, because a Stuff room's lines are split
-per character rather than tiered — that is the case §5's wording actually describes.
+So a Scramble 6 pool against Collapsed Stairwell (`Scramble 2: Clear, but both of you Exhaust 1` /
+`Scramble 5: Clear`) meets both lines: the room is Cleared and both characters still Exhaust 1.
+
+`CONTEXT.md` reads *"which is reached locks in"* in the singular, which would make one line resolve
+and not the other. The rulebook wins.
+
+One line cannot un-Clear a room another has Cleared: §5's first sentence is that any met threshold
+Clears it, so Villy's `Scramble 9: Flee this room for free` is void when its `Power 9` line was also
+met. See #3 for that line met on its own.
+
+**A consequence for the card list, not the rules:** neither Hazard's higher tier does anything.
+Collapsed Stairwell's `Scramble 5: Clear` and Ruptured Coolant Line's `Scramble 7: Clear` are both
+strictly contained in the lower tier they sit above, so reaching them changes nothing. That is #7:
+the cards do not print the reward tier the rulebook describes.
 
 ---
 
@@ -60,6 +70,8 @@ ends, not how it got there.
 
 ## 4. Last stand shuffles back the play zone only, not the hand
 
+`[you, 2026-09-01]`
+
 **Where:** the cleanup step of `END_PLAY`.
 
 Rulebook §9: *"all cards in the character's play zone are shuffled into their deck, then 2 cards are
@@ -69,8 +81,7 @@ Exhausted, `Hold` cards stay."*
 `CONTEXT.md`'s **last stand** entry says instead: *"the cards that would have been exhausted from
 hand and play zone are shuffled back into their deck."*
 
-**What the code does.** Follows the rulebook: play zone only. The rulebook is the more specific of
-the two — it spells out what happens to the hand in the same breath.
+**What the code does.** Follows the rulebook: play zone only. `CONTEXT.md` is stale here.
 
 ---
 
@@ -90,13 +101,16 @@ any other way lets a character burn their whole deck a card at a time for nothin
 
 ## 6. Stuff in an exhaust pile goes to the Scrapyard at ascension, not back to its pool
 
+`[you, 2026-09-01]` for the rule. The consequence below is still open.
+
 **Where:** `ASCEND`.
 
 Rulebook §10 step 1: *"Move all Stuff in both exhaust piles to the Scrapyard. It is out of the run
 for good."* `CONTEXT.md`'s **Ascend** entry says instead that Stuff *"returns to its pool"*, though
 `CONTEXT.md`'s own **Stuff**, **Scrap tax** and **Exhaust pile** entries all say Scrapyard.
 
-**What the code does.** Follows the rulebook and the majority of `CONTEXT.md`: the Scrapyard.
+**What the code does.** Follows the rulebook: the Scrapyard. `CONTEXT.md`'s **Ascend** entry is
+stale, and disagrees with its own **Stuff**, **Scrap tax** and **Exhaust pile** entries.
 
 **Consequence worth ruling on:** the Good Stuff pool never refills. The card list prints one copy of
 each of the eight Good Stuff cards, and floor 1 alone holds nine Stuff rooms. The pool is empty
@@ -117,6 +131,11 @@ Exhaust 1` / `Clear`).
 **What the code does.** The generator recognises a `... reveals a reward` clause and the engine
 implements the take-or-skip reveal, so the rule is there when a card prints it. Nothing in the
 current list exercises it.
+
+Since every met challenge resolves (#1), this is no longer only a missing bonus: a higher tier
+printed as plain `Clear` above a lower tier that already clears is **completely inert**. Both
+Hazards in the list are shaped that way, so their second thresholds do nothing at all. The fix is
+on the cards, not in the code — a higher tier has to print something the lower one does not.
 
 ---
 

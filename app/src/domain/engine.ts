@@ -454,14 +454,6 @@ function playCard(
 
 /* ------------------------------------------ the room check, and Phase 4 */
 
-/** Prefer a line that Clears, then the higher printed value, then printed order. */
-function bestLine(met: readonly Threshold[], first: Threshold): Threshold {
-  return met.reduce((a, b) => {
-    if (a.clears !== b.clears) return a.clears ? a : b;
-    return b.value > a.value ? b : a;
-  }, first);
-}
-
 const goodStuffFor = (t: Threshold, c: Character): number =>
   t.effects
     .filter((e) => e.type === "TakeGoodStuff" && (e.who === c || e.who === "both"))
@@ -491,11 +483,10 @@ interface RoomOutcome {
 }
 
 /**
- * §5: the room is checked once, when both characters have stopped playing.
- *
- * On an Enemy or a Hazard exactly one line resolves — the best one met — because
- * the higher tier of a Hazard is meant to replace the lower, not stack with it.
- * See open-questions.md #1.
+ * §5: the room is checked once, when both characters have stopped playing. If
+ * any challenge's threshold is met the room is Cleared, and the card text of
+ * *every* challenge met resolves — §6's higher Hazard tier "also pays a
+ * permanent card reward", on top of the lower tier rather than instead of it.
  */
 function roomOutcome(state: GameState, room: Room): RoomOutcome {
   const met = room.thresholds.filter((t) => thresholdIsMet(state, t));
@@ -504,13 +495,17 @@ function roomOutcome(state: GameState, room: Room): RoomOutcome {
     // §6: a Stuff room is Cleared either way — its own Flee line clears it.
     return { met, cleared: true, effects: stuffRoomEffects(met) };
   }
-  const first = met[0];
-  if (!first) {
+  if (met.length === 0) {
     // §5: if no threshold is met, the characters Flee. Resolve the Flee line.
     return { met, cleared: room.flee.clears, effects: room.flee.effects };
   }
-  const line = bestLine(met, first);
-  return { met: [line], cleared: line.clears, effects: line.effects };
+  // A line that says "Flee this room for free" cannot un-Clear a room another
+  // met line Cleared: §5's first sentence is that any met threshold Clears it.
+  return {
+    met,
+    cleared: met.some((t) => t.clears),
+    effects: met.flatMap((t) => t.effects),
+  };
 }
 
 function endPlay(state: GameState, run: Run): GameState {

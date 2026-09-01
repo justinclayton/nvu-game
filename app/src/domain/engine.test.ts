@@ -294,6 +294,51 @@ describe("§6 The three kinds of room", () => {
     expect(next.phase).toBe("Ascend");
   });
 
+  it("'resolve the card text of every challenge you met'", () => {
+    // Collapsed Stairwell clears at Scramble 2 and costs both a card; it also
+    // clears at Scramble 5. Meeting the higher line does not excuse the lower.
+    const state = rig({
+      phase: "Play",
+      activeRoom: room("Collapsed Stairwell"),
+      Red: player({ deck: pile("Shove", 5) }),
+      Gray: player({
+        deck: pile("Duck Under", 5),
+        hand: [card("Pick The Lock"), card("Coil Of Cable"), card("Duck Under"), card("Duck Under")],
+      }),
+    });
+    const g = ids(state, "Gray");
+    const { state: next, events } = play(state, [
+      { type: "PLAY_CARD", character: "Gray", cardId: g[0] as CardId, payWith: [g[2] as CardId, g[3] as CardId] },
+      playFree("Gray", g[1] as CardId),
+      { type: "END_PLAY" },
+    ]);
+    expect(events.filter((e) => e.type === "THRESHOLD_MET")).toHaveLength(2);
+    expect(next.cleared).toHaveLength(1);
+    expect(next.Red.exhaust).toHaveLength(1);
+  });
+
+  it("a met line that Clears beats one that says to Flee for free", () => {
+    // Villy prints Power 9 (Ascend) and Scramble 9 (Flee this room for free).
+    // §5: if any challenge's threshold is met, the room is Cleared.
+    const state = rig({
+      phase: "Play",
+      activeRoom: room("Villy, Coney's Work Husband"),
+      Red: player({ deck: pile("Shove", 5), hand: pile("Pry Bar", 3) }),
+      Gray: player({ deck: pile("Duck Under", 5), hand: pile("Coil Of Cable", 3) }),
+    });
+    const r = ids(state, "Red");
+    const g = ids(state, "Gray");
+    const { state: next } = play(state, [
+      // Three free Pry Bars is Power 9, three free Coils is Scramble 9, so both
+      // lines are met at once.
+      ...r.slice(0, 3).map((id) => playFree("Red", id as CardId)),
+      ...g.slice(0, 3).map((id) => playFree("Gray", id as CardId)),
+      { type: "END_PLAY" },
+    ]);
+    expect(next.cleared).toHaveLength(1);
+    expect(next.fled).toEqual([]);
+  });
+
   it("a Stuff room is Cleared either way and never punishes you", () => {
     const state = rig({
       phase: "Play",

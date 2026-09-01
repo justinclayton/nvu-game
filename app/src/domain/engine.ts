@@ -1,0 +1,851 @@
+/* The rules of North vs Up, and nothing else.
+ *
+ * One pure function: `execute(state, command)`, which is `validate` then apply.
+ * An illegal command is a value; the state handed in is never touched. Nothing
+ * here reads a clock, a network or Math.random — randomness is the seed carried
+ * in the state, so a run replays exactly from its seed and its command log.
+ *
+ * Section numbers point at design/rulebook.md, which is the authority. Where a
+ * rule allowed more than one reading, the reading is marked here and written up
+ * in design/web-game/open-questions.md.
+ */
+
+import { behaviourOf, type BehaviourContext, type ChoiceAnswer } from "./cards/behaviours";
+import {
+  canDraw,
+  costOf,
+  drawCapFor,
+  handCapFor,
+  mustStillDraw,
+  payOptions,
+  thresholdIsMet,
+} from "./queries";
+import { shuffle } from "./rng";
+import {
+  buildFloor,
+  emptyTurnRecord,
+  LAST_STAND_PRICE,
+  returnRoomsToSupply,
+  TOP_FLOOR,
+} from "./setup";
+import type {
+  AscendChoice,
+  Card,
+  Character,
+  Command,
+  DomainEvent,
+  GameState,
+  Pending,
+  Rejection,
+  RejectionCode,
+  Result,
+  Room,
+  RoomEffect,
+  Threshold,
+  TurnRecord,
+} from "./types";
+import { CorruptStateError } from "./types";
+import {
+  activateLastStand,
+  CHARACTERS,
+  dealBadStuff,
+  drawOne,
+  exhaust,
+  exhaustFromDeck,
+  exhaustFromHand,
+  goDown,
+  playerOf,
+  scrap,
+  shuffleIntoDeck,
+  standing,
+  takeGoodStuff,
+  topDeck,
+  withPlayer,
+} from "./verbs";
+
+/** A card effect that feeds itself would loop forever; this is the tripwire. */
+const TRIGGER_LIMIT = 500;
+
+const reject = (code: RejectionCode, message: string): Rejection => ({ code, message });
+
+/* ==========================================================================
+   Validation — "would this be legal?", asked without running anything.
+   ========================================================================== */
+
+export function validate(state: GameState, command: Command): Rejection | null {
+  if (state.phase === "GameOver") {
+    return reject("GameIsOver", "The run is over.");
+  }
+  if (state.pending) return validateAnswer(state.pending, command);
+
+  switch (command.type) {
+    case "CHOOSE_CHARACTER":
+    case "CHOOSE_CARDS":
+    case "ORDER_CARDS":
+    case "TAKE_REWARD":
+      return reject("NoPendingChoice", "Nothing is waiting to be answered.");
+
+    case "FLIP_ROOM": {
+      if (state.phase !== "Flip") return wrongPhase(state, "flip a room");
+      // §9: both Down at the start of a turn ends the run, so the command is
+      // still legal — there is simply no flip.
+      if (state.Red.down && state.Gray.down) return null;
+      if (state.floorDeck.length === 0) {
+        return reject("FloorDeckEmpty", "The floor deck and the Fled pile are both empty.");
+      }
+      return null;
+    }
+
+    case "DRAW": {
+      if (state.phase !== "Draw") return wrongPhase(state, "draw");
+      const p = playerOf(state, command.character);
+      if (p.down) return reject("CharacterIsDown", `${command.character} is Down.`);
+      if (p.lastStand) {
+        return reject("InLastStand", `${command.character} is in last stand and does not draw.`);
+      }
+      if (p.deck.length === 0) {
+        return reject("DeckIsEmpty", `${command.character} has nothing left to draw.`);
+      }
+      if (p.drewThisTurn >= drawCapFor(state, command.character)) {
+        return reject("DrawCapReached", `${command.character} may not draw any deeper this turn.`);
+      }
+      if (!canDraw(state, command.character)) {
+        return reject(
+          "HandIsFull",
+          `${command.character} is holding ${String(handCapFor(state, command.character))} and has already drawn.`,
+        );
+      }
+      return null;
+    }
+
+    case "END_DRAW": {
+      if (state.phase !== "Draw") return wrongPhase(state, "end the draw phase");
+      for (const c of CHARACTERS) {
+        if (mustStillDraw(state, c)) {
+          return reject("MustDrawAtLeastOne", `${c} must draw at least 1 card.`);
+        }
+      }
+      return null;
+    }
+
+    case "PLAY_CARD": {
+      if (state.phase !== "Play") return wrongPhase(state, "play a card");
+      const c = command.character;
+      const p = playerOf(state, c);
+      if (p.down) return reject("CharacterIsDown", `${c} is Down.`);
+      const card = p.hand.find((x) => x.id === command.cardId);
+      if (!card) return reject("NotInHand", `That card is not in ${c}'s hand.`);
+
+      const cost = costOf(state, c, card);
+      if (command.payWith.length !== cost) {
+        return reject(
+          "WrongPayment",
+          `${card.name} costs ${String(cost)}; ${String(command.payWith.length)} offered.`,
+        );
+      }
+      const offered = new Set(command.payWith);
+      if (offered.size !== command.payWith.length) {
+        return reject("WrongPayment", "The same card was offered twice.");
+      }
+      if (offered.has(command.cardId)) {
+        return reject("CannotPayWithThat", "A card cannot pay for itself.");
+      }
+      const payable = new Set(payOptions(state, c, command.cardId).map((x) => x.id));
+      for (const id of command.payWith) {
+        if (!payable.has(id)) return reject("CannotPayWithThat", `That card cannot pay this cost.`);
+      }
+      return null;
+    }
+
+    case "END_PLAY":
+      return state.phase === "Play" ? null : wrongPhase(state, "end the play phase");
+
+    case "ASCEND": {
+      if (state.phase !== "Ascend") return wrongPhase(state, "ascend");
+      for (const c of CHARACTERS) {
+        const problem = validateAscendChoice(state, c, command[c]);
+        if (problem) return problem;
+      }
+      return null;
+    }
+  }
+}
+
+function wrongPhase(state: GameState, what: string): Rejection {
+  return reject("WrongPhase", `Cannot ${what} during the ${state.phase} phase.`);
+}
+
+function validateAnswer(pending: Pending, command: Command): Rejection | null {
+  const waiting = reject("AwaitingChoice", `Waiting on: ${pending.prompt}`);
+  switch (command.type) {
+    case "CHOOSE_CHARACTER":
+      if (pending.kind !== "ChooseCharacter") return waiting;
+      return pending.options.includes(command.character)
+        ? null
+        : reject("NotAnOption", `${command.character} is not one of the options.`);
+
+    case "CHOOSE_CARDS": {
+      if (pending.kind !== "ChooseCards") return waiting;
+      const chosen = new Set(command.cardIds);
+      if (chosen.size !== command.cardIds.length) {
+        return reject("NotAnOption", "The same card was chosen twice.");
+      }
+      const options = new Set(pending.options.map((x) => x.id));
+      for (const id of chosen) {
+        if (!options.has(id)) return reject("NotAnOption", "That card was not offered.");
+      }
+      const wanted = Math.min(pending.count, pending.options.length);
+      if (command.cardIds.length === wanted) return null;
+      if (pending.optional && command.cardIds.length === 0) return null;
+      return reject("NotAnOption", `Choose ${String(wanted)}.`);
+    }
+
+    case "ORDER_CARDS": {
+      if (pending.kind !== "OrderCards") return waiting;
+      const want = [...pending.cards.map((x) => x.id)].sort();
+      const got = [...command.cardIds].sort();
+      const same = want.length === got.length && want.every((id, i) => id === got[i]);
+      return same ? null : reject("NotAnOption", "Order every card that was shown, once each.");
+    }
+
+    case "TAKE_REWARD":
+      return pending.kind === "TakeReward" ? null : waiting;
+
+    default:
+      return waiting;
+  }
+}
+
+function validateAscendChoice(
+  state: GameState,
+  c: Character,
+  choice: AscendChoice,
+): Rejection | null {
+  const pile = playerOf(state, c).exhaust;
+  const hasKeep = choice.keepStuffId !== null;
+  const hasScrap = choice.scrapId !== null;
+  if (hasKeep !== hasScrap) {
+    return reject("ScrapTaxIncomplete", "The Scrap tax is both halves or neither.");
+  }
+  if (hasKeep) {
+    const keep = pile.find((x) => x.id === choice.keepStuffId);
+    if (!keep || keep.kind === "player") {
+      return reject("NotAnOption", `That is not Stuff in ${c}'s exhaust pile.`);
+    }
+    const payer = pile.find((x) => x.id === choice.scrapId);
+    if (!payer || payer.id === choice.keepStuffId) {
+      return reject("NotAnOption", `That is not another card in ${c}'s exhaust pile.`);
+    }
+  }
+  if (choice.takeRewardId !== null) {
+    const offered = state.offer?.[c] ?? [];
+    if (!offered.some((x) => x.id === choice.takeRewardId)) {
+      return reject("NotOffered", `That card was not offered to ${c}.`);
+    }
+  }
+  return null;
+}
+
+/* ==========================================================================
+   The engine
+   ========================================================================== */
+
+/** One command's worth of events, plus how far the trigger dispatch has read. */
+interface Run {
+  readonly events: DomainEvent[];
+  scanned: number;
+}
+
+export function execute(state: GameState, command: Command): Result {
+  const reason = validate(state, command);
+  if (reason) return { ok: false, reason };
+  const run: Run = { events: [], scanned: 0 };
+  let next = apply(state, command, run);
+  next = flush(next, run);
+  return { ok: true, state: next, events: run.events };
+}
+
+function apply(state: GameState, command: Command, run: Run): GameState {
+  switch (command.type) {
+    case "FLIP_ROOM":
+      return flipRoom(state, run);
+    case "DRAW":
+      return drawOne(state, command.character, run.events);
+    case "END_DRAW":
+      return endDraw(state, run);
+    case "PLAY_CARD":
+      return playCard(state, command.character, command.cardId, command.payWith, run);
+    case "END_PLAY":
+      return endPlay(state, run);
+    case "CHOOSE_CHARACTER":
+      return answerCharacter(state, command.character, run);
+    case "CHOOSE_CARDS":
+      return answerCards(state, command.cardIds, "cards", run);
+    case "ORDER_CARDS":
+      return answerCards(state, command.cardIds, "order", run);
+    case "TAKE_REWARD":
+      return answerReward(state, command.take, run);
+    case "ASCEND":
+      return ascend(state, command.Red, command.Gray, run);
+  }
+}
+
+/* ------------------------------------------------------ this-turn triggers */
+
+/** Every card that can hear an event: in either hand, or in the play zone. */
+function listeners(state: GameState): readonly BehaviourContext[] {
+  const out: BehaviourContext[] = [];
+  for (const c of CHARACTERS) {
+    for (const card of playerOf(state, c).hand) out.push({ card, character: c });
+  }
+  for (const played of state.playZone) out.push({ card: played.card, character: played.owner });
+  return out;
+}
+
+/** Hand every event produced so far to every card that might be listening. */
+function flush(state: GameState, run: Run): GameState {
+  let s = state;
+  while (run.scanned < run.events.length) {
+    const event = run.events[run.scanned];
+    run.scanned += 1;
+    if (!event) continue;
+    for (const ctx of listeners(s)) {
+      const onEvent = behaviourOf(ctx.card.name)?.onEvent;
+      if (!onEvent) continue;
+      const step = onEvent(event, s, ctx);
+      s = step.state;
+      run.events.push(...step.events);
+    }
+    if (run.events.length > TRIGGER_LIMIT) {
+      throw new CorruptStateError("A card trigger is feeding itself.");
+    }
+  }
+  return s;
+}
+
+/* ----------------------------------------------------------- Phase 1: Flip */
+
+function flipRoom(state: GameState, run: Run): GameState {
+  // §9: the run ends when both characters are Down, checked at the start of a
+  // turn. If both are Down when a turn begins, there is no flip.
+  if (state.Red.down && state.Gray.down) {
+    run.events.push({ type: "GAME_OVER", outcome: "Defeat" });
+    return { ...state, phase: "GameOver", outcome: "Defeat" };
+  }
+  const room = state.floorDeck[0];
+  if (!room) throw new CorruptStateError("Flipped an empty floor deck.");
+
+  // §5: you always see what you are facing before you spend anything.
+  run.events.push({ type: "ROOM_FLIPPED", room });
+  return {
+    ...state,
+    turn: state.turn + 1,
+    floorDeck: state.floorDeck.slice(1),
+    activeRoom: room,
+    phase: "Draw",
+    Red: { ...state.Red, drewThisTurn: 0 },
+    Gray: { ...state.Gray, drewThisTurn: 0 },
+    thisTurn: emptyTurnRecord(),
+  };
+}
+
+/* ----------------------------------------------------------- Phase 2: Draw */
+
+function endDraw(state: GameState, run: Run): GameState {
+  // §9: a deck emptied by drawing puts its character in last stand as the last
+  // step of the draw phase.
+  const next = activateLastStand(state, run.events);
+  return { ...next, phase: "Play" };
+}
+
+/* ----------------------------------------------------------- Phase 3: Play */
+
+const addPaid = (record: TurnRecord, c: Character, n: number): TurnRecord =>
+  c === "Red"
+    ? { ...record, paid: { ...record.paid, Red: record.paid.Red + n } }
+    : { ...record, paid: { ...record.paid, Gray: record.paid.Gray + n } };
+
+const spendFreePlay = (record: TurnRecord, c: Character): TurnRecord =>
+  c === "Red"
+    ? { ...record, freePlays: { ...record.freePlays, Red: record.freePlays.Red - 1 } }
+    : { ...record, freePlays: { ...record.freePlays, Gray: record.freePlays.Gray - 1 } };
+
+function playCard(
+  state: GameState,
+  c: Character,
+  cardId: Card["id"],
+  payWith: readonly Card["id"][],
+  run: Run,
+): GameState {
+  const p = playerOf(state, c);
+  const card = p.hand.find((x) => x.id === cardId);
+  if (!card) throw new CorruptStateError("Played a card that is not in hand.");
+  const payment = payWith.flatMap((id) => {
+    const found = p.hand.find((x) => x.id === id);
+    return found ? [found] : [];
+  });
+
+  let s = state;
+  // §9: while in last stand every card in that hand is free, so nothing is spent
+  // and no printed discount is used up.
+  if (!p.lastStand && payment.length === 0 && s.thisTurn.freePlays[c] > 0 && card.cost > 0) {
+    s = { ...s, thisTurn: spendFreePlay(s.thisTurn, c) };
+  }
+
+  // §5: you pay in *other* cards from your own hand. Red never pays for Gray.
+  s = exhaustFromHand(s, c, payment, run.events);
+  if (payment.length > 0) {
+    run.events.push({ type: "COST_PAID", character: c, cards: payment });
+    s = { ...s, thisTurn: addPaid(s.thisTurn, c, payment.length) };
+  }
+
+  const after = playerOf(s, c);
+  s = withPlayer(s, c, { ...after, hand: after.hand.filter((x) => x.id !== cardId) });
+  s = { ...s, playZone: [...s.playZone, { owner: c, card }] };
+  run.events.push({ type: "CARD_PLAYED", character: c, card });
+
+  // §5: nothing resolves while you play — the *room* is checked once, at the end
+  // of the phase. A card's own printed effect still happens as it is played.
+  const onPlay = behaviourOf(card.name)?.onPlay;
+  if (onPlay) {
+    const step = onPlay(s, { card, character: c });
+    s = step.state;
+    run.events.push(...step.events);
+  }
+  return s;
+}
+
+/* ------------------------------------------ the room check, and Phase 4 */
+
+/** Prefer a line that Clears, then the higher printed value, then printed order. */
+function bestLine(met: readonly Threshold[], first: Threshold): Threshold {
+  return met.reduce((a, b) => {
+    if (a.clears !== b.clears) return a.clears ? a : b;
+    return b.value > a.value ? b : a;
+  }, first);
+}
+
+const goodStuffFor = (t: Threshold, c: Character): number =>
+  t.effects
+    .filter((e) => e.type === "TakeGoodStuff" && (e.who === c || e.who === "both"))
+    .reduce((most, e) => Math.max(most, e.type === "TakeGoodStuff" ? e.count : 0), 0);
+
+/**
+ * §6: a Stuff room's challenge is split per character, and a richer tier says
+ * "instead" — so each character takes the largest amount any met line awards
+ * them rather than the sum. See open-questions.md #2.
+ */
+function stuffRoomEffects(met: readonly Threshold[]): readonly RoomEffect[] {
+  const out: RoomEffect[] = [];
+  for (const c of CHARACTERS) {
+    const count = met.reduce((most, t) => Math.max(most, goodStuffFor(t, c)), 0);
+    if (count > 0) out.push({ type: "TakeGoodStuff", who: c, count });
+  }
+  for (const t of met) {
+    for (const e of t.effects) if (e.type !== "TakeGoodStuff") out.push(e);
+  }
+  return out;
+}
+
+interface RoomOutcome {
+  readonly met: readonly Threshold[];
+  readonly cleared: boolean;
+  readonly effects: readonly RoomEffect[];
+}
+
+/**
+ * §5: the room is checked once, when both characters have stopped playing.
+ *
+ * On an Enemy or a Hazard exactly one line resolves — the best one met — because
+ * the higher tier of a Hazard is meant to replace the lower, not stack with it.
+ * See open-questions.md #1.
+ */
+function roomOutcome(state: GameState, room: Room): RoomOutcome {
+  const met = room.thresholds.filter((t) => thresholdIsMet(state, t));
+
+  if (room.kind === "stuff") {
+    // §6: a Stuff room is Cleared either way — its own Flee line clears it.
+    return { met, cleared: true, effects: stuffRoomEffects(met) };
+  }
+  const first = met[0];
+  if (!first) {
+    // §5: if no threshold is met, the characters Flee. Resolve the Flee line.
+    return { met, cleared: room.flee.clears, effects: room.flee.effects };
+  }
+  const line = bestLine(met, first);
+  return { met: [line], cleared: line.clears, effects: line.effects };
+}
+
+function endPlay(state: GameState, run: Run): GameState {
+  const room = state.activeRoom;
+  if (!room) throw new CorruptStateError("Ended a play phase with no room in the zone.");
+
+  const outcome = roomOutcome(state, room);
+  for (const threshold of outcome.met) {
+    run.events.push({ type: "THRESHOLD_MET", room, threshold });
+  }
+
+  let s: GameState = { ...state, activeRoom: null };
+  if (outcome.cleared) {
+    // §5 cleanup 2: a Cleared room is out of the game. Nobody counts that heap.
+    run.events.push({ type: "ROOM_CLEARED", room });
+    s = { ...s, cleared: [...s.cleared, room] };
+  } else {
+    // §5 cleanup 1: a Fled room comes back around when the Fled pile shuffles in.
+    run.events.push({ type: "ROOM_FLED", room });
+    s = { ...s, fled: [...s.fled, room] };
+  }
+
+  s = {
+    ...s,
+    resolution: {
+      effects: outcome.effects,
+      roomEnded: outcome.cleared ? "Cleared" : "Fled",
+      // §9: what matters is how the room ends, not how it got there.
+      lastStandAtClear: {
+        Red: outcome.cleared && s.Red.lastStand,
+        Gray: outcome.cleared && s.Gray.lastStand,
+      },
+    },
+  };
+  return drain(s, run);
+}
+
+const withEffects = (state: GameState, effects: readonly RoomEffect[]): GameState =>
+  state.resolution ? { ...state, resolution: { ...state.resolution, effects } } : state;
+
+function retarget(effect: RoomEffect, who: Character): RoomEffect {
+  switch (effect.type) {
+    case "ExhaustFromDeck":
+      return { type: "ExhaustFromDeck", who, amount: effect.amount };
+    case "DealBadStuff":
+      return { type: "DealBadStuff", who };
+    case "TakeGoodStuff":
+      return { type: "TakeGoodStuff", who, count: effect.count };
+    case "RevealReward":
+      return { type: "RevealReward", who };
+  }
+}
+
+const promptFor = (effect: RoomEffect): string => {
+  switch (effect.type) {
+    case "ExhaustFromDeck":
+      return `Who Exhausts ${String(effect.amount)} from their deck?`;
+    case "DealBadStuff":
+      return "Who takes the Bad Stuff?";
+    case "TakeGoodStuff":
+      return "Who takes the Good Stuff?";
+    case "RevealReward":
+      return "Whose reward pool is revealed?";
+  }
+};
+
+function applyEffect(state: GameState, effect: RoomEffect, who: Character, run: Run): GameState {
+  switch (effect.type) {
+    case "ExhaustFromDeck":
+      return exhaustFromDeck(state, who, effect.amount, "a room's printed punishment", run.events);
+    case "DealBadStuff":
+      return dealBadStuff(state, who, run.events);
+    case "TakeGoodStuff":
+      return takeGoodStuff(state, who, effect.count, run.events);
+    case "RevealReward":
+      throw new CorruptStateError("A reward reveal is a pending choice, not an effect.");
+  }
+}
+
+/**
+ * Work through what the room owes, stopping at the first thing that needs a
+ * decision. §5: where a line says *1 character*, the team chooses which one and
+ * they take all of it — there is no splitting. With a partner Down there is
+ * nothing to choose and it all falls on the survivor (§9).
+ */
+function drain(state: GameState, run: Run): GameState {
+  let s = state;
+  for (;;) {
+    const resolution = s.resolution;
+    if (!resolution) return s;
+    const head = resolution.effects[0];
+    if (!head) return finishTurn(s, run);
+    const rest = resolution.effects.slice(1);
+
+    if (head.who === "both") {
+      s = withEffects(s, [...CHARACTERS.map((c) => retarget(head, c)), ...rest]);
+      continue;
+    }
+    if (head.who === "one") {
+      const options = standing(s);
+      const only = options[0];
+      if (!only) {
+        s = withEffects(s, rest);
+        continue;
+      }
+      if (options.length > 1) {
+        return { ...s, pending: { kind: "ChooseCharacter", prompt: promptFor(head), options, source: null } };
+      }
+      s = withEffects(s, [retarget(head, only), ...rest]);
+      continue;
+    }
+
+    if (head.type === "RevealReward") {
+      // §6: turn the top card of that character's reward pool face up, and take
+      // it or skip it.
+      const card = s.pools[head.who][0];
+      s = withEffects(s, rest);
+      if (!card) continue;
+      run.events.push({ type: "REWARD_REVEALED", character: head.who, card });
+      return {
+        ...s,
+        pending: {
+          kind: "TakeReward",
+          prompt: `Take ${card.name}, or skip it?`,
+          character: head.who,
+          card,
+          source: null,
+        },
+      };
+    }
+
+    s = applyEffect(s, head, head.who, run);
+    s = withEffects(s, rest);
+  }
+}
+
+/* -------------------------------------------------------- Phase 4: Cleanup */
+
+function finishTurn(state: GameState, run: Run): GameState {
+  const resolution = state.resolution;
+  let s: GameState = { ...state, resolution: null, pending: null };
+
+  // §9: the team Fleeing the room while a character is in last stand puts that
+  // character Down. In last stand you have to keep clearing rooms.
+  if (resolution?.roomEnded === "Fled") {
+    for (const c of CHARACTERS) {
+      if (playerOf(s, c).lastStand) {
+        s = goDown(s, c, "the team fled while they were in last stand", run.events);
+      }
+    }
+  }
+
+  run.events.push({ type: "CLEANUP_BEGAN" });
+  // A card that takes itself back out of the play zone does it now, before the
+  // piles are cleaned.
+  s = flush(s, run);
+
+  s = cleanupPiles(s, resolution?.lastStandAtClear ?? { Red: false, Gray: false }, run);
+
+  // §9: a deck emptied this phase puts its character in last stand as the
+  // phase's last step — after the room check and the Flee have resolved.
+  s = activateLastStand(s, run.events);
+
+  // §5 cleanup 4: if the floor draw pile is empty, shuffle the Fled pile back in.
+  if (s.floorDeck.length === 0 && s.fled.length > 0) {
+    const [deck, seed] = shuffle(s.fled, s.seed);
+    run.events.push({ type: "FLED_RESHUFFLED", rooms: deck.length });
+    s = { ...s, floorDeck: deck, fled: [], seed };
+  }
+
+  run.events.push({ type: "TURN_ENDED", turn: s.turn });
+
+  // §6: clearing the Enemy room ends the floor. You do not have to empty the
+  // deck; you have to kill the thing on the stairs.
+  if (s.cleared.some((r) => r.kind === "enemy")) {
+    run.events.push({ type: "FLOOR_CLEARED", floor: s.floor });
+    if (s.floor >= TOP_FLOOR) {
+      run.events.push({ type: "GAME_OVER", outcome: "Victory" });
+      return { ...s, phase: "GameOver", outcome: "Victory", playZone: [] };
+    }
+    // §10 step 3: each character is offered three cards from their own pool.
+    return {
+      ...s,
+      phase: "Ascend",
+      playZone: [],
+      offer: { Red: s.pools.Red.slice(0, 3), Gray: s.pools.Gray.slice(0, 3) },
+    };
+  }
+  return { ...s, phase: "Flip", playZone: [] };
+}
+
+/**
+ * §5 cleanup 3: Exhaust both hands and the entire play zone. `Hold` cards still
+ * in hand are the only survivors.
+ *
+ * §9: if the room was Cleared while a character was in last stand, the last
+ * stand cleanup replaces their play-zone cleanup — the play zone shuffles into
+ * their deck and 2 off the top are the price of getting out. Their hand is
+ * cleaned up as normal. See open-questions.md #4.
+ */
+function cleanupPiles(
+  state: GameState,
+  lastStandAtClear: Readonly<Record<Character, boolean>>,
+  run: Run,
+): GameState {
+  let s = state;
+  for (const c of CHARACTERS) {
+    const p = playerOf(s, c);
+    const played = s.playZone.filter((x) => x.owner === c).map((x) => x.card);
+    const kept = p.hand.filter((x) => x.hold);
+    const dropped = p.hand.filter((x) => !x.hold);
+
+    s = withPlayer(s, c, { ...p, hand: kept });
+    for (const card of kept) run.events.push({ type: "CARD_KEPT", character: c, card });
+    for (const card of dropped) s = exhaust(s, c, card, "hand", run.events);
+
+    if (lastStandAtClear[c] && !playerOf(s, c).down) {
+      s = shuffleIntoDeck(s, c, played, run.events);
+      s = withPlayer(s, c, { ...playerOf(s, c), lastStand: false });
+      const price = playerOf(s, c).deck.slice(0, LAST_STAND_PRICE);
+      s = exhaustFromDeck(s, c, LAST_STAND_PRICE, "the price of getting out", run.events);
+      run.events.push({ type: "LAST_STAND_ESCAPED", character: c, price });
+      continue;
+    }
+    for (const card of played) s = exhaust(s, c, card, "playZone", run.events);
+  }
+  return { ...s, playZone: [] };
+}
+
+/* ------------------------------------------------------ answering a choice */
+
+function contextFor(pending: Pending): BehaviourContext | null {
+  const source = pending.source;
+  if (!source) return null;
+  return { card: source.card, character: source.character };
+}
+
+function runChoice(state: GameState, answer: ChoiceAnswer, run: Run): GameState {
+  const pending = state.pending;
+  if (!pending) throw new CorruptStateError("Answered a choice that was not being asked.");
+  const ctx = contextFor(pending);
+  const cleared: GameState = { ...state, pending: null };
+  if (!ctx) return drain(cleared, run);
+
+  const onChoice = behaviourOf(ctx.card.name)?.onChoice;
+  if (!onChoice) throw new CorruptStateError(`${ctx.card.name} asked a question it cannot answer.`);
+  const step = onChoice(answer, cleared, ctx);
+  run.events.push(...step.events);
+  return step.state.pending ? step.state : drain(step.state, run);
+}
+
+function answerCharacter(state: GameState, character: Character, run: Run): GameState {
+  const pending = state.pending;
+  if (pending?.kind !== "ChooseCharacter") {
+    throw new CorruptStateError("Answered a character choice that was not being asked.");
+  }
+  if (pending.source) {
+    return runChoice(state, { kind: "character", tag: pending.source.tag, character }, run);
+  }
+  // A room asked, so the answer retargets the effect the drain stopped on.
+  const resolution = state.resolution;
+  const head = resolution?.effects[0];
+  if (!resolution || !head) throw new CorruptStateError("No room effect is waiting for a target.");
+  return drain(
+    {
+      ...state,
+      pending: null,
+      resolution: { ...resolution, effects: [retarget(head, character), ...resolution.effects.slice(1)] },
+    },
+    run,
+  );
+}
+
+function answerCards(
+  state: GameState,
+  cardIds: readonly Card["id"][],
+  kind: "cards" | "order",
+  run: Run,
+): GameState {
+  const pending = state.pending;
+  if (!pending?.source) throw new CorruptStateError("No card is waiting on that answer.");
+  const shown =
+    pending.kind === "ChooseCards"
+      ? pending.options
+      : pending.kind === "OrderCards"
+        ? pending.cards
+        : [];
+  const cards = cardIds.flatMap((id) => {
+    const found = shown.find((x) => x.id === id);
+    return found ? [found] : [];
+  });
+  return runChoice(state, { kind, tag: pending.source.tag, cards }, run);
+}
+
+function answerReward(state: GameState, take: boolean, run: Run): GameState {
+  const pending = state.pending;
+  if (pending?.kind !== "TakeReward") {
+    throw new CorruptStateError("No reward reveal is waiting for an answer.");
+  }
+  const { character, card } = pending;
+  const rest = state.pools[character].slice(1);
+  let s: GameState = { ...state, pending: null };
+  if (take) {
+    // §6: nothing shuffles during a floor, so it is the very next card they draw.
+    s = setPool(s, character, rest);
+    s = topDeck(s, character, card);
+    run.events.push({ type: "REWARD_TAKEN", character, card });
+  } else {
+    // Bottom of its pool, as a declined ascension reward does. NOT YET RULED
+    // (rulebook §6); see open-questions.md #8.
+    s = setPool(s, character, [...rest, card]);
+    run.events.push({ type: "REWARD_DECLINED", character });
+  }
+  return drain(s, run);
+}
+
+const setPool = (state: GameState, c: Character, cards: readonly Card[]): GameState =>
+  c === "Red"
+    ? { ...state, pools: { ...state.pools, Red: cards } }
+    : { ...state, pools: { ...state.pools, Gray: cards } };
+
+/* ------------------------------------------------------------ §10 Ascending */
+
+function ascend(state: GameState, red: AscendChoice, gray: AscendChoice, run: Run): GameState {
+  let s = state;
+  s = ascendOne(s, "Red", red, run);
+  s = ascendOne(s, "Gray", gray, run);
+
+  // §4: build the next floor's deck, with one fewer Stuff room than last time.
+  s = returnRoomsToSupply(s);
+  s = buildFloor({ ...s, floor: s.floor + 1, offer: null }, run.events);
+  return { ...s, phase: "Flip", playZone: [], thisTurn: emptyTurnRecord() };
+}
+
+function ascendOne(state: GameState, c: Character, choice: AscendChoice, run: Run): GameState {
+  let s = state;
+  let pile = [...playerOf(s, c).exhaust];
+
+  // §10 step 1: all Stuff in the exhaust pile moves to the Scrapyard, for good.
+  // The Scrap tax keeps one piece by Scrapping another card of that pile in its
+  // place. Kept Stuff stays ordinary Stuff; nothing is tracked.
+  if (choice.keepStuffId !== null && choice.scrapId !== null) {
+    const payer = pile.find((x) => x.id === choice.scrapId);
+    if (payer) {
+      pile = pile.filter((x) => x.id !== payer.id);
+      s = scrap(s, c, payer, run.events);
+    }
+  }
+  for (const card of pile) {
+    if (card.kind !== "player" && card.id !== choice.keepStuffId) s = scrap(s, c, card, run.events);
+  }
+  pile = pile.filter((x) => x.kind === "player" || x.id === choice.keepStuffId);
+
+  // §10 step 3: three cards from their own pool; take one or decline. A declined
+  // card goes to the bottom of its pool.
+  const offered = state.offer?.[c] ?? [];
+  const taken = offered.find((x) => x.id === choice.takeRewardId) ?? null;
+  if (taken) run.events.push({ type: "REWARD_TAKEN", character: c, card: taken });
+  else run.events.push({ type: "REWARD_DECLINED", character: c });
+  const returned = offered.filter((x) => x.id !== taken?.id);
+  s = setPool(s, c, [...s.pools[c].slice(offered.length), ...returned]);
+
+  // §10 step 2: the exhaust pile shuffles back into the deck. A floor cleared is
+  // a full heal, including for a character who was Down. Nothing bad crosses a
+  // floor boundary. Hands already followed the normal cleanup rules, so a hand
+  // holds only `Hold` cards — and those carry up the stairs, Stuff included.
+  s = withPlayer(s, c, {
+    ...playerOf(s, c),
+    exhaust: [],
+    down: false,
+    lastStand: false,
+    drewThisTurn: 0,
+  });
+  return shuffleIntoDeck(s, c, [...pile, ...(taken ? [taken] : [])], run.events);
+}

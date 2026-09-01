@@ -29,7 +29,7 @@ export const stuffRoomsOnFloor = (floor: number): number => Math.max(0, TOP_FLOO
 
 /* ------------------------------------------------------ minting the cards */
 
-function mintCard(face: CardFace, copy: number): Card {
+export function mintCard(face: CardFace, copy: number): Card {
   return {
     id: cardId(`${face.name}#${copy}`),
     name: face.name,
@@ -47,7 +47,7 @@ function mintCard(face: CardFace, copy: number): Card {
   };
 }
 
-function mintRoom(face: RoomFace, copy: number): Room {
+export function mintRoom(face: RoomFace, copy: number): Room {
   return {
     id: roomId(`${face.name}#${copy}`),
     name: face.name,

@@ -64,6 +64,7 @@ export default tseslint.config(
   // the game actually prints is the point of it. The direction that matters is
   // still shut: no test in domain knows about the store, an adapter, or React.
   forbidLayers("domain/**/*.test", ["content"], ["react", "react-dom", "zustand"]),
+  forbidLayers("domain/__fixtures__/*", ["content"], ["react", "react-dom", "zustand"]),
   forbidLayers("content", ["domain"]),
   forbidLayers("application", ["domain", "content"]),
   forbidLayers("infrastructure", ["domain", "application"]),

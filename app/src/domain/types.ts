@@ -167,6 +167,8 @@ export type Pending =
  */
 export interface Resolution {
   readonly effects: readonly RoomEffect[];
+  /** How the room ended. §9 reads this, not how it got there. */
+  readonly roomEnded: "Cleared" | "Fled";
   /** Who was in last stand when the room ended Cleared — they get the escape (§9). */
   readonly lastStandAtClear: Readonly<Record<Character, boolean>>;
 }

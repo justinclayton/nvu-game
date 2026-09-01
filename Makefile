@@ -34,8 +34,15 @@ build: prototype/cards.js
 prototype/cards.js: design/cards.yaml tools/cards.mjs
 	node tools/cards.mjs build
 
+# `make check` also runs the app's content drift test when app/ is installed;
+# on a fresh clone the generator's own check still stands on its own.
 check: build
 	node tools/cards.mjs check
+	@if [ -d app/node_modules ]; then \
+		cd app && npx vitest run src/content; \
+	else \
+		echo "app/ not installed — skipping the content drift test (run: make app-install)"; \
+	fi
 
 # The web game (app/). See design/web-game/spec.md.
 app/node_modules: app/package.json

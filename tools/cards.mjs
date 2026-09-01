@@ -1,12 +1,18 @@
 #!/usr/bin/env node
 /* North vs Up — card list tooling.
  *
- *   node tools/cards.mjs build    regenerate prototype/cards.js from design/cards.yaml
- *   node tools/cards.mjs check    fail if cards.js is stale or a prototype stops rendering
+ *   node tools/cards.mjs build    regenerate the generated card modules from design/cards.yaml
+ *   node tools/cards.mjs check    fail if either is stale or a prototype stops rendering
  *
  * design/cards.yaml is the source of truth for every card.  Nothing else in the
  * repo may hold a card's name, cost, stats, rarity, Hold, or rules text except
- * as a generated copy (prototype/cards.js).
+ * as a generated copy.  There are two:
+ *
+ *   prototype/cards.js                 untyped, for the paper prototypes
+ *   app/src/content/cards.generated.ts typed, for the web game
+ *
+ * The web game's module is structured, not prose: a room's threshold outcomes
+ * and its Flee line are parsed here so nothing in the app ever reads a sentence.
  *
  * No dependencies on purpose: this is a paper-prototype repo with no package.json,
  * and the parser only has to read the one file it owns.
@@ -20,6 +26,7 @@ import { createContext, runInContext } from "node:vm";
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 const YAML = join(ROOT, "design/cards.yaml");
 const OUT = join(ROOT, "prototype/cards.js");
+const OUT_TS = join(ROOT, "app/src/content/cards.generated.ts");
 const SETS = new Set(["official", "proposed"]);
 
 /* ------------------------------------------------------------------ parser
@@ -233,6 +240,206 @@ if (typeof module !== "undefined") module.exports = NVU_CARDS;
 `;
 }
 
+/* ------------------------------------------------- the printed prose, parsed
+   A room prints its threshold outcomes and its Flee line as sentences.  The web
+   game never reads a sentence, so the shapes the card list actually prints are
+   turned into structure here.  Anything this does not recognise is an error,
+   not a silently dropped rule.
+
+   Rulebook §5 for Flee lines, §6 for the three kinds of room. */
+
+const CARD_KINDS = new Set(["player", "good_stuff", "bad_stuff"]);
+const ROOM_KIND = { enemy_room: "enemy", hazard_room: "hazard", stuff_room: "stuff" };
+
+/** Rulebook §6: every Stuff room prints this Flee line and no other. */
+const STUFF_FLEE = "Clear the room, but leave empty-handed.";
+
+function who(word) {
+  const w = word.trim().toLowerCase();
+  if (w === "both of you" || w === "both") return "both";
+  if (w === "one of you" || w === "one") return "one";
+  if (w === "red") return "Red";
+  if (w === "gray") return "Gray";
+  throw new Error(`unrecognised target: "${word}"`);
+}
+
+/* Each entry reads one clause. `clears` and `fleeFree` are flags the clause
+   raises; `effect` is what it does. */
+const CLAUSES = [
+  [/^(?:and )?ascend$/i, () => ({ clears: true })],
+  [/^(?:and )?clear(?: the room)?$/i, () => ({ clears: true })],
+  [/^(?:and )?flee this room for free$/i, () => ({ fleeFree: true })],
+  [/^(?:and )?leave empty-handed$/i, () => ({})],
+  [
+    /^(both of you|one of you|red|gray) exhausts? (\d+)$/i,
+    (m) => ({ effect: { type: "ExhaustFromDeck", who: who(m[1]), amount: Number(m[2]) } }),
+  ],
+  [
+    /^(both of you|one of you|red|gray) (?:gets?|takes?) (?:(\d+) )?bad stuff$/i,
+    (m) => ({ effect: { type: "DealBadStuff", who: who(m[1]) } }),
+  ],
+  [
+    /^(both of you|one of you|red|gray) (?:gets?|takes?) (?:(\d+) )?good stuff$/i,
+    (m) => ({ effect: { type: "TakeGoodStuff", who: who(m[1]), count: Number(m[2] ?? 1) } }),
+  ],
+  [
+    /^(both of you|one of you|red|gray) (?:gets?|takes?) (\d+) instead$/i,
+    (m) => ({ effect: { type: "TakeGoodStuff", who: who(m[1]), count: Number(m[2]) } }),
+  ],
+  [
+    /^(both of you|one of you|red|gray) reveals? (?:a |the )?(?:card )?reward$/i,
+    (m) => ({ effect: { type: "RevealReward", who: who(m[1]) } }),
+  ],
+];
+
+/** Split printed prose into clauses: on full stops, commas, and a joining "and". */
+function clausesOf(prose) {
+  return prose
+    .split(/[.;]|,\s*(?:and\s+)?|\s+and\s+/i)
+    .map((c) => c.replace(/^\s*but\s+/i, "").trim())
+    .filter((c) => c !== "");
+}
+
+function readProse(prose, where) {
+  const out = { clears: false, fleeFree: false, effects: [] };
+  for (const clause of clausesOf(prose)) {
+    const hit = CLAUSES.find(([re]) => re.test(clause));
+    if (!hit) throw new Error(`${where}: unparsed clause "${clause}" in "${prose}"`);
+    const read = hit[1](clause.match(hit[0]));
+    if (read.clears) out.clears = true;
+    if (read.fleeFree) out.fleeFree = true;
+    if (read.effect) out.effects.push(read.effect);
+  }
+  return out;
+}
+
+/**
+ * Rulebook §6: a Stuff room's challenge is split per character, and each line is
+ * measured against that character's own side of the play zone.  A line naming
+ * both characters names no single side, so it reads the shared pool.
+ */
+function measuredOn(kind, effects) {
+  if (kind !== "stuff") return null;
+  const named = new Set(effects.map((e) => e.who).filter((w) => w === "Red" || w === "Gray"));
+  return named.size === 1 ? [...named][0] : null;
+}
+
+function threshold(raw, kind, where) {
+  if (!raw || typeof raw.value !== "number" || (raw.stat !== "Power" && raw.stat !== "Scramble")) {
+    throw new Error(`${where}: a threshold needs a Power or Scramble stat and a value`);
+  }
+  const outcome = String(raw.outcome ?? "");
+  const read = readProse(outcome, `${where} threshold "${outcome}"`);
+  return {
+    stat: raw.stat,
+    value: raw.value,
+    outcome,
+    // Rulebook §6: a Stuff room is Cleared either way, so every one of its lines
+    // clears.  Elsewhere only a line that says so does.
+    clears: kind === "stuff" ? true : read.clears,
+    fleeFree: read.fleeFree,
+    measuredOn: measuredOn(kind, read.effects),
+    effects: read.effects,
+  };
+}
+
+function fleeLine(card, kind) {
+  if (kind === "stuff") {
+    // Rulebook §6 prints this line for every Stuff room, so the card list does
+    // not repeat it.  Its own text Clears the room, which is why a Stuff room
+    // never reaches the Fled pile.
+    return { text: STUFF_FLEE, clears: true, effects: [] };
+  }
+  if (!card.flee) throw new Error(`${card.name}: every Enemy and Hazard room prints a Flee line`);
+  const read = readProse(card.flee, `${card.name} Flee line`);
+  return { text: card.flee, clears: read.clears, effects: read.effects };
+}
+
+function cardFace(c) {
+  return {
+    name: c.name,
+    set: c.set,
+    kind: c.kind,
+    owner: c.owner ?? null,
+    rarity: c.rarity ?? null,
+    starter: c.starter === true,
+    count: c.count ?? 1,
+    cost: c.cost ?? 0,
+    power: c.power ?? 0,
+    scramble: c.scramble ?? 0,
+    conditionalStat: c.conditional_stat === true,
+    hold: c.hold === true,
+    text: c.text ?? "",
+  };
+}
+
+function roomFace(c) {
+  const kind = ROOM_KIND[c.kind];
+  const thresholds = (c.thresholds ?? []).map((t) => threshold(t, kind, c.name));
+  if (thresholds.length === 0) throw new Error(`${c.name}: a room prints at least one threshold`);
+  return {
+    name: c.name,
+    set: c.set,
+    kind,
+    floor: typeof c.floor === "number" ? c.floor : null,
+    count: c.count ?? 1,
+    thresholds,
+    flee: fleeLine(c, kind),
+  };
+}
+
+/** The whole card list, in the shape app/src/domain/printed.ts describes. */
+export function structure(doc) {
+  const cards = [];
+  const rooms = [];
+  for (const c of doc.cards) {
+    if (CARD_KINDS.has(c.kind)) cards.push(cardFace(c));
+    else if (c.kind in ROOM_KIND) rooms.push(roomFace(c));
+    else throw new Error(`${c.name}: unknown kind ${JSON.stringify(c.kind)}`);
+  }
+  return { meta: { updated: String(doc.meta.updated ?? "") }, cards, rooms };
+}
+
+/* ------------------------------------------------------- the typed TS module */
+
+function ts(value, indent) {
+  const pad = "  ".repeat(indent);
+  if (value === null) return "null";
+  if (Array.isArray(value)) {
+    if (value.length === 0) return "[]";
+    const items = value.map((v) => `${pad}  ${ts(v, indent + 1)}`);
+    return `[\n${items.join(",\n")},\n${pad}]`;
+  }
+  if (typeof value === "object") {
+    const keys = Object.keys(value);
+    if (keys.length === 0) return "{}";
+    const body = keys.map((k) => `${pad}  ${k}: ${ts(value[k], indent + 1)}`);
+    return `{\n${body.join(",\n")},\n${pad}}`;
+  }
+  return JSON.stringify(value);
+}
+
+export function generateTs(doc) {
+  const content = structure(doc);
+  return `/* GENERATED FILE — DO NOT EDIT.
+ *
+ * Source: design/cards.yaml       Regenerate: node tools/cards.mjs build
+ * Check:  node tools/cards.mjs check
+ *
+ * Every card in North vs Up, as printed, with each room's threshold outcomes and
+ * Flee line already parsed into structure.  Data, not rules: this module knows
+ * what a card says and nothing about what the engine does with it.
+ *
+ * EVERY NUMBER IS A PLACEHOLDER — costs, stats and thresholds are still open
+ * design (design/rulebook.md, "NOT YET RULED").
+ */
+
+import type { CardContent } from "../domain/printed";
+
+export const CARD_CONTENT = ${ts(content, 0)} as const satisfies CardContent;
+`;
+}
+
 /* ------------------------------------------------------------------- check */
 
 function checkSchema(doc) {
@@ -323,7 +530,12 @@ const cmd = process.argv[2] || "build";
 
 if (cmd === "build") {
   writeFileSync(OUT, generate(doc));
-  console.log(`wrote prototype/cards.js — ${doc.cards.length} cards`);
+  writeFileSync(OUT_TS, generateTs(doc));
+  const { cards, rooms } = structure(doc);
+  console.log(
+    `wrote prototype/cards.js and app/src/content/cards.generated.ts — ` +
+    `${cards.length} cards and ${rooms.length} rooms`,
+  );
 } else if (cmd === "check") {
   const problems = [];
   problems.push(...checkSchema(doc));
@@ -331,6 +543,14 @@ if (cmd === "build") {
   let have = "";
   try { have = readFileSync(OUT, "utf8"); } catch { /* missing counts as stale */ }
   if (have !== want) problems.push("prototype/cards.js is stale — run: node tools/cards.mjs build");
+
+  const wantTs = generateTs(doc);
+  let haveTs = "";
+  try { haveTs = readFileSync(OUT_TS, "utf8"); } catch { /* missing counts as stale */ }
+  if (haveTs !== wantTs) {
+    problems.push("app/src/content/cards.generated.ts is stale — run: node tools/cards.mjs build");
+  }
+
   problems.push(...checkRenders(doc, want));
 
   if (problems.length) {

@@ -9,7 +9,6 @@ import type { DomainEvent } from "../types";
 import {
   CHARACTERS,
   drawOne,
-  exhaustFromDeck,
   grantFreePlay,
   hasFired,
   markFired,
@@ -141,9 +140,6 @@ export const STUFF: Registry = {
    * "ALL rooms" is read from either hand — one held Panic taxes the team. */
   Panic: {
     whileHeld: { thresholdScrambleDelta: 2 },
-    onPlay(state, ctx) {
-      const events: DomainEvent[] = [];
-      return done(exhaustFromDeck(state, ctx.character, 2, "Panic", events), events);
-    },
+    exhaustX: 2,
   },
 };

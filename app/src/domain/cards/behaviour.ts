@@ -37,6 +37,8 @@ export type ChoiceAnswer =
  */
 export interface HeldModifiers {
   readonly costDelta?: number;
+  /** Bare `Exhaust X` lines do nothing to this character. */
+  readonly ignoresExhaustX?: boolean;
   readonly playedPowerDelta?: number;
   readonly stuffPowerDelta?: number;
   readonly handCap?: number;
@@ -45,6 +47,11 @@ export interface HeldModifiers {
 }
 
 export interface CardBehaviour {
+  /**
+   * A bare `Exhaust X` printed on the card: X cards off the top of the player's
+   * own deck, into their exhaust pile. Resolved as the card is played.
+   */
+  exhaustX?: number;
   /** Conditional stats, recalculated every time the pool is read (§5). */
   stats?(state: GameState, owner: Character, card: Card): { power: number; scramble: number };
   /** A printed cost that is not the number in the corner. */

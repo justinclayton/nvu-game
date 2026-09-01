@@ -6,7 +6,6 @@
 
 import type { Card, Character, DomainEvent, GameState } from "../types";
 import {
-  exhaustFromDeck,
   playerOf,
   returnToHand,
   shuffleIntoDeck,
@@ -22,23 +21,28 @@ const othersPlayed = (state: GameState, c: Character, self: Card): number =>
 const playedBy = (state: GameState, c: Character): number =>
   state.playZone.filter((p) => p.owner === c).length;
 
-/** "Exhaust N" — §8's unchosen loss, off the top of your own deck. */
-const exhaustSelf = (amount: number) => ({
-  onPlay(state: GameState, ctx: { readonly character: Character }) {
-    const events: DomainEvent[] = [];
-    return done(exhaustFromDeck(state, ctx.character, amount, "a printed cost", events), events);
-  },
-});
-
 export const RED: Registry = {
   /* "Exhaust 2 (the top 2 cards of your deck go to your Exhaust pile)." */
-  Overdrive: exhaustSelf(2),
+  Overdrive: { exhaustX: 2 },
 
   /* "Exhaust 1." */
-  "Reckless Swing": exhaustSelf(1),
+  "Reckless Swing": { exhaustX: 1 },
 
   /* "Exhaust 3." */
-  Reckless: exhaustSelf(3),
+  Reckless: { exhaustX: 3 },
+
+  /* "While `Holding`, you don't Exhaust cards."
+   *
+   * `Exhaust X` written on its own means X off the top of your own deck, so
+   * this stops exactly those lines: a room's printed punishment, and its
+   * holder's own Overdrive, Reckless and Panic. It does not stop anything that
+   * names its zone or is spelled out by a rule — paying a cost, cleanup, the
+   * burned draw of a full hand, or the price of getting out of last stand — so
+   * the drain still runs. It protects its holder only, and it can never be
+   * spent, so it sits in one of their five slots for the rest of the run. */
+  "Zen Mode": {
+    whileHeld: { ignoresExhaustX: true },
+  },
 
   /* "If Gray played a card this turn, this costs 0."
    *

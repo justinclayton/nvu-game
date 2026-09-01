@@ -263,3 +263,112 @@ describe("Flurry — 'Power equal to twice the number of other cards Red played'
     expect(statPool(two.state).power).toBe(7);
   });
 });
+
+describe("Zen Mode — \"While `Holding`, you don't Exhaust cards\"", () => {
+  it("stops a room's printed `Exhaust X`", () => {
+    const state = playing({
+      activeRoom: room("Collapsed Stairwell"),
+      Red: player({ deck: pile("Shove", 5), hand: [card("Zen Mode")] }),
+      Gray: player({ deck: pile("Duck Under", 5) }),
+    });
+    // Collapsed Stairwell's Flee line: one of you Exhausts 3.
+    const { state: next, events } = play(state, [
+      { type: "END_PLAY" },
+      { type: "CHOOSE_CHARACTER", character: "Red" },
+    ]);
+    expect(next.Red.deck).toHaveLength(5);
+    expect(eventTypes(events)).toContain("EXHAUST_PREVENTED");
+  });
+
+  it("protects its holder only", () => {
+    const state = playing({
+      activeRoom: room("Coney, The Thing In The Stairwell"),
+      Red: player({ deck: pile("Shove", 5), hand: [card("Zen Mode")] }),
+      Gray: player({ deck: pile("Duck Under", 5) }),
+    });
+    // Coney's Flee line: both of you Exhaust 1.
+    const { state: next } = play(state, [{ type: "END_PLAY" }]);
+    expect(next.Red.deck).toHaveLength(5);
+    expect(next.Gray.deck).toHaveLength(4);
+  });
+
+  it("stops its holder's own Overdrive", () => {
+    const state = playing({
+      Red: player({ deck: pile("Shove", 4), hand: [card("Zen Mode"), card("Overdrive")] }),
+    });
+    const overdrive = state.Red.hand[1];
+    if (!overdrive) throw new Error("rig");
+    const { state: next, events } = must(state, free("Red", overdrive.id));
+    expect(next.Red.deck).toHaveLength(4);
+    expect(next.Red.exhaust).toEqual([]);
+    expect(eventTypes(events)).toEqual(["CARD_PLAYED", "EXHAUST_PREVENTED"]);
+    // The card still enters the play zone and still brings its Power.
+    expect(statPool(next).power).toBe(2);
+  });
+
+  it("does not stop paying a cost", () => {
+    const state = playing({
+      Red: player({
+        deck: pile("Shove", 4),
+        hand: [card("Zen Mode"), card("Charge In"), card("Shove"), card("Shove")],
+      }),
+    });
+    const hand = state.Red.hand.map((c) => c.id);
+    const [, chargeIn, payA, payB] = hand;
+    if (!chargeIn || !payA || !payB) throw new Error("rig");
+    const { state: next } = must(state, {
+      type: "PLAY_CARD",
+      character: "Red",
+      cardId: chargeIn,
+      payWith: [payA, payB],
+    });
+    expect(next.Red.exhaust).toHaveLength(2);
+  });
+
+  it("does not stop cleanup, and stays in hand itself", () => {
+    const state = playing({
+      activeRoom: room("Sorting Room"),
+      Red: player({ deck: pile("Shove", 4), hand: [card("Zen Mode"), card("Shove")] }),
+    });
+    const { state: next } = play(state, [{ type: "END_PLAY" }]);
+    // The Shove is Exhausted from hand as ever; Zen Mode has `Hold`, so it stays.
+    expect(next.Red.exhaust.map((c) => c.name)).toEqual(["Shove"]);
+    expect(next.Red.hand.some((c) => c.name === "Zen Mode")).toBe(true);
+  });
+
+  it("does not stop the burned draw of a full hand", () => {
+    const state = rig({
+      phase: "Draw",
+      activeRoom: room("Sorting Room"),
+      Red: player({
+        deck: pile("Shove", 4),
+        hand: [card("Zen Mode"), ...pile("Shove", 4)],
+      }),
+      Gray: player({ deck: pile("Duck Under", 4) }),
+    });
+    const { state: next, events } = must(state, { type: "DRAW", character: "Red" });
+    expect(next.Red.exhaust).toHaveLength(1);
+    expect(eventTypes(events)).toEqual(["DRAW_BURNED", "CARD_EXHAUSTED"]);
+  });
+
+  it("does not stop the price of getting out of last stand", () => {
+    const state = playing({
+      activeRoom: room("Sorting Room"),
+      Red: player({
+        deck: [],
+        hand: [card("Zen Mode"), card("Shove"), card("Shove"), card("Shove")],
+        lastStand: true,
+      }),
+      Gray: player({ deck: pile("Duck Under", 4) }),
+    });
+    const shoves = state.Red.hand.filter((c) => c.name === "Shove");
+    const { state: next, events } = play(state, [
+      ...shoves.map((c) => free("Red", c.id)),
+      { type: "END_PLAY" },
+    ]);
+    // Three played, shuffled back, two Exhausted as the price: one left.
+    expect(next.Red.deck).toHaveLength(1);
+    expect(eventTypes(events)).toContain("LAST_STAND_ESCAPED");
+    expect(eventTypes(events)).not.toContain("EXHAUST_PREVENTED");
+  });
+});

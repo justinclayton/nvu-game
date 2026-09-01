@@ -1,8 +1,8 @@
 # Web game — open questions
 
 Rules the implementation had to read one way when more than one reading was available. Each entry
-says what the code does, and why that reading fits the rulebook better than the alternative. None of
-these is a ruling; they are the list of things to rule on.
+says what the code does, and why that reading fits the rulebook better than the alternative. An
+entry tagged `[you]` has been ruled on and is settled; the rest are the list of things to rule on.
 
 The reading is marked in a comment beside the code, so a ruling here has one place to land.
 
@@ -206,18 +206,26 @@ that already cost nothing does not use it up.
 
 ---
 
-## 15. Zen Mode has no implementation
+## 15. `Exhaust X` on its own means X off the top of your own deck
 
-**Where:** nowhere. It is the one card with printed text and no behaviour, and
-`app/src/content/behaviour-coverage.test.ts` pins that fact so it cannot be forgotten.
+`[you, 2026-09-01]`
 
-Zen Mode reads *"While `Holding`, you don't Exhaust cards."* Taken literally that stops paying costs
-(§5), cleanup (§5), a room's printed punishment (§8), the last-stand exit tax (§9) and the burned
-draw of a full hand (§5) — which between them are most of how the game spends you. There is no
-reading here that is obviously the intended one, and guessing would quietly rewrite five rules.
+**Where:** `printedExhaust` in `app/src/domain/engine.ts`, and the generator's clause parser.
 
-It is a `proposed` card, so the build gate does not require it. It needs a ruling on which of those
-Exhausts it stops before it can be written.
+Where a card or a room prints `Exhaust X` and names no zone, it means: move X cards from the top of
+that character's deck to their exhaust pile. §8's other form, `Exhaust X cards from your hand`,
+names its zone and is unaffected.
+
+That is the only shape a card can turn off. **Zen Mode** — *"While `Holding`, you don't Exhaust
+cards"* — stops bare `Exhaust X` lines aimed at its holder: a room's printed punishment, and the
+holder's own Overdrive, Reckless, Reckless Swing and Panic. It reaches nothing that names its zone
+or that a rule spells out in its own words, so it does not stop paying a cost, cleanup, the burned
+draw of a full hand, or the price of getting out of last stand. The drain still runs.
+
+Two consequences worth knowing, neither of them a question: Zen Mode protects its holder and not
+their partner, so a team holding one can send every *"one of you Exhausts X"* line into that
+character for nothing; and it can never itself be spent, so it occupies one of five hand slots for
+the rest of the run.
 
 ---
 

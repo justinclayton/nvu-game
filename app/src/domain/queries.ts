@@ -27,6 +27,7 @@ export interface StatTotals {
 
 interface Modifiers {
   readonly costDelta: number;
+  readonly ignoresExhaustX: boolean;
   readonly playedPowerDelta: number;
   readonly stuffPowerDelta: number;
   readonly handCap: number;
@@ -35,6 +36,7 @@ interface Modifiers {
 
 const NO_MODIFIERS: Modifiers = {
   costDelta: 0,
+  ignoresExhaustX: false,
   playedPowerDelta: 0,
   stuffPowerDelta: 0,
   handCap: HAND_CAP,
@@ -51,6 +53,7 @@ export function heldModifiers(state: GameState, c: Character): Modifiers {
     if (!h) continue;
     m = {
       costDelta: m.costDelta + (h.costDelta ?? 0),
+      ignoresExhaustX: m.ignoresExhaustX || (h.ignoresExhaustX ?? false),
       playedPowerDelta: m.playedPowerDelta + (h.playedPowerDelta ?? 0),
       stuffPowerDelta: m.stuffPowerDelta + (h.stuffPowerDelta ?? 0),
       handCap: Math.min(m.handCap, h.handCap ?? HAND_CAP),
@@ -58,6 +61,17 @@ export function heldModifiers(state: GameState, c: Character): Modifiers {
     };
   }
   return m;
+}
+
+/**
+ * The card in this character's hand that is stopping bare `Exhaust X` lines, if
+ * one is. Named rather than merely counted, so the log can say what happened.
+ */
+export function exhaustXPreventedBy(state: GameState, c: Character): Card | null {
+  for (const card of playerOf(state, c).hand) {
+    if (held(card)?.ignoresExhaustX === true) return card;
+  }
+  return null;
 }
 
 /** §5: maximum hand size is 5, and `Hold` counts against it. A card may tighten it. */

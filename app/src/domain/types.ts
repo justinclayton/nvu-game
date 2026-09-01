@@ -257,6 +257,12 @@ export type DomainEvent =
     }
   | { readonly type: "CARD_SCRAPPED"; readonly character: Character | null; readonly card: Card }
   | {
+      readonly type: "EXHAUST_PREVENTED";
+      readonly character: Character;
+      readonly amount: number;
+      readonly by: Card;
+    }
+  | {
       readonly type: "CARDS_SHUFFLED_IN";
       readonly character: Character;
       readonly cards: readonly Card[];

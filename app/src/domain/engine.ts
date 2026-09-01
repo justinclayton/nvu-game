@@ -15,6 +15,7 @@ import {
   canDraw,
   costOf,
   drawCapFor,
+  exhaustXPreventedBy,
   handCapFor,
   mustStillDraw,
   payOptions,
@@ -325,6 +326,30 @@ function flush(state: GameState, run: Run): GameState {
   return s;
 }
 
+/**
+ * A bare `Exhaust X` line: X cards off the top of that character's own deck.
+ * Rooms print it as their punishment and some cards print it as their own cost.
+ *
+ * This is the only shape a card can turn off. `Exhaust X cards from your hand`
+ * names its zone, and so do cleanup, the burned draw of a full hand and the
+ * price of getting out of last stand — none of those is an `Exhaust X` line, so
+ * a card that stops `Exhaust X` does not stop them.
+ */
+function printedExhaust(
+  state: GameState,
+  c: Character,
+  amount: number,
+  cause: string,
+  run: Run,
+): GameState {
+  const stoppedBy = exhaustXPreventedBy(state, c);
+  if (stoppedBy) {
+    run.events.push({ type: "EXHAUST_PREVENTED", character: c, amount, by: stoppedBy });
+    return state;
+  }
+  return exhaustFromDeck(state, c, amount, cause, run.events);
+}
+
 /* ----------------------------------------------------------- Phase 1: Flip */
 
 function flipRoom(state: GameState, run: Run): GameState {
@@ -414,7 +439,11 @@ function playCard(
 
   // §5: nothing resolves while you play — the *room* is checked once, at the end
   // of the phase. A card's own printed effect still happens as it is played.
-  const onPlay = behaviourOf(card.name)?.onPlay;
+  const behaviour = behaviourOf(card.name);
+  if (behaviour?.exhaustX !== undefined) {
+    s = printedExhaust(s, c, behaviour.exhaustX, card.name, run);
+  }
+  const onPlay = behaviour?.onPlay;
   if (onPlay) {
     const step = onPlay(s, { card, character: c, zone: "playZone" });
     s = step.state;
@@ -551,7 +580,7 @@ const promptFor = (effect: RoomEffect): string => {
 function applyEffect(state: GameState, effect: RoomEffect, who: Character, run: Run): GameState {
   switch (effect.type) {
     case "ExhaustFromDeck":
-      return exhaustFromDeck(state, who, effect.amount, "a room's printed punishment", run.events);
+      return printedExhaust(state, who, effect.amount, "a room's printed punishment", run);
     case "DealBadStuff":
       return dealBadStuff(state, who, run.events);
     case "TakeGoodStuff":

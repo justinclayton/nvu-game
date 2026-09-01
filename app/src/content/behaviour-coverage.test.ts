@@ -14,12 +14,12 @@ const hasText = (text: string): boolean => text.trim() !== "";
 const withText = CARD_CONTENT.cards.filter((c) => hasText(c.text));
 
 /**
- * Proposed cards whose printed text has no reading the rulebook settles, so
- * nothing implements them yet. Each one is written up in
+ * Cards whose printed text has no reading the rulebook settles, so nothing
+ * implements them yet. Each one is written up in
  * design/web-game/open-questions.md. Adding a card without code changes this
  * list, which is the point: it stays a decision rather than an accident.
  */
-const UNIMPLEMENTED: readonly string[] = ["Zen Mode"];
+const UNIMPLEMENTED: readonly string[] = [];
 
 describe("behaviour coverage", () => {
   it("names every card whose printed text nothing implements yet", () => {

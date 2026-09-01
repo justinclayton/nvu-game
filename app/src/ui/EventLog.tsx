@@ -25,6 +25,8 @@ export function describeEvent(event: DomainEvent): string {
       return `${event.character} Exhausts ${event.card.name} from their ${event.from === "playZone" ? "play zone" : event.from}.`;
     case "CARD_SCRAPPED":
       return `${event.card.name} is Scrapped.`;
+    case "EXHAUST_PREVENTED":
+      return `${event.by.name} stops it: ${event.character} Exhausts nothing.`;
     case "CARDS_SHUFFLED_IN":
       return `${event.character} shuffles ${String(event.cards.length)} card(s) back in.`;
     case "CARD_TO_HAND":

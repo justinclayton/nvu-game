@@ -296,9 +296,11 @@ function apply(state: GameState, command: Command, run: Run): GameState {
 function listeners(state: GameState): readonly BehaviourContext[] {
   const out: BehaviourContext[] = [];
   for (const c of CHARACTERS) {
-    for (const card of playerOf(state, c).hand) out.push({ card, character: c });
+    for (const card of playerOf(state, c).hand) out.push({ card, character: c, zone: "hand" });
   }
-  for (const played of state.playZone) out.push({ card: played.card, character: played.owner });
+  for (const played of state.playZone) {
+    out.push({ card: played.card, character: played.owner, zone: "playZone" });
+  }
   return out;
 }
 
@@ -387,8 +389,14 @@ function playCard(
 
   let s = state;
   // §9: while in last stand every card in that hand is free, so nothing is spent
-  // and no printed discount is used up.
-  if (!p.lastStand && payment.length === 0 && s.thisTurn.freePlays[c] > 0 && card.cost > 0) {
+  // and no printed discount is used up. Otherwise a discount is used up only if
+  // the card would have cost something without it.
+  const withoutDiscount = costOf(
+    { ...s, thisTurn: { ...s.thisTurn, freePlays: { Red: 0, Gray: 0 } } },
+    c,
+    card,
+  );
+  if (!p.lastStand && s.thisTurn.freePlays[c] > 0 && withoutDiscount > 0) {
     s = { ...s, thisTurn: spendFreePlay(s.thisTurn, c) };
   }
 
@@ -408,7 +416,7 @@ function playCard(
   // of the phase. A card's own printed effect still happens as it is played.
   const onPlay = behaviourOf(card.name)?.onPlay;
   if (onPlay) {
-    const step = onPlay(s, { card, character: c });
+    const step = onPlay(s, { card, character: c, zone: "playZone" });
     s = step.state;
     run.events.push(...step.events);
   }
@@ -614,7 +622,9 @@ function drain(state: GameState, run: Run): GameState {
 
 function finishTurn(state: GameState, run: Run): GameState {
   const resolution = state.resolution;
-  let s: GameState = { ...state, resolution: null, pending: null };
+  // The resolution stays readable through cleanup: a card that asks whether the
+  // room was Cleared reads it there. It is cleared at the end of the turn.
+  let s: GameState = { ...state, pending: null };
 
   // §9: the team Fleeing the room while a character is in last stand puts that
   // character Down. In last stand you have to keep clearing rooms.
@@ -644,6 +654,7 @@ function finishTurn(state: GameState, run: Run): GameState {
     s = { ...s, floorDeck: deck, fled: [], seed };
   }
 
+  s = { ...s, resolution: null };
   run.events.push({ type: "TURN_ENDED", turn: s.turn });
 
   // §6: clearing the Enemy room ends the floor. You do not have to empty the
@@ -680,15 +691,35 @@ function cleanupPiles(
   run: Run,
 ): GameState {
   let s = state;
+
+  // The hand first: `Hold` cards stay, the rest Exhaust.
   for (const c of CHARACTERS) {
     const p = playerOf(s, c);
-    const played = s.playZone.filter((x) => x.owner === c).map((x) => x.card);
     const kept = p.hand.filter((x) => x.hold);
     const dropped = p.hand.filter((x) => !x.hold);
-
     s = withPlayer(s, c, { ...p, hand: kept });
     for (const card of kept) run.events.push({ type: "CARD_KEPT", character: c, card });
     for (const card of dropped) s = exhaust(s, c, card, "hand", run.events);
+  }
+
+  // Then any played card that takes itself somewhere else. It has to happen
+  // after the hand is swept, or a card returning to hand would be Exhausted
+  // straight back out of it.
+  for (const played of s.playZone) {
+    const onCleanup = behaviourOf(played.card.name)?.onCleanup;
+    if (!onCleanup) continue;
+    const step = onCleanup(s, {
+      card: played.card,
+      character: played.owner,
+      zone: "playZone",
+    });
+    s = step.state;
+    run.events.push(...step.events);
+  }
+
+  // Then the play zone itself.
+  for (const c of CHARACTERS) {
+    const played = s.playZone.filter((x) => x.owner === c).map((x) => x.card);
 
     if (lastStandAtClear[c] && !playerOf(s, c).down) {
       s = shuffleIntoDeck(s, c, played, run.events);
@@ -705,16 +736,17 @@ function cleanupPiles(
 
 /* ------------------------------------------------------ answering a choice */
 
-function contextFor(pending: Pending): BehaviourContext | null {
+function contextFor(state: GameState, pending: Pending): BehaviourContext | null {
   const source = pending.source;
   if (!source) return null;
-  return { card: source.card, character: source.character };
+  const zone = state.playZone.some((p) => p.card.id === source.card.id) ? "playZone" : "hand";
+  return { card: source.card, character: source.character, zone };
 }
 
 function runChoice(state: GameState, answer: ChoiceAnswer, run: Run): GameState {
   const pending = state.pending;
   if (!pending) throw new CorruptStateError("Answered a choice that was not being asked.");
-  const ctx = contextFor(pending);
+  const ctx = contextFor(state, pending);
   const cleared: GameState = { ...state, pending: null };
   if (!ctx) return drain(cleared, run);
 

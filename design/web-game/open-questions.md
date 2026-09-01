@@ -140,3 +140,93 @@ Hazards and 10-minus-the-floor Stuff rooms, and there is no Enemy printed for fl
 
 **What the code does.** Takes the Enemy whose printed floor matches; failing that, any Enemy room.
 A floor past 3 is therefore playable but guarded by a repeat. This is content, not rules.
+
+---
+
+## 10. A card's contribution to the pool never goes below zero
+
+**Where:** `contributionOf` in `app/src/domain/queries.ts`.
+
+Rust reads *"Holding: Stuff you play has -1 Power."* Played on a Coil Of Cable (Power 0, Scramble
+3) that would be Power -1, which would drain the shared pool rather than merely failing to fill it.
+
+**What the code does.** Each card's contribution is floored at zero. A card reduced past nothing
+contributes nothing.
+
+---
+
+## 11. A printed "this costs 0" is set first, then modifiers apply
+
+**Where:** `costOf`.
+
+Fast Follow reads *"If Gray played a card this turn, this costs 0"*, and Sluggish reads
+*"Holding: cards cost +1 to play."* Holding both, Fast Follow costs either 0 or 1.
+
+**What the code does.** The printed cost is what the card says it is, and a `Holding:` line adjusts
+it afterwards — so Fast Follow costs 1 while Sluggish is in hand. The alternative reading, that a
+printed 0 cannot be raised, would make "costs 0" a stronger keyword than anything else on a card.
+
+---
+
+## 12. "The card that clears the room" is read as "the room ended Cleared"
+
+**Where:** Both Barrels' `onCleanup`.
+
+Both Barrels reads *"If this is the card that clears the room, put this right back in your hand."*
+§5 checks the room **once**, when both characters have stopped, so no single card ever clears it —
+a pool does.
+
+**What the code does.** If the room ended Cleared and Both Barrels is in the play zone, it returns
+to hand at cleanup instead of Exhausting. Being the card that tipped the pool over the line is not
+something the rules can identify.
+
+---
+
+## 13. A card may draw during the Play phase
+
+**Where:** Covering Fire, I Know Kung Fu, Grav Harness.
+
+§5 says *"once play begins, nobody draws."* Three cards say otherwise in their own text.
+
+**What the code does.** The rule is the default and a card's printed text is the exception, which is
+the ordinary convention for a card game. Nothing rules on it explicitly.
+
+---
+
+## 14. "The next card played this turn costs 0" means the holder's next card
+
+**Where:** Overcharged Battery.
+
+The card names no character.
+
+**What the code does.** The discount goes to whoever played the Battery. §5's *"Red never pays for
+Gray"* is the reason: a cost is a private thing between a character and their own hand, so a
+discount should not cross either. The discount is also spent only when it saved something — a card
+that already cost nothing does not use it up.
+
+---
+
+## 15. Zen Mode has no implementation
+
+**Where:** nowhere. It is the one card with printed text and no behaviour, and
+`app/src/content/behaviour-coverage.test.ts` pins that fact so it cannot be forgotten.
+
+Zen Mode reads *"While `Holding`, you don't Exhaust cards."* Taken literally that stops paying costs
+(§5), cleanup (§5), a room's printed punishment (§8), the last-stand exit tax (§9) and the burned
+draw of a full hand (§5) — which between them are most of how the game spends you. There is no
+reading here that is obviously the intended one, and guessing would quietly rewrite five rules.
+
+It is a `proposed` card, so the build gate does not require it. It needs a ruling on which of those
+Exhausts it stops before it can be written.
+
+---
+
+## 16. Crowbar fires once a turn
+
+**Where:** Crowbar's `onEvent`.
+
+*"If you get any Good Stuff this turn, get an additional one."* The additional piece is itself Good
+Stuff, so read as a standing trigger it would empty the Good Stuff pool into one hand.
+
+**What the code does.** Once per turn per Crowbar, tracked by a marker in the turn record. Two
+Crowbars in a hand each pay once.

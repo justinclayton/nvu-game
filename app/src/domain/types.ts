@@ -262,6 +262,12 @@ export type DomainEvent =
       readonly cards: readonly Card[];
     }
   | { readonly type: "CARD_TO_HAND"; readonly character: Character; readonly card: Card }
+  | {
+      readonly type: "CARD_MOVED";
+      readonly character: Character;
+      readonly card: Card;
+      readonly to: "deck" | "hand";
+    }
   | { readonly type: "CARD_KEPT"; readonly character: Character; readonly card: Card }
   | { readonly type: "CARDS_PEEKED"; readonly character: Character; readonly cards: readonly Card[] }
   | { readonly type: "THRESHOLD_MET"; readonly room: Room; readonly threshold: Threshold }

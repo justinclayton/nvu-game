@@ -199,7 +199,9 @@ describe("§9 Going Down", () => {
       { type: "END_PLAY" },
     ]);
     expect(next.Red.hand).toEqual([]);
-    expect(next.Gray.hand).toHaveLength(1);
+    // Gray met their own line and Red is out, so everything earned went to Gray.
+    expect(next.Gray.hand.length).toBeGreaterThanOrEqual(1);
+    expect(next.Gray.hand.every((c) => c.kind === "good_stuff")).toBe(true);
   });
 
   it("'a Down character is skipped in the draw and play phases entirely'", () => {

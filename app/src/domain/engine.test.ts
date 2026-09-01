@@ -324,8 +324,12 @@ describe("§6 The three kinds of room", () => {
       { type: "PLAY_CARD", character: "Gray", cardId: g[0] as CardId, payWith: [g[1] as CardId] },
       { type: "END_PLAY" },
     ]);
-    expect(next.Red.hand).toHaveLength(1);
-    expect(next.Gray.hand).toHaveLength(1);
+    // Both lines paid. What each one drew is blind, and a Crowbar in hand pays
+    // an extra piece, so the count is "at least one" rather than exactly one.
+    expect(next.Red.hand.every((c) => c.kind === "good_stuff")).toBe(true);
+    expect(next.Red.hand.length).toBeGreaterThanOrEqual(1);
+    expect(next.Gray.hand.every((c) => c.kind === "good_stuff")).toBe(true);
+    expect(next.Gray.hand.length).toBeGreaterThanOrEqual(1);
   });
 
   it("a Stuff room's split line pays nobody when the pool is on the wrong side", () => {

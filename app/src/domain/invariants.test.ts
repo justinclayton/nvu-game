@@ -7,7 +7,7 @@
 import { describe, expect, it } from "vitest";
 import { CARD_CONTENT } from "../content";
 import { execute } from "./engine";
-import { costOf, payOptions, playableCards } from "./queries";
+import { canDraw, costOf, payOptions, playableCards } from "./queries";
 import { createInitialState } from "./setup";
 import type { AscendChoice, Card, CardId, Command, GameState } from "./types";
 import { CHARACTERS } from "./verbs";
@@ -45,9 +45,11 @@ function nextCommand(state: GameState): Command | null {
       return { type: "FLIP_ROOM" };
     case "Draw": {
       for (const c of CHARACTERS) {
-        const p = state[c];
-        if (p.down || p.lastStand || p.deck.length === 0) continue;
-        if (p.drewThisTurn < DRAW_DEPTH) return { type: "DRAW", character: c };
+        // A card in hand can cap how deep this character may draw, so the
+        // domain is what says whether another draw is legal.
+        if (state[c].drewThisTurn < DRAW_DEPTH && canDraw(state, c)) {
+          return { type: "DRAW", character: c };
+        }
       }
       return { type: "END_DRAW" };
     }

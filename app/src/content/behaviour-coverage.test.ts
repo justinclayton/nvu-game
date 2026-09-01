@@ -13,7 +13,20 @@ import { CARD_CONTENT } from "./index";
 const hasText = (text: string): boolean => text.trim() !== "";
 const withText = CARD_CONTENT.cards.filter((c) => hasText(c.text));
 
+/**
+ * Proposed cards whose printed text has no reading the rulebook settles, so
+ * nothing implements them yet. Each one is written up in
+ * design/web-game/open-questions.md. Adding a card without code changes this
+ * list, which is the point: it stays a decision rather than an accident.
+ */
+const UNIMPLEMENTED: readonly string[] = ["Zen Mode"];
+
 describe("behaviour coverage", () => {
+  it("names every card whose printed text nothing implements yet", () => {
+    const missing = withText.filter((c) => !(c.name in BEHAVIOURS)).map((c) => c.name);
+    expect(missing.sort()).toEqual([...UNIMPLEMENTED].sort());
+  });
+
   it("every official card with text has a behaviour", () => {
     const missing = withText
       .filter((c) => c.set === "official")

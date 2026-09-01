@@ -14,10 +14,12 @@ import type {
   StepResult,
 } from "../types";
 
-/** Which copy of which card is acting, and for whom. */
+/** Which copy of which card is acting, for whom, and from where. */
 export interface BehaviourContext {
   readonly card: Card;
   readonly character: Character;
+  /** A `Holding:` line only runs from the hand; a played card listens from the zone. */
+  readonly zone: "hand" | "playZone";
 }
 
 /** The answer to a question a card asked through `state.pending`. */
@@ -59,6 +61,12 @@ export interface CardBehaviour {
   onEvent?(event: DomainEvent, state: GameState, ctx: BehaviourContext): StepResult;
   /** The follow-up to a question this card asked. */
   onChoice?(answer: ChoiceAnswer, state: GameState, ctx: BehaviourContext): StepResult;
+  /**
+   * A card in the play zone taking itself somewhere other than the exhaust pile,
+   * at cleanup. Called before the play zone is swept; a card still in the zone
+   * afterwards is Exhausted as normal (§5).
+   */
+  onCleanup?(state: GameState, ctx: BehaviourContext): StepResult;
 }
 
 export type Registry = Readonly<Record<string, CardBehaviour>>;

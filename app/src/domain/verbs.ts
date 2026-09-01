@@ -180,6 +180,72 @@ export function shuffleIntoDeck(
   return withPlayer({ ...state, seed }, c, { ...p, deck });
 }
 
+/** Cards a character no longer holds. No event: the verb that receives them says so. */
+export function takeFromHand(state: GameState, c: Character, cards: readonly Card[]): GameState {
+  const ids = new Set(cards.map((x) => x.id));
+  const p = playerOf(state, c);
+  return withPlayer(state, c, { ...p, hand: p.hand.filter((x) => !ids.has(x.id)) });
+}
+
+/** Cards lifted back out of an exhaust pile, for a card that says it can. */
+export function takeFromExhaust(
+  state: GameState,
+  c: Character,
+  cards: readonly Card[],
+): GameState {
+  const ids = new Set(cards.map((x) => x.id));
+  const p = playerOf(state, c);
+  return withPlayer(state, c, { ...p, exhaust: p.exhaust.filter((x) => !ids.has(x.id)) });
+}
+
+/** Under the deck, so it is the last thing you will see rather than the next. */
+export function moveToBottomOfDeck(
+  state: GameState,
+  c: Character,
+  cards: readonly Card[],
+  events: DomainEvent[],
+): GameState {
+  const p = playerOf(state, c);
+  for (const card of cards) events.push({ type: "CARD_MOVED", character: c, card, to: "deck" });
+  return withPlayer(state, c, { ...p, deck: [...p.deck, ...cards] });
+}
+
+/**
+ * A card taking itself back out of the play zone, at cleanup.
+ *
+ * §9: no card may be put into a Down character's hand, so a card whose owner is
+ * out stays in the play zone and Exhausts with everything else.
+ */
+export function returnToHand(
+  state: GameState,
+  c: Character,
+  card: Card,
+  events: DomainEvent[],
+): GameState {
+  if (!state.playZone.some((p) => p.card.id === card.id)) return state;
+  if (playerOf(state, c).down) return state;
+  const lifted = { ...state, playZone: state.playZone.filter((p) => p.card.id !== card.id) };
+  return moveToHand(lifted, c, card, events);
+}
+
+/** Overcharged Battery: this character's next play costs nothing. */
+export const grantFreePlay = (state: GameState, c: Character): GameState =>
+  c === "Red"
+    ? {
+        ...state,
+        thisTurn: {
+          ...state.thisTurn,
+          freePlays: { ...state.thisTurn.freePlays, Red: state.thisTurn.freePlays.Red + 1 },
+        },
+      }
+    : {
+        ...state,
+        thisTurn: {
+          ...state.thisTurn,
+          freePlays: { ...state.thisTurn.freePlays, Gray: state.thisTurn.freePlays.Gray + 1 },
+        },
+      };
+
 /** Put a card on top of a deck. Nothing shuffles during a floor, so it is next (§6). */
 export function topDeck(state: GameState, c: Character, card: Card): GameState {
   const p = playerOf(state, c);

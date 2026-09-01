@@ -29,6 +29,8 @@ export function describeEvent(event: DomainEvent): string {
       return `${event.character} shuffles ${String(event.cards.length)} card(s) back in.`;
     case "CARD_TO_HAND":
       return `${event.character} takes ${event.card.name} into hand.`;
+    case "CARD_MOVED":
+      return `${event.card.name} goes to ${event.character}'s ${event.to}.`;
     case "CARD_KEPT":
       return `${event.character} holds ${event.card.name}.`;
     case "CARDS_PEEKED":

@@ -21,11 +21,13 @@ When you clear a floor, you move up. Because it's a pyramid, there will be fewer
 
 *North vs Up* is a cooperative roguelike deckbuilding card game intended for **two players**. One player plays as the aggressive and headstrong `Red`, while the other plays as the scrambling and resourceful `Gray`. Each character has their own deck that reflects these traits. As you ascend the tower, you will have opportunities to add new `Red`/`Gray`-specific cards to your deck. In addition, most floors will be littered with `Stuff` that you will need to collect and use in tandem with the other cards in your deck to progress.
 
-XXXXX
+Some things to note about how *North vs Up* works:
 
-**Your deck is your HP total, called `Stamina`.** Be careful to not go through your deck too quickly, because if you run out of `Stamina`, you'll risk going `Down`. If at any time both players are `Down`, 
+**Your deck is your HP total, called `Stamina`.** Be careful to not go through your deck too quickly, because if you run out of `Stamina`, you'll risk going `Down`. If at any time both players are `Down`, you lose the game!
 
-**Playing a card costs other cards.**
+**You choose how many cards to draw**. You'll draw a card into your hand, look at it, and then decide if you want to draw another card or stop. You can even wait to see what your partner draws before deciding as a group. If you hand is full, however, you'll have to wait -- you can't draw unless you have less than **5 cards** in your hand.
+
+**Playing a card costs other cards.** You pay for cards by putting them in your discard pile (also called the exhaust pile). The more cards in your hand, the more you'll be able to pay for expensive cards. But if you don't use them this turn, they get exhasted too!
 
 ---
 
@@ -33,48 +35,34 @@ XXXXX
 
 Each character has **three piles of their own**:
 
-
 |                  |                                                 |
 | ---------------- | ----------------------------------------------- |
 | **Deck**         | Face down. This is your health and your energy. |
 | **Hand**         | What you drew this turn. Maximum **5**.          |
 | **Exhaust pile** | Face up. Cards you have spent or lost.          |
 
-There is **no discard pile** for a character, and **no shuffling during a floor** unless a rule
-explicitly says to.
 
 In the middle of the table:
 
 - The **floor deck** — face down, with a **Fled** pile beside it and a **Cleared** heap beyond that.
-- The **active room zone** — one card, the room you are in right now.
+- The **active room** — one card, the room you are in right now.
 - The **play zone** — split into Red's side and Gray's side.
 
-Off to one side: **Red's reward pool**, **Gray's reward pool**, the **Good Stuff pool**, the
-**Bad Stuff pool**, and the **Scrapyard** — a face-up heap of everything the run has used up.
-Nothing ever leaves the Scrapyard.
+Keep off to one side: **Red and Gray's reward pools**, and the **Good and Bad Stuff pools**. You'll draw from these when told as you move throughout and up the tower.
 
 ---
 
 ## 4. Setting up a floor
 
-1. **Build the floor deck.** Take **1 Enemy room**, **3 Hazard rooms**, and **Stuff rooms equal to
-   10 minus the floor number** — nine on floor 1, five on floor 5, none on floor 10. Shuffle them
-   together face down.
-2. **Hands stay as cleanup left them.** At the start of the game that means empty; on later
-   floors it means whatever `Hold` cards survived the last cleanup.
+1. **Build the floor deck.** Take **1 Enemy room**, **3 Hazard rooms**, and **Stuff rooms equal to 10 minus the floor number** — nine on floor 1, five on floor 5, none on floor 10. Shuffle them together face down.
+2. **Hands stay as cleanup left them.** At the start of the game that means empty; on later floors it means whatever `Hold` cards survived the last cleanup.
 3. Clear the play zone and the active room zone.
-
-That is the whole of setup. The floor gets no harder to fight as you climb — it gets emptier.
-
-> **NOT YET RULED — starting deck size and composition.** For prototype play, use **12 cards each**.
-> Treat this as a placeholder, not a ruling (ticket 10).
 
 ---
 
-## 5. The turn
+## 5. Each turn
 
-**A turn belongs to the floor, not to a character.** There is no turn order, no first player, and
-no lead. Both of you act throughout every phase, simultaneously, in whatever order suits you.
+Each player shares a turn. Each action can be taken by either player, either all at once, alternating, or a combination of the two.
 
 ### Phase 1 — Flip
 
@@ -152,13 +140,9 @@ Go back to phase 1.
 
 ### Enemy room
 
-`Power X`. One stat standing in for how hard it hits and how much it can take.
+**There is one Enemy room in every floor deck, and clearing it ends the floor.** You do not have to empty the deck; you have to kill the thing on the stairs.
 
-**There is exactly one Enemy room in every floor deck, and clearing it ends the floor.** You do not
-have to empty the deck; you have to kill the thing on the stairs.
-
-Every Enemy room carries a **Flee** line. Failing one is not a disaster — it is backing out of a
-fight with a few scrapes to show. It will come back around when the Fled pile shuffles in.
+Every Enemy room carries a **Flee** line. Failing one is not a disaster — it is backing out of a fight with a few scrapes to show. It will come back around when the Fled pile shuffles in.
 
 > Expect to meet the Enemy the first time, look at what it costs, and walk away. That is normal play,
 > not a mistake.
@@ -316,8 +300,7 @@ Clearing the Enemy room ends the floor. Then, in order:
    that exhaust pile in its place**. Kept Stuff stays ordinary Stuff — it will be spent, Exhausted,
    and facing the Scrapyard again a floor from now. There is nothing to track.
 2. **Shuffle each exhaust pile back into its deck.** Both characters are now at full health —
-   including one who was Down. **A floor cleared is a full heal**, and nothing bad crosses a floor
-   boundary. There are no lasting wounds in this game.
+   including one who was Down. **A floor cleared is a full heal**, and nothing bad crosses a floor boundary. There are no lasting wounds in this game.
 3. **Take a reward.** Each character is offered **three cards from their own reward pool** and takes
    one — or declines. A taken card is shuffled into their deck. A declined card goes to the bottom
    of its pool.

@@ -294,29 +294,16 @@ Down when a turn begins, there is no flip. The game ends there.
 
 Clearing the Enemy room ends the floor. Then, in order:
 
-1. **Move all Stuff in both exhaust piles to the Scrapyard.** It is out of the run for good —
-   nothing ever leaves the Scrapyard. **This is the moment of the Scrap tax:** each character may
-   keep **one** Stuff card from their own exhaust pile instead, by Scrapping **another card from
-   that exhaust pile in its place**. Kept Stuff stays ordinary Stuff — it will be spent, Exhausted,
-   and facing the Scrapyard again a floor from now. There is nothing to track.
-2. **Shuffle each exhaust pile back into its deck.** Both characters are now at full health —
-   including one who was Down. **A floor cleared is a full heal**, and nothing bad crosses a floor boundary. There are no lasting wounds in this game.
-3. **Take a reward.** Each character is offered **three cards from their own reward pool** and takes
-   one — or declines. A taken card is shuffled into their deck. A declined card goes to the bottom
-   of its pool.
-4. **Build the next floor's deck** (section 4), with one fewer Stuff room than last time.
-
-**The Scrap tax is the game's deck-thinning engine, and its only voluntary one.** A run trades a
-weak card — often a starter — for a strong scavenged one, over and over, and decks get leaner and
-better and smaller. They also get more fragile: a deck is stamina, so every trade is a card of
-health given up, and the preserved Stuff is itself spent the moment it is finally played.
-
-**Declining is a real play, not a forfeit.** A card you skip is consistency you keep. Read section 1
-again if that sounds wrong.
-
-**Hands follow the normal cleanup rules and nothing more.** The turn that cleared the Enemy room
-still gets its cleanup, so by the time you ascend a hand holds only `Hold` cards — and those carry
-up the stairs, Stuff included.
+1. **Scrap:** Move every `Stuff` card in your exhaust pile to the **Scrapyard**. Nothing ever
+   leaves the Scrapyard. Exception: you may keep **one** `Stuff` card from your exhaust pile by
+   moving one other card from that exhaust pile to the Scrapyard in its place. A kept `Stuff` card
+   is ordinary `Stuff`.
+2. **Heal:** Shuffle your exhaust pile into your deck. A character who was Down is no longer Down.
+3. **Choose a reward:** Reveal the top three cards of your reward pool. Take one and shuffle it
+   into your deck, or take none. Put the cards you did not take on the bottom of your reward pool.
+4. **Keep your hand:** Your hand stays as cleanup left it. `Hold` cards, `Stuff` included, carry
+   up to the next floor.
+5. **Set up the next floor:** Follow section 4 with the next floor number.
 
 ---
 

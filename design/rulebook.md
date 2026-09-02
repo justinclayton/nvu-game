@@ -4,7 +4,7 @@
 
 ---
 
-## Intro
+## 1. Intro
 
 Something came down on Pyramid Tower and moved in. **Red** and **Gray** are going in to find out what it is.
 
@@ -17,7 +17,7 @@ When you clear a floor, you move up. Because it's a pyramid, there will be fewer
 
 ---
 
-## About the game
+## 2. About the game
 
 *North vs Up* is a cooperative roguelike deckbuilding card game intended for **two players**. One player plays as the aggressive and headstrong `Red`, while the other plays as the scrambling and resourceful `Gray`. Each character has their own deck that reflects these traits. As you ascend the tower, you will have opportunities to add new `Red`/`Gray`-specific cards to your deck. In addition, most floors will be littered with `Stuff` that you will need to collect and use in tandem with the other cards in your deck to progress.
 

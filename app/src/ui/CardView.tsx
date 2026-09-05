@@ -1,31 +1,27 @@
-/* One card, as printed (rulebook §8): name, type line, Cost, stats, text, Hold. */
+/* A card standing on its own, outside the mat: in a pending choice, in the
+ * ascension panel, or zoomed under the pointer. The card layer draws the ones
+ * on the table. */
 
-import type { Card, Character, GameState } from "@domain/types";
-import { costOf } from "@domain/queries";
-
-const TYPE_LINE: Record<Card["kind"], string> = {
-  player: "",
-  good_stuff: "Good Stuff",
-  bad_stuff: "Bad Stuff",
-};
+import type { Card, Character, GameState, Room } from "@domain/types";
+import { CardFace, RoomFace, toneOf } from "./CardFace";
 
 interface Props {
   readonly card: Card;
-  /** When given, the corner shows what this card costs its owner right now. */
   readonly state?: GameState | undefined;
-  readonly owner?: Character | undefined;
+  readonly owner?: Character | null | undefined;
   readonly selected?: boolean | undefined;
   readonly dimmed?: boolean | undefined;
   readonly onClick?: (() => void) | undefined;
   readonly badge?: string | undefined;
+  readonly size?: "table" | "large" | undefined;
 }
 
-export function CardView({ card, state, owner, selected, dimmed, onClick, badge }: Props) {
-  const typeLine = TYPE_LINE[card.kind] || (card.owner ?? "");
-  const cost = state && owner ? costOf(state, owner, card) : card.cost;
+export function CardView({ card, state, owner, selected, dimmed, onClick, badge, size }: Props) {
   const classes = [
     "card",
-    `card--${card.kind}`,
+    toneOf(card),
+    card.rarity ? `rarity--${card.rarity.toLowerCase()}` : "",
+    size === "large" ? "card--large" : "",
     selected ? "is-selected" : "",
     dimmed ? "is-dimmed" : "",
     onClick ? "is-clickable" : "",
@@ -35,25 +31,7 @@ export function CardView({ card, state, owner, selected, dimmed, onClick, badge 
 
   const body = (
     <>
-      <div className="card__top">
-        <span className="card__name">{card.name}</span>
-        <span className="card__cost" title="Cost">
-          {cost}
-        </span>
-      </div>
-      <div className="card__type">
-        {typeLine}
-        {card.rarity ? <span className="card__rarity"> · {card.rarity}</span> : null}
-      </div>
-      <div className="card__stats">
-        {card.conditionalStat ? <span className="stat stat--conditional">?</span> : null}
-        {card.power > 0 ? <span className="stat stat--power">Power {card.power}</span> : null}
-        {card.scramble > 0 ? (
-          <span className="stat stat--scramble">Scramble {card.scramble}</span>
-        ) : null}
-        {card.hold ? <span className="stat stat--hold">Hold</span> : null}
-      </div>
-      {card.text ? <p className="card__text">{card.text}</p> : null}
+      <CardFace card={card} state={state} owner={owner} />
       {badge ? <span className="card__badge">{badge}</span> : null}
     </>
   );
@@ -63,5 +41,21 @@ export function CardView({ card, state, owner, selected, dimmed, onClick, badge 
     <button type="button" className={classes} onClick={onClick}>
       {body}
     </button>
+  );
+}
+
+export function RoomCardView({
+  room,
+  state,
+  size,
+}: {
+  readonly room: Room;
+  readonly state?: GameState | undefined;
+  readonly size?: "table" | "large" | undefined;
+}) {
+  return (
+    <div className={`card card--room ${toneOf(room)} ${size === "large" ? "card--large" : ""}`}>
+      <RoomFace room={room} state={state} />
+    </div>
   );
 }

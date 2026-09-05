@@ -14,9 +14,11 @@ import { CardView } from "./CardView";
 interface Props {
   readonly state: GameState;
   readonly dispatch: (command: Command) => void;
+  /** A payment in progress, described for the player. */
+  readonly hint?: string | null | undefined;
 }
 
-export function Controls({ state, dispatch }: Props) {
+export function Controls({ state, dispatch, hint }: Props) {
   if (state.pending) return <PendingChoice state={state} dispatch={dispatch} />;
 
   const buttons: readonly { label: string; command: Command }[] =
@@ -44,8 +46,12 @@ export function Controls({ state, dispatch }: Props) {
           {label}
         </button>
       ))}
-      {buttons.length > 0 ? (
-        <span className="controls__why">{whyNot(state, buttons[0]?.command ?? { type: "END_PLAY" })}</span>
+      {hint ? (
+        <span className="controls__hint">{hint}</span>
+      ) : buttons.length > 0 ? (
+        <span className="controls__why">
+          {whyNot(state, buttons[0]?.command ?? { type: "END_PLAY" })}
+        </span>
       ) : null}
     </div>
   );

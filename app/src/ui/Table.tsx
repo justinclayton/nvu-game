@@ -1,31 +1,40 @@
-/* The table: both characters on one screen, the floor between them. */
+/* The table: both characters on one screen, the floor between them.
+ *
+ * The mat draws the state; this component owns the one piece of UI state the
+ * rules do not — a payment in progress — and turns clicks into commands.
+ */
 
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 import { canUndo, type SessionState } from "@application/session";
-import { costOf, payOptions, statPool } from "@domain/queries";
-import type { Card, Command, GameState } from "@domain/types";
+import { costOf, payOptions } from "@domain/queries";
+import type { Card, Character, Command, GameState } from "@domain/types";
 import { AscendPanel } from "./AscendPanel";
-import { CharacterPanel, type Paying } from "./CharacterPanel";
+import { type Inspected, type Paying } from "./CardLayer";
+import { CardView, RoomCardView } from "./CardView";
 import { Controls } from "./Controls";
 import { EventLog } from "./EventLog";
-import { RoomView } from "./RoomView";
+import { Mat } from "./Mat";
+import { moveDelays } from "./placements";
 import { useSession, useSessionState } from "./useSession";
-
-const PHASE_BLURB: Record<GameState["phase"], string> = {
-  Flip: "Turn the top card of the floor deck face up.",
-  Draw: "Each standing character draws, at least one, until they say they are done.",
-  Play: "Play into your own side. Nothing resolves until you both stop.",
-  Ascend: "The Enemy is dead. Pack up the floor.",
-  GameOver: "The run is over.",
-};
 
 export function Table({ onNewRun }: { readonly onNewRun: () => void }) {
   const session = useSession();
   const state = useSessionState((s: SessionState) => s.state);
+  const events = useSessionState((s: SessionState) => s.events);
   const rejection = useSessionState((s: SessionState) => s.lastRejection);
   const undoable = useSessionState(canUndo);
   const [paying, setPaying] = useState<Paying | null>(null);
+  const [inspected, setInspected] = useState<Inspected | null>(null);
+
+  /* The events the last command produced, and only on the render that shows
+   * them, so the cards it moved can leave one after another. */
+  const seenEvents = useRef(events.length);
+  const fresh = events.length > seenEvents.current ? events.slice(seenEvents.current) : [];
+  useEffect(() => {
+    seenEvents.current = events.length;
+  }, [events]);
+  const delays = moveDelays(fresh);
 
   const dispatch = useCallback(
     (command: Command) => {
@@ -38,44 +47,50 @@ export function Table({ onNewRun }: { readonly onNewRun: () => void }) {
   /* Picking a card in hand: a free card is played at once, and a card with a
    * cost starts a payment. The set of legal payments is `payOptions`. */
   const pickCard = useCallback(
-    (character: GameState["playZone"][number]["owner"], card: Card) => {
-      setPaying((current) => {
-        if (!current || current.character !== character) {
-          const cost = costOf(state, character, card);
-          if (cost === 0) {
-            session.getState().dispatch({
-              type: "PLAY_CARD",
-              character,
-              cardId: card.id,
-              payWith: [],
-            });
-            return null;
-          }
-          return { character, cardId: card.id, chosen: [] };
+    (character: Character, card: Card) => {
+      const play = (cardId: Card["id"], payWith: readonly Card["id"][]) => {
+        session.getState().dispatch({ type: "PLAY_CARD", character, cardId, payWith });
+        setPaying(null);
+      };
+      if (!paying || paying.character !== character) {
+        if (costOf(state, character, card) === 0) {
+          play(card.id, []);
+        } else {
+          setPaying({ character, cardId: card.id, chosen: [] });
         }
-        if (card.id === current.cardId) return null; // click it again to cancel
-        const legal = payOptions(state, character, current.cardId).some((c) => c.id === card.id);
-        if (!legal) return current;
-        const chosen = current.chosen.includes(card.id)
-          ? current.chosen.filter((id) => id !== card.id)
-          : [...current.chosen, card.id];
-        const cost = costOf(state, character, cardById(state, character, current.cardId));
-        if (chosen.length === cost) {
-          session.getState().dispatch({
-            type: "PLAY_CARD",
-            character,
-            cardId: current.cardId,
-            payWith: chosen,
-          });
-          return null;
-        }
-        return { ...current, chosen };
-      });
+        return;
+      }
+      if (card.id === paying.cardId) {
+        setPaying(null); // click it again to cancel
+        return;
+      }
+      const legal = payOptions(state, character, paying.cardId).some((c) => c.id === card.id);
+      if (!legal) return;
+      const chosen = paying.chosen.includes(card.id)
+        ? paying.chosen.filter((id) => id !== card.id)
+        : [...paying.chosen, card.id];
+      if (chosen.length === costOf(state, character, cardById(state, character, paying.cardId))) {
+        play(paying.cardId, chosen);
+      } else {
+        setPaying({ ...paying, chosen });
+      }
     },
-    [session, state],
+    [session, state, paying],
   );
 
-  const pool = statPool(state);
+  /* The zoomed card follows the pointer's hover; a card that moves out from
+   * under the pointer fires no leave event, so a state change clears it. */
+  useEffect(() => {
+    setInspected(null);
+  }, [state]);
+
+  const payingHint =
+    paying && state[paying.character].hand.some((c) => c.id === paying.cardId)
+      ? `${paying.character}: choose ${String(
+          costOf(state, paying.character, cardById(state, paying.character, paying.cardId)) -
+            paying.chosen.length,
+        )} more card(s) to Exhaust, or click the card again to cancel.`
+      : null;
 
   return (
     <div className="table">
@@ -105,82 +120,49 @@ export function Table({ onNewRun }: { readonly onNewRun: () => void }) {
         </div>
       </header>
 
-      <p className="table__blurb">{PHASE_BLURB[state.phase]}</p>
-
-      <section className="floor">
-        <dl className="piles piles--floor">
-          <div>
-            <dt>Floor deck</dt>
-            <dd>{state.floorDeck.length}</dd>
-          </div>
-          <div>
-            <dt>Fled</dt>
-            <dd>{state.fled.length}</dd>
-          </div>
-          <div>
-            <dt>Cleared</dt>
-            <dd>{state.cleared.length}</dd>
-          </div>
-          <div>
-            <dt>Scrapyard</dt>
-            <dd>{state.scrapyard.length}</dd>
-          </div>
-          <div className="piles__pool">
-            <dt>Stat pool</dt>
-            <dd>
-              Power {pool.power} · Scramble {pool.scramble}
-            </dd>
-          </div>
-        </dl>
-        {state.activeRoom ? (
-          <RoomView state={state} room={state.activeRoom} />
-        ) : (
-          <p className="floor__empty">No room in the zone.</p>
-        )}
-      </section>
+      <Mat
+        state={state}
+        delays={delays}
+        paying={paying}
+        onPickCard={pickCard}
+        onDraw={(c) => {
+          dispatch({ type: "DRAW", character: c });
+        }}
+        onInspect={setInspected}
+      />
 
       {state.phase === "Ascend" ? (
         <AscendPanel state={state} dispatch={dispatch} />
       ) : state.phase === "GameOver" ? (
         <section className="over">
-          <h2>{state.outcome === "Victory" ? "You reach the rooftop." : "Both of you are Down."}</h2>
+          <h2>
+            {state.outcome === "Victory" ? "You reach the rooftop." : "Both of you are Down."}
+          </h2>
           <button type="button" className="button button--primary" onClick={onNewRun}>
             Go again
           </button>
         </section>
       ) : (
-        <>
-          <div className="characters">
-            {(["Red", "Gray"] as const).map((c) => (
-              <CharacterPanel
-                key={c}
-                state={state}
-                character={c}
-                paying={paying}
-                onPickCard={(card) => {
-                  pickCard(c, card);
-                }}
-                onDraw={() => {
-                  dispatch({ type: "DRAW", character: c });
-                }}
-              />
-            ))}
-          </div>
-          <Controls state={state} dispatch={dispatch} />
-        </>
+        <Controls state={state} dispatch={dispatch} hint={payingHint} />
       )}
 
       {rejection ? <p className="rejection">{rejection.message}</p> : null}
       <EventLog />
+
+      {inspected ? (
+        <div className="inspector" aria-hidden="true">
+          {inspected.kind === "card" ? (
+            <CardView card={inspected.card} state={state} owner={inspected.owner} size="large" />
+          ) : (
+            <RoomCardView room={inspected.room} state={state} size="large" />
+          )}
+        </div>
+      ) : null}
     </div>
   );
 }
 
-function cardById(
-  state: GameState,
-  character: GameState["playZone"][number]["owner"],
-  id: Card["id"],
-): Card {
+function cardById(state: GameState, character: Character, id: Card["id"]): Card {
   const found = state[character].hand.find((c) => c.id === id);
   if (!found) throw new Error("The card being paid for left the hand.");
   return found;

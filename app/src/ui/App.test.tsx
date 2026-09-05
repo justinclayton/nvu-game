@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { act, fireEvent, render, screen, within } from "@testing-library/react";
+import { act, fireEvent, render, screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it } from "vitest";
 
 import { createSession, type Session } from "@application/session";
@@ -61,11 +61,11 @@ describe("the table", () => {
     fireEvent.click(screen.getAllByRole("button", { name: "Draw a card" })[0] as HTMLElement);
     const drawn = session.getState().state.Red.hand[0];
     expect(drawn).toBeDefined();
-    const redPanel = screen.getByRole("heading", { name: "Red" }).closest("section");
-    expect(redPanel).not.toBeNull();
-    if (redPanel && drawn) {
-      expect(within(redPanel).getAllByText(drawn.name).length).toBeGreaterThan(0);
-    }
+    // Cards live in one layer over the mat; a sprite says which zone it is in.
+    const inRedHand = Array.from(document.querySelectorAll('[data-zone="red-hand"]'));
+    expect(inRedHand).toHaveLength(1);
+    expect(inRedHand[0]?.textContent).toContain(drawn?.name ?? "");
+    expect(document.querySelectorAll('[data-zone="gray-hand"]')).toHaveLength(0);
   });
 
   it("shows the rejection when a command the rules refuse gets through", () => {
@@ -75,6 +75,27 @@ describe("the table", () => {
       session.getState().dispatch({ type: "END_PLAY" });
     });
     expect(screen.getByText(/Cannot end the play phase during the Flip phase/)).toBeDefined();
+  });
+
+  it("draws every card exactly once, face down in a deck until it is drawn", () => {
+    const sprites = () => Array.from(document.querySelectorAll(".sprite"));
+    const { state } = session.getState();
+    const onTable =
+      state.floorDeck.length +
+      state.Red.deck.length +
+      state.Gray.deck.length +
+      state.pools.Red.length +
+      state.pools.Gray.length +
+      state.pools.goodStuff.length +
+      state.pools.badStuff.length;
+    expect(sprites()).toHaveLength(onTable);
+    expect(sprites().every((s) => s.classList.contains("is-down"))).toBe(true);
+
+    fireEvent.click(screen.getByRole("button", { name: /Flip the next room/ }));
+    fireEvent.click(screen.getAllByRole("button", { name: "Draw a card" })[0] as HTMLElement);
+    expect(sprites()).toHaveLength(onTable);
+    const faceUp = sprites().filter((s) => !s.classList.contains("is-down"));
+    expect(faceUp.map((s) => s.getAttribute("data-zone")).sort()).toEqual(["red-hand", "room"]);
   });
 
   it("writes the log outside React", () => {

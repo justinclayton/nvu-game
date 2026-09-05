@@ -66,7 +66,9 @@ export function describeEvent(event: DomainEvent): string {
     case "FLOOR_CLEARED":
       return `Floor ${String(event.floor)} is clear.`;
     case "GAME_OVER":
-      return event.outcome === "Victory" ? "You reach the rooftop. You win." : "Both of you are Down.";
+      return event.outcome === "Victory"
+        ? "You reach the rooftop. You win."
+        : "Both of you are Down.";
   }
 }
 

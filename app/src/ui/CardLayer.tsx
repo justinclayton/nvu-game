@@ -12,7 +12,16 @@ import { useLayoutEffect, useRef, useState, type CSSProperties } from "react";
 import { costOf, playableCards } from "@domain/queries";
 import type { Card, Character, GameState, Room } from "@domain/types";
 import { CardBack, CardFace, RoomFace, toneOf } from "./CardFace";
-import { CARD_W, ROW_GAP, SLOT_PAD, STACK_STEP_MAX, STACK_STEP_X, STACK_STEP_Y } from "./metrics";
+import {
+  CARD_H,
+  CARD_W,
+  FLOAT_SCALE,
+  ROW_GAP,
+  SLOT_PAD,
+  STACK_STEP_MAX,
+  STACK_STEP_X,
+  STACK_STEP_Y,
+} from "./metrics";
 import { LOOSE_ZONES, ZONE_SHAPE, placements, type Placement, type ZoneId } from "./placements";
 import type { Rect, SlotRects } from "./useSlotRects";
 
@@ -33,6 +42,9 @@ interface Props {
   readonly delays: ReadonlyMap<string, number>;
   readonly paying: Paying | null;
   readonly onPickCard: (character: Character, card: Card) => void;
+  /** §10: the reward each character has chosen from the cards floating above the mat. */
+  readonly reward?: Readonly<Record<Character, Card["id"] | null>> | undefined;
+  readonly onPickReward?: ((character: Character, card: Card) => void) | undefined;
   readonly onInspect: (item: Inspected | null) => void;
 }
 
@@ -41,6 +53,7 @@ interface Pose {
   readonly y: number;
   readonly z: number;
   readonly rot: number;
+  readonly scale: number;
 }
 
 /** A small, fixed lean for a card tossed onto a loose pile. Same card, same lean. */
@@ -61,7 +74,19 @@ function poseOf(p: Placement, slot: Rect): Pose {
       y: slot.y + SLOT_PAD,
       z: 20 + p.index,
       rot: 0,
+      scale: 1,
     };
+  }
+  if (shape === "float") {
+    // Held up off the table: larger, centred in the band, spread so they never
+    // overlap. The scale is applied about the card's centre, so the card is
+    // placed by where its centre should land.
+    const w = CARD_W * FLOAT_SCALE;
+    const gap = ROW_GAP * 2;
+    const total = p.count * w + (p.count - 1) * gap;
+    const cx = slot.x + (slot.w - total) / 2 + p.index * (w + gap) + w / 2;
+    const cy = slot.y + slot.h / 2 - 6;
+    return { x: cx - CARD_W / 2, y: cy - CARD_H / 2, z: 300 + p.index, rot: 0, scale: FLOAT_SCALE };
   }
   const step = Math.min(p.index, STACK_STEP_MAX);
   return {
@@ -69,13 +94,26 @@ function poseOf(p: Placement, slot: Rect): Pose {
     y: slot.y + SLOT_PAD + step * STACK_STEP_Y,
     z: 1 + p.index,
     rot: LOOSE_ZONES.has(p.zone) ? leanOf(p.id) : 0,
+    scale: 1,
   };
 }
+
+const offerOf = (zone: ZoneId): Character | null =>
+  zone === "red-offer" ? "Red" : zone === "gray-offer" ? "Gray" : null;
 
 const handOf = (zone: ZoneId): Character | null =>
   zone === "red-hand" ? "Red" : zone === "gray-hand" ? "Gray" : null;
 
-export function CardLayer({ state, rects, delays, paying, onPickCard, onInspect }: Props) {
+export function CardLayer({
+  state,
+  rects,
+  delays,
+  paying,
+  onPickCard,
+  reward,
+  onPickReward,
+  onInspect,
+}: Props) {
   const placed = placements(state);
 
   /* A card that just changed zone is lifted above everything while it travels,
@@ -131,10 +169,16 @@ export function CardLayer({ state, rects, delays, paying, onPickCard, onInspect 
         const pose = poseOf(p, slot);
         const isMoving = moving.has(p.id);
         const hand = p.kind === "card" ? handOf(p.zone) : null;
+        const offer = p.kind === "card" ? offerOf(p.zone) : null;
         const payingHere = hand && paying?.character === hand ? paying : null;
-        const selected = p.kind === "card" && payingHere?.cardId === p.id;
+        const selected =
+          p.kind === "card" &&
+          (payingHere?.cardId === p.id || (offer !== null && reward?.[offer] === p.card.id));
         const chosen = p.kind === "card" && (payingHere?.chosen.includes(p.card.id) ?? false);
-        const clickable = p.kind === "card" && hand !== null && canClick(hand, p.card);
+        const clickable =
+          p.kind === "card" &&
+          ((hand !== null && canClick(hand, p.card)) ||
+            (offer !== null && !state.pending && onPickReward !== undefined));
         const dimmed =
           p.kind === "card" && hand !== null && state.phase === "Play" && !state[hand].down
             ? payingHere
@@ -148,6 +192,7 @@ export function CardLayer({ state, rects, delays, paying, onPickCard, onInspect 
           p.kind === "card" && p.card.rarity ? `rarity--${p.card.rarity.toLowerCase()}` : "",
           p.kind === "room" ? "sprite--room" : "",
           hand ? "sprite--hand" : "",
+          offer ? "sprite--float" : "",
           p.faceUp ? "" : "is-down",
           isMoving ? "is-moving" : "",
           selected ? "is-selected" : "",
@@ -163,6 +208,8 @@ export function CardLayer({ state, rects, delays, paying, onPickCard, onInspect 
           zIndex: (isMoving ? 200 : selected ? 150 : 0) + pose.z,
           transitionDelay: `${delays.get(p.id) ?? 0}ms`,
           "--lean": `${pose.rot}deg`,
+          "--scale": String(pose.scale),
+          "--bob-delay": `${String(p.index * 0.6)}s`,
         };
 
         const inspect = p.faceUp
@@ -194,13 +241,17 @@ export function CardLayer({ state, rects, delays, paying, onPickCard, onInspect 
           </div>
         );
 
-        if (clickable && p.kind === "card" && hand) {
+        if (clickable && p.kind === "card" && (hand || offer)) {
           const card = p.card;
-          const title = payingHere
-            ? payingHere.cardId === card.id
-              ? "Click again to cancel"
-              : `Exhaust ${card.name} to pay`
-            : `Play ${card.name} (costs ${String(costOf(state, hand, card))})`;
+          const title = offer
+            ? selected
+              ? `Taking ${card.name}. Click again to decline.`
+              : `Take ${card.name} into ${offer}'s deck`
+            : payingHere
+              ? payingHere.cardId === card.id
+                ? "Click again to cancel"
+                : `Exhaust ${card.name} to pay`
+              : `Play ${card.name} (costs ${String(costOf(state, hand ?? "Red", card))})`;
           return (
             <button
               key={p.id}
@@ -210,7 +261,8 @@ export function CardLayer({ state, rects, delays, paying, onPickCard, onInspect 
               data-zone={p.zone}
               title={title}
               onClick={() => {
-                onPickCard(hand, card);
+                if (offer) onPickReward?.(offer, card);
+                else if (hand) onPickCard(hand, card);
               }}
               onMouseEnter={inspect}
               onMouseLeave={uninspect}

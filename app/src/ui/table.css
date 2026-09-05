@@ -283,6 +283,16 @@ body {
 .well--hand {
   flex: none;
 }
+/* The band over this character's side of the play zone: the play row is one
+ * gap above the hand slot, so this lines up with its well. Measured, not drawn. */
+.float {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: calc(-1 * (16px + var(--ch) + 2 * var(--pad)));
+  height: calc(var(--ch) + 2 * var(--pad));
+  pointer-events: none;
+}
 
 /* The room at reading size, beside the room card. */
 .brief {
@@ -427,32 +437,71 @@ body {
   z-index: 300 !important;
 }
 
+/* The pose is one transform fed by variables: the layer sets the lean and the
+ * scale, and the states below only move the lift, so none of them fight. */
 .sprite__pose {
+  --lift: 0px;
+  --shadow: drop-shadow(1px 2px 2px rgba(0, 0, 0, 0.45));
   display: block;
   width: 100%;
   height: 100%;
-  transform: rotate(var(--lean, 0deg));
+  transform: translateY(var(--lift)) rotate(var(--lean, 0deg)) scale(var(--scale, 1));
   transition:
     transform 300ms ease,
     filter 300ms ease;
-  filter: drop-shadow(1px 2px 2px rgba(0, 0, 0, 0.45));
+  filter: var(--shadow);
   perspective: 700px;
 }
 .sprite.is-moving .sprite__pose {
-  filter: drop-shadow(3px 10px 10px rgba(0, 0, 0, 0.5));
+  --shadow: drop-shadow(3px 10px 10px rgba(0, 0, 0, 0.5));
 }
 .sprite.is-clickable:hover .sprite__pose,
 .sprite:focus-visible .sprite__pose {
-  transform: translateY(-10px) rotate(0deg);
+  --lift: -10px;
+  --lean: 0deg;
 }
 .sprite.is-selected .sprite__pose {
-  transform: translateY(-14px) rotate(0deg);
+  --lift: -14px;
+  --lean: 0deg;
 }
 .sprite.is-dimmed .sprite__pose {
-  filter: drop-shadow(1px 2px 2px rgba(0, 0, 0, 0.45)) saturate(0.25) brightness(0.8);
+  filter: var(--shadow) saturate(0.25) brightness(0.8);
 }
 .sprite.is-chosen .sprite__pose {
-  transform: translateY(6px) rotate(0deg);
+  --lift: 6px;
+  --lean: 0deg;
+}
+
+/* Cards on offer at ascension are held up off the table: larger, with a long
+ * shadow, and a slow bob. The chosen one is ringed and lifted higher. */
+.sprite--float .sprite__pose {
+  --shadow: drop-shadow(0 18px 18px rgba(0, 0, 0, 0.55));
+}
+.sprite--float .sprite__in {
+  animation: bob 3.2s ease-in-out infinite;
+  animation-delay: var(--bob-delay, 0s);
+}
+.sprite--float.is-clickable:hover .sprite__pose,
+.sprite--float:focus-visible .sprite__pose {
+  --lift: -16px;
+}
+.sprite--float.is-selected .sprite__pose {
+  --lift: -24px;
+  --shadow: drop-shadow(0 26px 22px rgba(0, 0, 0, 0.6));
+}
+.sprite--float.is-selected .face {
+  box-shadow:
+    0 0 0 0.3em var(--stock),
+    0 0 0 0.6em var(--woah);
+}
+@keyframes bob {
+  0%,
+  100% {
+    translate: 0 0;
+  }
+  50% {
+    translate: 0 -5px;
+  }
 }
 
 .sprite__in {
@@ -843,6 +892,20 @@ body {
   padding-top: 12px;
   margin-top: 12px;
 }
+.ascend__reward {
+  margin: 4px 0 0;
+  font-size: 14px;
+}
+.ascend__reward b {
+  font-family: var(--display);
+  font-size: 15px;
+}
+.ascend__reward .button {
+  margin-left: 6px;
+}
+.ascend__declining {
+  color: var(--print);
+}
 .ascend h4 {
   margin: 10px 0 2px;
   font: 400 10px/16px var(--stencil);
@@ -921,5 +984,6 @@ body {
   .sprite__in,
   .sprite__pose {
     transition: none !important;
+    animation: none !important;
   }
 }

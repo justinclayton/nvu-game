@@ -24,6 +24,8 @@ interface Props {
   readonly paying: Paying | null;
   readonly onPickCard: (character: Character, card: Card) => void;
   readonly onDraw: (character: Character) => void;
+  readonly reward?: Readonly<Record<Character, Card["id"] | null>> | undefined;
+  readonly onPickReward?: ((character: Character, card: Card) => void) | undefined;
   readonly onInspect: (item: Inspected | null) => void;
 }
 
@@ -93,11 +95,23 @@ function HandSlot({
         ) : null}
       </header>
       <div className="well well--hand" data-slot={`${tone}-hand`} />
+      {/* The band over this character's side of the play zone, where the cards
+          they are offered on ascending are held up for a look. Measured only. */}
+      <div className="float" data-slot={`${tone}-offer`} aria-hidden="true" />
     </section>
   );
 }
 
-export function Mat({ state, delays, paying, onPickCard, onDraw, onInspect }: Props) {
+export function Mat({
+  state,
+  delays,
+  paying,
+  onPickCard,
+  onDraw,
+  reward,
+  onPickReward,
+  onInspect,
+}: Props) {
   const matRef = useRef<HTMLDivElement>(null);
   const rects = useSlotRects(matRef, state);
 
@@ -168,6 +182,8 @@ export function Mat({ state, delays, paying, onPickCard, onDraw, onInspect }: Pr
         delays={delays}
         paying={paying}
         onPickCard={onPickCard}
+        reward={reward}
+        onPickReward={onPickReward}
         onInspect={onInspect}
       />
     </div>

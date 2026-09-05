@@ -19,6 +19,8 @@ export type ZoneId =
   | "scrap"
   | "red-rewards"
   | "gray-rewards"
+  | "red-offer"
+  | "gray-offer"
   | "red-deck"
   | "gray-deck"
   | "red-hand"
@@ -28,8 +30,11 @@ export type ZoneId =
   | "red-exhaust"
   | "gray-exhaust";
 
-/** A stack is one pile; a row lays its cards out side by side. */
-export type ZoneShape = "stack" | "row";
+/**
+ * A stack is one pile; a row lays its cards out side by side; a float holds the
+ * cards a character is being offered up off the mat, as if in their hands.
+ */
+export type ZoneShape = "stack" | "row" | "float";
 
 export const ZONE_SHAPE: Readonly<Record<ZoneId, ZoneShape>> = {
   floor: "stack",
@@ -41,6 +46,8 @@ export const ZONE_SHAPE: Readonly<Record<ZoneId, ZoneShape>> = {
   scrap: "stack",
   "red-rewards": "stack",
   "gray-rewards": "stack",
+  "red-offer": "float",
+  "gray-offer": "float",
   "red-deck": "stack",
   "gray-deck": "stack",
   "red-hand": "row",
@@ -74,8 +81,10 @@ export type Placement =
   | (Placed & { readonly kind: "card"; readonly card: Card; readonly owner: Character | null })
   | (Placed & { readonly kind: "room"; readonly room: Room });
 
-const zoneOf = (c: Character, part: "deck" | "hand" | "play" | "exhaust" | "rewards"): ZoneId =>
-  `${c.toLowerCase() as "red" | "gray"}-${part}`;
+const zoneOf = (
+  c: Character,
+  part: "deck" | "hand" | "play" | "exhaust" | "rewards" | "offer",
+): ZoneId => `${c.toLowerCase() as "red" | "gray"}-${part}`;
 
 export function placements(state: GameState): readonly Placement[] {
   const out: Placement[] = [];
@@ -139,14 +148,20 @@ export function placements(state: GameState): readonly Placement[] {
       zoneOf(c, "play"),
       { topFirst: false, faceUp: true, owner: c },
     );
+    // §10: on ascending, the top three of the pool are offered. They stay in the
+    // pool until the choice is made, but they are picked up off the table and
+    // held face up while the character looks them over.
+    const offered = state.phase === "Ascend" ? (state.offer?.[c] ?? []) : [];
+    const offeredIds = new Set(offered.map((x) => x.id));
+    cards(offered, zoneOf(c, "offer"), { topFirst: false, faceUp: true, owner: c });
     // §6: a revealed reward is the top of the pool, turned face up while the
     // character decides.
     const revealing = state.pending?.kind === "TakeReward" && state.pending.character === c;
-    cards(state.pools[c], zoneOf(c, "rewards"), {
-      topFirst: true,
-      faceUp: (_card, isTop) => revealing && isTop,
-      owner: c,
-    });
+    cards(
+      state.pools[c].filter((x) => !offeredIds.has(x.id)),
+      zoneOf(c, "rewards"),
+      { topFirst: true, faceUp: (_card, isTop) => revealing && isTop, owner: c },
+    );
   }
 
   // Stuff is drawn blind from its pool (rulebook §6), so the pools stay face down.

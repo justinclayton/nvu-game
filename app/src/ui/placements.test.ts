@@ -80,3 +80,23 @@ describe("moveDelays", () => {
     expect(delays.get(b.id)).toBe(100);
   });
 });
+
+describe("the reward offer", () => {
+  it("floats the offered cards above the mat and leaves the rest in the pool", () => {
+    const session = createSession(7, CARD_CONTENT);
+    const base = session.getState().state;
+    const state = {
+      ...base,
+      phase: "Ascend" as const,
+      offer: { Red: base.pools.Red.slice(0, 3), Gray: base.pools.Gray.slice(0, 3) },
+    };
+    const placed = placements(state);
+    const floating = placed.filter((p) => p.zone === "red-offer");
+    expect(floating.map((p) => p.id)).toEqual(state.offer.Red.map((c) => c.id));
+    expect(floating.every((p) => p.faceUp)).toBe(true);
+    expect(placed.filter((p) => p.zone === "red-rewards")).toHaveLength(base.pools.Red.length - 3);
+    // Outside the Ascend phase the offer is not picked up, even if one is set.
+    const notYet = placements({ ...state, phase: "Flip" });
+    expect(notYet.filter((p) => p.zone === "red-offer")).toHaveLength(0);
+  });
+});

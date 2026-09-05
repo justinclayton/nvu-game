@@ -8,8 +8,8 @@ import { useCallback, useEffect, useRef, useState } from "react";
 
 import { canUndo, type SessionState } from "@application/session";
 import { costOf, payOptions } from "@domain/queries";
-import type { Card, Character, Command, GameState } from "@domain/types";
-import { AscendPanel } from "./AscendPanel";
+import type { AscendChoice, Card, Character, Command, GameState } from "@domain/types";
+import { AscendPanel, NO_CHOICES, type AscendChoices } from "./AscendPanel";
 import { type Inspected, type Paying } from "./CardLayer";
 import { CardView, RoomCardView } from "./CardView";
 import { Controls } from "./Controls";
@@ -26,6 +26,13 @@ export function Table({ onNewRun }: { readonly onNewRun: () => void }) {
   const undoable = useSessionState(canUndo);
   const [paying, setPaying] = useState<Paying | null>(null);
   const [inspected, setInspected] = useState<Inspected | null>(null);
+  /* §10: what each character is keeping, Scrapping and taking, decided together
+   * and sent as one command. The cards on offer float above the mat, so the
+   * choice lives here where both the mat and the panel can read it. */
+  const [ascend, setAscend] = useState<AscendChoices>(NO_CHOICES);
+  const choose = useCallback((c: Character, patch: Partial<AscendChoice>) => {
+    setAscend((current) => ({ ...current, [c]: { ...current[c], ...patch } }));
+  }, []);
 
   /* The events the last command produced, and only on the render that shows
    * them, so the cards it moved can leave one after another. */
@@ -40,6 +47,7 @@ export function Table({ onNewRun }: { readonly onNewRun: () => void }) {
     (command: Command) => {
       session.getState().dispatch(command);
       setPaying(null);
+      if (command.type === "ASCEND") setAscend(NO_CHOICES);
     },
     [session],
   );
@@ -128,11 +136,15 @@ export function Table({ onNewRun }: { readonly onNewRun: () => void }) {
         onDraw={(c) => {
           dispatch({ type: "DRAW", character: c });
         }}
+        reward={{ Red: ascend.Red.takeRewardId, Gray: ascend.Gray.takeRewardId }}
+        onPickReward={(c, card) => {
+          choose(c, { takeRewardId: ascend[c].takeRewardId === card.id ? null : card.id });
+        }}
         onInspect={setInspected}
       />
 
       {state.phase === "Ascend" ? (
-        <AscendPanel state={state} dispatch={dispatch} />
+        <AscendPanel state={state} dispatch={dispatch} choices={ascend} onChoose={choose} />
       ) : state.phase === "GameOver" ? (
         <section className="over">
           <h2>

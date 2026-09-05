@@ -65,7 +65,7 @@ Off to one side:
 
 ## 5. Each turn
 
-Both players take each turn together. Within a phase, act in any order: at the same time, alternating, or a mix.
+Within a phase, act in any order: at the same time, alternating, or a mix.
 
 ### Phase 1 — Flip
 
@@ -77,10 +77,10 @@ A room card lists one or more **challenges**, each a `threshold: outcome` line, 
 
 Draw cards from your deck into your hand one at a time. Stop when you choose.
 
-- You **must** draw at least **1** card. A character in `Last Stand` does not draw (section 9).
-- You may **not** draw while you hold **5** or more cards. `Hold` cards count toward this limit. `Stuff` a room puts into your hand ignores it.
-- If you hold **5** or more cards, make your required draw anyway and put that card straight into your exhaust pile.
-- Draw ends for both players at once. Nobody plays until both players have stopped drawing. Once Play begins, nobody draws.
+- **Minimum:** Draw at least **1** card. A character in `Last Stand` does not draw (section 9).
+- **Maximum:** Do not draw while you hold **5** or more cards. `Hold` cards count toward this limit. `Stuff` a room puts into your hand ignores it.
+- **Full hand:** If you hold **5** or more cards, make your required draw anyway and put that card straight into your exhaust pile.
+- **End of Draw:** Draw ends for both players at once. Nobody plays until both players have stopped drawing. Once Play begins, nobody draws.
 
 ### Phase 3 — Play
 
@@ -103,9 +103,9 @@ In order:
 
 ### Phase 5 — Next turn
 
-- If the Enemy room was `Cleared` this turn, `Ascend` (section 10).
-- If both characters are `Down`, the game ends (section 11).
-- Otherwise, start the next turn at Flip.
+- **Ascend:** If the Enemy room was `Cleared` this turn, `Ascend` (section 10).
+- **Game end:** If both characters are `Down`, the game ends (section 11).
+- **Next turn:** Otherwise, start the next turn at Flip.
 
 ---
 
@@ -142,9 +142,9 @@ In order:
 `Stuff` is a card the floor gives you.
 
 - `Stuff` has `Hold` (section 8).
-- Play `Stuff` like any other card, or `Exhaust` it from your hand to pay another card's `Cost`.
+- Play `Stuff` from your hand, or `Exhaust` it from your hand to pay another card's `Cost`.
 - `Good Stuff` is earned from rooms. `Bad Stuff` is dealt to you as a punishment. The type line says which kind a card is (section 8).
-- Spent `Stuff` goes to the exhaust pile of whoever spent it. When you `Ascend`, `Stuff` in your exhaust pile is `Scrapped` (section 10). `Stuff` still in your hand carries over with `Hold`.
+- Spent `Stuff` goes to the exhaust pile of whoever spent it. When you `Ascend`, `Stuff` in your exhaust pile is `Scrapped` (section 10). `Stuff` in your hand carries over with `Hold`.
 
 ---
 
@@ -183,12 +183,12 @@ A room card shows:
 
 ### Keywords
 
-- `Hold`: This card is not Exhausted at Cleanup. It stays in your hand, counting toward your **5**-card limit, until you play it or spend it. Once played, it is Exhausted at Cleanup like any other card.
+- `Hold`: This card is not Exhausted at Cleanup. It stays in your hand, counting toward your **5**-card limit, until you play it or spend it. Once played, it is Exhausted at Cleanup with the rest of the play zone.
 - `Holding:` Text after this word applies while the card is in your hand.
 - `Exhaust X cards from your hand`: Choose **X** cards from your hand and move them to your exhaust pile.
 - `Exhaust X cards from your deck`: Move the top **X** cards of your deck to your exhaust pile, face up.
 - `Exhaust X` with no zone named: the same as `Exhaust X cards from your deck`.
-- `Scrap`: Move the card to the Scrapyard. Nothing leaves the Scrapyard.
+- `Scrap`: Move the card to the Scrapyard, for the rest of the run.
 
 ---
 
@@ -206,7 +206,7 @@ While in Last Stand:
 
 **Leave Last Stand:** Last Stand ends at the room check of the next Play phase.
 
-- If the room is `Cleared`, including by a `Flee` line that Clears it: at Cleanup, instead of Exhausting your side of the play zone, shuffle every card there into your deck, then `Exhaust` **2** cards from the top of your deck. You are no longer in Last Stand. Clean up your hand as normal.
+- If the room is `Cleared`, including by a `Flee` line that Clears it: at Cleanup, instead of Exhausting your side of the play zone, shuffle every card there into your deck, then `Exhaust` **2** cards from the top of your deck. Clean up your hand as normal.
 - If the team `Flees` and the room is not Cleared: you go `Down`.
 
 ### Going Down
@@ -237,7 +237,7 @@ Each player does the following:
 
 1. **Separate your exhaust pile:** Split it into `Stuff` cards and non-Stuff cards.
 2. **Say Goodbye to Your Stuff:** `Scrap` the `Stuff` cards. You may keep **one** `Stuff` card by Scrapping **one non-Stuff card** from your exhaust pile in its place.
-3. **Heal:** Shuffle the rest of your exhaust pile, kept `Stuff` included, into your deck. If you were `Down`, you are no longer Down.
+3. **Heal:** Shuffle the rest of your exhaust pile, kept `Stuff` included, into your deck. A `Down` character stands again.
 4. **Choose a reward:** Reveal the top **3** cards of your reward pool. You may shuffle **one** into your deck. Put the cards you did not take on the bottom of your reward pool.
 5. **Build the next floor:** Section 4.
 

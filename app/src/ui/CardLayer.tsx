@@ -12,16 +12,7 @@ import { useLayoutEffect, useRef, useState, type CSSProperties } from "react";
 import { costOf, playableCards } from "@domain/queries";
 import type { Card, Character, GameState, Room } from "@domain/types";
 import { CardBack, CardFace, RoomFace, toneOf } from "./CardFace";
-import {
-  CARD_H,
-  CARD_W,
-  FLOAT_SCALE,
-  ROW_GAP,
-  SLOT_PAD,
-  STACK_STEP_MAX,
-  STACK_STEP_X,
-  STACK_STEP_Y,
-} from "./metrics";
+import { FLOAT_SCALE, STACK_STEP_MAX, STACK_STEP_X, STACK_STEP_Y, type Metrics } from "./metrics";
 import { LOOSE_ZONES, ZONE_SHAPE, placements, type Placement, type ZoneId } from "./placements";
 import type { Rect, SlotRects } from "./useSlotRects";
 
@@ -37,6 +28,7 @@ export type Inspected =
 
 interface Props {
   readonly state: GameState;
+  readonly metrics: Metrics;
   readonly rects: SlotRects;
   /** Per card id, how long to wait before travelling. From the last command's events. */
   readonly delays: ReadonlyMap<string, number>;
@@ -63,7 +55,8 @@ function leanOf(id: string): number {
   return ((Math.abs(h) % 9) - 4) * 1.1;
 }
 
-function poseOf(p: Placement, slot: Rect): Pose {
+function poseOf(p: Placement, slot: Rect, m: Metrics): Pose {
+  const { cardW: CARD_W, cardH: CARD_H, slotPad: SLOT_PAD, rowGap: ROW_GAP } = m;
   const shape = ZONE_SHAPE[p.zone];
   if (shape === "row") {
     const usable = slot.w - 2 * SLOT_PAD;
@@ -106,6 +99,7 @@ const handOf = (zone: ZoneId): Character | null =>
 
 export function CardLayer({
   state,
+  metrics,
   rects,
   delays,
   paying,
@@ -166,7 +160,7 @@ export function CardLayer({
       {placed.map((p) => {
         const slot = rects[p.zone];
         if (!slot) return null;
-        const pose = poseOf(p, slot);
+        const pose = poseOf(p, slot, metrics);
         const isMoving = moving.has(p.id);
         const hand = p.kind === "card" ? handOf(p.zone) : null;
         const offer = p.kind === "card" ? offerOf(p.zone) : null;

@@ -13,13 +13,14 @@ import { useRef, type CSSProperties } from "react";
 import { canDraw } from "@domain/queries";
 import type { Card, Character, GameState } from "@domain/types";
 import { CardLayer, type Inspected, type Paying } from "./CardLayer";
-import { CARD_H, CARD_W, SLOT_PAD } from "./metrics";
+import type { Metrics } from "./metrics";
 import type { ZoneId } from "./placements";
 import { RoomBrief } from "./RoomBrief";
 import { useSlotRects } from "./useSlotRects";
 
 interface Props {
   readonly state: GameState;
+  readonly metrics: Metrics;
   readonly delays: ReadonlyMap<string, number>;
   readonly paying: Paying | null;
   readonly onPickCard: (character: Character, card: Card) => void;
@@ -104,6 +105,7 @@ function HandSlot({
 
 export function Mat({
   state,
+  metrics,
   delays,
   paying,
   onPickCard,
@@ -113,12 +115,12 @@ export function Mat({
   onInspect,
 }: Props) {
   const matRef = useRef<HTMLDivElement>(null);
-  const rects = useSlotRects(matRef, state);
+  const rects = useSlotRects(matRef, state, metrics);
 
   const vars: CSSProperties & Record<`--${string}`, string> = {
-    "--cw": `${String(CARD_W)}px`,
-    "--ch": `${String(CARD_H)}px`,
-    "--pad": `${String(SLOT_PAD)}px`,
+    "--cw": `${String(metrics.cardW)}px`,
+    "--ch": `${String(metrics.cardH)}px`,
+    "--pad": `${String(metrics.slotPad)}px`,
   };
 
   return (
@@ -178,6 +180,7 @@ export function Mat({
 
       <CardLayer
         state={state}
+        metrics={metrics}
         rects={rects}
         delays={delays}
         paying={paying}

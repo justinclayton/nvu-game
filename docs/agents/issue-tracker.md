@@ -45,3 +45,7 @@ Used by `/wayfinder`. The **map** is a file with one **child** file per ticket.
 - [`design/web-game/`](../../design/web-game/map.md) — architecture spec and skeleton for the official React web version.
 
 - [`design/core-design/`](../../design/core-design/map.md) — North vs Up core design spec.
+
+## Playtest records
+
+- [`design/playtests/`](../../design/playtests/) — one file per playtest, numbered from `01`. Notes are the designer's own, verbatim; rulings that come out of them land in the rulebook or a ticket, not here.

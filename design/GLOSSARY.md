@@ -129,7 +129,7 @@ To move cards to the Exhaust pile — from hand (to pay a Cost, or via the `Exha
 
 **Exhaust pile**
 
-A player's face-up pile of spent or lost cards. Played cards and unheld cards in hand move here at Cleanup; cards in it can be shuffled back into the deck (Ascending) or Scrapped.
+A player's face-up pile of spent or lost cards. Played cards move here at Cleanup; cards in it can be shuffled back into the deck (Ascending) or Scrapped.
 
 **Scrap**
 
@@ -139,9 +139,9 @@ To move a card to the Scrapyard, removing it from the game for good.
 
 The face-up pile of cards that have been Scrapped and removed from the game permanently.
 
-**Hold** / **Holding**
+**Holding**
 
-`Hold` is the keyword marking a card that stays in hand at Cleanup instead of being exhausted. `Holding` is the keyword marking a passive effect that applies only while the card is in hand — it stops applying once the card is played or exhausted.
+The keyword marking a passive effect that applies only while the card is in hand — it stops applying once the card is played or exhausted.
 
 **Turn**
 

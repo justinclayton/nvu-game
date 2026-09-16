@@ -95,7 +95,6 @@ Players add their combined stats they accumulated this turn and check to see if 
 Each player does the following:
 
 1. **Exhaust your play zone:** Move every card on your side of the play zone to your exhaust pile. If you are in `Last Stand`, see section 9 instead.
-2. **Exhaust your hand:** Move every card in your hand to your exhaust pile, except cards with `Hold`.
 
 If both players are `Down` at the end of the turn, the game ends (section 11).
 
@@ -170,7 +169,6 @@ A `Stuff` card shows the same parts as a player card, with these differences:
 
 ### Keywords
 
-- `Hold`: at Cleanup, this card stays in your hand instead of going to your exhaust pile.
 - `Holding:` a passive effect that applies while the card is in your hand. If the card is played or exhausted, the effect no longer applies.
 - `Exhaust X cards from your hand`: Choose **X** cards from your hand and move them to your exhaust pile.
 - `Exhaust X cards from your deck`: Move the top **X** cards of your deck to your exhaust pile.

@@ -42,7 +42,6 @@ export interface Card {
   readonly scramble: number;
   /** The stat is in the text, so the behaviour registry computes it. */
   readonly conditionalStat: boolean;
-  readonly hold: boolean;
   readonly starter: boolean;
   readonly text: string;
 }
@@ -82,7 +81,7 @@ export interface Pools {
 export interface PlayerState {
   /** Face down. This is health and energy both — the deck is stamina (§3). */
   readonly deck: readonly Card[];
-  /** What they drew this turn. Maximum 5, and `Hold` counts against it. */
+  /** What they drew this turn. Maximum 5. */
   readonly hand: readonly Card[];
   /** Face up. Cards spent or lost, gone for the floor. There is no discard pile. */
   readonly exhaust: readonly Card[];
@@ -277,7 +276,6 @@ export type DomainEvent =
       readonly card: Card;
       readonly to: "deck" | "hand";
     }
-  | { readonly type: "CARD_KEPT"; readonly character: Character; readonly card: Card }
   | { readonly type: "CARDS_PEEKED"; readonly character: Character; readonly cards: readonly Card[] }
   | { readonly type: "THRESHOLD_MET"; readonly room: Room; readonly threshold: Threshold }
   | { readonly type: "STUFF_TAKEN"; readonly character: Character; readonly card: Card }

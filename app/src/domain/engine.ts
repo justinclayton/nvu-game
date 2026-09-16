@@ -691,13 +691,12 @@ function finishTurn(state: GameState, run: Run): GameState {
 }
 
 /**
- * §5 cleanup 3: Exhaust both hands and the entire play zone. `Hold` cards still
- * in hand are the only survivors.
+ * §5 cleanup: Exhaust the entire play zone. The hand carries over untouched.
  *
  * §9: if the room was Cleared while a character was in last stand, the last
  * stand cleanup replaces their play-zone cleanup — the play zone shuffles into
- * their deck and 2 off the top are the price of getting out. Their hand is
- * cleaned up as normal. See open-questions.md #4.
+ * their deck and 2 off the top are the price of getting out. See
+ * open-questions.md #4.
  */
 function cleanupPiles(
   state: GameState,
@@ -706,19 +705,9 @@ function cleanupPiles(
 ): GameState {
   let s = state;
 
-  // The hand first: `Hold` cards stay, the rest Exhaust.
-  for (const c of CHARACTERS) {
-    const p = playerOf(s, c);
-    const kept = p.hand.filter((x) => x.hold);
-    const dropped = p.hand.filter((x) => !x.hold);
-    s = withPlayer(s, c, { ...p, hand: kept });
-    for (const card of kept) run.events.push({ type: "CARD_KEPT", character: c, card });
-    for (const card of dropped) s = exhaust(s, c, card, "hand", run.events);
-  }
-
-  // Then any played card that takes itself somewhere else. It has to happen
-  // after the hand is swept, or a card returning to hand would be Exhausted
-  // straight back out of it.
+  // Any played card that takes itself somewhere else. It has to happen
+  // before the play zone is Exhausted, or a card returning to hand would be
+  // Exhausted straight back out of it.
   for (const played of s.playZone) {
     const onCleanup = behaviourOf(played.card.name)?.onCleanup;
     if (!onCleanup) continue;
@@ -884,8 +873,7 @@ function ascendOne(state: GameState, c: Character, choice: AscendChoice, run: Ru
 
   // §10 step 2: the exhaust pile shuffles back into the deck. A floor cleared is
   // a full heal, including for a character who was Down. Nothing bad crosses a
-  // floor boundary. Hands already followed the normal cleanup rules, so a hand
-  // holds only `Hold` cards — and those carry up the stairs, Stuff included.
+  // floor boundary. A hand carries over untouched, Stuff included.
   s = withPlayer(s, c, {
     ...playerOf(s, c),
     exhaust: [],

@@ -229,7 +229,7 @@ describe("§5 Phase 2 — Draw and Play", () => {
 });
 
 describe("§5 Phase 4 — Cleanup", () => {
-  it("'Exhaust both hands and the entire play zone'", () => {
+  it("'Exhaust the entire play zone'", () => {
     const state = readyToEnd(
       rig({
         phase: "Play",
@@ -244,12 +244,12 @@ describe("§5 Phase 4 — Cleanup", () => {
       { type: "END_PLAY" },
     ]);
     expect(next.playZone).toEqual([]);
-    // The Shove played, the Charge In paid with, and the Good Stuff is Hold so
-    // it stays in hand.
+    // The Shove played, then Exhausted from the play zone; the Charge In was
+    // Exhausted earlier, to pay its cost.
     expect(next.Red.exhaust).toHaveLength(2);
   });
 
-  it("'`Hold` cards still in hand are the only survivors'", () => {
+  it("'the hand carries over untouched'", () => {
     const state = readyToEnd(
       rig({
         phase: "Play",
@@ -263,7 +263,7 @@ describe("§5 Phase 4 — Cleanup", () => {
       { type: "END_PLAY" },
       { type: "CHOOSE_CHARACTER", character: "Gray" },
     ]);
-    expect(next.Red.hand.map((c) => c.name)).toEqual(["Pry Bar"]);
+    expect(next.Red.hand.map((c) => c.name)).toEqual(["Pry Bar", "Shove"]);
   });
 
   it("'if the floor draw pile is empty, shuffle the Fled pile back into it'", () => {

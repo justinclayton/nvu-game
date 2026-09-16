@@ -66,7 +66,6 @@
   .pip { font-size:11px; padding:1px 5px; border-radius:3px; border:1px solid var(--line); }
   .pip.pw { color:#e79a8f; border-color:#5e3b36; }
   .pip.sc { color:#8fc6e7; border-color:#365060; }
-  .pip.hold { color:var(--gold); border-color:#5e4a24; }
   .pip.met { background:#24402c; color:#a8d6b3; border-color:#3c6247; }
   .card .txt { font-size:11px; color:var(--dim); font-style:italic; }
   .card .line { font-size:11px; line-height:1.35; }
@@ -319,7 +318,7 @@
       <li><strong>Flip</strong> — a room into the active room zone. If the draw pile is empty, the Fled pile shuffles back in first.</li>
       <li><strong>Draw</strong> — both characters at once, each stopping when they say so. At least 1, always. You may not draw <em>up</em> at 5 or more in hand — but the minimum still happens, and that card goes straight to the exhaust pile.</li>
       <li><strong>Play</strong> — either character, any order. Cost is paid in other cards from that character's own hand. Stats join one shared pool; a Stuff room reads each character's own side instead.</li>
-      <li><strong>Cleanup</strong> — an uncleared room applies its Flee line and goes to Fled. Then both hands and the whole play zone exhaust, except <code>Hold</code> cards in hand.</li>
+      <li><strong>Cleanup</strong> — an uncleared room applies its Flee line and goes to Fled. Then the whole play zone exhausts; hands carry over untouched.</li>
       <li><strong>Turn ends.</strong></li>
     </ol>
 
@@ -340,10 +339,9 @@
     <p class="tiny muted">A character goes <strong>Down</strong> when something would Exhaust a card
       from their empty deck, or when the team Flees a room while they are in last stand. An empty deck
       by itself is <em>not</em> Down.</p>
-    <p class="tiny muted">Clearing a room while in last stand gets you out: at that cleanup the cards
-      that would have exhausted from hand and play zone are shuffled back into the deck instead,
-      <strong>minus 2</strong>, which are exhausted as the price. <code>Hold</code> cards stay in hand
-      and are not part of the shuffle-back.</p>
+    <p class="tiny muted">Clearing a room while in last stand gets you out: at that cleanup the play
+      zone that would have exhausted is shuffled back into the deck instead, <strong>minus 2</strong>,
+      which are exhausted as the price. The hand is not part of the shuffle-back.</p>
 
     <h3>Something the engine surfaced, not a ruling</h3>
     <p class="tiny muted">A Stuff room is <strong>Cleared either way</strong>, and getting out of last
@@ -375,7 +373,7 @@
         which pool a reveal draws from is still unstated.</li>
       <li><strong>Card effect text is displayed, never executed.</strong> Conditional stats,
         <code>Deadweight Grip</code>, <code>Faceful of Slime</code> and the rest are read by a human at
-        the table, not by this engine. Stats, costs and <code>Hold</code> are all it understands.</li>
+        the table, not by this engine. Stats and costs are all it understands.</li>
       <li><strong>Red/Gray asymmetry</strong> is only what the cards print.</li>
       <li>The <strong>reward pool problem</strong> from ticket 12 is a component-count question and is
         not simulated.</li>
@@ -403,7 +401,7 @@ function cardsOfKind(k) {
   return NVU_CARDS.cards.filter(function (c) { return c.kind === k; });
 }
 
-/* Stats, costs and Hold are all the engine understands. Rules text is carried
+/* Stats and costs are all the engine understands. Rules text is carried
    through for display only — it is read by a human at the table. */
 function playerShape(c, owner) {
   return {
@@ -413,7 +411,6 @@ function playerShape(c, owner) {
     rarity: c.rarity,
     oomph: c.oomph,
     scramble: c.scramble,
-    hold: c.hold,
     cond: c.conditional_stat,
     text: c.text,
     /* Both characters start with a cheap card and a dear one; which is which
@@ -872,7 +869,7 @@ function awardGoodStuff(who, n) {
     var s = G.goodPool.pop();
     c.hand.push(s);                       // Stuff ignores the cap on the way in
     G.stats.stuffTaken++;
-    log(who + " takes " + s.def.name + " — to hand with Hold, ignoring the cap.", "g");
+    log(who + " takes " + s.def.name + " — straight to hand, ignoring the cap.", "g");
   }
 }
 /* Settle a Stuff room: each character's own side, own item, but the two lines
@@ -1026,17 +1023,15 @@ function finishCleanup() {
 
   for (i = 0; i < 2; i++) {
     var c = G.chars[names[i]];
-    var held = [], loose = [], zone = G.play[c.name];
-    for (j = 0; j < c.hand.length; j++) (c.hand[j].def.hold ? held : loose).push(c.hand[j]);
+    var zone = G.play[c.name];
 
     var escaping = CFG.lastStand && !c.down && c.deck.length === 0 && cleared;
 
     if (escaping) {
-      var back = loose.concat(zone), pay = [];
+      var back = zone.slice(), pay = [];
       for (j = 0; j < CFG.lsCost && back.length; j++) pay.push(back.pop());
       for (j = 0; j < pay.length; j++) c.exhaust.push(pay[j]);
       c.deck = shuffle(c.deck.concat(back));
-      c.hand = held;
       if (c.deck.length) {
         G.stats.lastStandExits++;
         log(c.name + " gets OUT of last stand — " + back.length +
@@ -1046,9 +1041,7 @@ function finishCleanup() {
             "still in last stand" + (pay.length ? ", and " + pay.length + " card(s) went to pay the price." : "."), "b");
       }
     } else {
-      for (j = 0; j < loose.length; j++) c.exhaust.push(loose[j]);
       for (j = 0; j < zone.length; j++) c.exhaust.push(zone[j]);
-      c.hand = held;
     }
   }
   G.play = { Red: [], Gray: [] };
@@ -1162,7 +1155,7 @@ function exportText() {
          (G.over ? "ended: " + G.over : "in progress, phase " + G.phase) + "\n";
   out += "started " + G.startedAt + ", exported " + new Date().toISOString() + "\n";
   out += "\nRules as of the floor rules summary of 2026-08-25. Card effect text is NOT executed by\n" +
-         "this engine — stats, costs and Hold are all it understands.\n";
+         "this engine — stats and costs are all it understands.\n";
   out += "\n--- settings ---\n";
   for (k in s) out += "  " + k + ": " + s[k] + "\n";
   out += "\n--- turns ---\n";
@@ -1184,7 +1177,7 @@ function exportJson() {
   var data = {
     tool: "nvu-encounter-sim",
     rulesAsOf: "2026-08-25 floor rules summary",
-    caveat: "Card effect text is not executed by this engine; stats, costs and Hold are.",
+    caveat: "Card effect text is not executed by this engine; stats and costs are.",
     startedAt: G.startedAt, exportedAt: new Date().toISOString(),
     floor: G.floor, outcome: G.over || ("in progress: " + G.phase),
     turnsPlayed: G.turnLog.length,
@@ -1642,7 +1635,6 @@ function statPips(d, met) {
   var h = "";
   if (d.oomph)    h += '<span class="pip pw">Oomph ' + d.oomph + "</span>";
   if (d.scramble) h += '<span class="pip sc">Scramble ' + d.scramble + "</span>";
-  if (d.hold)     h += '<span class="pip hold">Hold</span>';
   return h;
 }
 function challengeText(d) {

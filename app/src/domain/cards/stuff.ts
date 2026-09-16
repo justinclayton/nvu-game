@@ -1,8 +1,8 @@
 /* Good Stuff and Bad Stuff. Keyed by the name design/cards.yaml makes unique.
  *
- * §7: Stuff has `Hold`, so it stays in hand across turns, and it is ordinary
- * energy — you may Exhaust it from hand to pay another card's cost. Bad Stuff
- * behaves like any other Stuff except that it contributes no stats.
+ * §7: Stuff is ordinary energy — you may Exhaust it from hand to pay another
+ * card's cost. Bad Stuff behaves like any other Stuff except that it
+ * contributes no stats.
  */
 
 import type { DomainEvent } from "../types";

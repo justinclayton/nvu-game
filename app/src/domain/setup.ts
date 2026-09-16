@@ -14,7 +14,7 @@ import type { Card, DomainEvent, GameState, PlayerState, Room, TurnRecord } from
 /** The tenth floor is the roof: clearing its Enemy room wins the run (§11). */
 export const TOP_FLOOR = 10;
 
-/** Maximum hand size, and `Hold` counts against it (§5). */
+/** Maximum hand size (§5). */
 export const HAND_CAP = 5;
 
 /** The price of getting out of last stand (§9). */
@@ -41,7 +41,6 @@ export function mintCard(face: CardFace, copy: number): Card {
     oomph: face.oomph,
     scramble: face.scramble,
     conditionalStat: face.conditionalStat,
-    hold: face.hold,
     starter: face.starter,
     text: face.text,
   };

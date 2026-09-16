@@ -33,8 +33,6 @@ export function describeEvent(event: DomainEvent): string {
       return `${event.character} takes ${event.card.name} into hand.`;
     case "CARD_MOVED":
       return `${event.card.name} goes to ${event.character}'s ${event.to}.`;
-    case "CARD_KEPT":
-      return `${event.character} holds ${event.card.name}.`;
     case "CARDS_PEEKED":
       return `A look at ${event.character}'s deck: ${event.cards.map((c) => c.name).join(", ")}.`;
     case "THRESHOLD_MET":

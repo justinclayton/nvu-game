@@ -5,7 +5,7 @@
  *   node tools/cards.mjs check    fail if either is stale or a prototype stops rendering
  *
  * design/cards.yaml is the source of truth for every card.  Nothing else in the
- * repo may hold a card's name, cost, stats, rarity, Hold, or rules text except
+ * repo may hold a card's name, cost, stats, rarity, or rules text except
  * as a generated copy.  There are two:
  *
  *   prototype/cards.js                 untyped, for the paper prototypes
@@ -193,7 +193,7 @@ export function parseCardsYaml(text) {
 
 const FIELD_ORDER = [
   "name", "set", "kind", "owner", "starter", "rarity",
-  "rarity_status", "cost", "oomph", "scramble", "conditional_stat", "hold",
+  "rarity_status", "cost", "oomph", "scramble", "conditional_stat",
   "thresholds", "flee", "text", "note", "flagged",
 ];
 
@@ -368,7 +368,6 @@ function cardFace(c) {
     oomph: c.oomph ?? 0,
     scramble: c.scramble ?? 0,
     conditionalStat: c.conditional_stat === true,
-    hold: c.hold === true,
     text: c.text ?? "",
   };
 }

@@ -721,10 +721,6 @@ body {
   letter-spacing: 0.08em;
   color: #8a8270;
 }
-.hold {
-  font-weight: 700;
-  color: var(--ink);
-}
 .rarity--fine .rarity {
   color: var(--fine);
 }

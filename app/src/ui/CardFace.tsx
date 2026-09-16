@@ -70,7 +70,6 @@ export function CardFace({ card, state, owner }: CardFaceProps) {
       {card.text ? <p className="face__text">{card.text}</p> : null}
       <div className="face__foot">
         <span className="rarity">{card.rarity ?? ""}</span>
-        {card.hold ? <span className="hold">Hold</span> : null}
       </div>
     </div>
   );

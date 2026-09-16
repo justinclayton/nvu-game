@@ -17,7 +17,6 @@
 #   cost    integer              null means not yet set
 #   oomph / scramble  integer    
 #   conditional_stat  true       stat lives in the text instead of a field
-#   hold    true                 the card's effect runs while it sits in hand
 #   starter true                 part of a starting deck rather than a reward pool
 #   text    string               the literal printed rules text
 
@@ -155,7 +154,6 @@ cards:
     rarity: Woah
     cost: 1
     scramble: 2
-    hold: true
     text: >-
       Holding: Cards you play have +1 Oomph, but you may not draw more than 2 cards per turn.
 
@@ -185,7 +183,6 @@ cards:
     owner: Red
     rarity: Woah
     cost: 0
-    hold: true
     text: While `Holding`, you don't Exhaust cards.
 
 ### Gray
@@ -286,7 +283,6 @@ cards:
     rarity: Woah
     cost: 3
     oomph: 5
-    hold: true
     text: Holding: when you play a card with Scramble, draw 1 card.
 
   # Stuff
@@ -299,7 +295,6 @@ cards:
     rarity: Fine
     cost: 0
     oomph: 3
-    hold: true
 
   - name: Coil Of Cable
     set: proposed
@@ -307,7 +302,6 @@ cards:
     rarity: Fine
     cost: 0
     scramble: 3
-    hold: true
 
   - name: Crowbar
     set: proposed
@@ -316,7 +310,6 @@ cards:
     cost: 0
     oomph: 1
     scramble: 1
-    hold: true
     text: If you get any Good Stuff this turn, get an additional one.
 
   - name: A Pair Of Stich-Em-Ups
@@ -324,7 +317,6 @@ cards:
     kind: good_stuff
     rarity: Cool
     cost: 1
-    hold: true
     text: Move 2 cards from your exhaust pile to the bottom of your deck.
 
   - name: Cutting Torch
@@ -333,7 +325,6 @@ cards:
     rarity: Cool
     cost: 2
     oomph: 5
-    hold: true
 
   - name: Grav Harness
     set: proposed
@@ -342,7 +333,6 @@ cards:
     cost: 2
     oomph: 3
     scramble: 3
-    hold: true
     text: One of you draws 1 card, (even if their hand is full).
 
 
@@ -353,7 +343,6 @@ cards:
     rarity: Cool
     cost: 1
     scramble: 3
-    hold: true
     text: At the end of turn, return this card to your hand.
 
   - name: Overcharged Battery
@@ -362,7 +351,6 @@ cards:
     rarity: Cool
     cost: 1
     oomph: 2
-    hold: true
     text: The next card played this turn costs 0.
 
   ## Bad Stuff
@@ -371,42 +359,36 @@ cards:
     set: proposed
     kind: bad_stuff
     cost: 1
-    hold: true
     text: Holding: you may not draw more than 1 card per turn.
 
   - name: Torn Seal
     set: proposed
     kind: bad_stuff
     cost: 2
-    hold: true
     text: null
 
   - name: Sluggish
     set: proposed
     kind: bad_stuff
     cost: 1
-    hold: true
     text: Holding: cards cost +1 to play.
 
   - name: Rust
     set: proposed
     kind: bad_stuff
     cost: 2
-    hold: true
     text: Holding: Stuff you play has -1 Oomph.
 
   - name: Spore Cloud
     set: proposed
     kind: bad_stuff
     cost: 2
-    hold: true
     text: Holding: You can't have more than 3 cards in your hand.
 
   - name: Panic
     set: proposed
     kind: bad_stuff
     cost: 1
-    hold: true
     text: >-
       Holding: ALL rooms require an additional 2 `Scramble` to clear.
       Play: Exhaust 2.

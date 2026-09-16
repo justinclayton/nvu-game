@@ -30,7 +30,6 @@ export const CARD_CONTENT = {
       oomph: 2,
       scramble: 0,
       conditionalStat: false,
-      hold: false,
       text: "",
     },
     {
@@ -45,7 +44,6 @@ export const CARD_CONTENT = {
       oomph: 4,
       scramble: 0,
       conditionalStat: false,
-      hold: false,
       text: "",
     },
     {
@@ -60,7 +58,6 @@ export const CARD_CONTENT = {
       oomph: 2,
       scramble: 0,
       conditionalStat: false,
-      hold: false,
       text: "Exhaust 2 (the top 2 cards of your deck go to your Exhaust pile).",
     },
     {
@@ -75,7 +72,6 @@ export const CARD_CONTENT = {
       oomph: 0,
       scramble: 2,
       conditionalStat: false,
-      hold: false,
       text: "",
     },
     {
@@ -90,7 +86,6 @@ export const CARD_CONTENT = {
       oomph: 0,
       scramble: 4,
       conditionalStat: false,
-      hold: false,
       text: "",
     },
     {
@@ -105,7 +100,6 @@ export const CARD_CONTENT = {
       oomph: 0,
       scramble: 1,
       conditionalStat: false,
-      hold: false,
       text: "Look at the top card of any deck, then put it back on top. (Peek 1?)",
     },
     {
@@ -120,7 +114,6 @@ export const CARD_CONTENT = {
       oomph: 4,
       scramble: 0,
       conditionalStat: false,
-      hold: false,
       text: "Exhaust 1.",
     },
     {
@@ -135,7 +128,6 @@ export const CARD_CONTENT = {
       oomph: 3,
       scramble: 0,
       conditionalStat: false,
-      hold: false,
       text: "If Gray played a card this turn, this costs 0.",
     },
     {
@@ -150,7 +142,6 @@ export const CARD_CONTENT = {
       oomph: 5,
       scramble: 0,
       conditionalStat: false,
-      hold: false,
       text: "Exhaust 3.",
     },
     {
@@ -165,7 +156,6 @@ export const CARD_CONTENT = {
       oomph: 4,
       scramble: 0,
       conditionalStat: false,
-      hold: false,
       text: "Shuffle an exhausted Red card back into your deck.",
     },
     {
@@ -180,7 +170,6 @@ export const CARD_CONTENT = {
       oomph: 2,
       scramble: 0,
       conditionalStat: false,
-      hold: false,
       text: "This has Oomph +2 for each card you paid with this turn.",
     },
     {
@@ -195,7 +184,6 @@ export const CARD_CONTENT = {
       oomph: 2,
       scramble: 0,
       conditionalStat: false,
-      hold: false,
       text: "Shuffle 1 Stuff from your hand into your deck.",
     },
     {
@@ -210,7 +198,6 @@ export const CARD_CONTENT = {
       oomph: 0,
       scramble: 2,
       conditionalStat: false,
-      hold: true,
       text: "Holding: Cards you play have +1 Oomph, but you may not draw more than 2 cards per turn.",
     },
     {
@@ -225,7 +212,6 @@ export const CARD_CONTENT = {
       oomph: 4,
       scramble: 0,
       conditionalStat: false,
-      hold: false,
       text: "If Gray has already played at least one card this turn, +2 Oomph. If this is the card that clears the room, put this right back in your hand.",
     },
     {
@@ -240,7 +226,6 @@ export const CARD_CONTENT = {
       oomph: 0,
       scramble: 0,
       conditionalStat: true,
-      hold: false,
       text: "Oomph equal to twice the number of other cards Red played this turn.",
     },
     {
@@ -255,7 +240,6 @@ export const CARD_CONTENT = {
       oomph: 0,
       scramble: 0,
       conditionalStat: false,
-      hold: true,
       text: "While `Holding`, you don't Exhaust cards.",
     },
     {
@@ -270,7 +254,6 @@ export const CARD_CONTENT = {
       oomph: 0,
       scramble: 1,
       conditionalStat: false,
-      hold: false,
       text: "Look at the top 2 cards of any deck. Put them back in either order.",
     },
     {
@@ -285,7 +268,6 @@ export const CARD_CONTENT = {
       oomph: 0,
       scramble: 0,
       conditionalStat: true,
-      hold: false,
       text: "Oomph equal to twice the number of cards Red has played this turn.",
     },
     {
@@ -300,7 +282,6 @@ export const CARD_CONTENT = {
       oomph: 0,
       scramble: 0,
       conditionalStat: true,
-      hold: false,
       text: "If any Bad Stuff is played this turn, Oomph 2 and Scramble 2.",
     },
     {
@@ -315,7 +296,6 @@ export const CARD_CONTENT = {
       oomph: 0,
       scramble: 2,
       conditionalStat: false,
-      hold: false,
       text: "Look at the top 3 cards of any deck, then put them back in any order.",
     },
     {
@@ -330,7 +310,6 @@ export const CARD_CONTENT = {
       oomph: 0,
       scramble: 2,
       conditionalStat: false,
-      hold: false,
       text: "Move 1 Stuff from your hand to Red's hand.",
     },
     {
@@ -345,7 +324,6 @@ export const CARD_CONTENT = {
       oomph: 2,
       scramble: 0,
       conditionalStat: false,
-      hold: false,
       text: "Shuffle an exhausted Gray card back into your deck.",
     },
     {
@@ -360,7 +338,6 @@ export const CARD_CONTENT = {
       oomph: 0,
       scramble: 2,
       conditionalStat: false,
-      hold: false,
       text: "Shuffle 1 Stuff from Red's hand into Red's deck.",
     },
     {
@@ -375,7 +352,6 @@ export const CARD_CONTENT = {
       oomph: 0,
       scramble: 2,
       conditionalStat: false,
-      hold: false,
       text: "Every time Red plays a card this turn, draw 1 card.",
     },
     {
@@ -390,7 +366,6 @@ export const CARD_CONTENT = {
       oomph: 0,
       scramble: 0,
       conditionalStat: true,
-      hold: false,
       text: "Scramble equal to twice the number of other cards Gray played this turn.",
     },
     {
@@ -405,7 +380,6 @@ export const CARD_CONTENT = {
       oomph: 0,
       scramble: 0,
       conditionalStat: false,
-      hold: false,
       text: "Scrap a card from your hand. If you do, draw the top card from the Gray Rewards deck directly into your hand.",
     },
     {
@@ -420,7 +394,6 @@ export const CARD_CONTENT = {
       oomph: 5,
       scramble: 0,
       conditionalStat: false,
-      hold: true,
       text: "Holding: when you play a card with Scramble, draw 1 card.",
     },
     {
@@ -435,7 +408,6 @@ export const CARD_CONTENT = {
       oomph: 3,
       scramble: 0,
       conditionalStat: false,
-      hold: true,
       text: "",
     },
     {
@@ -450,7 +422,6 @@ export const CARD_CONTENT = {
       oomph: 0,
       scramble: 3,
       conditionalStat: false,
-      hold: true,
       text: "",
     },
     {
@@ -465,7 +436,6 @@ export const CARD_CONTENT = {
       oomph: 1,
       scramble: 1,
       conditionalStat: false,
-      hold: true,
       text: "If you get any Good Stuff this turn, get an additional one.",
     },
     {
@@ -480,7 +450,6 @@ export const CARD_CONTENT = {
       oomph: 0,
       scramble: 0,
       conditionalStat: false,
-      hold: true,
       text: "Move 2 cards from your exhaust pile to the bottom of your deck.",
     },
     {
@@ -495,7 +464,6 @@ export const CARD_CONTENT = {
       oomph: 5,
       scramble: 0,
       conditionalStat: false,
-      hold: true,
       text: "",
     },
     {
@@ -510,7 +478,6 @@ export const CARD_CONTENT = {
       oomph: 3,
       scramble: 3,
       conditionalStat: false,
-      hold: true,
       text: "One of you draws 1 card, (even if their hand is full).",
     },
     {
@@ -525,7 +492,6 @@ export const CARD_CONTENT = {
       oomph: 0,
       scramble: 3,
       conditionalStat: false,
-      hold: true,
       text: "At the end of turn, return this card to your hand.",
     },
     {
@@ -540,7 +506,6 @@ export const CARD_CONTENT = {
       oomph: 2,
       scramble: 0,
       conditionalStat: false,
-      hold: true,
       text: "The next card played this turn costs 0.",
     },
     {
@@ -555,7 +520,6 @@ export const CARD_CONTENT = {
       oomph: 0,
       scramble: 0,
       conditionalStat: false,
-      hold: true,
       text: "Holding: you may not draw more than 1 card per turn.",
     },
     {
@@ -570,7 +534,6 @@ export const CARD_CONTENT = {
       oomph: 0,
       scramble: 0,
       conditionalStat: false,
-      hold: true,
       text: "",
     },
     {
@@ -585,7 +548,6 @@ export const CARD_CONTENT = {
       oomph: 0,
       scramble: 0,
       conditionalStat: false,
-      hold: true,
       text: "Holding: cards cost +1 to play.",
     },
     {
@@ -600,7 +562,6 @@ export const CARD_CONTENT = {
       oomph: 0,
       scramble: 0,
       conditionalStat: false,
-      hold: true,
       text: "Holding: Stuff you play has -1 Oomph.",
     },
     {
@@ -615,7 +576,6 @@ export const CARD_CONTENT = {
       oomph: 0,
       scramble: 0,
       conditionalStat: false,
-      hold: true,
       text: "Holding: You can't have more than 3 cards in your hand.",
     },
     {
@@ -630,7 +590,6 @@ export const CARD_CONTENT = {
       oomph: 0,
       scramble: 0,
       conditionalStat: false,
-      hold: true,
       text: "Holding: ALL rooms require an additional 2 `Scramble` to clear. Play: Exhaust 2.",
     },
   ],

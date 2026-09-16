@@ -74,7 +74,7 @@ export function exhaustXPreventedBy(state: GameState, c: Character): Card | null
   return null;
 }
 
-/** §5: maximum hand size is 5, and `Hold` counts against it. A card may tighten it. */
+/** §5: maximum hand size is 5. A card may tighten it. */
 export const handCapFor = (state: GameState, c: Character): number =>
   heldModifiers(state, c).handCap;
 

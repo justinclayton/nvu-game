@@ -115,7 +115,7 @@ describe("§10 Ascending", () => {
     expect(eventTypes(events)).toContain("REWARD_DECLINED");
   });
 
-  it("'`Hold` cards carry up the stairs, Stuff included'", () => {
+  it("'the hand carries up the stairs, Stuff included'", () => {
     const held = card("Pry Bar");
     const state = atAscension({
       Red: player({ deck: pile("Shove", 2), hand: [held], exhaust: pile("Charge In", 3) }),

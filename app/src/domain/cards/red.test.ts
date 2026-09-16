@@ -338,15 +338,15 @@ describe("Zen Mode — \"While `Holding`, you don't Exhaust cards\"", () => {
     expect(next.Red.exhaust).toHaveLength(2);
   });
 
-  it("does not stop cleanup, and stays in hand itself", () => {
+  it("does not stop cleanup", () => {
     const state = playing({
       activeRoom: room("Sorting Room"),
       Red: player({ deck: pile("Shove", 4), hand: [card("Zen Mode"), card("Shove")] }),
     });
     const { state: next } = play(state, [{ type: "END_PLAY" }]);
-    // The Shove is Exhausted from hand as ever; Zen Mode has `Hold`, so it stays.
-    expect(next.Red.exhaust.map((c) => c.name)).toEqual(["Shove"]);
-    expect(next.Red.hand.some((c) => c.name === "Zen Mode")).toBe(true);
+    // Nothing was played, so nothing Exhausts; the whole hand carries over.
+    expect(next.Red.exhaust).toEqual([]);
+    expect(next.Red.hand.map((c) => c.name)).toEqual(["Zen Mode", "Shove"]);
   });
 
   it("does not stop the burned draw of a full hand", () => {

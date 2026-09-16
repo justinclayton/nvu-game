@@ -88,7 +88,6 @@ export interface CardFace {
   readonly scramble: number;
   /** The stat lives in the text instead of a field, so a behaviour computes it. */
   readonly conditionalStat: boolean;
-  readonly hold: boolean;
   readonly text: string;
 }
 

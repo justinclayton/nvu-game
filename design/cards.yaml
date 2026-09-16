@@ -15,14 +15,14 @@
 #   owner   Red | Gray           player cards only
 #   rarity  Fine | Cool | Woah
 #   cost    integer              null means not yet set
-#   power / scramble  integer    
+#   oomph / scramble  integer    
 #   conditional_stat  true       stat lives in the text instead of a field
 #   hold    true                 the card's effect runs while it sits in hand
 #   starter true                 part of a starting deck rather than a reward pool
 #   text    string               the literal printed rules text
 
 meta:
-  updated: 2026-08-30
+  updated: 2026-09-16
 
 cards:
 
@@ -39,7 +39,7 @@ cards:
     kind: player
     owner: Red
     cost: 1
-    power: 2
+    oomph: 2
 
   - name: Charge In
     count: 5
@@ -48,7 +48,7 @@ cards:
     kind: player
     owner: Red
     cost: 2
-    power: 4
+    oomph: 4
 
   - name: Overdrive
     count: 2
@@ -57,7 +57,7 @@ cards:
     kind: player
     owner: Red
     cost: 0
-    power: 2
+    oomph: 2
     text: Exhaust 2 (the top 2 cards of your deck go to your Exhaust pile).
 
   ### Gray
@@ -100,7 +100,7 @@ cards:
     owner: Red
     rarity: Fine
     cost: 1
-    power: 4
+    oomph: 4
     text: Exhaust 1.
 
   - name: Fast Follow
@@ -109,7 +109,7 @@ cards:
     owner: Red
     rarity: Fine
     cost: 1
-    power: 3
+    oomph: 3
     text: If Gray played a card this turn, this costs 0.
 
   - name: Reckless
@@ -118,7 +118,7 @@ cards:
     owner: Red
     rarity: Fine
     cost: 1
-    power: 5
+    oomph: 5
     text: Exhaust 3.
 
   - name: Second Wind
@@ -127,7 +127,7 @@ cards:
     owner: Red
     rarity: Cool
     cost: 2
-    power: 4
+    oomph: 4
     text: Shuffle an exhausted Red card back into your deck.
 
   - name: Junk Launcher
@@ -136,8 +136,8 @@ cards:
     owner: Red
     rarity: Cool
     cost: 2
-    power: 2
-    text: This has Power +2 for each card you paid with this turn.
+    oomph: 2
+    text: This has Oomph +2 for each card you paid with this turn.
 
   - name: Heavy Pockets
     set: proposed
@@ -145,7 +145,7 @@ cards:
     owner: Red
     rarity: Cool
     cost: 1
-    power: 2
+    oomph: 2
     text: Shuffle 1 Stuff from your hand into your deck.
 
   - name: Deadweight Grip
@@ -157,7 +157,7 @@ cards:
     scramble: 2
     hold: true
     text: >-
-      Holding: Cards you play have +1 Power, but you may not draw more than 2 cards at draw time.
+      Holding: Cards you play have +1 Oomph, but you may not draw more than 2 cards per turn.
 
   - name: Both Barrels
     set: proposed
@@ -165,9 +165,9 @@ cards:
     owner: Red
     rarity: Woah
     cost: 2
-    power: 4
+    oomph: 4
     text: >-
-      If Gray has already played at least one card this turn, +2 Power.
+      If Gray has already played at least one card this turn, +2 Oomph.
       If this is the card that clears the room, put this right back in your hand.
 
   - name: Flurry
@@ -177,7 +177,7 @@ cards:
     rarity: Woah
     cost: 1
     conditional_stat: true
-    text: Power equal to twice the number of other cards Red played this turn.
+    text: Oomph equal to twice the number of other cards Red played this turn.
 
   - name: Zen Mode
     set: proposed
@@ -206,7 +206,7 @@ cards:
     rarity: Cool
     cost: 1
     conditional_stat: true
-    text: Power equal to twice the number of cards Red has played this turn.
+    text: Oomph equal to twice the number of cards Red has played this turn.
 
   - name: One Man's Junk
     set: proposed
@@ -215,7 +215,7 @@ cards:
     rarity: Cool
     cost: 1
     conditional_stat: true
-    text: If any Bad Stuff is played this turn, Power 2 and Scramble 2.
+    text: If any Bad Stuff is played this turn, Oomph 2 and Scramble 2.
 
   - name: Hack the Doors
     set: proposed
@@ -241,7 +241,7 @@ cards:
     owner: Gray
     rarity: Fine
     cost: 1
-    power: 2
+    oomph: 2
     text: Shuffle an exhausted Gray card back into your deck.
 
   - name: I'll Take That
@@ -285,7 +285,7 @@ cards:
     owner: Gray
     rarity: Woah
     cost: 3
-    power: 5
+    oomph: 5
     hold: true
     text: Holding: when you play a card with Scramble, draw 1 card.
 
@@ -298,7 +298,7 @@ cards:
     kind: good_stuff
     rarity: Fine
     cost: 0
-    power: 3
+    oomph: 3
     hold: true
 
   - name: Coil Of Cable
@@ -314,7 +314,7 @@ cards:
     kind: good_stuff
     rarity: Fine
     cost: 0
-    power: 1
+    oomph: 1
     scramble: 1
     hold: true
     text: If you get any Good Stuff this turn, get an additional one.
@@ -332,7 +332,7 @@ cards:
     kind: good_stuff
     rarity: Cool
     cost: 2
-    power: 5
+    oomph: 5
     hold: true
 
   - name: Grav Harness
@@ -340,7 +340,7 @@ cards:
     kind: good_stuff
     rarity: Woah
     cost: 2
-    power: 3
+    oomph: 3
     scramble: 3
     hold: true
     text: One of you draws 1 card, (even if their hand is full).
@@ -361,7 +361,7 @@ cards:
     kind: good_stuff
     rarity: Cool
     cost: 1
-    power: 2
+    oomph: 2
     hold: true
     text: The next card played this turn costs 0.
 
@@ -372,7 +372,7 @@ cards:
     kind: bad_stuff
     cost: 1
     hold: true
-    text: Holding: you may not draw more than 1 card at draw time.
+    text: Holding: you may not draw more than 1 card per turn.
 
   - name: Torn Seal
     set: proposed
@@ -393,7 +393,7 @@ cards:
     kind: bad_stuff
     cost: 2
     hold: true
-    text: Holding: Stuff you play has -1 Power.
+    text: Holding: Stuff you play has -1 Oomph.
 
   - name: Spore Cloud
     set: proposed
@@ -418,7 +418,7 @@ cards:
     kind: enemy_room
     floor: 1
     thresholds:
-      - stat: Power
+      - stat: Oomph
         value: 5
         outcome: Ascend
     flee: Both of you Exhaust 1.
@@ -428,7 +428,7 @@ cards:
     kind: enemy_room
     floor: 2
     thresholds:
-      - stat: Power
+      - stat: Oomph
         value: 9
         outcome: Ascend
     flee: Both of you Exhaust 1.
@@ -438,7 +438,7 @@ cards:
     kind: enemy_room
     floor: 3
     thresholds:
-      - stat: Power
+      - stat: Oomph
         value: 9
         outcome: Ascend
       - stat: Scramble
@@ -456,7 +456,7 @@ cards:
       outcome: Clear, but both of you Exhaust 1.
     - stat: Scramble
       value: 5
-      outcome: Clear
+      outcome: Clear, and one of you reveals a reward.
     flee: One of you Exhausts 3.
 
   - name: Ruptured Coolant Line
@@ -469,7 +469,7 @@ cards:
       outcome: Clear, but both of you get Bad Stuff.
     - stat: Scramble
       value: 7
-      outcome: Clear
+      outcome: Clear, and one of you reveals a reward.
     flee: Both of you Exhaust 1, and one of you gets Bad Stuff.
 
   - name: Sorting Room
@@ -477,7 +477,7 @@ cards:
     set: proposed
     kind: stuff_room
     thresholds:
-      - stat: Power
+      - stat: Oomph
         value: 2
         outcome: Red gets Good Stuff.
       - stat: Scramble
@@ -489,13 +489,13 @@ cards:
     set: proposed
     kind: stuff_room
     thresholds:
-      - stat: Power
+      - stat: Oomph
         value: 2
         outcome: Red gets Good Stuff.
       - stat: Scramble
         value: 2
         outcome: Gray gets Good Stuff.
-      - stat: Power
+      - stat: Oomph
         value: 4
         outcome: Red gets 2 instead.
       - stat: Scramble
@@ -510,7 +510,7 @@ cards:
       - stat: Scramble
         value: 3
         outcome: Both of you get Good Stuff.
-      - stat: Power
+      - stat: Oomph
         value: 5
         outcome: Red gets 2 instead.
 

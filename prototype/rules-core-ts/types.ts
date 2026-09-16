@@ -8,7 +8,7 @@
  */
 
 export type Character = "Red" | "Gray";
-export type Stat = "Power" | "Scramble";
+export type Stat = "Oomph" | "Scramble";
 export type Rarity = "Fine" | "Cool" | "Woah";
 
 /** What a card is. `player` cards belong to a character; Stuff belongs to the floor. */
@@ -35,7 +35,7 @@ export interface Card {
   readonly owner?: Character;       // player cards only
   readonly rarity?: Rarity;         // purely printed; no rule reads it
   readonly cost: number;
-  readonly power: number;
+  readonly oomph: number;
   readonly scramble: number;
   readonly hold: boolean;
   readonly starter: boolean;

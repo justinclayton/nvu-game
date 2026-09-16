@@ -115,7 +115,7 @@ var TYPE_LINE = {
 
 function statLine(c) {
   var parts = [];
-  if (c.power) parts.push("Power " + c.power);
+  if (c.oomph) parts.push("Oomph " + c.oomph);
   if (c.scramble) parts.push("Scramble " + c.scramble);
   if (parts.length) return '<div class="stat">' + parts.join(", ") + "</div>";
   return "";

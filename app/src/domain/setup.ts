@@ -38,7 +38,7 @@ export function mintCard(face: CardFace, copy: number): Card {
     owner: face.owner,
     rarity: face.rarity,
     cost: face.cost,
-    power: face.power,
+    oomph: face.oomph,
     scramble: face.scramble,
     conditionalStat: face.conditionalStat,
     hold: face.hold,

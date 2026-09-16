@@ -47,7 +47,7 @@ function mean(a) { return a.length ? a.reduce(function (x, y) { return x + y; },
    a hand of modifiers with nothing to modify, so this is the number that shows it. */
 function statDensity(deck) {
   var k = 0;
-  deck.forEach(function (x) { if ((x.def.power || 0) > 0 || (x.def.scramble || 0) > 0) k++; });
+  deck.forEach(function (x) { if ((x.def.oomph || 0) > 0 || (x.def.scramble || 0) > 0) k++; });
   return { n: deck.length, k: k };
 }
 /* P(at least one stat card in a hand of h), hypergeometric. */

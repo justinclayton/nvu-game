@@ -124,7 +124,7 @@ export function scenarios(): Scenario[] {
         { note: "", command: { type: "DRAW", character: "Gray" } },
         { note: "", command: { type: "END_DRAW" } },
         {
-          note: "Red plays Charge In for free — in last stand every card in hand costs nothing. Power 3 against the Sump Crawler's Power 5.",
+          note: "Red plays Charge In for free — in last stand every card in hand costs nothing. Oomph 3 against the Sump Crawler's Oomph 5.",
           command: { type: "PLAY_CARD", character: "Red", cardId: "", payWith: [] },
         },
         {
@@ -234,7 +234,7 @@ export function scenarios(): Scenario[] {
       id: "stuff-room-sides",
       title: "A Stuff room reads each character's own side",
       question:
-        "Tool Cage asks Red for Scramble and Gray for Power — each measured only against their own side of the play zone. So the shared pool is not shared here. Does one room reading the zone differently from every other room hold up?",
+        "Tool Cage asks Red for Scramble and Gray for Oomph — each measured only against their own side of the play zone. So the shared pool is not shared here. Does one room reading the zone differently from every other room hold up?",
       setup: (c) =>
         rig(c, {
           phase: "Play",
@@ -244,15 +244,15 @@ export function scenarios(): Scenario[] {
         }),
       steps: [
         {
-          note: "Red plays Shove: Power 1. The shared pool now has Power 1 — but Tool Cage wants Scramble from Red, so Red still gets nothing.",
+          note: "Red plays Shove: Oomph 1. The shared pool now has Oomph 1 — but Tool Cage wants Scramble from Red, so Red still gets nothing.",
           command: { type: "PLAY_CARD", character: "Red", cardId: "", payWith: [] },
         },
         {
-          note: "Gray plays Duck Under: Scramble 1. Team pool is now Power 1 AND Scramble 1, which looks like both lines are met.",
+          note: "Gray plays Duck Under: Scramble 1. Team pool is now Oomph 1 AND Scramble 1, which looks like both lines are met.",
           command: { type: "PLAY_CARD", character: "Gray", cardId: "", payWith: [] },
         },
         {
-          note: "End play. Neither line pays: Red's own side has no Scramble and Gray's own side has no Power. The room clears anyway and the team walks out empty-handed.",
+          note: "End play. Neither line pays: Red's own side has no Scramble and Gray's own side has no Oomph. The room clears anyway and the team walks out empty-handed.",
           command: { type: "END_PLAY" },
         },
       ],
@@ -305,11 +305,11 @@ export function scenarios(): Scenario[] {
       },
       steps: [
         {
-          note: "Red plays Charge In (Power 3), paying with the other Charge In.",
+          note: "Red plays Charge In (Oomph 3), paying with the other Charge In.",
           command: { type: "PLAY_CARD", character: "Red", cardId: "", payWith: [] },
         },
         {
-          note: "Not enough: the Sump Crawler wants Power 5 and the pool is 3. Nothing happens yet.",
+          note: "Not enough: the Sump Crawler wants Oomph 5 and the pool is 3. Nothing happens yet.",
         },
         {
           note: "End play. Red flees, then the turn ends. (Rig the numbers in the free-play tab if you want to see the kill.)",
@@ -337,7 +337,7 @@ export function resolveStep(state: GameState, step: Step): Command | null {
     const cost = free ? 0 : c.cost;
     const fodder = p.hand
       .filter((x) => x.id !== c.id && !/may not be Exhausted to pay a cost/i.test(x.text))
-      .sort((a, b) => a.power + a.scramble - (b.power + b.scramble))
+      .sort((a, b) => a.oomph + a.scramble - (b.oomph + b.scramble))
       .slice(0, cost);
     if (fodder.length < cost) continue;
     return { ...cmd, cardId: c.id, payWith: fodder.map((x) => x.id) };

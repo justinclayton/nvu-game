@@ -35,7 +35,7 @@ export function RoomBrief({ state }: { readonly state: GameState }) {
               className="brief__pool"
               title="The stat pool: every card in the play zone, added up"
             >
-              <b>{pool.power}</b> Power · <b>{pool.scramble}</b> Scramble
+              <b>{pool.oomph}</b> Oomph · <b>{pool.scramble}</b> Scramble
             </span>
           </div>
           <ul className="brief__lines">
@@ -43,7 +43,7 @@ export function RoomBrief({ state }: { readonly state: GameState }) {
               const met = thresholdIsMet(state, t);
               const target = thresholdTarget(state, t);
               const side = statPool(state, t.measuredOn ?? undefined);
-              const have = t.stat === "Power" ? side.power : side.scramble;
+              const have = t.stat === "Oomph" ? side.oomph : side.scramble;
               return (
                 <li key={i} className={met ? "bline is-met" : "bline"}>
                   <span className="bline__need">
@@ -67,7 +67,7 @@ export function RoomBrief({ state }: { readonly state: GameState }) {
           <span className="brief__kind">{state.phase}</span>
           <p className="brief__blurb">{PHASE_BLURB[state.phase]}</p>
           <span className="brief__pool">
-            <b>{pool.power}</b> Power · <b>{pool.scramble}</b> Scramble
+            <b>{pool.oomph}</b> Oomph · <b>{pool.scramble}</b> Scramble
           </span>
         </>
       )}

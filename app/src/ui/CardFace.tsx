@@ -54,10 +54,10 @@ export function CardFace({ card, state, owner }: CardFaceProps) {
       <div className="face__art" aria-hidden="true" />
       <div className="face__stats">
         {card.conditionalStat ? <span className="stat stat--conditional">?</span> : null}
-        {card.power > 0 ? (
-          <span className="stat stat--power">
-            <b>{card.power}</b>
-            <i>Power</i>
+        {card.oomph > 0 ? (
+          <span className="stat stat--oomph">
+            <b>{card.oomph}</b>
+            <i>Oomph</i>
           </span>
         ) : null}
         {card.scramble > 0 ? (

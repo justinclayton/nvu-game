@@ -180,10 +180,10 @@ describe("§5 Phase 3 — Play", () => {
       { type: "PLAY_CARD", character: "Red", cardId: redHand[0] as CardId, payWith: [redHand[1] as CardId] },
       { type: "PLAY_CARD", character: "Gray", cardId: grayHand[0] as CardId, payWith: [grayHand[1] as CardId] },
     ]);
-    // Shove is Power 2, Duck Under is Scramble 2.
-    expect(statPool(next)).toEqual({ power: 2, scramble: 2 });
-    expect(statPool(next, "Red")).toEqual({ power: 2, scramble: 0 });
-    expect(statPool(next, "Gray")).toEqual({ power: 0, scramble: 2 });
+    // Shove is Oomph 2, Duck Under is Scramble 2.
+    expect(statPool(next)).toEqual({ oomph: 2, scramble: 2 });
+    expect(statPool(next, "Red")).toEqual({ oomph: 2, scramble: 0 });
+    expect(statPool(next, "Gray")).toEqual({ oomph: 0, scramble: 2 });
   });
 
   it("'nothing resolves while you play' — the room is checked once, at the end", () => {
@@ -200,7 +200,7 @@ describe("§5 Phase 3 — Play", () => {
       cardId: hand[0] as CardId,
       payWith: [hand[1] as CardId],
     });
-    // Sorting Room pays at Power 2 and the pool is 2, but nothing has happened.
+    // Sorting Room pays at Oomph 2 and the pool is 2, but nothing has happened.
     expect(mid.activeRoom).not.toBeNull();
     expect(mid.Red.hand).toHaveLength(0);
   });
@@ -272,8 +272,8 @@ describe("§5 Phase 4 — Cleanup", () => {
 
 describe("§6 The three kinds of room", () => {
   it("an Enemy room ends the floor when it is Cleared", () => {
-    // The Cherry wants Power 5: Charge In (Power 4, Cost 2) plus a free Pry Bar
-    // (Power 3) gets there with two Shoves as the payment.
+    // The Cherry wants Oomph 5: Charge In (Oomph 4, Cost 2) plus a free Pry Bar
+    // (Oomph 3) gets there with two Shoves as the payment.
     const state = rig({
       phase: "Play",
       activeRoom: room("Gross Thing That Looks Like A Cherry"),
@@ -318,7 +318,7 @@ describe("§6 The three kinds of room", () => {
   });
 
   it("a met line that Clears beats one that says to Flee for free", () => {
-    // Villy prints Power 9 (Ascend) and Scramble 9 (Flee this room for free).
+    // Villy prints Oomph 9 (Ascend) and Scramble 9 (Flee this room for free).
     // §5: if any challenge's threshold is met, the room is Cleared.
     const state = rig({
       phase: "Play",
@@ -329,7 +329,7 @@ describe("§6 The three kinds of room", () => {
     const r = ids(state, "Red");
     const g = ids(state, "Gray");
     const { state: next } = play(state, [
-      // Three free Pry Bars is Power 9, three free Coils is Scramble 9, so both
+      // Three free Pry Bars is Oomph 9, three free Coils is Scramble 9, so both
       // lines are met at once.
       ...r.slice(0, 3).map((id) => playFree("Red", id as CardId)),
       ...g.slice(0, 3).map((id) => playFree("Gray", id as CardId)),
@@ -354,7 +354,7 @@ describe("§6 The three kinds of room", () => {
   });
 
   it("'each character is measured on their own side of the play zone only'", () => {
-    // Sorting Room: Power 2 pays Red, Scramble 2 pays Gray. Red plays Power and
+    // Sorting Room: Oomph 2 pays Red, Scramble 2 pays Gray. Red plays Oomph and
     // Gray plays Scramble, so each pays for their own item.
     const state = rig({
       phase: "Play",
@@ -378,7 +378,7 @@ describe("§6 The three kinds of room", () => {
   });
 
   it("a Stuff room's split line pays nobody when the pool is on the wrong side", () => {
-    // Tool Cage asks Red for Power 5 on Red's own side; Red plays Scramble.
+    // Tool Cage asks Red for Oomph 5 on Red's own side; Red plays Scramble.
     const state = rig({
       phase: "Play",
       activeRoom: room("Sorting Room"),
@@ -390,7 +390,7 @@ describe("§6 The three kinds of room", () => {
       playFree("Red", r[0] as CardId),
       { type: "END_PLAY" },
     ]);
-    // Scramble 3 on Red's side meets nothing: Sorting Room asks Red for Power.
+    // Scramble 3 on Red's side meets nothing: Sorting Room asks Red for Oomph.
     // Gray's line reads Gray's own side, which is empty.
     expect(next.Red.hand).toHaveLength(0);
     expect(next.Gray.hand).toHaveLength(0);

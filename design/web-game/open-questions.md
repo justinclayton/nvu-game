@@ -28,7 +28,7 @@ So a Scramble 6 pool against Collapsed Stairwell (`Scramble 2: Clear, but both o
 and not the other. The rulebook wins.
 
 One line cannot un-Clear a room another has Cleared: §5's first sentence is that any met threshold
-Clears it, so Villy's `Scramble 9: Flee this room for free` is void when its `Power 9` line was also
+Clears it, so Villy's `Scramble 9: Flee this room for free` is void when its `Oomph 9` line was also
 met. See #3 for that line met on its own.
 
 **A consequence for the card list, not the rules:** neither Hazard's higher tier does anything.
@@ -58,7 +58,7 @@ adds to `Both of you get Good Stuff`.
 **Where:** the generator, and the room check.
 
 Villy, Coney's Work Husband prints `Scramble 9: Flee this room for free.` alongside
-`Power 9: Ascend`. §5's "any threshold met Clears the room" would Clear Villy on Scramble alone,
+`Oomph 9: Ascend`. §5's "any threshold met Clears the room" would Clear Villy on Scramble alone,
 which contradicts the line's own words.
 
 **What the code does.** The line does not Clear: the room goes to the Fled pile and its Flee line
@@ -122,6 +122,8 @@ written give the pool no way back.
 
 ## 7. No Hazard in the card list prints the reward tier the rulebook describes
 
+`[you, 2026-09-16]` Both Hazards now print `Clear, and one of you reveals a reward` as their higher tier.
+
 **Where:** the generator's threshold parser.
 
 Rulebook §6: a Hazard's higher threshold *"also pays a permanent card reward"*. Both Hazards in
@@ -166,8 +168,8 @@ A floor past 3 is therefore playable but guarded by a repeat. This is content, n
 
 **Where:** `contributionOf` in `app/src/domain/queries.ts`.
 
-Rust reads *"Holding: Stuff you play has -1 Power."* Played on a Coil Of Cable (Power 0, Scramble
-3) that would be Power -1, which would drain the shared pool rather than merely failing to fill it.
+Rust reads *"Holding: Stuff you play has -1 Oomph."* Played on a Coil Of Cable (Oomph 0, Scramble
+3) that would be Oomph -1, which would drain the shared pool rather than merely failing to fill it.
 
 **What the code does.** Each card's contribution is floored at zero. A card reduced past nothing
 contributes nothing.
@@ -202,6 +204,8 @@ something the rules can identify.
 ---
 
 ## 13. A card may draw during the Play phase
+
+`[you, 2026-09-16]` Draw and Play are one phase. Drawing during play is the rule, not an exception.
 
 **Where:** Covering Fire, I Know Kung Fu, Grav Harness.
 

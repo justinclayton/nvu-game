@@ -80,7 +80,7 @@ folder.
 
 ```ts
 interface CardBehaviour {
-  stats?(state, owner, card): { power: number; scramble: number }
+  stats?(state, owner, card): { oomph: number; scramble: number }
   onPlay?(state, ctx): StepResult
   whileHeld?: { costDelta?; stuffPowerDelta?; handCap?; drawCap? }
   onEvent?(event, state, ctx): StepResult

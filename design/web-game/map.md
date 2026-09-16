@@ -24,7 +24,7 @@ built beyond the skeleton. The spec lands at `design/web-game/spec.md`.
 - **Skills every session should consult**: `/grilling` and `/domain-modeling` for grilling tickets;
   `/prototype` for prototype tickets; `/codebase-design` when deciding where a seam goes.
 - **Standing preferences**: write plainly, no noun-stacks; state the rule, not how it got there;
-  tag every decision as yours or agent-proposed; name phases Flip/Draw/Play/Cleanup by name.
+  tag every decision as yours or agent-proposed; name phases Flip/Draw and Play/Outcome/Cleanup by name.
 - The spec is prose plus one directory tree. No diagrams.
 
 ## Decisions so far

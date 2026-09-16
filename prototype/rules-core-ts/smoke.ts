@@ -28,10 +28,10 @@ function reachable(state: GameState, room: GameState["activeRoom"]): boolean {
   if (!room) return false;
   if (room.kind === "stuff") return true; // any stat at all pays something here
   const lowest = room.thresholds.reduce((a, b) => (b.value < a.value ? b : a));
-  const have = lowest.stat === "Power" ? pool(state).power : pool(state).scramble;
+  const have = lowest.stat === "Oomph" ? pool(state).oomph : pool(state).scramble;
   const inHand = (["Red", "Gray"] as const)
     .flatMap((c) => playerOf(state, c).hand)
-    .reduce((n, card) => n + (lowest.stat === "Power" ? card.power : card.scramble), 0);
+    .reduce((n, card) => n + (lowest.stat === "Oomph" ? card.oomph : card.scramble), 0);
   return have + inHand >= lowest.value;
 }
 
@@ -41,13 +41,13 @@ function greedyPlay(state: GameState, c: Character): Command | null {
   if (!reachable(state, state.activeRoom)) return null;
   const free = statusOf(p) === "LastStand";
   const scoring = p.hand
-    .filter((x) => x.power + x.scramble > 0)
-    .sort((a, b) => b.power + b.scramble - (a.power + a.scramble));
+    .filter((x) => x.oomph + x.scramble > 0)
+    .sort((a, b) => b.oomph + b.scramble - (a.oomph + a.scramble));
   for (const card of scoring) {
     const cost = free ? 0 : card.cost;
     const fodder = p.hand
       .filter((x) => x.id !== card.id && canPayCost(x))
-      .sort((a, b) => a.power + a.scramble - (b.power + b.scramble))
+      .sort((a, b) => a.oomph + a.scramble - (b.oomph + b.scramble))
       .slice(0, cost);
     if (fodder.length < cost) continue;
     return { type: "PLAY_CARD", character: c, cardId: card.id, payWith: fodder.map((x) => x.id) };

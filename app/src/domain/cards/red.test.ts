@@ -113,7 +113,7 @@ describe("Second Wind — 'Shuffle an exhausted Red card back into your deck'", 
   });
 });
 
-describe("Junk Launcher — 'Power +2 for each card you paid with this turn'", () => {
+describe("Junk Launcher — 'Oomph +2 for each card you paid with this turn'", () => {
   it("counts the cards already spent, which are no longer anywhere else", () => {
     const state = playing({
       Red: player({
@@ -128,8 +128,8 @@ describe("Junk Launcher — 'Power +2 for each card you paid with this turn'", (
       cardId: hand[0] as CardId,
       payWith: [hand[1] as CardId, hand[2] as CardId],
     });
-    // Printed Power 2, plus 2 for each of the two cards it cost.
-    expect(statPool(next).power).toBe(6);
+    // Printed Oomph 2, plus 2 for each of the two cards it cost.
+    expect(statPool(next).oomph).toBe(6);
   });
 });
 
@@ -159,8 +159,8 @@ describe("Heavy Pockets — 'Shuffle 1 Stuff from your hand into your deck'", ()
   });
 });
 
-describe("Deadweight Grip — 'Cards you play have +1 Power, draw no more than 2'", () => {
-  it("adds a Power to everything its holder plays", () => {
+describe("Deadweight Grip — 'Cards you play have +1 Oomph, draw no more than 2'", () => {
+  it("adds a Oomph to everything its holder plays", () => {
     const state = playing({
       Red: player({
         deck: pile("Shove", 3),
@@ -174,8 +174,8 @@ describe("Deadweight Grip — 'Cards you play have +1 Power, draw no more than 2
       cardId: hand[1] as CardId,
       payWith: [hand[2] as CardId],
     });
-    // Shove is Power 2, and the Grip is still in hand.
-    expect(statPool(next).power).toBe(3);
+    // Shove is Oomph 2, and the Grip is still in hand.
+    expect(statPool(next).oomph).toBe(3);
   });
 
   it("caps its holder's draw at 2", () => {
@@ -196,8 +196,8 @@ describe("Deadweight Grip — 'Cards you play have +1 Power, draw no more than 2
   });
 });
 
-describe("Both Barrels — '+2 Power after Gray, and back to hand on a clear'", () => {
-  it("is Power 4 alone and Power 6 once Gray has played", () => {
+describe("Both Barrels — '+2 Oomph after Gray, and back to hand on a clear'", () => {
+  it("is Oomph 4 alone and Oomph 6 once Gray has played", () => {
     const state = playing({
       Red: player({ deck: pile("Shove", 3), hand: [card("Both Barrels"), card("Shove"), card("Shove")] }),
       Gray: player({ deck: pile("Duck Under", 3), hand: [card("Coil Of Cable")] }),
@@ -209,10 +209,10 @@ describe("Both Barrels — '+2 Power after Gray, and back to hand on a clear'", 
       cardId: r[0] as CardId,
       payWith: [r[1] as CardId, r[2] as CardId],
     });
-    expect(statPool(alone.state).power).toBe(4);
+    expect(statPool(alone.state).oomph).toBe(4);
 
     const withGray = must(alone.state, free("Gray", ids(alone.state, "Gray")[0] as CardId));
-    expect(statPool(withGray.state).power).toBe(6);
+    expect(statPool(withGray.state).oomph).toBe(6);
   });
 
   it("comes back to hand when the room is Cleared", () => {
@@ -243,7 +243,7 @@ describe("Both Barrels — '+2 Power after Gray, and back to hand on a clear'", 
   });
 });
 
-describe("Flurry — 'Power equal to twice the number of other cards Red played'", () => {
+describe("Flurry — 'Oomph equal to twice the number of other cards Red played'", () => {
   it("counts Red's other played cards, not itself", () => {
     const state = playing({
       Red: player({
@@ -255,12 +255,12 @@ describe("Flurry — 'Power equal to twice the number of other cards Red played'
     const one = play(state, [
       { type: "PLAY_CARD", character: "Red", cardId: r[0] as CardId, payWith: [r[3] as CardId] },
     ]);
-    // Nothing else played: Flurry is Power 0.
-    expect(statPool(one.state).power).toBe(0);
+    // Nothing else played: Flurry is Oomph 0.
+    expect(statPool(one.state).oomph).toBe(0);
 
     const two = play(one.state, [free("Red", r[1] as CardId), free("Red", r[2] as CardId)]);
-    // Two other cards, so Flurry is Power 4, plus the Pry Bar's 3.
-    expect(statPool(two.state).power).toBe(7);
+    // Two other cards, so Flurry is Oomph 4, plus the Pry Bar's 3.
+    expect(statPool(two.state).oomph).toBe(7);
   });
 });
 
@@ -302,8 +302,8 @@ describe("Zen Mode — \"While `Holding`, you don't Exhaust cards\"", () => {
     expect(next.Red.deck).toHaveLength(4);
     expect(next.Red.exhaust).toEqual([]);
     expect(eventTypes(events)).toEqual(["CARD_PLAYED", "EXHAUST_PREVENTED"]);
-    // The card still enters the play zone and still brings its Power.
-    expect(statPool(next).power).toBe(2);
+    // The card still enters the play zone and still brings its Oomph.
+    expect(statPool(next).oomph).toBe(2);
   });
 
   it("does not stop paying a cost", () => {

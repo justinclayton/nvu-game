@@ -25,7 +25,7 @@ Some things to note about how *North vs Up* works:
 
 **You choose how many cards to draw**. You'll draw a card into your hand, look at it, and then decide if you want to draw another card or stop. You can even wait to see what your partner draws before deciding as a group. If you hand is full, however, you'll have to wait -- you can't draw unless you have less than **5 cards** in your hand.
 
-**Playing a card costs other cards.** You pay for cards by putting them in your discard pile (also called the exhaust pile). The more cards in your hand, the more you'll be able to pay for expensive cards. But if you don't use them this turn, they get exhasted too!
+**Playing a card costs other cards.** You pay for cards by putting them in your discard pile (also called the exhaust pile). The more cards in your hand, the more you'll be able to pay for expensive cards. But if you don't use them this turn, they get exhausted too!
 
 ---
 ## Setup
@@ -67,25 +67,20 @@ In the middle of the table:
 
 Turn the top card of the Floor deck face up onto the Rooms pile. This is the new Active Room.
 
-### 2. Draw
+### 2. Draw and Play
 
-Players take turns drawing cards from their deck into their hand, in any order.
+Players take turns either drawing a card or playing a card, in any order. You may draw and play as many times as you like.
 
-You may draw as many cards as you like (up to your maximum hand size), but you **must draw at least 1 during the Draw phase**.
+- **Draw**: Move the top card of your deck into your hand. You **must** draw at least **1** card this turn.
+- **Full Hand**: If you are holding **5** or more cards, you have a `Full Hand` and cannot draw. If you are forced to draw with a `Full Hand`, that card goes into your exhaust pile instead.
+- **Play**: Move a card from your hand into your play zone and pay for it: look at its `Cost`, then move that number of cards from your hand to your exhaust pile. Unless otherwise specified, you can only pay for a card with other cards from your own hand. If a card's cost is 0 or less, play the card for free.
+- **Add up stats**: Stats on played cards add together across both sides of the play zone into one team pool.
 
-**Maximum:** If you are holding **5** or more cards, you have a `Full Hand`, and cannot draw more cards. If you are forced to draw with a Full Hand, that card goes into your exhaust pile instead.
+> *Example: `Red` plays a card with `Oomph 2`. `Gray` plays two cards, which read `Oomph 1`, and `Scramble 2`. Together, they have `Oomph 3` and `Scramble 2`.*
 
-### 3. Play
+The phase ends when both players pass.
 
-Players take turns playing cards from their hand into their play zone, in any order.
-   - **Pay for cards**: To play a card, you must pay for it. To pay for a card, look at its `Cost`, then move that number of cards from your hand to your Exhaust pile. Unless otherwise specified, you can only pay for a card with other cards from your own hand. If a card's cost is 0 or less, play the card for free.
-   - Their stats add together across both sides of the play zone into one team pool.
-
-> *Example: `Red` plays a card with `Power 2`. `Gray` plays two cards, which read `Power 1`, and `Scramble 2`. Together, they have `Power 3` and `Scramble 2`.*
-
-The phase ends when both players choose to stop playing cards.
-
-### 4. Outcome
+### 3. Outcome
 
 Players add their combined stats they accumulated this turn and check to see if they Cleared one or more challenges, or if they must Flee.
 
@@ -95,17 +90,18 @@ Players add their combined stats they accumulated this turn and check to see if 
 
 **Flee**: If *no challenges* have been cleared, the players must Flee the room. Resolve the `Flee:` outcome according to the text on the card, then **shuffle the room card back into the Floor deck**.
 
-### 5. Cleanup (end of turn)
+### 4. Cleanup (end of turn)
 
-Each player moves all played cards on their side of the play zone to their exhaust pile.
+Each player does the following:
 
-If one player is in `Last Stand` (see: *Last Stand*)
+1. **Exhaust your play zone:** Move every card on your side of the play zone to your exhaust pile. If you are in `Last Stand`, see section 9 instead.
+2. **Exhaust your hand:** Move every card in your hand to your exhaust pile, except cards with `Hold`.
 
 If both players are `Down` at the end of the turn, the game ends (section 11).
 
-> Players always alternate actions between each other, starting with either player. Either player may skip their turn. If both players pass, the phase ends.
+> Players always alternate actions between each other, starting with either player. Either player may pass. If both players pass, the phase ends.
 
-*Example (Draw phase): Red draws, Gray draws, Red passes, Gray draws, Red draws, Gray passes, Red passes, phase ends.*
+*Example (Draw and Play phase): Red draws, Gray draws, Red draws, Gray plays, Red plays, Gray passes, Red plays, Gray passes, Red passes, phase ends.*
 
 ---
 ## Cards
@@ -139,7 +135,7 @@ A room card presents one or more **challenges** to the players. Each turn player
 - A Stuff room's `Flee` line reads: *Flee: Clear the room, but leave empty-handed.*
 - Its challenges are split per character:
 
-  > *Power 1: Red takes 1 Good Stuff.*
+  > *Oomph 1: Red takes 1 Good Stuff.*
   > *Scramble 1: Gray takes 1 Good Stuff.*
 
 - Measure each character's challenge against that character's own side of the play zone only.
@@ -154,7 +150,7 @@ A Character card shows:
 - **Name**
 - **Type line:** `Red` or `Gray`. Note that starter cards are also indicated as such on this line.
 - **`Cost`**: the number of cards you `Exhaust` from your hand to play it.
-- **Stats**: `Power` and/or `Scramble`. Most cards will have this, though not all. Note that some cards also provide stats as part of their **effect text**.
+- **Stats**: `Oomph` and/or `Scramble`. Most cards will have this, though not all. Note that some cards also provide stats as part of their **effect text**.
 - **Effect text**, including keywords or other card-specific rules, modifiers, or stat calculations.
 - **Rarity border:** `Fine`, `Cool`, or `Woah`. Has no in-game effect.
 
@@ -174,6 +170,7 @@ A `Stuff` card shows the same parts as a player card, with these differences:
 
 ### Keywords
 
+- `Hold`: at Cleanup, this card stays in your hand instead of going to your exhaust pile.
 - `Holding:` a passive effect that applies while the card is in your hand. If the card is played or exhausted, the effect no longer applies.
 - `Exhaust X cards from your hand`: Choose **X** cards from your hand and move them to your exhaust pile.
 - `Exhaust X cards from your deck`: Move the top **X** cards of your deck to your exhaust pile.

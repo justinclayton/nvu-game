@@ -11,7 +11,7 @@
 export type Character = "Red" | "Gray";
 
 /** Rulebook §8. The two stat keywords at level 1. */
-export type Stat = "Power" | "Scramble";
+export type Stat = "Oomph" | "Scramble";
 
 /** Rulebook §8. Purely printed: no rule anywhere reads it. */
 export type Rarity = "Fine" | "Cool" | "Woah";
@@ -84,7 +84,7 @@ export interface CardFace {
   /** How many physical copies the card list prints. */
   readonly count: number;
   readonly cost: number;
-  readonly power: number;
+  readonly oomph: number;
   readonly scramble: number;
   /** The stat lives in the text instead of a field, so a behaviour computes it. */
   readonly conditionalStat: boolean;

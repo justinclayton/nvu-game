@@ -121,7 +121,7 @@ export const STUFF: Registry = {
     whileHeld: { costDelta: 1 },
   },
 
-  /* "Holding: Stuff you play has -1 Power." */
+  /* "Holding: Stuff you play has -1 Oomph." */
   Rust: {
     whileHeld: { stuffPowerDelta: -1 },
   },

@@ -188,7 +188,7 @@ export function playableCards(state: GameState, c: Character): readonly Card[] {
 
 /** §5: may this character draw another card right now? */
 export function canDraw(state: GameState, c: Character): boolean {
-  if (state.phase !== "Draw" || state.pending !== null) return false;
+  if (state.phase !== "Play" || state.pending !== null) return false;
   const p = playerOf(state, c);
   if (p.down || p.lastStand) return false;
   if (p.deck.length === 0) return false;

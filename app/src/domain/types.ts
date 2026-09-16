@@ -110,8 +110,12 @@ export interface TurnRecord {
 
 /* ------------------------------------------------------------ the phases */
 
-/** Cleanup is not a waiting phase; it is the last step of `END_PLAY` (§5). */
-export type Phase = "Flip" | "Draw" | "Play" | "Ascend" | "GameOver";
+/**
+ * Draw and Play are one phase (§5): either character may draw or play a card
+ * on their action, in any order, until both pass. Cleanup is not a waiting
+ * phase of its own; it is the last step of `END_PLAY`.
+ */
+export type Phase = "Flip" | "Play" | "Ascend" | "GameOver";
 
 export type Outcome = "Victory" | "Defeat";
 
@@ -221,7 +225,6 @@ export interface AscendChoice {
 export type Command =
   | { readonly type: "FLIP_ROOM" }
   | { readonly type: "DRAW"; readonly character: Character }
-  | { readonly type: "END_DRAW" }
   | {
       readonly type: "PLAY_CARD";
       readonly character: Character;

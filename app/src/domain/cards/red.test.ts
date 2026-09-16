@@ -2,7 +2,18 @@
 
 import { beforeEach, describe, expect, it } from "vitest";
 import { costOf, statPool } from "../queries";
-import { card, eventTypes, must, pile, play, player, resetRig, rig, room } from "../__fixtures__/rig";
+import {
+  card,
+  eventTypes,
+  must,
+  pile,
+  play,
+  player,
+  readyToEnd,
+  resetRig,
+  rig,
+  room,
+} from "../__fixtures__/rig";
 import type { CardId, Character, GameState } from "../types";
 
 beforeEach(resetRig);
@@ -14,13 +25,15 @@ const free = (c: Character, cardId: CardId) =>
   ({ type: "PLAY_CARD", character: c, cardId, payWith: [] }) as const;
 
 const playing = (over: Partial<GameState> = {}) =>
-  rig({
-    phase: "Play",
-    activeRoom: room("Gross Thing That Looks Like A Cherry"),
-    Red: player({ deck: pile("Shove", 6) }),
-    Gray: player({ deck: pile("Duck Under", 6) }),
-    ...over,
-  });
+  readyToEnd(
+    rig({
+      phase: "Play",
+      activeRoom: room("Gross Thing That Looks Like A Cherry"),
+      Red: player({ deck: pile("Shove", 6) }),
+      Gray: player({ deck: pile("Duck Under", 6) }),
+      ...over,
+    }),
+  );
 
 describe("Reckless Swing — 'Exhaust 1'", () => {
   it("takes one off the top of your own deck", () => {
@@ -180,7 +193,7 @@ describe("Deadweight Grip — 'Cards you play have +1 Oomph, draw no more than 2
 
   it("caps its holder's draw at 2", () => {
     const state = rig({
-      phase: "Draw",
+      phase: "Play",
       activeRoom: room("Sorting Room"),
       Red: player({ deck: pile("Shove", 6), hand: [card("Deadweight Grip")] }),
       Gray: player({ deck: pile("Duck Under", 6) }),
@@ -338,7 +351,7 @@ describe("Zen Mode — \"While `Holding`, you don't Exhaust cards\"", () => {
 
   it("does not stop the burned draw of a full hand", () => {
     const state = rig({
-      phase: "Draw",
+      phase: "Play",
       activeRoom: room("Sorting Room"),
       Red: player({
         deck: pile("Shove", 4),

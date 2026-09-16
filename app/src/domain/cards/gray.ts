@@ -190,9 +190,9 @@ export const GRAY: Registry = {
 
   /* "Every time Red plays a card this turn, draw 1 card."
    *
-   * A card-driven draw in the play phase. §5's "once play begins, nobody draws"
-   * is the rule; the card is the exception that says so. See
-   * open-questions.md #13. */
+   * Draw and Play are one phase (§5), so a card-driven draw here is nothing
+   * special — it is the same draw a player's own action would make, just
+   * triggered by the event instead. See open-questions.md #13. */
   "Covering Fire": {
     onEvent(event, state, ctx) {
       if (ctx.zone !== "playZone") return nothing(state);

@@ -83,7 +83,7 @@ function HandSlot({
         <span className="slot__label slot__label--inline">
           hand · {state[character].hand.length}
         </span>
-        {state.phase === "Draw" ? (
+        {state.phase === "Play" ? (
           <button
             type="button"
             className="button button--small"

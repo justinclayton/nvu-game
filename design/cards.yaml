@@ -317,7 +317,7 @@ cards:
     kind: good_stuff
     rarity: Cool
     cost: 1
-    text: Move 2 cards from your exhaust pile to the bottom of your deck.
+    text: Choose a character. Move 2 cards from that character's exhaust pile to the bottom of their deck.
 
   - name: Cutting Torch
     set: proposed
@@ -358,7 +358,7 @@ cards:
   - name: Faceful Of Slime
     set: proposed
     kind: bad_stuff
-    cost: 1
+    cost: 2
     text: Holding: you may not draw more than 1 card per turn.
 
   - name: Torn Seal

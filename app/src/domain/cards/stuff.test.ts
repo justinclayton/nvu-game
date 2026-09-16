@@ -61,8 +61,8 @@ describe("Crowbar — 'If you get any Good Stuff this turn, get an additional on
   });
 });
 
-describe("A Pair Of Stich-Em-Ups — 'Move 2 cards from your exhaust pile to the bottom'", () => {
-  it("takes exactly two, and they go under the deck", () => {
+describe("A Pair Of Stich-Em-Ups — 'Choose a character, move 2 cards from their exhaust'", () => {
+  it("heals the caster with no choice offered when only they have exhaust", () => {
     const state = playing({
       Red: player({
         deck: pile("Shove", 2),
@@ -78,7 +78,8 @@ describe("A Pair Of Stich-Em-Ups — 'Move 2 cards from your exhaust pile to the
       payWith: [r[1] as CardId],
     });
     const pending = asked.state.pending;
-    if (pending?.kind !== "ChooseCards") throw new Error("expected a card choice");
+    if (pending?.kind !== "ChooseCards") throw new Error("expected a card choice, no character prompt");
+    expect(pending.character).toBe("Red");
     expect(pending.count).toBe(2);
 
     const chosen = pending.options.slice(0, 2).map((c) => c.id);
@@ -86,6 +87,84 @@ describe("A Pair Of Stich-Em-Ups — 'Move 2 cards from your exhaust pile to the
     expect(next.Red.deck.slice(-2).map((c) => c.id)).toEqual(chosen);
     expect(next.Red.deck).toHaveLength(4);
     expect(eventTypes(events)).toContain("CARD_MOVED");
+  });
+
+  it("asks which character when both have exhaust, and heals the other one", () => {
+    const state = playing({
+      Red: player({
+        deck: pile("Shove", 2),
+        hand: [card("A Pair Of Stich-Em-Ups"), card("Shove")],
+        exhaust: pile("Charge In", 3),
+      }),
+      Gray: player({
+        deck: pile("Duck Under", 2),
+        exhaust: pile("Duck Under", 3),
+      }),
+    });
+    const r = ids(state, "Red");
+    const asked = must(state, {
+      type: "PLAY_CARD",
+      character: "Red",
+      cardId: r[0] as CardId,
+      payWith: [r[1] as CardId],
+    });
+    expect(asked.state.pending?.kind).toBe("ChooseCharacter");
+
+    const chosen = must(asked.state, { type: "CHOOSE_CHARACTER", character: "Gray" });
+    const pending = chosen.state.pending;
+    if (pending?.kind !== "ChooseCards") throw new Error("expected a card choice for Gray");
+    expect(pending.character).toBe("Gray");
+    expect(pending.options).toEqual(state.Gray.exhaust);
+
+    const chosenCards = pending.options.slice(0, 2).map((c) => c.id);
+    const { state: next, events } = must(chosen.state, {
+      type: "CHOOSE_CARDS",
+      cardIds: chosenCards,
+    });
+    expect(next.Gray.deck.slice(-2).map((c) => c.id)).toEqual(chosenCards);
+    expect(next.Gray.deck).toHaveLength(4);
+    expect(next.Gray.exhaust).toHaveLength(1);
+    // Red's own pile picked up the payment card that was Exhausted to play it,
+    // on top of the 3 it started with — the choice still landed on Gray.
+    expect(next.Red.exhaust).toHaveLength(4);
+    expect(eventTypes(events)).toContain("CARD_MOVED");
+  });
+
+  it("heals a partner in Last Stand without ending it early", () => {
+    const state = playing({
+      // Red is in Last Stand too, so playing costs nothing and Red's own
+      // exhaust pile stays empty — the only eligible target is Gray.
+      Red: player({
+        deck: [],
+        hand: [card("A Pair Of Stich-Em-Ups")],
+        exhaust: [],
+        lastStand: true,
+      }),
+      Gray: player({
+        deck: [],
+        exhaust: pile("Duck Under", 3),
+        lastStand: true,
+      }),
+    });
+    const r = ids(state, "Red");
+    // Only Gray has anything in exhaust, so the heal goes straight to Gray
+    // with no character prompt.
+    const asked = must(state, {
+      type: "PLAY_CARD",
+      character: "Red",
+      cardId: r[0] as CardId,
+      payWith: [],
+    });
+    const pending = asked.state.pending;
+    if (pending?.kind !== "ChooseCards") throw new Error("expected a card choice for Gray");
+    expect(pending.character).toBe("Gray");
+
+    const chosen = pending.options.slice(0, 2).map((c) => c.id);
+    const { state: next } = must(asked.state, { type: "CHOOSE_CARDS", cardIds: chosen });
+    expect(next.Gray.deck).toHaveLength(2);
+    // Last Stand only ends at Cleanup (§9); refilling the deck mid-turn does
+    // not stand Gray back up on its own.
+    expect(next.Gray.lastStand).toBe(true);
   });
 });
 

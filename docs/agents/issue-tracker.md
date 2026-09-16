@@ -1,51 +1,69 @@
-# Issue tracker: Local Markdown (relocated)
+# Issue tracker: GitHub
 
-Issues, specs, and wayfinder maps for this repo live as markdown files under `design/`.
-
-This is the standard local-markdown tracker with one override: the directory is `design/`, not
-`.scratch/`. This repo is entirely design documents — the maps and tickets *are* the work, not
-scratch beside it — so `.scratch` was rejected as misleading.
+Issues and specs for this repo live as GitHub issues on `justinclayton/nvu-game`. Use the `gh` CLI for all operations.
 
 ## Conventions
 
-- One effort per directory: `design/<effort-slug>/`
-- The spec is `design/<effort-slug>/spec.md`
-- Issues are one file per ticket at `design/<effort-slug>/issues/<NN>-<slug>.md`, numbered from
-  `01` — never a single combined tickets file
-- Triage state is a `Status:` line near the top of each issue file
-- Comments and conversation history append to the bottom under a `## Comments` heading
+- **Create an issue**: `gh issue create --title "..." --body "..."`. Use a heredoc for multi-line bodies.
+- **Read an issue**: `gh issue view <number> --comments`, filtering comments by `jq` and also fetching labels.
+- **List issues**: `gh issue list --state open --json number,title,body,labels,comments --jq '[.[] | {number, title, body, labels: [.labels[].name], comments: [.comments[].body]}]'` with appropriate `--label` and `--state` filters.
+- **Comment on an issue**: `gh issue comment <number> --body "..."`
+- **Apply / remove labels**: `gh issue edit <number> --add-label "..."` / `--remove-label "..."`
+- **Close**: `gh issue close <number> --comment "..."`
+
+Issue bodies here use an "Acceptance criteria" checklist rather than a "Done-when" line; treat it the same way — every box checked is the completion criterion.
+
+## Claiming an issue
+
+Open issues an agent may pick up carry `ready-for-agent`. "Take the next issue" means the lowest-numbered open `ready-for-agent` issue with no open blocker. Claiming is the session's first write: swap the label so no other session picks the same one.
+
+```
+gh issue edit <n> --add-label in-progress --remove-label ready-for-agent
+```
+
+An issue that says "design first" or asks for `/grilling` carries `needs-human` instead of `ready-for-agent`: the designer settles the design in a session, records the outcome on the issue, and swaps the label. Agents never claim `needs-human` issues.
+
+Name the working branch `claude/issue-<n>` after the issue number. Open the PR with `Closes #<n>` in the body; the merge closes the issue and the `in-progress` label goes with it.
+
+Infer the repo from `git remote -v`; `gh` does this automatically when run inside a clone.
+
+## Running issues with subagents
+
+A coordinator session can work a batch of `ready-for-agent` issues by launching one subagent per issue, each in its own worktree (`.claude/worktrees/issue-<n>`, branch `claude/issue-<n>`), in dependency order. `/run-issues` (a user-level skill) is that process; `/take-issue` is the single-issue path for a Sonnet session in the main checkout.
+
+- **Model: Sonnet by default.** Use Opus only for architecture or refactor issues that rewrite files other issues also touch (an engine or rules-core restructure is the shape).
+- **Concurrency: 2–3 agents at once.** Check plan usage (`get_usage`) before launching each wave.
+- **No shared runtime resource.** This is a web app with no device pool or shared signed-in account, so waves aren't limited by that; the only thing to serialize is issues that touch the same generated or hand-authored files (`design/cards.yaml`, `prototype/cards.js`, the engine in `app/src/`).
+- **Environment setup, per worktree:**
+  ```sh
+  git worktree add .claude/worktrees/issue-<n> -b claude/issue-<n> origin/main
+  ( cd .claude/worktrees/issue-<n> && make app-install )
+  ```
+- **Verify:** `make check` (regenerates and checks the card modules against `design/cards.yaml`) and `make app-check` (lint, typecheck, test the web game) in the worktree. Both must pass before opening a PR. Run `make build` after any change to `design/cards.yaml` so the generated modules aren't stale.
+- **Conflict hotspots** when merging the base branch into a still-open issue branch: `design/cards.yaml`, `prototype/cards.js` (generated — regenerate rather than hand-merge), and the engine/rules files under `app/src/`.
+- **Recovery.** On resuming a run after a limit or a sleep: launch a fresh agent with an explicit "state you inherit" section (commits, PR, scratchpad artifacts, how `main` moved).
+
+## Screenshots and video on pull requests
+
+A PR for anything a person can see (a new screen, control, layout, or a visible bug fix) carries pictures of it, so the review can happen from the PR page rather than by building the branch. Screenshots for a static change; a short GIF for an interaction. Skip it for pure rules, engine, or tooling changes with no UI surface.
+
+Attach images directly to the PR body (drag-and-drop or `gh pr create --body-file` with an image already uploaded via the GitHub UI/API) rather than maintaining a media branch — this repo has no `pr-media` convention.
 
 ## When a skill says "publish to the issue tracker"
 
-Create a new file under `design/<effort-slug>/`, creating the directory if needed.
+Create a GitHub issue.
 
 ## When a skill says "fetch the relevant ticket"
 
-Read the file at the referenced path. The user will normally pass the path or the issue number.
+Run `gh issue view <number> --comments`.
 
 ## Wayfinding operations
 
-Used by `/wayfinder`. The **map** is a file with one **child** file per ticket.
+Used by `/wayfinder`. The **map** is a single issue with **child** issues as tickets.
 
-- **Map**: `design/<effort>/map.md` — the Destination / Notes / Decisions-so-far / Not-yet-specified
-  / Out-of-scope body.
-- **Child ticket**: `design/<effort>/issues/NN-<slug>.md`, numbered from `01`, with the question in
-  the body. A `Type:` line records the ticket type (`research`/`prototype`/`grilling`/`task`); a
-  `Status:` line records `open`/`claimed`/`resolved`.
-- **Blocking**: a `Blocked by: NN, NN` line near the top. A ticket is unblocked when every file it
-  lists is `resolved`.
-- **Frontier**: scan `design/<effort>/issues/` for files that are open, unblocked, and unclaimed;
-  first by number wins.
-- **Claim**: set `Status: claimed` and save before any work.
-- **Resolve**: append the answer under an `## Answer` heading, set `Status: resolved`, then append a
-  context pointer (gist + link) to the map's Decisions-so-far in `map.md`.
-
-## Active efforts
-
-- [`design/web-game/`](../../design/web-game/map.md) — architecture spec and skeleton for the official React web version.
-
-- [`design/core-design/`](../../design/core-design/map.md) — North vs Up core design spec.
-
-## Playtest records
-
-- [`design/playtests/`](../../design/playtests/) — one file per playtest, numbered from `01`. Notes are the designer's own, verbatim; rulings that come out of them land in the rulebook or a ticket, not here.
+- **Map**: a single issue labelled `wayfinder:map`, holding the Notes / Decisions-so-far / Fog body. `gh issue create --label wayfinder:map`.
+- **Child ticket**: an issue linked to the map as a GitHub sub-issue (`gh api` on the sub-issues endpoint). Where sub-issues aren't enabled, add the child to a task list in the map body and put `Part of #<map>` at the top of the child body. Labels: `wayfinder:<type>` (`research`/`prototype`/`grilling`/`task`). Once claimed, the ticket is assigned to the driving dev.
+- **Blocking**: prefer GitHub's native issue dependencies (`gh api --method POST repos/justinclayton/nvu-game/issues/<child>/dependencies/blocked_by -F issue_id=<blocker-db-id>`, where `<blocker-db-id>` is the blocker's numeric database id from `gh api repos/justinclayton/nvu-game/issues/<n> --jq .id`, not the `#number`). Where that isn't set up, the existing fallback in this repo is a `## Blocked by` section in the body listing the blocker issue URLs directly.
+- **Frontier query**: list the map's open children (`gh issue list --state open`, scoped to the map's sub-issues / task list), drop any with an open blocker or an assignee; first in map order wins.
+- **Claim**: `gh issue edit <n> --add-assignee @me`, the session's first write.
+- **Resolve**: `gh issue comment <n> --body "<answer>"`, then `gh issue close <n>`, then append a context pointer (gist + link) to the map's Decisions-so-far.

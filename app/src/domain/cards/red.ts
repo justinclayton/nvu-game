@@ -113,7 +113,7 @@ export const RED: Registry = {
   },
 
   /* "Holding: Cards you play have +1 Oomph, but you may not draw more than 2
-   * cards at draw time." */
+   * cards per turn." */
   "Deadweight Grip": {
     whileHeld: { playedPowerDelta: 1, drawCap: 2 },
   },

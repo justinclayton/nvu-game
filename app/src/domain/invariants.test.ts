@@ -43,7 +43,9 @@ function nextCommand(state: GameState): Command | null {
   switch (state.phase) {
     case "Flip":
       return { type: "FLIP_ROOM" };
-    case "Draw": {
+    case "Play": {
+      // Draw and Play are one phase: draw up to a shallow depth first, then
+      // play whatever is affordable, then pass.
       for (const c of CHARACTERS) {
         // A card in hand can cap how deep this character may draw, so the
         // domain is what says whether another draw is legal.
@@ -51,9 +53,6 @@ function nextCommand(state: GameState): Command | null {
           return { type: "DRAW", character: c };
         }
       }
-      return { type: "END_DRAW" };
-    }
-    case "Play": {
       for (const c of CHARACTERS) {
         const card = playableCards(state, c)[0];
         if (!card) continue;
@@ -168,7 +167,6 @@ describe("seeded-run invariants", () => {
   it("a rejected command leaves the state identical", () => {
     const [start] = createInitialState(1, CARD_CONTENT);
     const illegal: Command[] = [
-      { type: "END_DRAW" },
       { type: "END_PLAY" },
       { type: "DRAW", character: "Red" },
       { type: "TAKE_REWARD", take: true },

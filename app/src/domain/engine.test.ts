@@ -4,7 +4,18 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import { execute } from "./engine";
 import { statPool } from "./queries";
-import { card, eventTypes, must, pile, play, player, resetRig, rig, room } from "./__fixtures__/rig";
+import {
+  card,
+  eventTypes,
+  must,
+  pile,
+  play,
+  player,
+  readyToEnd,
+  resetRig,
+  rig,
+  room,
+} from "./__fixtures__/rig";
 import type { CardId, Command, GameState } from "./types";
 
 beforeEach(resetRig);
@@ -31,7 +42,7 @@ describe("§5 Phase 1 — Flip", () => {
     const { state: next, events } = must(state, { type: "FLIP_ROOM" });
     expect(next.activeRoom?.id).toBe(first.id);
     expect(next.floorDeck).toHaveLength(1);
-    expect(next.phase).toBe("Draw");
+    expect(next.phase).toBe("Play");
     expect(eventTypes(events)).toEqual(["ROOM_FLIPPED"]);
   });
 
@@ -49,19 +60,30 @@ describe("§5 Phase 1 — Flip", () => {
   });
 });
 
-describe("§5 Phase 2 — Draw", () => {
+describe("§5 Phase 2 — Draw and Play", () => {
   const drawState = (over = {}) =>
     rig({
-      phase: "Draw",
+      phase: "Play",
       activeRoom: room("Sorting Room"),
       Red: player({ deck: pile("Shove", 5) }),
       Gray: player({ deck: pile("Duck Under", 5) }),
       ...over,
     });
 
-  it("'you must draw at least 1' — the draw phase will not end otherwise", () => {
+  const playState = (over = {}) =>
+    readyToEnd(
+      rig({
+        phase: "Play",
+        activeRoom: room("Gross Thing That Looks Like A Cherry"),
+        Red: player({ deck: pile("Shove", 5), hand: [card("Charge In"), card("Shove")] }),
+        Gray: player({ deck: pile("Duck Under", 5) }),
+        ...over,
+      }),
+    );
+
+  it("'you must draw at least 1' — the phase will not end otherwise", () => {
     const state = drawState();
-    const rejected = execute(state, { type: "END_DRAW" });
+    const rejected = execute(state, { type: "END_PLAY" });
     expect(rejected.ok).toBe(false);
     if (!rejected.ok) expect(rejected.reason.code).toBe("MustDrawAtLeastOne");
   });
@@ -87,38 +109,25 @@ describe("§5 Phase 2 — Draw", () => {
     if (!twice.ok) expect(twice.reason.code).toBe("HandIsFull");
   });
 
-  it("'the draw phase ends for both characters at once'", () => {
-    const state = drawState();
-    const { state: next } = play(state, [
-      { type: "DRAW", character: "Red" },
-      { type: "DRAW", character: "Gray" },
-      { type: "END_DRAW" },
-    ]);
-    expect(next.phase).toBe("Play");
-  });
-
-  it("'once play begins, nobody draws'", () => {
-    const state = drawState();
-    const { state: next } = play(state, [
-      { type: "DRAW", character: "Red" },
-      { type: "DRAW", character: "Gray" },
-      { type: "END_DRAW" },
-    ]);
-    const rejected = execute(next, { type: "DRAW", character: "Red" });
-    expect(rejected.ok).toBe(false);
-    if (!rejected.ok) expect(rejected.reason.code).toBe("WrongPhase");
-  });
-});
-
-describe("§5 Phase 3 — Play", () => {
-  const playState = (over = {}) =>
-    rig({
+  it("'either may draw or play on their action' — drawing and playing interleave", () => {
+    const state = rig({
       phase: "Play",
-      activeRoom: room("Gross Thing That Looks Like A Cherry"),
-      Red: player({ deck: pile("Shove", 5), hand: [card("Charge In"), card("Shove")] }),
+      activeRoom: room("Sorting Room"),
+      Red: player({ deck: pile("Shove", 5), hand: [card("Shove"), card("Shove")] }),
       Gray: player({ deck: pile("Duck Under", 5) }),
-      ...over,
     });
+    const before = ids(state, "Red");
+    const { state: next } = play(state, [
+      { type: "DRAW", character: "Red" },
+      { type: "PLAY_CARD", character: "Red", cardId: before[0] as CardId, payWith: [before[1] as CardId] },
+      { type: "DRAW", character: "Red" },
+    ]);
+    // A draw, then a play, then another draw — nothing about being mid-phase
+    // stopped either. Hand: 2 dealt, +1 drawn, -2 played/paid, +1 drawn = 2.
+    expect(next.phase).toBe("Play");
+    expect(next.Red.hand).toHaveLength(2);
+    expect(next.Red.drewThisTurn).toBe(2);
+  });
 
   it("'to play a card, Exhaust cards from your hand equal to its Cost'", () => {
     const state = playState();
@@ -206,12 +215,14 @@ describe("§5 Phase 3 — Play", () => {
   });
 
   it("'declining is failing without trying' — spending nothing is legal", () => {
-    const state = rig({
-      phase: "Play",
-      activeRoom: room("Collapsed Stairwell"),
-      Red: player({ deck: pile("Shove", 3), hand: [card("Shove")] }),
-      Gray: player({ deck: pile("Duck Under", 3) }),
-    });
+    const state = readyToEnd(
+      rig({
+        phase: "Play",
+        activeRoom: room("Collapsed Stairwell"),
+        Red: player({ deck: pile("Shove", 3), hand: [card("Shove")] }),
+        Gray: player({ deck: pile("Duck Under", 3) }),
+      }),
+    );
     const { state: next } = must(state, { type: "END_PLAY" });
     expect(next.fled).toHaveLength(1);
   });
@@ -219,12 +230,14 @@ describe("§5 Phase 3 — Play", () => {
 
 describe("§5 Phase 4 — Cleanup", () => {
   it("'Exhaust both hands and the entire play zone'", () => {
-    const state = rig({
-      phase: "Play",
-      activeRoom: room("Sorting Room"),
-      Red: player({ deck: pile("Shove", 3), hand: [card("Shove"), card("Charge In")] }),
-      Gray: player({ deck: pile("Duck Under", 3) }),
-    });
+    const state = readyToEnd(
+      rig({
+        phase: "Play",
+        activeRoom: room("Sorting Room"),
+        Red: player({ deck: pile("Shove", 3), hand: [card("Shove"), card("Charge In")] }),
+        Gray: player({ deck: pile("Duck Under", 3) }),
+      }),
+    );
     const hand = ids(state, "Red");
     const { state: next } = play(state, [
       { type: "PLAY_CARD", character: "Red", cardId: hand[0] as CardId, payWith: [hand[1] as CardId] },
@@ -237,12 +250,14 @@ describe("§5 Phase 4 — Cleanup", () => {
   });
 
   it("'`Hold` cards still in hand are the only survivors'", () => {
-    const state = rig({
-      phase: "Play",
-      activeRoom: room("Collapsed Stairwell"),
-      Red: player({ deck: pile("Shove", 5), hand: [card("Pry Bar"), card("Shove")] }),
-      Gray: player({ deck: pile("Duck Under", 5) }),
-    });
+    const state = readyToEnd(
+      rig({
+        phase: "Play",
+        activeRoom: room("Collapsed Stairwell"),
+        Red: player({ deck: pile("Shove", 5), hand: [card("Pry Bar"), card("Shove")] }),
+        Gray: player({ deck: pile("Duck Under", 5) }),
+      }),
+    );
     // The Flee line reads "One of you Exhausts 3", so the room asks who first.
     const { state: next } = play(state, [
       { type: "END_PLAY" },
@@ -252,14 +267,16 @@ describe("§5 Phase 4 — Cleanup", () => {
   });
 
   it("'if the floor draw pile is empty, shuffle the Fled pile back into it'", () => {
-    const state = rig({
-      phase: "Play",
-      activeRoom: room("Collapsed Stairwell"),
-      floorDeck: [],
-      fled: [room("Ruptured Coolant Line")],
-      Red: player({ deck: pile("Shove", 5) }),
-      Gray: player({ deck: pile("Duck Under", 5) }),
-    });
+    const state = readyToEnd(
+      rig({
+        phase: "Play",
+        activeRoom: room("Collapsed Stairwell"),
+        floorDeck: [],
+        fled: [room("Ruptured Coolant Line")],
+        Red: player({ deck: pile("Shove", 5) }),
+        Gray: player({ deck: pile("Duck Under", 5) }),
+      }),
+    );
     const { state: next, events } = play(state, [
       { type: "END_PLAY" },
       { type: "CHOOSE_CHARACTER", character: "Red" },
@@ -274,15 +291,17 @@ describe("§6 The three kinds of room", () => {
   it("an Enemy room ends the floor when it is Cleared", () => {
     // The Cherry wants Oomph 5: Charge In (Oomph 4, Cost 2) plus a free Pry Bar
     // (Oomph 3) gets there with two Shoves as the payment.
-    const state = rig({
-      phase: "Play",
-      activeRoom: room("Gross Thing That Looks Like A Cherry"),
-      Red: player({
-        deck: pile("Shove", 5),
-        hand: [card("Charge In"), card("Shove"), card("Shove"), card("Pry Bar")],
+    const state = readyToEnd(
+      rig({
+        phase: "Play",
+        activeRoom: room("Gross Thing That Looks Like A Cherry"),
+        Red: player({
+          deck: pile("Shove", 5),
+          hand: [card("Charge In"), card("Shove"), card("Shove"), card("Pry Bar")],
+        }),
+        Gray: player({ deck: pile("Duck Under", 5) }),
       }),
-      Gray: player({ deck: pile("Duck Under", 5) }),
-    });
+    );
     const h = ids(state, "Red");
     const { state: next, events } = play(state, [
       { type: "PLAY_CARD", character: "Red", cardId: h[0] as CardId, payWith: [h[1] as CardId, h[2] as CardId] },
@@ -297,15 +316,17 @@ describe("§6 The three kinds of room", () => {
   it("'resolve the card text of every challenge you met'", () => {
     // Collapsed Stairwell clears at Scramble 2 and costs both a card; it also
     // clears at Scramble 5. Meeting the higher line does not excuse the lower.
-    const state = rig({
-      phase: "Play",
-      activeRoom: room("Collapsed Stairwell"),
-      Red: player({ deck: pile("Shove", 5) }),
-      Gray: player({
-        deck: pile("Duck Under", 5),
-        hand: [card("Pick The Lock"), card("Coil Of Cable"), card("Duck Under"), card("Duck Under")],
+    const state = readyToEnd(
+      rig({
+        phase: "Play",
+        activeRoom: room("Collapsed Stairwell"),
+        Red: player({ deck: pile("Shove", 5) }),
+        Gray: player({
+          deck: pile("Duck Under", 5),
+          hand: [card("Pick The Lock"), card("Coil Of Cable"), card("Duck Under"), card("Duck Under")],
+        }),
       }),
-    });
+    );
     const g = ids(state, "Gray");
     const { state: next, events } = play(state, [
       { type: "PLAY_CARD", character: "Gray", cardId: g[0] as CardId, payWith: [g[2] as CardId, g[3] as CardId] },
@@ -320,12 +341,14 @@ describe("§6 The three kinds of room", () => {
   it("a met line that Clears beats one that says to Flee for free", () => {
     // Villy prints Oomph 9 (Ascend) and Scramble 9 (Flee this room for free).
     // §5: if any challenge's threshold is met, the room is Cleared.
-    const state = rig({
-      phase: "Play",
-      activeRoom: room("Villy, Coney's Work Husband"),
-      Red: player({ deck: pile("Shove", 5), hand: pile("Pry Bar", 3) }),
-      Gray: player({ deck: pile("Duck Under", 5), hand: pile("Coil Of Cable", 3) }),
-    });
+    const state = readyToEnd(
+      rig({
+        phase: "Play",
+        activeRoom: room("Villy, Coney's Work Husband"),
+        Red: player({ deck: pile("Shove", 5), hand: pile("Pry Bar", 3) }),
+        Gray: player({ deck: pile("Duck Under", 5), hand: pile("Coil Of Cable", 3) }),
+      }),
+    );
     const r = ids(state, "Red");
     const g = ids(state, "Gray");
     const { state: next } = play(state, [
@@ -340,12 +363,14 @@ describe("§6 The three kinds of room", () => {
   });
 
   it("a Stuff room is Cleared either way and never punishes you", () => {
-    const state = rig({
-      phase: "Play",
-      activeRoom: room("Sorting Room"),
-      Red: player({ deck: pile("Shove", 5) }),
-      Gray: player({ deck: pile("Duck Under", 5) }),
-    });
+    const state = readyToEnd(
+      rig({
+        phase: "Play",
+        activeRoom: room("Sorting Room"),
+        Red: player({ deck: pile("Shove", 5) }),
+        Gray: player({ deck: pile("Duck Under", 5) }),
+      }),
+    );
     const { state: next, events } = must(state, { type: "END_PLAY" });
     expect(next.cleared).toHaveLength(1);
     expect(next.fled).toEqual([]);
@@ -356,12 +381,14 @@ describe("§6 The three kinds of room", () => {
   it("'each character is measured on their own side of the play zone only'", () => {
     // Sorting Room: Oomph 2 pays Red, Scramble 2 pays Gray. Red plays Oomph and
     // Gray plays Scramble, so each pays for their own item.
-    const state = rig({
-      phase: "Play",
-      activeRoom: room("Sorting Room"),
-      Red: player({ deck: pile("Shove", 5), hand: [card("Shove"), card("Shove")] }),
-      Gray: player({ deck: pile("Duck Under", 5), hand: [card("Duck Under"), card("Duck Under")] }),
-    });
+    const state = readyToEnd(
+      rig({
+        phase: "Play",
+        activeRoom: room("Sorting Room"),
+        Red: player({ deck: pile("Shove", 5), hand: [card("Shove"), card("Shove")] }),
+        Gray: player({ deck: pile("Duck Under", 5), hand: [card("Duck Under"), card("Duck Under")] }),
+      }),
+    );
     const r = ids(state, "Red");
     const g = ids(state, "Gray");
     const { state: next } = play(state, [
@@ -379,12 +406,14 @@ describe("§6 The three kinds of room", () => {
 
   it("a Stuff room's split line pays nobody when the pool is on the wrong side", () => {
     // Tool Cage asks Red for Oomph 5 on Red's own side; Red plays Scramble.
-    const state = rig({
-      phase: "Play",
-      activeRoom: room("Sorting Room"),
-      Red: player({ deck: pile("Shove", 5), hand: [card("Coil Of Cable")] }),
-      Gray: player({ deck: pile("Duck Under", 5) }),
-    });
+    const state = readyToEnd(
+      rig({
+        phase: "Play",
+        activeRoom: room("Sorting Room"),
+        Red: player({ deck: pile("Shove", 5), hand: [card("Coil Of Cable")] }),
+        Gray: player({ deck: pile("Duck Under", 5) }),
+      }),
+    );
     const r = ids(state, "Red");
     const { state: next } = play(state, [
       playFree("Red", r[0] as CardId),

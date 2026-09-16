@@ -98,7 +98,7 @@ export function validate(state: GameState, command: Command): Rejection | null {
     }
 
     case "DRAW": {
-      if (state.phase !== "Draw") return wrongPhase(state, "draw");
+      if (state.phase !== "Play") return wrongPhase(state, "draw");
       const p = playerOf(state, command.character);
       if (p.down) return reject("CharacterIsDown", `${command.character} is Down.`);
       if (p.lastStand) {
@@ -115,16 +115,6 @@ export function validate(state: GameState, command: Command): Rejection | null {
           "HandIsFull",
           `${command.character} is holding ${String(handCapFor(state, command.character))} and has already drawn.`,
         );
-      }
-      return null;
-    }
-
-    case "END_DRAW": {
-      if (state.phase !== "Draw") return wrongPhase(state, "end the draw phase");
-      for (const c of CHARACTERS) {
-        if (mustStillDraw(state, c)) {
-          return reject("MustDrawAtLeastOne", `${c} must draw at least 1 card.`);
-        }
       }
       return null;
     }
@@ -158,8 +148,15 @@ export function validate(state: GameState, command: Command): Rejection | null {
       return null;
     }
 
-    case "END_PLAY":
-      return state.phase === "Play" ? null : wrongPhase(state, "end the play phase");
+    case "END_PLAY": {
+      if (state.phase !== "Play") return wrongPhase(state, "end the draw and play phase");
+      for (const c of CHARACTERS) {
+        if (mustStillDraw(state, c)) {
+          return reject("MustDrawAtLeastOne", `${c} must draw at least 1 card.`);
+        }
+      }
+      return null;
+    }
 
     case "ASCEND": {
       if (state.phase !== "Ascend") return wrongPhase(state, "ascend");
@@ -270,10 +267,12 @@ function apply(state: GameState, command: Command, run: Run): GameState {
   switch (command.type) {
     case "FLIP_ROOM":
       return flipRoom(state, run);
-    case "DRAW":
-      return drawOne(state, command.character, run.events);
-    case "END_DRAW":
-      return endDraw(state, run);
+    case "DRAW": {
+      // §9: a draw that empties the deck puts that character in last stand
+      // right away — see the note on `activateLastStand`.
+      const drawn = drawOne(state, command.character, run.events);
+      return activateLastStand(drawn, run.events);
+    }
     case "PLAY_CARD":
       return playCard(state, command.character, command.cardId, command.payWith, run);
     case "END_PLAY":
@@ -369,23 +368,14 @@ function flipRoom(state: GameState, run: Run): GameState {
     turn: state.turn + 1,
     floorDeck: state.floorDeck.slice(1),
     activeRoom: room,
-    phase: "Draw",
+    phase: "Play",
     Red: { ...state.Red, drewThisTurn: 0 },
     Gray: { ...state.Gray, drewThisTurn: 0 },
     thisTurn: emptyTurnRecord(),
   };
 }
 
-/* ----------------------------------------------------------- Phase 2: Draw */
-
-function endDraw(state: GameState, run: Run): GameState {
-  // §9: a deck emptied by drawing puts its character in last stand as the last
-  // step of the draw phase.
-  const next = activateLastStand(state, run.events);
-  return { ...next, phase: "Play" };
-}
-
-/* ----------------------------------------------------------- Phase 3: Play */
+/* ------------------------------------------------- Phase 2: Draw and Play */
 
 const addPaid = (record: TurnRecord, c: Character, n: number): TurnRecord =>
   c === "Red"
@@ -452,7 +442,7 @@ function playCard(
   return s;
 }
 
-/* ------------------------------------------ the room check, and Phase 4 */
+/* -------------------------------------------------------- Phase 3: Outcome */
 
 const goodStuffFor = (t: Threshold, c: Character): number =>
   t.effects

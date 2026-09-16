@@ -304,9 +304,12 @@ function drawFromPool(
 /* --------------------------------------------------------------- last stand */
 
 /**
- * §9: last stand activates as the last step of the phase that emptied the deck,
- * so whatever else that phase does resolves first. Called at the end of every
- * phase that can touch a deck.
+ * §9: your character enters last stand the moment your deck becomes empty. A
+ * draw that empties it activates this right after that draw (see `engine.ts`'s
+ * `DRAW` handling), so a card played later the same turn already benefits.
+ * Anything else that can empty a deck mid-turn — a room's printed punishment, a
+ * card that Exhausts from its own deck — is swept for here again at cleanup,
+ * since nothing before that point needs it settled any sooner.
  */
 export function activateLastStand(state: GameState, events: DomainEvent[]): GameState {
   let next = state;

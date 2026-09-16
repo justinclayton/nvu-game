@@ -209,10 +209,13 @@ something the rules can identify.
 
 **Where:** Covering Fire, I Know Kung Fu, Grav Harness.
 
-§5 says *"once play begins, nobody draws."* Three cards say otherwise in their own text.
+§5 used to say *"once play begins, nobody draws,"* which made these three cards' own draws a stated
+exception to it.
 
-**What the code does.** The rule is the default and a card's printed text is the exception, which is
-the ordinary convention for a card game. Nothing rules on it explicitly.
+**What the code does.** Now that Draw and Play are one phase, there is no rule left for these three
+to be an exception to: a card-driven draw is the same draw a player's own action would make, just
+triggered by the card's event instead. `drawOne` never checked phase to begin with — only the `DRAW`
+command's own legality does — so nothing here changed when the phases merged.
 
 ---
 
@@ -261,3 +264,20 @@ Stuff, so read as a standing trigger it would empty the Good Stuff pool into one
 
 **What the code does.** Once per turn per Crowbar, tracked by a marker in the turn record. Two
 Crowbars in a hand each pay once.
+
+---
+
+## 17. Last stand activates right after the draw that empties the deck
+
+**Where:** the `DRAW` command in `app/src/domain/engine.ts`, and `activateLastStand` in `verbs.ts`.
+
+§9: *"When your deck becomes empty, your character immediately enters Last Stand."* Draw and Play
+used to be separate phases, so the engine only checked for an empty deck at the end of the draw
+phase — close enough to "immediately" while nothing else could happen in between. Now that a
+character can play a card in the same breath as the draw that empties their deck, waiting for the
+phase to end would mean paying full cost for cards played after the deck is already dry.
+
+**What the code does.** A `DRAW` command sweeps for last stand right after it runs, so it is live
+before anything played later that turn is costed. Everything else that can empty a deck mid-turn — a
+room's printed punishment, a card's own `Exhaust X` — is still swept for once, at cleanup, same as
+before the phases merged.

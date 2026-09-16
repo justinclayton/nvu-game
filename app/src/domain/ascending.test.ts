@@ -2,7 +2,18 @@
 
 import { beforeEach, describe, expect, it } from "vitest";
 import { execute } from "./engine";
-import { card, eventTypes, must, pile, play, player, resetRig, rig, room } from "./__fixtures__/rig";
+import {
+  card,
+  eventTypes,
+  must,
+  pile,
+  play,
+  player,
+  readyToEnd,
+  resetRig,
+  rig,
+  room,
+} from "./__fixtures__/rig";
 import type { AscendChoice, GameState } from "./types";
 
 beforeEach(resetRig);
@@ -134,16 +145,18 @@ describe("§10 Ascending", () => {
 
 describe("§11 Winning", () => {
   it("'you win by clearing the Enemy room on floor 10'", () => {
-    const state = rig({
-      phase: "Play",
-      floor: 10,
-      activeRoom: room("Gross Thing That Looks Like A Cherry"),
-      Red: player({
-        deck: pile("Shove", 4),
-        hand: [card("Charge In"), card("Shove"), card("Shove"), card("Pry Bar")],
+    const state = readyToEnd(
+      rig({
+        phase: "Play",
+        floor: 10,
+        activeRoom: room("Gross Thing That Looks Like A Cherry"),
+        Red: player({
+          deck: pile("Shove", 4),
+          hand: [card("Charge In"), card("Shove"), card("Shove"), card("Pry Bar")],
+        }),
+        Gray: player({ deck: pile("Duck Under", 4) }),
       }),
-      Gray: player({ deck: pile("Duck Under", 4) }),
-    });
+    );
     const hand = state.Red.hand.map((c) => c.id);
     const [chargeIn, payA, payB, pryBar] = hand;
     if (!chargeIn || !payA || !payB || !pryBar) throw new Error("rig");

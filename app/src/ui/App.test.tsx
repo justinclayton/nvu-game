@@ -32,10 +32,10 @@ describe("the table", () => {
 
   it("offers the flip, and nothing else, at the start of a turn", () => {
     expect(screen.getByRole("button", { name: /Flip the next room/ })).toBeDefined();
-    expect(screen.queryByRole("button", { name: /finished drawing/ })).toBeNull();
+    expect(screen.queryByRole("button", { name: /check the room/ })).toBeNull();
   });
 
-  it("names the room once it is flipped, and moves to the draw phase", () => {
+  it("names the room once it is flipped, and starts the draw-and-play phase", () => {
     fireEvent.click(screen.getByRole("button", { name: /Flip the next room/ }));
     const room = session.getState().state.activeRoom;
     expect(room).not.toBeNull();
@@ -43,15 +43,15 @@ describe("the table", () => {
     expect(screen.getAllByRole("button", { name: "Draw a card" })).toHaveLength(2);
   });
 
-  it("will not let the draw phase end before both have drawn", () => {
+  it("will not let the turn end before both have drawn", () => {
     fireEvent.click(screen.getByRole("button", { name: /Flip the next room/ }));
-    const end = screen.getByRole("button", { name: /finished drawing/ });
+    const end = screen.getByRole("button", { name: /check the room/ });
     expect(end.hasAttribute("disabled")).toBe(true);
 
     for (const button of screen.getAllByRole("button", { name: "Draw a card" })) {
       fireEvent.click(button);
     }
-    expect(screen.getByRole("button", { name: /finished drawing/ }).hasAttribute("disabled")).toBe(
+    expect(screen.getByRole("button", { name: /check the room/ }).hasAttribute("disabled")).toBe(
       false,
     );
   });
@@ -74,7 +74,7 @@ describe("the table", () => {
     act(() => {
       session.getState().dispatch({ type: "END_PLAY" });
     });
-    expect(screen.getByText(/Cannot end the play phase during the Flip phase/)).toBeDefined();
+    expect(screen.getByText(/Cannot end the draw and play phase during the Flip phase/)).toBeDefined();
   });
 
   it("draws every card exactly once, face down in a deck until it is drawn", () => {

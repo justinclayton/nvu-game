@@ -109,7 +109,7 @@ export const STUFF: Registry = {
 
   /* ------------------------------------------------------------- Bad Stuff */
 
-  /* "Holding: you may not draw more than 1 card at draw time." */
+  /* "Holding: you may not draw more than 1 card per turn." */
   "Faceful Of Slime": {
     whileHeld: { drawCap: 1 },
   },

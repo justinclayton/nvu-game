@@ -10,7 +10,7 @@ Is the whole game state one aggregate, and are commands in and events out the on
 boundary? Decide what is a value object (Card, Room, Threshold), what is the aggregate root, whether
 the seeded RNG stays inside the state, and whether the engine returns `[state, events]` or events
 alone with state derived. Cross-check against the prototype's `types.ts`, which is the reference
-shape, and against `CONTEXT.md`, which is the vocabulary the types must use verbatim.
+shape, and against `design/GLOSSARY.md`, which is the vocabulary the types must use verbatim.
 
 ## Answer
 
@@ -23,7 +23,7 @@ events, plus pure query functions.
 **Value objects**, all readonly plain types, no classes: `Card`, `Room`, `Threshold`,
 `FleeLine`, `PlayedCard`, `RewardOffer`. Ids are branded: `CardId` is unique per physical
 copy, `RoomId` per room. `Character` is the literal union `"Red" | "Gray"`. Every type name is a
-term from `CONTEXT.md`, spelled the same way: exhaust pile, Fled, Cleared, Scrapyard, last stand,
+term from `design/GLOSSARY.md`, spelled the same way: exhaust pile, Fled, Cleared, Scrapyard, last stand,
 Down.
 
 **The signature.**

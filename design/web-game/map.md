@@ -11,7 +11,7 @@ built beyond the skeleton. The spec lands at `design/web-game/spec.md`.
 ## Notes
 
 - **Domain**: North vs Up, a two-character cooperative deckbuilder. The rules are ratified in
-  [`design/rulebook.md`](../rulebook.md) and the vocabulary in [`CONTEXT.md`](../../CONTEXT.md).
+  [`design/rulebook.md`](../rulebook.md) and the vocabulary in [`design/GLOSSARY.md`](../GLOSSARY.md).
   Every card is written down once, in [`design/cards.yaml`](../cards.yaml); `make build` generates
   `prototype/cards.js` from it. The web game reads from that same source.
 - **Reference, not code**: [`prototype/rules-core-ts/`](../../prototype/rules-core-ts/README.md) is a

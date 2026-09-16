@@ -4,7 +4,7 @@ Rules the implementation had to read one way when more than one reading was avai
 says what the code does, and why that reading fits the rulebook better than the alternative. An
 entry tagged `[you]` has been ruled on and is settled; the rest are the list of things to rule on.
 
-**`design/rulebook.md` is the authority.** Where `CONTEXT.md` disagrees with it, `CONTEXT.md` is
+**`design/rulebook.md` is the authority.** Where `GLOSSARY.md` disagrees with it, `GLOSSARY.md` is
 stale and the rulebook wins. `[you, 2026-09-01]`
 
 The reading is marked in a comment beside the code, so a ruling here has one place to land.
@@ -24,7 +24,7 @@ reward"*, on top of the lower rather than instead of it.
 So a Scramble 6 pool against Collapsed Stairwell (`Scramble 2: Clear, but both of you Exhaust 1` /
 `Scramble 5: Clear`) meets both lines: the room is Cleared and both characters still Exhaust 1.
 
-`CONTEXT.md` reads *"which is reached locks in"* in the singular, which would make one line resolve
+`GLOSSARY.md` reads *"which is reached locks in"* in the singular, which would make one line resolve
 and not the other. The rulebook wins.
 
 One line cannot un-Clear a room another has Cleared: §5's first sentence is that any met threshold
@@ -78,10 +78,10 @@ Rulebook §9: *"all cards in the character's play zone are shuffled into their d
 Exhausted from the top of that deck... Their hand is cleaned up as normal — unplayed cards are
 Exhausted, `Hold` cards stay."*
 
-`CONTEXT.md`'s **last stand** entry says instead: *"the cards that would have been exhausted from
+`GLOSSARY.md`'s **last stand** entry says instead: *"the cards that would have been exhausted from
 hand and play zone are shuffled back into their deck."*
 
-**What the code does.** Follows the rulebook: play zone only. `CONTEXT.md` is stale here.
+**What the code does.** Follows the rulebook: play zone only. `GLOSSARY.md` is stale here.
 
 ---
 
@@ -106,10 +106,10 @@ any other way lets a character burn their whole deck a card at a time for nothin
 **Where:** `ASCEND`.
 
 Rulebook §10 step 1: *"Move all Stuff in both exhaust piles to the Scrapyard. It is out of the run
-for good."* `CONTEXT.md`'s **Ascend** entry says instead that Stuff *"returns to its pool"*, though
-`CONTEXT.md`'s own **Stuff**, **Scrap tax** and **Exhaust pile** entries all say Scrapyard.
+for good."* `GLOSSARY.md`'s **Ascend** entry says instead that Stuff *"returns to its pool"*, though
+`GLOSSARY.md`'s own **Stuff**, **Scrap tax** and **Exhaust pile** entries all say Scrapyard.
 
-**What the code does.** Follows the rulebook: the Scrapyard. `CONTEXT.md`'s **Ascend** entry is
+**What the code does.** Follows the rulebook: the Scrapyard. `GLOSSARY.md`'s **Ascend** entry is
 stale, and disagrees with its own **Stuff**, **Scrap tax** and **Exhaust pile** entries.
 
 **Consequence worth ruling on:** the Good Stuff pool never refills. The card list prints one copy of

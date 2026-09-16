@@ -7,7 +7,7 @@ This document is the handoff to the implementing agent. The map is [`map.md`](ma
 ## Context
 
 North vs Up is a two-character cooperative deckbuilder with ratified rules in
-[`design/rulebook.md`](../rulebook.md) and a settled vocabulary in [`CONTEXT.md`](../../CONTEXT.md).
+[`design/rulebook.md`](../rulebook.md) and a settled vocabulary in [`design/GLOSSARY.md`](../GLOSSARY.md).
 Every card is written down once, in [`design/cards.yaml`](../cards.yaml). A throwaway TypeScript
 prototype in [`prototype/rules-core-ts/`](../../prototype/rules-core-ts/README.md) showed that a
 pure `(state, command) -> [state, events]` engine runs every ratified rule and replays exactly from
@@ -15,7 +15,7 @@ a seed. The official web version starts clean and keeps that shape.
 
 Scope: React, TypeScript strict, one browser with both characters on one screen, hosted locally.
 No networking and no server. DDD in its light form: one bounded context, a pure domain, a
-ubiquitous language taken verbatim from `CONTEXT.md`.
+ubiquitous language taken verbatim from `design/GLOSSARY.md`.
 
 ## Decision
 
@@ -50,7 +50,7 @@ folder.
 - `GameState` is the one aggregate root. Outside code holds it whole and never reaches inside.
 - Value objects are readonly plain types, no classes: `Card`, `Room`, `Threshold`, `FleeLine`,
   `PlayedCard`, `RewardOffer`. Ids are branded: `CardId` per physical copy, `RoomId` per room.
-  `Character` is `"Red" | "Gray"`. Type and field names are `CONTEXT.md` terms.
+  `Character` is `"Red" | "Gray"`. Type and field names are `design/GLOSSARY.md` terms.
 - The engine:
 
   ```ts
@@ -164,7 +164,7 @@ Do these in order. Each step ends green under `make app-check`.
    then remove it.
 2. **Generator output.** Extend `tools/cards.mjs` to emit `cards.generated.ts` with structured
    thresholds and flee lines. Wire `make build` and `make check`.
-3. **Domain types** from `CONTEXT.md` and the prototype's `types.ts`: state, commands, events,
+3. **Domain types** from `design/GLOSSARY.md` and the prototype's `types.ts`: state, commands, events,
    `Result`, `Pending`, branded ids.
 4. **Engine**: `execute` as validate then apply, one rulebook section at a time, each with its
    tests. Port the eight walkthroughs as fixtures. Add the seeded-run invariants.

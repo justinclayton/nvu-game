@@ -2,7 +2,7 @@
 
 The official web version. Architecture: [`design/web-game/spec.md`](../design/web-game/spec.md).
 The rules are [`design/rulebook.md`](../design/rulebook.md); the vocabulary is
-[`CONTEXT.md`](../CONTEXT.md); every card is written down once in
+[`design/GLOSSARY.md`](../design/GLOSSARY.md); every card is written down once in
 [`design/cards.yaml`](../design/cards.yaml).
 
 ```

@@ -1,6 +1,6 @@
 /* The domain model. One aggregate, `GameState`; one way in, `execute`.
  *
- * Every name here is a term from CONTEXT.md, spelled the same way: exhaust pile,
+ * Every name here is a term from design/GLOSSARY.md, spelled the same way: exhaust pile,
  * Fled, Cleared, Scrapyard, last stand, Down, stat pool, play zone. Section
  * numbers in the comments point at design/rulebook.md.
  *

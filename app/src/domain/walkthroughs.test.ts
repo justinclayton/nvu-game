@@ -105,9 +105,6 @@ describe("walkthrough 3 — the escape that actually works", () => {
     expect(eventTypes(events)).toContain("LAST_STAND_ESCAPED");
     expect(next.Red.deck).toHaveLength(1);
     expect(next.Red.lastStand).toBe(false);
-    // The fourth Shove was never played, so it exhausts with the rest of the
-    // hand. Red's own side beat the Sorting Room's Oomph 2, so what is left in
-    // hand is the Good Stuff that paid — Stuff has `Hold`.
     // The fourth Shove was never played, so it carries over along with the
     // Good Stuff Red's side earned by beating the Sorting Room's Oomph 2 —
     // the hand is never touched at Cleanup.

@@ -6,7 +6,7 @@
  * prints small and large.
  *
  * Rulebook §8 sets the order: name, type line, Cost in the corner, stats, text,
- * Hold, a rarity edge. There is no art on the digital card, so the art window is
+ * a rarity edge. There is no art on the digital card, so the art window is
  * a field of the type's colour, which is what tells a hand apart at a glance.
  */
 

@@ -16,6 +16,7 @@ import { Controls } from "./Controls";
 import { EventLog } from "./EventLog";
 import { Mat } from "./Mat";
 import { moveDelays } from "./placements";
+import { useMetrics } from "./useMetrics";
 import { useSession, useSessionState } from "./useSession";
 
 export function Table({ onNewRun }: { readonly onNewRun: () => void }) {
@@ -24,6 +25,7 @@ export function Table({ onNewRun }: { readonly onNewRun: () => void }) {
   const events = useSessionState((s: SessionState) => s.events);
   const rejection = useSessionState((s: SessionState) => s.lastRejection);
   const undoable = useSessionState(canUndo);
+  const metrics = useMetrics();
   const [paying, setPaying] = useState<Paying | null>(null);
   const [inspected, setInspected] = useState<Inspected | null>(null);
   /* §10: what each character is keeping, Scrapping and taking, decided together
@@ -130,6 +132,7 @@ export function Table({ onNewRun }: { readonly onNewRun: () => void }) {
 
       <Mat
         state={state}
+        metrics={metrics}
         delays={delays}
         paying={paying}
         onPickCard={pickCard}

@@ -7,6 +7,7 @@ import { card, pile, player, resetRig, rig, room } from "@domain/__fixtures__/ri
 import type { AscendChoice, Character, Command, GameState } from "@domain/types";
 import { AscendPanel, NO_CHOICES, type AscendChoices } from "./AscendPanel";
 import { Mat } from "./Mat";
+import { FULL } from "./metrics";
 
 /* The ascension panel offers both halves of the Scrap tax; the reward is chosen
  * from the three cards floating above the mat. Both read one choice, which the
@@ -41,6 +42,7 @@ function Harness({
     <>
       <Mat
         state={state}
+        metrics={FULL}
         delays={new Map()}
         paying={null}
         onPickCard={vi.fn()}

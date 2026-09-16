@@ -25,10 +25,15 @@ const same = (a: SlotRects, b: SlotRects): boolean => {
 
 /**
  * Measure every `[data-slot]` inside `ref`. Re-measures when the mat resizes
- * and whenever `key` changes, which the table passes its state as, so a slot
- * that moved because the layout around it changed is caught on the same frame.
+ * and whenever `key` or `metrics` changes — the table passes its state and the
+ * table dimensions in force — so a slot that moved because the layout around
+ * it changed is caught on the same frame.
  */
-export function useSlotRects(ref: RefObject<HTMLElement | null>, key: unknown): SlotRects {
+export function useSlotRects(
+  ref: RefObject<HTMLElement | null>,
+  key: unknown,
+  metrics?: unknown,
+): SlotRects {
   const [rects, setRects] = useState<SlotRects>({});
 
   useLayoutEffect(() => {
@@ -56,7 +61,7 @@ export function useSlotRects(ref: RefObject<HTMLElement | null>, key: unknown): 
       observer?.disconnect();
       window.removeEventListener("resize", measure);
     };
-  }, [ref, key]);
+  }, [ref, key, metrics]);
 
   return rects;
 }

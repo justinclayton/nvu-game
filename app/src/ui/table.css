@@ -979,6 +979,166 @@ body {
   }
 }
 
+/* ------------------------------------------------------------ compact table
+ *
+ * Under 960px across — a phone held sideways — the table is drawn compact:
+ * smaller cards (the numbers are `COMPACT` in metrics.ts; the mat sets the
+ * variables from them), the pools moved from a rail at the side to a row under
+ * the mat, tighter chrome and a smaller zoomed card. The breakpoint is
+ * `COMPACT_BELOW` in metrics.ts. */
+@media (max-width: 959px) {
+  body {
+    font-size: 14px;
+  }
+  .table {
+    padding: 8px max(10px, env(safe-area-inset-right)) 24px max(10px, env(safe-area-inset-left));
+    overflow-x: hidden;
+  }
+  .table__head {
+    flex-wrap: wrap;
+    gap: 10px 14px;
+    padding: 2px 2px 8px;
+  }
+  .table__head h1 {
+    font-size: 18px;
+  }
+  .table__meta {
+    gap: 10px;
+    font-size: 12px;
+  }
+  .table__actions .button {
+    padding: 6px 10px;
+    font-size: 12px;
+  }
+
+  .mat {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 10px;
+    min-width: 0;
+    padding: 10px 10px 12px;
+    border-radius: 10px;
+  }
+  .mat__main {
+    gap: 10px;
+  }
+  .mat-row {
+    gap: 8px;
+  }
+  .mat__divider {
+    margin: 16px 0 0;
+  }
+  .mat__rail {
+    display: flex;
+    gap: 8px;
+    padding: 10px 0 0;
+    border-left: 0;
+    border-top: 1.5px dashed var(--print-faint);
+  }
+  .mat__rail .slot {
+    flex: none;
+  }
+
+  .slot__label {
+    font-size: 8px;
+    letter-spacing: 0.1em;
+    left: 4px;
+  }
+  .slot__count {
+    min-width: 17px;
+    height: 17px;
+    font-size: 10px;
+    line-height: 15px;
+    right: -6px;
+    bottom: -6px;
+  }
+  .slot__head {
+    gap: 6px;
+    height: 24px;
+    padding: 0 4px;
+  }
+  .slot__title {
+    font-size: 13px;
+  }
+  .status {
+    font-size: 9px;
+  }
+  .slot__head .button--small {
+    font-size: 11px;
+    padding: 3px 7px;
+  }
+
+  .brief {
+    padding: 5px 8px;
+  }
+  .brief__kind {
+    font-size: 8px;
+  }
+  .brief__name {
+    font-size: 14px;
+  }
+  .brief__pool {
+    font-size: 11px;
+  }
+  .brief__pool b {
+    font-size: 13px;
+  }
+  .brief__lines {
+    margin-top: 3px;
+  }
+  .bline {
+    grid-template-columns: 72px minmax(0, 1fr) auto;
+    gap: 6px;
+    font-size: 11px;
+    padding: 1px 0;
+  }
+  .bline__need {
+    font-size: 12px;
+  }
+  .bline__have {
+    font-size: 10px;
+  }
+  .brief__flee {
+    margin-top: 3px;
+    font-size: 11px;
+  }
+  .brief__blurb {
+    font-size: 13px;
+  }
+
+  .controls {
+    margin-top: 10px;
+    padding: 8px 10px;
+    gap: 8px;
+  }
+  .controls__prompt {
+    font-size: 14px;
+  }
+  .ascend {
+    margin-top: 10px;
+    padding: 10px 12px 12px;
+  }
+  .ascend h2 {
+    font-size: 18px;
+  }
+  .log {
+    margin-top: 12px;
+  }
+  .log__lines {
+    max-height: 100px;
+    font-size: 12px;
+  }
+
+  /* The zoomed card, small enough to leave the hands visible on a short screen. */
+  .inspector {
+    right: max(8px, env(safe-area-inset-right));
+    bottom: 8px;
+  }
+  .inspector .card--large {
+    --cw: 150px;
+    --ch: 210px;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .sprite,
   .sprite__in,

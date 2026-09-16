@@ -19,7 +19,7 @@ export interface RawCard {
   rarity?: "Fine" | "Cool" | "Woah";
   starter?: boolean;
   cost: number | null;
-  power?: number;
+  oomph?: number;
   scramble?: number;
   conditional_stat?: boolean;
   hold?: boolean;
@@ -51,7 +51,7 @@ function mint(raw: RawCard): Card {
     owner: raw.owner,
     rarity: raw.rarity,
     cost: raw.cost ?? 0,
-    power: raw.power ?? 0,
+    oomph: raw.oomph ?? 0,
     scramble: raw.scramble ?? 0,
     hold: raw.hold === true,
     starter: raw.starter === true,
@@ -120,13 +120,13 @@ export type StatFn = (ctx: {
   grayPlayed: number;
   badStuffPlayed: number;
   handOf: (c: Character) => readonly Card[];
-}) => { power: number; scramble: number };
+}) => { oomph: number; scramble: number };
 
 export const CONDITIONALS: Record<string, StatFn> = {
-  "In Step": ({ redPlayed }) => ({ power: 2 * redPlayed, scramble: 0 }),
+  "In Step": ({ redPlayed }) => ({ oomph: 2 * redPlayed, scramble: 0 }),
   "One Man's Junk": ({ badStuffPlayed }) =>
-    badStuffPlayed > 0 ? { power: 2, scramble: 2 } : { power: 0, scramble: 0 },
-  "Both Barrels": ({ grayPlayed }) => ({ power: grayPlayed > 0 ? 5 : 2, scramble: 0 }),
+    badStuffPlayed > 0 ? { oomph: 2, scramble: 2 } : { oomph: 0, scramble: 0 },
+  "Both Barrels": ({ grayPlayed }) => ({ oomph: grayPlayed > 0 ? 5 : 2, scramble: 0 }),
 };
 
 /** Cards that print a rule against being spent as fuel (Torn Seal). */

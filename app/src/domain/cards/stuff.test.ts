@@ -32,7 +32,7 @@ describe("Crowbar — 'If you get any Good Stuff this turn, get an additional on
       }),
     });
     const r = ids(state, "Red");
-    // Charge In is Power 4 on Red's own side, which pays Red 2 Good Stuff; the
+    // Charge In is Oomph 4 on Red's own side, which pays Red 2 Good Stuff; the
     // Crowbar adds one more, once.
     const { state: next } = play(state, [
       {
@@ -181,8 +181,8 @@ describe("Faceful Of Slime — 'Holding: you may not draw more than 1 card'", ()
   });
 });
 
-describe("Rust — 'Holding: Stuff you play has -1 Power'", () => {
-  it("takes a Power off Stuff, and leaves other cards alone", () => {
+describe("Rust — 'Holding: Stuff you play has -1 Oomph'", () => {
+  it("takes a Oomph off Stuff, and leaves other cards alone", () => {
     const state = playing({
       Red: player({
         deck: pile("Shove", 3),
@@ -191,8 +191,8 @@ describe("Rust — 'Holding: Stuff you play has -1 Power'", () => {
     });
     const r = ids(state, "Red");
     const withStuff = must(state, free("Red", r[1] as CardId));
-    // The Pry Bar is Power 3, less 1 while the Rust is held.
-    expect(statPool(withStuff.state).power).toBe(2);
+    // The Pry Bar is Oomph 3, less 1 while the Rust is held.
+    expect(statPool(withStuff.state).oomph).toBe(2);
 
     const withCard = must(withStuff.state, {
       type: "PLAY_CARD",
@@ -200,8 +200,8 @@ describe("Rust — 'Holding: Stuff you play has -1 Power'", () => {
       cardId: r[2] as CardId,
       payWith: [r[3] as CardId],
     });
-    // Shove is Power 2 and is not Stuff.
-    expect(statPool(withCard.state).power).toBe(4);
+    // Shove is Oomph 2 and is not Stuff.
+    expect(statPool(withCard.state).oomph).toBe(4);
   });
 });
 

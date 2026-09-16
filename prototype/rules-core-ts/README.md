@@ -85,7 +85,7 @@ or 2. That is not an engine fault — it is arithmetic that only shows up once t
   of life per floor**.
 - Floor 1 holds **13 rooms** (1 Enemy, 3 Hazard, 9 Stuff).
 - So a character gets through roughly a third of a floor before their deck is gone, and the Enemy
-  room wants Power 5–9 out of a starter deck whose best card is Power 3.
+  room wants Oomph 5–9 out of a starter deck whose best card is Oomph 3.
 
 The floor is three times longer than a deck-pass affords. Either the deck is much bigger, or the
 floor is much shorter, or a cleared room has to give cards back far more often than the last-stand

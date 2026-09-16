@@ -116,21 +116,21 @@ export const GRAY: Registry = {
   /* "Look at the top 3 cards of any deck, then put them back in any order." */
   "Hack the Doors": peek(3),
 
-  /* "Power equal to twice the number of cards Red has played this turn." */
+  /* "Oomph equal to twice the number of cards Red has played this turn." */
   "In Step": {
     stats(state, _owner, card) {
-      return { power: 2 * playedBy(state, "Red"), scramble: card.scramble };
+      return { oomph: 2 * playedBy(state, "Red"), scramble: card.scramble };
     },
   },
 
-  /* "If any Bad Stuff is played this turn, Power 2 and Scramble 2."
+  /* "If any Bad Stuff is played this turn, Oomph 2 and Scramble 2."
    *
    * Bad Stuff itself contributes no stats (§7); this card is what makes playing
    * a piece of it worth anything. */
   "One Man's Junk": {
     stats(state) {
       const played = state.playZone.some((p) => p.card.kind === "bad_stuff");
-      return played ? { power: 2, scramble: 2 } : { power: 0, scramble: 0 };
+      return played ? { oomph: 2, scramble: 2 } : { oomph: 0, scramble: 0 };
     },
   },
 
@@ -205,7 +205,7 @@ export const GRAY: Registry = {
   /* "Scramble equal to twice the number of other cards Gray played this turn." */
   "Every Little Bit Helps": {
     stats(state, owner, card) {
-      return { power: card.power, scramble: 2 * othersPlayed(state, owner, card) };
+      return { oomph: card.oomph, scramble: 2 * othersPlayed(state, owner, card) };
     },
   },
 

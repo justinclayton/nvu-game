@@ -38,7 +38,7 @@ export interface Card {
   /** Purely printed: no rule reads it. */
   readonly rarity: Rarity | null;
   readonly cost: number;
-  readonly power: number;
+  readonly oomph: number;
   readonly scramble: number;
   /** The stat is in the text, so the behaviour registry computes it. */
   readonly conditionalStat: boolean;

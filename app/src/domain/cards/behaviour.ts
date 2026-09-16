@@ -53,7 +53,7 @@ export interface CardBehaviour {
    */
   exhaustX?: number;
   /** Conditional stats, recalculated every time the pool is read (§5). */
-  stats?(state: GameState, owner: Character, card: Card): { power: number; scramble: number };
+  stats?(state: GameState, owner: Character, card: Card): { oomph: number; scramble: number };
   /** A printed cost that is not the number in the corner. */
   cost?(state: GameState, owner: Character, card: Card): number;
   /** A one-shot effect, resolved as the card enters the play zone. */

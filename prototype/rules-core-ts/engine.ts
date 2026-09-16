@@ -55,24 +55,24 @@ export const OTHER = (c: Character): Character => (c === "Red" ? "Gray" : "Red")
  * `side` narrows the pool to one character's own side, which is the only thing
  * a Stuff room ever measures (section 6).
  */
-export function pool(s: GameState, side?: Character): { power: number; scramble: number } {
+export function pool(s: GameState, side?: Character): { oomph: number; scramble: number } {
   const ctx = {
     redPlayed: s.playZone.filter((p) => p.owner === "Red").length,
     grayPlayed: s.playZone.filter((p) => p.owner === "Gray").length,
     badStuffPlayed: s.playZone.filter((p) => p.card.kind === "bad_stuff").length,
     handOf: (c: Character) => playerOf(s, c).hand,
   };
-  let power = 0;
+  let oomph = 0;
   let scramble = 0;
   for (const { owner, card } of s.playZone) {
     if (side && owner !== side) continue;
     const fn = CONDITIONALS[card.name];
-    const stats = fn ? fn(ctx) : { power: card.power, scramble: card.scramble };
-    power += stats.power;
+    const stats = fn ? fn(ctx) : { oomph: card.oomph, scramble: card.scramble };
+    oomph += stats.oomph;
     scramble += stats.scramble;
   }
   // Section 7: Bad Stuff contributes no stats, whatever else it does.
-  return { power, scramble };
+  return { oomph, scramble };
 }
 
 /* ------------------------------------------------------- moving cards around */
@@ -310,7 +310,7 @@ function playCard(
 /** The highest threshold line the shared pool currently meets, or null. */
 function bestMet(s: GameState, room: Room): Threshold | null {
   const p = pool(s);
-  const met = room.thresholds.filter((t) => (t.stat === "Power" ? p.power : p.scramble) >= t.value);
+  const met = room.thresholds.filter((t) => (t.stat === "Oomph" ? p.oomph : p.scramble) >= t.value);
   if (met.length === 0) return null;
   return met.reduce((a, b) => (b.value > a.value ? b : a));
 }
@@ -353,7 +353,7 @@ function endPlay(
       const side = pool(state, c);
       const met = room.thresholds
         .filter((t) => t.recipient === c)
-        .filter((t) => (t.stat === "Power" ? side.power : side.scramble) >= t.value);
+        .filter((t) => (t.stat === "Oomph" ? side.oomph : side.scramble) >= t.value);
       if (met.length === 0) continue;
       const best = met.reduce((a, b) => ((b.stuffCount ?? 0) > (a.stuffCount ?? 0) ? b : a));
       ev.push({ type: "THRESHOLD_MET", room, threshold: best });

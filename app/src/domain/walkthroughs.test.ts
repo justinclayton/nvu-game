@@ -64,8 +64,8 @@ describe("walkthrough 2 — into last stand, and out the wrong way", () => {
       free("Red", hand(drawn.state, "Red")[0] as CardId),
       { type: "PLAY_CARD", character: "Gray", cardId: grayHand[0] as CardId, payWith: [grayHand[1] as CardId] },
     ]);
-    // Power 4 against the Cherry's Power 5. Gray's Scramble does nothing here.
-    expect(statPool(played.state)).toEqual({ power: 4, scramble: 2 });
+    // Oomph 4 against the Cherry's Oomph 5. Gray's Scramble does nothing here.
+    expect(statPool(played.state)).toEqual({ oomph: 4, scramble: 2 });
 
     const ended = play(played.state, [{ type: "END_PLAY" }]);
     expect(eventTypes(ended.events)).toContain("ROOM_FLED");
@@ -96,7 +96,7 @@ describe("walkthrough 3 — the escape that actually works", () => {
     expect(next.Red.deck).toHaveLength(1);
     expect(next.Red.lastStand).toBe(false);
     // The fourth Shove was never played, so it exhausts with the rest of the
-    // hand. Red's own side beat the Sorting Room's Power 2, so what is left in
+    // hand. Red's own side beat the Sorting Room's Oomph 2, so what is left in
     // hand is the Good Stuff that paid — Stuff has `Hold`.
     expect(next.Red.hand.every((c) => c.hold)).toBe(true);
     expect(next.Red.hand.some((c) => c.name === "Shove")).toBe(false);
@@ -123,7 +123,7 @@ describe("walkthrough 4 — spending Stuff spends it for good", () => {
       Gray: player({ deck: pile("Duck Under", 5) }),
     });
     const h = hand(state, "Red");
-    // Charge In (Power 4, Cost 2) paid for with a Pry Bar and a Shove. The Pry
+    // Charge In (Oomph 4, Cost 2) paid for with a Pry Bar and a Shove. The Pry
     // Bar lands in the exhaust pile looking recoverable — and is not.
     const played = play(state, [
       { type: "PLAY_CARD", character: "Red", cardId: h[0] as CardId, payWith: [h[1] as CardId, h[2] as CardId] },
@@ -134,7 +134,7 @@ describe("walkthrough 4 — spending Stuff spends it for good", () => {
       free("Red", h[3] as CardId),
       { type: "END_PLAY" },
     ]);
-    // Power 4 + 3 beats the Cherry's Power 5, so the floor is cleared.
+    // Oomph 4 + 3 beats the Cherry's Oomph 5, so the floor is cleared.
     expect(cleared.state.phase).toBe("Ascend");
 
     const ascended = play(cleared.state, [{ type: "ASCEND", Red: NOTHING, Gray: NOTHING }]);
@@ -182,8 +182,8 @@ describe("walkthrough 5 — nothing resolves until play is declared over", () =>
 
 describe("walkthrough 6 — a Stuff room reads each character's own side", () => {
   it("pays nobody when the shared pool looks right but the sides do not", () => {
-    // Sorting Room asks Red for Power and Gray for Scramble. Red brings
-    // Scramble and Gray brings Power, so the shared pool has both and neither
+    // Sorting Room asks Red for Oomph and Gray for Scramble. Red brings
+    // Scramble and Gray brings Oomph, so the shared pool has both and neither
     // side has what its own line wants.
     const state = rig({
       phase: "Play",
@@ -195,7 +195,7 @@ describe("walkthrough 6 — a Stuff room reads each character's own side", () =>
       free("Red", hand(state, "Red")[0] as CardId),
       free("Gray", hand(state, "Gray")[0] as CardId),
     ]);
-    expect(statPool(played.state)).toEqual({ power: 3, scramble: 3 });
+    expect(statPool(played.state)).toEqual({ oomph: 3, scramble: 3 });
 
     const { state: next, events } = play(played.state, [{ type: "END_PLAY" }]);
     expect(eventTypes(events)).not.toContain("STUFF_TAKEN");

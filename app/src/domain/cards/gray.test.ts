@@ -71,7 +71,7 @@ describe("Hack the Doors — 'Look at the top 3 of any deck'", () => {
   });
 });
 
-describe("In Step — 'Power equal to twice the number of cards Red has played'", () => {
+describe("In Step — 'Oomph equal to twice the number of cards Red has played'", () => {
   it("reads Red's side of the play zone", () => {
     const state = playing({
       Red: player({ deck: pile("Shove", 4), hand: [card("Pry Bar"), card("Coil Of Cable")] }),
@@ -84,15 +84,15 @@ describe("In Step — 'Power equal to twice the number of cards Red has played'"
       cardId: g[0] as CardId,
       payWith: [g[1] as CardId],
     });
-    expect(statPool(one.state, "Gray").power).toBe(0);
+    expect(statPool(one.state, "Gray").oomph).toBe(0);
 
     const r = ids(one.state, "Red");
     const two = play(one.state, [free("Red", r[0] as CardId), free("Red", r[1] as CardId)]);
-    expect(statPool(two.state, "Gray").power).toBe(4);
+    expect(statPool(two.state, "Gray").oomph).toBe(4);
   });
 });
 
-describe("One Man's Junk — 'If any Bad Stuff is played this turn, Power 2 and Scramble 2'", () => {
+describe("One Man's Junk — 'If any Bad Stuff is played this turn, Oomph 2 and Scramble 2'", () => {
   it("contributes nothing until a piece of Bad Stuff is on the table", () => {
     const state = playing({
       Gray: player({
@@ -113,7 +113,7 @@ describe("One Man's Junk — 'If any Bad Stuff is played this turn, Power 2 and 
       cardId: g[0] as CardId,
       payWith: [g[1] as CardId],
     });
-    expect(statPool(one.state)).toEqual({ power: 0, scramble: 0 });
+    expect(statPool(one.state)).toEqual({ oomph: 0, scramble: 0 });
 
     // Torn Seal is Bad Stuff: it contributes no stats itself, but it is what
     // this card was waiting for.
@@ -123,7 +123,7 @@ describe("One Man's Junk — 'If any Bad Stuff is played this turn, Power 2 and 
       cardId: g[2] as CardId,
       payWith: [g[3] as CardId, g[4] as CardId],
     });
-    expect(statPool(two.state)).toEqual({ power: 2, scramble: 2 });
+    expect(statPool(two.state)).toEqual({ oomph: 2, scramble: 2 });
   });
 });
 

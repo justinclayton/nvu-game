@@ -79,13 +79,13 @@ export const RED: Registry = {
     },
   },
 
-  /* "This has Power +2 for each card you paid with this turn."
+  /* "This has Oomph +2 for each card you paid with this turn."
    *
    * Cards paid with have already gone to the exhaust pile, so the turn record is
    * what counts them. */
   "Junk Launcher": {
     stats(state, owner, card) {
-      return { power: card.power + 2 * state.thisTurn.paid[owner], scramble: card.scramble };
+      return { oomph: card.oomph + 2 * state.thisTurn.paid[owner], scramble: card.scramble };
     },
   },
 
@@ -112,13 +112,13 @@ export const RED: Registry = {
     },
   },
 
-  /* "Holding: Cards you play have +1 Power, but you may not draw more than 2
+  /* "Holding: Cards you play have +1 Oomph, but you may not draw more than 2
    * cards at draw time." */
   "Deadweight Grip": {
     whileHeld: { playedPowerDelta: 1, drawCap: 2 },
   },
 
-  /* "If Gray has already played at least one card this turn, +2 Power. If this
+  /* "If Gray has already played at least one card this turn, +2 Oomph. If this
    * is the card that clears the room, put this right back in your hand."
    *
    * No single card clears a room — the check happens once, when both characters
@@ -127,7 +127,7 @@ export const RED: Registry = {
   "Both Barrels": {
     stats(state, _owner, card) {
       const bonus = playedBy(state, "Gray") > 0 ? 2 : 0;
-      return { power: card.power + bonus, scramble: card.scramble };
+      return { oomph: card.oomph + bonus, scramble: card.scramble };
     },
     onCleanup(state, ctx) {
       if (state.resolution?.roomEnded !== "Cleared") return nothing(state);
@@ -136,10 +136,10 @@ export const RED: Registry = {
     },
   },
 
-  /* "Power equal to twice the number of other cards Red played this turn." */
+  /* "Oomph equal to twice the number of other cards Red played this turn." */
   Flurry: {
     stats(state, owner, card) {
-      return { power: 2 * othersPlayed(state, owner, card), scramble: card.scramble };
+      return { oomph: 2 * othersPlayed(state, owner, card), scramble: card.scramble };
     },
   },
 };

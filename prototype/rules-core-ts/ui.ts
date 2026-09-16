@@ -60,7 +60,7 @@ function run(cmd: Command, label: string, note?: string) {
 /* ------------------------------------------------------------------ drawing */
 
 function cardChip(c: Card, opts: { pick?: Character; on?: () => void; dim?: boolean } = {}): string {
-  const stats = [c.power ? `P${c.power}` : "", c.scramble ? `S${c.scramble}` : ""].filter(Boolean).join(" ");
+  const stats = [c.oomph ? `P${c.oomph}` : "", c.scramble ? `S${c.scramble}` : ""].filter(Boolean).join(" ");
   const kind = c.kind === "player" ? c.owner ?? "" : c.kind === "good_stuff" ? "Good Stuff" : "Bad Stuff";
   const ticked = opts.pick && view.selected[opts.pick].includes(c.id);
   return `<span class="chip ${c.kind} ${ticked ? "ticked" : ""} ${opts.dim ? "dim" : ""}"
@@ -83,7 +83,7 @@ function playerPanel(c: Character): string {
   const side = pool(s, c);
   return `<section class="player ${c.toLowerCase()} ${status.toLowerCase()}">
     <h3>${c} <span class="status">${status}</span>
-      <span class="side">own side: Power ${side.power} · Scramble ${side.scramble}</span></h3>
+      <span class="side">own side: Oomph ${side.oomph} · Scramble ${side.scramble}</span></h3>
     <div class="hand">
       <h4>Hand <span>${p.hand.length}/${HAND_CAP}</span></h4>
       <div class="cards">${
@@ -121,11 +121,11 @@ function roomPanel(): string {
     <ul>${r.thresholds
       .map((t) => {
         const have = t.recipient
-          ? t.stat === "Power"
-            ? pool(s, t.recipient).power
+          ? t.stat === "Oomph"
+            ? pool(s, t.recipient).oomph
             : pool(s, t.recipient).scramble
-          : t.stat === "Power"
-            ? p.power
+          : t.stat === "Oomph"
+            ? p.oomph
             : p.scramble;
         const met = have >= t.value;
         return `<li class="${met ? "met" : ""}">${t.stat} ${t.value} — ${esc(t.outcome)}
@@ -248,7 +248,7 @@ function render() {
       <span>Floor <b>${s.floor}</b></span>
       <span>Turn <b>${s.turn}</b></span>
       <span>Phase <b>${s.phase}</b></span>
-      <span>Pool <b>Power ${pool(s).power} · Scramble ${pool(s).scramble}</b></span>
+      <span>Pool <b>Oomph ${pool(s).oomph} · Scramble ${pool(s).scramble}</b></span>
       <span>Floor deck <b>${s.floorDeck.length}</b></span>
       <span>Fled <b>${s.fled.length}</b></span>
       <span>Cleared <b>${s.cleared.length}</b></span>

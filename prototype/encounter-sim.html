@@ -291,7 +291,7 @@
   <div class="panel">
     <h2>Enemy and pool sizes</h2>
     <div class="row">
-      <label>Enemy Power at floor 1 <input type="number" id="setEnemyPow" min="1" max="40" value="5"></label>
+      <label>Enemy Oomph at floor 1 <input type="number" id="setEnemyPow" min="1" max="40" value="5"></label>
       <label>+ per floor <input type="number" id="setEnemyPowStep" min="0" max="6" step="0.5" value="0"></label>
       <label>Good Stuff pool size <input type="number" id="setGoodPool" min="4" max="120" value="40"></label>
       <span class="tiny muted">Ticket 22 puts escalation on scarcity, not on a harder fight, so the
@@ -411,7 +411,7 @@ function playerShape(c, owner) {
     owner: owner || c.owner,
     cost: c.cost === null ? 0 : c.cost,
     rarity: c.rarity,
-    power: c.power,
+    oomph: c.oomph,
     scramble: c.scramble,
     hold: c.hold,
     cond: c.conditional_stat,
@@ -595,7 +595,7 @@ function buildFloorDeck(floor) {
   var out = [], i;
   for (i = 0; i < CFG.enemyN; i++) {
     var e = ENEMY_ROOMS[i % ENEMY_ROOMS.length];
-    out.push(inst(Object.assign({}, e, { power: enemyPower(floor) + (e.basePower - 5) })));
+    out.push(inst(Object.assign({}, e, { oomph: enemyPower(floor) + (e.basePower - 5) })));
   }
   for (i = 0; i < CFG.hazardN; i++) out.push(inst(HAZARD_ROOMS[i % HAZARD_ROOMS.length]));
   var n = stuffCount(floor);
@@ -604,15 +604,15 @@ function buildFloorDeck(floor) {
 }
 
 /* A Stuff room's live challenge, built from the unruled settings. */
-/* A Stuff room prints one Power line and one Scramble line. Which character
+/* A Stuff room prints one Oomph line and one Scramble line. Which character
    fills which is not printed: either may take either, one line each. */
 function stuffLines(def) {
   var lines = [
-    { stat:"power",    need:CFG.stuffT1, pay:CFG.stuffP1, tier:1 },
+    { stat:"oomph",    need:CFG.stuffT1, pay:CFG.stuffP1, tier:1 },
     { stat:"scramble", need:CFG.stuffT1, pay:CFG.stuffP1, tier:1 }
   ];
   if (CFG.stuffTier2 && def.rich) {
-    lines.push({ stat:"power",    need:CFG.stuffT2, pay:CFG.stuffP2, tier:2 });
+    lines.push({ stat:"oomph",    need:CFG.stuffT2, pay:CFG.stuffP2, tier:2 });
     lines.push({ stat:"scramble", need:CFG.stuffT2, pay:CFG.stuffP2, tier:2 });
   }
   return lines;
@@ -628,13 +628,13 @@ function stuffPay(side, stat, def) {
 /* One character to each line, whichever way round pays the pair more. */
 function stuffAssign(def) {
   var r = sideStats("Red"), g = sideStats("Gray");
-  var straight = stuffPay(r, "power", def)    + stuffPay(g, "scramble", def);
-  var crossed  = stuffPay(r, "scramble", def) + stuffPay(g, "power", def);
-  return crossed > straight ? { Red:"scramble", Gray:"power" }
-                            : { Red:"power",    Gray:"scramble" };
+  var straight = stuffPay(r, "oomph", def)    + stuffPay(g, "scramble", def);
+  var crossed  = stuffPay(r, "scramble", def) + stuffPay(g, "oomph", def);
+  return crossed > straight ? { Red:"scramble", Gray:"oomph" }
+                            : { Red:"oomph",    Gray:"scramble" };
 }
 function roomThreshold(def) {
-  if (def.kind === "Enemy") return { stat:"power", n:def.power };
+  if (def.kind === "Enemy") return { stat:"oomph", n:def.oomph };
   if (def.kind === "Hazard") return { stat:def.stat, n:def.t1 };
   return null;
 }
@@ -839,16 +839,16 @@ function finishPlay(owner, iid, payIids) {
 
 function sideStats(owner) {
   /* Safe with no live floor: the Library tab renders room cards before a floor starts. */
-  var p = { power:0, scramble:0 }, z = G ? G.play[owner] : [];
+  var p = { oomph:0, scramble:0 }, z = G ? G.play[owner] : [];
   for (var i = 0; i < z.length; i++) {
-    p.power += z[i].def.power || 0;
+    p.oomph += z[i].def.oomph || 0;
     p.scramble += z[i].def.scramble || 0;
   }
   return p;
 }
 function pool() {
   var r = sideStats("Red"), g = sideStats("Gray");
-  return { power: r.power + g.power, scramble: r.scramble + g.scramble };
+  return { oomph: r.oomph + g.oomph, scramble: r.scramble + g.scramble };
 }
 /* Enemy and Hazard clear the instant the shared pool meets the threshold.
    Stuff rooms are settled when the play phase is declared over. */
@@ -919,7 +919,7 @@ function whoReveals() {
   if (g.down) return r;
   return r.deck.length <= g.deck.length ? r : g;
 }
-function cardStat(def) { return Math.max(def.power || 0, def.scramble || 0); }
+function cardStat(def) { return Math.max(def.oomph || 0, def.scramble || 0); }
 function wantsReward(c, card) {
   if (REWARD_POLICY === "never") return false;
   if (REWARD_POLICY === "always") return true;
@@ -1241,12 +1241,12 @@ function bestPlays(c, stat, need, hoard) {
       if (hoard && isGoodStuff(hand[i])) { skip = true; break; }
       play.push(hand[i]);
       cost += free ? 0 : (hand[i].def.cost || 0);
-      p += hand[i].def.power || 0;
+      p += hand[i].def.oomph || 0;
       s += hand[i].def.scramble || 0;
     }
     if (skip) continue;                                // hoarding: this subset spends Stuff
     if (play.length + cost > n) continue;              // not enough cards to pay
-    var got = stat === "power" ? p : s;
+    var got = stat === "oomph" ? p : s;
     var spend = play.length + cost;
     var meets = got >= need;
     var score = meets ? (1000 - spend) : got * 10 - spend;
@@ -1272,7 +1272,7 @@ function autoTurn(opts) {
      its own deck is built for and the settle picks the better pairing. */
   function drawStat(c) {
     if (!stuffRoom) return t.stat;
-    return c.name === "Red" ? "power" : "scramble";
+    return c.name === "Red" ? "oomph" : "scramble";
   }
   function tier1Need(c) { return CFG.stuffT1; }
   /* Match the target to what the play stage will chase: on a Stuff room that is
@@ -1340,7 +1340,7 @@ function autoTurn(opts) {
       for (i = 0; i < 2; i++) {
         c = G.chars[names[i]];
         if (c.down) continue;
-        var stat = c.name === "Red" ? "power" : "scramble";
+        var stat = c.name === "Red" ? "oomph" : "scramble";
         var rich = CFG.stuffTier2 && d.rich;
         var b = bestPlays(c, stat, rich ? CFG.stuffT2 : CFG.stuffT1, hoard);
         if (!b.meets && rich) b = bestPlays(c, stat, CFG.stuffT1, hoard);
@@ -1599,7 +1599,7 @@ function renderBatch(a, floors) {
   h += '<div class="panel"><h2>Settings this run used</h2><p class="tiny muted">' +
        "Decks " + CFG.deckRed + "/" + CFG.deckGray + " · Stuff curve " + CFG.stuffBase + "→" + CFG.stuffTop +
        " · Stuff thresholds " + CFG.stuffT1 + "/" + CFG.stuffT2 + " paying " + CFG.stuffP1 + "/" + CFG.stuffP2 +
-       " · hand cap " + (CFG.cap ? CFG.capN : "off") + " · Enemy Power " + enemyPower(1) +
+       " · hand cap " + (CFG.cap ? CFG.capN : "off") + " · Enemy Oomph " + enemyPower(1) +
        " (+" + CFG.enemyPowStep + "/floor) · last stand exit " + CFG.lsCost +
        " · auto-player: " + el("batchGreed").value + (el("batchHoldStuff").checked ? ", hoarding Stuff" : ", spending Stuff freely") +
        "</p></div>";
@@ -1640,14 +1640,14 @@ function runOneVerbose() {
 
 function statPips(d, met) {
   var h = "";
-  if (d.power)    h += '<span class="pip pw">Power ' + d.power + "</span>";
+  if (d.oomph)    h += '<span class="pip pw">Oomph ' + d.oomph + "</span>";
   if (d.scramble) h += '<span class="pip sc">Scramble ' + d.scramble + "</span>";
   if (d.hold)     h += '<span class="pip hold">Hold</span>';
   return h;
 }
 function challengeText(d) {
-  if (d.kind === "Enemy") return "Power " + d.power + ": Clear";
-  if (d.kind === "Hazard") return d.stat === "power" ? "Power " + d.t1 + ": Clear" : "Scramble " + d.t1 + ": Clear";
+  if (d.kind === "Enemy") return "Oomph " + d.oomph + ": Clear";
+  if (d.kind === "Hazard") return d.stat === "oomph" ? "Oomph " + d.t1 + ": Clear" : "Scramble " + d.t1 + ": Clear";
   var L = stuffLines(d);
   return L.map(function (x) {
     return capitalize(x.stat) + " " + x.need + ": a character takes " + x.pay;
@@ -1680,13 +1680,13 @@ function roomHTML(d) {
     var L = stuffLines(d);
     /* Who is on which line is worked out from what is on the table, so the
        panel names the character the line is currently going to. */
-    var assign = G ? stuffAssign(d) : { Red:"power", Gray:"scramble" };
+    var assign = G ? stuffAssign(d) : { Red:"oomph", Gray:"scramble" };
     var onLine = {}; onLine[assign.Red] = "Red"; onLine[assign.Gray] = "Gray";
     for (i = 0; i < L.length; i++) {
       var who = onLine[L[i].stat];
-      var side = G ? sideStats(who) : { power:0, scramble:0 };
+      var side = G ? sideStats(who) : { oomph:0, scramble:0 };
       var met = side[L[i].stat] >= L[i].need;
-      lines += '<div class="line"><span class="pip ' + (met ? "met" : L[i].stat === "power" ? "pw" : "sc") + '">' +
+      lines += '<div class="line"><span class="pip ' + (met ? "met" : L[i].stat === "oomph" ? "pw" : "sc") + '">' +
         capitalize(L[i].stat) + " " + L[i].need + "</span> " + who + " takes " + L[i].pay +
         " Good Stuff" + (L[i].tier === 2 ? " <span class='muted'>(second tier)</span>" : "") + "</div>";
     }
@@ -1694,7 +1694,7 @@ function roomHTML(d) {
   } else {
     var t = roomThreshold(d);
     var met1 = p[t.stat] >= t.n;
-    lines += '<div class="line"><span class="pip ' + (met1 ? "met" : t.stat === "power" ? "pw" : "sc") + '">' +
+    lines += '<div class="line"><span class="pip ' + (met1 ? "met" : t.stat === "oomph" ? "pw" : "sc") + '">' +
       capitalize(t.stat) + " " + t.n + "</span> Clear</div>";
     if (d.t2) {
       var met2 = p[d.stat] >= d.t2;
@@ -1735,13 +1735,13 @@ function render() {
     : "";
 
   var p = pool();
-  el("poolReadout").textContent = "shared pool: Power " + p.power + ", Scramble " + p.scramble;
+  el("poolReadout").textContent = "shared pool: Oomph " + p.oomph + ", Scramble " + p.scramble;
   for (i = 0; i < 2; i++) {
     var who = names[i], z = G.play[who], side = sideStats(who);
     el("playZone-" + who).innerHTML =
       (z.length ? z.map(function (c) { return cardHTML(c.def); }).join("")
                 : '<div class="muted tiny">—</div>') +
-      '<div class="tiny muted" style="width:100%">' + who + "'s side: Power " + side.power +
+      '<div class="tiny muted" style="width:100%">' + who + "'s side: Oomph " + side.oomph +
       ", Scramble " + side.scramble + "</div>";
   }
 
@@ -1822,7 +1822,7 @@ function renderLibrary() {
       list.map(function (d) { return cardHTML(d); }).join("") + "</div>";
   }
   var rooms = ENEMY_ROOMS.concat(HAZARD_ROOMS).map(function (d) {
-    return roomHTML(d.kind === "Enemy" ? Object.assign({}, d, { power: d.basePower }) : d);
+    return roomHTML(d.kind === "Enemy" ? Object.assign({}, d, { oomph: d.basePower }) : d);
   }).join("");
   var stuffRooms = STUFF_ROOMS.map(function (d) { return roomHTML(d); }).join("");
   el("library").innerHTML =

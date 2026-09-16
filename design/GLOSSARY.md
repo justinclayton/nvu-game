@@ -41,7 +41,7 @@ A Room with two Scramble challenges. The lower threshold clears the room; the hi
 
 **Stuff room**
 
-A Room whose Flee line clears the room but leaves the players empty-handed. Its challenges are split per character (e.g. a Power threshold for Red, a Scramble threshold for Gray), each measured against only that character's side of the play zone. Some Stuff rooms have a second, higher challenge. A Down character earns nothing from a Stuff room.
+A Room whose Flee line clears the room but leaves the players empty-handed. Its challenges are split per character (e.g. a Oomph threshold for Red, a Scramble threshold for Gray), each measured against only that character's side of the play zone. Some Stuff rooms have a second, higher challenge. A Down character earns nothing from a Stuff room.
 
 **Stuff**
 
@@ -55,17 +55,17 @@ The two kinds of Stuff card, drawn face down from their matching pool into a pla
 
 The face-down piles in the middle of the table that Good Stuff and Bad Stuff cards are drawn from.
 
-**Power** / **Scramble**
+**Oomph** / **Scramble**
 
 The two stat types a card can carry. Stats from all cards played in a turn add together into the team's Stat pool, which is compared against Room challenge thresholds.
 
 **Stat pool**
 
-The combined Power and/or Scramble total from every card both players played this turn, across both sides of the play zone. Checked against Challenge thresholds during the Outcome phase.
+The combined Oomph and/or Scramble total from every card both players played this turn, across both sides of the play zone. Checked against Challenge thresholds during the Outcome phase.
 
 **Play zone**
 
-The blank area in front of each player where cards are played during the Play phase. Cards here are moved to the Exhaust pile at Cleanup, unless the player is leaving Last Stand after a Clear, in which case they're shuffled into that player's deck instead.
+The blank area in front of each player where cards are played during the Draw and Play phase. Cards here are moved to the Exhaust pile at Cleanup, unless the player is leaving Last Stand after a Clear, in which case they're shuffled into that player's deck instead.
 
 **Type line**
 
@@ -119,9 +119,9 @@ The cards a player has drawn and is holding, used to play cards and pay Costs. S
 
 Five cards. A player holding 5 or more has a Full Hand and cannot draw; if forced to draw anyway, the card goes to the Exhaust pile instead.
 
-**Draw**
+**Draw and Play**
 
-The turn phase where players take turns drawing cards from their deck into their hand, in any order. Each player must draw at least once, but may draw up to their Maximum hand size. A player in Last Stand does not draw, even if forced.
+The turn phase where players take turns either drawing a card from their deck into their hand or playing a card from their hand into their play zone, in any order. Each player must draw at least once, but may draw up to their Maximum hand size. A player in Last Stand does not draw, even if forced.
 
 **Exhaust**
 
@@ -129,7 +129,7 @@ To move cards to the Exhaust pile — from hand (to pay a Cost, or via the `Exha
 
 **Exhaust pile**
 
-A player's face-up pile of spent or lost cards. Played cards move here at Cleanup; cards in it can be shuffled back into the deck (Ascending) or Scrapped.
+A player's face-up pile of spent or lost cards. Played cards and unheld cards in hand move here at Cleanup; cards in it can be shuffled back into the deck (Ascending) or Scrapped.
 
 **Scrap**
 
@@ -141,11 +141,11 @@ The face-up pile of cards that have been Scrapped and removed from the game perm
 
 **Hold** / **Holding**
 
-A card kept in hand rather than played. `Holding` is the keyword marking a passive effect that applies only while the card is in hand — it stops applying once the card is played or exhausted.
+`Hold` is the keyword marking a card that stays in hand at Cleanup instead of being exhausted. `Holding` is the keyword marking a passive effect that applies only while the card is in hand — it stops applying once the card is played or exhausted.
 
 **Turn**
 
-One pass through the five phases: New Room, Draw, Play, Outcome, and Cleanup. Repeats until the floor is cleared (Ascend) or the game ends.
+One pass through the four phases: New Room, Draw and Play, Outcome, and Cleanup. Repeats until the floor is cleared (Ascend) or the game ends.
 
 **Last Stand**
 

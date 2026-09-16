@@ -19,7 +19,7 @@ import type {
 import { CHARACTERS, playerOf } from "./verbs";
 
 export interface StatTotals {
-  readonly power: number;
+  readonly oomph: number;
   readonly scramble: number;
 }
 
@@ -93,15 +93,15 @@ export const drawCapFor = (state: GameState, c: Character): number =>
  */
 export function contributionOf(state: GameState, played: PlayedCard): StatTotals {
   const { owner, card } = played;
-  if (card.kind === "bad_stuff") return { power: 0, scramble: 0 };
+  if (card.kind === "bad_stuff") return { oomph: 0, scramble: 0 };
   const behaviour = behaviourOf(card.name);
   const base = behaviour?.stats
     ? behaviour.stats(state, owner, card)
-    : { power: card.power, scramble: card.scramble };
+    : { oomph: card.oomph, scramble: card.scramble };
   const m = heldModifiers(state, owner);
   const stuffDelta = card.kind === "good_stuff" ? m.stuffPowerDelta : 0;
   return {
-    power: Math.max(0, base.power + m.playedPowerDelta + stuffDelta),
+    oomph: Math.max(0, base.oomph + m.playedPowerDelta + stuffDelta),
     scramble: Math.max(0, base.scramble),
   };
 }
@@ -112,15 +112,15 @@ export function contributionOf(state: GameState, played: PlayedCard): StatTotals
  * only thing a Stuff room ever measures (§6).
  */
 export function statPool(state: GameState, side?: Character): StatTotals {
-  let power = 0;
+  let oomph = 0;
   let scramble = 0;
   for (const played of state.playZone) {
     if (side && played.owner !== side) continue;
     const c = contributionOf(state, played);
-    power += c.power;
+    oomph += c.oomph;
     scramble += c.scramble;
   }
-  return { power, scramble };
+  return { oomph, scramble };
 }
 
 /** A card that says "ALL rooms require an additional N Scramble" is read from either hand. */
@@ -141,7 +141,7 @@ export function thresholdTarget(state: GameState, threshold: Threshold): number 
 }
 
 const statOf = (totals: StatTotals, stat: Stat): number =>
-  stat === "Power" ? totals.power : totals.scramble;
+  stat === "Oomph" ? totals.oomph : totals.scramble;
 
 /** Is this line's threshold met? A Stuff room's line reads one character's own side. */
 export function thresholdIsMet(state: GameState, threshold: Threshold): boolean {

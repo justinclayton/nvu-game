@@ -156,7 +156,7 @@ export function parseCardsYaml(text) {
       if (!key) throw new Error(`line ${n + 1}: nested list item with no list key`);
       const bm = rest.match(/^([A-Za-z_]+):\s*(.*)$/);
       if (bm) {
-        // `- stat: Power` opens a block map; its later keys sit indented past the dash
+        // `- stat: Oomph` opens a block map; its later keys sit indented past the dash
         const item = { [bm[1]]: parseScalar(bm[2]) };
         card[key].push(item);
         nested = { item, indent };
@@ -193,7 +193,7 @@ export function parseCardsYaml(text) {
 
 const FIELD_ORDER = [
   "name", "set", "kind", "owner", "starter", "rarity",
-  "rarity_status", "cost", "power", "scramble", "conditional_stat", "hold",
+  "rarity_status", "cost", "oomph", "scramble", "conditional_stat", "hold",
   "thresholds", "flee", "text", "note", "flagged",
 ];
 
@@ -325,8 +325,8 @@ function measuredOn(kind, effects) {
 }
 
 function threshold(raw, kind, where) {
-  if (!raw || typeof raw.value !== "number" || (raw.stat !== "Power" && raw.stat !== "Scramble")) {
-    throw new Error(`${where}: a threshold needs a Power or Scramble stat and a value`);
+  if (!raw || typeof raw.value !== "number" || (raw.stat !== "Oomph" && raw.stat !== "Scramble")) {
+    throw new Error(`${where}: a threshold needs a Oomph or Scramble stat and a value`);
   }
   const outcome = String(raw.outcome ?? "");
   const read = readProse(outcome, `${where} threshold "${outcome}"`);
@@ -365,7 +365,7 @@ function cardFace(c) {
     starter: c.starter === true,
     count: c.count ?? 1,
     cost: c.cost ?? 0,
-    power: c.power ?? 0,
+    oomph: c.oomph ?? 0,
     scramble: c.scramble ?? 0,
     conditionalStat: c.conditional_stat === true,
     hold: c.hold === true,

@@ -246,7 +246,7 @@ if (typeof module !== "undefined") module.exports = NVU_CARDS;
    turned into structure here.  Anything this does not recognise is an error,
    not a silently dropped rule.
 
-   Rulebook §5 for Flee lines; the three kinds of room are Enemy, Hazard, and
+   Rulebook §8 for Flee lines; the three kinds of room are Enemy, Hazard, and
    Stuff (rulebook §8, and see open-questions.md #2, #7, #8). */
 
 const CARD_KINDS = new Set(["player", "good_stuff", "bad_stuff"]);
@@ -338,7 +338,7 @@ function threshold(raw, kind, where) {
     stat: raw.stat,
     value: raw.value,
     outcome,
-    // Rulebook §5: meeting any threshold Clears the room. A Stuff room's lines
+    // Each Turn, Outcome: meeting any threshold Clears the room. A Stuff room's lines
     // never say "clear" themselves, so this is where that rule reaches them.
     clears: kind === "stuff" ? true : read.clears,
     fleeFree: read.fleeFree,

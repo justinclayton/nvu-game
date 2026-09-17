@@ -160,7 +160,7 @@ describe("walkthrough 5 — nothing resolves until play is declared over", () =>
   it("checks the room once, and resolves every line the pool met", () => {
     // Collapsed Stairwell: Scramble 2 clears and costs both a card; Scramble 5
     // clears too. Passing the low line does nothing until play ends, and when
-    // it does, both lines resolve — §5 says every challenge you met.
+    // it does, both lines resolve — Each Turn, Outcome says every challenge you met.
     const state = rig({
       phase: "Play",
       activeRoom: room("Collapsed Stairwell"),

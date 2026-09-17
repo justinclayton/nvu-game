@@ -36,9 +36,9 @@ export const standing = (state: GameState): readonly Character[] =>
 /* --------------------------------------------------------------- discarding */
 
 /**
- * §4: to discard is to move a card to its owner's discard pile — gone for the
- * floor. Stuff discards like anything else; the Scrapyard only comes into it at
- * ascension (§7).
+ * Setup: to discard is to move a card to its owner's discard pile — gone for
+ * the floor. Stuff discards like anything else; the Scrapyard only comes into
+ * it at ascension (§10).
  */
 export function discard(
   state: GameState,
@@ -114,7 +114,7 @@ export function discardFromHand(
 /* ----------------------------------------------------------------- drawing */
 
 /**
- * §5: draw one card. A full hand does not excuse the opening draw — the card is
+ * Each Turn, Draw: draw one card. A full hand does not excuse the opening draw — the card is
  * put straight into the discard pile instead of the hand, so a full hand costs
  * you a card a turn rather than saving you one.
  *
@@ -154,7 +154,7 @@ export function drawOne(
 /**
  * §9: no card may be put into a Down character's hand — you cannot park Stuff on
  * a partner who is out. Stuff pushed into a hand by a room ignores the hand cap
- * entirely (§5), and so does anything else that moves a card to a hand.
+ * entirely, and so does anything else that moves a card to a hand.
  */
 export function moveToHand(
   state: GameState,
@@ -292,7 +292,7 @@ export function takeGoodStuff(
   return next;
 }
 
-/** §7: Bad Stuff is dealt to you, as a room's printed punishment. */
+/** Bad Stuff is dealt to you, as a room's printed "gets Bad Stuff" punishment. */
 export function dealBadStuff(
   state: GameState,
   c: Character,

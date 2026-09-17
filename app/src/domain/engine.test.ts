@@ -29,7 +29,7 @@ const playFree = (c: "Red" | "Gray", cardId: CardId): Command => ({
   payWith: [],
 });
 
-describe("§5 Flip", () => {
+describe("Flip", () => {
   it("turns the top card of the floor deck face up before anything is spent", () => {
     const first = room("Sorting Room");
     const state = rig({
@@ -60,7 +60,7 @@ describe("§5 Flip", () => {
   });
 });
 
-describe("§5 Draw", () => {
+describe("Draw", () => {
   const flipState = (over = {}) =>
     rig({
       phase: "Flip",
@@ -137,7 +137,7 @@ describe("§5 Draw", () => {
   });
 });
 
-describe("§5 Play", () => {
+describe("Play", () => {
   const playState = (over = {}) =>
     rig({
       phase: "Play",
@@ -250,7 +250,7 @@ describe("§5 Play", () => {
   });
 });
 
-describe("§5 Cleanup", () => {
+describe("Cleanup", () => {
   it("'Discard the entire play zone'", () => {
     const state = rig({
       phase: "Play",
@@ -390,7 +390,7 @@ describe("Room kinds: Enemy, Hazard, Stuff", () => {
 
   it("a met line that Clears beats one that says to Flee for free", () => {
     // Villy prints Oomph 9 (Ascend) and Scramble 9 (Flee this room for free).
-    // §5: if any challenge's threshold is met, the room is Cleared.
+    // Each Turn, Outcome: if any challenge's threshold is met, the room is Cleared.
     const state = rig({
       phase: "Play",
       activeRoom: room("Villy, Coney's Work Husband"),

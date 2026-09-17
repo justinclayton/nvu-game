@@ -362,7 +362,7 @@ function flipRoom(state: GameState, run: Run): GameState {
   const room = state.floorDeck[0];
   if (!room) throw new CorruptStateError("Flipped an empty floor deck.");
 
-  // §5: you always see what you are facing before you spend anything.
+  // Each Turn, New Room: you always see what you are facing before you spend anything.
   run.events.push({ type: "ROOM_FLIPPED", room });
   const flipped: GameState = {
     ...state,
@@ -380,10 +380,11 @@ function flipRoom(state: GameState, run: Run): GameState {
 /* ------------------------------------------------------------ Draw */
 
 /**
- * §5: Draw opens with both characters drawing 1 card at the same time. The
- * engine draws them one after the other, Red first, which is the same result:
- * neither draw can see or change the other. A `Full Hand` burns the card to the
- * discard pile (§5) and a character in last stand does not draw at all (§9).
+ * Each Turn, Draw: opens with both characters drawing 1 card at the same time.
+ * The engine draws them one after the other, Red first, which is the same
+ * result: neither draw can see or change the other. A `Full Hand` burns the
+ * card to the discard pile and a character in last stand does not draw at
+ * all (§9).
  */
 function openingDraw(state: GameState, run: Run): GameState {
   let s = state;
@@ -435,7 +436,7 @@ function playCard(
     s = { ...s, thisTurn: spendFreePlay(s.thisTurn, c) };
   }
 
-  // §5: you pay in *other* cards from your own hand. Red never pays for Gray.
+  // Each Turn, Play: you pay in *other* cards from your own hand. Red never pays for Gray.
   s = discardFromHand(s, c, payment, run.events);
   if (payment.length > 0) {
     run.events.push({ type: "COST_PAID", character: c, cards: payment });
@@ -447,8 +448,8 @@ function playCard(
   s = { ...s, playZone: [...s.playZone, { owner: c, card }] };
   run.events.push({ type: "CARD_PLAYED", character: c, card });
 
-  // §5: nothing resolves while you play — the *room* is checked once, at the end
-  // of the phase. A card's own printed effect still happens as it is played.
+  // Each Turn: nothing resolves while you play — the *room* is checked once, at
+  // the end of the phase. A card's own printed effect still happens as it is played.
   const behaviour = behaviourOf(card.name);
   if (behaviour?.exhaustX !== undefined) {
     s = printedExhaust(s, c, behaviour.exhaustX, card.name, run);
@@ -493,7 +494,7 @@ interface RoomOutcome {
 }
 
 /**
- * §5: the room is checked once, when both characters have stopped playing. If
+ * Each Turn, Outcome: the room is checked once, when both characters have stopped playing. If
  * any challenge's threshold is met the room is Cleared, and the card text of
  * *every* challenge met resolves — a Hazard's higher tier also reveals a
  * reward, on top of the lower tier rather than instead of it. See
@@ -503,7 +504,7 @@ function roomOutcome(state: GameState, room: Room): RoomOutcome {
   const met = room.thresholds.filter((t) => thresholdIsMet(state, t));
 
   if (met.length === 0) {
-    // §5: if no threshold is met, the characters Flee. Resolve the Flee line.
+    // Each Turn, Outcome: if no threshold is met, the characters Flee. Resolve the Flee line.
     // A Stuff room prints no Flee line of its own; it Fled empty-handed like
     // any other room, and does not Clear.
     return { met, cleared: room.flee.clears, effects: room.flee.effects };
@@ -512,7 +513,7 @@ function roomOutcome(state: GameState, room: Room): RoomOutcome {
     return { met, cleared: true, effects: stuffRoomEffects(met) };
   }
   // A line that says "Flee this room for free" cannot un-Clear a room another
-  // met line Cleared: §5's first sentence is that any met threshold Clears it.
+  // met line Cleared: Outcome's first sentence is that any met threshold Clears it.
   return {
     met,
     cleared: met.some((t) => t.clears),
@@ -531,11 +532,12 @@ function endPlay(state: GameState, run: Run): GameState {
 
   let s: GameState = { ...state, activeRoom: null };
   if (outcome.cleared) {
-    // §5 cleanup 2: a Cleared room is out of the game. Nobody counts that heap.
+    // A Cleared room is out of the game. Nobody counts that heap.
     run.events.push({ type: "ROOM_CLEARED", room });
     s = { ...s, cleared: [...s.cleared, room] };
   } else {
-    // §5 cleanup 1: a Fled room comes back around when the Fled pile shuffles in.
+    // A Fled room comes back around when the Fled pile shuffles in. See
+    // open-questions.md #21.
     run.events.push({ type: "ROOM_FLED", room });
     s = { ...s, fled: [...s.fled, room] };
   }
@@ -599,7 +601,7 @@ function applyEffect(state: GameState, effect: RoomEffect, who: Character, run: 
 
 /**
  * Work through what the room owes, stopping at the first thing that needs a
- * decision. §5: where a line says *1 character*, the team chooses which one and
+ * decision. Where a line says *1 character*, the team chooses which one and
  * they take all of it — there is no splitting. With a partner Down there is
  * nothing to choose and it all falls on the survivor (§9).
  */
@@ -683,7 +685,8 @@ function finishTurn(state: GameState, run: Run): GameState {
   // stand the moment a deck empties, so this ordinarily finds nothing to do.
   s = activateLastStand(s, run.events);
 
-  // §5 cleanup 4: if the floor draw pile is empty, shuffle the Fled pile back in.
+  // If the floor draw pile is empty, shuffle the Fled pile back in. See
+  // open-questions.md #21.
   if (s.floorDeck.length === 0 && s.fled.length > 0) {
     const [deck, seed] = shuffle(s.fled, s.seed);
     run.events.push({ type: "FLED_RESHUFFLED", rooms: deck.length });
@@ -713,7 +716,7 @@ function finishTurn(state: GameState, run: Run): GameState {
 }
 
 /**
- * §5 cleanup: discard the entire play zone. The hand carries over untouched.
+ * Each Turn, Cleanup: discard the entire play zone. The hand carries over untouched.
  *
  * §9: if the room was Cleared while a character was in last stand, the last
  * stand cleanup replaces their play-zone cleanup — the play zone shuffles into
@@ -859,7 +862,7 @@ function ascend(state: GameState, red: AscendChoice, gray: AscendChoice, run: Ru
   s = ascendOne(s, "Red", red, run);
   s = ascendOne(s, "Gray", gray, run);
 
-  // §4: build the next floor's deck, with one fewer Stuff room than last time.
+  // Setup: build the next floor's deck, with one fewer Stuff room than last time.
   s = returnRoomsToSupply(s);
   s = buildFloor({ ...s, floor: s.floor + 1, offer: null }, run.events);
   return { ...s, phase: "Flip", playZone: [], thisTurn: emptyTurnRecord() };

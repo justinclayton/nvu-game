@@ -1,4 +1,6 @@
 #!/bin/sh
 # Refuse to commit while the card list has drifted (stale cards.js, schema
 # problems, or a prototype that stops rendering the whole list).
+# The orphan `pr-media` branch holds only images, so there is no card list to check.
+[ -f tools/cards.mjs ] || exit 0
 exec node tools/cards.mjs check

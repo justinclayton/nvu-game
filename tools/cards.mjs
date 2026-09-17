@@ -251,8 +251,10 @@ if (typeof module !== "undefined") module.exports = NVU_CARDS;
 const CARD_KINDS = new Set(["player", "good_stuff", "bad_stuff"]);
 const ROOM_KIND = { enemy_room: "enemy", hazard_room: "hazard", stuff_room: "stuff" };
 
-/** Rulebook §6: every Stuff room prints this Flee line and no other. */
-const STUFF_FLEE = "Clear the room, but leave empty-handed.";
+/** No Stuff room in cards.yaml prints a Flee line of its own; this is the text
+ * shown when one is fled without meeting a threshold. It has no effect and,
+ * like any other Flee, does not clear the room. */
+const STUFF_FLEE = "Leave empty-handed.";
 
 function who(word) {
   const w = word.trim().toLowerCase();
@@ -334,8 +336,8 @@ function threshold(raw, kind, where) {
     stat: raw.stat,
     value: raw.value,
     outcome,
-    // Rulebook §6: a Stuff room is Cleared either way, so every one of its lines
-    // clears.  Elsewhere only a line that says so does.
+    // Rulebook §5: meeting any threshold Clears the room. A Stuff room's lines
+    // never say "clear" themselves, so this is where that rule reaches them.
     clears: kind === "stuff" ? true : read.clears,
     fleeFree: read.fleeFree,
     measuredOn: measuredOn(kind, read.effects),
@@ -345,10 +347,7 @@ function threshold(raw, kind, where) {
 
 function fleeLine(card, kind) {
   if (kind === "stuff") {
-    // Rulebook §6 prints this line for every Stuff room, so the card list does
-    // not repeat it.  Its own text Clears the room, which is why a Stuff room
-    // never reaches the Fled pile.
-    return { text: STUFF_FLEE, clears: true, effects: [] };
+    return { text: STUFF_FLEE, clears: false, effects: [] };
   }
   if (!card.flee) throw new Error(`${card.name}: every Enemy and Hazard room prints a Flee line`);
   const read = readProse(card.flee, `${card.name} Flee line`);

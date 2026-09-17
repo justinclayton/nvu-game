@@ -501,13 +501,14 @@ interface RoomOutcome {
 function roomOutcome(state: GameState, room: Room): RoomOutcome {
   const met = room.thresholds.filter((t) => thresholdIsMet(state, t));
 
-  if (room.kind === "stuff") {
-    // §6: a Stuff room is Cleared either way — its own Flee line clears it.
-    return { met, cleared: true, effects: stuffRoomEffects(met) };
-  }
   if (met.length === 0) {
     // §5: if no threshold is met, the characters Flee. Resolve the Flee line.
+    // A Stuff room prints no Flee line of its own; it Fled empty-handed like
+    // any other room, and does not Clear.
     return { met, cleared: room.flee.clears, effects: room.flee.effects };
+  }
+  if (room.kind === "stuff") {
+    return { met, cleared: true, effects: stuffRoomEffects(met) };
   }
   // A line that says "Flee this room for free" cannot un-Clear a room another
   // met line Cleared: §5's first sentence is that any met threshold Clears it.

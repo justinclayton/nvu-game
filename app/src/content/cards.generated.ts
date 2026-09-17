@@ -844,8 +844,8 @@ export const CARD_CONTENT = {
         },
       ],
       flee: {
-        text: "Clear the room, but leave empty-handed.",
-        clears: true,
+        text: "Leave empty-handed.",
+        clears: false,
         effects: [],
       },
     },
@@ -918,8 +918,8 @@ export const CARD_CONTENT = {
         },
       ],
       flee: {
-        text: "Clear the room, but leave empty-handed.",
-        clears: true,
+        text: "Leave empty-handed.",
+        clears: false,
         effects: [],
       },
     },
@@ -962,8 +962,8 @@ export const CARD_CONTENT = {
         },
       ],
       flee: {
-        text: "Clear the room, but leave empty-handed.",
-        clears: true,
+        text: "Leave empty-handed.",
+        clears: false,
         effects: [],
       },
     },
@@ -1006,8 +1006,8 @@ export const CARD_CONTENT = {
         },
       ],
       flee: {
-        text: "Clear the room, but leave empty-handed.",
-        clears: true,
+        text: "Leave empty-handed.",
+        clears: false,
         effects: [],
       },
     },

@@ -215,15 +215,23 @@ describe("Grav Harness — 'One of you draws 1 card, even if their hand is full'
 
 describe("Riot Shield — 'If the room is Cleared, return this to your hand at the end of the turn'", () => {
   it("comes back to hand when the room is Cleared", () => {
+    // Riot Shield alone only pays Scramble, which Sorting Room measures on
+    // Gray's side — Red also needs to meet the Oomph 2 on their own side for
+    // this room to Clear, so Red plays a Shove too.
     const state = playing({
       activeRoom: room("Sorting Room"),
-      Red: player({ deck: pile("Shove", 3), hand: [card("Riot Shield"), card("Shove")] }),
+      Red: player({
+        deck: pile("Shove", 3),
+        hand: [card("Riot Shield"), card("Shove"), card("Shove"), card("Shove")],
+      }),
     });
     const r = ids(state, "Red");
     const { state: next } = play(state, [
       { type: "PLAY_CARD", character: "Red", cardId: r[0] as CardId, payWith: [r[1] as CardId] },
+      { type: "PLAY_CARD", character: "Red", cardId: r[2] as CardId, payWith: [r[3] as CardId] },
       { type: "END_PLAY" },
     ]);
+    expect(next.cleared).toHaveLength(1);
     expect(next.Red.hand.some((c) => c.name === "Riot Shield")).toBe(true);
     expect(next.Red.discard.some((c) => c.name === "Riot Shield")).toBe(false);
   });

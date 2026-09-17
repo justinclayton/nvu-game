@@ -146,9 +146,9 @@ export function Mat({
           <Slot id="red-play" label="Red · play zone" row tone="red" />
           <Slot id="red-discard" label="Discard" count={state.Red.discard.length} tone="red" />
           <div className="mat__divider" />
-          <Slot id="gray-discard" label="Discard" count={state.Gray.discard.length} tone="gray" />
-          <Slot id="gray-play" label="Gray · play zone" row tone="gray" />
           <Slot id="gray-deck" label="Gray · deck" count={state.Gray.deck.length} tone="gray" />
+          <Slot id="gray-play" label="Gray · play zone" row tone="gray" />
+          <Slot id="gray-discard" label="Discard" count={state.Gray.discard.length} tone="gray" />
         </div>
 
         <div className="mat-row mat-row--hands">

@@ -350,6 +350,44 @@ describe("§6 The three kinds of room", () => {
     expect(next.Red.discard).toHaveLength(1);
   });
 
+  it("'the higher threshold also gives a reward' — taken or skipped", () => {
+    // Two Coil Of Cables (Scramble 3 each, cost 0) clear both of Collapsed
+    // Stairwell's lines: Scramble 2 (Exhaust 1 each) and Scramble 5 (one of
+    // you reveals a reward).
+    const state = rig({
+      phase: "Play",
+      activeRoom: room("Collapsed Stairwell"),
+      Red: player({ deck: pile("Shove", 5) }),
+      Gray: player({
+        deck: pile("Duck Under", 5),
+        hand: [card("Coil Of Cable"), card("Coil Of Cable")],
+      }),
+    });
+    const grayPool = state.pools.Gray;
+    const g = ids(state, "Gray");
+    const { state: afterPlay } = play(state, [
+      playFree("Gray", g[0] as CardId),
+      playFree("Gray", g[1] as CardId),
+      { type: "END_PLAY" },
+    ]);
+    expect(afterPlay.pending?.kind).toBe("ChooseCharacter");
+
+    const { state: afterChoice, events: choiceEvents } = must(afterPlay, {
+      type: "CHOOSE_CHARACTER",
+      character: "Gray",
+    });
+    expect(eventTypes(choiceEvents)).toContain("REWARD_REVEALED");
+    expect(afterChoice.pending?.kind).toBe("TakeReward");
+
+    const { state: afterTake, events: takeEvents } = must(afterChoice, {
+      type: "TAKE_REWARD",
+      take: true,
+    });
+    expect(eventTypes(takeEvents)).toContain("REWARD_TAKEN");
+    expect(afterTake.Gray.deck[0]?.name).toBe(grayPool[0]?.name);
+    expect(afterTake.pools.Gray).toHaveLength(grayPool.length - 1);
+  });
+
   it("a met line that Clears beats one that says to Flee for free", () => {
     // Villy prints Oomph 9 (Ascend) and Scramble 9 (Flee this room for free).
     // §5: if any challenge's threshold is met, the room is Cleared.

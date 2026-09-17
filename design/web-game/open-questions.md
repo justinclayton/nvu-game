@@ -17,24 +17,18 @@ The reading is marked in a comment beside the code, so a ruling here has one pla
 
 **Where:** `roomOutcome` in `app/src/domain/engine.ts`.
 
-§5: *"If any challenge's threshold is met, the room is Cleared. Resolve the card text of **every**
-challenge you met."* §6 agrees for Hazards — the higher tier *"**also** pays a permanent card
-reward"*, on top of the lower rather than instead of it.
+§5: *"If more than one challenge has been cleared, their outcomes may be resolved in any order."*
+That only makes sense if every met challenge's outcome resolves, not just one. §6 agrees for
+Hazards: the higher tier *"also gives a reward"*, on top of the lower tier rather than instead of
+it.
 
-So a Scramble 6 pool against Collapsed Stairwell (`Scramble 2: Clear, but both of you Exhaust 1` /
-`Scramble 5: Clear`) meets both lines: the room is Cleared and both characters still Exhaust 1.
-
-`GLOSSARY.md` reads *"which is reached locks in"* in the singular, which would make one line resolve
-and not the other. The rulebook wins.
+So a Scramble 5 pool against Collapsed Stairwell (`Scramble 2: Clear, but both of you Exhaust 1.` /
+`Scramble 5: Clear, and one of you reveals a reward.`) meets both lines: the room is Cleared, both
+characters Exhaust 1, and one of them reveals a reward.
 
 One line cannot un-Clear a room another has Cleared: §5's first sentence is that any met threshold
 Clears it, so Villy's `Scramble 9: Flee this room for free` is void when its `Oomph 9` line was also
 met. See #3 for that line met on its own.
-
-**A consequence for the card list, not the rules:** neither Hazard's higher tier does anything.
-Collapsed Stairwell's `Scramble 5: Clear` and Ruptured Coolant Line's `Scramble 7: Clear` are both
-strictly contained in the lower tier they sit above, so reaching them changes nothing. That is #7:
-the cards do not print the reward tier the rulebook describes.
 
 ---
 
@@ -42,9 +36,10 @@ the cards do not print the reward tier the rulebook describes.
 
 **Where:** the generator, `tools/cards.mjs`, and the room check.
 
-Rulebook §6 says a Stuff room's challenge is split per character and *"each character is measured on
-their own side of the play zone only"*. Tool Cage and Spill Of Cargo print a line that names both
-(`Scramble 3: Both of you get Good Stuff.`), and a line naming both names no single side.
+Rulebook §6 says a Stuff room's challenges are split per character: *"Measure each character's
+challenge against that character's own side of the play zone only."* Tool Cage and Spill Of Cargo
+print a line that names both (`Scramble 3: Both of you get Good Stuff.`), and a line naming both
+names no single side.
 
 **What the code does.** A line naming exactly one character is measured on that character's side; a
 line naming both is measured on the shared pool and pays both standing characters. Each character
@@ -58,44 +53,44 @@ adds to `Both of you get Good Stuff`.
 **Where:** the generator, and the room check.
 
 Villy, Coney's Work Husband prints `Scramble 9: Flee this room for free.` alongside
-`Oomph 9: Ascend`. §5's "any threshold met Clears the room" would Clear Villy on Scramble alone,
-which contradicts the line's own words.
+`Oomph 9: Ascend`. §5's *"if any challenge's threshold has been met or exceeded, the players Clear
+the room"* would Clear Villy on Scramble alone, which contradicts the line's own words.
 
 **What the code does.** The line does not Clear: the room goes to the Fled pile and its Flee line
-does not resolve. Because the room ends Fled, §9's *"the team Flees the room while that character is
-in last stand"* still applies, so a character in last stand goes Down. §9's test is how the room
-ends, not how it got there.
+does not resolve. Because the room ends Fled, §9's rule that a character in last stand goes Down
+when the room was Fled still applies. §9's test is how the room ends, not how it got there.
 
 ---
 
-## 4. Last stand shuffles back the play zone only, not the hand
+## 4. Last stand shuffles the play zone only; the hand carries over untouched
 
 `[you, 2026-09-01]`
 
 **Where:** the cleanup step of `END_PLAY`.
 
-Rulebook §9: *"all cards in the character's play zone are shuffled into their deck, then 2 cards are
-Exhausted from the top of that deck... Their hand is cleaned up as normal — unplayed cards are
-Exhausted, `Hold` cards stay."*
+Rulebook §9: *"If the room was Cleared, instead of discarding your side of the play zone, shuffle
+your play zone to form your new remaining deck, then Exhaust 2 cards from the top of your deck."*
+Cleanup never touches a hand, in or out of last stand — every card in hand carries over to the next
+turn.
 
-`GLOSSARY.md`'s **last stand** entry says instead: *"the cards that would have been exhausted from
-hand and play zone are shuffled back into their deck."*
-
-**What the code does.** Follows the rulebook: play zone only. `GLOSSARY.md` is stale here.
+**What the code does.** Follows the rulebook: only the play zone shuffles in and pays the price; the
+hand is left exactly as it was.
 
 ---
 
-## 5. A full hand allows exactly one draw, and it is burned
+## 5. A full hand does not skip the opening draw; it burns the card instead
 
-**Where:** `validate` on `DRAW`.
+**Where:** `drawOne` in `app/src/domain/verbs.ts`, called from the opening draw in `engine.ts`.
 
-§5 gives two rules that meet in one case: *"You may not draw up while holding 5 or more cards"* and
-*"A full hand does not excuse the minimum. Draw your one card anyway — and put it straight into your
-exhaust pile."*
+§2 gives two rules that meet on a turn's first draw: *"Both players draw 1 card at the same time"*
+and *"If you are holding 5 or more cards, you have a Full Hand and cannot draw. If you are forced to
+draw with a Full Hand, that card goes into your discard pile instead."*
 
-**What the code does.** With a full hand, `DRAW` is legal only while the character has not yet drawn
-this turn, and that one card goes to the discard pile. A second burned draw is rejected. Reading it
-any other way lets a character burn their whole deck a card at a time for nothing.
+**What the code does.** The opening draw always happens, full hand or not; a Full Hand character's
+opening card goes straight to their discard pile instead of their hand. "Cannot draw" governs only
+the later, voluntary draws in the phase — those are refused outright while the hand is full. Reading
+the opening draw as skipped instead would leave "if you are forced to draw with a Full Hand"
+describing nothing, since nothing else in the Draw phase forces a draw.
 
 ---
 
@@ -103,14 +98,14 @@ any other way lets a character burn their whole deck a card at a time for nothin
 
 `[you, 2026-09-01]` for the rule. The consequence below is still open.
 
-**Where:** `ASCEND`.
+**Where:** `ascendOne` in `app/src/domain/engine.ts`.
 
-Rulebook §10 step 1: *"Move all Stuff in both exhaust piles to the Scrapyard. It is out of the run
-for good."* `GLOSSARY.md`'s **Ascend** entry says instead that Stuff *"returns to its pool"*, though
-`GLOSSARY.md`'s own **Stuff**, **Scrap tax** and **Discard pile** entries all say Scrapyard.
+Rulebook §10 steps 1–2: *"Separate your discard pile: Split it into Stuff cards and non-Stuff cards.
+Say Goodbye to Your Stuff: Scrap the Stuff cards. You may keep one Stuff card by Scrapping one
+non-Stuff card from your discard pile in its place."*
 
-**What the code does.** Follows the rulebook: the Scrapyard. `GLOSSARY.md`'s **Ascend** entry is
-stale, and disagrees with its own **Stuff**, **Scrap tax** and **Discard pile** entries.
+**What the code does.** Every Stuff card in the discard pile is Scrapped, except the one card a
+player keeps by Scrapping a non-Stuff card from that pile in its place.
 
 **Consequence worth ruling on:** the Good Stuff pool never refills. The card list prints one copy of
 each of the eight Good Stuff cards, and floor 1 alone holds nine Stuff rooms. The pool is empty
@@ -120,33 +115,29 @@ written give the pool no way back.
 
 ---
 
-## 7. No Hazard in the card list prints the reward tier the rulebook describes
+## 7. Both Hazards print a reward tier
 
-`[you, 2026-09-16]` Both Hazards now print `Clear, and one of you reveals a reward` as their higher tier.
+`[you, 2026-09-16]`
 
-**Where:** the generator's threshold parser.
+**Where:** the generator's threshold parser, and `design/cards.yaml`.
 
-Rulebook §6: a Hazard's higher threshold *"also pays a permanent card reward"*. Both Hazards in
-`design/cards.yaml` print a higher tier that removes a punishment instead (`Clear, but both of you
-Exhaust 1` / `Clear`).
+Rulebook §6: a Hazard's higher threshold *"also gives a reward: turn the top card of the named
+character's reward pool face up. That character takes it or skips it."* Both Hazards in
+`design/cards.yaml` — Collapsed Stairwell and Ruptured Coolant Line — print `Clear, and one of you
+reveals a reward.` as their higher tier.
 
-**What the code does.** The generator recognises a `... reveals a reward` clause and the engine
-implements the take-or-skip reveal, so the rule is there when a card prints it. Nothing in the
-current list exercises it.
-
-Since every met challenge resolves (#1), this is no longer only a missing bonus: a higher tier
-printed as plain `Clear` above a lower tier that already clears is **completely inert**. Both
-Hazards in the list are shaped that way, so their second thresholds do nothing at all. The fix is
-on the cards, not in the code — a higher tier has to print something the lower one does not.
+**What the code does.** The generator recognises the `... reveals a reward` clause and the engine
+implements the take-or-skip reveal, so both Hazards exercise it.
 
 ---
 
 ## 8. A skipped reward reveal goes to the bottom of its pool
 
+`[you, 2026-09-16]`
+
 **Where:** the `RewardReveal` pending choice.
 
-The rulebook flags this itself, in §6: *"NOT YET RULED — whether a skipped reveal goes to the bottom
-of its pool, as a declined ascension reward does (ticket 09)."*
+Rulebook §6: *"A skipped card goes to the bottom of the reward pool."*
 
 **What the code does.** Bottom of the pool, matching the declined ascension reward.
 
@@ -276,3 +267,19 @@ trigger. Waiting for the phase to end would leave a character drawing and being 
 `DRAW` command — so the state is live for the rest of the phase. Everything else that can empty a
 deck mid-turn — a room's printed punishment, a card's own `Exhaust X` — is swept for once, at
 cleanup.
+
+---
+
+## 18. The floor deck's Hazard count is fixed at 3, not left to chance
+
+**Where:** `HAZARD_ROOMS_PER_FLOOR` in `app/src/domain/setup.ts`.
+
+The Floor deck section says only: *"select randomly from the available Floor cards until you have
+the right number."* It does not say how many of those are Hazards and how many are Stuff. The card list
+prints exactly 6 Hazard rooms (3 Collapsed Stairwell, 3 Ruptured Coolant Line), and every used room
+returns to the supply at Ascending, so a fixed 3 Hazards a floor is what the printed counts support.
+
+**What the code does.** Takes exactly 3 Hazard rooms and 1 Enemy room every floor, then fills the
+rest with Stuff rooms (10 minus the floor number). A draw at random from the whole Floor-card
+supply, Hazard and Stuff mixed together, would also fit the rulebook's words, and could leave a
+floor with more or fewer than 3 Hazards.

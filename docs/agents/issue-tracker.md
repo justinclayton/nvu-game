@@ -47,7 +47,27 @@ A coordinator session can work a batch of `ready-for-agent` issues by launching 
 
 A PR for anything a person can see (a new screen, control, layout, or a visible bug fix) carries pictures of it, so the review can happen from the PR page rather than by building the branch. Screenshots for a static change; a short GIF for an interaction. Skip it for pure rules, engine, or tooling changes with no UI surface.
 
-Attach images directly to the PR body (drag-and-drop or `gh pr create --body-file` with an image already uploaded via the GitHub UI/API) rather than maintaining a media branch — this repo has no `pr-media` convention.
+Media lives on the orphan branch `pr-media`, one directory per issue, and is referenced from the PR body by URL. It never merges into `main`.
+
+```
+# from any checkout, without disturbing the working tree
+git fetch origin pr-media
+git worktree add --detach /tmp/pr-media-<n> origin/pr-media   # detached, so parallel sessions don't fight over the branch
+mkdir -p /tmp/pr-media-<n>/issue-<n> && cp <screenshots> /tmp/pr-media-<n>/issue-<n>/
+git -C /tmp/pr-media-<n> add -A && git -C /tmp/pr-media-<n> commit -m "Add media for issue #<n>"
+git -C /tmp/pr-media-<n> push origin HEAD:pr-media   # rejected? pull --rebase origin pr-media, then push again
+git worktree remove /tmp/pr-media-<n>
+```
+
+Reference each file as `![caption](https://github.com/justinclayton/nvu-game/raw/pr-media/issue-<n>/<file>)`, with a one-line caption saying what to look at. This repo is private, so use that `github.com/.../raw/...` form: it loads for anyone signed in with access, while a `raw.githubusercontent.com` URL does not render. Keep files small: downscale screenshots to about 800px wide (`sips --resampleWidth 800 in.png --out out.png`), and keep GIFs under a few megabytes.
+
+Taking a screenshot of a page without a browser session, for the web game's dev server or a prototype served locally:
+
+```
+"/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" --headless --screenshot=out.png --window-size=1280,800 <url>
+```
+
+Before-and-after pairs are the most useful shape for a fix; a single frame of the new thing is enough for a feature.
 
 ## When a skill says "publish to the issue tracker"
 

@@ -393,6 +393,12 @@ cards:
       Holding: ALL rooms require an additional 2 `Scramble` to clear.
       Play: Exhaust 2.
 
+  - name: My Head Is Quantum Spinning
+    set: proposed
+    kind: bad_stuff
+    cost: 1
+    text: "Holding: whenever you draw a card, your partner must also draw a card."
+
   # Rooms
 
   - name: Gross Thing That Looks Like A Cherry

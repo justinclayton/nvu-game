@@ -592,6 +592,20 @@ export const CARD_CONTENT = {
       conditionalStat: false,
       text: "Holding: ALL rooms require an additional 2 `Scramble` to clear. Play: Exhaust 2.",
     },
+    {
+      name: "My Head Is Quantum Spinning",
+      set: "proposed",
+      kind: "bad_stuff",
+      owner: null,
+      rarity: null,
+      starter: false,
+      count: 1,
+      cost: 1,
+      oomph: 0,
+      scramble: 0,
+      conditionalStat: false,
+      text: "Holding: whenever you draw a card, your partner must also draw a card.",
+    },
   ],
   rooms: [
     {

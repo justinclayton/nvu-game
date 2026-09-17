@@ -54,6 +54,7 @@ var NVU_CARDS = {
     {"name":"Rust","set":"proposed","kind":"bad_stuff","cost":2,"text":"Holding: Stuff you play has -1 Oomph."},
     {"name":"Spore Cloud","set":"proposed","kind":"bad_stuff","cost":2,"text":"Holding: You can't have more than 3 cards in your hand."},
     {"name":"Panic","set":"proposed","kind":"bad_stuff","cost":1,"text":"Holding: ALL rooms require an additional 2 `Scramble` to clear. Play: Exhaust 2."},
+    {"name":"My Head Is Quantum Spinning","set":"proposed","kind":"bad_stuff","cost":1,"text":"Holding: whenever you draw a card, your partner must also draw a card."},
     {"name":"Gross Thing That Looks Like A Cherry","set":"proposed","kind":"enemy_room","thresholds":[{"stat":"Oomph","value":5,"outcome":"Ascend"}],"flee":"Both of you Exhaust 1.","floor":1},
     {"name":"Coney, The Thing In The Stairwell","set":"proposed","kind":"enemy_room","thresholds":[{"stat":"Oomph","value":9,"outcome":"Ascend"}],"flee":"Both of you Exhaust 1.","floor":2},
     {"name":"Villy, Coney's Work Husband","set":"proposed","kind":"enemy_room","thresholds":[{"stat":"Oomph","value":9,"outcome":"Ascend"},{"stat":"Scramble","value":9,"outcome":"Flee this room for free."}],"flee":"Both of you Exhaust 2.","floor":3},

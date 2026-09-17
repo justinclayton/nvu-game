@@ -116,12 +116,19 @@ export function exhaustFromHand(
  * you a card a turn rather than saving you one.
  *
  * `ignoreHandCap` is for a card that says so in its own text.
+ *
+ * `forced` marks a draw that a card's text made someone else take, as opposed
+ * to one they chose or the opening draw. It is stamped onto the resulting
+ * event so a card that triggers off draws can tell its own forced draw apart
+ * from one that counts toward triggering it again (see `My Head Is Quantum
+ * Spinning`, which must not chain off the draw it just forced).
  */
 export function drawOne(
   state: GameState,
   c: Character,
   events: DomainEvent[],
   ignoreHandCap = false,
+  forced = false,
 ): GameState {
   const p = playerOf(state, c);
   if (p.down) return state;
@@ -130,10 +137,10 @@ export function drawOne(
 
   const rest = { ...p, deck: p.deck.slice(1), drewThisTurn: p.drewThisTurn + 1 };
   if (!ignoreHandCap && p.hand.length >= HAND_CAP) {
-    events.push({ type: "DRAW_BURNED", character: c, card });
+    events.push({ type: "DRAW_BURNED", character: c, card, forced });
     return exhaust(withPlayer(state, c, rest), c, card, "deck", events);
   }
-  events.push({ type: "CARD_DRAWN", character: c, card });
+  events.push({ type: "CARD_DRAWN", character: c, card, forced });
   return withPlayer(state, c, { ...rest, hand: [...p.hand, card] });
 }
 

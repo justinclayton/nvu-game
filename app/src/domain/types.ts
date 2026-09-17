@@ -249,8 +249,19 @@ export type ExhaustedFrom = "hand" | "deck" | "playZone";
 export type DomainEvent =
   | { readonly type: "FLOOR_BUILT"; readonly floor: number; readonly rooms: number }
   | { readonly type: "ROOM_FLIPPED"; readonly room: Room }
-  | { readonly type: "CARD_DRAWN"; readonly character: Character; readonly card: Card }
-  | { readonly type: "DRAW_BURNED"; readonly character: Character; readonly card: Card }
+  | {
+      readonly type: "CARD_DRAWN";
+      readonly character: Character;
+      readonly card: Card;
+      /** True for a draw a card's text forced on someone else — see `drawOne`. */
+      readonly forced?: boolean;
+    }
+  | {
+      readonly type: "DRAW_BURNED";
+      readonly character: Character;
+      readonly card: Card;
+      readonly forced?: boolean;
+    }
   | { readonly type: "CARD_PLAYED"; readonly character: Character; readonly card: Card }
   | { readonly type: "COST_PAID"; readonly character: Character; readonly cards: readonly Card[] }
   | {

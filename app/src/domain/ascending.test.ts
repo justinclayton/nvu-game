@@ -131,7 +131,7 @@ describe("§10 Ascending", () => {
     const kinds = next.floorDeck.map((r) => r.kind);
     expect(kinds.filter((k) => k === "enemy")).toHaveLength(1);
     expect(kinds.filter((k) => k === "hazard")).toHaveLength(3);
-    expect(kinds.filter((k) => k === "stuff")).toHaveLength(8);
+    expect(kinds.filter((k) => k === "stuff")).toHaveLength(5);
     expect(eventTypes(events)).toContain("FLOOR_BUILT");
   });
 

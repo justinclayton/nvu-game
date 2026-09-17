@@ -41,7 +41,7 @@ A Room with two Scramble challenges. The lower threshold clears the room; the hi
 
 **Stuff room**
 
-A Room whose Flee line clears the room but leaves the players empty-handed. Its challenges are split per character (e.g. a Oomph threshold for Red, a Scramble threshold for Gray), each measured against only that character's side of the play zone. Some Stuff rooms have a second, higher challenge. A Down character earns nothing from a Stuff room.
+A Room whose Flee line, like any other room's, leaves the players empty-handed without clearing it. Its challenges are split per character (e.g. a Oomph threshold for Red, a Scramble threshold for Gray), each measured against only that character's side of the play zone. Some Stuff rooms have a second, higher challenge. A Down character earns nothing from a Stuff room.
 
 **Stuff**
 

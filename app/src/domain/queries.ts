@@ -109,7 +109,7 @@ export function contributionOf(state: GameState, played: PlayedCard): StatTotals
 /**
  * §5: the stats on played cards form one shared pool across both characters.
  * `side` narrows it to one character's own side of the play zone, which is the
- * only thing a Stuff room ever measures (§6).
+ * only thing a Stuff room ever measures. See open-questions.md #2.
  */
 export function statPool(state: GameState, side?: Character): StatTotals {
   let oomph = 0;

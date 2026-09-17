@@ -18,9 +18,9 @@ The reading is marked in a comment beside the code, so a ruling here has one pla
 **Where:** `roomOutcome` in `app/src/domain/engine.ts`.
 
 §5: *"If more than one challenge has been cleared, their outcomes may be resolved in any order."*
-That only makes sense if every met challenge's outcome resolves, not just one. §6 agrees for
-Hazards: the higher tier *"also gives a reward"*, on top of the lower tier rather than instead of
-it.
+That only makes sense if every met challenge's outcome resolves, not just one. Collapsed Stairwell
+and Ruptured Coolant Line agree for Hazards: both print a higher tier reading `Clear, and one of
+you reveals a reward.`, on top of the lower tier rather than instead of it.
 
 So a Scramble 5 pool against Collapsed Stairwell (`Scramble 2: Clear, but both of you Exhaust 1.` /
 `Scramble 5: Clear, and one of you reveals a reward.`) meets both lines: the room is Cleared, both
@@ -36,10 +36,10 @@ met. See #3 for that line met on its own.
 
 **Where:** the generator, `tools/cards.mjs`, and the room check.
 
-Rulebook §6 says a Stuff room's challenges are split per character: *"Measure each character's
-challenge against that character's own side of the play zone only."* Tool Cage and Spill Of Cargo
-print a line that names both (`Scramble 3: Both of you get Good Stuff.`), and a line naming both
-names no single side.
+A Stuff room's challenges are split per character: Sorting Room prints `Oomph 2: Red gets Good
+Stuff.` and `Scramble 2: Gray gets Good Stuff.`, one line per character. Tool Cage and Spill Of
+Cargo instead print a line that names both (`Scramble 3: Both of you get Good Stuff.`), and a line
+naming both names no single side.
 
 **What the code does.** A line naming exactly one character is measured on that character's side; a
 line naming both is measured on the shared pool and pays both standing characters. Each character
@@ -121,10 +121,10 @@ written give the pool no way back.
 
 **Where:** the generator's threshold parser, and `design/cards.yaml`.
 
-Rulebook §6: a Hazard's higher threshold *"also gives a reward: turn the top card of the named
-character's reward pool face up. That character takes it or skips it."* Both Hazards in
-`design/cards.yaml` — Collapsed Stairwell and Ruptured Coolant Line — print `Clear, and one of you
-reveals a reward.` as their higher tier.
+A Hazard's higher threshold also gives a reward: the top card of the named character's reward pool
+turns face up, and that character takes it or skips it. Both Hazards in `design/cards.yaml` —
+Collapsed Stairwell and Ruptured Coolant Line — print `Clear, and one of you reveals a reward.` as
+their higher tier.
 
 **What the code does.** The generator recognises the `... reveals a reward` clause and the engine
 implements the take-or-skip reveal, so both Hazards exercise it.
@@ -137,7 +137,7 @@ implements the take-or-skip reveal, so both Hazards exercise it.
 
 **Where:** the `RewardReveal` pending choice.
 
-Rulebook §6: *"A skipped card goes to the bottom of the reward pool."*
+A skipped reward card goes to the bottom of its pool.
 
 **What the code does.** Bottom of the pool, matching the declined ascension reward.
 
@@ -312,3 +312,15 @@ prints 1, and both are read by the same `drawCapFor`.
 card is capping them. A Deadweight Grip holder who has already drawn their 2 cards this turn is
 skipped exactly as a Faceful Of Slime holder at 1 is. This extension to Deadweight Grip was not
 itself ruled on — it follows from reading the same code the ruling named.
+
+---
+
+## 20. Good Stuff is drawn face down, and a Down character earns none of it
+
+**Where:** `takeGoodStuff` in `app/src/domain/verbs.ts`.
+
+No card and no ruling says how a character comes by Good Stuff or what a `Down` character gets from
+a room. The rule lives only in the engine.
+
+**What the code does.** Each piece of Good Stuff earned is drawn face down from the Good Stuff pool
+straight into the earning character's hand. A `Down` character is skipped and earns nothing.

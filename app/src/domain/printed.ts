@@ -19,7 +19,7 @@ export type Rarity = "Fine" | "Cool" | "Woah";
 /** The type line of a player card (rulebook §8). There is no neutral card but Stuff. */
 export type CardKind = "player" | "good_stuff" | "bad_stuff";
 
-/** The type line of a room card (rulebook §6). */
+/** The type line of a room card (rulebook §8). */
 export type RoomKind = "enemy" | "hazard" | "stuff";
 
 /** Whether a card is ratified or still a proposal. Only official cards gate the build. */
@@ -45,7 +45,7 @@ export type RoomEffect =
  *
  * `measuredOn` is the whole of what makes a Stuff room different: a line that
  * names one character is measured against that character's own side of the play
- * zone, never the shared pool (rulebook §6).
+ * zone, never the shared pool. See open-questions.md #2.
  */
 export interface Threshold {
   readonly stat: Stat;
@@ -62,12 +62,14 @@ export interface Threshold {
 }
 
 /**
- * The Flee line every room prints (rulebook §5). A Stuff room's own line Clears
- * the room, which is why a Stuff room never goes to Fled and never punishes you.
+ * The Flee line every room prints (rulebook §5). No Stuff room in
+ * design/cards.yaml prints one of its own, so the generator supplies
+ * "Leave empty-handed." for display; it Flees like any other room, with no
+ * Clear and no effects.
  */
 export interface FleeLine {
   readonly text: string;
-  /** A Stuff room's Flee text Clears the room (rulebook §6). */
+  /** Whether this room's Flee text Clears it. A Stuff room's never does. */
   readonly clears: boolean;
   readonly effects: readonly RoomEffect[];
 }
@@ -91,7 +93,7 @@ export interface CardFace {
   readonly text: string;
 }
 
-/** A room card, exactly as printed (rulebook §6). */
+/** A room card, exactly as printed (rulebook §8). */
 export interface RoomFace {
   readonly name: string;
   readonly set: CardSet;

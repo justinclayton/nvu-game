@@ -15,7 +15,8 @@ import { CardView, RoomCardView } from "./CardView";
 import { Controls } from "./Controls";
 import { EventLog } from "./EventLog";
 import { Mat } from "./Mat";
-import { moveDelays } from "./placements";
+import { moveDelays, type ZoneId } from "./placements";
+import { PilePanel } from "./PilePanel";
 import { useMetrics } from "./useMetrics";
 import { useSession, useSessionState } from "./useSession";
 
@@ -28,6 +29,11 @@ export function Table({ onNewRun }: { readonly onNewRun: () => void }) {
   const metrics = useMetrics();
   const [paying, setPaying] = useState<Paying | null>(null);
   const [inspected, setInspected] = useState<Inspected | null>(null);
+  /* Debug mode: a playtester's view, not a rule. Off by default, and nothing
+   * under `execute` ever reads it — it only changes what `placements()` hands
+   * back to the card layer. */
+  const [debug, setDebug] = useState(false);
+  const [openPile, setOpenPile] = useState<ZoneId | null>(null);
   /* §10: what each character is keeping, Scrapping and taking, decided together
    * and sent as one command. The cards on offer float above the mat, so the
    * choice lives here where both the mat and the panel can read it. */
@@ -112,6 +118,17 @@ export function Table({ onNewRun }: { readonly onNewRun: () => void }) {
           <span className="table__phase">{state.phase}</span>
         </div>
         <div className="table__actions">
+          <label className="debug-toggle" title="Turn every pile face up, for inspecting the table.">
+            <input
+              type="checkbox"
+              checked={debug}
+              onChange={(e) => {
+                setDebug(e.target.checked);
+                if (!e.target.checked) setOpenPile(null);
+              }}
+            />
+            Debug
+          </label>
           <button
             type="button"
             className="button"
@@ -144,6 +161,8 @@ export function Table({ onNewRun }: { readonly onNewRun: () => void }) {
           choose(c, { takeRewardId: ascend[c].takeRewardId === card.id ? null : card.id });
         }}
         onInspect={setInspected}
+        debug={debug}
+        onOpenPile={setOpenPile}
       />
 
       {state.phase === "Ascend" ? (
@@ -172,6 +191,16 @@ export function Table({ onNewRun }: { readonly onNewRun: () => void }) {
             <RoomCardView room={inspected.room} state={state} size="large" />
           )}
         </div>
+      ) : null}
+
+      {openPile ? (
+        <PilePanel
+          state={state}
+          zone={openPile}
+          onClose={() => {
+            setOpenPile(null);
+          }}
+        />
       ) : null}
     </div>
   );

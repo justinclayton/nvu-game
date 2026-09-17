@@ -28,6 +28,9 @@ interface Props {
   readonly reward?: Readonly<Record<Character, Card["id"] | null>> | undefined;
   readonly onPickReward?: ((character: Character, card: Card) => void) | undefined;
   readonly onInspect: (item: Inspected | null) => void;
+  /** Debug mode: every pile is face up, and a stacked one can be opened for a full read. */
+  readonly debug?: boolean | undefined;
+  readonly onOpenPile?: ((zone: ZoneId) => void) | undefined;
 }
 
 interface SlotProps {
@@ -36,12 +39,16 @@ interface SlotProps {
   readonly count?: number | undefined;
   readonly row?: boolean | undefined;
   readonly tone?: "red" | "gray" | undefined;
+  readonly onOpenPile?: ((zone: ZoneId) => void) | undefined;
 }
 
-function Slot({ id, label, count, row, tone }: SlotProps) {
+function Slot({ id, label, count, row, tone, onOpenPile }: SlotProps) {
   const classes = ["slot", row ? "slot--row" : "slot--stack", tone ? `slot--${tone}` : ""]
     .filter(Boolean)
     .join(" ");
+  // Only a stack piles up in a way the table can't show all of at once; a row
+  // already lays every card out where it can be read.
+  const inspectable = !row && onOpenPile;
   return (
     <div className={classes}>
       <span className="slot__label">{label}</span>
@@ -51,6 +58,18 @@ function Slot({ id, label, count, row, tone }: SlotProps) {
         </span>
       ) : null}
       <div className="well" data-slot={id} />
+      {inspectable ? (
+        <button
+          type="button"
+          className="slot__inspect"
+          aria-label={`Read every card in ${label}`}
+          onClick={() => {
+            onOpenPile(id);
+          }}
+        >
+          Read pile
+        </button>
+      ) : null}
     </div>
   );
 }
@@ -113,9 +132,15 @@ export function Mat({
   reward,
   onPickReward,
   onInspect,
+  debug,
+  onOpenPile,
 }: Props) {
   const matRef = useRef<HTMLDivElement>(null);
   const rects = useSlotRects(matRef, state, metrics);
+  // Only offered in debug mode, and only for piles that stack more than one
+  // card deep — a row already shows everything, and the active room is a
+  // single card that is already face up.
+  const openPile = debug ? onOpenPile : undefined;
 
   const vars: CSSProperties & Record<`--${string}`, string> = {
     "--cw": `${String(metrics.cardW)}px`,
@@ -134,21 +159,45 @@ export function Mat({
     >
       <div className="mat__main">
         <div className="mat-row mat-row--floor">
-          <Slot id="floor" label="Floor deck" count={state.floorDeck.length} />
-          <Slot id="fled" label="Fled" count={state.fled.length} />
-          <Slot id="cleared" label="Cleared" count={state.cleared.length} />
+          <Slot id="floor" label="Floor deck" count={state.floorDeck.length} onOpenPile={openPile} />
+          <Slot id="fled" label="Fled" count={state.fled.length} onOpenPile={openPile} />
+          <Slot id="cleared" label="Cleared" count={state.cleared.length} onOpenPile={openPile} />
           <Slot id="room" label="Active room" />
           <RoomBrief state={state} />
         </div>
 
         <div className="mat-row mat-row--table">
-          <Slot id="red-deck" label="Red · deck" count={state.Red.deck.length} tone="red" />
+          <Slot
+            id="red-deck"
+            label="Red · deck"
+            count={state.Red.deck.length}
+            tone="red"
+            onOpenPile={openPile}
+          />
           <Slot id="red-play" label="Red · play zone" row tone="red" />
-          <Slot id="red-discard" label="Discard" count={state.Red.discard.length} tone="red" />
+          <Slot
+            id="red-discard"
+            label="Discard"
+            count={state.Red.discard.length}
+            tone="red"
+            onOpenPile={openPile}
+          />
           <div className="mat__divider" />
-          <Slot id="gray-deck" label="Gray · deck" count={state.Gray.deck.length} tone="gray" />
+          <Slot
+            id="gray-deck"
+            label="Gray · deck"
+            count={state.Gray.deck.length}
+            tone="gray"
+            onOpenPile={openPile}
+          />
           <Slot id="gray-play" label="Gray · play zone" row tone="gray" />
-          <Slot id="gray-discard" label="Discard" count={state.Gray.discard.length} tone="gray" />
+          <Slot
+            id="gray-discard"
+            label="Discard"
+            count={state.Gray.discard.length}
+            tone="gray"
+            onOpenPile={openPile}
+          />
         </div>
 
         <div className="mat-row mat-row--hands">
@@ -171,11 +220,23 @@ export function Mat({
       </div>
 
       <aside className="mat__rail" aria-label="The pools at the side of the table">
-        <Slot id="good" label="Good Stuff" count={state.pools.goodStuff.length} />
-        <Slot id="bad" label="Bad Stuff" count={state.pools.badStuff.length} />
-        <Slot id="red-rewards" label="Red rewards" count={state.pools.Red.length} tone="red" />
-        <Slot id="gray-rewards" label="Gray rewards" count={state.pools.Gray.length} tone="gray" />
-        <Slot id="scrap" label="Scrapyard" count={state.scrapyard.length} />
+        <Slot id="good" label="Good Stuff" count={state.pools.goodStuff.length} onOpenPile={openPile} />
+        <Slot id="bad" label="Bad Stuff" count={state.pools.badStuff.length} onOpenPile={openPile} />
+        <Slot
+          id="red-rewards"
+          label="Red rewards"
+          count={state.pools.Red.length}
+          tone="red"
+          onOpenPile={openPile}
+        />
+        <Slot
+          id="gray-rewards"
+          label="Gray rewards"
+          count={state.pools.Gray.length}
+          tone="gray"
+          onOpenPile={openPile}
+        />
+        <Slot id="scrap" label="Scrapyard" count={state.scrapyard.length} onOpenPile={openPile} />
       </aside>
 
       <CardLayer
@@ -188,6 +249,7 @@ export function Mat({
         reward={reward}
         onPickReward={onPickReward}
         onInspect={onInspect}
+        debug={debug}
       />
     </div>
   );

@@ -66,10 +66,10 @@ folder.
   same game.
 - `createInitialState(seed, content)` is the only place content enters. After that `execute` takes
   no content.
-- `phase` is `Flip | Play | Ascend | GameOver`. `Play` is Draw and Play together: either character
-  may draw or play a card on their action, and `END_PLAY` ends it for both at once. Cleanup runs as
-  the last step of `END_PLAY` and is announced by events. `pending: Pending | null` is a separate
-  field for a choice the engine is waiting on.
+- `phase` is `Flip | Draw | Play | Ascend | GameOver`. `FLIP_ROOM` opens Draw by drawing one card
+  for each standing character; `END_DRAW` and `END_PLAY` each end their phase for both characters at
+  once. Cleanup runs as the last step of `END_PLAY` and is announced by events. `pending: Pending |
+  null` is a separate field for a choice the engine is waiting on.
 - `Command` and `DomainEvent` are discriminated unions on `type`, switched exhaustively with a
   `never` default. Both live in domain. The prototype's `types.ts` is the reference shape; copy its
   intent, not its file.

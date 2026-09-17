@@ -205,17 +205,14 @@ something the rules can identify.
 
 ## 13. A card may draw during the Play phase
 
-`[you, 2026-09-16]` Draw and Play are one phase. Drawing during play is the rule, not an exception.
-
 **Where:** Covering Fire, I Know Kung Fu, Grav Harness.
 
-§5 used to say *"once play begins, nobody draws,"* which made these three cards' own draws a stated
-exception to it.
+§5 says *"you may not draw during this phase."* Three cards say otherwise in their own text.
 
-**What the code does.** Now that Draw and Play are one phase, there is no rule left for these three
-to be an exception to: a card-driven draw is the same draw a player's own action would make, just
-triggered by the card's event instead. `drawOne` never checked phase to begin with — only the `DRAW`
-command's own legality does — so nothing here changed when the phases merged.
+**What the code does.** The rule is the default and a card's printed text is the exception, which is
+the ordinary convention for a card game. The phase is checked only by the `DRAW` command's own
+legality; `drawOne`, which every card-driven draw goes through, does not check it. Nothing rules on
+it explicitly.
 
 ---
 
@@ -269,15 +266,15 @@ Crowbars in a hand each pay once.
 
 ## 17. Last stand activates right after the draw that empties the deck
 
-**Where:** the `DRAW` command in `app/src/domain/engine.ts`, and `activateLastStand` in `verbs.ts`.
+**Where:** the `DRAW` command and the opening draw in `app/src/domain/engine.ts`, and
+`activateLastStand` in `verbs.ts`.
 
-§9: *"When your deck becomes empty, your character immediately enters Last Stand."* Draw and Play
-used to be separate phases, so the engine only checked for an empty deck at the end of the draw
-phase — close enough to "immediately" while nothing else could happen in between. Now that a
-character can play a card in the same breath as the draw that empties their deck, waiting for the
-phase to end would mean paying full cost for cards played after the deck is already dry.
+§9: *"When your deck becomes empty, your character immediately enters Last Stand."* A draw is what
+empties a deck most turns, and the Draw phase runs on after it: the partner draws, and so may a card
+trigger. Waiting for the phase to end would leave a character drawing and being asked to draw while
+§9 says they no longer do.
 
-**What the code does.** A `DRAW` command sweeps for last stand right after it runs, so it is live
-before anything played later that turn is costed. Everything else that can empty a deck mid-turn — a
-room's printed punishment, a card's own `Exhaust X` — is still swept for once, at cleanup, same as
-before the phases merged.
+**What the code does.** A draw sweeps for last stand right away — both the opening draw and each
+`DRAW` command — so the state is live for the rest of the phase. Everything else that can empty a
+deck mid-turn — a room's printed punishment, a card's own `Exhaust X` — is swept for once, at
+cleanup.

@@ -53,8 +53,8 @@ describe("placements", () => {
 
   it("lays a hand out left to right in hand order, face up", () => {
     const session = createSession(7, CARD_CONTENT);
+    // The flip deals the opening draw, so one more makes two.
     session.getState().dispatch({ type: "FLIP_ROOM" });
-    session.getState().dispatch({ type: "DRAW", character: "Red" });
     session.getState().dispatch({ type: "DRAW", character: "Red" });
     const { state } = session.getState();
     const hand = placements(state).filter((p) => p.zone === "red-hand");

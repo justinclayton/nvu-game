@@ -9,7 +9,6 @@ import {
   pile,
   play,
   player,
-  readyToEnd,
   resetRig,
   rig,
   room,
@@ -25,15 +24,13 @@ const free = (c: Character, cardId: CardId) =>
   ({ type: "PLAY_CARD", character: c, cardId, payWith: [] }) as const;
 
 const playing = (over: Partial<GameState> = {}) =>
-  readyToEnd(
-    rig({
-      phase: "Play",
-      activeRoom: room("Gross Thing That Looks Like A Cherry"),
-      Red: player({ deck: pile("Shove", 6) }),
-      Gray: player({ deck: pile("Duck Under", 6) }),
-      ...over,
-    }),
-  );
+  rig({
+    phase: "Play",
+    activeRoom: room("Gross Thing That Looks Like A Cherry"),
+    Red: player({ deck: pile("Shove", 6) }),
+    Gray: player({ deck: pile("Duck Under", 6) }),
+    ...over,
+  });
 
 describe("Catch Your Breath — 'Look at the top 2 of any deck, put them back in either order'", () => {
   it("shows two and lets the player choose the order", () => {

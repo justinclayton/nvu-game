@@ -8,8 +8,8 @@ import type { GameState } from "@domain/types";
 
 const PHASE_BLURB: Record<GameState["phase"], string> = {
   Flip: "Turn the top card of the floor deck face up.",
-  Play:
-    "Draw or play into your own side, in any order — at least one draw each. Nothing resolves until you both stop.",
+  Draw: "Each standing character has drawn one. Draw as deep as you dare, then stop.",
+  Play: "Play into your own side. Nothing resolves until you both stop.",
   Ascend: "The Enemy is dead. Pack up the floor.",
   GameOver: "The run is over.",
 };

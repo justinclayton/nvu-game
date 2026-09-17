@@ -9,7 +9,6 @@ import {
   pile,
   play,
   player,
-  readyToEnd,
   resetRig,
   rig,
   room,
@@ -25,15 +24,13 @@ const free = (c: Character, cardId: CardId) =>
   ({ type: "PLAY_CARD", character: c, cardId, payWith: [] }) as const;
 
 const playing = (over: Partial<GameState> = {}) =>
-  readyToEnd(
-    rig({
-      phase: "Play",
-      activeRoom: room("Gross Thing That Looks Like A Cherry"),
-      Red: player({ deck: pile("Shove", 6) }),
-      Gray: player({ deck: pile("Duck Under", 6) }),
-      ...over,
-    }),
-  );
+  rig({
+    phase: "Play",
+    activeRoom: room("Gross Thing That Looks Like A Cherry"),
+    Red: player({ deck: pile("Shove", 6) }),
+    Gray: player({ deck: pile("Duck Under", 6) }),
+    ...over,
+  });
 
 describe("Crowbar — 'If you get any Good Stuff this turn, get an additional one'", () => {
   it("pays a second piece, once, however many times Stuff arrives", () => {
@@ -260,7 +257,7 @@ describe("Overcharged Battery — 'The next card played this turn costs 0'", () 
 describe("Faceful Of Slime — 'Holding: you may not draw more than 1 card'", () => {
   it("caps the draw at one", () => {
     const state = rig({
-      phase: "Play",
+      phase: "Draw",
       activeRoom: room("Sorting Room"),
       Red: player({ deck: pile("Shove", 6), hand: [card("Faceful Of Slime")] }),
       Gray: player({ deck: pile("Duck Under", 6) }),
@@ -300,7 +297,7 @@ describe("Rust — 'Holding: Stuff you play has -1 Oomph'", () => {
 describe("Spore Cloud — \"Holding: You can't have more than 3 cards in your hand\"", () => {
   it("tightens the hand cap to 3", () => {
     const state = rig({
-      phase: "Play",
+      phase: "Draw",
       activeRoom: room("Sorting Room"),
       Red: player({ deck: pile("Shove", 6), hand: [card("Spore Cloud")] }),
       Gray: player({ deck: pile("Duck Under", 6) }),

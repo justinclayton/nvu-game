@@ -72,7 +72,7 @@ export function rig(over: Partial<GameState> = {}): GameState {
     seed: 1,
     floor: 1,
     turn: 1,
-    phase: "Play",
+    phase: "Draw",
     floorDeck: [],
     activeRoom: null,
     fled: [],
@@ -95,20 +95,6 @@ export function rig(over: Partial<GameState> = {}): GameState {
     outcome: null,
   };
   return { ...base, ...over };
-}
-
-/**
- * Both characters as if they had already met this turn's minimum draw, so
- * `END_PLAY` is not blocked on it. For a fixture that is testing Play, Outcome
- * or Cleanup and does not care about the draw itself — a test of the draw
- * minimum rigs `drewThisTurn` directly instead.
- */
-export function readyToEnd(state: GameState): GameState {
-  return {
-    ...state,
-    Red: { ...state.Red, drewThisTurn: Math.max(state.Red.drewThisTurn, 1) },
-    Gray: { ...state.Gray, drewThisTurn: Math.max(state.Gray.drewThisTurn, 1) },
-  };
 }
 
 export interface Ran {

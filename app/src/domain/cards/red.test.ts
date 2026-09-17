@@ -9,7 +9,6 @@ import {
   pile,
   play,
   player,
-  readyToEnd,
   resetRig,
   rig,
   room,
@@ -25,15 +24,13 @@ const free = (c: Character, cardId: CardId) =>
   ({ type: "PLAY_CARD", character: c, cardId, payWith: [] }) as const;
 
 const playing = (over: Partial<GameState> = {}) =>
-  readyToEnd(
-    rig({
-      phase: "Play",
-      activeRoom: room("Gross Thing That Looks Like A Cherry"),
-      Red: player({ deck: pile("Shove", 6) }),
-      Gray: player({ deck: pile("Duck Under", 6) }),
-      ...over,
-    }),
-  );
+  rig({
+    phase: "Play",
+    activeRoom: room("Gross Thing That Looks Like A Cherry"),
+    Red: player({ deck: pile("Shove", 6) }),
+    Gray: player({ deck: pile("Duck Under", 6) }),
+    ...over,
+  });
 
 describe("Reckless Swing — 'Exhaust 1'", () => {
   it("takes one off the top of your own deck", () => {
@@ -193,7 +190,7 @@ describe("Deadweight Grip — 'Cards you play have +1 Oomph, draw no more than 2
 
   it("caps its holder's draw at 2", () => {
     const state = rig({
-      phase: "Play",
+      phase: "Draw",
       activeRoom: room("Sorting Room"),
       Red: player({ deck: pile("Shove", 6), hand: [card("Deadweight Grip")] }),
       Gray: player({ deck: pile("Duck Under", 6) }),
@@ -351,17 +348,23 @@ describe("Zen Mode — \"While `Holding`, you don't Exhaust cards\"", () => {
 
   it("does not stop the burned draw of a full hand", () => {
     const state = rig({
-      phase: "Play",
-      activeRoom: room("Sorting Room"),
+      phase: "Flip",
+      floorDeck: [room("Sorting Room")],
       Red: player({
         deck: pile("Shove", 4),
         hand: [card("Zen Mode"), ...pile("Shove", 4)],
       }),
       Gray: player({ deck: pile("Duck Under", 4) }),
     });
-    const { state: next, events } = must(state, { type: "DRAW", character: "Red" });
+    // The opening draw is the only draw a full hand ever takes.
+    const { state: next, events } = must(state, { type: "FLIP_ROOM" });
     expect(next.Red.exhaust).toHaveLength(1);
-    expect(eventTypes(events)).toEqual(["DRAW_BURNED", "CARD_EXHAUSTED"]);
+    expect(eventTypes(events)).toEqual([
+      "ROOM_FLIPPED",
+      "DRAW_BURNED",
+      "CARD_EXHAUSTED",
+      "CARD_DRAWN",
+    ]);
   });
 
   it("does not stop the price of getting out of last stand", () => {

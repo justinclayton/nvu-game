@@ -85,11 +85,11 @@ export interface PlayerState {
   readonly hand: readonly Card[];
   /** Face up. Cards spent or lost, gone for the floor. There is no discard pile. */
   readonly exhaust: readonly Card[];
-  /** Down is out: skipped in Draw and Play, no rewards, no punishments (§9). */
+  /** Down is out: skipped in Draw and in Play, no rewards, no punishments (§9). */
   readonly down: boolean;
-  /** Set as the last step of the phase that emptied the deck (§9). */
+  /** Set the moment the deck runs out, and swept for again at cleanup (§9). */
   readonly lastStand: boolean;
-  /** Reset each Flip; the minimum-1 draw and any draw cap are checked against it. */
+  /** Reset at Flip. The opening draw is the first of these; a draw cap counts them. */
   readonly drewThisTurn: number;
 }
 
@@ -110,11 +110,12 @@ export interface TurnRecord {
 /* ------------------------------------------------------------ the phases */
 
 /**
- * Draw and Play are one phase (§5): either character may draw or play a card
- * on their action, in any order, until both pass. Cleanup is not a waiting
- * phase of its own; it is the last step of `END_PLAY`.
+ * Draw and Play are two phases (§5). Both characters draw one card at the same
+ * time as Draw opens, then take turns drawing until both pass; nobody draws
+ * during Play. Cleanup is not a waiting phase of its own; it is the last step
+ * of `END_PLAY`.
  */
-export type Phase = "Flip" | "Play" | "Ascend" | "GameOver";
+export type Phase = "Flip" | "Draw" | "Play" | "Ascend" | "GameOver";
 
 export type Outcome = "Victory" | "Defeat";
 
@@ -224,6 +225,7 @@ export interface AscendChoice {
 export type Command =
   | { readonly type: "FLIP_ROOM" }
   | { readonly type: "DRAW"; readonly character: Character }
+  | { readonly type: "END_DRAW" }
   | {
       readonly type: "PLAY_CARD";
       readonly character: Character;
@@ -308,7 +310,6 @@ export type RejectionCode =
   | "GameIsOver"
   | "CharacterIsDown"
   | "InLastStand"
-  | "MustDrawAtLeastOne"
   | "DeckIsEmpty"
   | "HandIsFull"
   | "DrawCapReached"

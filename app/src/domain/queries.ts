@@ -188,21 +188,12 @@ export function playableCards(state: GameState, c: Character): readonly Card[] {
 
 /** §5: may this character draw another card right now? */
 export function canDraw(state: GameState, c: Character): boolean {
-  if (state.phase !== "Play" || state.pending !== null) return false;
+  if (state.phase !== "Draw" || state.pending !== null) return false;
   const p = playerOf(state, c);
   if (p.down || p.lastStand) return false;
   if (p.deck.length === 0) return false;
   if (p.drewThisTurn >= drawCapFor(state, c)) return false;
-  // You may not draw *up* while at the cap — but the minimum draw still happens,
-  // and that card is Exhausted instead of entering the hand.
-  return p.hand.length < handCapFor(state, c) || p.drewThisTurn === 0;
-}
-
-/** §5: you must draw at least 1. Last stand and an empty deck are the exceptions (§9). */
-export function mustStillDraw(state: GameState, c: Character): boolean {
-  const p = playerOf(state, c);
-  if (p.down || p.lastStand || p.deck.length === 0) return false;
-  return p.drewThisTurn < 1;
+  return p.hand.length < handCapFor(state, c);
 }
 
 /* -------------------------------------------------------------------- undo */

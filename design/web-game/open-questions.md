@@ -189,17 +189,15 @@ printed 0 cannot be raised, would make "costs 0" a stronger keyword than anythin
 
 ---
 
-## 12. "The card that clears the room" is read as "the room ended Cleared"
+## 12. Both Barrels and Riot Shield come back when the room is Cleared
 
-**Where:** Both Barrels' `onCleanup`.
+`[you, 2026-09-16]`
 
-Both Barrels reads *"If this is the card that clears the room, put this right back in your hand."*
-§5 checks the room **once**, when both characters have stopped, so no single card ever clears it —
-a pool does.
+**Where:** the `onCleanup` of Both Barrels and of Riot Shield.
 
-**What the code does.** If the room ended Cleared and Both Barrels is in the play zone, it returns
-to hand at cleanup instead of Exhausting. Being the card that tipped the pool over the line is not
-something the rules can identify.
+Both cards read *"If the room is Cleared, return this to your hand at the end of the turn."* If the room ended
+Cleared and the card is in the play zone, it returns to hand at Cleanup instead of being Exhausted.
+If the room was Fled, it is Exhausted with the rest of the play zone. The return is not optional.
 
 ---
 
@@ -239,8 +237,8 @@ Where a card or a room prints `Exhaust X` and names no zone, it means: move X ca
 that character's deck to their exhaust pile. §8's other form, `Exhaust X cards from your hand`,
 names its zone and is unaffected.
 
-That is the only shape a card can turn off. **Zen Mode** — *"While `Holding`, you don't Exhaust
-cards"* — stops bare `Exhaust X` lines aimed at its holder: a room's printed punishment, and the
+That is the only shape a card can turn off. **Zen Mode** — *"Holding: you don't `Exhaust`"* —
+stops bare `Exhaust X` lines aimed at its holder: a room's printed punishment, and the
 holder's own Overdrive, Reckless, Reckless Swing and Panic. It reaches nothing that names its zone
 or that a rule spells out in its own words, so it does not stop paying a cost, cleanup, the burned
 draw of a full hand, or the price of getting out of last stand. The drain still runs.

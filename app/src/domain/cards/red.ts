@@ -31,7 +31,7 @@ export const RED: Registry = {
   /* "Exhaust 3." */
   Reckless: { exhaustX: 3 },
 
-  /* "While `Holding`, you don't Exhaust cards."
+  /* "Holding: you don't `Exhaust`."
    *
    * `Exhaust X` written on its own means X off the top of your own deck, so
    * this stops exactly those lines: a room's printed punishment, and its
@@ -118,11 +118,9 @@ export const RED: Registry = {
     whileHeld: { playedPowerDelta: 1, drawCap: 2 },
   },
 
-  /* "If Gray has already played at least one card this turn, +2 Oomph. If this
-   * is the card that clears the room, put this right back in your hand."
+  /* "If Gray has already played at least one card this turn, +2 Oomph. If the
+   * room is Cleared, return this to your hand at the end of the turn."
    *
-   * No single card clears a room — the check happens once, when both characters
-   * have stopped — so this reads as: if the room ended Cleared, it comes back.
    * See open-questions.md #12. */
   "Both Barrels": {
     stats(state, _owner, card) {

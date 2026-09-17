@@ -166,7 +166,7 @@ cards:
     oomph: 4
     text: >-
       If Gray has already played at least one card this turn, +2 Oomph.
-      If this is the card that clears the room, put this right back in your hand.
+      If the room is Cleared, return this to your hand at the end of the turn.
 
   - name: Flurry
     set: proposed
@@ -183,7 +183,7 @@ cards:
     owner: Red
     rarity: Woah
     cost: 0
-    text: While `Holding`, you don't Exhaust cards.
+    text: Holding: you don't `Exhaust`.
 
 ### Gray
 
@@ -343,7 +343,7 @@ cards:
     rarity: Cool
     cost: 1
     scramble: 3
-    text: At the end of turn, return this card to your hand.
+    text: If the room is Cleared, return this to your hand at the end of the turn.
 
   - name: Overcharged Battery
     set: proposed

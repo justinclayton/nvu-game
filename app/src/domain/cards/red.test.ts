@@ -274,7 +274,7 @@ describe("Flurry — 'Oomph equal to twice the number of other cards Red played'
   });
 });
 
-describe("Zen Mode — \"While `Holding`, you don't Exhaust cards\"", () => {
+describe("Zen Mode — \"Holding: you don't `Exhaust`\"", () => {
   it("stops a room's printed `Exhaust X`", () => {
     const state = playing({
       activeRoom: room("Collapsed Stairwell"),

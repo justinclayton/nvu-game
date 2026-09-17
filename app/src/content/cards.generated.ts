@@ -212,7 +212,7 @@ export const CARD_CONTENT = {
       oomph: 4,
       scramble: 0,
       conditionalStat: false,
-      text: "If Gray has already played at least one card this turn, +2 Oomph. If this is the card that clears the room, put this right back in your hand.",
+      text: "If Gray has already played at least one card this turn, +2 Oomph. If the room is Cleared, return this to your hand at the end of the turn.",
     },
     {
       name: "Flurry",
@@ -240,7 +240,7 @@ export const CARD_CONTENT = {
       oomph: 0,
       scramble: 0,
       conditionalStat: false,
-      text: "While `Holding`, you don't Exhaust cards.",
+      text: "Holding: you don't `Exhaust`.",
     },
     {
       name: "Catch Your Breath",
@@ -492,7 +492,7 @@ export const CARD_CONTENT = {
       oomph: 0,
       scramble: 3,
       conditionalStat: false,
-      text: "At the end of turn, return this card to your hand.",
+      text: "If the room is Cleared, return this to your hand at the end of the turn.",
     },
     {
       name: "Overcharged Battery",

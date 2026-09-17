@@ -450,7 +450,7 @@ export const CARD_CONTENT = {
       oomph: 0,
       scramble: 0,
       conditionalStat: false,
-      text: "Move 2 cards from your exhaust pile to the bottom of your deck.",
+      text: "Choose a character. Move 2 cards from that character's exhaust pile to the bottom of their deck.",
     },
     {
       name: "Cutting Torch",
@@ -516,7 +516,7 @@ export const CARD_CONTENT = {
       rarity: null,
       starter: false,
       count: 1,
-      cost: 1,
+      cost: 2,
       oomph: 0,
       scramble: 0,
       conditionalStat: false,

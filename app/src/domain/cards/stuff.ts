@@ -5,7 +5,7 @@
  * contributes no stats.
  */
 
-import type { DomainEvent } from "../types";
+import type { Character, DomainEvent, GameState, Pending } from "../types";
 import {
   CHARACTERS,
   drawOne,
@@ -18,7 +18,20 @@ import {
   takeFromExhaust,
   takeGoodStuff,
 } from "../verbs";
-import { ask, done, nothing, source, type Registry } from "./behaviour";
+import { ask, done, nothing, source, type BehaviourContext, type Registry } from "./behaviour";
+
+/** The `ChooseCards` question for a Stich-Em-Ups heal, once the target is known. */
+function healCardsAsk(state: GameState, ctx: BehaviourContext, target: Character): Pending {
+  return {
+    kind: "ChooseCards",
+    prompt: `Move which 2 cards to the bottom of ${target}'s deck?`,
+    character: target,
+    options: playerOf(state, target).exhaust,
+    count: 2,
+    optional: false,
+    source: source(ctx, `stich-em-ups:${target}`),
+  };
+}
 
 export const STUFF: Registry = {
   /* ------------------------------------------------------------ Good Stuff */
@@ -39,26 +52,39 @@ export const STUFF: Registry = {
     },
   },
 
-  /* "Move 2 cards from your exhaust pile to the bottom of your deck." */
+  /* "Choose a character. Move 2 cards from that character's exhaust pile to the
+   * bottom of their deck."
+   *
+   * Either character can be healed, so a character with cards in both exhaust
+   * piles is asked which one first; a character with only one eligible pile
+   * skips straight to picking the cards from it. Healing a partner in Last
+   * Stand only refills their deck — nothing here clears the `lastStand` flag,
+   * so the rulebook's "Last Stand ends at Cleanup" still holds. */
   "A Pair Of Stich-Em-Ups": {
     onPlay(state, ctx) {
-      const options = playerOf(state, ctx.character).exhaust;
-      if (options.length === 0) return nothing(state);
+      const eligible = CHARACTERS.filter((c) => playerOf(state, c).exhaust.length > 0);
+      if (eligible.length === 0) return nothing(state);
+      if (eligible.length === 1) {
+        const target = eligible[0];
+        if (!target) return nothing(state);
+        return ask(state, healCardsAsk(state, ctx, target));
+      }
       return ask(state, {
-        kind: "ChooseCards",
-        prompt: "Move which 2 cards to the bottom of your deck?",
-        character: ctx.character,
-        options,
-        count: 2,
-        optional: false,
-        source: source(ctx, "stich-em-ups"),
+        kind: "ChooseCharacter",
+        prompt: "Heal which character?",
+        options: eligible,
+        source: source(ctx, "stich-em-ups-character"),
       });
     },
     onChoice(answer, state, ctx) {
+      if (answer.kind === "character") {
+        return ask(state, healCardsAsk(state, ctx, answer.character));
+      }
       if (answer.kind !== "cards") return nothing(state);
+      const target = answer.tag.split(":")[1] === "Red" ? "Red" : "Gray";
       const events: DomainEvent[] = [];
-      const lifted = takeFromExhaust(state, ctx.character, answer.cards);
-      return done(moveToBottomOfDeck(lifted, ctx.character, answer.cards, events), events);
+      const lifted = takeFromExhaust(state, target, answer.cards);
+      return done(moveToBottomOfDeck(lifted, target, answer.cards, events), events);
     },
   },
 

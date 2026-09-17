@@ -275,7 +275,7 @@ cleanup.
 **Where:** `HAZARD_ROOMS_PER_FLOOR` in `app/src/domain/setup.ts`.
 
 The Floor deck section says only: *"select randomly from the available Floor cards until you have
-the right number."* It no longer says how many of those are Hazards versus Stuff. The card list
+the right number."* It does not say how many of those are Hazards and how many are Stuff. The card list
 prints exactly 6 Hazard rooms (3 Collapsed Stairwell, 3 Ruptured Coolant Line), and every used room
 returns to the supply at Ascending, so a fixed 3 Hazards a floor is what the printed counts support.
 

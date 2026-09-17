@@ -43,9 +43,12 @@ export interface SavedRun {
   readonly commands: readonly Command[];
 }
 
-export function createSession(seed: number, content: CardContent) {
-  const [initial, events] = createInitialState(seed, content);
-
+/**
+ * Build a session from a state already in hand, with whatever events led to
+ * it. `createSession` is this plus `createInitialState`; a fixture loader is
+ * this plus a rigged state, and needs nothing else from the session.
+ */
+export function createSessionFrom(initial: GameState, events: readonly DomainEvent[] = []) {
   return createStore<SessionState>()(
     subscribeWithSelector((set, get) => ({
       state: initial,
@@ -103,7 +106,12 @@ export function createSession(seed: number, content: CardContent) {
 }
 
 /** The store, with `subscribeWithSelector`'s extra `subscribe` overload intact. */
-export type Session = ReturnType<typeof createSession>;
+export type Session = ReturnType<typeof createSessionFrom>;
+
+export function createSession(seed: number, content: CardContent): Session {
+  const [initial, events] = createInitialState(seed, content);
+  return createSessionFrom(initial, events);
+}
 
 export const canUndo = (session: SessionState): boolean => session.history.length > 0;
 

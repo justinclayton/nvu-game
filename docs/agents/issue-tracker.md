@@ -61,6 +61,18 @@ git worktree remove /tmp/pr-media-<n>
 
 Reference each file as `![caption](https://github.com/justinclayton/nvu-game/raw/pr-media/issue-<n>/<file>)`, with a one-line caption saying what to look at. This repo is private, so use that `github.com/.../raw/...` form: it loads for anyone signed in with access, while a `raw.githubusercontent.com` URL does not render. Keep files small: downscale screenshots to about 800px wide (`sips --resampleWidth 800 in.png --out out.png`), and keep GIFs under a few megabytes.
 
+**Opening a mid-game screen.** The web game always starts from a fresh run, and reaching a given
+prompt can take several turns of play. Under the dev server (`make app`), `?fixture=<name>` opens
+the app already parked on a named state instead — `http://localhost:5173/?fixture=play`, say. An
+unknown name shows the list of names that exist. This only works under the dev server: the loader
+and the named states are dev-only and are not in a production build.
+
+The named states are `app/src/domain/__fixtures__/scenarios.ts`, built with the same `rig` helpers
+the domain tests use (`app/src/domain/__fixtures__/rig.ts`), so a state is a few lines and cannot
+drift from the engine's types. Add a fixture there when a PR needs a state the set lacks: build it
+the way a domain test would — `rig`, `card`, `pile`, `must`/`play` — ending wherever the screen
+wants to be looked at, and give it a name and a one-line description in the `FIXTURES` list.
+
 Taking a screenshot of a page without a browser session, for the web game's dev server or a prototype served locally:
 
 ```

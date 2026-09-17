@@ -94,12 +94,12 @@ hand and play zone are shuffled back into their deck."*
 exhaust pile."*
 
 **What the code does.** With a full hand, `DRAW` is legal only while the character has not yet drawn
-this turn, and that one card goes to the exhaust pile. A second burned draw is rejected. Reading it
+this turn, and that one card goes to the discard pile. A second burned draw is rejected. Reading it
 any other way lets a character burn their whole deck a card at a time for nothing.
 
 ---
 
-## 6. Stuff in an exhaust pile goes to the Scrapyard at ascension, not back to its pool
+## 6. Stuff in a discard pile goes to the Scrapyard at ascension, not back to its pool
 
 `[you, 2026-09-01]` for the rule. The consequence below is still open.
 
@@ -107,10 +107,10 @@ any other way lets a character burn their whole deck a card at a time for nothin
 
 Rulebook §10 step 1: *"Move all Stuff in both exhaust piles to the Scrapyard. It is out of the run
 for good."* `GLOSSARY.md`'s **Ascend** entry says instead that Stuff *"returns to its pool"*, though
-`GLOSSARY.md`'s own **Stuff**, **Scrap tax** and **Exhaust pile** entries all say Scrapyard.
+`GLOSSARY.md`'s own **Stuff**, **Scrap tax** and **Discard pile** entries all say Scrapyard.
 
 **What the code does.** Follows the rulebook: the Scrapyard. `GLOSSARY.md`'s **Ascend** entry is
-stale, and disagrees with its own **Stuff**, **Scrap tax** and **Exhaust pile** entries.
+stale, and disagrees with its own **Stuff**, **Scrap tax** and **Discard pile** entries.
 
 **Consequence worth ruling on:** the Good Stuff pool never refills. The card list prints one copy of
 each of the eight Good Stuff cards, and floor 1 alone holds nine Stuff rooms. The pool is empty
@@ -196,8 +196,8 @@ printed 0 cannot be raised, would make "costs 0" a stronger keyword than anythin
 **Where:** the `onCleanup` of Both Barrels and of Riot Shield.
 
 Both cards read *"If the room is Cleared, return this to your hand at the end of the turn."* If the room ended
-Cleared and the card is in the play zone, it returns to hand at Cleanup instead of being Exhausted.
-If the room was Fled, it is Exhausted with the rest of the play zone. The return is not optional.
+Cleared and the card is in the play zone, it returns to hand at Cleanup instead of being discarded.
+If the room was Fled, it is discarded with the rest of the play zone. The return is not optional.
 
 ---
 
@@ -234,7 +234,7 @@ that already cost nothing does not use it up.
 **Where:** `printedExhaust` in `app/src/domain/engine.ts`, and the generator's clause parser.
 
 Where a card or a room prints `Exhaust X` and names no zone, it means: move X cards from the top of
-that character's deck to their exhaust pile. §8's other form, `Exhaust X cards from your hand`,
+that character's deck to their discard pile. §8's other form, `Discard X cards from your hand`,
 names its zone and is unaffected.
 
 That is the only shape a card can turn off. **Zen Mode** — *"Holding: you don't `Exhaust`"* —

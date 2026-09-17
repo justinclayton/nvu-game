@@ -31,7 +31,7 @@ export function AscendPanel({ state, dispatch, choices, onChoose }: Props) {
     <section className="ascend">
       <h2>The floor is clear. Up the stairs.</h2>
       <p className="ascend__note">
-        Every Stuff card in an exhaust pile is Scrapped, then the pile shuffles back into the deck —
+        Every Stuff card in a discard pile is Scrapped, then the pile shuffles back into the deck —
         a floor cleared is a full heal. The Scrap tax keeps one piece of Stuff by Scrapping another
         card in its place. Each of you is offered three cards from your own reward pool: they are
         floating above your side of the table. Take one, or take none.
@@ -39,8 +39,8 @@ export function AscendPanel({ state, dispatch, choices, onChoose }: Props) {
 
       {(["Red", "Gray"] as const).map((c) => {
         const choice = choices[c];
-        const stuff = state[c].exhaust.filter((x) => x.kind !== "player");
-        const payers = state[c].exhaust.filter((x) => x.id !== choice.keepStuffId);
+        const stuff = state[c].discard.filter((x) => x.kind !== "player");
+        const payers = state[c].discard.filter((x) => x.id !== choice.keepStuffId);
         const offered = state.offer?.[c] ?? [];
         const taking = offered.find((x) => x.id === choice.takeRewardId) ?? null;
         return (

@@ -9,7 +9,7 @@ The rulebook is a **procedure**: what a player does, in order, to understand how
 
 ## Sentences
 
-- Second person, present tense, imperative, addressed to one player: "Shuffle your exhaust pile into your deck." When both players act at once, say "Each player does the following:" once, then continue in "you".
+- Second person, present tense, imperative, addressed to one player: "Shuffle your discard pile into your deck." When both players act at once, say "Each player does the following:" once, then continue in "you".
 - A step carries its action and its exception, nothing more. What follows from the exception is its own step or a defined term.
 - "May" grants a choice. "Must" removes choice. Strike every "should".
 - Game terms in backticks, as the rulebook already does (`Stuff`, `Hold`, `Ascend`). One term per thing, used everywhere.

@@ -99,7 +99,7 @@ export function Table({ onNewRun }: { readonly onNewRun: () => void }) {
       ? `${paying.character}: choose ${String(
           costOf(state, paying.character, cardById(state, paying.character, paying.cardId)) -
             paying.chosen.length,
-        )} more card(s) to Exhaust, or click the card again to cancel.`
+        )} more card(s) to discard, or click the card again to cancel.`
       : null;
 
   return (

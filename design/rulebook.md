@@ -25,7 +25,7 @@ Some things to note about how *North vs Up* works:
 
 **You choose how many cards to draw**. You'll draw a card into your hand, look at it, and then decide if you want to draw another card or stop. You can even wait to see what your partner draws before deciding as a group. If you hand is full, however, you'll have to wait -- you can't draw unless you have less than **5 cards** in your hand.
 
-**Playing a card costs other cards.** You pay for cards by putting them in your discard pile (also called the exhaust pile). The more cards in your hand, the more you'll be able to pay for expensive cards. But if you don't use them this turn, they get exhausted too!
+**Playing a card costs other cards.** You pay for a card by discarding other cards from your hand. The more cards in your hand, the more you'll be able to pay for expensive cards. Cards you don't spend stay in your hand for the next turn -- but a full hand can't draw.
 
 ---
 ## Setup
@@ -47,7 +47,7 @@ To create the floor deck, first add the `Enemy Room` marked with the number of f
 By each player:
 
 - **Character Deck** (face down)
-- **Exhaust pile** (face up): Cards you have spent or lost.
+- **Discard pile** (face up): Cards you have spent or lost.
 - **Hand**: Cards you draw, hold, and use to play.
 - **Reward Pool** (face down): Cards you will add to your deck throughout the game.
 - **Play zone**: Blank area where your cards will be played.
@@ -72,7 +72,7 @@ Turn the top card of the Floor deck face up onto the Rooms pile. This is the new
 Both players draw **1** card at the same time. Players then take turns drawing a card, one at a time, as many times as they like.
 
 - **Draw**: Move the top card of your deck into your hand.
-- **Full Hand**: If you are holding **5** or more cards, you have a `Full Hand` and cannot draw. If you are forced to draw with a `Full Hand`, that card goes into your exhaust pile instead.
+- **Full Hand**: If you are holding **5** or more cards, you have a `Full Hand` and cannot draw. If you are forced to draw with a `Full Hand`, that card goes into your discard pile instead.
 - **Last Stand**: If you are in `Last Stand`, skip the opening draw.
 
 The phase ends when both players pass.
@@ -81,7 +81,7 @@ The phase ends when both players pass.
 
 Players take turns playing a card. You may not draw during this phase.
 
-- **Play**: Move a card from your hand into your play zone and pay for it: look at its `Cost`, then move that number of cards from your hand to your exhaust pile. Unless otherwise specified, you can only pay for a card with other cards from your own hand. If a card's cost is 0 or less, play the card for free.
+- **Play**: Move a card from your hand into your play zone and pay for it: look at its `Cost`, then move that number of cards from your hand to your discard pile. Unless otherwise specified, you can only pay for a card with other cards from your own hand. If a card's cost is 0 or less, play the card for free.
 - **Add up stats**: Stats on played cards add together across both sides of the play zone into one team pool.
 
 > *Example: `Red` plays a card with `Oomph 2`. `Gray` plays two cards, which read `Oomph 1`, and `Scramble 2`. Together, they have `Oomph 3` and `Scramble 2`.*
@@ -102,7 +102,7 @@ Players add their combined stats they accumulated this turn and check to see if 
 
 Each player does the following:
 
-1. **Exhaust your play zone:** Move every card on your side of the play zone to your exhaust pile. If you are in `Last Stand`, see section 9 instead.
+1. **Discard your play zone:** Move every card on your side of the play zone to your discard pile. If you are in `Last Stand`, see section 9 instead.
 
 If both players are `Down` at the end of the turn, the game ends (section 11).
 
@@ -158,7 +158,7 @@ A Character card shows:
 
 - **Name**
 - **Type line:** `Red` or `Gray`. Note that starter cards are also indicated as such on this line.
-- **`Cost`**: the number of cards you `Exhaust` from your hand to play it.
+- **`Cost`**: the number of cards you discard from your hand to play it.
 - **Stats**: `Oomph` and/or `Scramble`. Most cards will have this, though not all. Note that some cards also provide stats as part of their **effect text**.
 - **Effect text**, including keywords or other card-specific rules, modifiers, or stat calculations.
 - **Rarity border:** `Fine`, `Cool`, or `Woah`. Has no in-game effect.
@@ -179,9 +179,9 @@ A `Stuff` card shows the same parts as a player card, with these differences:
 
 ### Keywords
 
-- `Holding:` a passive effect that applies while the card is in your hand. If the card is played or exhausted, the effect no longer applies.
-- `Exhaust X cards from your hand`: Choose **X** cards from your hand and move them to your exhaust pile.
-- `Exhaust X cards from your deck`: Move the top **X** cards of your deck to your exhaust pile.
+- `Holding:` a passive effect that applies while the card is in your hand. If the card is played or discarded, the effect no longer applies.
+- `Discard X cards from your hand`: Choose **X** cards from your hand and move them to your discard pile.
+- `Exhaust X cards from your deck`: Move the top **X** cards of your deck to your discard pile.
 - `Exhaust X`: the same as `Exhaust X cards from your deck`.
 - `Scrap`: Move the card to the Scrapyard. It is removed of play for the rest of the game.
 
@@ -197,12 +197,12 @@ A `Stuff` card shows the same parts as a player card, with these differences:
 
 **Leaving Last Stand**: At the beginning of the next Cleanup phase:
 
-- If the room was `Cleared`, instead of Exhausting your side of the play zone, shuffle your play zone to form your new remaining deck, then `Exhaust` **2** cards from the top of your deck.
+- If the room was `Cleared`, instead of discarding your side of the play zone, shuffle your play zone to form your new remaining deck, then `Exhaust` **2** cards from the top of your deck.
 - If the room was `Fled` instead: you are `Down`.
 
 ### Going Down
 
-**When you go Down:** Move your hand to your exhaust pile.
+**When you go Down:** Move your hand to your discard pile.
 
 While Down, you are not able to act.
 
@@ -216,9 +216,9 @@ When you have Cleared the Enemy room, you escape the current floor and `Ascend` 
 
 Each player does the following:
 
-1. **Separate your exhaust pile:** Split it into `Stuff` cards and non-Stuff cards.
-2. **Say Goodbye to Your Stuff:** `Scrap` the `Stuff` cards. You may keep **one** `Stuff` card by Scrapping **one non-Stuff card** from your exhaust pile in its place.
-3. **Heal:** Shuffle the rest of your exhaust pile, kept `Stuff` included, into your deck. A `Down` character stands again.
+1. **Separate your discard pile:** Split it into `Stuff` cards and non-Stuff cards.
+2. **Say Goodbye to Your Stuff:** `Scrap` the `Stuff` cards. You may keep **one** `Stuff` card by Scrapping **one non-Stuff card** from your discard pile in its place.
+3. **Heal:** Shuffle the rest of your discard pile, kept `Stuff` included, into your deck. A `Down` character stands again.
 4. **Choose a reward:** Reveal the top **3** cards of your reward pool. You may shuffle **one** into your deck. Put the cards you did not take on the bottom of your reward pool.
 5. **Build the next floor:** Section 4.
 

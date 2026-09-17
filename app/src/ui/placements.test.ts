@@ -28,10 +28,10 @@ describe("placements", () => {
       state.cleared.length +
       state.Red.deck.length +
       state.Red.hand.length +
-      state.Red.exhaust.length +
+      state.Red.discard.length +
       state.Gray.deck.length +
       state.Gray.hand.length +
-      state.Gray.exhaust.length +
+      state.Gray.discard.length +
       state.playZone.length +
       state.pools.Red.length +
       state.pools.Gray.length +
@@ -71,9 +71,9 @@ describe("moveDelays", () => {
     const [a, b] = state.Red.deck;
     if (!a || !b) throw new Error("rig");
     const events: DomainEvent[] = [
-      { type: "CARD_EXHAUSTED", character: "Red", card: a, from: "hand" },
-      { type: "CARD_EXHAUSTED", character: "Red", card: b, from: "hand" },
-      { type: "CARD_EXHAUSTED", character: "Red", card: a, from: "hand" },
+      { type: "CARD_DISCARDED", character: "Red", card: a, from: "hand" },
+      { type: "CARD_DISCARDED", character: "Red", card: b, from: "hand" },
+      { type: "CARD_DISCARDED", character: "Red", card: a, from: "hand" },
     ];
     const delays = moveDelays(events, 100);
     expect(delays.get(a.id)).toBe(0);

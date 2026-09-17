@@ -46,7 +46,7 @@ describe("Reckless Swing — 'Exhaust 1'", () => {
     });
     expect(next.Red.deck).toHaveLength(3);
     // One paid from hand and one off the top of the deck.
-    expect(next.Red.exhaust).toHaveLength(2);
+    expect(next.Red.discard).toHaveLength(2);
   });
 });
 
@@ -86,13 +86,13 @@ describe("Fast Follow — 'If Gray played a card this turn, this costs 0'", () =
   });
 });
 
-describe("Second Wind — 'Shuffle an exhausted Red card back into your deck'", () => {
-  it("offers Red's own exhausted cards, and nothing else", () => {
+describe("Second Wind — 'Shuffle a Red card from your discard pile back into your deck'", () => {
+  it("offers Red's own discarded cards, and nothing else", () => {
     const state = playing({
       Red: player({
         deck: pile("Shove", 3),
         hand: [card("Second Wind"), card("Shove"), card("Shove")],
-        exhaust: [card("Charge In"), card("Pry Bar")],
+        discard: [card("Charge In"), card("Pry Bar")],
       }),
     });
     const hand = ids(state, "Red");
@@ -118,7 +118,7 @@ describe("Second Wind — 'Shuffle an exhausted Red card back into your deck'", 
       cardIds: [chosen.id],
     });
     expect(next.Red.deck.some((c) => c.id === chosen.id)).toBe(true);
-    expect(next.Red.exhaust.some((c) => c.id === chosen.id)).toBe(false);
+    expect(next.Red.discard.some((c) => c.id === chosen.id)).toBe(false);
     expect(eventTypes(events)).toContain("CARDS_SHUFFLED_IN");
   });
 });
@@ -236,10 +236,10 @@ describe("Both Barrels — '+2 Oomph after Gray, and back to hand on a clear'", 
       { type: "END_PLAY" },
     ]);
     expect(next.Red.hand.some((c) => c.name === "Both Barrels")).toBe(true);
-    expect(next.Red.exhaust.some((c) => c.name === "Both Barrels")).toBe(false);
+    expect(next.Red.discard.some((c) => c.name === "Both Barrels")).toBe(false);
   });
 
-  it("stays exhausted when the room is not Cleared", () => {
+  it("stays discarded when the room is not Cleared", () => {
     const state = playing({
       activeRoom: room("Gross Thing That Looks Like A Cherry"),
       Red: player({ deck: pile("Shove", 3), hand: [card("Both Barrels"), card("Shove"), card("Shove")] }),
@@ -249,7 +249,7 @@ describe("Both Barrels — '+2 Oomph after Gray, and back to hand on a clear'", 
       { type: "PLAY_CARD", character: "Red", cardId: r[0] as CardId, payWith: [r[1] as CardId, r[2] as CardId] },
       { type: "END_PLAY" },
     ]);
-    expect(next.Red.exhaust.some((c) => c.name === "Both Barrels")).toBe(true);
+    expect(next.Red.discard.some((c) => c.name === "Both Barrels")).toBe(true);
   });
 });
 
@@ -310,7 +310,7 @@ describe("Zen Mode — \"Holding: you don't `Exhaust`\"", () => {
     if (!overdrive) throw new Error("rig");
     const { state: next, events } = must(state, free("Red", overdrive.id));
     expect(next.Red.deck).toHaveLength(4);
-    expect(next.Red.exhaust).toEqual([]);
+    expect(next.Red.discard).toEqual([]);
     expect(eventTypes(events)).toEqual(["CARD_PLAYED", "EXHAUST_PREVENTED"]);
     // The card still enters the play zone and still brings its Oomph.
     expect(statPool(next).oomph).toBe(2);
@@ -332,7 +332,7 @@ describe("Zen Mode — \"Holding: you don't `Exhaust`\"", () => {
       cardId: chargeIn,
       payWith: [payA, payB],
     });
-    expect(next.Red.exhaust).toHaveLength(2);
+    expect(next.Red.discard).toHaveLength(2);
   });
 
   it("does not stop cleanup", () => {
@@ -341,8 +341,8 @@ describe("Zen Mode — \"Holding: you don't `Exhaust`\"", () => {
       Red: player({ deck: pile("Shove", 4), hand: [card("Zen Mode"), card("Shove")] }),
     });
     const { state: next } = play(state, [{ type: "END_PLAY" }]);
-    // Nothing was played, so nothing Exhausts; the whole hand carries over.
-    expect(next.Red.exhaust).toEqual([]);
+    // Nothing was played, so nothing is discarded; the whole hand carries over.
+    expect(next.Red.discard).toEqual([]);
     expect(next.Red.hand.map((c) => c.name)).toEqual(["Zen Mode", "Shove"]);
   });
 
@@ -358,11 +358,11 @@ describe("Zen Mode — \"Holding: you don't `Exhaust`\"", () => {
     });
     // The opening draw is the only draw a full hand ever takes.
     const { state: next, events } = must(state, { type: "FLIP_ROOM" });
-    expect(next.Red.exhaust).toHaveLength(1);
+    expect(next.Red.discard).toHaveLength(1);
     expect(eventTypes(events)).toEqual([
       "ROOM_FLIPPED",
       "DRAW_BURNED",
-      "CARD_EXHAUSTED",
+      "CARD_DISCARDED",
       "CARD_DRAWN",
     ]);
   });

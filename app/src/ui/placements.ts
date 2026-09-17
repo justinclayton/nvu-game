@@ -27,8 +27,8 @@ export type ZoneId =
   | "gray-hand"
   | "red-play"
   | "gray-play"
-  | "red-exhaust"
-  | "gray-exhaust";
+  | "red-discard"
+  | "gray-discard";
 
 /**
  * A stack is one pile; a row lays its cards out side by side; a float holds the
@@ -54,8 +54,8 @@ export const ZONE_SHAPE: Readonly<Record<ZoneId, ZoneShape>> = {
   "gray-hand": "row",
   "red-play": "row",
   "gray-play": "row",
-  "red-exhaust": "stack",
-  "gray-exhaust": "stack",
+  "red-discard": "stack",
+  "gray-discard": "stack",
 };
 
 /** Piles that cards are tossed onto rather than squared up, so each one settles askew. */
@@ -63,8 +63,8 @@ export const LOOSE_ZONES: ReadonlySet<ZoneId> = new Set<ZoneId>([
   "fled",
   "cleared",
   "scrap",
-  "red-exhaust",
-  "gray-exhaust",
+  "red-discard",
+  "gray-discard",
 ]);
 
 interface Placed {
@@ -83,7 +83,7 @@ export type Placement =
 
 const zoneOf = (
   c: Character,
-  part: "deck" | "hand" | "play" | "exhaust" | "rewards" | "offer",
+  part: "deck" | "hand" | "play" | "discard" | "rewards" | "offer",
 ): ZoneId => `${c.toLowerCase() as "red" | "gray"}-${part}`;
 
 export function placements(state: GameState): readonly Placement[] {
@@ -142,7 +142,7 @@ export function placements(state: GameState): readonly Placement[] {
     const p = state[c];
     cards(p.deck, zoneOf(c, "deck"), { topFirst: true, faceUp: false, owner: c });
     cards(p.hand, zoneOf(c, "hand"), { topFirst: false, faceUp: true, owner: c });
-    cards(p.exhaust, zoneOf(c, "exhaust"), { topFirst: false, faceUp: true, owner: c });
+    cards(p.discard, zoneOf(c, "discard"), { topFirst: false, faceUp: true, owner: c });
     cards(
       state.playZone.filter((x) => x.owner === c).map((x) => x.card),
       zoneOf(c, "play"),
@@ -174,7 +174,7 @@ export function placements(state: GameState): readonly Placement[] {
 
 /**
  * The order the last command moved things in, as a delay per card id, so a
- * cleanup that Exhausts five cards sends them one after another rather than all
+ * cleanup that discards five cards sends them one after another rather than all
  * at once. A card the events never name moves with no delay.
  */
 export function moveDelays(

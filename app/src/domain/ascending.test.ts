@@ -32,8 +32,8 @@ function atAscension(over: Partial<GameState> = {}): GameState {
       ...Array.from({ length: 8 }, () => room("Sorting Room")),
     ],
     cleared: [room("Gross Thing That Looks Like A Cherry")],
-    Red: player({ deck: pile("Shove", 2), exhaust: [...pile("Charge In", 3), card("Pry Bar")] }),
-    Gray: player({ deck: pile("Duck Under", 2), exhaust: pile("Pick The Lock", 3) }),
+    Red: player({ deck: pile("Shove", 2), discard: [...pile("Charge In", 3), card("Pry Bar")] }),
+    Gray: player({ deck: pile("Duck Under", 2), discard: pile("Pick The Lock", 3) }),
     ...over,
   });
   return {
@@ -43,7 +43,7 @@ function atAscension(over: Partial<GameState> = {}): GameState {
 }
 
 describe("§10 Ascending", () => {
-  it("'move all Stuff in both exhaust piles to the Scrapyard'", () => {
+  it("'move all Stuff in both discard piles to the Scrapyard'", () => {
     const state = atAscension();
     const { state: next, events } = must(state, { type: "ASCEND", Red: NOTHING, Gray: NOTHING });
     expect(next.scrapyard.map((c) => c.name)).toEqual(["Pry Bar"]);
@@ -53,8 +53,8 @@ describe("§10 Ascending", () => {
 
   it("'each character may keep one Stuff card by Scrapping another in its place'", () => {
     const state = atAscension();
-    const pryBar = state.Red.exhaust.find((c) => c.name === "Pry Bar");
-    const payer = state.Red.exhaust.find((c) => c.name === "Charge In");
+    const pryBar = state.Red.discard.find((c) => c.name === "Pry Bar");
+    const payer = state.Red.discard.find((c) => c.name === "Charge In");
     if (!pryBar || !payer) throw new Error("rig");
     const { state: next } = must(state, {
       type: "ASCEND",
@@ -67,7 +67,7 @@ describe("§10 Ascending", () => {
 
   it("'the Scrap tax is both halves or neither'", () => {
     const state = atAscension();
-    const pryBar = state.Red.exhaust.find((c) => c.name === "Pry Bar");
+    const pryBar = state.Red.discard.find((c) => c.name === "Pry Bar");
     if (!pryBar) throw new Error("rig");
     const rejected = execute(state, {
       type: "ASCEND",
@@ -80,12 +80,12 @@ describe("§10 Ascending", () => {
 
   it("'a floor cleared is a full heal' — including for a character who was Down", () => {
     const state = atAscension({
-      Red: player({ deck: [], hand: [], exhaust: pile("Shove", 12), down: true }),
+      Red: player({ deck: [], hand: [], discard: pile("Shove", 12), down: true }),
     });
     const { state: next } = must(state, { type: "ASCEND", Red: NOTHING, Gray: NOTHING });
     expect(next.Red.down).toBe(false);
     expect(next.Red.deck).toHaveLength(12);
-    expect(next.Red.exhaust).toEqual([]);
+    expect(next.Red.discard).toEqual([]);
   });
 
   it("'a taken card is shuffled into their deck; a declined card goes to the bottom'", () => {
@@ -117,7 +117,7 @@ describe("§10 Ascending", () => {
   it("'the hand carries up the stairs, Stuff included'", () => {
     const held = card("Pry Bar");
     const state = atAscension({
-      Red: player({ deck: pile("Shove", 2), hand: [held], exhaust: pile("Charge In", 3) }),
+      Red: player({ deck: pile("Shove", 2), hand: [held], discard: pile("Charge In", 3) }),
     });
     const { state: next } = must(state, { type: "ASCEND", Red: NOTHING, Gray: NOTHING });
     expect(next.Red.hand.map((c) => c.id)).toEqual([held.id]);

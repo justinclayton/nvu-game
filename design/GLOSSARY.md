@@ -65,7 +65,7 @@ The combined Oomph and/or Scramble total from every card both players played thi
 
 **Play zone**
 
-The blank area in front of each player where cards are played during the Play phase. Cards here are moved to the Exhaust pile at Cleanup, unless the player is leaving Last Stand after a Clear, in which case they're shuffled into that player's deck instead.
+The blank area in front of each player where cards are played during the Play phase. Cards here are moved to the discard pile at Cleanup, unless the player is leaving Last Stand after a Clear, in which case they're shuffled into that player's deck instead.
 
 **Type line**
 
@@ -77,7 +77,7 @@ The border on a Character or Good Stuff card — `Fine`, `Cool`, or `Woah` — w
 
 **Cost**
 
-The number of cards a player must Exhaust from their hand to play a card. A Cost of 0 or less means the card is played for free. While in Last Stand, a player ignores Cost entirely.
+The number of cards a player must discard from their hand to play a card. A Cost of 0 or less means the card is played for free. While in Last Stand, a player ignores Cost entirely.
 
 **Cleared**
 
@@ -117,7 +117,7 @@ The cards a player has drawn and is holding, used to play cards and pay Costs. S
 
 **Maximum hand size**
 
-Five cards. A player holding 5 or more has a Full Hand and cannot draw; if forced to draw anyway, the card goes to the Exhaust pile instead.
+Five cards. A player holding 5 or more has a Full Hand and cannot draw; if forced to draw anyway, the card goes to the discard pile instead.
 
 **Draw**
 
@@ -127,13 +127,17 @@ The turn phase where both players first draw 1 card at the same time, then take 
 
 The turn phase where players take turns playing a card from their hand into their play zone. Nobody draws during it.
 
-**Exhaust**
+**Discard**
 
-To move cards to the Exhaust pile — from hand (to pay a Cost, or via the `Exhaust X cards from your hand` keyword) or from the top of a deck (via `Exhaust X cards from your deck` / `Exhaust X`).
+To move a card to its owner's discard pile, from wherever it was: paying a Cost, the `Discard X cards from your hand` keyword, the play zone at Cleanup, the burned draw of a Full Hand, or the hand of a character going Down.
 
-**Exhaust pile**
+**Discard pile**
 
 A player's face-up pile of spent or lost cards. Played cards move here at Cleanup; cards in it can be shuffled back into the deck (Ascending) or Scrapped.
+
+**Exhaust**
+
+The keyword `Exhaust X`, also written `Exhaust X cards from your deck`: discard the top X cards of your own deck.
 
 **Scrap**
 
@@ -145,7 +149,7 @@ The face-up pile of cards that have been Scrapped and removed from the game perm
 
 **Holding**
 
-The keyword marking a passive effect that applies only while the card is in hand — it stops applying once the card is played or exhausted.
+The keyword marking a passive effect that applies only while the card is in hand — it stops applying once the card is played or discarded.
 
 **Turn**
 
@@ -153,8 +157,8 @@ One pass through the five phases: New Room, Draw, Play, Outcome, and Cleanup. Re
 
 **Last Stand**
 
-The state a character enters immediately when their deck becomes empty. While in it, they ignore Cost when playing cards and do not draw, even if forced. It ends at the next Cleanup: if the room was Cleared, the player shuffles their play zone into a new deck and exhausts its top 2 cards instead of exhausting their play zone as normal; if the room was Fled, the player goes Down instead.
+The state a character enters immediately when their deck becomes empty. While in it, they ignore Cost when playing cards and do not draw, even if forced. It ends at the next Cleanup: if the room was Cleared, the player shuffles their play zone into a new deck and Exhausts its top 2 cards instead of discarding their play zone as normal; if the room was Fled, the player goes Down instead.
 
 **Down**
 
-The state a character enters from Last Stand after a Fled room. A Down character moves their hand to the exhaust pile and cannot act. If both characters are Down, the game ends in a loss.
+The state a character enters from Last Stand after a Fled room. A Down character moves their hand to the discard pile and cannot act. If both characters are Down, the game ends in a loss.

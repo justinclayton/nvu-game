@@ -244,7 +244,7 @@ export function CardLayer({
             : payingHere
               ? payingHere.cardId === card.id
                 ? "Click again to cancel"
-                : `Exhaust ${card.name} to pay`
+                : `Discard ${card.name} to pay`
               : `Play ${card.name} (costs ${String(costOf(state, hand ?? "Red", card))})`;
           return (
             <button

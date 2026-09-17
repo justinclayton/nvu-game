@@ -58,7 +58,7 @@ export const CARD_CONTENT = {
       oomph: 2,
       scramble: 0,
       conditionalStat: false,
-      text: "Exhaust 2 (the top 2 cards of your deck go to your Exhaust pile).",
+      text: "Exhaust 2 (the top 2 cards of your deck go to your discard pile).",
     },
     {
       name: "Duck Under",
@@ -156,7 +156,7 @@ export const CARD_CONTENT = {
       oomph: 4,
       scramble: 0,
       conditionalStat: false,
-      text: "Shuffle an exhausted Red card back into your deck.",
+      text: "Shuffle a Red card from your discard pile back into your deck.",
     },
     {
       name: "Junk Launcher",
@@ -324,7 +324,7 @@ export const CARD_CONTENT = {
       oomph: 2,
       scramble: 0,
       conditionalStat: false,
-      text: "Shuffle an exhausted Gray card back into your deck.",
+      text: "Shuffle a Gray card from your discard pile back into your deck.",
     },
     {
       name: "I'll Take That",
@@ -450,7 +450,7 @@ export const CARD_CONTENT = {
       oomph: 0,
       scramble: 0,
       conditionalStat: false,
-      text: "Choose a character. Move 2 cards from that character's exhaust pile to the bottom of their deck.",
+      text: "Choose a character. Move 2 cards from that character's discard pile to the bottom of their deck.",
     },
     {
       name: "Cutting Torch",

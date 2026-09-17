@@ -45,7 +45,7 @@ export function room(name: string): Room {
 export const player = (over: Partial<PlayerState> = {}): PlayerState => ({
   deck: [],
   hand: [],
-  exhaust: [],
+  discard: [],
   down: false,
   lastStand: false,
   drewThisTurn: 0,

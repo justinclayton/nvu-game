@@ -165,7 +165,7 @@ export const emptyTurnRecord = (): TurnRecord => ({
 const freshPlayer = (deck: readonly Card[]): PlayerState => ({
   deck,
   hand: [],
-  exhaust: [],
+  discard: [],
   down: false,
   lastStand: false,
   drewThisTurn: 0,

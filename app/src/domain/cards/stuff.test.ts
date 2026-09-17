@@ -58,13 +58,13 @@ describe("Crowbar — 'If you get any Good Stuff this turn, get an additional on
   });
 });
 
-describe("A Pair Of Stich-Em-Ups — 'Choose a character, move 2 cards from their exhaust'", () => {
-  it("heals the caster with no choice offered when only they have exhaust", () => {
+describe("A Pair Of Stich-Em-Ups — 'Choose a character, move 2 cards from their discard pile'", () => {
+  it("heals the caster with no choice offered when only they have a discard pile", () => {
     const state = playing({
       Red: player({
         deck: pile("Shove", 2),
         hand: [card("A Pair Of Stich-Em-Ups"), card("Shove")],
-        exhaust: pile("Charge In", 3),
+        discard: pile("Charge In", 3),
       }),
     });
     const r = ids(state, "Red");
@@ -86,16 +86,16 @@ describe("A Pair Of Stich-Em-Ups — 'Choose a character, move 2 cards from thei
     expect(eventTypes(events)).toContain("CARD_MOVED");
   });
 
-  it("asks which character when both have exhaust, and heals the other one", () => {
+  it("asks which character when both have a discard pile, and heals the other one", () => {
     const state = playing({
       Red: player({
         deck: pile("Shove", 2),
         hand: [card("A Pair Of Stich-Em-Ups"), card("Shove")],
-        exhaust: pile("Charge In", 3),
+        discard: pile("Charge In", 3),
       }),
       Gray: player({
         deck: pile("Duck Under", 2),
-        exhaust: pile("Duck Under", 3),
+        discard: pile("Duck Under", 3),
       }),
     });
     const r = ids(state, "Red");
@@ -111,7 +111,7 @@ describe("A Pair Of Stich-Em-Ups — 'Choose a character, move 2 cards from thei
     const pending = chosen.state.pending;
     if (pending?.kind !== "ChooseCards") throw new Error("expected a card choice for Gray");
     expect(pending.character).toBe("Gray");
-    expect(pending.options).toEqual(state.Gray.exhaust);
+    expect(pending.options).toEqual(state.Gray.discard);
 
     const chosenCards = pending.options.slice(0, 2).map((c) => c.id);
     const { state: next, events } = must(chosen.state, {
@@ -120,31 +120,31 @@ describe("A Pair Of Stich-Em-Ups — 'Choose a character, move 2 cards from thei
     });
     expect(next.Gray.deck.slice(-2).map((c) => c.id)).toEqual(chosenCards);
     expect(next.Gray.deck).toHaveLength(4);
-    expect(next.Gray.exhaust).toHaveLength(1);
-    // Red's own pile picked up the payment card that was Exhausted to play it,
+    expect(next.Gray.discard).toHaveLength(1);
+    // Red's own pile picked up the payment card that was discarded to play it,
     // on top of the 3 it started with — the choice still landed on Gray.
-    expect(next.Red.exhaust).toHaveLength(4);
+    expect(next.Red.discard).toHaveLength(4);
     expect(eventTypes(events)).toContain("CARD_MOVED");
   });
 
   it("heals a partner in Last Stand without ending it early", () => {
     const state = playing({
       // Red is in Last Stand too, so playing costs nothing and Red's own
-      // exhaust pile stays empty — the only eligible target is Gray.
+      // discard pile stays empty — the only eligible target is Gray.
       Red: player({
         deck: [],
         hand: [card("A Pair Of Stich-Em-Ups")],
-        exhaust: [],
+        discard: [],
         lastStand: true,
       }),
       Gray: player({
         deck: [],
-        exhaust: pile("Duck Under", 3),
+        discard: pile("Duck Under", 3),
         lastStand: true,
       }),
     });
     const r = ids(state, "Red");
-    // Only Gray has anything in exhaust, so the heal goes straight to Gray
+    // Only Gray has anything in their discard pile, so the heal goes straight to Gray
     // with no character prompt.
     const asked = must(state, {
       type: "PLAY_CARD",
@@ -225,10 +225,10 @@ describe("Riot Shield — 'If the room is Cleared, return this to your hand at t
       { type: "END_PLAY" },
     ]);
     expect(next.Red.hand.some((c) => c.name === "Riot Shield")).toBe(true);
-    expect(next.Red.exhaust.some((c) => c.name === "Riot Shield")).toBe(false);
+    expect(next.Red.discard.some((c) => c.name === "Riot Shield")).toBe(false);
   });
 
-  it("is Exhausted with the play zone when the room is Fled", () => {
+  it("is discarded with the play zone when the room is Fled", () => {
     const state = playing({
       activeRoom: room("Gross Thing That Looks Like A Cherry"),
       Red: player({ deck: pile("Shove", 3), hand: [card("Riot Shield"), card("Shove")] }),
@@ -239,7 +239,7 @@ describe("Riot Shield — 'If the room is Cleared, return this to your hand at t
       { type: "END_PLAY" },
     ]);
     expect(next.Red.hand.some((c) => c.name === "Riot Shield")).toBe(false);
-    expect(next.Red.exhaust.some((c) => c.name === "Riot Shield")).toBe(true);
+    expect(next.Red.discard.some((c) => c.name === "Riot Shield")).toBe(true);
   });
 });
 
@@ -377,7 +377,7 @@ describe("My Head Is Quantum Spinning — 'whenever you draw a card, your partne
     expect(eventTypes(events)).toEqual(["CARD_DRAWN", "CARD_DRAWN"]);
   });
 
-  it("exhausts the forced draw when the partner has a Full Hand", () => {
+  it("discards the forced draw when the partner has a Full Hand", () => {
     const state = rig({
       phase: "Draw",
       activeRoom: room("Sorting Room"),
@@ -386,7 +386,7 @@ describe("My Head Is Quantum Spinning — 'whenever you draw a card, your partne
     });
     const { state: next } = must(state, { type: "DRAW", character: "Red" });
     expect(next.Gray.hand).toHaveLength(5);
-    expect(next.Gray.exhaust).toHaveLength(1);
+    expect(next.Gray.discard).toHaveLength(1);
     expect(next.Gray.drewThisTurn).toBe(1);
   });
 

@@ -50,9 +50,9 @@ import {
   CHARACTERS,
   dealBadStuff,
   drawOne,
-  exhaust,
+  discard,
   exhaustFromDeck,
-  exhaustFromHand,
+  discardFromHand,
   goDown,
   playerOf,
   scrap,
@@ -218,7 +218,7 @@ function validateAscendChoice(
   c: Character,
   choice: AscendChoice,
 ): Rejection | null {
-  const pile = playerOf(state, c).exhaust;
+  const pile = playerOf(state, c).discard;
   const hasKeep = choice.keepStuffId !== null;
   const hasScrap = choice.scrapId !== null;
   if (hasKeep !== hasScrap) {
@@ -227,11 +227,11 @@ function validateAscendChoice(
   if (hasKeep) {
     const keep = pile.find((x) => x.id === choice.keepStuffId);
     if (!keep || keep.kind === "player") {
-      return reject("NotAnOption", `That is not Stuff in ${c}'s exhaust pile.`);
+      return reject("NotAnOption", `That is not Stuff in ${c}'s discard pile.`);
     }
     const payer = pile.find((x) => x.id === choice.scrapId);
     if (!payer || payer.id === choice.keepStuffId) {
-      return reject("NotAnOption", `That is not another card in ${c}'s exhaust pile.`);
+      return reject("NotAnOption", `That is not another card in ${c}'s discard pile.`);
     }
   }
   if (choice.takeRewardId !== null) {
@@ -330,7 +330,7 @@ function flush(state: GameState, run: Run): GameState {
  * A bare `Exhaust X` line: X cards off the top of that character's own deck.
  * Rooms print it as their punishment and some cards print it as their own cost.
  *
- * This is the only shape a card can turn off. `Exhaust X cards from your hand`
+ * This is the only shape a card can turn off. `Discard X cards from your hand`
  * names its zone, and so do cleanup, the burned draw of a full hand and the
  * price of getting out of last stand — none of those is an `Exhaust X` line, so
  * a card that stops `Exhaust X` does not stop them.
@@ -383,7 +383,7 @@ function flipRoom(state: GameState, run: Run): GameState {
  * §5: Draw opens with both characters drawing 1 card at the same time. The
  * engine draws them one after the other, Red first, which is the same result:
  * neither draw can see or change the other. A `Full Hand` burns the card to the
- * exhaust pile (§5) and a character in last stand does not draw at all (§9).
+ * discard pile (§5) and a character in last stand does not draw at all (§9).
  */
 function openingDraw(state: GameState, run: Run): GameState {
   let s = state;
@@ -436,7 +436,7 @@ function playCard(
   }
 
   // §5: you pay in *other* cards from your own hand. Red never pays for Gray.
-  s = exhaustFromHand(s, c, payment, run.events);
+  s = discardFromHand(s, c, payment, run.events);
   if (payment.length > 0) {
     run.events.push({ type: "COST_PAID", character: c, cards: payment });
     s = { ...s, thisTurn: addPaid(s.thisTurn, c, payment.length) };
@@ -711,7 +711,7 @@ function finishTurn(state: GameState, run: Run): GameState {
 }
 
 /**
- * §5 cleanup: Exhaust the entire play zone. The hand carries over untouched.
+ * §5 cleanup: discard the entire play zone. The hand carries over untouched.
  *
  * §9: if the room was Cleared while a character was in last stand, the last
  * stand cleanup replaces their play-zone cleanup — the play zone shuffles into
@@ -726,8 +726,8 @@ function cleanupPiles(
   let s = state;
 
   // Any played card that takes itself somewhere else. It has to happen
-  // before the play zone is Exhausted, or a card returning to hand would be
-  // Exhausted straight back out of it.
+  // before the play zone is discarded, or a card returning to hand would be
+  // discarded straight back out of it.
   for (const played of s.playZone) {
     const onCleanup = behaviourOf(played.card.name)?.onCleanup;
     if (!onCleanup) continue;
@@ -752,7 +752,7 @@ function cleanupPiles(
       run.events.push({ type: "LAST_STAND_ESCAPED", character: c, price });
       continue;
     }
-    for (const card of played) s = exhaust(s, c, card, "playZone", run.events);
+    for (const card of played) s = discard(s, c, card, "playZone", run.events);
   }
   return { ...s, playZone: [] };
 }
@@ -865,9 +865,9 @@ function ascend(state: GameState, red: AscendChoice, gray: AscendChoice, run: Ru
 
 function ascendOne(state: GameState, c: Character, choice: AscendChoice, run: Run): GameState {
   let s = state;
-  let pile = [...playerOf(s, c).exhaust];
+  let pile = [...playerOf(s, c).discard];
 
-  // §10 step 1: all Stuff in the exhaust pile moves to the Scrapyard, for good.
+  // §10 step 1: all Stuff in the discard pile moves to the Scrapyard, for good.
   // The Scrap tax keeps one piece by Scrapping another card of that pile in its
   // place. Kept Stuff stays ordinary Stuff; nothing is tracked.
   if (choice.keepStuffId !== null && choice.scrapId !== null) {
@@ -891,12 +891,12 @@ function ascendOne(state: GameState, c: Character, choice: AscendChoice, run: Ru
   const returned = offered.filter((x) => x.id !== taken?.id);
   s = setPool(s, c, [...s.pools[c].slice(offered.length), ...returned]);
 
-  // §10 step 2: the exhaust pile shuffles back into the deck. A floor cleared is
+  // §10 step 2: the discard pile shuffles back into the deck. A floor cleared is
   // a full heal, including for a character who was Down. Nothing bad crosses a
   // floor boundary. A hand carries over untouched, Stuff included.
   s = withPlayer(s, c, {
     ...playerOf(s, c),
-    exhaust: [],
+    discard: [],
     down: false,
     lastStand: false,
     drewThisTurn: 0,

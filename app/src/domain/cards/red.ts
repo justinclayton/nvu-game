@@ -9,7 +9,7 @@ import {
   playerOf,
   returnToHand,
   shuffleIntoDeck,
-  takeFromExhaust,
+  takeFromDiscard,
   takeFromHand,
 } from "../verbs";
 import { ask, done, nothing, source, type Registry } from "./behaviour";
@@ -22,7 +22,7 @@ const playedBy = (state: GameState, c: Character): number =>
   state.playZone.filter((p) => p.owner === c).length;
 
 export const RED: Registry = {
-  /* "Exhaust 2 (the top 2 cards of your deck go to your Exhaust pile)." */
+  /* "Exhaust 2 (the top 2 cards of your deck go to your discard pile)." */
   Overdrive: { exhaustX: 2 },
 
   /* "Exhaust 1." */
@@ -54,16 +54,16 @@ export const RED: Registry = {
     },
   },
 
-  /* "Shuffle an exhausted Red card back into your deck."
+  /* "Shuffle a Red card from your discard pile back into your deck."
    *
-   * Red's own cards only: Stuff in the exhaust pile is not a Red card. */
+   * Red's own cards only: Stuff in the discard pile is not a Red card. */
   "Second Wind": {
     onPlay(state, ctx) {
-      const options = playerOf(state, ctx.character).exhaust.filter((c) => c.owner === "Red");
+      const options = playerOf(state, ctx.character).discard.filter((c) => c.owner === "Red");
       if (options.length === 0) return nothing(state);
       return ask(state, {
         kind: "ChooseCards",
-        prompt: "Shuffle which exhausted Red card back into your deck?",
+        prompt: "Shuffle which Red card from your discard pile back into your deck?",
         character: ctx.character,
         options,
         count: 1,
@@ -74,14 +74,14 @@ export const RED: Registry = {
     onChoice(answer, state, ctx) {
       if (answer.kind !== "cards") return nothing(state);
       const events: DomainEvent[] = [];
-      const lifted = takeFromExhaust(state, ctx.character, answer.cards);
+      const lifted = takeFromDiscard(state, ctx.character, answer.cards);
       return done(shuffleIntoDeck(lifted, ctx.character, answer.cards, events), events);
     },
   },
 
   /* "This has Oomph +2 for each card you paid with this turn."
    *
-   * Cards paid with have already gone to the exhaust pile, so the turn record is
+   * Cards paid with have already gone to the discard pile, so the turn record is
    * what counts them. */
   "Junk Launcher": {
     stats(state, owner, card) {

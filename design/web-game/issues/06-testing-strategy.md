@@ -19,7 +19,7 @@ runner.
 
 **Domain, the bulk of the suite.**
 - **Rulebook tests.** One describe block per rulebook section, test names quoting the rule:
-  `describe("§5 Play phase")` with `it("a full hand still draws for the minimum and exhausts the
+  `describe("§5 Play phase")` with `it("a full hand still draws for the minimum and discards the
   card")`. When a rule changes, the failing test names the section.
 - **Walkthrough fixtures.** The prototype's eight scenarios in `scenarios.ts` are ported as rigged
   starting states with expected events. They are the regression suite for the hard rules.

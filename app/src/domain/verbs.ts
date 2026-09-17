@@ -271,6 +271,10 @@ export function topDeck(state: GameState, c: Character, card: Card): GameState {
 /**
  * What you earn is drawn face down from the Good Stuff pool and goes to that
  * character's hand. A Down character earns nothing. See open-questions.md #20.
+ *
+ * Every piece handed over is also tallied on `thisTurn.goodStuffTaken`, which
+ * is how Crowbar's own "if you got any Good Stuff this turn" looks backward
+ * at what has already landed. See open-questions.md #16.
  */
 export function takeGoodStuff(
   state: GameState,
@@ -292,6 +296,13 @@ export function takeGoodStuff(
     next = { ...next, seed, pools: { ...next.pools, goodStuff: rest } };
     events.push({ type: "STUFF_TAKEN", character: c, card });
     next = moveToHand(next, c, card, events);
+    next = {
+      ...next,
+      thisTurn: {
+        ...next.thisTurn,
+        goodStuffTaken: { ...next.thisTurn.goodStuffTaken, [c]: next.thisTurn.goodStuffTaken[c] + 1 },
+      },
+    };
   }
   return next;
 }
@@ -312,6 +323,15 @@ export function dealBadStuff(
   events.push({ type: "STUFF_TAKEN", character: c, card });
   return moveToHand(next, c, card, events);
 }
+
+/** Has this once-per-turn trigger already gone off? See open-questions.md #16. */
+export const hasFired = (state: GameState, key: string): boolean => state.thisTurn.fired.includes(key);
+
+/** Mark a once-per-turn trigger as spent, so an effect that could feed itself fires once. */
+export const markFired = (state: GameState, key: string): GameState => ({
+  ...state,
+  thisTurn: { ...state.thisTurn, fired: [...state.thisTurn.fired, key] },
+});
 
 function drawFromPool(
   pool: readonly Card[],
@@ -345,11 +365,3 @@ export function activateLastStand(state: GameState, events: DomainEvent[]): Game
   return next;
 }
 
-/** Mark a once-per-turn trigger as spent, so an effect that feeds itself fires once. */
-export const hasFired = (state: GameState, key: string): boolean =>
-  state.thisTurn.fired.includes(key);
-
-export const markFired = (state: GameState, key: string): GameState => ({
-  ...state,
-  thisTurn: { ...state.thisTurn, fired: [...state.thisTurn.fired, key] },
-});

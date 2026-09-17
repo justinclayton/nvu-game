@@ -109,8 +109,9 @@ describe("walkthrough 3 — the escape that actually works", () => {
     expect(next.Red.lastStand).toBe(false);
     // The fourth Shove was never played, so it carries over along with the
     // Good Stuff Red's side earned by beating the Sorting Room's Oomph 2 —
-    // the hand is never touched at Cleanup.
-    expect(next.Red.hand.map((c) => c.name)).toEqual(["Shove", "Crowbar", "Grav Harness"]);
+    // the hand is never touched at Cleanup. Crowbar sits there unplayed, so
+    // its own "Play:" effect never runs — it cannot count its own arrival.
+    expect(next.Red.hand.map((c) => c.name)).toEqual(["Shove", "Crowbar"]);
   });
 });
 

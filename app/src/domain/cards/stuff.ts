@@ -37,13 +37,39 @@ function healCardsAsk(state: GameState, ctx: BehaviourContext, target: Character
 export const STUFF: Registry = {
   /* ------------------------------------------------------------ Good Stuff */
 
-  /* "If you get any Good Stuff this turn, get an additional one."
+  /* "Play: if you get any Good Stuff this turn, get an additional one."
    *
-   * Once per turn per Crowbar: the extra piece is itself Good Stuff, and without
-   * the marker it would feed itself for as long as the pool held out. */
+   * Once played, "this turn" covers the rest of the turn Crowbar sits in the
+   * play zone — including a room's payout at Outcome, after the whole Play
+   * phase (and so this card's own `onPlay`) has already run. That is the
+   * primary case: a Crowbar played earlier in Play, paid off by the room
+   * later. It is split across two hooks accordingly:
+   *
+   * - `onPlay` looks backward, once, at `thisTurn.goodStuffTaken` — whatever
+   *   its controller was already handed earlier in the same turn, before
+   *   Crowbar was played.
+   * - `onEvent`, listening only from the play zone (the shape Covering Fire
+   *   uses for the same reason), catches a later gain — the room's Outcome
+   *   payout being the one there is today.
+   *
+   * Either hook can fire, but only one ever does: a `fired` marker keyed by
+   * this copy's own card id is set the moment either pays out, so a Crowbar
+   * that already looked back at play does not also react to the room's
+   * payout minutes later, and its own bonus piece (itself a `STUFF_TAKEN` for
+   * good_stuff) can never retrigger it. Two Crowbars each carry their own
+   * key, so two played this turn pay two. Neither hook ever sees Crowbar's
+   * own arrival — a room handing Crowbar to a hand is not Crowbar being
+   * played, and while it sits in a hand `onEvent` is not listening at all.
+   * See open-questions.md #16. */
   Crowbar: {
+    onPlay(state, ctx) {
+      if (state.thisTurn.goodStuffTaken[ctx.character] === 0) return nothing(state);
+      const key = `${ctx.card.id}:crowbar`;
+      const events: DomainEvent[] = [];
+      return done(takeGoodStuff(markFired(state, key), ctx.character, 1, events), events);
+    },
     onEvent(event, state, ctx) {
-      if (ctx.zone !== "hand") return nothing(state);
+      if (ctx.zone !== "playZone") return nothing(state);
       if (event.type !== "STUFF_TAKEN" || event.character !== ctx.character) return nothing(state);
       if (event.card.kind !== "good_stuff") return nothing(state);
       const key = `${ctx.card.id}:crowbar`;

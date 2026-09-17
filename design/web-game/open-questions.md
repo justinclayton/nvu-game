@@ -249,15 +249,44 @@ the rest of the run.
 
 ---
 
-## 16. Crowbar fires once a turn
+## 16. Crowbar is an on-play effect, and its "this turn" spans the whole turn it is played
 
-**Where:** Crowbar's `onEvent`.
+**Where:** Crowbar's `onPlay` and `onEvent`, in `app/src/domain/cards/stuff.ts`.
 
-*"If you get any Good Stuff this turn, get an additional one."* The additional piece is itself Good
-Stuff, so read as a standing trigger it would empty the Good Stuff pool into one hand.
+Crowbar reads *"Play: if you get any Good Stuff this turn, get an additional one."*
 
-**What the code does.** Once per turn per Crowbar, tracked by a marker in the turn record. Two
-Crowbars in a hand each pay once.
+`[you, 2026-09-17]`
+
+> Crowbar is an on-play effect, not a passive one. Its printed text should say so — `Play:` — and
+> the engine should match.
+
+So effect text applies once, when Crowbar is played, rather than as a standing trigger that
+listens the whole time the card sits in a hand.
+
+`[you, 2026-09-17]`
+
+> Red plays Crowbar during the Play phase. At Outcome that same turn, the room pays Red Good
+> Stuff. Does Crowbar give Red the additional piece? Yes — that is specifically the primary use
+> case for when it triggers.
+
+So Crowbar's "this turn" covers the rest of the turn it sits in the play zone once played,
+including a room's own payout at Outcome, which resolves after the whole Play phase — and so
+after Crowbar's own `onPlay` — has already run.
+
+**What the code does**, beyond the two rulings above: Crowbar can gain from either half of the
+turn, so it is checked from both `onPlay` and `onEvent`. `onPlay` looks backward, once, at
+`thisTurn.goodStuffTaken` — whatever its controller was already handed earlier in the same turn.
+`onEvent`, listening only while the card sits in the play zone (the same shape Covering Fire uses
+for `CARD_PLAYED`), catches a gain that lands later — a room's Outcome payout being the one there
+is today.
+
+Only one of the two ever pays out: a `fired` marker keyed by that copy's own card id is set the
+moment either hook pays, so a Crowbar that already looked back at play does not also react to the
+room's payout minutes later, and its own bonus piece — itself a `STUFF_TAKEN` for good_stuff —
+can never retrigger it. Two Crowbars played by the same controller in one turn each carry their
+own key, so both pay. Neither hook ever sees Crowbar's own arrival: a room handing Crowbar to a
+hand is not Crowbar being played, and `onEvent` is not listening at all while the card sits
+unplayed in a hand.
 
 ---
 

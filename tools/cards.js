@@ -42,7 +42,7 @@ var NVU_CARDS = {
     {"name":"I Know Kung Fu","set":"proposed","kind":"player","owner":"Gray","rarity":"Woah","cost":3,"oomph":5,"text":"Holding: when you play a card with Scramble, draw 1 card."},
     {"name":"Pry Bar","set":"proposed","kind":"good_stuff","rarity":"Fine","cost":0,"oomph":3},
     {"name":"Coil Of Cable","set":"proposed","kind":"good_stuff","rarity":"Fine","cost":0,"scramble":3},
-    {"name":"Crowbar","set":"proposed","kind":"good_stuff","rarity":"Fine","cost":0,"oomph":1,"scramble":1,"text":"If you get any Good Stuff this turn, get an additional one."},
+    {"name":"Crowbar","set":"proposed","kind":"good_stuff","rarity":"Fine","cost":0,"oomph":1,"scramble":1,"text":"Play: if you get any Good Stuff this turn, get an additional one."},
     {"name":"A Pair Of Stich-Em-Ups","set":"proposed","kind":"good_stuff","rarity":"Cool","cost":1,"text":"Choose a character. Move 2 cards from that character's discard pile to the bottom of their deck."},
     {"name":"Cutting Torch","set":"proposed","kind":"good_stuff","rarity":"Cool","cost":2,"oomph":5},
     {"name":"Grav Harness","set":"proposed","kind":"good_stuff","rarity":"Woah","cost":2,"oomph":3,"scramble":3,"text":"One of you draws 1 card, (even if their hand is full)."},

@@ -310,7 +310,7 @@ cards:
     cost: 0
     oomph: 1
     scramble: 1
-    text: If you get any Good Stuff this turn, get an additional one.
+    text: "Play: if you get any Good Stuff this turn, get an additional one."
 
   - name: A Pair Of Stich-Em-Ups
     set: proposed

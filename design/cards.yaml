@@ -3,10 +3,10 @@
 #
 # Everything that shows a card should read this file. Change a card HERE, then run build.
 #
-#   node tools/cards.mjs build    regenerates prototype/cards.js (used by `prototype/card-sheet.html`,
-#                                 the simulator, and sim-sweep.js
-#   node tools/cards.mjs check    fails if cards.js is stale, or if a prototype
-#                                 stops rendering the whole list
+#   node tools/cards.mjs build    regenerates tools/cards.js (used by tools/card-sheet.html, the
+#                                 print-and-cut sheet) and app/src/content/cards.generated.ts
+#   node tools/cards.mjs check    fails if either generated module is stale, or if the card
+#                                 sheet stops printing the whole list
 #
 #
 # Fields

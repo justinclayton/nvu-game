@@ -6,9 +6,9 @@
  * Every card in North vs Up, as printed.  EVERY NUMBER IS A PLACEHOLDER —
  * costs, stats and thresholds are still open design.
  *
- * Loaded by prototype/card-sheet.html (the cutting sheet) and
- * prototype/encounter-sim.html (the simulator) with a plain <script> tag, so
- * both keep working from file:// with no build step and no server.
+ * Loaded by tools/card-sheet.html (the print-and-cut sheet) with a plain
+ * <script> tag, so the sheet keeps working from file:// with no build step
+ * and no server.
  */
 var NVU_CARDS = {
   meta: {"updated":"2026-09-16"},
@@ -67,7 +67,7 @@ var NVU_CARDS = {
   ]
 };
 
-/* Views the prototypes share. */
+/* Views over the list, for whatever loads it. */
 NVU_CARDS.by = function (fn) { return NVU_CARDS.cards.filter(fn); };
 NVU_CARDS.official = NVU_CARDS.cards.filter(function (c) { return c.set === "official"; });
 NVU_CARDS.proposed = NVU_CARDS.cards.filter(function (c) { return c.set === "proposed"; });

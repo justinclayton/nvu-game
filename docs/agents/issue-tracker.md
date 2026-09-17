@@ -31,16 +31,16 @@ Infer the repo from `git remote -v`; `gh` does this automatically when run insid
 
 A coordinator session can work a batch of `ready-for-agent` issues by launching one subagent per issue, each in its own worktree (`.claude/worktrees/issue-<n>`, branch `claude/issue-<n>`), in dependency order. `/run-issues` (a user-level skill) is that process; `/take-issue` is the single-issue path for a Sonnet session in the main checkout.
 
-- **Model: Sonnet by default.** Use Opus only for architecture or refactor issues that rewrite files other issues also touch (an engine or rules-core restructure is the shape).
+- **Model: Sonnet by default.** Use Opus only for architecture or refactor issues that rewrite files other issues also touch (a restructure of the engine under `app/src/domain/` is the shape).
 - **Concurrency: 2–3 agents at once.** Check plan usage (`get_usage`) before launching each wave.
-- **No shared runtime resource.** This is a web app with no device pool or shared signed-in account, so waves aren't limited by that; the only thing to serialize is issues that touch the same generated or hand-authored files (`design/cards.yaml`, `prototype/cards.js`, the engine in `app/src/`).
+- **No shared runtime resource.** This is a web app with no device pool or shared signed-in account, so waves aren't limited by that; the only thing to serialize is issues that touch the same generated or hand-authored files (`design/cards.yaml`, `tools/cards.js`, the engine in `app/src/`).
 - **Environment setup, per worktree:**
   ```sh
   git worktree add .claude/worktrees/issue-<n> -b claude/issue-<n> origin/main
   ( cd .claude/worktrees/issue-<n> && make app-install )
   ```
 - **Verify:** `make check` (regenerates and checks the card modules against `design/cards.yaml`) and `make app-check` (lint, typecheck, test the web game) in the worktree. Both must pass before opening a PR. Run `make build` after any change to `design/cards.yaml` so the generated modules aren't stale.
-- **Conflict hotspots** when merging the base branch into a still-open issue branch: `design/cards.yaml`, `prototype/cards.js` (generated — regenerate rather than hand-merge), and the engine/rules files under `app/src/`.
+- **Conflict hotspots** when merging the base branch into a still-open issue branch: `design/cards.yaml`, `tools/cards.js` (generated — regenerate rather than hand-merge), and the engine/rules files under `app/src/`.
 - **Recovery.** On resuming a run after a limit or a sleep: launch a fresh agent with an explicit "state you inherit" section (commits, PR, scratchpad artifacts, how `main` moved).
 
 ## Screenshots and video on pull requests
@@ -73,7 +73,7 @@ drift from the engine's types. Add a fixture there when a PR needs a state the s
 the way a domain test would — `rig`, `card`, `pile`, `must`/`play` — ending wherever the screen
 wants to be looked at, and give it a name and a one-line description in the `FIXTURES` list.
 
-Taking a screenshot of a page without a browser session, for the web game's dev server or a prototype served locally:
+Taking a screenshot of a page without a browser session, for the web game's dev server or a local file such as `tools/card-sheet.html`:
 
 ```
 "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" --headless --screenshot=out.png --window-size=1280,800 <url>

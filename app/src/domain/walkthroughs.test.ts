@@ -1,4 +1,4 @@
-/* The eight walkthroughs from the rules-core prototype, as fixtures.
+/* The eight walkthroughs of the hardest rules, as fixtures.
  *
  * Each one is a rigged state and the events it must produce. These are the
  * regression suite for the rules that are hard to reason about on paper —

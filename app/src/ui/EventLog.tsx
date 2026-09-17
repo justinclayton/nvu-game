@@ -1,76 +1,21 @@
-/* The text log. It subscribes to the session's event log outside React and
- * appends to its own list, so a long run does not re-render the table. Sound
- * and animation would hang off the same subscription. */
+/* The text log, and the playtester's tools for it.
+ *
+ * It subscribes to the session outside React and appends to its own list, so a
+ * long run does not re-render the table. Sound and animation would hang off the
+ * same subscription. The lines themselves are `logLines` in the application
+ * layer, which interleaves the events with the notes typed against them — a
+ * note is a line of the log, not a comment attached to the side of it.
+ *
+ * The note box and the export buttons live here, with the log, because that is
+ * what they are about: one writes a line into it and the others take it away.
+ */
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 
-import type { DomainEvent } from "@domain/types";
+import { lineKindOf, logLines } from "@application/narrate";
+import type { SessionState } from "@application/session";
+import { ExportControls } from "./ExportControls";
 import { useSession } from "./useSession";
-
-export function describeEvent(event: DomainEvent): string {
-  switch (event.type) {
-    case "FLOOR_BUILT":
-      return `Floor ${String(event.floor)} is built: ${String(event.rooms)} rooms.`;
-    case "ROOM_FLIPPED":
-      return `You are in: ${event.room.name}.`;
-    case "CARD_DRAWN":
-      return `${event.character} draws ${event.card.name}.`;
-    case "DRAW_BURNED":
-      return `${event.character}'s hand is full — ${event.card.name} is discarded instead.`;
-    case "CARD_PLAYED":
-      return `${event.character} plays ${event.card.name}.`;
-    case "COST_PAID":
-      return `${event.character} pays with ${event.cards.map((c) => c.name).join(", ")}.`;
-    case "CARD_DISCARDED":
-      return `${event.character} discards ${event.card.name} from their ${event.from === "playZone" ? "play zone" : event.from}.`;
-    case "CARD_SCRAPPED":
-      return `${event.card.name} is Scrapped.`;
-    case "EXHAUST_PREVENTED":
-      return `${event.by.name} stops it: ${event.character} Exhausts nothing.`;
-    case "CARDS_SHUFFLED_IN":
-      return `${event.character} shuffles ${String(event.cards.length)} card(s) back in.`;
-    case "CARD_TO_HAND":
-      return `${event.character} takes ${event.card.name} into hand.`;
-    case "CARD_MOVED":
-      return `${event.card.name} goes to ${event.character}'s ${event.to}.`;
-    case "CARDS_PEEKED":
-      return `A look at ${event.character}'s deck: ${event.cards.map((c) => c.name).join(", ")}.`;
-    case "THRESHOLD_MET":
-      return `${event.threshold.stat} ${String(event.threshold.value)} met — ${event.threshold.outcome}`;
-    case "STUFF_TAKEN":
-      return `${event.character} gets ${event.card.name}.`;
-    case "STUFF_POOL_EMPTY":
-      return `The ${event.pool === "good_stuff" ? "Good" : "Bad"} Stuff pool is empty — ${event.character} gets nothing.`;
-    case "ROOM_CLEARED":
-      return `${event.room.name} is Cleared.`;
-    case "ROOM_FLED":
-      return `You Flee ${event.room.name}.`;
-    case "FLED_RESHUFFLED":
-      return `The Fled pile shuffles back in: ${String(event.rooms)} rooms.`;
-    case "LAST_STAND":
-      return `${event.character}'s deck is empty — last stand.`;
-    case "LAST_STAND_ESCAPED":
-      return `${event.character} gets out of last stand, ${String(event.price.length)} cards the poorer.`;
-    case "WENT_DOWN":
-      return `${event.character} is Down — ${event.cause}.`;
-    case "REWARD_REVEALED":
-      return `${event.character}'s reward pool shows ${event.card.name}.`;
-    case "REWARD_TAKEN":
-      return `${event.character} takes ${event.card.name}.`;
-    case "REWARD_DECLINED":
-      return `${event.character} declines the reward.`;
-    case "CLEANUP_BEGAN":
-      return "Cleanup.";
-    case "TURN_ENDED":
-      return `— end of turn ${String(event.turn)} —`;
-    case "FLOOR_CLEARED":
-      return `Floor ${String(event.floor)} is clear.`;
-    case "GAME_OVER":
-      return event.outcome === "Victory"
-        ? "You reach the rooftop. You win."
-        : "Both of you are Down.";
-  }
-}
 
 export function EventLog() {
   const session = useSession();
@@ -78,33 +23,80 @@ export function EventLog() {
   const shown = useRef(0);
 
   useEffect(() => {
-    const render = (events: readonly DomainEvent[]) => {
+    const render = (state: SessionState) => {
       const list = listRef.current;
       if (!list) return;
-      if (events.length < shown.current) {
+      const lines = logLines(state.events, state.notes);
+      if (lines.length < shown.current) {
         list.replaceChildren();
         shown.current = 0;
       }
-      for (const event of events.slice(shown.current)) {
+      for (const line of lines.slice(shown.current)) {
         const item = document.createElement("li");
-        item.className = `log__line log__line--${event.type.toLowerCase()}`;
-        item.textContent = describeEvent(event);
+        item.className = `log__line log__line--${lineKindOf(line)}`;
+        item.textContent = line.kind === "note" ? `Note — ${line.text}` : line.text;
         list.append(item);
       }
-      shown.current = events.length;
+      shown.current = lines.length;
       list.scrollTop = list.scrollHeight;
     };
 
-    render(session.getState().events);
-    return session.subscribe((s) => s.events, render);
+    render(session.getState());
+    return session.subscribe(render);
   }, [session]);
 
   return (
     <div className="log">
-      <h2 className="log__title" id="log-title">
-        Log
-      </h2>
+      <div className="log__head">
+        <h2 className="log__title" id="log-title">
+          Log
+        </h2>
+        <ExportControls />
+      </div>
       <ol className="log__lines" aria-labelledby="log-title" ref={listRef} />
+      <NoteBox />
     </div>
+  );
+}
+
+/**
+ * A thought, typed where it happened. The note lands at the end of the log as
+ * it stands, so it reads back between the same two lines it was typed between
+ * — which is the whole point of typing it here rather than on paper.
+ */
+function NoteBox() {
+  const session = useSession();
+  const [text, setText] = useState("");
+
+  const add = () => {
+    session.getState().note(text);
+    setText("");
+  };
+
+  return (
+    <form
+      className="note-box"
+      onSubmit={(e) => {
+        e.preventDefault();
+        add();
+      }}
+    >
+      <label className="note-box__label" htmlFor="note-text">
+        Note
+      </label>
+      <input
+        id="note-text"
+        className="note-box__input"
+        type="text"
+        value={text}
+        placeholder="Something to come back to."
+        onChange={(e) => {
+          setText(e.target.value);
+        }}
+      />
+      <button type="submit" className="button button--small" disabled={text.trim() === ""}>
+        Add note
+      </button>
+    </form>
   );
 }

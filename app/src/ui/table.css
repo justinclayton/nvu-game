@@ -567,7 +567,7 @@ body {
 .face {
   display: flex;
   flex-direction: column;
-  gap: 0.35em;
+  gap: 0.3em;
   padding: 0.7em 0.8em 0.6em;
   background: var(--stock);
   border: 0.18em solid var(--stock-edge);
@@ -616,6 +616,11 @@ body {
 .name {
   font: 700 1.45em/1.05 var(--display);
   letter-spacing: 0.005em;
+}
+/* A name too long for two lines at 1.45em — shrunk so it wraps to fewer,
+ * shorter lines instead of pushing the text below it further down. */
+.face--long-name .name {
+  font-size: 1.15em;
 }
 .cost {
   flex: none;
@@ -705,11 +710,79 @@ body {
   font-size: 1.7em;
   font-weight: 700;
 }
+/* Oomph and Scramble together, shrunk enough to stay on one line rather than
+ * wrapping and eating the row height text below needs. */
+.face__stats--pair {
+  flex-wrap: nowrap;
+  gap: 0.5em;
+}
+.face__stats--pair .stat {
+  gap: 0.2em;
+}
+.face__stats--pair .stat b {
+  font-size: 1.5em;
+}
+.face__stats--pair .stat i {
+  font-size: 0.8em;
+}
 .face__text {
   margin: 0;
   font-size: 1.02em;
   line-height: 1.25;
   color: #333;
+}
+
+/* A card that prints text yields the art window to it rather than clipping:
+ * the more text there is, the smaller the art gets and the smaller the text
+ * itself prints, in the same four steps `textTierOf` in CardFace.tsx picks
+ * from. An untexted card never carries one of these classes, so it keeps the
+ * art window it always had. Leave room to add a step above `xl` later
+ * (issue #47 revisits this sizing for wide screens) rather than assuming two
+ * tiers is the ceiling. */
+.face--text-s .face__art {
+  flex: 0 1 auto;
+  min-height: 1.3em;
+}
+.face--text-m .face__art {
+  flex: 0 1 auto;
+  min-height: 0.7em;
+}
+.face--text-m .face__text {
+  font-size: 0.88em;
+  line-height: 1.16;
+}
+.face--text-s .stat b,
+.face--text-m .stat b {
+  font-size: 1.7em;
+}
+.face--text-l .face__art {
+  flex: 0 1 auto;
+  min-height: 0.4em;
+}
+.face--text-l .face__text {
+  font-size: 0.84em;
+  line-height: 1.16;
+}
+.face--text-l .stat b {
+  font-size: 1.6em;
+}
+.face--text-xl {
+  gap: 0.22em;
+}
+.face--text-xl .face__art {
+  flex: 0 0 auto;
+  min-height: 0;
+  height: 0.3em;
+}
+.face--text-xl .face__text {
+  font-size: 0.76em;
+  line-height: 1.1;
+}
+.face--text-xl .stat b {
+  font-size: 1.4em;
+}
+.face--text-xl .face__stats {
+  gap: 0.5em;
 }
 .face__foot {
   margin-top: auto;
@@ -731,29 +804,34 @@ body {
   color: #a8790a;
 }
 
-/* A room card prints its threshold lines and its Flee line. */
+/* A room card prints its threshold lines and its Flee line. Like a player
+ * card, it carries a `face--text-{s,m,l,xl}` tier (from `roomTextTierOf`,
+ * weighed by threshold count and outcome length rather than one string's
+ * length) so a room with more to say shrinks to keep all of it in view
+ * instead of clipping the lines furthest down. Room #47 adds a tier above
+ * `xl` for wide screens; the same class name is what it hangs that off. */
 .face--room .name {
-  font-size: 1.35em;
-  margin: 0.1em 0 0.15em;
+  font-size: 1.1em;
+  margin: 0.05em 0 0.1em;
 }
 .face--room .face__art {
   flex: 0 0 auto;
-  min-height: 2.6em;
+  min-height: 1.1em;
 }
 .lines {
   list-style: none;
   margin: 0;
   padding: 0;
-  font-size: 0.95em;
+  font-size: 0.85em;
 }
 .line {
-  padding: 0.2em 0;
+  padding: 0.12em 0;
   border-bottom: 1px dotted var(--stock-edge);
-  line-height: 1.2;
+  line-height: 1.15;
 }
 .line b {
   display: block;
-  font: 700 1.15em/1.2 var(--display);
+  font: 700 1.1em/1.15 var(--display);
 }
 .line.is-met {
   color: var(--met);
@@ -763,10 +841,10 @@ body {
 }
 .flee {
   margin-top: auto;
-  padding-top: 0.3em;
+  padding-top: 0.2em;
   border-top: 1px solid var(--stock-edge);
-  font-size: 0.9em;
-  line-height: 1.25;
+  font-size: 0.8em;
+  line-height: 1.2;
   color: var(--ink-soft);
 }
 .flee b {
@@ -774,6 +852,44 @@ body {
   letter-spacing: 0.06em;
   font-size: 0.9em;
   margin-right: 0.3em;
+}
+.face--room.face--text-m .lines {
+  font-size: 0.78em;
+}
+.face--room.face--text-m .flee {
+  font-size: 0.74em;
+}
+.face--room.face--text-l .face__art {
+  min-height: 0.6em;
+}
+.face--room.face--text-l .lines {
+  font-size: 0.72em;
+}
+.face--room.face--text-l .line {
+  padding: 0.08em 0;
+}
+.face--room.face--text-l .flee {
+  font-size: 0.68em;
+  padding-top: 0.12em;
+}
+.face--room.face--text-xl .face__art {
+  min-height: 0;
+  flex: 0 0 0;
+}
+.face--room.face--text-xl .name {
+  font-size: 1em;
+}
+.face--room.face--text-xl .lines {
+  font-size: 0.64em;
+}
+.face--room.face--text-xl .line {
+  padding: 0.05em 0;
+  line-height: 1.05;
+}
+.face--room.face--text-xl .flee {
+  font-size: 0.6em;
+  padding-top: 0.08em;
+  line-height: 1.1;
 }
 
 .back {

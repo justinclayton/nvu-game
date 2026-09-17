@@ -112,12 +112,12 @@ export const STUFF: Registry = {
     },
   },
 
-  /* "At the end of turn, return this card to your hand."
+  /* "If the room is Cleared, return this to your hand at the end of the turn."
    *
-   * Playing a `Hold` card normally spends it (§8): it goes to the play zone and
-   * Exhausts with everything else. This one comes back instead. */
+   * See open-questions.md #12. */
   "Riot Shield": {
     onCleanup(state, ctx) {
+      if (state.resolution?.roomEnded !== "Cleared") return nothing(state);
       const events: DomainEvent[] = [];
       return done(returnToHand(state, ctx.character, ctx.card, events), events);
     },

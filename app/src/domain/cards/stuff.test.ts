@@ -216,8 +216,8 @@ describe("Grav Harness — 'One of you draws 1 card, even if their hand is full'
   });
 });
 
-describe("Riot Shield — 'At the end of turn, return this card to your hand'", () => {
-  it("comes back instead of Exhausting with the rest of the play zone", () => {
+describe("Riot Shield — 'If the room is Cleared, return this to your hand at the end of the turn'", () => {
+  it("comes back to hand when the room is Cleared", () => {
     const state = playing({
       activeRoom: room("Sorting Room"),
       Red: player({ deck: pile("Shove", 3), hand: [card("Riot Shield"), card("Shove")] }),
@@ -229,6 +229,20 @@ describe("Riot Shield — 'At the end of turn, return this card to your hand'", 
     ]);
     expect(next.Red.hand.some((c) => c.name === "Riot Shield")).toBe(true);
     expect(next.Red.exhaust.some((c) => c.name === "Riot Shield")).toBe(false);
+  });
+
+  it("is Exhausted with the play zone when the room is Fled", () => {
+    const state = playing({
+      activeRoom: room("Gross Thing That Looks Like A Cherry"),
+      Red: player({ deck: pile("Shove", 3), hand: [card("Riot Shield"), card("Shove")] }),
+    });
+    const r = ids(state, "Red");
+    const { state: next } = play(state, [
+      { type: "PLAY_CARD", character: "Red", cardId: r[0] as CardId, payWith: [r[1] as CardId] },
+      { type: "END_PLAY" },
+    ]);
+    expect(next.Red.hand.some((c) => c.name === "Riot Shield")).toBe(false);
+    expect(next.Red.exhaust.some((c) => c.name === "Riot Shield")).toBe(true);
   });
 });
 

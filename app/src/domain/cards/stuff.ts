@@ -126,11 +126,11 @@ export const STUFF: Registry = {
 
   /* "The next card played this turn costs 0."
    *
-   * Its holder's next card: Red never pays for Gray, so a discount cannot cross
-   * either. See open-questions.md #14. */
+   * The next card either character plays, and gone when the Play phase ends.
+   * See open-questions.md #14. */
   "Overcharged Battery": {
-    onPlay(state, ctx) {
-      return done(grantFreePlay(state, ctx.character));
+    onPlay(state) {
+      return done(grantFreePlay(state));
     },
   },
 

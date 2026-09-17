@@ -14,6 +14,7 @@ import { behaviourOf, type BehaviourContext, type ChoiceAnswer } from "./cards/b
 import {
   canDraw,
   costOf,
+  costOverrideSpentBy,
   drawCapFor,
   exhaustXPreventedBy,
   handCapFor,
@@ -48,6 +49,7 @@ import { CorruptStateError } from "./types";
 import {
   activateLastStand,
   CHARACTERS,
+  clearFreePlays,
   dealBadStuff,
   drawOne,
   discard,
@@ -57,6 +59,7 @@ import {
   playerOf,
   scrap,
   shuffleIntoDeck,
+  spendFreePlay,
   standing,
   takeGoodStuff,
   topDeck,
@@ -403,11 +406,6 @@ const addPaid = (record: TurnRecord, c: Character, n: number): TurnRecord =>
     ? { ...record, paid: { ...record.paid, Red: record.paid.Red + n } }
     : { ...record, paid: { ...record.paid, Gray: record.paid.Gray + n } };
 
-const spendFreePlay = (record: TurnRecord, c: Character): TurnRecord =>
-  c === "Red"
-    ? { ...record, freePlays: { ...record.freePlays, Red: record.freePlays.Red - 1 } }
-    : { ...record, freePlays: { ...record.freePlays, Gray: record.freePlays.Gray - 1 } };
-
 function playCard(
   state: GameState,
   c: Character,
@@ -424,16 +422,11 @@ function playCard(
   });
 
   let s = state;
-  // §9: while in last stand every card in that hand is free, so nothing is spent
-  // and no printed discount is used up. Otherwise a discount is used up only if
-  // the card would have cost something without it.
-  const withoutDiscount = costOf(
-    { ...s, thisTurn: { ...s.thisTurn, freePlays: { Red: 0, Gray: 0 } } },
-    c,
-    card,
-  );
-  if (!p.lastStand && s.thisTurn.freePlays[c] > 0 && withoutDiscount > 0) {
-    s = { ...s, thisTurn: spendFreePlay(s.thisTurn, c) };
+  // A one-shot cost override is used up here. Last stand is not one of those,
+  // so a character playing their whole hand for nothing (§9) never burns the
+  // team's free play, and neither does a card that already cost nothing.
+  if (costOverrideSpentBy(s, c, card)?.reason === "free play") {
+    s = spendFreePlay(s);
   }
 
   // Each Turn, Play: you pay in *other* cards from your own hand. Red never pays for Gray.
@@ -663,6 +656,10 @@ function finishTurn(state: GameState, run: Run): GameState {
   // The resolution stays readable through cleanup: a card that asks whether the
   // room was Cleared reads it there. It is cleared at the end of the turn.
   let s: GameState = { ...state, pending: null };
+
+  // The Play phase is over, so a free play nobody used is gone: it discounts a
+  // card played this turn or nothing at all. See open-questions.md #14.
+  s = clearFreePlays(s);
 
   // §9: the team Fleeing the room while a character is in last stand puts that
   // character Down. In last stand you have to keep clearing rooms.

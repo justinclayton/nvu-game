@@ -29,10 +29,13 @@ export const ENEMY_ROOMS_PER_FLOOR = 1;
 export const HAZARD_ROOMS_PER_FLOOR = 3;
 
 /**
- * Stuff rooms equal 10 minus the floor number: nine on floor 1, none on floor
- * 10. See open-questions.md #18.
+ * The floor deck is 10 cards on floor 1 and one fewer each floor above it
+ * (rulebook Setup, "Floor deck"). Enemy and Hazard counts are fixed, so Stuff
+ * rooms carry the whole decrease: six on floor 1, none from floor 7 up. See
+ * open-questions.md #18.
  */
-export const stuffRoomsOnFloor = (floor: number): number => Math.max(0, TOP_FLOOR - floor);
+export const stuffRoomsOnFloor = (floor: number): number =>
+  Math.max(0, TOP_FLOOR - ENEMY_ROOMS_PER_FLOOR - HAZARD_ROOMS_PER_FLOOR - (floor - 1));
 
 /* ------------------------------------------------------ minting the cards */
 
@@ -87,10 +90,10 @@ function takeRooms(
 }
 
 /**
- * 1 Enemy room, 3 Hazard rooms, and Stuff rooms equal to 10 minus the floor
- * number, shuffled together face down — the printed-count reading of
- * open-questions.md #18. The floor gets no harder as you climb — it gets
- * emptier.
+ * 1 Enemy room, 3 Hazard rooms, and however many Stuff rooms it takes to make
+ * a 10-card floor on floor 1 and one fewer each floor above, shuffled
+ * together face down — the printed-count reading of open-questions.md #18.
+ * The floor gets no harder as you climb — it gets emptier.
  *
  * Enemy rooms name the floor they guard. Nothing is printed above floor 3, so a
  * higher floor falls back to any Enemy room; see open-questions.md #9.

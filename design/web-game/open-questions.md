@@ -300,9 +300,9 @@ prints exactly 6 Hazard rooms (3 Collapsed Stairwell, 3 Ruptured Coolant Line), 
 returns to the supply at Ascending, so a fixed 3 Hazards a floor is what the printed counts support.
 
 **What the code does.** Takes exactly 3 Hazard rooms and 1 Enemy room every floor, then fills the
-rest with Stuff rooms (10 minus the floor number). A draw at random from the whole Floor-card
-supply, Hazard and Stuff mixed together, would also fit the rulebook's words, and could leave a
-floor with more or fewer than 3 Hazards.
+rest with Stuff rooms up to the rulebook's floor size — 10 on floor 1, one fewer each floor above. A
+draw at random from the whole Floor-card supply, Hazard and Stuff mixed together, would also fit the
+rulebook's words, and could leave a floor with more or fewer than 3 Hazards.
 
 ---
 

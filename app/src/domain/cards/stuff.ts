@@ -6,6 +6,7 @@
  */
 
 import type { Character, DomainEvent, GameState, Pending } from "../types";
+import { drawCapFor } from "../queries";
 import {
   CHARACTERS,
   drawOne,
@@ -179,14 +180,23 @@ export const STUFF: Registry = {
    * does not count as a draw that forces one, whether it lands on this same
    * copy or on a copy the partner is holding. Full Hand and Last Stand for the
    * forced draw come from `drawOne` and the same last-stand check `openingDraw`
-   * uses — no new rule for either. */
+   * uses — no new rule for either.
+   *
+   * Ruled for Faceful Of Slime: a draw cap already reached stops a forced draw
+   * from happening at all — no card moves, and nothing is pushed to `events`,
+   * so there is no draw event for anything else to see. `drawCapFor` reads
+   * every `Holding:` line in the partner's hand, so Deadweight Grip's cap of 2
+   * is stopped the same way; that extension is this engine's own reading, not
+   * a ruling. See open-questions.md #17 and #19. */
   "My Head Is Quantum Spinning": {
     onEvent(event, state, ctx) {
       if (ctx.zone !== "hand") return nothing(state);
       if (event.type !== "CARD_DRAWN" && event.type !== "DRAW_BURNED") return nothing(state);
       if (event.character !== ctx.character || event.forced) return nothing(state);
       const partner = ctx.character === "Red" ? "Gray" : "Red";
-      if (playerOf(state, partner).lastStand) return nothing(state);
+      const partnerState = playerOf(state, partner);
+      if (partnerState.lastStand) return nothing(state);
+      if (partnerState.drewThisTurn >= drawCapFor(state, partner)) return nothing(state);
       const events: DomainEvent[] = [];
       return done(drawOne(state, partner, events, false, true), events);
     },

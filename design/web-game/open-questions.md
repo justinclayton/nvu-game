@@ -194,14 +194,15 @@ If the room was Fled, it is discarded with the rest of the play zone. The return
 
 ## 13. A card may draw during the Play phase
 
+`[you, 2026-09-17]`
+
 **Where:** Covering Fire, I Know Kung Fu, Grav Harness.
 
 §5 says *"you may not draw during this phase."* Three cards say otherwise in their own text.
 
 **What the code does.** The rule is the default and a card's printed text is the exception, which is
 the ordinary convention for a card game. The phase is checked only by the `DRAW` command's own
-legality; `drawOne`, which every card-driven draw goes through, does not check it. Nothing rules on
-it explicitly.
+legality; `drawOne`, which every card-driven draw goes through, does not check it.
 
 ---
 
@@ -253,20 +254,32 @@ Crowbars in a hand each pay once.
 
 ---
 
-## 17. Last stand activates right after the draw that empties the deck
+## 17. Last stand activates the instant any deck becomes empty
 
-**Where:** the `DRAW` command and the opening draw in `app/src/domain/engine.ts`, and
-`activateLastStand` in `verbs.ts`.
+`[you, 2026-09-17]`
 
-§9: *"When your deck becomes empty, your character immediately enters Last Stand."* A draw is what
-empties a deck most turns, and the Draw phase runs on after it: the partner draws, and so may a card
-trigger. Waiting for the phase to end would leave a character drawing and being asked to draw while
-§9 says they no longer do.
+**Where:** `drawOne` and `exhaustFromDeck` in `app/src/domain/verbs.ts`, which call
+`activateLastStand` on themselves; `engine.ts`'s cleanup sweeps once more as a backstop.
 
-**What the code does.** A draw sweeps for last stand right away — both the opening draw and each
-`DRAW` command — so the state is live for the rest of the phase. Everything else that can empty a
-deck mid-turn — a room's printed punishment, a card's own `Exhaust X` — is swept for once, at
-cleanup.
+§9: *"When your deck becomes empty, your character immediately enters Last Stand."* A draw or an
+Exhaust is what empties a deck, and the turn runs on after either: the partner may draw, a card may
+trigger, the room may still owe more of its punishment. Waiting for the phase to end would leave a
+character acting, or being acted on, while §9 says they are already in Last Stand.
+
+**What the code does.** `drawOne` and `exhaustFromDeck` are the only two places a card ever leaves
+the top of a deck, so each sweeps for last stand on itself the moment it empties one. Every cause
+goes through one or the other: a chosen or opening draw, a draw a card's text forces, a card's own
+`Exhaust X`, and a room's printed punishment. The state is live in the same step the deck empties,
+not at the end of the phase. `engine.ts` still sweeps once more at cleanup as a backstop, which
+ordinarily finds nothing left to do.
+
+**Consequence worth knowing:** a character whose deck a room's Flee punishment empties enters Last
+Stand during Outcome, before Cleanup runs. §9 sends a character Down at Cleanup if they are in Last
+Stand and the room Fled, with no exception for how recently they entered it — so this character goes
+Down at that same Cleanup, exactly as a character who had already been in Last Stand since an
+earlier draw does. The only difference is how much of the turn each spent there: the
+earlier-emptied character got a Play phase with every card free before going Down, and the one
+emptied by the Flee punishment did not, since Play had already ended.
 
 ---
 
@@ -283,3 +296,19 @@ returns to the supply at Ascending, so a fixed 3 Hazards a floor is what the pri
 rest with Stuff rooms (10 minus the floor number). A draw at random from the whole Floor-card
 supply, Hazard and Stuff mixed together, would also fit the rulebook's words, and could leave a
 floor with more or fewer than 3 Hazards.
+
+---
+
+## 19. Deadweight Grip's draw cap also stops a forced draw
+
+**Where:** `My Head Is Quantum Spinning`'s `onEvent`, `app/src/domain/cards/stuff.ts`.
+
+The designer ruled that Faceful Of Slime's draw cap stops a forced draw outright — no card moves,
+and no draw event fires — rather than letting the forced draw happen and only then discarding it
+the way a Full Hand does. Deadweight Grip prints its own draw cap of 2 the same way Faceful Of Slime
+prints 1, and both are read by the same `drawCapFor`.
+
+**What the code does.** The forced draw checks `drawCapFor` for whoever it would land on, whichever
+card is capping them. A Deadweight Grip holder who has already drawn their 2 cards this turn is
+skipped exactly as a Faceful Of Slime holder at 1 is. This extension to Deadweight Grip was not
+itself ruled on — it follows from reading the same code the ruling named.

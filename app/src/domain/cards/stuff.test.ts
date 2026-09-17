@@ -402,4 +402,26 @@ describe("My Head Is Quantum Spinning — 'whenever you draw a card, your partne
     expect(next.Gray.deck).toHaveLength(6);
     expect(next.Gray.drewThisTurn).toBe(0);
   });
+
+  // Ruled for Faceful Of Slime: a draw cap already reached stops a forced draw
+  // outright. Deadweight Grip's cap of 2 is the same code and is the agent's own
+  // reading, not a ruling — see open-questions.md #17 and #19.
+  it("does not draw a partner who already drew their capped card this turn (Faceful Of Slime)", () => {
+    const state = rig({
+      phase: "Draw",
+      activeRoom: room("Sorting Room"),
+      Red: player({ deck: pile("Shove", 6), hand: [card("My Head Is Quantum Spinning")] }),
+      Gray: player({
+        deck: pile("Duck Under", 6),
+        hand: [card("Faceful Of Slime")],
+        drewThisTurn: 1,
+      }),
+    });
+    const { state: next, events } = must(state, { type: "DRAW", character: "Red" });
+    // No card moved for Gray, and no draw event at all for the forced draw.
+    expect(next.Gray.hand).toHaveLength(1);
+    expect(next.Gray.deck).toHaveLength(6);
+    expect(next.Gray.drewThisTurn).toBe(1);
+    expect(eventTypes(events)).toEqual(["CARD_DRAWN"]);
+  });
 });

@@ -12,7 +12,7 @@ import {
   playerOf,
   scrap,
   shuffleIntoDeck,
-  takeFromExhaust,
+  takeFromDiscard,
   takeFromHand,
 } from "../verbs";
 import {
@@ -162,14 +162,14 @@ export const GRAY: Registry = {
     },
   },
 
-  /* "Shuffle an exhausted Gray card back into your deck." */
+  /* "Shuffle a Gray card from your discard pile back into your deck." */
   "Hit 'n Run": {
     onPlay(state, ctx) {
-      const options = playerOf(state, ctx.character).exhaust.filter((c) => c.owner === "Gray");
+      const options = playerOf(state, ctx.character).discard.filter((c) => c.owner === "Gray");
       if (options.length === 0) return nothing(state);
       return ask(state, {
         kind: "ChooseCards",
-        prompt: "Shuffle which exhausted Gray card back into your deck?",
+        prompt: "Shuffle which Gray card from your discard pile back into your deck?",
         character: ctx.character,
         options,
         count: 1,
@@ -180,7 +180,7 @@ export const GRAY: Registry = {
     onChoice(answer, state, ctx) {
       if (answer.kind !== "cards") return nothing(state);
       const events: DomainEvent[] = [];
-      const lifted = takeFromExhaust(state, ctx.character, answer.cards);
+      const lifted = takeFromDiscard(state, ctx.character, answer.cards);
       return done(shuffleIntoDeck(lifted, ctx.character, answer.cards, events), events);
     },
   },

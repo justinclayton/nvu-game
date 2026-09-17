@@ -31,7 +31,7 @@ const free = (c: Character, cardId: CardId) =>
 const NOTHING: AscendChoice = { keepStuffId: null, scrapId: null, takeRewardId: null };
 
 describe("walkthrough 1 — a full hand costs you a card", () => {
-  it("puts the drawn card straight into the exhaust pile", () => {
+  it("puts the drawn card straight into the discard pile", () => {
     const state = rig({
       phase: "Flip",
       floorDeck: [room("Sorting Room")],
@@ -42,12 +42,12 @@ describe("walkthrough 1 — a full hand costs you a card", () => {
     expect(eventTypes(events)).toEqual([
       "ROOM_FLIPPED",
       "DRAW_BURNED",
-      "CARD_EXHAUSTED",
+      "CARD_DISCARDED",
       "CARD_DRAWN",
     ]);
     expect(next.Red.hand).toHaveLength(5);
     expect(next.Red.deck).toHaveLength(5);
-    expect(next.Red.exhaust).toHaveLength(1);
+    expect(next.Red.discard).toHaveLength(1);
     expect(next.Gray.hand).toHaveLength(1);
   });
 });
@@ -115,7 +115,7 @@ describe("walkthrough 3 — the escape that actually works", () => {
 });
 
 describe("walkthrough 4 — spending Stuff spends it for good", () => {
-  it("leaves a spent Pry Bar in the exhaust pile, then Scraps it at ascension", () => {
+  it("leaves a spent Pry Bar in the discard pile, then Scraps it at ascension", () => {
     const state = rig({
       phase: "Play",
       floor: 1,
@@ -135,11 +135,11 @@ describe("walkthrough 4 — spending Stuff spends it for good", () => {
     });
     const h = hand(state, "Red");
     // Charge In (Oomph 4, Cost 2) paid for with a Pry Bar and a Shove. The Pry
-    // Bar lands in the exhaust pile looking recoverable — and is not.
+    // Bar lands in the discard pile looking recoverable — and is not.
     const played = play(state, [
       { type: "PLAY_CARD", character: "Red", cardId: h[0] as CardId, payWith: [h[1] as CardId, h[2] as CardId] },
     ]);
-    expect(played.state.Red.exhaust.map((c) => c.name)).toContain("Pry Bar");
+    expect(played.state.Red.discard.map((c) => c.name)).toContain("Pry Bar");
 
     const cleared = play(played.state, [
       free("Red", h[3] as CardId),
@@ -150,7 +150,7 @@ describe("walkthrough 4 — spending Stuff spends it for good", () => {
 
     const ascended = play(cleared.state, [{ type: "ASCEND", Red: NOTHING, Gray: NOTHING }]);
     // Both Pry Bars — the one spent as fuel and the one played — are gone for
-    // the run. Neither shuffles back with the rest of the exhaust pile.
+    // the run. Neither shuffles back with the rest of the discard pile.
     expect(ascended.state.scrapyard.map((c) => c.name)).toEqual(["Pry Bar", "Pry Bar"]);
     expect(ascended.state.Red.deck.some((c) => c.name === "Pry Bar")).toBe(false);
   });
@@ -186,7 +186,7 @@ describe("walkthrough 5 — nothing resolves until play is declared over", () =>
     // you Exhaust 1" is still owed, because the higher tier adds to it rather
     // than replacing it.
     expect(high.events.filter((e) => e.type === "THRESHOLD_MET")).toHaveLength(2);
-    expect(high.state.Red.exhaust).toHaveLength(1);
+    expect(high.state.Red.discard).toHaveLength(1);
     expect(high.state.Red.deck).toHaveLength(4);
   });
 });
@@ -231,7 +231,7 @@ describe("walkthrough 7 — Down, and everything landing on the survivor", () =>
       { type: "END_PLAY" },
     ]);
     // "Both of you Exhaust 1, and one of you gets Bad Stuff." Red takes nothing.
-    expect(next.Red.exhaust).toEqual([]);
+    expect(next.Red.discard).toEqual([]);
     expect(next.Gray.deck).toHaveLength(2);
     expect(next.Gray.hand.map((c) => c.kind)).toEqual(["bad_stuff"]);
     // Nobody was asked who: there was nobody to choose between.
@@ -255,16 +255,16 @@ describe("walkthrough 8 — ascending: full heal, Scrap tax, reward", () => {
       ],
       Red: player({
         deck: pile("Shove", 2),
-        exhaust: [...pile("Shove", 4), card("Pry Bar"), card("Coil Of Cable")],
+        discard: [...pile("Shove", 4), card("Pry Bar"), card("Coil Of Cable")],
       }),
-      Gray: player({ deck: pile("Duck Under", 3), exhaust: pile("Duck Under", 5), down: true }),
+      Gray: player({ deck: pile("Duck Under", 3), discard: pile("Duck Under", 5), down: true }),
     });
     const withOffer = {
       ...state,
       offer: { Red: state.pools.Red.slice(0, 3), Gray: state.pools.Gray.slice(0, 3) },
     };
-    const keep = withOffer.Red.exhaust.find((c) => c.name === "Pry Bar");
-    const payer = withOffer.Red.exhaust.find((c) => c.name === "Shove");
+    const keep = withOffer.Red.discard.find((c) => c.name === "Pry Bar");
+    const payer = withOffer.Red.discard.find((c) => c.name === "Shove");
     const reward = withOffer.offer.Red[0];
     if (!keep || !payer || !reward) throw new Error("rig");
 

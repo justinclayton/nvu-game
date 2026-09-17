@@ -23,7 +23,7 @@ events, plus pure query functions.
 **Value objects**, all readonly plain types, no classes: `Card`, `Room`, `Threshold`,
 `FleeLine`, `PlayedCard`, `RewardOffer`. Ids are branded: `CardId` is unique per physical
 copy, `RoomId` per room. `Character` is the literal union `"Red" | "Gray"`. Every type name is a
-term from `design/GLOSSARY.md`, spelled the same way: exhaust pile, Fled, Cleared, Scrapyard, last stand,
+term from `design/GLOSSARY.md`, spelled the same way: discard pile, Fled, Cleared, Scrapyard, last stand,
 Down.
 
 **The signature.**

@@ -1,6 +1,6 @@
 /* Good Stuff and Bad Stuff. Keyed by the name design/cards.yaml makes unique.
  *
- * §7: Stuff is ordinary energy — you may Exhaust it from hand to pay another
+ * §7: Stuff is ordinary energy — you may discard it from hand to pay another
  * card's cost. Bad Stuff behaves like any other Stuff except that it
  * contributes no stats.
  */
@@ -15,7 +15,7 @@ import {
   moveToBottomOfDeck,
   playerOf,
   returnToHand,
-  takeFromExhaust,
+  takeFromDiscard,
   takeGoodStuff,
 } from "../verbs";
 import { ask, done, nothing, source, type BehaviourContext, type Registry } from "./behaviour";
@@ -26,7 +26,7 @@ function healCardsAsk(state: GameState, ctx: BehaviourContext, target: Character
     kind: "ChooseCards",
     prompt: `Move which 2 cards to the bottom of ${target}'s deck?`,
     character: target,
-    options: playerOf(state, target).exhaust,
+    options: playerOf(state, target).discard,
     count: 2,
     optional: false,
     source: source(ctx, `stich-em-ups:${target}`),
@@ -52,17 +52,17 @@ export const STUFF: Registry = {
     },
   },
 
-  /* "Choose a character. Move 2 cards from that character's exhaust pile to the
+  /* "Choose a character. Move 2 cards from that character's discard pile to the
    * bottom of their deck."
    *
-   * Either character can be healed, so a character with cards in both exhaust
+   * Either character can be healed, so a character with cards in both discard
    * piles is asked which one first; a character with only one eligible pile
    * skips straight to picking the cards from it. Healing a partner in Last
    * Stand only refills their deck — nothing here clears the `lastStand` flag,
    * so the rulebook's "Last Stand ends at Cleanup" still holds. */
   "A Pair Of Stich-Em-Ups": {
     onPlay(state, ctx) {
-      const eligible = CHARACTERS.filter((c) => playerOf(state, c).exhaust.length > 0);
+      const eligible = CHARACTERS.filter((c) => playerOf(state, c).discard.length > 0);
       if (eligible.length === 0) return nothing(state);
       if (eligible.length === 1) {
         const target = eligible[0];
@@ -83,7 +83,7 @@ export const STUFF: Registry = {
       if (answer.kind !== "cards") return nothing(state);
       const target = answer.tag.split(":")[1] === "Red" ? "Red" : "Gray";
       const events: DomainEvent[] = [];
-      const lifted = takeFromExhaust(state, target, answer.cards);
+      const lifted = takeFromDiscard(state, target, answer.cards);
       return done(moveToBottomOfDeck(lifted, target, answer.cards, events), events);
     },
   },

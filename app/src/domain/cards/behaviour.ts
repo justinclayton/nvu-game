@@ -49,7 +49,7 @@ export interface HeldModifiers {
 export interface CardBehaviour {
   /**
    * A bare `Exhaust X` printed on the card: X cards off the top of the player's
-   * own deck, into their exhaust pile. Resolved as the card is played.
+   * own deck, into their discard pile. Resolved as the card is played.
    */
   exhaustX?: number;
   /** Conditional stats, recalculated every time the pool is read (§5). */
@@ -69,9 +69,9 @@ export interface CardBehaviour {
   /** The follow-up to a question this card asked. */
   onChoice?(answer: ChoiceAnswer, state: GameState, ctx: BehaviourContext): StepResult;
   /**
-   * A card in the play zone taking itself somewhere other than the exhaust pile,
+   * A card in the play zone taking itself somewhere other than the discard pile,
    * at cleanup. Called before the play zone is swept; a card still in the zone
-   * afterwards is Exhausted as normal (§5).
+   * afterwards is discarded as normal (§5).
    */
   onCleanup?(state: GameState, ctx: BehaviourContext): StepResult;
 }

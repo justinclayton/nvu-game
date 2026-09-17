@@ -18,8 +18,8 @@ function atAscension(): GameState {
     phase: "Ascend",
     floor: 1,
     cleared: [room("Gross Thing That Looks Like A Cherry")],
-    Red: player({ deck: pile("Shove", 2), exhaust: [...pile("Charge In", 2), card("Pry Bar")] }),
-    Gray: player({ deck: pile("Duck Under", 2), exhaust: pile("Pick The Lock", 2) }),
+    Red: player({ deck: pile("Shove", 2), discard: [...pile("Charge In", 2), card("Pry Bar")] }),
+    Gray: player({ deck: pile("Duck Under", 2), discard: pile("Pick The Lock", 2) }),
   });
   return {
     ...base,
@@ -113,8 +113,8 @@ describe("the ascension panel", () => {
     const state = atAscension();
     const dispatch = vi.fn();
     render(<Harness state={state} dispatch={dispatch} />);
-    const pryBar = state.Red.exhaust.find((c) => c.name === "Pry Bar");
-    const payer = state.Red.exhaust.find((c) => c.name === "Charge In");
+    const pryBar = state.Red.discard.find((c) => c.name === "Pry Bar");
+    const payer = state.Red.discard.find((c) => c.name === "Charge In");
     const reward = state.offer?.Red[0];
     if (!pryBar || !payer || !reward) throw new Error("rig");
 

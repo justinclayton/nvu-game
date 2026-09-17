@@ -2,7 +2,7 @@
  *
  * Rulebook §3, drawn. The floor deck, its Fled and Cleared piles and the active
  * room across the top with the room's brief beside them; each character's deck,
- * side of the play zone and exhaust pile in the middle; their hands along the
+ * side of the play zone and discard pile in the middle; their hands along the
  * near edge. The pools sit off to the right, as the rulebook keeps them off to
  * one side. Every slot here is an empty, measured box; the card layer draws the
  * cards over it.
@@ -144,9 +144,9 @@ export function Mat({
         <div className="mat-row mat-row--table">
           <Slot id="red-deck" label="Red · deck" count={state.Red.deck.length} tone="red" />
           <Slot id="red-play" label="Red · play zone" row tone="red" />
-          <Slot id="red-exhaust" label="Exhaust" count={state.Red.exhaust.length} tone="red" />
+          <Slot id="red-discard" label="Discard" count={state.Red.discard.length} tone="red" />
           <div className="mat__divider" />
-          <Slot id="gray-exhaust" label="Exhaust" count={state.Gray.exhaust.length} tone="gray" />
+          <Slot id="gray-discard" label="Discard" count={state.Gray.discard.length} tone="gray" />
           <Slot id="gray-play" label="Gray · play zone" row tone="gray" />
           <Slot id="gray-deck" label="Gray · deck" count={state.Gray.deck.length} tone="gray" />
         </div>

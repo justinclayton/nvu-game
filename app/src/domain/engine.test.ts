@@ -90,13 +90,13 @@ describe("§5 Draw", () => {
     expect(next.Gray.drewThisTurn).toBe(1);
   });
 
-  it("'if you are forced to draw with a Full Hand' — the opening draw is Exhausted", () => {
+  it("'if you are forced to draw with a Full Hand' — the opening draw is discarded", () => {
     const state = flipState({
       Red: player({ deck: pile("Shove", 5), hand: pile("Charge In", 5) }),
     });
     const { state: next, events } = must(state, { type: "FLIP_ROOM" });
     expect(next.Red.hand).toHaveLength(5);
-    expect(next.Red.exhaust).toHaveLength(1);
+    expect(next.Red.discard).toHaveLength(1);
     expect(next.Red.deck).toHaveLength(4);
     expect(eventTypes(events)).toContain("DRAW_BURNED");
   });
@@ -153,7 +153,7 @@ describe("§5 Play", () => {
     if (!rejected.ok) expect(rejected.reason.code).toBe("WrongPhase");
   });
 
-  it("'to play a card, Exhaust cards from your hand equal to its Cost'", () => {
+  it("'to play a card, discard cards from your hand equal to its Cost'", () => {
     const state = playState();
     const [charge, shove] = state.Red.hand;
     if (!charge || !shove) throw new Error("rig");
@@ -251,7 +251,7 @@ describe("§5 Play", () => {
 });
 
 describe("§5 Cleanup", () => {
-  it("'Exhaust the entire play zone'", () => {
+  it("'Discard the entire play zone'", () => {
     const state = rig({
       phase: "Play",
       activeRoom: room("Sorting Room"),
@@ -264,9 +264,9 @@ describe("§5 Cleanup", () => {
       { type: "END_PLAY" },
     ]);
     expect(next.playZone).toEqual([]);
-    // The Shove played, then Exhausted from the play zone; the Charge In was
-    // Exhausted earlier, to pay its cost.
-    expect(next.Red.exhaust).toHaveLength(2);
+    // The Shove played, then discarded from the play zone; the Charge In was
+    // discarded earlier, to pay its cost.
+    expect(next.Red.discard).toHaveLength(2);
   });
 
   it("'the hand carries over untouched'", () => {
@@ -347,7 +347,7 @@ describe("§6 The three kinds of room", () => {
     ]);
     expect(events.filter((e) => e.type === "THRESHOLD_MET")).toHaveLength(2);
     expect(next.cleared).toHaveLength(1);
-    expect(next.Red.exhaust).toHaveLength(1);
+    expect(next.Red.discard).toHaveLength(1);
   });
 
   it("a met line that Clears beats one that says to Flee for free", () => {

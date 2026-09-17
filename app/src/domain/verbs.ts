@@ -14,7 +14,7 @@ import type {
   Card,
   Character,
   DomainEvent,
-  ExhaustedFrom,
+  DiscardedFrom,
   GameState,
   PlayerState,
 } from "./types";
@@ -33,26 +33,26 @@ export const withPlayer = (state: GameState, c: Character, p: PlayerState): Game
 export const standing = (state: GameState): readonly Character[] =>
   CHARACTERS.filter((c) => !state[c].down);
 
-/* --------------------------------------------------------------- exhausting */
+/* --------------------------------------------------------------- discarding */
 
 /**
- * §4: to Exhaust is to move a card to its owner's exhaust pile — gone for the
- * floor. Stuff exhausts like anything else; the Scrapyard only comes into it at
+ * §4: to discard is to move a card to its owner's discard pile — gone for the
+ * floor. Stuff discards like anything else; the Scrapyard only comes into it at
  * ascension (§7).
  */
-export function exhaust(
+export function discard(
   state: GameState,
   c: Character,
   card: Card,
-  from: ExhaustedFrom,
+  from: DiscardedFrom,
   events: DomainEvent[],
 ): GameState {
   const p = playerOf(state, c);
-  events.push({ type: "CARD_EXHAUSTED", character: c, card, from });
-  return withPlayer(state, c, { ...p, exhaust: [...p.exhaust, card] });
+  events.push({ type: "CARD_DISCARDED", character: c, card, from });
+  return withPlayer(state, c, { ...p, discard: [...p.discard, card] });
 }
 
-/** §9: going Down empties your hand into your exhaust pile. */
+/** §9: going Down empties your hand into your discard pile. */
 export function goDown(
   state: GameState,
   c: Character,
@@ -63,7 +63,7 @@ export function goDown(
   if (p.down) return state;
   events.push({ type: "WENT_DOWN", character: c, cause });
   let next = withPlayer(state, c, { ...p, down: true, lastStand: false, hand: [] });
-  for (const card of p.hand) next = exhaust(next, c, card, "hand", events);
+  for (const card of p.hand) next = discard(next, c, card, "hand", events);
   return next;
 }
 
@@ -89,13 +89,13 @@ export function exhaustFromDeck(
     const card = p.deck[0];
     if (!card) return goDown(next, c, cause, events);
     next = withPlayer(next, c, { ...p, deck: p.deck.slice(1) });
-    next = exhaust(next, c, card, "deck", events);
+    next = discard(next, c, card, "deck", events);
   }
   return next;
 }
 
-/** §8: `Exhaust X cards from your hand` — a cost you chose. */
-export function exhaustFromHand(
+/** §8: `Discard X cards from your hand` — a cost you chose. */
+export function discardFromHand(
   state: GameState,
   c: Character,
   cards: readonly Card[],
@@ -104,7 +104,7 @@ export function exhaustFromHand(
   const ids = new Set(cards.map((x) => x.id));
   const p = playerOf(state, c);
   let next = withPlayer(state, c, { ...p, hand: p.hand.filter((x) => !ids.has(x.id)) });
-  for (const card of cards) next = exhaust(next, c, card, "hand", events);
+  for (const card of cards) next = discard(next, c, card, "hand", events);
   return next;
 }
 
@@ -112,7 +112,7 @@ export function exhaustFromHand(
 
 /**
  * §5: draw one card. A full hand does not excuse the opening draw — the card is
- * put straight into the exhaust pile instead of the hand, so a full hand costs
+ * put straight into the discard pile instead of the hand, so a full hand costs
  * you a card a turn rather than saving you one.
  *
  * `ignoreHandCap` is for a card that says so in its own text.
@@ -138,7 +138,7 @@ export function drawOne(
   const rest = { ...p, deck: p.deck.slice(1), drewThisTurn: p.drewThisTurn + 1 };
   if (!ignoreHandCap && p.hand.length >= HAND_CAP) {
     events.push({ type: "DRAW_BURNED", character: c, card, forced });
-    return exhaust(withPlayer(state, c, rest), c, card, "deck", events);
+    return discard(withPlayer(state, c, rest), c, card, "deck", events);
   }
   events.push({ type: "CARD_DRAWN", character: c, card, forced });
   return withPlayer(state, c, { ...rest, hand: [...p.hand, card] });
@@ -194,15 +194,15 @@ export function takeFromHand(state: GameState, c: Character, cards: readonly Car
   return withPlayer(state, c, { ...p, hand: p.hand.filter((x) => !ids.has(x.id)) });
 }
 
-/** Cards lifted back out of an exhaust pile, for a card that says it can. */
-export function takeFromExhaust(
+/** Cards lifted back out of a discard pile, for a card that says it can. */
+export function takeFromDiscard(
   state: GameState,
   c: Character,
   cards: readonly Card[],
 ): GameState {
   const ids = new Set(cards.map((x) => x.id));
   const p = playerOf(state, c);
-  return withPlayer(state, c, { ...p, exhaust: p.exhaust.filter((x) => !ids.has(x.id)) });
+  return withPlayer(state, c, { ...p, discard: p.discard.filter((x) => !ids.has(x.id)) });
 }
 
 /** Under the deck, so it is the last thing you will see rather than the next. */
@@ -221,7 +221,7 @@ export function moveToBottomOfDeck(
  * A card taking itself back out of the play zone, at cleanup.
  *
  * §9: no card may be put into a Down character's hand, so a card whose owner is
- * out stays in the play zone and Exhausts with everything else.
+ * out stays in the play zone and is discarded with everything else.
  */
 export function returnToHand(
   state: GameState,

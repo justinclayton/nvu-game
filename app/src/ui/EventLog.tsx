@@ -16,13 +16,13 @@ export function describeEvent(event: DomainEvent): string {
     case "CARD_DRAWN":
       return `${event.character} draws ${event.card.name}.`;
     case "DRAW_BURNED":
-      return `${event.character}'s hand is full — ${event.card.name} is Exhausted instead.`;
+      return `${event.character}'s hand is full — ${event.card.name} is discarded instead.`;
     case "CARD_PLAYED":
       return `${event.character} plays ${event.card.name}.`;
     case "COST_PAID":
       return `${event.character} pays with ${event.cards.map((c) => c.name).join(", ")}.`;
-    case "CARD_EXHAUSTED":
-      return `${event.character} Exhausts ${event.card.name} from their ${event.from === "playZone" ? "play zone" : event.from}.`;
+    case "CARD_DISCARDED":
+      return `${event.character} discards ${event.card.name} from their ${event.from === "playZone" ? "play zone" : event.from}.`;
     case "CARD_SCRAPPED":
       return `${event.card.name} is Scrapped.`;
     case "EXHAUST_PREVENTED":

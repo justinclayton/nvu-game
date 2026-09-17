@@ -101,7 +101,7 @@ function allCards(state: GameState): readonly Card[] {
   const perCharacter = CHARACTERS.flatMap((c) => [
     ...state[c].deck,
     ...state[c].hand,
-    ...state[c].exhaust,
+    ...state[c].discard,
   ]);
   return [
     ...perCharacter,

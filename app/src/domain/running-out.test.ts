@@ -75,7 +75,7 @@ describe("§9 Last stand", () => {
     const [chargeIn] = ids(state, "Red");
     const { state: next } = must(state, free("Red", chargeIn as CardId));
     expect(next.playZone).toHaveLength(1);
-    expect(next.Red.exhaust).toEqual([]);
+    expect(next.Red.discard).toEqual([]);
   });
 
   it("'all cards in the play zone are shuffled into their deck, then 2 are Exhausted'", () => {
@@ -94,7 +94,7 @@ describe("§9 Last stand", () => {
     ]);
     // Three played, shuffled back, two Exhausted as the price: one left.
     expect(next.Red.deck).toHaveLength(1);
-    expect(next.Red.exhaust).toHaveLength(2);
+    expect(next.Red.discard).toHaveLength(2);
     expect(next.Red.lastStand).toBe(false);
     expect(next.Red.down).toBe(false);
     expect(eventTypes(events)).toContain("LAST_STAND_ESCAPED");
@@ -171,7 +171,7 @@ describe("§9 Going Down", () => {
     expect(eventTypes(events)).toContain("WENT_DOWN");
   });
 
-  it("'going Down empties your hand into your exhaust pile'", () => {
+  it("'going Down empties your hand into your discard pile'", () => {
     const state = rig({
       phase: "Play",
       activeRoom: room("Collapsed Stairwell"),
@@ -183,7 +183,7 @@ describe("§9 Going Down", () => {
       { type: "CHOOSE_CHARACTER", character: "Red" },
     ]);
     expect(next.Red.hand).toEqual([]);
-    expect(next.Red.exhaust.map((c) => c.name)).toContain("Pry Bar");
+    expect(next.Red.discard.map((c) => c.name)).toContain("Pry Bar");
   });
 
   it("'a Down character takes no punishments' — every Flee line falls on the survivor", () => {
@@ -196,7 +196,7 @@ describe("§9 Going Down", () => {
     // "Both of you Exhaust 1, and one of you gets Bad Stuff." Red is out, so
     // there is nobody to choose between: it all lands on Gray.
     const { state: next } = must(state, { type: "END_PLAY" });
-    expect(next.Red.exhaust).toEqual([]);
+    expect(next.Red.discard).toEqual([]);
     expect(next.Gray.deck).toHaveLength(4);
     expect(next.Gray.hand).toHaveLength(1);
     expect(next.Gray.hand[0]?.kind).toBe("bad_stuff");

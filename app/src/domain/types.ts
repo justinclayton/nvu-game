@@ -1,6 +1,6 @@
 /* The domain model. One aggregate, `GameState`; one way in, `execute`.
  *
- * Every name here is a term from design/GLOSSARY.md, spelled the same way: exhaust pile,
+ * Every name here is a term from design/GLOSSARY.md, spelled the same way: discard pile,
  * Fled, Cleared, Scrapyard, last stand, Down, stat pool, play zone. Section
  * numbers in the comments point at design/rulebook.md.
  *
@@ -84,7 +84,7 @@ export interface PlayerState {
   /** What they drew this turn. Maximum 5. */
   readonly hand: readonly Card[];
   /** Face up. Cards spent or lost, gone for the floor. There is no discard pile. */
-  readonly exhaust: readonly Card[];
+  readonly discard: readonly Card[];
   /** Down is out: skipped in Draw and in Play, no rewards, no punishments (§9). */
   readonly down: boolean;
   /** Set the moment the deck runs out, and swept for again at cleanup (§9). */
@@ -96,7 +96,7 @@ export interface PlayerState {
 /**
  * What the turn in progress has done that no pile records. Reset at Flip.
  *
- * Cards paid with have already gone to the exhaust pile, so a card that reads
+ * Cards paid with have already gone to the discard pile, so a card that reads
  * "for each card you paid with this turn" has nothing else to count.
  */
 export interface TurnRecord {
@@ -214,7 +214,7 @@ export interface GameState {
 
 /** The Scrap tax and the reward, both decided at the moment of ascending (§10). */
 export interface AscendChoice {
-  /** Keep this Stuff from your own exhaust pile out of the Scrapyard... */
+  /** Keep this Stuff from your own discard pile out of the Scrapyard... */
   readonly keepStuffId: CardId | null;
   /** ...by Scrapping this other card of that pile in its place. Both or neither. */
   readonly scrapId: CardId | null;
@@ -243,8 +243,8 @@ export type CommandType = Command["type"];
 
 /* --------------------------------------------------------------- events */
 
-/** Where a card was when it was Exhausted. `deck` is the loss you did not choose (§8). */
-export type ExhaustedFrom = "hand" | "deck" | "playZone";
+/** Where a card was when it was discarded. `deck` is the loss you did not choose (§8). */
+export type DiscardedFrom = "hand" | "deck" | "playZone";
 
 export type DomainEvent =
   | { readonly type: "FLOOR_BUILT"; readonly floor: number; readonly rooms: number }
@@ -265,10 +265,10 @@ export type DomainEvent =
   | { readonly type: "CARD_PLAYED"; readonly character: Character; readonly card: Card }
   | { readonly type: "COST_PAID"; readonly character: Character; readonly cards: readonly Card[] }
   | {
-      readonly type: "CARD_EXHAUSTED";
+      readonly type: "CARD_DISCARDED";
       readonly character: Character;
       readonly card: Card;
-      readonly from: ExhaustedFrom;
+      readonly from: DiscardedFrom;
     }
   | { readonly type: "CARD_SCRAPPED"; readonly character: Character | null; readonly card: Card }
   | {

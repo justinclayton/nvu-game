@@ -159,7 +159,7 @@ export function metThresholds(state: GameState): readonly Threshold[] {
 /* ---------------------------------------------------------------- the costs */
 
 /**
- * §5: to play a card you Exhaust cards from your hand equal to its Cost.
+ * §5: to play a card you discard cards from your hand equal to its Cost.
  * §9: while in last stand, every card in that hand may be played at no cost.
  */
 export function costOf(state: GameState, c: Character, card: Card): number {
@@ -216,6 +216,6 @@ const REVEALING: ReadonlySet<DomainEvent["type"]> = new Set([
  */
 export function revealsHiddenInfo(events: readonly DomainEvent[]): boolean {
   return events.some(
-    (e) => REVEALING.has(e.type) || (e.type === "CARD_EXHAUSTED" && e.from === "deck"),
+    (e) => REVEALING.has(e.type) || (e.type === "CARD_DISCARDED" && e.from === "deck"),
   );
 }

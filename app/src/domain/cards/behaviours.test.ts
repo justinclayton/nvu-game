@@ -24,7 +24,7 @@ const first = (state: GameState, c: Character): CardId => {
 };
 
 describe("Overdrive — 'Exhaust 2'", () => {
-  it("puts the top 2 cards of your own deck into your exhaust pile", () => {
+  it("puts the top 2 cards of your own deck into your discard pile", () => {
     const state = rig({
       phase: "Play",
       activeRoom: room("Sorting Room"),
@@ -38,15 +38,15 @@ describe("Overdrive — 'Exhaust 2'", () => {
       payWith: [],
     });
     expect(next.Red.deck).toHaveLength(2);
-    expect(next.Red.exhaust).toHaveLength(2);
+    expect(next.Red.discard).toHaveLength(2);
     expect(next.Gray.deck).toHaveLength(4);
     expect(eventTypes(events)).toEqual([
       "CARD_PLAYED",
-      "CARD_EXHAUSTED",
-      "CARD_EXHAUSTED",
+      "CARD_DISCARDED",
+      "CARD_DISCARDED",
     ]);
     // §8: off the top, not chosen.
-    expect(events.filter((e) => e.type === "CARD_EXHAUSTED").every((e) => e.from === "deck")).toBe(
+    expect(events.filter((e) => e.type === "CARD_DISCARDED").every((e) => e.from === "deck")).toBe(
       true,
     );
   });

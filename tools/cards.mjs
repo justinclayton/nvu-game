@@ -2,20 +2,20 @@
 /* North vs Up — card list tooling.
  *
  *   node tools/cards.mjs build    regenerate the generated card modules from design/cards.yaml
- *   node tools/cards.mjs check    fail if either is stale or a prototype stops rendering
+ *   node tools/cards.mjs check    fail if either is stale or the card sheet stops rendering
  *
  * design/cards.yaml is the source of truth for every card.  Nothing else in the
  * repo may hold a card's name, cost, stats, rarity, or rules text except
  * as a generated copy.  There are two:
  *
- *   prototype/cards.js                 untyped, for the paper prototypes
+ *   tools/cards.js                     untyped, for the printable card sheet
  *   app/src/content/cards.generated.ts typed, for the web game
  *
  * The web game's module is structured, not prose: a room's threshold outcomes
  * and its Flee line are parsed here so nothing in the app ever reads a sentence.
  *
- * No dependencies on purpose: this is a paper-prototype repo with no package.json,
- * and the parser only has to read the one file it owns.
+ * No dependencies on purpose: this script and the card sheet beside it run from
+ * a bare checkout, and the parser only has to read the one file it owns.
  */
 
 import { readFileSync, writeFileSync } from "node:fs";
@@ -25,7 +25,7 @@ import { createContext, runInContext } from "node:vm";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 const YAML = join(ROOT, "design/cards.yaml");
-const OUT = join(ROOT, "prototype/cards.js");
+const OUT = join(ROOT, "tools/cards.js");
 const OUT_TS = join(ROOT, "app/src/content/cards.generated.ts");
 const SETS = new Set(["official", "proposed"]);
 
@@ -214,9 +214,9 @@ function generate(doc) {
  * Every card in North vs Up, as printed.  EVERY NUMBER IS A PLACEHOLDER —
  * costs, stats and thresholds are still open design.
  *
- * Loaded by prototype/card-sheet.html (the cutting sheet) and
- * prototype/encounter-sim.html (the simulator) with a plain <script> tag, so
- * both keep working from file:// with no build step and no server.
+ * Loaded by tools/card-sheet.html (the print-and-cut sheet) with a plain
+ * <script> tag, so the sheet keeps working from file:// with no build step
+ * and no server.
  */
 var NVU_CARDS = {
   meta: ${JSON.stringify(doc.meta)},
@@ -225,7 +225,7 @@ ${body}
   ]
 };
 
-/* Views the prototypes share. */
+/* Views over the list, for whatever loads it. */
 NVU_CARDS.by = function (fn) { return NVU_CARDS.cards.filter(fn); };
 NVU_CARDS.official = NVU_CARDS.cards.filter(function (c) { return c.set === "official"; });
 NVU_CARDS.proposed = NVU_CARDS.cards.filter(function (c) { return c.set === "proposed"; });
@@ -457,10 +457,10 @@ function checkSchema(doc) {
   return problems;
 }
 
-/* --------------------------------------------------- the prototypes render
-   Both prototypes are now views of the card list, so "does it still render"
-   is part of checking the list. Each page's script is run against a DOM stub
-   and asked how many cards it put on the page. */
+/* ------------------------------------------------- the card sheet renders
+   The sheet is a view of the card list, so "does it still print every card"
+   is part of checking the list. Its script is run against a DOM stub and
+   asked how many cards it put on the page. */
 
 function stubEl() {
   return {
@@ -492,33 +492,19 @@ function baseContext(cardsJs) {
 
 function checkRenders(doc, cardsJs) {
   const problems = [];
-  const total = doc.cards.length;
   const totalWithCopies = doc.cards.reduce((sum, c) => sum + (c.count || 1), 0);
 
   try {
-    const sheet = readFileSync(join(ROOT, "prototype/card-sheet.html"), "utf8");
+    const sheet = readFileSync(join(ROOT, "tools/card-sheet.html"), "utf8");
     const { ctx, store } = baseContext(cardsJs);
     runInContext(sheet.match(/<script>\n"use strict";([\s\S]*?)<\/script>/)[1], ctx);
     const html = store.sheets.innerHTML;
     const drawn = (html.match(/class="card /g) || []).length;
     if (drawn !== totalWithCopies) {
-      problems.push(`prototype/card-sheet.html renders ${drawn} cards, not ${totalWithCopies}`);
+      problems.push(`tools/card-sheet.html renders ${drawn} cards, not ${totalWithCopies}`);
     }
   } catch (e) {
-    problems.push(`prototype/card-sheet.html failed to render: ${e.message}`);
-  }
-
-  try {
-    const sim = readFileSync(join(ROOT, "prototype/encounter-sim.html"), "utf8");
-    const { ctx, store } = baseContext(cardsJs);
-    runInContext(sim.match(/<script>\n"use strict";([\s\S]*)<\/script>/)[1], ctx);
-    runInContext("renderLibrary()", ctx);
-    const drawn = (store.library.innerHTML.match(/class="card/g) || []).length;
-    if (drawn !== total) {
-      problems.push(`prototype/encounter-sim.html's card list shows ${drawn} cards, not ${total}`);
-    }
-  } catch (e) {
-    problems.push(`prototype/encounter-sim.html failed to render: ${e.message}`);
+    problems.push(`tools/card-sheet.html failed to render: ${e.message}`);
   }
   return problems;
 }
@@ -533,7 +519,7 @@ if (cmd === "build") {
   writeFileSync(OUT_TS, generateTs(doc));
   const { cards, rooms } = structure(doc);
   console.log(
-    `wrote prototype/cards.js and app/src/content/cards.generated.ts — ` +
+    `wrote tools/cards.js and app/src/content/cards.generated.ts — ` +
     `${cards.length} cards and ${rooms.length} rooms`,
   );
 } else if (cmd === "check") {
@@ -542,7 +528,7 @@ if (cmd === "build") {
   const want = generate(doc);
   let have = "";
   try { have = readFileSync(OUT, "utf8"); } catch { /* missing counts as stale */ }
-  if (have !== want) problems.push("prototype/cards.js is stale — run: node tools/cards.mjs build");
+  if (have !== want) problems.push("tools/cards.js is stale — run: node tools/cards.mjs build");
 
   const wantTs = generateTs(doc);
   let haveTs = "";
@@ -559,7 +545,7 @@ if (cmd === "build") {
     process.exit(1);
   }
   console.log(`no drift — ${doc.cards.length} cards agree across cards.yaml and cards.js,
-and both prototypes render all ${doc.cards.length}`);
+and the card sheet prints every copy of all ${doc.cards.length}`);
 } else {
   console.error("usage: node tools/cards.mjs [build|check]");
   process.exit(2);

@@ -3,7 +3,7 @@
  * A printed playmat seen from above, with cardstock on it. The mat's zones are
  * stencilled in cream on slate-teal neoprene; the cards are cream stock with a
  * type bar, a rarity edge and a colour field where art would go. The type
- * colours and rarity colours are the ones prototype/card-sheet.html prints, so
+ * colours and rarity colours are the ones tools/card-sheet.html prints, so
  * a card on this screen matches the card that comes out of the printer.
  *
  * Everything on a card face is sized in em, and `.card` / `.sprite` set their
@@ -1034,15 +1034,67 @@ body {
   font: 700 28px/1.1 var(--display);
 }
 
+/* The log, the note box that writes into it and the buttons that take it away
+ * are one block, so they stay together wherever the log goes — under the mat,
+ * or in its own column beside it on a wide screen. */
 .log {
   margin-top: 18px;
 }
-.log__title {
+.log__head {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
   margin: 0 0 4px;
+}
+.log__title {
+  margin: 0;
   font: 400 10px/16px var(--stencil);
   letter-spacing: 0.14em;
   text-transform: uppercase;
   color: var(--print);
+}
+.log__exports {
+  margin-left: auto;
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+}
+.log__exports-label {
+  font: 400 10px/16px var(--stencil);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--print);
+}
+
+/* A note is typed into the log, so the box sits against the bottom of it. */
+.note-box {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 6px;
+}
+.note-box__label {
+  font: 400 10px/16px var(--stencil);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--print);
+}
+.note-box__input {
+  flex: 1 1 auto;
+  min-width: 0;
+  padding: 7px 10px;
+  border: 1px solid rgba(245, 239, 225, 0.35);
+  border-radius: 4px;
+  background: rgba(0, 0, 0, 0.25);
+  color: var(--stock);
+  font: 14px/1.2 var(--sans);
+}
+.note-box__input::placeholder {
+  color: var(--print-faint);
+}
+.note-box__input:focus-visible {
+  outline: 2px solid var(--woah);
+  outline-offset: 1px;
 }
 .log__lines {
   list-style: none;
@@ -1073,6 +1125,15 @@ body {
 .log__line--room_cleared,
 .log__line--floor_cleared {
   color: var(--met-light);
+}
+/* A typed note, marked out from the rules' own narration around it. */
+.log__line--note {
+  margin: 2px 0;
+  padding: 2px 8px;
+  border-left: 3px solid var(--woah);
+  background: rgba(218, 165, 32, 0.12);
+  color: #f2d48a;
+  font-weight: 700;
 }
 
 /* The zoomed copy of whatever is under the pointer. */
@@ -1242,6 +1303,20 @@ body {
   .log__lines {
     max-height: 100px;
     font-size: 12px;
+  }
+  /* The note field keeps the row; on a screen too narrow even for that, the
+   * button drops under it rather than squeezing the field to nothing. */
+  .note-box {
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+  .note-box__input {
+    min-width: 12em;
+    padding: 6px 8px;
+    font-size: 13px;
+  }
+  .log__exports {
+    gap: 4px;
   }
 
   /* The zoomed card, small enough to leave the hands visible on a short screen. */

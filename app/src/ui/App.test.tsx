@@ -146,3 +146,45 @@ describe("debug mode", () => {
     expect(screen.queryByRole("button", { name: /Read every card in/ })).toBeNull();
   });
 });
+
+describe("the playtester's notes", () => {
+  const log = () => document.querySelector(".log__lines") as HTMLElement;
+
+  it("lands a typed note in the log, at the point it was typed", () => {
+    fireEvent.click(screen.getByRole("button", { name: /Flip the next room/ }));
+    const before = log().textContent ?? "";
+
+    const field = screen.getByLabelText("Note");
+    fireEvent.change(field, { target: { value: "that room should not repeat" } });
+    fireEvent.click(screen.getByRole("button", { name: "Add note" }));
+
+    const lines = Array.from(log().querySelectorAll("li"));
+    const note = lines[lines.length - 1];
+    expect(note?.textContent).toBe("Note — that room should not repeat");
+    expect(note?.className).toContain("log__line--note");
+    // The note is added to the log, not instead of it.
+    expect(log().textContent).toContain(before);
+    expect(session.getState().notes).toEqual([
+      { at: session.getState().events.length, text: "that room should not repeat" },
+    ]);
+  });
+
+  it("empties the field once the note is in, and refuses an empty one", () => {
+    const field = screen.getByLabelText("Note") as HTMLInputElement;
+    expect(screen.getByRole("button", { name: "Add note" }).hasAttribute("disabled")).toBe(true);
+
+    fireEvent.change(field, { target: { value: "  " } });
+    expect(screen.getByRole("button", { name: "Add note" }).hasAttribute("disabled")).toBe(true);
+
+    fireEvent.change(field, { target: { value: "a thought" } });
+    fireEvent.click(screen.getByRole("button", { name: "Add note" }));
+    expect(field.value).toBe("");
+    expect(session.getState().notes).toHaveLength(1);
+  });
+
+  it("offers the run in all three formats", () => {
+    for (const name of [".txt", ".csv", ".json"]) {
+      expect(screen.getByRole("button", { name })).toBeDefined();
+    }
+  });
+});

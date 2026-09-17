@@ -159,16 +159,86 @@ export function metThresholds(state: GameState): readonly Threshold[] {
 /* ---------------------------------------------------------------- the costs */
 
 /**
- * Each Turn, Play: to play a card you discard cards from your hand equal to its Cost.
- * §9: while in last stand, every card in that hand may be played at no cost.
+ * A reason a card may be played for nothing, whatever it prints.
+ *
+ * An override is not a modifier: it wins outright instead of adjusting the
+ * printed cost, so no `Holding:` line can raise a cost back off zero. A
+ * one-shot override is used up by the card it pays for.
  */
-export function costOf(state: GameState, c: Character, card: Card): number {
-  const p = playerOf(state, c);
-  if (p.lastStand) return 0;
-  if ((state.thisTurn.freePlays[c] ?? 0) > 0) return 0;
+export interface CostOverride {
+  /** Named, so a log line or a label can say why a card was free. */
+  readonly reason: "last stand" | "free play";
+  /** Playing a card through this override uses it up. */
+  readonly oneShot: boolean;
+}
+
+interface CostOverrideRule extends CostOverride {
+  /** Is this override there to be used, for this character and this card? */
+  readonly available: (state: GameState, c: Character, card: Card) => boolean;
+}
+
+/**
+ * Everything that can zero a cost, in the order `costOf` reads it. A card that
+ * makes a play free says so with a rule here and a verb that arms it, rather
+ * than with another branch inside `costOf`.
+ *
+ * Last stand is first, so a character already playing their whole hand for
+ * nothing does not swallow the team's free play.
+ */
+const COST_OVERRIDES: readonly CostOverrideRule[] = [
+  {
+    // §9: while in last stand, every card in that hand may be played at no cost.
+    reason: "last stand",
+    oneShot: false,
+    available: (state, c) => playerOf(state, c).lastStand,
+  },
+  {
+    // Overcharged Battery: the next card played this turn, by either character.
+    // See open-questions.md #14.
+    reason: "free play",
+    oneShot: true,
+    available: (state) => state.thisTurn.freePlays > 0,
+  },
+];
+
+/** The override that would pay for this card right now, if one would. */
+export function costOverrideFor(state: GameState, c: Character, card: Card): CostOverride | null {
+  const rule = COST_OVERRIDES.find((o) => o.available(state, c, card));
+  return rule ? { reason: rule.reason, oneShot: rule.oneShot } : null;
+}
+
+/**
+ * What the card asks for with nothing overriding it: the number in the corner,
+ * or what the card says instead, and then any `Holding:` line. A printed
+ * "costs 0" is set first and modifiers apply after; see open-questions.md #11.
+ */
+export function printedCostOf(state: GameState, c: Character, card: Card): number {
   const behaviour = behaviourOf(card.name);
   const base = behaviour?.cost ? behaviour.cost(state, c, card) : card.cost;
   return Math.max(0, base + heldModifiers(state, c).costDelta);
+}
+
+/**
+ * Each Turn, Play: to play a card you discard cards from your hand equal to its Cost.
+ */
+export function costOf(state: GameState, c: Character, card: Card): number {
+  return costOverrideFor(state, c, card) ? 0 : printedCostOf(state, c, card);
+}
+
+/**
+ * The one-shot override playing this card would use up, if it would use one up.
+ *
+ * An override is spent only when it saved something: a card that already cost
+ * nothing is played for nothing on its own and leaves the discount standing.
+ */
+export function costOverrideSpentBy(
+  state: GameState,
+  c: Character,
+  card: Card,
+): CostOverride | null {
+  const override = costOverrideFor(state, c, card);
+  if (!override?.oneShot) return null;
+  return printedCostOf(state, c, card) > 0 ? override : null;
 }
 
 /**

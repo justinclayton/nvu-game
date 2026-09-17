@@ -207,16 +207,22 @@ legality; `drawOne`, which every card-driven draw goes through, does not check i
 
 ---
 
-## 14. "The next card played this turn costs 0" means the holder's next card
+## 14. "The next card played this turn costs 0" means the next card, by either character
+
+`[you, 2026-09-17]`
 
 **Where:** Overcharged Battery.
 
 The card names no character.
 
-**What the code does.** The discount goes to whoever played the Battery. Each Turn, Play's rule that
-you pay in other cards from your own hand is the reason: a cost is a private thing between a
-character and their own hand, so a discount should not cross either. The discount is also spent
-only when it saved something — a card that already cost nothing does not use it up.
+**What the code does.** The card means what it says: the next card played, by either character. The
+discount belongs to the team rather than to whoever played the Battery, so Red playing the Battery
+can pay for Gray's next card. It is spent by the card that uses it, and the Play phase ending drops
+whatever is left of it. It is spent only when it saved something — a card that already cost nothing
+does not use it up, and neither does a card played for free in last stand.
+
+The discount is one of the cost overrides `costOf` consults, which is also how last stand's free
+plays work, so another card that wants to make a play free has somewhere to say so.
 
 ---
 
@@ -294,9 +300,9 @@ prints exactly 6 Hazard rooms (3 Collapsed Stairwell, 3 Ruptured Coolant Line), 
 returns to the supply at Ascending, so a fixed 3 Hazards a floor is what the printed counts support.
 
 **What the code does.** Takes exactly 3 Hazard rooms and 1 Enemy room every floor, then fills the
-rest with Stuff rooms (10 minus the floor number). A draw at random from the whole Floor-card
-supply, Hazard and Stuff mixed together, would also fit the rulebook's words, and could leave a
-floor with more or fewer than 3 Hazards.
+rest with Stuff rooms up to the rulebook's floor size — 10 on floor 1, one fewer each floor above. A
+draw at random from the whole Floor-card supply, Hazard and Stuff mixed together, would also fit the
+rulebook's words, and could leave a floor with more or fewer than 3 Hazards.
 
 ---
 

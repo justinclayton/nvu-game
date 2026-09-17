@@ -242,23 +242,23 @@ export function returnToHand(
   return moveToHand(lifted, c, card, events);
 }
 
-/** Overcharged Battery: this character's next play costs nothing. */
-export const grantFreePlay = (state: GameState, c: Character): GameState =>
-  c === "Red"
-    ? {
-        ...state,
-        thisTurn: {
-          ...state.thisTurn,
-          freePlays: { ...state.thisTurn.freePlays, Red: state.thisTurn.freePlays.Red + 1 },
-        },
-      }
-    : {
-        ...state,
-        thisTurn: {
-          ...state.thisTurn,
-          freePlays: { ...state.thisTurn.freePlays, Gray: state.thisTurn.freePlays.Gray + 1 },
-        },
-      };
+/** Arm a free play: the next card played this turn costs nothing, whoever plays it. */
+export const grantFreePlay = (state: GameState): GameState => ({
+  ...state,
+  thisTurn: { ...state.thisTurn, freePlays: state.thisTurn.freePlays + 1 },
+});
+
+/** Drop every free play nobody used. The discount is for a card played this turn. */
+export const clearFreePlays = (state: GameState): GameState =>
+  state.thisTurn.freePlays === 0
+    ? state
+    : { ...state, thisTurn: { ...state.thisTurn, freePlays: 0 } };
+
+/** Use up one free play, as the card it paid for is played. */
+export const spendFreePlay = (state: GameState): GameState => ({
+  ...state,
+  thisTurn: { ...state.thisTurn, freePlays: Math.max(0, state.thisTurn.freePlays - 1) },
+});
 
 /** Put a card on top of a deck. Nothing shuffles during a floor, so it is next. */
 export function topDeck(state: GameState, c: Character, card: Card): GameState {

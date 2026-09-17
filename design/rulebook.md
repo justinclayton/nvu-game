@@ -129,28 +129,6 @@ A room card presents one or more **challenges** to the players. Each turn player
 - **Challenges:** one or more lines with `threshold: outcome`.
 - **`Flee`**: what happens when no challenges are completed.
 
-#### Types of rooms
-- **Enemy room**: unique per floor, as indicated on the card. One per floor.
-
-### Hazard room
-
-- A Hazard room lists **2** challenges, both `Scramble` thresholds.
-- The lower threshold Clears the room.
-- The higher threshold also gives a reward: turn the top card of the named character's reward pool face up. That character takes it or skips it. A taken card goes on top of that character's deck. A skipped card goes to the bottom of the reward pool.
-- Every Hazard room has a `Flee` line.
-
-### Stuff room
-
-- A Stuff room's `Flee` line reads: *Flee: Clear the room, but leave empty-handed.*
-- Its challenges are split per character:
-
-  > *Oomph 1: Red takes 1 Good Stuff.*
-  > *Scramble 1: Gray takes 1 Good Stuff.*
-
-- Measure each character's challenge against that character's own side of the play zone only.
-- Some Stuff rooms list a second, higher challenge.
-- `Good Stuff` you earn is drawn face down from the Good Stuff pool and goes into your hand. A `Down` character earns nothing.
-
 ### Character cards
 
 #### Placeholder for diagram

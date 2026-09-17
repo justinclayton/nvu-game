@@ -410,7 +410,7 @@ describe("§6 The three kinds of room", () => {
     expect(next.fled).toEqual([]);
   });
 
-  it("a Stuff room is Cleared either way and never punishes you", () => {
+  it("a Stuff room that meets no threshold Flees, empty-handed and unpunished", () => {
     const state = rig({
       phase: "Play",
       activeRoom: room("Sorting Room"),
@@ -418,8 +418,11 @@ describe("§6 The three kinds of room", () => {
       Gray: player({ deck: pile("Duck Under", 5) }),
     });
     const { state: next, events } = must(state, { type: "END_PLAY" });
-    expect(next.cleared).toHaveLength(1);
-    expect(next.fled).toEqual([]);
+    // The empty floor deck reshuffles Fled back in during cleanup, so the room
+    // does not linger in `fled` — check the events for how it actually ended.
+    expect(eventTypes(events)).toContain("ROOM_FLED");
+    expect(eventTypes(events)).not.toContain("ROOM_CLEARED");
+    expect(next.cleared).toEqual([]);
     expect(eventTypes(events)).not.toContain("STUFF_TAKEN");
     expect(next.Red.deck).toHaveLength(5);
   });

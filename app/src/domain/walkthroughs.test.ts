@@ -210,7 +210,11 @@ describe("walkthrough 6 — a Stuff room reads each character's own side", () =>
 
     const { state: next, events } = play(played.state, [{ type: "END_PLAY" }]);
     expect(eventTypes(events)).not.toContain("STUFF_TAKEN");
-    expect(next.cleared).toHaveLength(1);
+    // The empty floor deck reshuffles Fled back in during cleanup, so the room
+    // does not linger in `fled` — check the events for how it actually ended.
+    expect(eventTypes(events)).toContain("ROOM_FLED");
+    expect(eventTypes(events)).not.toContain("ROOM_CLEARED");
+    expect(next.cleared).toEqual([]);
     expect(next.Red.hand).toEqual([]);
     expect(next.Gray.hand).toEqual([]);
   });

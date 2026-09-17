@@ -194,6 +194,38 @@ describe("§9 Last stand", () => {
     expect(next.Red.down).toBe(true);
   });
 
+  it("logs getting out before the price and any resulting Down, with an empty play zone", () => {
+    // Playtest 2, note 10: Red is already in Last Stand and plays nothing
+    // this turn — Gray alone clears the room. Red's play zone is empty, so
+    // the shuffle-back is a no-op and the price comes off an already-empty
+    // deck, sending Red Down. The log should still read "got out" before
+    // "Down", never the other way around, and the price it reports (0 cards)
+    // should match what Red actually lost.
+    const state = rig({
+      phase: "Play",
+      activeRoom: room("Sorting Room"),
+      Red: player({ deck: [], hand: [], lastStand: true }),
+      Gray: player({ deck: pile("Duck Under", 4), hand: pile("Duck Under", 2) }),
+    });
+    const grayHand = ids(state, "Gray");
+    const { state: next, events } = play(state, [
+      {
+        type: "PLAY_CARD",
+        character: "Gray",
+        cardId: grayHand[0] as CardId,
+        payWith: [grayHand[1] as CardId],
+      },
+      { type: "END_PLAY" },
+    ]);
+    expect(next.cleared).toHaveLength(1);
+    expect(next.Red.down).toBe(true);
+
+    const types = eventTypes(events);
+    expect(types.indexOf("LAST_STAND_ESCAPED")).toBeLessThan(types.indexOf("WENT_DOWN"));
+    const escaped = events.find((e) => e.type === "LAST_STAND_ESCAPED");
+    expect(escaped).toMatchObject({ price: [] });
+  });
+
   it("'the team Fleeing while a character is in last stand puts them Down'", () => {
     const state = rig({
       phase: "Play",

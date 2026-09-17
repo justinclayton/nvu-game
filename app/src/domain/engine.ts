@@ -749,9 +749,13 @@ function cleanupPiles(
     if (lastStandAtClear[c] && !playerOf(s, c).down) {
       s = shuffleIntoDeck(s, c, played, run.events);
       s = withPlayer(s, c, { ...playerOf(s, c), lastStand: false });
+      // The price is read off the top of the deck before it is paid, not
+      // after: what's sitting there right now is exactly what `exhaustFromDeck`
+      // is about to take, so the event can announce the escape — and report
+      // what it cost — before the exhaust (and any Down it causes) happens.
       const price = playerOf(s, c).deck.slice(0, LAST_STAND_PRICE);
-      s = exhaustFromDeck(s, c, LAST_STAND_PRICE, "the price of getting out", run.events);
       run.events.push({ type: "LAST_STAND_ESCAPED", character: c, price });
+      s = exhaustFromDeck(s, c, LAST_STAND_PRICE, "the price of getting out", run.events);
       continue;
     }
     for (const card of played) s = discard(s, c, card, "playZone", run.events);

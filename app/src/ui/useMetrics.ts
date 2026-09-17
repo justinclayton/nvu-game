@@ -1,30 +1,40 @@
-/* Which set of table dimensions is in force: the full table, or the compact one
- * for a viewport too narrow for it. Follows the viewport as it resizes or turns. */
+/* Which set of table dimensions is in force: compact, full, or wide. Follows
+ * the viewport as it resizes or turns. */
 
 import { useEffect, useState } from "react";
 
-import { COMPACT, COMPACT_QUERY, FULL, type Metrics } from "./metrics";
+import { COMPACT, COMPACT_QUERY, FULL, WIDE, WIDE_QUERY, type Metrics } from "./metrics";
 
-const matches = (): boolean =>
+const matchesQuery = (query: string): boolean =>
   typeof window !== "undefined" &&
   typeof window.matchMedia === "function" &&
-  window.matchMedia(COMPACT_QUERY).matches;
+  window.matchMedia(query).matches;
 
 export function useMetrics(): Metrics {
-  const [compact, setCompact] = useState(matches);
+  const [compact, setCompact] = useState(() => matchesQuery(COMPACT_QUERY));
+  const [wide, setWide] = useState(() => matchesQuery(WIDE_QUERY));
 
   useEffect(() => {
     if (typeof window === "undefined" || typeof window.matchMedia !== "function") return;
-    const query = window.matchMedia(COMPACT_QUERY);
-    const update = () => {
-      setCompact(query.matches);
+    const compactQuery = window.matchMedia(COMPACT_QUERY);
+    const wideQuery = window.matchMedia(WIDE_QUERY);
+    const updateCompact = () => {
+      setCompact(compactQuery.matches);
     };
-    update();
-    query.addEventListener("change", update);
+    const updateWide = () => {
+      setWide(wideQuery.matches);
+    };
+    updateCompact();
+    updateWide();
+    compactQuery.addEventListener("change", updateCompact);
+    wideQuery.addEventListener("change", updateWide);
     return () => {
-      query.removeEventListener("change", update);
+      compactQuery.removeEventListener("change", updateCompact);
+      wideQuery.removeEventListener("change", updateWide);
     };
   }, []);
 
-  return compact ? COMPACT : FULL;
+  if (compact) return COMPACT;
+  if (wide) return WIDE;
+  return FULL;
 }

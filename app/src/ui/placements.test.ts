@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 import { createSession } from "@application/session";
 import { CARD_CONTENT } from "@content/index";
 import type { DomainEvent } from "@domain/types";
-import { moveDelays, placements } from "./placements";
+import { moveDelays, pileOf, placements } from "./placements";
 
 /* The card layer draws one sprite per placement, so the placements have to
  * account for every physical card exactly once, and put the top of each pile on
@@ -61,6 +61,36 @@ describe("placements", () => {
     expect(hand.map((p) => p.index)).toEqual([0, 1]);
     expect(hand.map((p) => p.id)).toEqual(state.Red.hand.map((c) => c.id));
     expect(hand.every((p) => p.faceUp)).toBe(true);
+  });
+});
+
+describe("debug mode", () => {
+  it("turns every card and room face up, on top of whatever the rules would show", () => {
+    const session = createSession(7, CARD_CONTENT);
+    const { state } = session.getState();
+
+    // Off: the usual mix of face-up and face-down.
+    const ordinary = placements(state);
+    expect(ordinary.some((p) => !p.faceUp)).toBe(true);
+
+    // On: nothing is face down, and no card or room is dropped or duplicated.
+    const debugged = placements(state, true);
+    expect(debugged.every((p) => p.faceUp)).toBe(true);
+    expect(debugged.map((p) => p.id).sort()).toEqual(ordinary.map((p) => p.id).sort());
+  });
+});
+
+describe("pileOf", () => {
+  it("lists a pile top of stack first, face up, regardless of the ordinary faceUp rule", () => {
+    const session = createSession(7, CARD_CONTENT);
+    const { state } = session.getState();
+
+    const pile = pileOf(state, "red-deck");
+    expect(pile).toHaveLength(state.Red.deck.length);
+    expect(pile.every((p) => p.faceUp)).toBe(true);
+    // Top of stack (highest index) first.
+    expect(pile[0]?.index).toBe(state.Red.deck.length - 1);
+    expect(pile.at(-1)?.index).toBe(0);
   });
 });
 

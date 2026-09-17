@@ -105,6 +105,22 @@ function lastStand(): GameState {
   });
 }
 
+/** Both hands holding the cards with the most printed text, to check none of it clips. */
+function longestText(): GameState {
+  return rig({
+    phase: "Play",
+    activeRoom: room(SORTING_ROOM),
+    Red: player({
+      deck: pile("Shove", 4),
+      hand: [card("Deadweight Grip"), card("Both Barrels"), card("Panic")],
+    }),
+    Gray: player({
+      deck: pile("Duck Under", 4),
+      hand: [card("Level Up"), card("My Head Is Quantum Spinning")],
+    }),
+  });
+}
+
 /** The Ascend phase, both reward pools revealing three cards each. */
 function ascending(): GameState {
   const base = rig({
@@ -192,6 +208,11 @@ export const FIXTURES: readonly Fixture[] = [
     name: "ascend",
     description: "The Ascend phase, both reward offers revealed.",
     build: stable(ascending),
+  },
+  {
+    name: "longest-text",
+    description: "Both hands holding the cards with the most printed text.",
+    build: stable(longestText),
   },
   (() => {
     const ran = stableRan(emptyGoodStuffPool);

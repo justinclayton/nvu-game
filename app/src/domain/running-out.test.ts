@@ -39,6 +39,85 @@ describe("§9 Last stand", () => {
     expect(eventTypes(drew.events)).toContain("LAST_STAND");
   });
 
+  it("enters Last Stand the instant a card's own text draws the last card", () => {
+    // Covering Fire: "Every time Red plays a card this turn, draw 1 card."
+    // Gray holds it played, Gray's deck has exactly one card left, so Red's
+    // play is what empties it — not a chosen or opening draw.
+    const state = rig({
+      phase: "Play",
+      activeRoom: room("Sorting Room"),
+      Red: player({ deck: pile("Shove", 4), hand: pile("Shove", 2) }),
+      Gray: player({
+        deck: [card("Duck Under")],
+        hand: [card("Covering Fire"), card("Duck Under")],
+      }),
+    });
+    const grayHand = ids(state, "Gray");
+    const redHand = ids(state, "Red");
+    const { state: next, events } = play(state, [
+      { type: "PLAY_CARD", character: "Gray", cardId: grayHand[0] as CardId, payWith: [grayHand[1] as CardId] },
+      { type: "PLAY_CARD", character: "Red", cardId: redHand[0] as CardId, payWith: [redHand[1] as CardId] },
+    ]);
+    expect(next.Gray.deck).toEqual([]);
+    expect(next.Gray.lastStand).toBe(true);
+    expect(eventTypes(events)).toContain("LAST_STAND");
+  });
+
+  it("enters Last Stand the instant a card's own Exhaust X empties the deck", () => {
+    // Reckless Swing: "Exhaust 1." Red's own deck has exactly one card left.
+    const state = rig({
+      phase: "Play",
+      activeRoom: room("Sorting Room"),
+      Red: player({ deck: [card("Shove")], hand: [card("Reckless Swing"), card("Shove")] }),
+      Gray: player({ deck: pile("Duck Under", 4) }),
+    });
+    const hand = ids(state, "Red");
+    const { state: next, events } = must(state, {
+      type: "PLAY_CARD",
+      character: "Red",
+      cardId: hand[0] as CardId,
+      payWith: [hand[1] as CardId],
+    });
+    expect(next.Red.deck).toEqual([]);
+    expect(next.Red.lastStand).toBe(true);
+    expect(eventTypes(events)).toContain("LAST_STAND");
+  });
+
+  it(
+    "enters Last Stand the instant a room's Flee punishment empties the deck, " +
+      "then goes Down at that same Cleanup because the room Fled",
+    () => {
+      // Collapsed Stairwell's Flee line: "One of you Exhausts 3." Nobody played
+      // anything, so no threshold is met and the room Flees. Red's deck holds
+      // exactly 3 cards — the punishment itself is what empties it, during
+      // Outcome, before Cleanup ever runs.
+      const state = rig({
+        phase: "Play",
+        activeRoom: room("Collapsed Stairwell"),
+        Red: player({ deck: pile("Shove", 3), hand: [] }),
+        Gray: player({ deck: pile("Duck Under", 4) }),
+      });
+      const { state: next, events } = play(state, [
+        { type: "END_PLAY" },
+        { type: "CHOOSE_CHARACTER", character: "Red" },
+      ]);
+      const types = eventTypes(events);
+      expect(next.Red.deck).toEqual([]);
+      expect(types).toContain("LAST_STAND");
+      // The rulebook's Last Stand section (§9) sends a Fled character Down at
+      // the very Cleanup that follows — including one who only just entered
+      // Last Stand during this same Outcome. This is the same fate as a
+      // character already in Last Stand from an earlier draw this turn (see
+      // "the team Fleeing while a character is in last stand puts them Down"
+      // above): both end the turn Down. The difference is only in how much of
+      // the turn they spent in Last Stand — this one never saw a Play phase
+      // with free costs, since Play had already ended before their deck ran out.
+      expect(next.Red.down).toBe(true);
+      expect(types).toContain("WENT_DOWN");
+      expect(types.indexOf("LAST_STAND")).toBeLessThan(types.indexOf("WENT_DOWN"));
+    },
+  );
+
   it("'a character in last stand does not draw' — the opening draw included", () => {
     const state = rig({
       phase: "Draw",

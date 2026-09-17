@@ -266,12 +266,10 @@ function apply(state: GameState, command: Command, run: Run): GameState {
   switch (command.type) {
     case "FLIP_ROOM":
       return flipRoom(state, run);
-    case "DRAW": {
-      // §9: a draw that empties the deck puts that character in last stand
-      // right away — see the note on `activateLastStand`.
-      const drawn = drawOne(state, command.character, run.events);
-      return activateLastStand(drawn, run.events);
-    }
+    case "DRAW":
+      // §9: `drawOne` itself sweeps for last stand right away if this empties
+      // the deck — see the note on `activateLastStand`.
+      return drawOne(state, command.character, run.events);
     case "END_DRAW":
       return { ...state, phase: "Play" };
     case "PLAY_CARD":
@@ -329,6 +327,8 @@ function flush(state: GameState, run: Run): GameState {
 /**
  * A bare `Exhaust X` line: X cards off the top of that character's own deck.
  * Rooms print it as their punishment and some cards print it as their own cost.
+ * `exhaustFromDeck` sweeps for last stand right away if this empties the deck
+ * (§9), whichever of the two prints it.
  *
  * This is the only shape a card can turn off. `Discard X cards from your hand`
  * names its zone, and so do cleanup, the burned draw of a full hand and the
@@ -389,10 +389,10 @@ function openingDraw(state: GameState, run: Run): GameState {
   let s = state;
   for (const c of CHARACTERS) {
     if (playerOf(s, c).lastStand) continue;
+    // §9: `drawOne` sweeps for last stand right away if this draw empties the deck.
     s = drawOne(s, c, run.events);
   }
-  // §9: a draw that empties a deck puts that character in last stand right away.
-  return activateLastStand(s, run.events);
+  return s;
 }
 
 /* ------------------------------------------------------------ Play */
@@ -677,8 +677,8 @@ function finishTurn(state: GameState, run: Run): GameState {
 
   s = cleanupPiles(s, resolution?.lastStandAtClear ?? { Red: false, Gray: false }, run);
 
-  // §9: a deck emptied this phase puts its character in last stand as the
-  // phase's last step — after the room check and the Flee have resolved.
+  // §9: a backstop. `drawOne` and `exhaustFromDeck` already sweep for last
+  // stand the moment a deck empties, so this ordinarily finds nothing to do.
   s = activateLastStand(s, run.events);
 
   // §5 cleanup 4: if the floor draw pile is empty, shuffle the Fled pile back in.

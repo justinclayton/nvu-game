@@ -72,8 +72,10 @@ export function goDown(
  * face up, no choices.
  *
  * §9: a card that would be moved from the top of an empty deck puts that
- * character Down. Last stand is a separate thing and activates later, as the
- * last step of the phase (see `activateLastStand`).
+ * character Down. Emptying the deck instead — the last card just exhausted was
+ * the last one there — puts them in Last Stand right away (see
+ * `activateLastStand`), whether this call is a room's printed punishment or a
+ * card's own `Exhaust X`.
  */
 export function exhaustFromDeck(
   state: GameState,
@@ -90,6 +92,7 @@ export function exhaustFromDeck(
     if (!card) return goDown(next, c, cause, events);
     next = withPlayer(next, c, { ...p, deck: p.deck.slice(1) });
     next = discard(next, c, card, "deck", events);
+    next = activateLastStand(next, events);
   }
   return next;
 }
@@ -122,6 +125,10 @@ export function discardFromHand(
  * event so a card that triggers off draws can tell its own forced draw apart
  * from one that counts toward triggering it again (see `My Head Is Quantum
  * Spinning`, which must not chain off the draw it just forced).
+ *
+ * §9: a draw that leaves the deck empty puts that character in Last Stand right
+ * away (see `activateLastStand`) — every draw goes through here, chosen,
+ * opening, or a card's own text, so this is the one place that needs to know.
  */
 export function drawOne(
   state: GameState,
@@ -138,10 +145,10 @@ export function drawOne(
   const rest = { ...p, deck: p.deck.slice(1), drewThisTurn: p.drewThisTurn + 1 };
   if (!ignoreHandCap && p.hand.length >= HAND_CAP) {
     events.push({ type: "DRAW_BURNED", character: c, card, forced });
-    return discard(withPlayer(state, c, rest), c, card, "deck", events);
+    return activateLastStand(discard(withPlayer(state, c, rest), c, card, "deck", events), events);
   }
   events.push({ type: "CARD_DRAWN", character: c, card, forced });
-  return withPlayer(state, c, { ...rest, hand: [...p.hand, card] });
+  return activateLastStand(withPlayer(state, c, { ...rest, hand: [...p.hand, card] }), events);
 }
 
 /**
@@ -311,12 +318,14 @@ function drawFromPool(
 /* --------------------------------------------------------------- last stand */
 
 /**
- * §9: your character enters last stand the moment your deck becomes empty. A
- * draw that empties it activates this right after that draw (see `engine.ts`'s
- * `DRAW` handling and its opening draw), so the rest of the turn already sees
- * it. Anything else that can empty a deck mid-turn — a room's printed
- * punishment, a card that Exhausts from its own deck — is swept for here again
- * at cleanup, since nothing before that point needs it settled any sooner.
+ * §9: your character enters last stand the moment your deck becomes empty.
+ * `drawOne` and `exhaustFromDeck` each call this on themselves right after
+ * removing a card, so every cause is covered from the one place that moves
+ * cards off the top of a deck: a chosen or opening draw, a forced draw, a
+ * card's own `Exhaust X`, and a room's printed punishment all see it land in
+ * the same step the deck empties, not at the end of the phase. `engine.ts`
+ * also sweeps once more at cleanup as a backstop; that call finds nothing left
+ * to do in the ordinary case.
  */
 export function activateLastStand(state: GameState, events: DomainEvent[]): GameState {
   let next = state;

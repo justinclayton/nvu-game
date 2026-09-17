@@ -273,7 +273,7 @@ goes through one or the other: a chosen or opening draw, a draw a card's text fo
 not at the end of the phase. `engine.ts` still sweeps once more at cleanup as a backstop, which
 ordinarily finds nothing left to do.
 
-**Consequence worth knowing:** a character whose deck a room's Flee punishment empties enters Last
+**Consequence, ruled with it** `[you, 2026-09-17]`**:** a character whose deck a room's Flee punishment empties enters Last
 Stand during Outcome, before Cleanup runs. §9 sends a character Down at Cleanup if they are in Last
 Stand and the room Fled, with no exception for how recently they entered it — so this character goes
 Down at that same Cleanup, exactly as a character who had already been in Last Stand since an

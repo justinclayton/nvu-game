@@ -64,7 +64,99 @@ describe("Crowbar — 'Play: if you get any Good Stuff this turn, get an additio
     expect(next.Red.hand.filter((c) => c.kind === "good_stuff")).toHaveLength(1);
   });
 
-  it("can never count its own arrival: a room handing Red both Crowbar and another piece pays no third", () => {
+  it("takes the extra piece from the room's own payout at Outcome, when it saw no earlier gain", () => {
+    // The primary case (open-questions.md #16, ruled 2026-09-17): Crowbar
+    // played earlier in Play, with nothing yet to look back at, still catches
+    // the room's own payout once Outcome hands it over — rigged through a
+    // real Sorting Room clear, not by setting turn-record fields by hand.
+    const state = playing({
+      activeRoom: room("Sorting Room"),
+      Red: player({
+        deck: pile("Shove", 4),
+        hand: [card("Crowbar"), card("Shove"), card("Shove")],
+      }),
+    });
+    const r = ids(state, "Red");
+    const { state: next, events } = play(state, [
+      free("Red", r[0] as CardId), // Crowbar, cost 0, nothing to look back at yet
+      { type: "PLAY_CARD", character: "Red", cardId: r[1] as CardId, payWith: [r[2] as CardId] }, // Shove, Oomph 2
+      { type: "END_PLAY" },
+    ]);
+    // Sorting Room's Oomph-2 line meets on Crowbar's own Oomph 1 plus Shove's
+    // 2, and pays Red one piece at Outcome; the played Crowbar catches that
+    // payout as it lands and pays a second.
+    expect(eventTypes(events).filter((t) => t === "STUFF_TAKEN")).toHaveLength(2);
+    expect(next.Red.hand.filter((c) => c.kind === "good_stuff")).toHaveLength(2);
+  });
+
+  it("does not fire again at Outcome once it already fired on an earlier gain", () => {
+    // Once-per-copy (open-questions.md #16, the agent's reading): whichever
+    // hook pays first uses up this copy's only bonus for the turn.
+    const rigged = playing({
+      activeRoom: room("Sorting Room"),
+      Red: player({
+        deck: pile("Shove", 4),
+        hand: [card("Crowbar"), card("Shove"), card("Shove")],
+      }),
+    });
+    const state = { ...rigged, thisTurn: { ...rigged.thisTurn, goodStuffTaken: { Red: 1, Gray: 0 } } };
+    const r = ids(state, "Red");
+    const { state: next } = play(state, [
+      free("Red", r[0] as CardId), // Crowbar: fires now, at play, off the look-back
+      { type: "PLAY_CARD", character: "Red", cardId: r[1] as CardId, payWith: [r[2] as CardId] }, // Shove, Oomph 2
+      { type: "END_PLAY" }, // pays Red another piece at Outcome — Crowbar stays quiet
+    ]);
+    // One from the look-back bonus, one from the room's own Outcome payout —
+    // never a second bonus on top.
+    expect(next.Red.hand.filter((c) => c.kind === "good_stuff")).toHaveLength(2);
+  });
+
+  it("two Crowbars played by the same controller pay two extra pieces", () => {
+    const state = playing({
+      activeRoom: room("Sorting Room"),
+      Red: player({
+        deck: pile("Shove", 4),
+        hand: [card("Crowbar"), card("Crowbar"), card("Shove"), card("Shove")],
+      }),
+    });
+    const r = ids(state, "Red");
+    const { state: next } = play(state, [
+      free("Red", r[0] as CardId), // first Crowbar
+      free("Red", r[1] as CardId), // second Crowbar
+      { type: "PLAY_CARD", character: "Red", cardId: r[2] as CardId, payWith: [r[3] as CardId] }, // Shove, Oomph 2
+      { type: "END_PLAY" },
+    ]);
+    // The room's own piece, plus one bonus per Crowbar.
+    expect(next.Red.hand.filter((c) => c.kind === "good_stuff")).toHaveLength(3);
+  });
+
+  it("pays nothing and logs an empty pool when its own bonus draw finds none left", () => {
+    // The room's payout goes first and spends the pool's one remaining card;
+    // Crowbar's own bonus draw then goes through `takeGoodStuff` and finds it
+    // empty, the same as any other draw would.
+    const rigged = playing({
+      activeRoom: room("Sorting Room"),
+      Red: player({
+        deck: pile("Shove", 4),
+        hand: [card("Crowbar"), card("Shove"), card("Shove")],
+      }),
+    });
+    const state = {
+      ...rigged,
+      pools: { ...rigged.pools, goodStuff: [card("A Pair Of Stich-Em-Ups")] },
+    };
+    const r = ids(state, "Red");
+    const { state: next, events } = play(state, [
+      free("Red", r[0] as CardId),
+      { type: "PLAY_CARD", character: "Red", cardId: r[1] as CardId, payWith: [r[2] as CardId] },
+      { type: "END_PLAY" },
+    ]);
+    expect(eventTypes(events).filter((t) => t === "STUFF_TAKEN")).toHaveLength(1);
+    expect(eventTypes(events).filter((t) => t === "STUFF_POOL_EMPTY")).toHaveLength(1);
+    expect(next.Red.hand.filter((c) => c.kind === "good_stuff")).toHaveLength(1);
+  });
+
+  it("does not fire on its own arrival: a room handing Red both Crowbar and another piece pays no third", () => {
     const state = playing({
       activeRoom: room("Ration Locker"),
       Red: player({
@@ -74,8 +166,9 @@ describe("Crowbar — 'Play: if you get any Good Stuff this turn, get an additio
     });
     const r = ids(state, "Red");
     // Charge In is Oomph 4 on Red's own side, which pays Red 2 Good Stuff.
-    // Whether or not Crowbar itself is one of the two, the pool never grows a
-    // third piece from that arrival — only playing Crowbar afterward could.
+    // Whether or not Crowbar itself is one of the two, arriving unplayed in a
+    // hand is not Crowbar being played — the pool never grows a third piece
+    // from that arrival, only playing Crowbar afterward could.
     const { state: next } = play(state, [
       {
         type: "PLAY_CARD",

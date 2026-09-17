@@ -113,6 +113,12 @@ export interface TurnRecord {
    * has something to look back at. See open-questions.md #16.
    */
   readonly goodStuffTaken: Readonly<Record<Character, number>>;
+  /**
+   * Once-per-turn markers, so a trigger that could feed itself fires once.
+   * Crowbar keys this by its own card id, so two copies each get their own
+   * marker. See open-questions.md #16.
+   */
+  readonly fired: readonly string[];
 }
 
 /* ------------------------------------------------------------ the phases */

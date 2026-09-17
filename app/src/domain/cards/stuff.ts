@@ -11,6 +11,8 @@ import {
   CHARACTERS,
   drawOne,
   grantFreePlay,
+  hasFired,
+  markFired,
   moveToBottomOfDeck,
   playerOf,
   returnToHand,
@@ -37,20 +39,43 @@ export const STUFF: Registry = {
 
   /* "Play: if you get any Good Stuff this turn, get an additional one."
    *
-   * An on-play effect, resolved once, the moment Crowbar itself enters the
-   * play zone. It looks backward at `thisTurn.goodStuffTaken` — whatever its
-   * controller has already been handed earlier in the same turn — never at
-   * itself (its own arrival landed earlier, while it was still being handed
-   * to a hand, not played from one) and never forward at the room's own
-   * payout, which resolves later, at Outcome, after the whole Play phase
-   * (and so after this onPlay) has already run. Being one-shot, it cannot
-   * feed itself the way the old hand-standing trigger could, so it needs no
-   * once-per-turn marker. See open-questions.md #16. */
+   * Once played, "this turn" covers the rest of the turn Crowbar sits in the
+   * play zone — including a room's payout at Outcome, after the whole Play
+   * phase (and so this card's own `onPlay`) has already run. That is the
+   * primary case: a Crowbar played earlier in Play, paid off by the room
+   * later. It is split across two hooks accordingly:
+   *
+   * - `onPlay` looks backward, once, at `thisTurn.goodStuffTaken` — whatever
+   *   its controller was already handed earlier in the same turn, before
+   *   Crowbar was played.
+   * - `onEvent`, listening only from the play zone (the shape Covering Fire
+   *   uses for the same reason), catches a later gain — the room's Outcome
+   *   payout being the one there is today.
+   *
+   * Either hook can fire, but only one ever does: a `fired` marker keyed by
+   * this copy's own card id is set the moment either pays out, so a Crowbar
+   * that already looked back at play does not also react to the room's
+   * payout minutes later, and its own bonus piece (itself a `STUFF_TAKEN` for
+   * good_stuff) can never retrigger it. Two Crowbars each carry their own
+   * key, so two played this turn pay two. Neither hook ever sees Crowbar's
+   * own arrival — a room handing Crowbar to a hand is not Crowbar being
+   * played, and while it sits in a hand `onEvent` is not listening at all.
+   * See open-questions.md #16. */
   Crowbar: {
     onPlay(state, ctx) {
       if (state.thisTurn.goodStuffTaken[ctx.character] === 0) return nothing(state);
+      const key = `${ctx.card.id}:crowbar`;
       const events: DomainEvent[] = [];
-      return done(takeGoodStuff(state, ctx.character, 1, events), events);
+      return done(takeGoodStuff(markFired(state, key), ctx.character, 1, events), events);
+    },
+    onEvent(event, state, ctx) {
+      if (ctx.zone !== "playZone") return nothing(state);
+      if (event.type !== "STUFF_TAKEN" || event.character !== ctx.character) return nothing(state);
+      if (event.card.kind !== "good_stuff") return nothing(state);
+      const key = `${ctx.card.id}:crowbar`;
+      if (hasFired(state, key)) return nothing(state);
+      const events: DomainEvent[] = [];
+      return done(takeGoodStuff(markFired(state, key), ctx.character, 1, events), events);
     },
   },
 

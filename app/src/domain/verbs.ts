@@ -324,6 +324,15 @@ export function dealBadStuff(
   return moveToHand(next, c, card, events);
 }
 
+/** Has this once-per-turn trigger already gone off? See open-questions.md #16. */
+export const hasFired = (state: GameState, key: string): boolean => state.thisTurn.fired.includes(key);
+
+/** Mark a once-per-turn trigger as spent, so an effect that could feed itself fires once. */
+export const markFired = (state: GameState, key: string): GameState => ({
+  ...state,
+  thisTurn: { ...state.thisTurn, fired: [...state.thisTurn.fired, key] },
+});
+
 function drawFromPool(
   pool: readonly Card[],
   seed: number,

@@ -1,4 +1,4 @@
-/* §10 Ascending — the Scrapyard, the Scrap tax, the full heal, the reward. */
+/* Rulebook, Ascending — the Scrapyard, the Scrap tax, the full heal, the reward. */
 
 import { beforeEach, describe, expect, it } from "vitest";
 import { execute } from "./engine";
@@ -42,7 +42,7 @@ function atAscension(over: Partial<GameState> = {}): GameState {
   };
 }
 
-describe("§10 Ascending", () => {
+describe("Ascending", () => {
   it("'move all Stuff in both discard piles to the Scrapyard'", () => {
     const state = atAscension();
     const { state: next, events } = must(state, { type: "ASCEND", Red: NOTHING, Gray: NOTHING });
@@ -142,7 +142,7 @@ describe("§10 Ascending", () => {
   });
 });
 
-describe("§11 Winning", () => {
+describe("Winning and losing", () => {
   it("'you win by clearing the Enemy room on floor 10'", () => {
     const state = rig({
       phase: "Play",

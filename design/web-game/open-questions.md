@@ -57,8 +57,8 @@ Villy, Coney's Work Husband prints `Scramble 9: Flee this room for free.` alongs
 players Clear the room"* would Clear Villy on Scramble alone, which contradicts the line's own words.
 
 **What the code does.** The line does not Clear: the room goes to the Fled pile and its Flee line
-does not resolve. Because the room ends Fled, §9's rule that a character in last stand goes Down
-when the room was Fled still applies. §9's test is how the room ends, not how it got there.
+does not resolve. Because the room ends Fled, the rule in Rulebook, Last Stand that a character in last stand goes Down
+when the room was Fled still applies. The test in Rulebook, Last Stand is how the room ends, not how it got there.
 
 ---
 
@@ -68,7 +68,7 @@ when the room was Fled still applies. §9's test is how the room ends, not how i
 
 **Where:** the cleanup step of `END_PLAY`.
 
-Rulebook §9: *"If the room was Cleared, instead of discarding your side of the play zone, shuffle
+Rulebook, Last Stand: *"If the room was Cleared, instead of discarding your side of the play zone, shuffle
 your play zone to form your new remaining deck, then Exhaust 2 cards from the top of your deck."*
 Cleanup never touches a hand, in or out of last stand — every card in hand carries over to the next
 turn.
@@ -82,7 +82,7 @@ hand is left exactly as it was.
 
 **Where:** `drawOne` in `app/src/domain/verbs.ts`, called from the opening draw in `engine.ts`.
 
-§2 gives two rules that meet on a turn's first draw: *"Both players draw 1 card at the same time"*
+Rulebook, Each Turn: Draw gives two rules that meet on a turn's first draw: *"Both players draw 1 card at the same time"*
 and *"If you are holding 5 or more cards, you have a Full Hand and cannot draw. If you are forced to
 draw with a Full Hand, that card goes into your discard pile instead."*
 
@@ -100,7 +100,7 @@ describing nothing, since nothing else in the Draw phase forces a draw.
 
 **Where:** `ascendOne` in `app/src/domain/engine.ts`.
 
-Rulebook §10 steps 1–2: *"Separate your discard pile: Split it into Stuff cards and non-Stuff cards.
+Rulebook, Ascending steps 1–2: *"Separate your discard pile: Split it into Stuff cards and non-Stuff cards.
 Say Goodbye to Your Stuff: Scrap the Stuff cards. You may keep one Stuff card by Scrapping one
 non-Stuff card from your discard pile in its place."*
 
@@ -233,7 +233,7 @@ plays work, so another card that wants to make a play free has somewhere to say 
 **Where:** `printedExhaust` in `app/src/domain/engine.ts`, and the generator's clause parser.
 
 Where a card or a room prints `Exhaust X` and names no zone, it means: move X cards from the top of
-that character's deck to their discard pile. §8's other form, `Discard X cards from your hand`,
+that character's deck to their discard pile. The other form in Rulebook, Card anatomy: Keywords, `Discard X cards from your hand`,
 names its zone and is unaffected.
 
 That is the only shape a card can turn off. **Zen Mode** — *"Holding: you don't `Exhaust`"* —
@@ -268,10 +268,10 @@ Crowbars in a hand each pay once.
 **Where:** `drawOne` and `exhaustFromDeck` in `app/src/domain/verbs.ts`, which call
 `activateLastStand` on themselves; `engine.ts`'s cleanup sweeps once more as a backstop.
 
-§9: *"When your deck becomes empty, your character immediately enters Last Stand."* A draw or an
+Rulebook, Last Stand: *"When your deck becomes empty, your character immediately enters Last Stand."* A draw or an
 Exhaust is what empties a deck, and the turn runs on after either: the partner may draw, a card may
 trigger, the room may still owe more of its punishment. Waiting for the phase to end would leave a
-character acting, or being acted on, while §9 says they are already in Last Stand.
+character acting, or being acted on, while Rulebook, Last Stand says they are already in Last Stand.
 
 **What the code does.** `drawOne` and `exhaustFromDeck` are the only two places a card ever leaves
 the top of a deck, so each sweeps for last stand on itself the moment it empties one. Every cause
@@ -281,7 +281,7 @@ not at the end of the phase. `engine.ts` still sweeps once more at cleanup as a 
 ordinarily finds nothing left to do.
 
 **Consequence, ruled with it** `[you, 2026-09-17]`**:** a character whose deck a room's Flee punishment empties enters Last
-Stand during Outcome, before Cleanup runs. §9 sends a character Down at Cleanup if they are in Last
+Stand during Outcome, before Cleanup runs. Rulebook, Last Stand sends a character Down at Cleanup if they are in Last
 Stand and the room Fled, with no exception for how recently they entered it — so this character goes
 Down at that same Cleanup, exactly as a character who had already been in Last Stand since an
 earlier draw does. The only difference is how much of the turn each spent there: the

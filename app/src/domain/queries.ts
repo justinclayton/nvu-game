@@ -187,7 +187,7 @@ interface CostOverrideRule extends CostOverride {
  */
 const COST_OVERRIDES: readonly CostOverrideRule[] = [
   {
-    // §9: while in last stand, every card in that hand may be played at no cost.
+    // Rulebook, Last Stand: while in last stand, every card in that hand may be played at no cost.
     reason: "last stand",
     oneShot: false,
     available: (state, c) => playerOf(state, c).lastStand,

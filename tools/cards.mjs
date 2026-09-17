@@ -246,8 +246,8 @@ if (typeof module !== "undefined") module.exports = NVU_CARDS;
    turned into structure here.  Anything this does not recognise is an error,
    not a silently dropped rule.
 
-   Rulebook §8 for Flee lines; the three kinds of room are Enemy, Hazard, and
-   Stuff (rulebook §8, and see open-questions.md #2, #7, #8). */
+   Rulebook, Card anatomy: Room Cards for Flee lines; the three kinds of room are Enemy, Hazard, and
+   Stuff (rulebook, Card anatomy: Room Cards, and see open-questions.md #2, #7, #8). */
 
 const CARD_KINDS = new Set(["player", "good_stuff", "bad_stuff"]);
 const ROOM_KIND = { enemy_room: "enemy", hazard_room: "hazard", stuff_room: "stuff" };

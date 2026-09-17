@@ -283,8 +283,12 @@ export function takeGoodStuff(
     if (playerOf(next, c).down) return next;
     const [card, rest, seed] = drawFromPool(next.pools.goodStuff, next.seed);
     // The pool never refills: spent Stuff goes to the Scrapyard at ascension.
-    // See open-questions.md #6.
-    if (!card) return next;
+    // See open-questions.md #6. Say so — a reward the log announced but the
+    // pool could not pay must not go silent (issue #37).
+    if (!card) {
+      events.push({ type: "STUFF_POOL_EMPTY", character: c, pool: "good_stuff" });
+      return next;
+    }
     next = { ...next, seed, pools: { ...next.pools, goodStuff: rest } };
     events.push({ type: "STUFF_TAKEN", character: c, card });
     next = moveToHand(next, c, card, events);
@@ -300,7 +304,10 @@ export function dealBadStuff(
 ): GameState {
   if (playerOf(state, c).down) return state; // takes no punishments (§9)
   const [card, rest, seed] = drawFromPool(state.pools.badStuff, state.seed);
-  if (!card) return state;
+  if (!card) {
+    events.push({ type: "STUFF_POOL_EMPTY", character: c, pool: "bad_stuff" });
+    return state;
+  }
   const next = { ...state, seed, pools: { ...state.pools, badStuff: rest } };
   events.push({ type: "STUFF_TAKEN", character: c, card });
   return moveToHand(next, c, card, events);

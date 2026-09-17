@@ -184,17 +184,17 @@ export function Mat({
           />
           <div className="mat__divider" />
           <Slot
-            id="gray-discard"
-            label="Discard"
-            count={state.Gray.discard.length}
+            id="gray-deck"
+            label="Gray · deck"
+            count={state.Gray.deck.length}
             tone="gray"
             onOpenPile={openPile}
           />
           <Slot id="gray-play" label="Gray · play zone" row tone="gray" />
           <Slot
-            id="gray-deck"
-            label="Gray · deck"
-            count={state.Gray.deck.length}
+            id="gray-discard"
+            label="Discard"
+            count={state.Gray.discard.length}
             tone="gray"
             onOpenPile={openPile}
           />

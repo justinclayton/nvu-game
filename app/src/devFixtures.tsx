@@ -8,7 +8,7 @@
  */
 
 import { createSessionFrom, type Session } from "@application/session";
-import { buildFixture, fixtureList } from "@domain/__fixtures__/scenarios";
+import { buildFixture, fixtureEvents, fixtureList } from "@domain/__fixtures__/scenarios";
 
 export type FixtureLookup =
   | { readonly ok: true; readonly session: Session }
@@ -21,7 +21,7 @@ export type FixtureLookup =
 export function loadFixture(name: string): FixtureLookup {
   const state = buildFixture(name);
   if (!state) return { ok: false, requested: name, fixtures: fixtureList() };
-  return { ok: true, session: createSessionFrom(state) };
+  return { ok: true, session: createSessionFrom(state, fixtureEvents(name)) };
 }
 
 /** An unknown fixture name: the list of names that do exist, and nothing else. */

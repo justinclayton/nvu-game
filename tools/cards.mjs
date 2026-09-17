@@ -246,7 +246,8 @@ if (typeof module !== "undefined") module.exports = NVU_CARDS;
    turned into structure here.  Anything this does not recognise is an error,
    not a silently dropped rule.
 
-   Rulebook §5 for Flee lines, §6 for the three kinds of room. */
+   Rulebook §5 for Flee lines; the three kinds of room are Enemy, Hazard, and
+   Stuff (rulebook §8, and see open-questions.md #2, #7, #8). */
 
 const CARD_KINDS = new Set(["player", "good_stuff", "bad_stuff"]);
 const ROOM_KIND = { enemy_room: "enemy", hazard_room: "hazard", stuff_room: "stuff" };
@@ -316,9 +317,10 @@ function readProse(prose, where) {
 }
 
 /**
- * Rulebook §6: a Stuff room's challenge is split per character, and each line is
- * measured against that character's own side of the play zone.  A line naming
- * both characters names no single side, so it reads the shared pool.
+ * A Stuff room's challenge is split per character, and each line is measured
+ * against that character's own side of the play zone.  A line naming both
+ * characters names no single side, so it reads the shared pool. See
+ * open-questions.md #2.
  */
 function measuredOn(kind, effects) {
   if (kind !== "stuff") return null;

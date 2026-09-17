@@ -260,7 +260,7 @@ export const grantFreePlay = (state: GameState, c: Character): GameState =>
         },
       };
 
-/** Put a card on top of a deck. Nothing shuffles during a floor, so it is next (§6). */
+/** Put a card on top of a deck. Nothing shuffles during a floor, so it is next. */
 export function topDeck(state: GameState, c: Character, card: Card): GameState {
   const p = playerOf(state, c);
   return withPlayer(state, c, { ...p, deck: [card, ...p.deck] });
@@ -269,8 +269,8 @@ export function topDeck(state: GameState, c: Character, card: Card): GameState {
 /* -------------------------------------------------------------------- Stuff */
 
 /**
- * §6: what you earn is drawn blind from the Good Stuff pool and goes to that
- * character's hand. A Down character earns nothing.
+ * What you earn is drawn face down from the Good Stuff pool and goes to that
+ * character's hand. A Down character earns nothing. See open-questions.md #20.
  */
 export function takeGoodStuff(
   state: GameState,

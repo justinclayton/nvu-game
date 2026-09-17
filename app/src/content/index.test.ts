@@ -35,7 +35,8 @@ describe("content", () => {
   });
 
   it("measures a Stuff room's single-character lines on that character's own side", () => {
-    // Rulebook §6: each character is measured on their own side of the play zone.
+    // A Stuff room measures each character's own side of the play zone. See
+    // open-questions.md #2.
     for (const room of CARD_CONTENT.rooms.filter((r) => r.kind === "stuff")) {
       for (const t of room.thresholds) {
         const named = t.effects.filter((e) => e.who === "Red" || e.who === "Gray");

@@ -211,10 +211,10 @@ describe("§9 Last stand", () => {
     expect(eventTypes(events)).toContain("ROOM_FLED");
   });
 
-  it("a Flee line whose own text Clears the room still counts as a Clear", () => {
-    // A Stuff room's Flee line clears it, so last stand survives an empty board
-    // — but the escape tax still meets an empty deck. Two cards played is what
-    // gets you out.
+  it("a met threshold Clears a Stuff room, so Last Stand ends normally", () => {
+    // Sorting Room's Oomph 2 line is met by three free Shoves, so the room
+    // Clears — last stand survives an empty board, but the escape tax still
+    // needs the deck it exhausts from. Two cards played is what gets you out.
     const state = rig({
       phase: "Play",
       activeRoom: room("Sorting Room"),

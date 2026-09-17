@@ -303,7 +303,7 @@ describe("§5 Cleanup", () => {
   });
 });
 
-describe("§6 The three kinds of room", () => {
+describe("Room kinds: Enemy, Hazard, Stuff", () => {
   it("an Enemy room ends the floor when it is Cleared", () => {
     // The Cherry wants Oomph 5: Charge In (Oomph 4, Cost 2) plus a free Pry Bar
     // (Oomph 3) gets there with two Shoves as the payment.
@@ -350,7 +350,7 @@ describe("§6 The three kinds of room", () => {
     expect(next.Red.discard).toHaveLength(1);
   });
 
-  it("'the higher threshold also gives a reward' — taken or skipped", () => {
+  it("a Hazard's higher threshold also reveals a reward — taken or skipped", () => {
     // Two Coil Of Cables (Scramble 3 each, cost 0) clear both of Collapsed
     // Stairwell's lines: Scramble 2 (Exhaust 1 each) and Scramble 5 (one of
     // you reveals a reward).
@@ -427,7 +427,7 @@ describe("§6 The three kinds of room", () => {
     expect(next.Red.deck).toHaveLength(5);
   });
 
-  it("'each character is measured on their own side of the play zone only'", () => {
+  it("a Stuff room measures each character on their own side of the play zone only", () => {
     // Sorting Room: Oomph 2 pays Red, Scramble 2 pays Gray. Red plays Oomph and
     // Gray plays Scramble, so each pays for their own item.
     const state = rig({

@@ -470,7 +470,7 @@ const goodStuffFor = (t: Threshold, c: Character): number =>
     .reduce((most, e) => Math.max(most, e.type === "TakeGoodStuff" ? e.count : 0), 0);
 
 /**
- * §6: a Stuff room's challenge is split per character, and a richer tier says
+ * A Stuff room's challenge is split per character, and a richer tier says
  * "instead" — so each character takes the largest amount any met line awards
  * them rather than the sum. See open-questions.md #2.
  */
@@ -495,8 +495,9 @@ interface RoomOutcome {
 /**
  * §5: the room is checked once, when both characters have stopped playing. If
  * any challenge's threshold is met the room is Cleared, and the card text of
- * *every* challenge met resolves — §6's higher Hazard tier "also pays a
- * permanent card reward", on top of the lower tier rather than instead of it.
+ * *every* challenge met resolves — a Hazard's higher tier also reveals a
+ * reward, on top of the lower tier rather than instead of it. See
+ * open-questions.md #1.
  */
 function roomOutcome(state: GameState, room: Room): RoomOutcome {
   const met = room.thresholds.filter((t) => thresholdIsMet(state, t));
@@ -630,8 +631,8 @@ function drain(state: GameState, run: Run): GameState {
     }
 
     if (head.type === "RevealReward") {
-      // §6: turn the top card of that character's reward pool face up, and take
-      // it or skip it.
+      // Turn the top card of that character's reward pool face up, and take
+      // it or skip it. See open-questions.md #7.
       const card = s.pools[head.who][0];
       s = withEffects(s, rest);
       if (!card) continue;
@@ -692,7 +693,7 @@ function finishTurn(state: GameState, run: Run): GameState {
   s = { ...s, resolution: null };
   run.events.push({ type: "TURN_ENDED", turn: s.turn });
 
-  // §6: clearing the Enemy room ends the floor. You do not have to empty the
+  // §10: clearing the Enemy room ends the floor. You do not have to empty the
   // deck; you have to kill the thing on the stairs.
   if (s.cleared.some((r) => r.kind === "enemy")) {
     run.events.push({ type: "FLOOR_CLEARED", floor: s.floor });
@@ -833,13 +834,13 @@ function answerReward(state: GameState, take: boolean, run: Run): GameState {
   const rest = state.pools[character].slice(1);
   let s: GameState = { ...state, pending: null };
   if (take) {
-    // §6: nothing shuffles during a floor, so it is the very next card they draw.
+    // Nothing shuffles during a floor, so it is the very next card they draw.
     s = setPool(s, character, rest);
     s = topDeck(s, character, card);
     run.events.push({ type: "REWARD_TAKEN", character, card });
   } else {
-    // Bottom of its pool, as a declined ascension reward does. NOT YET RULED
-    // (rulebook §6); see open-questions.md #8.
+    // Bottom of its pool, as a declined ascension reward does. Ruled;
+    // see open-questions.md #8.
     s = setPool(s, character, [...rest, card]);
     run.events.push({ type: "REWARD_DECLINED", character });
   }

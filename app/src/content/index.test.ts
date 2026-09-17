@@ -26,7 +26,7 @@ describe("content", () => {
   it("carries structure, never prose, for what a room does", () => {
     for (const room of CARD_CONTENT.rooms) {
       expect(room.thresholds.length).toBeGreaterThan(0);
-      // Rulebook §5: a Flee never clears the room — only a met threshold does.
+      // Each Turn, Outcome: a Flee never clears the room — only a met threshold does.
       expect(room.flee.clears).toBe(false);
       for (const t of room.thresholds) {
         expect(t.clears || t.fleeFree).toBe(true);

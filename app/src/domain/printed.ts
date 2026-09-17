@@ -29,8 +29,8 @@ export type CardSet = "official" | "proposed";
  * One thing a room does to the characters. A room's Flee line and each of its
  * threshold outcomes are lists of these, so the engine never parses prose.
  *
- * `who: "one"` is rulebook §5: the team chooses which character, and that
- * character takes all of it. There is no splitting.
+ * `who: "one"` means the team chooses which character, and that character
+ * takes all of it. There is no splitting.
  */
 export type EffectTarget = Character | "one" | "both";
 
@@ -41,7 +41,7 @@ export type RoomEffect =
   | { readonly type: "RevealReward"; readonly who: EffectTarget };
 
 /**
- * One `threshold: outcome` line (rulebook §5).
+ * One `threshold: outcome` line (rulebook §8).
  *
  * `measuredOn` is the whole of what makes a Stuff room different: a line that
  * names one character is measured against that character's own side of the play
@@ -62,7 +62,7 @@ export interface Threshold {
 }
 
 /**
- * The Flee line every room prints (rulebook §5). No Stuff room in
+ * The Flee line every room prints (rulebook §8). No Stuff room in
  * design/cards.yaml prints one of its own, so the generator supplies
  * "Leave empty-handed." for display; it Flees like any other room, with no
  * Clear and no effects.

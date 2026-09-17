@@ -17,18 +17,18 @@ The reading is marked in a comment beside the code, so a ruling here has one pla
 
 **Where:** `roomOutcome` in `app/src/domain/engine.ts`.
 
-§5: *"If more than one challenge has been cleared, their outcomes may be resolved in any order."*
-That only makes sense if every met challenge's outcome resolves, not just one. Collapsed Stairwell
-and Ruptured Coolant Line agree for Hazards: both print a higher tier reading `Clear, and one of
-you reveals a reward.`, on top of the lower tier rather than instead of it.
+Each Turn, Outcome: *"If more than one challenge has been cleared, their outcomes may be resolved in
+any order."* That only makes sense if every met challenge's outcome resolves, not just one. Collapsed
+Stairwell and Ruptured Coolant Line agree for Hazards: both print a higher tier reading `Clear, and
+one of you reveals a reward.`, on top of the lower tier rather than instead of it.
 
 So a Scramble 5 pool against Collapsed Stairwell (`Scramble 2: Clear, but both of you Exhaust 1.` /
 `Scramble 5: Clear, and one of you reveals a reward.`) meets both lines: the room is Cleared, both
 characters Exhaust 1, and one of them reveals a reward.
 
-One line cannot un-Clear a room another has Cleared: §5's first sentence is that any met threshold
-Clears it, so Villy's `Scramble 9: Flee this room for free` is void when its `Oomph 9` line was also
-met. See #3 for that line met on its own.
+One line cannot un-Clear a room another has Cleared: Outcome's first sentence is that any met
+threshold Clears it, so Villy's `Scramble 9: Flee this room for free` is void when its `Oomph 9`
+line was also met. See #3 for that line met on its own.
 
 ---
 
@@ -53,8 +53,8 @@ adds to `Both of you get Good Stuff`.
 **Where:** the generator, and the room check.
 
 Villy, Coney's Work Husband prints `Scramble 9: Flee this room for free.` alongside
-`Oomph 9: Ascend`. §5's *"if any challenge's threshold has been met or exceeded, the players Clear
-the room"* would Clear Villy on Scramble alone, which contradicts the line's own words.
+`Oomph 9: Ascend`. Each Turn, Outcome's *"if any challenge's threshold has been met or exceeded, the
+players Clear the room"* would Clear Villy on Scramble alone, which contradicts the line's own words.
 
 **What the code does.** The line does not Clear: the room goes to the Fled pile and its Flee line
 does not resolve. Because the room ends Fled, §9's rule that a character in last stand goes Down
@@ -147,8 +147,9 @@ A skipped reward card goes to the bottom of its pool.
 
 **Where:** floor setup.
 
-Enemy rooms name the floor they guard (`floor: 1`, `2`, `3`). §4 builds every floor from 1 Enemy, 3
-Hazards and 10-minus-the-floor Stuff rooms, and there is no Enemy printed for floors 4 upward.
+Enemy rooms name the floor they guard (`floor: 1`, `2`, `3`). Every floor is built from 1 Enemy, 3
+Hazards and 10-minus-the-floor Stuff rooms (the printed-count reading of #18), and there is no Enemy
+printed for floors 4 upward.
 
 **What the code does.** Takes the Enemy whose printed floor matches; failing that, any Enemy room.
 A floor past 3 is therefore playable but guarded by a repeat. This is content, not rules.
@@ -198,7 +199,7 @@ If the room was Fled, it is discarded with the rest of the play zone. The return
 
 **Where:** Covering Fire, I Know Kung Fu, Grav Harness.
 
-§5 says *"you may not draw during this phase."* Three cards say otherwise in their own text.
+Each Turn, Play says *"you may not draw during this phase."* Three cards say otherwise in their own text.
 
 **What the code does.** The rule is the default and a card's printed text is the exception, which is
 the ordinary convention for a card game. The phase is checked only by the `DRAW` command's own
@@ -212,10 +213,10 @@ legality; `drawOne`, which every card-driven draw goes through, does not check i
 
 The card names no character.
 
-**What the code does.** The discount goes to whoever played the Battery. §5's *"Red never pays for
-Gray"* is the reason: a cost is a private thing between a character and their own hand, so a
-discount should not cross either. The discount is also spent only when it saved something — a card
-that already cost nothing does not use it up.
+**What the code does.** The discount goes to whoever played the Battery. Each Turn, Play's rule that
+you pay in other cards from your own hand is the reason: a cost is a private thing between a
+character and their own hand, so a discount should not cross either. The discount is also spent
+only when it saved something — a card that already cost nothing does not use it up.
 
 ---
 
@@ -324,3 +325,20 @@ a room. The rule lives only in the engine.
 
 **What the code does.** Each piece of Good Stuff earned is drawn face down from the Good Stuff pool
 straight into the earning character's hand. A `Down` character is skipped and earns nothing.
+
+---
+
+## 21. A Fled room waits in a Fled pile instead of returning straight to the Floor deck
+
+**Where:** `endPlay` and `finishTurn` in `app/src/domain/engine.ts`.
+
+The Outcome section reads: *"Flee: If no challenges have been cleared, the players must Flee the
+room. Resolve the `Flee:` outcome according to the text on the card, then shuffle the room card
+back into the Floor deck."* Read plainly, a Fled room reshuffles into the Floor deck the same turn
+it Fled.
+
+**What the code does.** A Fled room instead moves to a separate Fled pile at Cleanup, and only
+shuffles back into the Floor deck once the Floor deck itself runs out. Both readings keep a Fled
+room in circulation for the floor; they disagree on when it can come up again. This predates the
+citation cleanup that added this entry and was not itself re-derived from the rulebook — flagging
+it here rather than changing engine behavior or the rulebook text.

@@ -1,4 +1,4 @@
-/* Setting up a run and setting up a floor (rulebook §4).
+/* Setting up a run and setting up a floor (rulebook: Setup).
  *
  * This is the one place content enters the domain. `createInitialState` mints a
  * physical copy of every printed card and room and deals them into the piles;
@@ -14,17 +14,24 @@ import type { Card, DomainEvent, GameState, PlayerState, Room, TurnRecord } from
 /** The tenth floor is the roof: clearing its Enemy room wins the run (§11). */
 export const TOP_FLOOR = 10;
 
-/** Maximum hand size (§5). */
+/** Maximum hand size (Each Turn, Draw). */
 export const HAND_CAP = 5;
 
 /** The price of getting out of last stand (§9). */
 export const LAST_STAND_PRICE = 2;
 
-/** Every floor holds exactly one Enemy room and three Hazards (§4). */
+/**
+ * Every floor holds exactly one Enemy room and three Hazards. The rulebook's
+ * Floor deck section doesn't say so; this is the printed-count reading of an
+ * unruled question. See open-questions.md #18.
+ */
 export const ENEMY_ROOMS_PER_FLOOR = 1;
 export const HAZARD_ROOMS_PER_FLOOR = 3;
 
-/** Stuff rooms equal 10 minus the floor number: nine on floor 1, none on floor 10 (§4). */
+/**
+ * Stuff rooms equal 10 minus the floor number: nine on floor 1, none on floor
+ * 10. See open-questions.md #18.
+ */
 export const stuffRoomsOnFloor = (floor: number): number => Math.max(0, TOP_FLOOR - floor);
 
 /* ------------------------------------------------------ minting the cards */
@@ -80,9 +87,10 @@ function takeRooms(
 }
 
 /**
- * §4: 1 Enemy room, 3 Hazard rooms, and Stuff rooms equal to 10 minus the floor
- * number, shuffled together face down. The floor gets no harder as you climb —
- * it gets emptier.
+ * 1 Enemy room, 3 Hazard rooms, and Stuff rooms equal to 10 minus the floor
+ * number, shuffled together face down — the printed-count reading of
+ * open-questions.md #18. The floor gets no harder as you climb — it gets
+ * emptier.
  *
  * Enemy rooms name the floor they guard. Nothing is printed above floor 3, so a
  * higher floor falls back to any Enemy room; see open-questions.md #9.
@@ -174,7 +182,7 @@ const freshPlayer = (deck: readonly Card[]): PlayerState => ({
 /**
  * The only place content enters the domain.
  *
- * §4: hands start empty and the first floor's deck is built. Starting deck size
+ * Setup: hands start empty and the first floor's deck is built. Starting deck size
  * and composition are NOT YET RULED; the card list's printed copy counts are
  * what the decks are, which comes to 12 cards each.
  */

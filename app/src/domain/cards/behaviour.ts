@@ -52,7 +52,7 @@ export interface CardBehaviour {
    * own deck, into their discard pile. Resolved as the card is played.
    */
   exhaustX?: number;
-  /** Conditional stats, recalculated every time the pool is read (§5). */
+  /** Conditional stats, recalculated every time the pool is read. */
   stats?(state: GameState, owner: Character, card: Card): { oomph: number; scramble: number };
   /** A printed cost that is not the number in the corner. */
   cost?(state: GameState, owner: Character, card: Card): number;
@@ -71,7 +71,7 @@ export interface CardBehaviour {
   /**
    * A card in the play zone taking itself somewhere other than the discard pile,
    * at cleanup. Called before the play zone is swept; a card still in the zone
-   * afterwards is discarded as normal (§5).
+   * afterwards is discarded as normal (Each Turn, Cleanup).
    */
   onCleanup?(state: GameState, ctx: BehaviourContext): StepResult;
 }

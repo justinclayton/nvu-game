@@ -4,7 +4,7 @@ import { createInitialState, stuffRoomsOnFloor } from "./setup";
 
 const content = CARD_CONTENT;
 
-describe("§4 Setting up a floor", () => {
+describe("Setting up a floor", () => {
   it("deals each character their own deck and leaves both hands empty", () => {
     const [state] = createInitialState(1, content);
     expect(state.Red.hand).toEqual([]);

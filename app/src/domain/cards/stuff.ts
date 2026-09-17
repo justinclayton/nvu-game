@@ -1,6 +1,6 @@
 /* Good Stuff and Bad Stuff. Keyed by the name design/cards.yaml makes unique.
  *
- * §7: Stuff is ordinary energy — you may discard it from hand to pay another
+ * §8: Stuff is ordinary energy — you may discard it from hand to pay another
  * card's cost. Bad Stuff behaves like any other Stuff except that it
  * contributes no stats.
  */
@@ -143,7 +143,7 @@ export const STUFF: Registry = {
 
   /* "Holding: cards cost +1 to play."
    *
-   * It bites its holder only: Red never pays for Gray (§5). */
+   * It bites its holder only: Red never pays for Gray (Each Turn, Play). */
   Sluggish: {
     whileHeld: { costDelta: 1 },
   },
@@ -155,7 +155,7 @@ export const STUFF: Registry = {
 
   /* "Holding: You can't have more than 3 cards in your hand."
    *
-   * §5's hand cap is a draw-phase limit, so this is too: it stops you drawing
+   * Each Turn, Draw's hand cap is a draw-phase limit, so this is too: it stops you drawing
    * up past 3, and Stuff pushed into your hand by a room ignores it as ever. */
   "Spore Cloud": {
     whileHeld: { handCap: 3 },
@@ -175,7 +175,7 @@ export const STUFF: Registry = {
    * One-way: the holder's draw forces the partner's, never the reverse. Any
    * draw counts — the opening draw, a chosen draw in Draw/Play, or one a card's
    * text causes — so this listens for both `CARD_DRAWN` and `DRAW_BURNED`,
-   * which are the two shapes a draw can take (§5). The forced draw itself is
+   * which are the two shapes a draw can take (Each Turn). The forced draw itself is
    * stamped `forced` by `drawOne` and is skipped here, so it cannot chain: it
    * does not count as a draw that forces one, whether it lands on this same
    * copy or on a copy the partner is holding. Full Hand and Last Stand for the

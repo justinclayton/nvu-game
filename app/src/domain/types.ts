@@ -51,7 +51,7 @@ export interface Room {
   readonly id: RoomId;
   readonly name: string;
   readonly kind: RoomKind;
-  /** Enemy rooms name the floor they guard (§4). */
+  /** Enemy rooms name the floor they guard (§8). */
   readonly floor: number | null;
   readonly thresholds: readonly Threshold[];
   readonly flee: FleeLine;
@@ -110,7 +110,7 @@ export interface TurnRecord {
 /* ------------------------------------------------------------ the phases */
 
 /**
- * Draw and Play are two phases (§5). Both characters draw one card at the same
+ * Draw and Play are two phases (Each Turn). Both characters draw one card at the same
  * time as Draw opens, then take turns drawing until both pass; nobody draws
  * during Play. Cleanup is not a waiting phase of its own; it is the last step
  * of `END_PLAY`.
@@ -191,7 +191,7 @@ export interface GameState {
   readonly activeRoom: Room | null;
   readonly fled: readonly Room[];
   readonly cleared: readonly Room[];
-  /** Every printed room copy not currently built into a floor (§4). */
+  /** Every printed room copy not currently built into a floor (Setup). */
   readonly roomSupply: readonly Room[];
 
   readonly Red: PlayerState;

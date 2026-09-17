@@ -125,7 +125,7 @@ export const GRAY: Registry = {
 
   /* "If any Bad Stuff is played this turn, Oomph 2 and Scramble 2."
    *
-   * Bad Stuff itself contributes no stats (§7); this card is what makes playing
+   * Bad Stuff itself contributes no stats; this card is what makes playing
    * a piece of it worth anything. */
   "One Man's Junk": {
     stats(state) {
@@ -190,8 +190,8 @@ export const GRAY: Registry = {
 
   /* "Every time Red plays a card this turn, draw 1 card."
    *
-   * A card-driven draw during Play. §5's "you may not draw during this phase"
-   * is the rule; the card is the exception that says so. See
+   * A card-driven draw during Play. Each Turn, Play's "you may not draw during
+   * this phase" is the rule; the card is the exception that says so. See
    * open-questions.md #13. */
   "Covering Fire": {
     onEvent(event, state, ctx) {

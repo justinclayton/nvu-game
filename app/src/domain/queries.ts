@@ -1,7 +1,7 @@
 /* Pure reads of the state. The UI computes no rule; it asks one of these.
  *
  * Nothing here changes anything. Every answer is derived from the state handed
- * in, so a conditional stat is recalculated every time the pool is read (§5).
+ * in, so a conditional stat is recalculated every time the pool is read.
  */
 
 import { behaviourOf, type HeldModifiers } from "./cards/behaviours";
@@ -74,7 +74,7 @@ export function exhaustXPreventedBy(state: GameState, c: Character): Card | null
   return null;
 }
 
-/** §5: maximum hand size is 5. A card may tighten it. */
+/** Each Turn, Draw: maximum hand size is 5. A card may tighten it. */
 export const handCapFor = (state: GameState, c: Character): number =>
   heldModifiers(state, c).handCap;
 
@@ -85,8 +85,8 @@ export const drawCapFor = (state: GameState, c: Character): number =>
 /* ------------------------------------------------------------- the stat pool */
 
 /**
- * §7: Bad Stuff contributes no stats, whatever else it does.
- * §5: conditional stats are recalculated every time the pool is read.
+ * Bad Stuff cards print no Stats line, so they contribute none, whatever else
+ * they do. Conditional stats are recalculated every time the pool is read.
  *
  * A contribution never goes below zero: a card that is reduced past nothing
  * contributes nothing rather than draining the pool. See open-questions.md #10.
@@ -107,7 +107,7 @@ export function contributionOf(state: GameState, played: PlayedCard): StatTotals
 }
 
 /**
- * §5: the stats on played cards form one shared pool across both characters.
+ * Each Turn, Play: the stats on played cards form one shared pool across both characters.
  * `side` narrows it to one character's own side of the play zone, which is the
  * only thing a Stuff room ever measures. See open-questions.md #2.
  */
@@ -159,7 +159,7 @@ export function metThresholds(state: GameState): readonly Threshold[] {
 /* ---------------------------------------------------------------- the costs */
 
 /**
- * §5: to play a card you discard cards from your hand equal to its Cost.
+ * Each Turn, Play: to play a card you discard cards from your hand equal to its Cost.
  * §9: while in last stand, every card in that hand may be played at no cost.
  */
 export function costOf(state: GameState, c: Character, card: Card): number {
@@ -171,7 +171,10 @@ export function costOf(state: GameState, c: Character, card: Card): number {
   return Math.max(0, base + heldModifiers(state, c).costDelta);
 }
 
-/** §5: you pay in *other* cards from your own hand. Red never pays for Gray. */
+/**
+ * Each Turn, Play: you pay in *other* cards from your own hand — Red's hand
+ * and Gray's hand are separate, so Red never pays for Gray.
+ */
 export function payOptions(state: GameState, c: Character, cardId: CardId): readonly Card[] {
   return playerOf(state, c).hand.filter((x) => x.id !== cardId);
 }
@@ -186,7 +189,7 @@ export function playableCards(state: GameState, c: Character): readonly Card[] {
 
 /* ---------------------------------------------------------------- the draw */
 
-/** §5: may this character draw another card right now? */
+/** Each Turn, Draw: may this character draw another card right now? */
 export function canDraw(state: GameState, c: Character): boolean {
   if (state.phase !== "Draw" || state.pending !== null) return false;
   const p = playerOf(state, c);

@@ -1084,12 +1084,13 @@ body {
   pointer-events: none;
   filter: drop-shadow(0 14px 28px rgba(0, 0, 0, 0.6));
 }
-/* With room beside the table, the zoomed card sits there instead of over the mat. */
-@media (min-width: 1700px) {
+/* Past the wide table's own cap (below), there is room beside it again, and
+ * the zoomed card sits there instead of over the mat. */
+@media (min-width: 2500px) {
   .inspector {
     right: auto;
     bottom: auto;
-    left: calc(50% + 606px);
+    left: calc(50% + 1020px);
     top: 78px;
   }
 }
@@ -1251,6 +1252,57 @@ body {
   .inspector .card--large {
     --cw: 150px;
     --ch: 210px;
+  }
+}
+
+/* --------------------------------------------------------------- wide table
+ *
+ * From `WIDE_ABOVE` in metrics.ts (1700px), there is room to spare: the mat
+ * draws at the `WIDE` metrics tier — bigger cards, not more empty felt around
+ * the same ones — and the log moves to a column of its own beside the mat
+ * instead of stacking underneath it, since it is the thing a playtester reads
+ * most. `.table` becomes the grid; everything below the mat row still spans
+ * both columns, in DOM order. Capped rather than filling ever-wider screens,
+ * so the same "empty felt" problem doesn't just reappear at a larger scale. */
+@media (min-width: 1700px) {
+  .table {
+    max-width: min(96vw, 2000px);
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 340px;
+    column-gap: 24px;
+    grid-template-areas:
+      "head head"
+      "mat  log"
+      "foot foot"
+      "note note";
+  }
+  .table__head {
+    grid-area: head;
+  }
+  .mat {
+    grid-area: mat;
+    min-width: 1425px;
+    grid-template-columns: minmax(0, 1fr) 265px;
+  }
+  .ascend,
+  .over,
+  .controls {
+    grid-area: foot;
+  }
+  .rejection {
+    grid-area: note;
+  }
+  .log {
+    grid-area: log;
+    margin-top: 0;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+  }
+  .log__lines {
+    flex: 1 1 auto;
+    max-height: none;
+    min-height: 0;
   }
 }
 

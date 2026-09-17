@@ -29,7 +29,7 @@ export const playerOf = (state: GameState, c: Character): PlayerState => state[c
 export const withPlayer = (state: GameState, c: Character, p: PlayerState): GameState =>
   c === "Red" ? { ...state, Red: p } : { ...state, Gray: p };
 
-/** Everyone not Down. A Down character is skipped by everything (§9). */
+/** Everyone not Down. A Down character is skipped by everything (rulebook, Last Stand: Going Down). */
 export const standing = (state: GameState): readonly Character[] =>
   CHARACTERS.filter((c) => !state[c].down);
 
@@ -38,7 +38,7 @@ export const standing = (state: GameState): readonly Character[] =>
 /**
  * Setup: to discard is to move a card to its owner's discard pile — gone for
  * the floor. Stuff discards like anything else; the Scrapyard only comes into
- * it at ascension (§10).
+ * it at ascension (rulebook, Ascending).
  */
 export function discard(
   state: GameState,
@@ -52,7 +52,7 @@ export function discard(
   return withPlayer(state, c, { ...p, discard: [...p.discard, card] });
 }
 
-/** §9: going Down empties your hand into your discard pile. */
+/** Rulebook, Last Stand: Going Down: going Down empties your hand into your discard pile. */
 export function goDown(
   state: GameState,
   c: Character,
@@ -68,12 +68,12 @@ export function goDown(
 }
 
 /**
- * §8: `Exhaust X cards from your deck` — a loss you did not choose. Off the top,
+ * Rulebook, Card anatomy: Keywords: `Exhaust X cards from your deck` — a loss you did not choose. Off the top,
  * face up, no choices.
  *
- * §9: a card that would be moved from the top of an empty deck puts that
- * character Down. Emptying the deck instead — the last card just exhausted was
- * the last one there — puts them in Last Stand right away (see
+ * A card that would be moved from the top of an empty deck puts that
+ * character Down (rulebook, About the game: running out of Stamina). Emptying the deck instead — the last card just exhausted was
+ * the last one there — puts them in Last Stand right away (rulebook, Last Stand; see
  * `activateLastStand`), whether this call is a room's printed punishment or a
  * card's own `Exhaust X`.
  */
@@ -87,7 +87,7 @@ export function exhaustFromDeck(
   let next = state;
   for (let i = 0; i < amount; i++) {
     const p = playerOf(next, c);
-    if (p.down) return next; // A Down character takes no punishments (§9).
+    if (p.down) return next; // A Down character takes no punishments (rulebook, Last Stand: Going Down).
     const card = p.deck[0];
     if (!card) return goDown(next, c, cause, events);
     next = withPlayer(next, c, { ...p, deck: p.deck.slice(1) });
@@ -97,7 +97,7 @@ export function exhaustFromDeck(
   return next;
 }
 
-/** §8: `Discard X cards from your hand` — a cost you chose. */
+/** Rulebook, Card anatomy: Keywords: `Discard X cards from your hand` — a cost you chose. */
 export function discardFromHand(
   state: GameState,
   c: Character,
@@ -126,7 +126,7 @@ export function discardFromHand(
  * from one that counts toward triggering it again (see `My Head Is Quantum
  * Spinning`, which must not chain off the draw it just forced).
  *
- * §9: a draw that leaves the deck empty puts that character in Last Stand right
+ * Rulebook, Last Stand: a draw that leaves the deck empty puts that character in Last Stand right
  * away (see `activateLastStand`) — every draw goes through here, chosen,
  * opening, or a card's own text, so this is the one place that needs to know.
  */
@@ -152,7 +152,7 @@ export function drawOne(
 }
 
 /**
- * §9: no card may be put into a Down character's hand — you cannot park Stuff on
+ * Rulebook, Last Stand: Going Down: no card may be put into a Down character's hand — you cannot park Stuff on
  * a partner who is out. Stuff pushed into a hand by a room ignores the hand cap
  * entirely, and so does anything else that moves a card to a hand.
  */
@@ -170,7 +170,7 @@ export function moveToHand(
 
 /* ---------------------------------------------------------------- the piles */
 
-/** §10: to Scrap is to move a card to the Scrapyard, gone for the run. */
+/** Rulebook, Card anatomy: Keywords: to Scrap is to move a card to the Scrapyard, gone for the run. */
 export function scrap(
   state: GameState,
   c: Character | null,
@@ -227,7 +227,7 @@ export function moveToBottomOfDeck(
 /**
  * A card taking itself back out of the play zone, at cleanup.
  *
- * §9: no card may be put into a Down character's hand, so a card whose owner is
+ * Rulebook, Last Stand: Going Down: no card may be put into a Down character's hand, so a card whose owner is
  * out stays in the play zone and is discarded with everything else.
  */
 export function returnToHand(
@@ -287,8 +287,12 @@ export function takeGoodStuff(
     if (playerOf(next, c).down) return next;
     const [card, rest, seed] = drawFromPool(next.pools.goodStuff, next.seed);
     // The pool never refills: spent Stuff goes to the Scrapyard at ascension.
-    // See open-questions.md #6.
-    if (!card) return next;
+    // See open-questions.md #6. Say so — a reward the log announced but the
+    // pool could not pay must not go silent (issue #37).
+    if (!card) {
+      events.push({ type: "STUFF_POOL_EMPTY", character: c, pool: "good_stuff" });
+      return next;
+    }
     next = { ...next, seed, pools: { ...next.pools, goodStuff: rest } };
     events.push({ type: "STUFF_TAKEN", character: c, card });
     next = moveToHand(next, c, card, events);
@@ -309,9 +313,12 @@ export function dealBadStuff(
   c: Character,
   events: DomainEvent[],
 ): GameState {
-  if (playerOf(state, c).down) return state; // takes no punishments (§9)
+  if (playerOf(state, c).down) return state; // takes no punishments (rulebook, Last Stand: Going Down)
   const [card, rest, seed] = drawFromPool(state.pools.badStuff, state.seed);
-  if (!card) return state;
+  if (!card) {
+    events.push({ type: "STUFF_POOL_EMPTY", character: c, pool: "bad_stuff" });
+    return state;
+  }
   const next = { ...state, seed, pools: { ...state.pools, badStuff: rest } };
   events.push({ type: "STUFF_TAKEN", character: c, card });
   return moveToHand(next, c, card, events);
@@ -329,7 +336,7 @@ function drawFromPool(
 /* --------------------------------------------------------------- last stand */
 
 /**
- * §9: your character enters last stand the moment your deck becomes empty.
+ * Rulebook, Last Stand: your character enters last stand the moment your deck becomes empty.
  * `drawOne` and `exhaustFromDeck` each call this on themselves right after
  * removing a card, so every cause is covered from the one place that moves
  * cards off the top of a deck: a chosen or opening draw, a forced draw, a

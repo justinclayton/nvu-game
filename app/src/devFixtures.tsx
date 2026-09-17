@@ -8,7 +8,21 @@
  */
 
 import { createSessionFrom, type Session } from "@application/session";
-import { buildFixture, fixtureList } from "@domain/__fixtures__/scenarios";
+import { buildFixture, fixtureEvents, fixtureList } from "@domain/__fixtures__/scenarios";
+
+/**
+ * Notes to type into a fixture's log as it opens, for the screens where what
+ * is worth looking at is a note in place. They land at the end of the log the
+ * same way a typed one does, because that is the same code path.
+ *
+ * A note is session data, not state, so it cannot live in the fixtures beside
+ * the rigged states: the domain has never heard of a note.
+ */
+const FIXTURE_NOTES: Readonly<Record<string, readonly string[]>> = {
+  "empty-good-stuff": [
+    "the log says Red gets Good Stuff and then says there was none — which happened?",
+  ],
+};
 
 export type FixtureLookup =
   | { readonly ok: true; readonly session: Session }
@@ -21,7 +35,9 @@ export type FixtureLookup =
 export function loadFixture(name: string): FixtureLookup {
   const state = buildFixture(name);
   if (!state) return { ok: false, requested: name, fixtures: fixtureList() };
-  return { ok: true, session: createSessionFrom(state) };
+  const session = createSessionFrom(state, fixtureEvents(name));
+  for (const text of FIXTURE_NOTES[name] ?? []) session.getState().note(text);
+  return { ok: true, session };
 }
 
 /** An unknown fixture name: the list of names that do exist, and nothing else. */

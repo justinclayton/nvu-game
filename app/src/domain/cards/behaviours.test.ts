@@ -45,7 +45,7 @@ describe("Overdrive — 'Exhaust 2'", () => {
       "CARD_DISCARDED",
       "CARD_DISCARDED",
     ]);
-    // §8: off the top, not chosen.
+    // Rulebook, Card anatomy: Keywords: off the top, not chosen.
     expect(events.filter((e) => e.type === "CARD_DISCARDED").every((e) => e.from === "deck")).toBe(
       true,
     );

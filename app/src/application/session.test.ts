@@ -1,12 +1,29 @@
 import { describe, expect, it } from "vitest";
 import { CARD_CONTENT } from "@content/index";
+import { card, pile, player, rig, room } from "@domain/__fixtures__/rig";
 import type { Command } from "@domain/types";
-import { canUndo, createSession, loadSession, replay, saveOf } from "./session";
+import {
+  canUndo,
+  createSession,
+  createSessionFrom,
+  loadSession,
+  replay,
+  saveOf,
+  type SavedRun,
+  type Session,
+} from "./session";
 
 const content = CARD_CONTENT;
 const SEED = 4242;
 
 const newSession = () => createSession(SEED, content);
+
+/** A session built from a seed always has one to save from. */
+function mustSave(session: Session): SavedRun {
+  const saved = saveOf(session.getState());
+  if (!saved) throw new Error("a seeded session had no seed to save from");
+  return saved;
+}
 
 /** The commands a session needs to get from a new run into the Play phase. */
 function throughATurn(): readonly Command[] {
@@ -102,7 +119,7 @@ describe("save and replay", () => {
   it("a run is its seed plus its command log", () => {
     const session = newSession();
     for (const command of throughATurn()) session.getState().dispatch(command);
-    const saved = saveOf(session.getState(), SEED);
+    const saved = mustSave(session);
     expect(saved.seed).toBe(SEED);
     expect(saved.commands).toEqual(throughATurn());
   });
@@ -110,16 +127,21 @@ describe("save and replay", () => {
   it("replays to exactly the same state", () => {
     const session = newSession();
     for (const command of throughATurn()) session.getState().dispatch(command);
-    const saved = saveOf(session.getState(), SEED);
-    expect(replay(saved, content)).toEqual(session.getState().state);
+    expect(replay(mustSave(session), content)).toEqual(session.getState().state);
   });
 
   it("loads a saved run into a live session", () => {
     const session = newSession();
     for (const command of throughATurn()) session.getState().dispatch(command);
-    const loaded = loadSession(saveOf(session.getState(), SEED), content);
+    const loaded = loadSession(mustSave(session), content);
     expect(loaded.getState().state).toEqual(session.getState().state);
     expect(loaded.getState().commands).toEqual(session.getState().commands);
+  });
+
+  it("has no seed to save from when the state was rigged into place", () => {
+    const rigged = createSessionFrom(createSession(SEED, content).getState().state);
+    expect(rigged.getState().seed).toBeNull();
+    expect(saveOf(rigged.getState())).toBeNull();
   });
 
   it("says so when a save and the rules have diverged", () => {
@@ -129,11 +151,72 @@ describe("save and replay", () => {
   });
 });
 
+describe("notes", () => {
+  it("lands a note at the point the log has reached", () => {
+    const session = newSession();
+    session.getState().dispatch({ type: "FLIP_ROOM" });
+    const after = session.getState().events.length;
+    session.getState().note("  the floor is bigger than the rulebook says  ");
+    expect(session.getState().notes).toEqual([
+      { at: after, text: "the floor is bigger than the rulebook says" },
+    ]);
+  });
+
+  it("ignores a note with nothing in it", () => {
+    const session = newSession();
+    session.getState().note("   ");
+    expect(session.getState().notes).toEqual([]);
+  });
+
+  it("changes neither log, so a run replays the same with notes or without", () => {
+    const session = newSession();
+    for (const command of throughATurn()) session.getState().dispatch(command);
+    const before = session.getState();
+    session.getState().note("a thought");
+    expect(session.getState().commands).toEqual(before.commands);
+    expect(session.getState().events).toEqual(before.events);
+    expect(replay(mustSave(session), content)).toEqual(before.state);
+  });
+
+  it("keeps a note about the thing being undone, at the new end of the log", () => {
+    // In last stand every card is free, so the play needs no payment and is
+    // still takeable back — a play reveals nothing.
+    const session = createSessionFrom(
+      rig({
+        phase: "Play",
+        activeRoom: room("Sorting Room"),
+        Red: player({ deck: [], hand: [card("Charge In")], lastStand: true }),
+        Gray: player({ deck: pile("Duck Under", 4) }),
+      }),
+    );
+    const charge = session.getState().state.Red.hand[0];
+    if (!charge) throw new Error("rig");
+    session.getState().dispatch({
+      type: "PLAY_CARD",
+      character: "Red",
+      cardId: charge.id,
+      payWith: [],
+    });
+    session.getState().note("that play should not have been free");
+    const noted = session.getState().events.length;
+    expect(noted).toBeGreaterThan(0);
+
+    expect(session.getState().undo()).toBe(true);
+    const [note] = session.getState().notes;
+    expect(note?.text).toBe("that play should not have been free");
+    expect(note?.at).toBe(session.getState().events.length);
+    expect(note?.at).toBeLessThan(noted);
+  });
+});
+
 describe("subscribing outside React", () => {
   it("notifies a selector on the event log", () => {
     const session = newSession();
     const seen: number[] = [];
-    const stop = session.subscribe((s) => s.events, (events) => seen.push(events.length));
+    const stop = session.subscribe(
+      (s) => s.events,
+      (events) => seen.push(events.length),
+    );
     session.getState().dispatch({ type: "FLIP_ROOM" });
     session.getState().dispatch({ type: "END_PLAY" });
     stop();

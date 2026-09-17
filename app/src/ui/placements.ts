@@ -86,7 +86,12 @@ const zoneOf = (
   part: "deck" | "hand" | "play" | "discard" | "rewards" | "offer",
 ): ZoneId => `${c.toLowerCase() as "red" | "gray"}-${part}`;
 
-export function placements(state: GameState): readonly Placement[] {
+/**
+ * `debug` is a view-only override: every card and room comes back face up,
+ * regardless of what the rules would show a player. Nothing under `execute`
+ * ever sees it — it exists only so a playtester can read the table from here.
+ */
+export function placements(state: GameState, debug = false): readonly Placement[] {
   const out: Placement[] = [];
 
   /* Decks and pools keep their top at index 0; discards are appended, so their
@@ -112,7 +117,7 @@ export function placements(state: GameState): readonly Placement[] {
         zone,
         index,
         count,
-        faceUp: typeof opts.faceUp === "function" ? opts.faceUp(card, isTop) : opts.faceUp,
+        faceUp: debug || (typeof opts.faceUp === "function" ? opts.faceUp(card, isTop) : opts.faceUp),
         owner: opts.owner ?? card.owner,
       });
     });
@@ -128,7 +133,7 @@ export function placements(state: GameState): readonly Placement[] {
         zone,
         index: topFirst ? count - 1 - i : i,
         count,
-        faceUp,
+        faceUp: debug || faceUp,
       });
     });
   };
@@ -148,7 +153,7 @@ export function placements(state: GameState): readonly Placement[] {
       zoneOf(c, "play"),
       { topFirst: false, faceUp: true, owner: c },
     );
-    // §10: on ascending, the top three of the pool are offered. They stay in the
+    // Rulebook, Ascending: on ascending, the top three of the pool are offered. They stay in the
     // pool until the choice is made, but they are picked up off the table and
     // held face up while the character looks them over.
     const offered = state.phase === "Ascend" ? (state.offer?.[c] ?? []) : [];
@@ -171,6 +176,19 @@ export function placements(state: GameState): readonly Placement[] {
   cards(state.scrapyard, "scrap", { topFirst: false, faceUp: true });
 
   return out;
+}
+
+/**
+ * Every placement in one pile, top of the stack first. Debug mode uses this to
+ * read a pile too deep for the table to show at a glance — the table only ever
+ * shows the top few cards' worth of offset before they land on top of one
+ * another. Always face up, since this is for reading the pile, not for how it
+ * sits on the table.
+ */
+export function pileOf(state: GameState, zone: ZoneId): readonly Placement[] {
+  return placements(state, true)
+    .filter((p) => p.zone === zone)
+    .sort((a, b) => b.index - a.index);
 }
 
 /**

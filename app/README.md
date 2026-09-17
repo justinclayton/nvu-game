@@ -42,4 +42,26 @@ is owned by `Table.tsx`, so the floating cards and the ascension panel read the 
 
 Card faces (`CardFace.tsx`) are sized in em from the card's width, so the same face prints at
 table scale, in a panel, and zoomed under the pointer. The type colours and rarity edges are the
-ones `prototype/card-sheet.html` prints.
+ones `tools/card-sheet.html` prints.
+
+## The log, notes and exports
+
+The log (`EventLog.tsx`) is the event stream as sentences, and the playtester's tools for it sit
+with it: a box that writes a note into the log, and three buttons that take the run away.
+
+A note is not a game rule, so it is not a domain event and not a command. It is session data:
+`notes` in the session store, each note anchored to a position in the event log, which is where it
+reads back. The engine never sees one, and a run replays the same whether notes were typed or not.
+Undo keeps a note about the thing being taken back, moving it to the new end of the log.
+
+`application/narrate.ts` turns events into lines and interleaves the notes, so the screen and every
+export read the same log. `application/exportRun.ts` writes the three files:
+
+| File    | What it is                                                                   |
+| ------- | ---------------------------------------------------------------------------- |
+| `.txt`  | the transcript, numbered, notes in place — what a playtest record quotes     |
+| `.csv`  | one row per turn, counted off the event log — several playtests side by side |
+| `.json` | the seed, the command log and the notes — this file replays the run          |
+
+`loadSession(run, content, notes)` takes a `.json` export back: a fold of `execute` over the
+command log rebuilds the run, and the notes go back where they were typed.

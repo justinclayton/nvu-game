@@ -11,13 +11,13 @@ import type { CardContent, CardFace, Character, RoomFace } from "./printed";
 import { shuffle } from "./rng";
 import type { Card, DomainEvent, GameState, PlayerState, Room, TurnRecord } from "./types";
 
-/** The tenth floor is the roof: clearing its Enemy room wins the run (§11). */
+/** The tenth floor is the roof: clearing its Enemy room wins the run (rulebook, Winning and losing). */
 export const TOP_FLOOR = 10;
 
 /** Maximum hand size (Each Turn, Draw). */
 export const HAND_CAP = 5;
 
-/** The price of getting out of last stand (§9). */
+/** The price of getting out of last stand (rulebook, Last Stand). */
 export const LAST_STAND_PRICE = 2;
 
 /**

@@ -10,14 +10,20 @@
  * reachable from the app's dev-only bundle without pulling a test runner in.
  */
 
-import type { GameState } from "../types";
-import { card, must, pile, play, player, resetRig, rig, room } from "./rig";
+import type { DomainEvent, GameState } from "../types";
+import { card, must, pile, play, player, resetRig, rig, room, type Ran } from "./rig";
 
 export interface Fixture {
   readonly name: string;
   /** One line, shown beside the name when the list is printed. */
   readonly description: string;
   build(): GameState;
+  /**
+   * The narrated events leading to `build()`'s state, for a screen that needs
+   * the log itself to be looked at. Most fixtures leave the log empty — it is
+   * cheaper to park on the state directly than to replay into it.
+   */
+  events?(): readonly DomainEvent[];
 }
 
 const SORTING_ROOM = "Sorting Room";
@@ -99,6 +105,22 @@ function lastStand(): GameState {
   });
 }
 
+/** Both hands holding the cards with the most printed text, to check none of it clips. */
+function longestText(): GameState {
+  return rig({
+    phase: "Play",
+    activeRoom: room(SORTING_ROOM),
+    Red: player({
+      deck: pile("Shove", 4),
+      hand: [card("Deadweight Grip"), card("Both Barrels"), card("Panic")],
+    }),
+    Gray: player({
+      deck: pile("Duck Under", 4),
+      hand: [card("Level Up"), card("My Head Is Quantum Spinning")],
+    }),
+  });
+}
+
 /** The Ascend phase, both reward pools revealing three cards each. */
 function ascending(): GameState {
   const base = rig({
@@ -121,8 +143,37 @@ function ascending(): GameState {
   };
 }
 
+/**
+ * Play phase: Sorting Room's Oomph 2 line owes Red a Good Stuff, but the pool
+ * is dry. The reward line still prints, followed by the pool-empty line
+ * (issue #37) rather than paying out in silence.
+ */
+function emptyGoodStuffPool(): Ran {
+  const state = rig({
+    phase: "Play",
+    activeRoom: room(SORTING_ROOM),
+    Red: player({ deck: pile("Shove", 5), hand: [card("Shove"), card("Shove")] }),
+    Gray: player({ deck: pile("Duck Under", 5) }),
+  });
+  const dry = { ...state, pools: { ...state.pools, goodStuff: [] } };
+  const [toPlay, toPayWith] = dry.Red.hand;
+  if (!toPlay || !toPayWith) throw new Error("rig");
+  return play(dry, [
+    { type: "PLAY_CARD", character: "Red", cardId: toPlay.id, payWith: [toPayWith.id] },
+    { type: "END_PLAY" },
+  ]);
+}
+
 /** Wraps a builder so every fixture starts from the same, stable card ids. */
 function stable(build: () => GameState): () => GameState {
+  return () => {
+    resetRig();
+    return build();
+  };
+}
+
+/** Same, for a builder whose events matter as much as the state it ends on. */
+function stableRan(build: () => Ran): () => Ran {
   return () => {
     resetRig();
     return build();
@@ -158,6 +209,20 @@ export const FIXTURES: readonly Fixture[] = [
     description: "The Ascend phase, both reward offers revealed.",
     build: stable(ascending),
   },
+  {
+    name: "longest-text",
+    description: "Both hands holding the cards with the most printed text.",
+    build: stable(longestText),
+  },
+  (() => {
+    const ran = stableRan(emptyGoodStuffPool);
+    return {
+      name: "empty-good-stuff",
+      description: "A met reward line pays nothing from an empty Good Stuff pool.",
+      build: () => ran().state,
+      events: () => ran().events,
+    };
+  })(),
 ];
 
 export const fixtureNames = (): readonly string[] => FIXTURES.map((f) => f.name);
@@ -169,4 +234,10 @@ export const fixtureList = (): readonly Pick<Fixture, "name" | "description">[] 
 export function buildFixture(name: string): GameState | null {
   const fixture = FIXTURES.find((f) => f.name === name);
   return fixture ? fixture.build() : null;
+}
+
+/** The log leading to that fixture's state — empty unless the fixture says otherwise. */
+export function fixtureEvents(name: string): readonly DomainEvent[] {
+  const fixture = FIXTURES.find((f) => f.name === name);
+  return fixture?.events ? fixture.events() : [];
 }

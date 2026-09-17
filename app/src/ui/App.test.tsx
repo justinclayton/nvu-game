@@ -109,3 +109,82 @@ describe("the table", () => {
     expect(log.textContent).toContain("You are in:");
   });
 });
+
+describe("debug mode", () => {
+  const sprites = () => Array.from(document.querySelectorAll(".sprite"));
+
+  it("is off by default: face-down piles stay face down", () => {
+    const checkbox = screen.getByRole("checkbox", { name: "Debug" }) as HTMLInputElement;
+    expect(checkbox.checked).toBe(false);
+    expect(sprites().some((s) => s.classList.contains("is-down"))).toBe(true);
+  });
+
+  it("turns every pile face up when switched on, and back when switched off", () => {
+    const before = sprites().filter((s) => s.classList.contains("is-down")).length;
+    expect(before).toBeGreaterThan(0);
+
+    fireEvent.click(screen.getByRole("checkbox", { name: "Debug" }));
+    expect(sprites().some((s) => s.classList.contains("is-down"))).toBe(false);
+
+    fireEvent.click(screen.getByRole("checkbox", { name: "Debug" }));
+    expect(sprites().filter((s) => s.classList.contains("is-down")).length).toBe(before);
+  });
+
+  it("reads a stacked pile's full contents from a panel", () => {
+    const { state } = session.getState();
+    fireEvent.click(screen.getByRole("checkbox", { name: "Debug" }));
+
+    fireEvent.click(screen.getByRole("button", { name: /Read every card in Floor deck/ }));
+    const dialog = screen.getByRole("dialog");
+    expect(dialog.textContent).toContain(`${String(state.floorDeck.length)} card`);
+
+    fireEvent.click(screen.getByRole("button", { name: "Close" }));
+    expect(screen.queryByRole("dialog")).toBeNull();
+  });
+
+  it("has no pile-reading affordance while debug is off", () => {
+    expect(screen.queryByRole("button", { name: /Read every card in/ })).toBeNull();
+  });
+});
+
+describe("the playtester's notes", () => {
+  const log = () => document.querySelector(".log__lines") as HTMLElement;
+
+  it("lands a typed note in the log, at the point it was typed", () => {
+    fireEvent.click(screen.getByRole("button", { name: /Flip the next room/ }));
+    const before = log().textContent ?? "";
+
+    const field = screen.getByLabelText("Note");
+    fireEvent.change(field, { target: { value: "that room should not repeat" } });
+    fireEvent.click(screen.getByRole("button", { name: "Add note" }));
+
+    const lines = Array.from(log().querySelectorAll("li"));
+    const note = lines[lines.length - 1];
+    expect(note?.textContent).toBe("Note — that room should not repeat");
+    expect(note?.className).toContain("log__line--note");
+    // The note is added to the log, not instead of it.
+    expect(log().textContent).toContain(before);
+    expect(session.getState().notes).toEqual([
+      { at: session.getState().events.length, text: "that room should not repeat" },
+    ]);
+  });
+
+  it("empties the field once the note is in, and refuses an empty one", () => {
+    const field = screen.getByLabelText("Note") as HTMLInputElement;
+    expect(screen.getByRole("button", { name: "Add note" }).hasAttribute("disabled")).toBe(true);
+
+    fireEvent.change(field, { target: { value: "  " } });
+    expect(screen.getByRole("button", { name: "Add note" }).hasAttribute("disabled")).toBe(true);
+
+    fireEvent.change(field, { target: { value: "a thought" } });
+    fireEvent.click(screen.getByRole("button", { name: "Add note" }));
+    expect(field.value).toBe("");
+    expect(session.getState().notes).toHaveLength(1);
+  });
+
+  it("offers the run in all three formats", () => {
+    for (const name of [".txt", ".csv", ".json"]) {
+      expect(screen.getByRole("button", { name })).toBeDefined();
+    }
+  });
+});

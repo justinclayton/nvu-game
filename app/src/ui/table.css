@@ -3,7 +3,7 @@
  * A printed playmat seen from above, with cardstock on it. The mat's zones are
  * stencilled in cream on slate-teal neoprene; the cards are cream stock with a
  * type bar, a rarity edge and a colour field where art would go. The type
- * colours and rarity colours are the ones prototype/card-sheet.html prints, so
+ * colours and rarity colours are the ones tools/card-sheet.html prints, so
  * a card on this screen matches the card that comes out of the printer.
  *
  * Everything on a card face is sized in em, and `.card` / `.sprite` set their
@@ -567,7 +567,7 @@ body {
 .face {
   display: flex;
   flex-direction: column;
-  gap: 0.35em;
+  gap: 0.3em;
   padding: 0.7em 0.8em 0.6em;
   background: var(--stock);
   border: 0.18em solid var(--stock-edge);
@@ -616,6 +616,11 @@ body {
 .name {
   font: 700 1.45em/1.05 var(--display);
   letter-spacing: 0.005em;
+}
+/* A name too long for two lines at 1.45em — shrunk so it wraps to fewer,
+ * shorter lines instead of pushing the text below it further down. */
+.face--long-name .name {
+  font-size: 1.15em;
 }
 .cost {
   flex: none;
@@ -705,11 +710,79 @@ body {
   font-size: 1.7em;
   font-weight: 700;
 }
+/* Oomph and Scramble together, shrunk enough to stay on one line rather than
+ * wrapping and eating the row height text below needs. */
+.face__stats--pair {
+  flex-wrap: nowrap;
+  gap: 0.5em;
+}
+.face__stats--pair .stat {
+  gap: 0.2em;
+}
+.face__stats--pair .stat b {
+  font-size: 1.5em;
+}
+.face__stats--pair .stat i {
+  font-size: 0.8em;
+}
 .face__text {
   margin: 0;
   font-size: 1.02em;
   line-height: 1.25;
   color: #333;
+}
+
+/* A card that prints text yields the art window to it rather than clipping:
+ * the more text there is, the smaller the art gets and the smaller the text
+ * itself prints, in the same four steps `textTierOf` in CardFace.tsx picks
+ * from. An untexted card never carries one of these classes, so it keeps the
+ * art window it always had. Leave room to add a step above `xl` later
+ * (issue #47 revisits this sizing for wide screens) rather than assuming two
+ * tiers is the ceiling. */
+.face--text-s .face__art {
+  flex: 0 1 auto;
+  min-height: 1.3em;
+}
+.face--text-m .face__art {
+  flex: 0 1 auto;
+  min-height: 0.7em;
+}
+.face--text-m .face__text {
+  font-size: 0.88em;
+  line-height: 1.16;
+}
+.face--text-s .stat b,
+.face--text-m .stat b {
+  font-size: 1.7em;
+}
+.face--text-l .face__art {
+  flex: 0 1 auto;
+  min-height: 0.4em;
+}
+.face--text-l .face__text {
+  font-size: 0.84em;
+  line-height: 1.16;
+}
+.face--text-l .stat b {
+  font-size: 1.6em;
+}
+.face--text-xl {
+  gap: 0.22em;
+}
+.face--text-xl .face__art {
+  flex: 0 0 auto;
+  min-height: 0;
+  height: 0.3em;
+}
+.face--text-xl .face__text {
+  font-size: 0.76em;
+  line-height: 1.1;
+}
+.face--text-xl .stat b {
+  font-size: 1.4em;
+}
+.face--text-xl .face__stats {
+  gap: 0.5em;
 }
 .face__foot {
   margin-top: auto;
@@ -731,29 +804,34 @@ body {
   color: #a8790a;
 }
 
-/* A room card prints its threshold lines and its Flee line. */
+/* A room card prints its threshold lines and its Flee line. Like a player
+ * card, it carries a `face--text-{s,m,l,xl}` tier (from `roomTextTierOf`,
+ * weighed by threshold count and outcome length rather than one string's
+ * length) so a room with more to say shrinks to keep all of it in view
+ * instead of clipping the lines furthest down. Room #47 adds a tier above
+ * `xl` for wide screens; the same class name is what it hangs that off. */
 .face--room .name {
-  font-size: 1.35em;
-  margin: 0.1em 0 0.15em;
+  font-size: 1.1em;
+  margin: 0.05em 0 0.1em;
 }
 .face--room .face__art {
   flex: 0 0 auto;
-  min-height: 2.6em;
+  min-height: 1.1em;
 }
 .lines {
   list-style: none;
   margin: 0;
   padding: 0;
-  font-size: 0.95em;
+  font-size: 0.85em;
 }
 .line {
-  padding: 0.2em 0;
+  padding: 0.12em 0;
   border-bottom: 1px dotted var(--stock-edge);
-  line-height: 1.2;
+  line-height: 1.15;
 }
 .line b {
   display: block;
-  font: 700 1.15em/1.2 var(--display);
+  font: 700 1.1em/1.15 var(--display);
 }
 .line.is-met {
   color: var(--met);
@@ -763,10 +841,10 @@ body {
 }
 .flee {
   margin-top: auto;
-  padding-top: 0.3em;
+  padding-top: 0.2em;
   border-top: 1px solid var(--stock-edge);
-  font-size: 0.9em;
-  line-height: 1.25;
+  font-size: 0.8em;
+  line-height: 1.2;
   color: var(--ink-soft);
 }
 .flee b {
@@ -774,6 +852,44 @@ body {
   letter-spacing: 0.06em;
   font-size: 0.9em;
   margin-right: 0.3em;
+}
+.face--room.face--text-m .lines {
+  font-size: 0.78em;
+}
+.face--room.face--text-m .flee {
+  font-size: 0.74em;
+}
+.face--room.face--text-l .face__art {
+  min-height: 0.6em;
+}
+.face--room.face--text-l .lines {
+  font-size: 0.72em;
+}
+.face--room.face--text-l .line {
+  padding: 0.08em 0;
+}
+.face--room.face--text-l .flee {
+  font-size: 0.68em;
+  padding-top: 0.12em;
+}
+.face--room.face--text-xl .face__art {
+  min-height: 0;
+  flex: 0 0 0;
+}
+.face--room.face--text-xl .name {
+  font-size: 1em;
+}
+.face--room.face--text-xl .lines {
+  font-size: 0.64em;
+}
+.face--room.face--text-xl .line {
+  padding: 0.05em 0;
+  line-height: 1.05;
+}
+.face--room.face--text-xl .flee {
+  font-size: 0.6em;
+  padding-top: 0.08em;
+  line-height: 1.1;
 }
 
 .back {
@@ -918,15 +1034,67 @@ body {
   font: 700 28px/1.1 var(--display);
 }
 
+/* The log, the note box that writes into it and the buttons that take it away
+ * are one block, so they stay together wherever the log goes — under the mat,
+ * or in its own column beside it on a wide screen. */
 .log {
   margin-top: 18px;
 }
-.log__title {
+.log__head {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
   margin: 0 0 4px;
+}
+.log__title {
+  margin: 0;
   font: 400 10px/16px var(--stencil);
   letter-spacing: 0.14em;
   text-transform: uppercase;
   color: var(--print);
+}
+.log__exports {
+  margin-left: auto;
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+}
+.log__exports-label {
+  font: 400 10px/16px var(--stencil);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--print);
+}
+
+/* A note is typed into the log, so the box sits against the bottom of it. */
+.note-box {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 6px;
+}
+.note-box__label {
+  font: 400 10px/16px var(--stencil);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--print);
+}
+.note-box__input {
+  flex: 1 1 auto;
+  min-width: 0;
+  padding: 7px 10px;
+  border: 1px solid rgba(245, 239, 225, 0.35);
+  border-radius: 4px;
+  background: rgba(0, 0, 0, 0.25);
+  color: var(--stock);
+  font: 14px/1.2 var(--sans);
+}
+.note-box__input::placeholder {
+  color: var(--print-faint);
+}
+.note-box__input:focus-visible {
+  outline: 2px solid var(--woah);
+  outline-offset: 1px;
 }
 .log__lines {
   list-style: none;
@@ -951,9 +1119,21 @@ body {
   color: var(--red-light);
   font-weight: 700;
 }
+.log__line--stuff_pool_empty {
+  color: var(--red-light);
+}
 .log__line--room_cleared,
 .log__line--floor_cleared {
   color: var(--met-light);
+}
+/* A typed note, marked out from the rules' own narration around it. */
+.log__line--note {
+  margin: 2px 0;
+  padding: 2px 8px;
+  border-left: 3px solid var(--woah);
+  background: rgba(218, 165, 32, 0.12);
+  color: #f2d48a;
+  font-weight: 700;
 }
 
 /* The zoomed copy of whatever is under the pointer. */
@@ -965,12 +1145,13 @@ body {
   pointer-events: none;
   filter: drop-shadow(0 14px 28px rgba(0, 0, 0, 0.6));
 }
-/* With room beside the table, the zoomed card sits there instead of over the mat. */
-@media (min-width: 1700px) {
+/* Past the wide table's own cap (below), there is room beside it again, and
+ * the zoomed card sits there instead of over the mat. */
+@media (min-width: 2500px) {
   .inspector {
     right: auto;
     bottom: auto;
-    left: calc(50% + 606px);
+    left: calc(50% + 1020px);
     top: 78px;
   }
 }
@@ -1123,6 +1304,20 @@ body {
     max-height: 100px;
     font-size: 12px;
   }
+  /* The note field keeps the row; on a screen too narrow even for that, the
+   * button drops under it rather than squeezing the field to nothing. */
+  .note-box {
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+  .note-box__input {
+    min-width: 12em;
+    padding: 6px 8px;
+    font-size: 13px;
+  }
+  .log__exports {
+    gap: 4px;
+  }
 
   /* The zoomed card, small enough to leave the hands visible on a short screen. */
   .inspector {
@@ -1135,6 +1330,57 @@ body {
   }
 }
 
+/* --------------------------------------------------------------- wide table
+ *
+ * From `WIDE_ABOVE` in metrics.ts (1700px), there is room to spare: the mat
+ * draws at the `WIDE` metrics tier — bigger cards, not more empty felt around
+ * the same ones — and the log moves to a column of its own beside the mat
+ * instead of stacking underneath it, since it is the thing a playtester reads
+ * most. `.table` becomes the grid; everything below the mat row still spans
+ * both columns, in DOM order. Capped rather than filling ever-wider screens,
+ * so the same "empty felt" problem doesn't just reappear at a larger scale. */
+@media (min-width: 1700px) {
+  .table {
+    max-width: min(96vw, 2000px);
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 340px;
+    column-gap: 24px;
+    grid-template-areas:
+      "head head"
+      "mat  log"
+      "foot foot"
+      "note note";
+  }
+  .table__head {
+    grid-area: head;
+  }
+  .mat {
+    grid-area: mat;
+    min-width: 1425px;
+    grid-template-columns: minmax(0, 1fr) 265px;
+  }
+  .ascend,
+  .over,
+  .controls {
+    grid-area: foot;
+  }
+  .rejection {
+    grid-area: note;
+  }
+  .log {
+    grid-area: log;
+    margin-top: 0;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+  }
+  .log__lines {
+    flex: 1 1 auto;
+    max-height: none;
+    min-height: 0;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .sprite,
   .sprite__in,
@@ -1142,4 +1388,110 @@ body {
     transition: none !important;
     animation: none !important;
   }
+}
+
+/* ------------------------------------------------------------------ debug
+ *
+ * Debug mode: a checkbox in the header turns every pile face up (handled by
+ * `placements()`), and a small button appears on every stacked slot to read
+ * that pile's full contents — the stack itself can only ever show a card or
+ * two of offset before the rest sit hidden underneath. The pile panel is a
+ * fixed overlay, independent of the mat's own layout, so it keeps working
+ * whatever else moves around the mat. */
+.debug-toggle {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-right: 4px;
+  font: 600 13px/1 var(--display);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--print);
+  cursor: pointer;
+}
+.debug-toggle input {
+  cursor: pointer;
+}
+
+.slot__inspect {
+  position: absolute;
+  top: 0;
+  right: 0;
+  z-index: 401;
+  padding: 1px 6px;
+  border: 1px solid var(--print-faint);
+  border-radius: 4px;
+  background: var(--ink);
+  color: var(--print);
+  font: 600 9px/16px var(--display);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+.slot__inspect:hover {
+  color: var(--stock);
+  border-color: var(--print);
+}
+
+.pile-panel__backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 2000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: rgba(0, 0, 0, 0.6);
+}
+.pile-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-width: min(900px, 100%);
+  max-height: 100%;
+  padding: 16px 18px;
+  border-radius: 10px;
+  background: linear-gradient(180deg, var(--felt), var(--felt-deep));
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+  color: var(--stock);
+}
+.pile-panel__head {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+}
+.pile-panel__head h2 {
+  margin: 0;
+  font: 700 18px/1 var(--display);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+.pile-panel__count {
+  color: var(--print);
+  font-size: 13px;
+}
+.pile-panel__head .button {
+  margin-left: auto;
+}
+.pile-panel__list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  overflow-y: auto;
+  padding: 4px 2px;
+}
+.pile-panel__item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+.pile-panel__pos {
+  font: 700 10px/1 var(--display);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--print);
+}
+.pile-panel__empty {
+  color: var(--print);
 }

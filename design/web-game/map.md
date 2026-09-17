@@ -13,11 +13,9 @@ built beyond the skeleton. The spec lands at `design/web-game/spec.md`.
 - **Domain**: North vs Up, a two-character cooperative deckbuilder. The rules are ratified in
   [`design/rulebook.md`](../rulebook.md) and the vocabulary in [`design/GLOSSARY.md`](../GLOSSARY.md).
   Every card is written down once, in [`design/cards.yaml`](../cards.yaml); `make build` generates
-  `prototype/cards.js` from it. The web game reads from that same source.
-- **Reference, not code**: [`prototype/rules-core-ts/`](../../prototype/rules-core-ts/README.md) is a
-  throwaway prototype. Its `(state, command) -> [state, events]` spine, seeded RNG kept in state, and
-  command/event split carry forward as decisions. Its code does not. The official build starts
-  clean in a new top-level directory. `[proposed by agent → you approved, 2026-09-01]`
+  `tools/cards.js` for the printable card sheet from it. The web game reads from that same source.
+- **The engine's shape**: a `(state, command) -> [state, events]` spine, randomness as a seed kept
+  in state, and commands and events as separate types. `[proposed by agent → you approved, 2026-09-01]`
 - **Scope settled at charting** `[you, 2026-09-01]`: React, TypeScript strict, one browser with
   both characters on one screen, hosted locally, no networking. DDD in its lighter form: one bounded
   context, a pure domain layer, a ubiquitous language, and everything else kept out of it.

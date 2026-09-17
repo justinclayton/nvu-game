@@ -90,7 +90,7 @@ export function validate(state: GameState, command: Command): Rejection | null {
 
     case "FLIP_ROOM": {
       if (state.phase !== "Flip") return wrongPhase(state, "flip a room");
-      // §9: both Down at the start of a turn ends the run, so the command is
+      // Rulebook, Last Stand: Going Down: both Down at the start of a turn ends the run, so the command is
       // still legal — there is simply no flip.
       if (state.Red.down && state.Gray.down) return null;
       if (state.floorDeck.length === 0) {
@@ -270,7 +270,7 @@ function apply(state: GameState, command: Command, run: Run): GameState {
     case "FLIP_ROOM":
       return flipRoom(state, run);
     case "DRAW":
-      // §9: `drawOne` itself sweeps for last stand right away if this empties
+      // Rulebook, Last Stand: `drawOne` itself sweeps for last stand right away if this empties
       // the deck — see the note on `activateLastStand`.
       return drawOne(state, command.character, run.events);
     case "END_DRAW":
@@ -331,7 +331,7 @@ function flush(state: GameState, run: Run): GameState {
  * A bare `Exhaust X` line: X cards off the top of that character's own deck.
  * Rooms print it as their punishment and some cards print it as their own cost.
  * `exhaustFromDeck` sweeps for last stand right away if this empties the deck
- * (§9), whichever of the two prints it.
+ * (rulebook, Last Stand), whichever of the two prints it.
  *
  * This is the only shape a card can turn off. `Discard X cards from your hand`
  * names its zone, and so do cleanup, the burned draw of a full hand and the
@@ -356,7 +356,7 @@ function printedExhaust(
 /* ------------------------------------------------------------ Flip */
 
 function flipRoom(state: GameState, run: Run): GameState {
-  // §9: the run ends when both characters are Down, checked at the start of a
+  // Rulebook, Last Stand: Going Down: the run ends when both characters are Down, checked at the start of a
   // turn. If both are Down when a turn begins, there is no flip.
   if (state.Red.down && state.Gray.down) {
     run.events.push({ type: "GAME_OVER", outcome: "Defeat" });
@@ -387,13 +387,13 @@ function flipRoom(state: GameState, run: Run): GameState {
  * The engine draws them one after the other, Red first, which is the same
  * result: neither draw can see or change the other. A `Full Hand` burns the
  * card to the discard pile and a character in last stand does not draw at
- * all (§9).
+ * all (rulebook, Last Stand).
  */
 function openingDraw(state: GameState, run: Run): GameState {
   let s = state;
   for (const c of CHARACTERS) {
     if (playerOf(s, c).lastStand) continue;
-    // §9: `drawOne` sweeps for last stand right away if this draw empties the deck.
+    // Rulebook, Last Stand: `drawOne` sweeps for last stand right away if this draw empties the deck.
     s = drawOne(s, c, run.events);
   }
   return s;
@@ -423,7 +423,7 @@ function playCard(
 
   let s = state;
   // A one-shot cost override is used up here. Last stand is not one of those,
-  // so a character playing their whole hand for nothing (§9) never burns the
+  // so a character playing their whole hand for nothing (rulebook, Last Stand) never burns the
   // team's free play, and neither does a card that already cost nothing.
   if (costOverrideSpentBy(s, c, card)?.reason === "free play") {
     s = spendFreePlay(s);
@@ -540,7 +540,7 @@ function endPlay(state: GameState, run: Run): GameState {
     resolution: {
       effects: outcome.effects,
       roomEnded: outcome.cleared ? "Cleared" : "Fled",
-      // §9: what matters is how the room ends, not how it got there.
+      // Rulebook, Last Stand: what matters is how the room ends, not how it got there.
       lastStandAtClear: {
         Red: outcome.cleared && s.Red.lastStand,
         Gray: outcome.cleared && s.Gray.lastStand,
@@ -596,7 +596,7 @@ function applyEffect(state: GameState, effect: RoomEffect, who: Character, run: 
  * Work through what the room owes, stopping at the first thing that needs a
  * decision. Where a line says *1 character*, the team chooses which one and
  * they take all of it — there is no splitting. With a partner Down there is
- * nothing to choose and it all falls on the survivor (§9).
+ * nothing to choose and it all falls on the survivor (rulebook, Last Stand: Going Down).
  */
 function drain(state: GameState, run: Run): GameState {
   let s = state;
@@ -661,7 +661,7 @@ function finishTurn(state: GameState, run: Run): GameState {
   // card played this turn or nothing at all. See open-questions.md #14.
   s = clearFreePlays(s);
 
-  // §9: the team Fleeing the room while a character is in last stand puts that
+  // Rulebook, Last Stand: the team Fleeing the room while a character is in last stand puts that
   // character Down. In last stand you have to keep clearing rooms.
   if (resolution?.roomEnded === "Fled") {
     for (const c of CHARACTERS) {
@@ -678,7 +678,7 @@ function finishTurn(state: GameState, run: Run): GameState {
 
   s = cleanupPiles(s, resolution?.lastStandAtClear ?? { Red: false, Gray: false }, run);
 
-  // §9: a backstop. `drawOne` and `exhaustFromDeck` already sweep for last
+  // Rulebook, Last Stand: a backstop. `drawOne` and `exhaustFromDeck` already sweep for last
   // stand the moment a deck empties, so this ordinarily finds nothing to do.
   s = activateLastStand(s, run.events);
 
@@ -693,7 +693,7 @@ function finishTurn(state: GameState, run: Run): GameState {
   s = { ...s, resolution: null };
   run.events.push({ type: "TURN_ENDED", turn: s.turn });
 
-  // §10: clearing the Enemy room ends the floor. You do not have to empty the
+  // Rulebook, Ascending: clearing the Enemy room ends the floor. You do not have to empty the
   // deck; you have to kill the thing on the stairs.
   if (s.cleared.some((r) => r.kind === "enemy")) {
     run.events.push({ type: "FLOOR_CLEARED", floor: s.floor });
@@ -701,7 +701,7 @@ function finishTurn(state: GameState, run: Run): GameState {
       run.events.push({ type: "GAME_OVER", outcome: "Victory" });
       return { ...s, phase: "GameOver", outcome: "Victory", playZone: [] };
     }
-    // §10 step 3: each character is offered three cards from their own pool.
+    // Rulebook, Ascending: each character is offered three cards from their own pool.
     return {
       ...s,
       phase: "Ascend",
@@ -715,7 +715,7 @@ function finishTurn(state: GameState, run: Run): GameState {
 /**
  * Each Turn, Cleanup: discard the entire play zone. The hand carries over untouched.
  *
- * §9: if the room was Cleared while a character was in last stand, the last
+ * Rulebook, Last Stand: if the room was Cleared while a character was in last stand, the last
  * stand cleanup replaces their play-zone cleanup — the play zone shuffles into
  * their deck and 2 off the top are the price of getting out. See
  * open-questions.md #4.
@@ -749,9 +749,13 @@ function cleanupPiles(
     if (lastStandAtClear[c] && !playerOf(s, c).down) {
       s = shuffleIntoDeck(s, c, played, run.events);
       s = withPlayer(s, c, { ...playerOf(s, c), lastStand: false });
+      // The price is read off the top of the deck before it is paid, not
+      // after: what's sitting there right now is exactly what `exhaustFromDeck`
+      // is about to take, so the event can announce the escape — and report
+      // what it cost — before the exhaust (and any Down it causes) happens.
       const price = playerOf(s, c).deck.slice(0, LAST_STAND_PRICE);
-      s = exhaustFromDeck(s, c, LAST_STAND_PRICE, "the price of getting out", run.events);
       run.events.push({ type: "LAST_STAND_ESCAPED", character: c, price });
+      s = exhaustFromDeck(s, c, LAST_STAND_PRICE, "the price of getting out", run.events);
       continue;
     }
     for (const card of played) s = discard(s, c, card, "playZone", run.events);
@@ -852,7 +856,7 @@ const setPool = (state: GameState, c: Character, cards: readonly Card[]): GameSt
     ? { ...state, pools: { ...state.pools, Red: cards } }
     : { ...state, pools: { ...state.pools, Gray: cards } };
 
-/* ------------------------------------------------------------ §10 Ascending */
+/* ------------------------------------------------------------ Rulebook, Ascending */
 
 function ascend(state: GameState, red: AscendChoice, gray: AscendChoice, run: Run): GameState {
   let s = state;
@@ -869,7 +873,7 @@ function ascendOne(state: GameState, c: Character, choice: AscendChoice, run: Ru
   let s = state;
   let pile = [...playerOf(s, c).discard];
 
-  // §10 step 1: all Stuff in the discard pile moves to the Scrapyard, for good.
+  // Rulebook, Ascending: all Stuff in the discard pile moves to the Scrapyard, for good.
   // The Scrap tax keeps one piece by Scrapping another card of that pile in its
   // place. Kept Stuff stays ordinary Stuff; nothing is tracked.
   if (choice.keepStuffId !== null && choice.scrapId !== null) {
@@ -884,7 +888,7 @@ function ascendOne(state: GameState, c: Character, choice: AscendChoice, run: Ru
   }
   pile = pile.filter((x) => x.kind === "player" || x.id === choice.keepStuffId);
 
-  // §10 step 3: three cards from their own pool; take one or decline. A declined
+  // Rulebook, Ascending: three cards from their own pool; take one or decline. A declined
   // card goes to the bottom of its pool.
   const offered = state.offer?.[c] ?? [];
   const taken = offered.find((x) => x.id === choice.takeRewardId) ?? null;
@@ -893,7 +897,7 @@ function ascendOne(state: GameState, c: Character, choice: AscendChoice, run: Ru
   const returned = offered.filter((x) => x.id !== taken?.id);
   s = setPool(s, c, [...s.pools[c].slice(offered.length), ...returned]);
 
-  // §10 step 2: the discard pile shuffles back into the deck. A floor cleared is
+  // Rulebook, Ascending: the discard pile shuffles back into the deck. A floor cleared is
   // a full heal, including for a character who was Down. Nothing bad crosses a
   // floor boundary. A hand carries over untouched, Stuff included.
   s = withPlayer(s, c, {

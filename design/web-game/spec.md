@@ -8,10 +8,9 @@ This document is the handoff to the implementing agent. The map is [`map.md`](ma
 
 North vs Up is a two-character cooperative deckbuilder with ratified rules in
 [`design/rulebook.md`](../rulebook.md) and a settled vocabulary in [`design/GLOSSARY.md`](../GLOSSARY.md).
-Every card is written down once, in [`design/cards.yaml`](../cards.yaml). A throwaway TypeScript
-prototype in [`prototype/rules-core-ts/`](../../prototype/rules-core-ts/README.md) showed that a
-pure `(state, command) -> [state, events]` engine runs every ratified rule and replays exactly from
-a seed. The official web version starts clean and keeps that shape.
+Every card is written down once, in [`design/cards.yaml`](../cards.yaml). The engine is a pure
+`(state, command) -> [state, events]` function: it runs every ratified rule and replays a run
+exactly from its seed.
 
 Scope: React, TypeScript strict, one browser with both characters on one screen, hosted locally.
 No networking and no server. DDD in its light form: one bounded context, a pure domain, a
@@ -71,8 +70,7 @@ folder.
   once. Cleanup runs as the last step of `END_PLAY` and is announced by events. `pending: Pending |
   null` is a separate field for a choice the engine is waiting on.
 - `Command` and `DomainEvent` are discriminated unions on `type`, switched exhaustively with a
-  `never` default. Both live in domain. The prototype's `types.ts` is the reference shape; copy its
-  intent, not its file.
+  `never` default. Both live in domain.
 
 ### Card behaviour ([ticket 03](issues/03-card-logic-binding.md))
 
@@ -106,14 +104,18 @@ The UI computes no rule. It uses three things, all in domain:
 ### Session and React ([ticket 05](issues/05-ui-state-management.md))
 
 - `application/session.ts`: `createSession(seed, content)` returns a Zustand vanilla store
-  (`createStore` + `subscribeWithSelector`) holding `{ state, commands, events, history,
-  lastRejection }`. React-free.
+  (`createStore` + `subscribeWithSelector`) holding `{ state, seed, commands, events, notes,
+  history, lastRejection }`. React-free.
 - `dispatch(command)`: on `ok`, replace state whole, append command and events; on rejection, store
   it and change nothing else.
 - Undo: a stack of prior states, allowed back to the last checkpoint. A checkpoint is any command
   whose events revealed hidden information, decided by `revealsHiddenInfo`. In practice
   `FLIP_ROOM`, `DRAW`, `END_PLAY`, `ASCEND`.
 - Save is the seed plus the command log. Load is a fold of `execute` over it.
+- A playtester's note is session data, not a rule. `notes` holds `{ at, text }` pairs, where `at`
+  is a position in the event log, so a note reads back where it was typed and no note text ever
+  reaches the domain or the command log. Exporting a run writes the transcript, the per-turn rows
+  and the replayable seed-plus-commands file. `[proposed by agent, 2026-09-17]`
 - `ui/useSession.ts` wraps `useStore(session, selector)`. Sound, animation, and the text log
   subscribe to the event log outside React.
 - `infrastructure/seed.ts` supplies the seed from `crypto.getRandomValues`.
@@ -122,8 +124,8 @@ The UI computes no rule. It uses three things, all in domain:
 
 Vitest, `node` environment except `ui/`.
 
-- Domain: a describe block per rulebook section with test names quoting the rule; the prototype's
-  eight walkthroughs ported as rigged-state fixtures with expected events; seeded-run invariants
+- Domain: a describe block per rulebook section with test names quoting the rule; eight
+  walkthroughs of the hardest rules as rigged-state fixtures with expected events; seeded-run invariants
   (exact replay, no input mutation, card conservation, Down empties the hand, rejection leaves
   state identical); a test per registry entry beside the behaviour.
 - Content: generated module is fresh, every official text card has a behaviour.
@@ -165,7 +167,7 @@ Do these in order. Each step ends green under `make app-check`.
    then remove it.
 2. **Generator output.** Extend `tools/cards.mjs` to emit `cards.generated.ts` with structured
    thresholds and flee lines. Wire `make build` and `make check`.
-3. **Domain types** from `design/GLOSSARY.md` and the prototype's `types.ts`: state, commands, events,
+3. **Domain types** from `design/GLOSSARY.md`: state, commands, events,
    `Result`, `Pending`, branded ids.
 4. **Engine**: `execute` as validate then apply, one rulebook section at a time, each with its
    tests. Port the eight walkthroughs as fixtures. Add the seeded-run invariants.

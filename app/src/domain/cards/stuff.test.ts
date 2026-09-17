@@ -39,29 +39,54 @@ const playing = (over: Partial<GameState> = {}) =>
     ...over,
   });
 
-describe("Crowbar — 'If you get any Good Stuff this turn, get an additional one'", () => {
-  it("pays a second piece, once, however many times Stuff arrives", () => {
+describe("Crowbar — 'Play: if you get any Good Stuff this turn, get an additional one'", () => {
+  it("does nothing when played first, before anything else has paid this turn", () => {
+    const state = playing({
+      Red: player({ deck: pile("Shove", 4), hand: [card("Crowbar")] }),
+    });
+    const r = ids(state, "Red");
+    const { state: next, events } = play(state, [free("Red", r[0] as CardId)]);
+    expect(eventTypes(events)).not.toContain("STUFF_TAKEN");
+    expect(next.Red.hand).toEqual([]);
+  });
+
+  it("takes an extra piece when played after this character already got Good Stuff this turn", () => {
+    // The room's own payout normally lands after Play ends (open-questions.md
+    // #16), so this rigs the look-back condition directly rather than reaching
+    // it through a room: Red has already been handed one piece this turn.
+    const rigged = playing({
+      Red: player({ deck: pile("Shove", 4), hand: [card("Crowbar")] }),
+    });
+    const state = { ...rigged, thisTurn: { ...rigged.thisTurn, goodStuffTaken: { Red: 1, Gray: 0 } } };
+    const r = ids(state, "Red");
+    const { state: next, events } = play(state, [free("Red", r[0] as CardId)]);
+    expect(eventTypes(events)).toContain("STUFF_TAKEN");
+    expect(next.Red.hand.filter((c) => c.kind === "good_stuff")).toHaveLength(1);
+  });
+
+  it("can never count its own arrival: a room handing Red both Crowbar and another piece pays no third", () => {
     const state = playing({
       activeRoom: room("Ration Locker"),
       Red: player({
         deck: pile("Shove", 4),
-        hand: [card("Crowbar"), card("Charge In"), card("Shove"), card("Shove")],
+        hand: [card("Charge In"), card("Shove"), card("Shove")],
       }),
     });
     const r = ids(state, "Red");
-    // Charge In is Oomph 4 on Red's own side, which pays Red 2 Good Stuff; the
-    // Crowbar adds one more, once.
+    // Charge In is Oomph 4 on Red's own side, which pays Red 2 Good Stuff.
+    // Whether or not Crowbar itself is one of the two, the pool never grows a
+    // third piece from that arrival — only playing Crowbar afterward could.
     const { state: next } = play(state, [
       {
         type: "PLAY_CARD",
         character: "Red",
-        cardId: r[1] as CardId,
-        payWith: [r[2] as CardId, r[3] as CardId],
+        cardId: r[0] as CardId,
+        payWith: [r[1] as CardId, r[2] as CardId],
       },
       { type: "END_PLAY" },
     ]);
-    const stuff = next.Red.hand.filter((c) => c.kind === "good_stuff" && c.name !== "Crowbar");
-    expect(stuff).toHaveLength(3);
+    const stuff = next.Red.hand.filter((c) => c.kind === "good_stuff");
+    expect(stuff).toHaveLength(2);
   });
 });
 

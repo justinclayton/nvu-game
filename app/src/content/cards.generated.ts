@@ -436,7 +436,7 @@ export const CARD_CONTENT = {
       oomph: 1,
       scramble: 1,
       conditionalStat: false,
-      text: "If you get any Good Stuff this turn, get an additional one.",
+      text: "Play: if you get any Good Stuff this turn, get an additional one.",
     },
     {
       name: "A Pair Of Stich-Em-Ups",

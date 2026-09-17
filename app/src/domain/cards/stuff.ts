@@ -11,8 +11,6 @@ import {
   CHARACTERS,
   drawOne,
   grantFreePlay,
-  hasFired,
-  markFired,
   moveToBottomOfDeck,
   playerOf,
   returnToHand,
@@ -37,19 +35,22 @@ function healCardsAsk(state: GameState, ctx: BehaviourContext, target: Character
 export const STUFF: Registry = {
   /* ------------------------------------------------------------ Good Stuff */
 
-  /* "If you get any Good Stuff this turn, get an additional one."
+  /* "Play: if you get any Good Stuff this turn, get an additional one."
    *
-   * Once per turn per Crowbar: the extra piece is itself Good Stuff, and without
-   * the marker it would feed itself for as long as the pool held out. */
+   * An on-play effect, resolved once, the moment Crowbar itself enters the
+   * play zone. It looks backward at `thisTurn.goodStuffTaken` — whatever its
+   * controller has already been handed earlier in the same turn — never at
+   * itself (its own arrival landed earlier, while it was still being handed
+   * to a hand, not played from one) and never forward at the room's own
+   * payout, which resolves later, at Outcome, after the whole Play phase
+   * (and so after this onPlay) has already run. Being one-shot, it cannot
+   * feed itself the way the old hand-standing trigger could, so it needs no
+   * once-per-turn marker. See open-questions.md #16. */
   Crowbar: {
-    onEvent(event, state, ctx) {
-      if (ctx.zone !== "hand") return nothing(state);
-      if (event.type !== "STUFF_TAKEN" || event.character !== ctx.character) return nothing(state);
-      if (event.card.kind !== "good_stuff") return nothing(state);
-      const key = `${ctx.card.id}:crowbar`;
-      if (hasFired(state, key)) return nothing(state);
+    onPlay(state, ctx) {
+      if (state.thisTurn.goodStuffTaken[ctx.character] === 0) return nothing(state);
       const events: DomainEvent[] = [];
-      return done(takeGoodStuff(markFired(state, key), ctx.character, 1, events), events);
+      return done(takeGoodStuff(state, ctx.character, 1, events), events);
     },
   },
 

@@ -107,8 +107,12 @@ export interface TurnRecord {
    * Play phase ending drops what is left of it.
    */
   readonly freePlays: number;
-  /** Once-per-turn markers, so a trigger that feeds itself fires once. */
-  readonly fired: readonly string[];
+  /**
+   * Crowbar: how many pieces of Good Stuff each character has already been
+   * handed this turn, so an on-play "if you got any earlier this turn" check
+   * has something to look back at. See open-questions.md #16.
+   */
+  readonly goodStuffTaken: Readonly<Record<Character, number>>;
 }
 
 /* ------------------------------------------------------------ the phases */

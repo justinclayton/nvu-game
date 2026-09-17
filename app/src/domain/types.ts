@@ -296,6 +296,11 @@ export type DomainEvent =
   | { readonly type: "CARDS_PEEKED"; readonly character: Character; readonly cards: readonly Card[] }
   | { readonly type: "THRESHOLD_MET"; readonly room: Room; readonly threshold: Threshold }
   | { readonly type: "STUFF_TAKEN"; readonly character: Character; readonly card: Card }
+  | {
+      readonly type: "STUFF_POOL_EMPTY";
+      readonly character: Character;
+      readonly pool: "good_stuff" | "bad_stuff";
+    }
   | { readonly type: "ROOM_CLEARED"; readonly room: Room }
   | { readonly type: "ROOM_FLED"; readonly room: Room }
   | { readonly type: "FLED_RESHUFFLED"; readonly rooms: number }

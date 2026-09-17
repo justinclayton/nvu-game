@@ -951,6 +951,9 @@ body {
   color: var(--red-light);
   font-weight: 700;
 }
+.log__line--stuff_pool_empty {
+  color: var(--red-light);
+}
 .log__line--room_cleared,
 .log__line--floor_cleared {
   color: var(--met-light);

@@ -168,4 +168,27 @@ export const STUFF: Registry = {
     whileHeld: { thresholdScrambleDelta: 2 },
     exhaustX: 2,
   },
+
+  /* "Holding: whenever you draw a card, your partner must also draw a card."
+   *
+   * One-way: the holder's draw forces the partner's, never the reverse. Any
+   * draw counts — the opening draw, a chosen draw in Draw/Play, or one a card's
+   * text causes — so this listens for both `CARD_DRAWN` and `DRAW_BURNED`,
+   * which are the two shapes a draw can take (§5). The forced draw itself is
+   * stamped `forced` by `drawOne` and is skipped here, so it cannot chain: it
+   * does not count as a draw that forces one, whether it lands on this same
+   * copy or on a copy the partner is holding. Full Hand and Last Stand for the
+   * forced draw come from `drawOne` and the same last-stand check `openingDraw`
+   * uses — no new rule for either. */
+  "My Head Is Quantum Spinning": {
+    onEvent(event, state, ctx) {
+      if (ctx.zone !== "hand") return nothing(state);
+      if (event.type !== "CARD_DRAWN" && event.type !== "DRAW_BURNED") return nothing(state);
+      if (event.character !== ctx.character || event.forced) return nothing(state);
+      const partner = ctx.character === "Red" ? "Gray" : "Red";
+      if (playerOf(state, partner).lastStand) return nothing(state);
+      const events: DomainEvent[] = [];
+      return done(drawOne(state, partner, events, false, true), events);
+    },
+  },
 };

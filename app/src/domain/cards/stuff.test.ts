@@ -344,3 +344,48 @@ describe("Panic — 'ALL rooms require an additional 2 Scramble, and Play: Exhau
     expect(next.Red.deck).toHaveLength(2);
   });
 });
+
+describe("My Head Is Quantum Spinning — 'whenever you draw a card, your partner must also draw'", () => {
+  it("forces the partner to draw immediately, and does not chain back", () => {
+    const state = rig({
+      phase: "Draw",
+      activeRoom: room("Sorting Room"),
+      Red: player({ deck: pile("Shove", 6), hand: [card("My Head Is Quantum Spinning")] }),
+      Gray: player({ deck: pile("Duck Under", 6) }),
+    });
+    const { state: next, events } = must(state, { type: "DRAW", character: "Red" });
+    // Red's chosen draw plus the held card.
+    expect(next.Red.hand).toHaveLength(2);
+    // The forced draw landed on Gray right away, and only once — if it chained
+    // back to Red (or bounced off Gray's own forced draw) this would be higher.
+    expect(next.Gray.hand).toHaveLength(1);
+    expect(next.Gray.drewThisTurn).toBe(1);
+    expect(eventTypes(events)).toEqual(["CARD_DRAWN", "CARD_DRAWN"]);
+  });
+
+  it("exhausts the forced draw when the partner has a Full Hand", () => {
+    const state = rig({
+      phase: "Draw",
+      activeRoom: room("Sorting Room"),
+      Red: player({ deck: pile("Shove", 6), hand: [card("My Head Is Quantum Spinning")] }),
+      Gray: player({ deck: pile("Duck Under", 6), hand: pile("Shove", 5) }),
+    });
+    const { state: next } = must(state, { type: "DRAW", character: "Red" });
+    expect(next.Gray.hand).toHaveLength(5);
+    expect(next.Gray.exhaust).toHaveLength(1);
+    expect(next.Gray.drewThisTurn).toBe(1);
+  });
+
+  it("does not draw a partner in Last Stand", () => {
+    const state = rig({
+      phase: "Draw",
+      activeRoom: room("Sorting Room"),
+      Red: player({ deck: pile("Shove", 6), hand: [card("My Head Is Quantum Spinning")] }),
+      Gray: player({ deck: pile("Duck Under", 6), lastStand: true }),
+    });
+    const { state: next } = must(state, { type: "DRAW", character: "Red" });
+    expect(next.Gray.hand).toHaveLength(0);
+    expect(next.Gray.deck).toHaveLength(6);
+    expect(next.Gray.drewThisTurn).toBe(0);
+  });
+});

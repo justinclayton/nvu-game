@@ -67,12 +67,20 @@ In the middle of the table:
 
 Turn the top card of the Floor deck face up onto the Rooms pile. This is the new Active Room.
 
-### 2. Draw and Play
+### 2. Draw
 
-Players take turns either drawing a card or playing a card, in any order. You may draw and play as many times as you like.
+Both players draw **1** card at the same time. Players then take turns drawing a card, one at a time, as many times as they like.
 
-- **Draw**: Move the top card of your deck into your hand. You **must** draw at least **1** card this turn.
+- **Draw**: Move the top card of your deck into your hand.
 - **Full Hand**: If you are holding **5** or more cards, you have a `Full Hand` and cannot draw. If you are forced to draw with a `Full Hand`, that card goes into your exhaust pile instead.
+- **Last Stand**: If you are in `Last Stand`, skip the opening draw.
+
+The phase ends when both players pass.
+
+### 3. Play
+
+Players take turns playing a card. You may not draw during this phase.
+
 - **Play**: Move a card from your hand into your play zone and pay for it: look at its `Cost`, then move that number of cards from your hand to your exhaust pile. Unless otherwise specified, you can only pay for a card with other cards from your own hand. If a card's cost is 0 or less, play the card for free.
 - **Add up stats**: Stats on played cards add together across both sides of the play zone into one team pool.
 
@@ -80,7 +88,7 @@ Players take turns either drawing a card or playing a card, in any order. You ma
 
 The phase ends when both players pass.
 
-### 3. Outcome
+### 4. Outcome
 
 Players add their combined stats they accumulated this turn and check to see if they Cleared one or more challenges, or if they must Flee.
 
@@ -90,7 +98,7 @@ Players add their combined stats they accumulated this turn and check to see if 
 
 **Flee**: If *no challenges* have been cleared, the players must Flee the room. Resolve the `Flee:` outcome according to the text on the card, then **shuffle the room card back into the Floor deck**.
 
-### 4. Cleanup (end of turn)
+### 5. Cleanup (end of turn)
 
 Each player does the following:
 
@@ -100,7 +108,9 @@ If both players are `Down` at the end of the turn, the game ends (section 11).
 
 > Players always alternate actions between each other, starting with either player. Either player may pass. If both players pass, the phase ends.
 
-*Example (Draw and Play phase): Red draws, Gray draws, Red draws, Gray plays, Red plays, Gray passes, Red plays, Gray passes, Red passes, phase ends.*
+*Example (Draw phase): Red and Gray each draw their opening card, Red draws, Gray draws, Red passes, Gray draws, Gray passes, phase ends.*
+
+*Example (Play phase): Red plays, Gray plays, Red plays, Gray passes, Red passes, phase ends.*
 
 ---
 ## Cards

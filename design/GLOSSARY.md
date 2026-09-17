@@ -65,7 +65,7 @@ The combined Oomph and/or Scramble total from every card both players played thi
 
 **Play zone**
 
-The blank area in front of each player where cards are played during the Draw and Play phase. Cards here are moved to the Exhaust pile at Cleanup, unless the player is leaving Last Stand after a Clear, in which case they're shuffled into that player's deck instead.
+The blank area in front of each player where cards are played during the Play phase. Cards here are moved to the Exhaust pile at Cleanup, unless the player is leaving Last Stand after a Clear, in which case they're shuffled into that player's deck instead.
 
 **Type line**
 
@@ -119,9 +119,13 @@ The cards a player has drawn and is holding, used to play cards and pay Costs. S
 
 Five cards. A player holding 5 or more has a Full Hand and cannot draw; if forced to draw anyway, the card goes to the Exhaust pile instead.
 
-**Draw and Play**
+**Draw**
 
-The turn phase where players take turns either drawing a card from their deck into their hand or playing a card from their hand into their play zone, in any order. Each player must draw at least once, but may draw up to their Maximum hand size. A player in Last Stand does not draw, even if forced.
+The turn phase where both players first draw 1 card at the same time, then take turns drawing a card, one at a time, for as long as they like. A player in Last Stand does not draw, even if forced.
+
+**Play**
+
+The turn phase where players take turns playing a card from their hand into their play zone. Nobody draws during it.
 
 **Exhaust**
 
@@ -145,7 +149,7 @@ The keyword marking a passive effect that applies only while the card is in hand
 
 **Turn**
 
-One pass through the four phases: New Room, Draw and Play, Outcome, and Cleanup. Repeats until the floor is cleared (Ascend) or the game ends.
+One pass through the five phases: New Room, Draw, Play, Outcome, and Cleanup. Repeats until the floor is cleared (Ascend) or the game ends.
 
 **Last Stand**
 

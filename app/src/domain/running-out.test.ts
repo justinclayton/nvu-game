@@ -9,7 +9,6 @@ import {
   pile,
   play,
   player,
-  readyToEnd,
   resetRig,
   rig,
   room,
@@ -27,22 +26,22 @@ const free = (c: Character, cardId: CardId) =>
 describe("§9 Last stand", () => {
   it("'immediately enters Last Stand' the moment the draw that empties the deck lands", () => {
     const state = rig({
-      phase: "Play",
+      phase: "Draw",
       activeRoom: room("Sorting Room"),
       Red: player({ deck: [card("Charge In")] }),
       Gray: player({ deck: pile("Duck Under", 4) }),
     });
     const drew = must(state, { type: "DRAW", character: "Red" });
-    // Draw and Play are one phase now, so there is no phase boundary left to
-    // wait for: the same command that empties the deck turns last stand on.
+    // The rest of the Draw phase runs on, so the state is live right away
+    // rather than at the phase boundary. See open-questions.md #17.
     expect(drew.state.Red.deck).toEqual([]);
     expect(drew.state.Red.lastStand).toBe(true);
     expect(eventTypes(drew.events)).toContain("LAST_STAND");
   });
 
-  it("'a character in last stand does not draw' — and the minimum does not apply to them", () => {
+  it("'a character in last stand does not draw' — the opening draw included", () => {
     const state = rig({
-      phase: "Play",
+      phase: "Draw",
       activeRoom: room("Sorting Room"),
       Red: player({ deck: [], hand: pile("Shove", 2), lastStand: true }),
       Gray: player({ deck: pile("Duck Under", 4) }),
@@ -50,10 +49,20 @@ describe("§9 Last stand", () => {
     const rejected = execute(state, { type: "DRAW", character: "Red" });
     expect(rejected.ok).toBe(false);
     if (!rejected.ok) expect(rejected.reason.code).toBe("InLastStand");
-    // Gray's single draw is enough — Red, in last stand, owes nothing.
-    const drawn = must(state, { type: "DRAW", character: "Gray" });
-    const ended = execute(drawn.state, { type: "END_PLAY" });
-    expect(ended.ok).toBe(true);
+
+    // And the flip that opens a turn passes them by, rather than sending them
+    // Down on an empty deck.
+    const turn = must(
+      rig({
+        phase: "Flip",
+        floorDeck: [room("Sorting Room")],
+        Red: player({ deck: [], hand: pile("Shove", 2), lastStand: true }),
+        Gray: player({ deck: pile("Duck Under", 4) }),
+      }),
+      { type: "FLIP_ROOM" },
+    );
+    expect(turn.state.Red.down).toBe(false);
+    expect(turn.state.Red.hand).toHaveLength(2);
   });
 
   it("'every card in their hand may be played at no cost'", () => {
@@ -70,14 +79,12 @@ describe("§9 Last stand", () => {
   });
 
   it("'all cards in the play zone are shuffled into their deck, then 2 are Exhausted'", () => {
-    const state = readyToEnd(
-      rig({
-        phase: "Play",
-        activeRoom: room("Sorting Room"),
-        Red: player({ deck: [], hand: pile("Shove", 3), lastStand: true }),
-        Gray: player({ deck: pile("Duck Under", 4) }),
-      }),
-    );
+    const state = rig({
+      phase: "Play",
+      activeRoom: room("Sorting Room"),
+      Red: player({ deck: [], hand: pile("Shove", 3), lastStand: true }),
+      Gray: player({ deck: pile("Duck Under", 4) }),
+    });
     const hand = ids(state, "Red");
     const { state: next, events } = play(state, [
       free("Red", hand[0] as CardId),
@@ -94,14 +101,12 @@ describe("§9 Last stand", () => {
   });
 
   it("'if fewer than 2 cards went into that shuffle, the tax sends you Down'", () => {
-    const state = readyToEnd(
-      rig({
-        phase: "Play",
-        activeRoom: room("Sorting Room"),
-        Red: player({ deck: [], hand: pile("Shove", 2), lastStand: true }),
-        Gray: player({ deck: pile("Duck Under", 4) }),
-      }),
-    );
+    const state = rig({
+      phase: "Play",
+      activeRoom: room("Sorting Room"),
+      Red: player({ deck: [], hand: pile("Shove", 2), lastStand: true }),
+      Gray: player({ deck: pile("Duck Under", 4) }),
+    });
     const hand = ids(state, "Red");
     const { state: next } = play(state, [
       free("Red", hand[0] as CardId),
@@ -111,15 +116,13 @@ describe("§9 Last stand", () => {
   });
 
   it("'the team Fleeing while a character is in last stand puts them Down'", () => {
-    const state = readyToEnd(
-      rig({
-        phase: "Play",
-        activeRoom: room("Gross Thing That Looks Like A Cherry"),
-        floorDeck: [room("Sorting Room")],
-        Red: player({ deck: [], hand: [card("Shove")], lastStand: true }),
-        Gray: player({ deck: pile("Duck Under", 4) }),
-      }),
-    );
+    const state = rig({
+      phase: "Play",
+      activeRoom: room("Gross Thing That Looks Like A Cherry"),
+      floorDeck: [room("Sorting Room")],
+      Red: player({ deck: [], hand: [card("Shove")], lastStand: true }),
+      Gray: player({ deck: pile("Duck Under", 4) }),
+    });
     const hand = ids(state, "Red");
     const { state: next, events } = play(state, [
       free("Red", hand[0] as CardId),
@@ -133,14 +136,12 @@ describe("§9 Last stand", () => {
     // A Stuff room's Flee line clears it, so last stand survives an empty board
     // — but the escape tax still meets an empty deck. Two cards played is what
     // gets you out.
-    const state = readyToEnd(
-      rig({
-        phase: "Play",
-        activeRoom: room("Sorting Room"),
-        Red: player({ deck: [], hand: pile("Shove", 3), lastStand: true }),
-        Gray: player({ deck: pile("Duck Under", 4) }),
-      }),
-    );
+    const state = rig({
+      phase: "Play",
+      activeRoom: room("Sorting Room"),
+      Red: player({ deck: [], hand: pile("Shove", 3), lastStand: true }),
+      Gray: player({ deck: pile("Duck Under", 4) }),
+    });
     const hand = ids(state, "Red");
     const { state: next } = play(state, [
       free("Red", hand[0] as CardId),
@@ -155,14 +156,12 @@ describe("§9 Last stand", () => {
 
 describe("§9 Going Down", () => {
   it("'a card would be moved from the top of their deck, but the deck is empty'", () => {
-    const state = readyToEnd(
-      rig({
-        phase: "Play",
-        activeRoom: room("Collapsed Stairwell"),
-        Red: player({ deck: [], hand: [card("Pry Bar")] }),
-        Gray: player({ deck: pile("Duck Under", 4) }),
-      }),
-    );
+    const state = rig({
+      phase: "Play",
+      activeRoom: room("Collapsed Stairwell"),
+      Red: player({ deck: [], hand: [card("Pry Bar")] }),
+      Gray: player({ deck: pile("Duck Under", 4) }),
+    });
     // Collapsed Stairwell's Flee line: one of you Exhausts 3.
     const { state: next, events } = play(state, [
       { type: "END_PLAY" },
@@ -173,14 +172,12 @@ describe("§9 Going Down", () => {
   });
 
   it("'going Down empties your hand into your exhaust pile'", () => {
-    const state = readyToEnd(
-      rig({
-        phase: "Play",
-        activeRoom: room("Collapsed Stairwell"),
-        Red: player({ deck: [], hand: [card("Pry Bar"), card("Shove")] }),
-        Gray: player({ deck: pile("Duck Under", 4) }),
-      }),
-    );
+    const state = rig({
+      phase: "Play",
+      activeRoom: room("Collapsed Stairwell"),
+      Red: player({ deck: [], hand: [card("Pry Bar"), card("Shove")] }),
+      Gray: player({ deck: pile("Duck Under", 4) }),
+    });
     const { state: next } = play(state, [
       { type: "END_PLAY" },
       { type: "CHOOSE_CHARACTER", character: "Red" },
@@ -190,14 +187,12 @@ describe("§9 Going Down", () => {
   });
 
   it("'a Down character takes no punishments' — every Flee line falls on the survivor", () => {
-    const state = readyToEnd(
-      rig({
-        phase: "Play",
-        activeRoom: room("Ruptured Coolant Line"),
-        Red: player({ deck: [], hand: [], down: true }),
-        Gray: player({ deck: pile("Duck Under", 5) }),
-      }),
-    );
+    const state = rig({
+      phase: "Play",
+      activeRoom: room("Ruptured Coolant Line"),
+      Red: player({ deck: [], hand: [], down: true }),
+      Gray: player({ deck: pile("Duck Under", 5) }),
+    });
     // "Both of you Exhaust 1, and one of you gets Bad Stuff." Red is out, so
     // there is nobody to choose between: it all lands on Gray.
     const { state: next } = must(state, { type: "END_PLAY" });
@@ -208,14 +203,12 @@ describe("§9 Going Down", () => {
   });
 
   it("'no card may be put into a Down character's hand'", () => {
-    const state = readyToEnd(
-      rig({
-        phase: "Play",
-        activeRoom: room("Sorting Room"),
-        Red: player({ deck: [], hand: [], down: true }),
-        Gray: player({ deck: pile("Duck Under", 5), hand: [card("Coil Of Cable")] }),
-      }),
-    );
+    const state = rig({
+      phase: "Play",
+      activeRoom: room("Sorting Room"),
+      Red: player({ deck: [], hand: [], down: true }),
+      Gray: player({ deck: pile("Duck Under", 5), hand: [card("Coil Of Cable")] }),
+    });
     const [coil] = ids(state, "Gray");
     const { state: next } = play(state, [
       free("Gray", coil as CardId),
@@ -227,9 +220,9 @@ describe("§9 Going Down", () => {
     expect(next.Gray.hand.every((c) => c.kind === "good_stuff")).toBe(true);
   });
 
-  it("'a Down character is skipped' — the minimum draw passes them by too", () => {
+  it("'a Down character is skipped' — the opening draw passes them by too", () => {
     const state = rig({
-      phase: "Play",
+      phase: "Draw",
       activeRoom: room("Sorting Room"),
       Red: player({ deck: pile("Shove", 3), down: true }),
       Gray: player({ deck: pile("Duck Under", 3) }),
@@ -237,8 +230,18 @@ describe("§9 Going Down", () => {
     const rejected = execute(state, { type: "DRAW", character: "Red" });
     expect(rejected.ok).toBe(false);
     if (!rejected.ok) expect(rejected.reason.code).toBe("CharacterIsDown");
-    const drawn = must(state, { type: "DRAW", character: "Gray" });
-    const ended = execute(drawn.state, { type: "END_PLAY" });
-    expect(ended.ok).toBe(true);
+
+    const turn = must(
+      rig({
+        phase: "Flip",
+        floorDeck: [room("Sorting Room")],
+        Red: player({ deck: pile("Shove", 3), down: true }),
+        Gray: player({ deck: pile("Duck Under", 3) }),
+      }),
+      { type: "FLIP_ROOM" },
+    );
+    expect(turn.state.Red.hand).toEqual([]);
+    expect(turn.state.Red.deck).toHaveLength(3);
+    expect(turn.state.Gray.hand).toHaveLength(1);
   });
 });

@@ -8,12 +8,13 @@ const SEED = 4242;
 
 const newSession = () => createSession(SEED, content);
 
-/** The commands a session needs to get both characters through their draws. */
+/** The commands a session needs to get from a new run into the Play phase. */
 function throughATurn(): readonly Command[] {
   return [
     { type: "FLIP_ROOM" },
     { type: "DRAW", character: "Red" },
     { type: "DRAW", character: "Gray" },
+    { type: "END_DRAW" },
   ];
 }
 
@@ -57,8 +58,11 @@ describe("undo", () => {
   it("cannot reach back past a command that revealed hidden information", () => {
     const session = newSession();
     for (const command of throughATurn()) session.getState().dispatch(command);
-    // Flip and both draws each showed somebody a card, so there is nothing to
-    // take back.
+    // The flip and both draws each showed somebody a card, so there is nothing
+    // to take back — END_DRAW revealed nothing, so it alone can be undone.
+    expect(canUndo(session.getState())).toBe(true);
+    expect(session.getState().undo()).toBe(true);
+    expect(session.getState().state.phase).toBe("Draw");
     expect(canUndo(session.getState())).toBe(false);
     expect(session.getState().undo()).toBe(false);
   });
@@ -74,7 +78,8 @@ describe("undo", () => {
     const cost = card.cost;
     const payWith = red.hand.filter((c) => c.id !== card.id).slice(0, cost);
     if (payWith.length < cost) {
-      // Nothing affordable was drawn; skip rather than assert on an empty play.
+      // Nothing affordable was drawn; the point still stands on END_DRAW alone.
+      expect(canUndo(beforePlay)).toBe(true);
       return;
     }
 

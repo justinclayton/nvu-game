@@ -17,7 +17,6 @@ import {
   drawCapFor,
   exhaustXPreventedBy,
   handCapFor,
-  mustStillDraw,
   payOptions,
   thresholdIsMet,
 } from "./queries";
@@ -98,7 +97,7 @@ export function validate(state: GameState, command: Command): Rejection | null {
     }
 
     case "DRAW": {
-      if (state.phase !== "Play") return wrongPhase(state, "draw");
+      if (state.phase !== "Draw") return wrongPhase(state, "draw");
       const p = playerOf(state, command.character);
       if (p.down) return reject("CharacterIsDown", `${command.character} is Down.`);
       if (p.lastStand) {
@@ -113,9 +112,14 @@ export function validate(state: GameState, command: Command): Rejection | null {
       if (!canDraw(state, command.character)) {
         return reject(
           "HandIsFull",
-          `${command.character} is holding ${String(handCapFor(state, command.character))} and has already drawn.`,
+          `${command.character} is holding ${String(handCapFor(state, command.character))} and has a Full Hand.`,
         );
       }
+      return null;
+    }
+
+    case "END_DRAW": {
+      if (state.phase !== "Draw") return wrongPhase(state, "end the draw phase");
       return null;
     }
 
@@ -149,12 +153,7 @@ export function validate(state: GameState, command: Command): Rejection | null {
     }
 
     case "END_PLAY": {
-      if (state.phase !== "Play") return wrongPhase(state, "end the draw and play phase");
-      for (const c of CHARACTERS) {
-        if (mustStillDraw(state, c)) {
-          return reject("MustDrawAtLeastOne", `${c} must draw at least 1 card.`);
-        }
-      }
+      if (state.phase !== "Play") return wrongPhase(state, "end the play phase");
       return null;
     }
 
@@ -273,6 +272,8 @@ function apply(state: GameState, command: Command, run: Run): GameState {
       const drawn = drawOne(state, command.character, run.events);
       return activateLastStand(drawn, run.events);
     }
+    case "END_DRAW":
+      return { ...state, phase: "Play" };
     case "PLAY_CARD":
       return playCard(state, command.character, command.cardId, command.payWith, run);
     case "END_PLAY":
@@ -349,7 +350,7 @@ function printedExhaust(
   return exhaustFromDeck(state, c, amount, cause, run.events);
 }
 
-/* ----------------------------------------------------------- Phase 1: Flip */
+/* ------------------------------------------------------------ Flip */
 
 function flipRoom(state: GameState, run: Run): GameState {
   // §9: the run ends when both characters are Down, checked at the start of a
@@ -363,19 +364,38 @@ function flipRoom(state: GameState, run: Run): GameState {
 
   // §5: you always see what you are facing before you spend anything.
   run.events.push({ type: "ROOM_FLIPPED", room });
-  return {
+  const flipped: GameState = {
     ...state,
     turn: state.turn + 1,
     floorDeck: state.floorDeck.slice(1),
     activeRoom: room,
-    phase: "Play",
+    phase: "Draw",
     Red: { ...state.Red, drewThisTurn: 0 },
     Gray: { ...state.Gray, drewThisTurn: 0 },
     thisTurn: emptyTurnRecord(),
   };
+  return openingDraw(flipped, run);
 }
 
-/* ------------------------------------------------- Phase 2: Draw and Play */
+/* ------------------------------------------------------------ Draw */
+
+/**
+ * §5: Draw opens with both characters drawing 1 card at the same time. The
+ * engine draws them one after the other, Red first, which is the same result:
+ * neither draw can see or change the other. A `Full Hand` burns the card to the
+ * exhaust pile (§5) and a character in last stand does not draw at all (§9).
+ */
+function openingDraw(state: GameState, run: Run): GameState {
+  let s = state;
+  for (const c of CHARACTERS) {
+    if (playerOf(s, c).lastStand) continue;
+    s = drawOne(s, c, run.events);
+  }
+  // §9: a draw that empties a deck puts that character in last stand right away.
+  return activateLastStand(s, run.events);
+}
+
+/* ------------------------------------------------------------ Play */
 
 const addPaid = (record: TurnRecord, c: Character, n: number): TurnRecord =>
   c === "Red"
@@ -442,7 +462,7 @@ function playCard(
   return s;
 }
 
-/* -------------------------------------------------------- Phase 3: Outcome */
+/* ------------------------------------------------------------ Outcome */
 
 const goodStuffFor = (t: Threshold, c: Character): number =>
   t.effects
@@ -632,7 +652,7 @@ function drain(state: GameState, run: Run): GameState {
   }
 }
 
-/* -------------------------------------------------------- Phase 4: Cleanup */
+/* ------------------------------------------------------------ Cleanup */
 
 function finishTurn(state: GameState, run: Run): GameState {
   const resolution = state.resolution;

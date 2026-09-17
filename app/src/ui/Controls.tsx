@@ -24,9 +24,11 @@ export function Controls({ state, dispatch, hint }: Props) {
   const buttons: readonly { label: string; command: Command }[] =
     state.phase === "Flip"
       ? [{ label: "Flip the next room", command: { type: "FLIP_ROOM" } }]
-      : state.phase === "Play"
-        ? [{ label: "Both of us are done — check the room", command: { type: "END_PLAY" } }]
-        : [];
+      : state.phase === "Draw"
+        ? [{ label: "Everyone has finished drawing", command: { type: "END_DRAW" } }]
+        : state.phase === "Play"
+          ? [{ label: "Both of us have stopped — check the room", command: { type: "END_PLAY" } }]
+          : [];
 
   return (
     <div className="controls">

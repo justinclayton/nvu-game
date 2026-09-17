@@ -43,9 +43,7 @@ function nextCommand(state: GameState): Command | null {
   switch (state.phase) {
     case "Flip":
       return { type: "FLIP_ROOM" };
-    case "Play": {
-      // Draw and Play are one phase: draw up to a shallow depth first, then
-      // play whatever is affordable, then pass.
+    case "Draw": {
       for (const c of CHARACTERS) {
         // A card in hand can cap how deep this character may draw, so the
         // domain is what says whether another draw is legal.
@@ -53,6 +51,9 @@ function nextCommand(state: GameState): Command | null {
           return { type: "DRAW", character: c };
         }
       }
+      return { type: "END_DRAW" };
+    }
+    case "Play": {
       for (const c of CHARACTERS) {
         const card = playableCards(state, c)[0];
         if (!card) continue;

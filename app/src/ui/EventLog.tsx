@@ -39,6 +39,8 @@ export function describeEvent(event: DomainEvent): string {
       return `${event.threshold.stat} ${String(event.threshold.value)} met — ${event.threshold.outcome}`;
     case "STUFF_TAKEN":
       return `${event.character} gets ${event.card.name}.`;
+    case "STUFF_POOL_EMPTY":
+      return `The ${event.pool === "good_stuff" ? "Good" : "Bad"} Stuff pool is empty — ${event.character} gets nothing.`;
     case "ROOM_CLEARED":
       return `${event.room.name} is Cleared.`;
     case "ROOM_FLED":

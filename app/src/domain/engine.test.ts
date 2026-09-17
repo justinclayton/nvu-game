@@ -469,4 +469,61 @@ describe("Room kinds: Enemy, Hazard, Stuff", () => {
     expect(next.Red.hand).toHaveLength(0);
     expect(next.Gray.hand).toHaveLength(0);
   });
+
+  it("a met threshold against an empty Good Stuff pool pays nothing and says so", () => {
+    // Sorting Room's Oomph 2 line owes Red a Good Stuff, but the pool is dry.
+    const state = rig({
+      phase: "Play",
+      activeRoom: room("Sorting Room"),
+      Red: player({ deck: pile("Shove", 5), hand: [card("Shove"), card("Shove")] }),
+      Gray: player({ deck: pile("Duck Under", 5) }),
+    });
+    const empty = { ...state, pools: { ...state.pools, goodStuff: [] } };
+    const r = ids(empty, "Red");
+    const { state: next, events } = play(empty, [
+      { type: "PLAY_CARD", character: "Red", cardId: r[0] as CardId, payWith: [r[1] as CardId] },
+      { type: "END_PLAY" },
+    ]);
+    expect(eventTypes(events)).not.toContain("STUFF_TAKEN");
+    expect(events).toContainEqual({
+      type: "STUFF_POOL_EMPTY",
+      character: "Red",
+      pool: "good_stuff",
+    });
+    expect(next.Red.hand).toHaveLength(0);
+  });
+
+  it("a met threshold against an empty Bad Stuff pool deals nothing and says so", () => {
+    // Ruptured Coolant Line's Scramble 4 line owes both of you Bad Stuff, but
+    // the pool is dry.
+    const state = rig({
+      phase: "Play",
+      activeRoom: room("Ruptured Coolant Line"),
+      Red: player({ deck: pile("Shove", 5) }),
+      Gray: player({
+        deck: pile("Duck Under", 5),
+        hand: [card("Coil Of Cable"), card("Coil Of Cable")],
+      }),
+    });
+    const empty = { ...state, pools: { ...state.pools, badStuff: [] } };
+    const g = ids(empty, "Gray");
+    const { state: next, events } = play(empty, [
+      playFree("Gray", g[0] as CardId),
+      playFree("Gray", g[1] as CardId),
+      { type: "END_PLAY" },
+    ]);
+    expect(eventTypes(events)).not.toContain("STUFF_TAKEN");
+    expect(events).toContainEqual({
+      type: "STUFF_POOL_EMPTY",
+      character: "Red",
+      pool: "bad_stuff",
+    });
+    expect(events).toContainEqual({
+      type: "STUFF_POOL_EMPTY",
+      character: "Gray",
+      pool: "bad_stuff",
+    });
+    expect(next.Red.hand).toHaveLength(0);
+    expect(next.Gray.hand).toHaveLength(0);
+  });
 });

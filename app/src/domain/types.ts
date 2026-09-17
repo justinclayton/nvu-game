@@ -101,8 +101,12 @@ export interface PlayerState {
  */
 export interface TurnRecord {
   readonly paid: Readonly<Record<Character, number>>;
-  /** Overcharged Battery: this many of a character's next plays cost nothing. */
-  readonly freePlays: Readonly<Record<Character, number>>;
+  /**
+   * Overcharged Battery: this many of the next cards played cost nothing,
+   * whichever character plays them. The discount belongs to the team, and the
+   * Play phase ending drops what is left of it.
+   */
+  readonly freePlays: number;
   /** Once-per-turn markers, so a trigger that feeds itself fires once. */
   readonly fired: readonly string[];
 }

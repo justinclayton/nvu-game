@@ -13,7 +13,7 @@ import {
   rig,
   room,
 } from "../__fixtures__/rig";
-import type { CardId, Character, GameState } from "../types";
+import type { Card, CardId, Character, GameState } from "../types";
 
 beforeEach(resetRig);
 
@@ -22,6 +22,13 @@ const ids = (state: GameState, c: Character): readonly CardId[] =>
 
 const free = (c: Character, cardId: CardId) =>
   ({ type: "PLAY_CARD", character: c, cardId, payWith: [] }) as const;
+
+/** One named card out of a hand, so a test never counts hand positions. */
+function handCard(state: GameState, c: Character, name: string): Card {
+  const found = state[c].hand.find((x) => x.name === name);
+  if (!found) throw new Error(`${c} is not holding ${name}`);
+  return found;
+}
 
 const playing = (over: Partial<GameState> = {}) =>
   rig({
@@ -273,6 +280,85 @@ describe("Overcharged Battery — 'The next card played this turn costs 0'", () 
 
     const spent = must(charged.state, free("Red", first.id));
     expect(costOf(spent.state, "Red", second)).toBe(2);
+  });
+
+  it("discounts the next card whichever character plays it", () => {
+    const state = playing({
+      Red: player({ deck: pile("Shove", 3), hand: [card("Overcharged Battery"), card("Shove")] }),
+      Gray: player({
+        deck: pile("Duck Under", 3),
+        hand: [card("Pick The Lock"), card("Duck Under")],
+      }),
+    });
+    const r = ids(state, "Red");
+    const charged = must(state, {
+      type: "PLAY_CARD",
+      character: "Red",
+      cardId: r[0] as CardId,
+      payWith: [r[1] as CardId],
+    });
+    const lock = handCard(charged.state, "Gray", "Pick The Lock");
+    expect(costOf(charged.state, "Gray", lock)).toBe(0);
+
+    // Gray spends it, so Gray's next card is back to its printed cost.
+    const spent = must(charged.state, free("Gray", lock.id));
+    expect(costOf(spent.state, "Gray", handCard(spent.state, "Gray", "Duck Under"))).toBe(1);
+  });
+
+  it("is not used up by a card that already costs 0", () => {
+    const state = playing({
+      Red: player({
+        deck: pile("Shove", 3),
+        hand: [card("Overcharged Battery"), card("Shove"), card("Pry Bar"), card("Charge In")],
+      }),
+    });
+    const r = ids(state, "Red");
+    const charged = must(state, {
+      type: "PLAY_CARD",
+      character: "Red",
+      cardId: r[0] as CardId,
+      payWith: [r[1] as CardId],
+    });
+    // Pry Bar is Cost 0 on its own, so it saves nothing and leaves the discount
+    // standing for Charge In.
+    const played = must(charged.state, free("Red", handCard(charged.state, "Red", "Pry Bar").id));
+    expect(played.state.thisTurn.freePlays).toBe(1);
+    expect(costOf(played.state, "Red", handCard(played.state, "Red", "Charge In"))).toBe(0);
+  });
+
+  it("does not survive the end of the Play phase", () => {
+    const state = playing({
+      Red: player({
+        deck: pile("Shove", 3),
+        hand: [card("Overcharged Battery"), card("Shove"), card("Charge In")],
+      }),
+    });
+    const r = ids(state, "Red");
+    const { state: next } = play(state, [
+      { type: "PLAY_CARD", character: "Red", cardId: r[0] as CardId, payWith: [r[1] as CardId] },
+      { type: "END_PLAY" },
+    ]);
+    expect(next.thisTurn.freePlays).toBe(0);
+  });
+
+  it("is not swallowed by a character playing for free in last stand", () => {
+    const state = playing({
+      Red: player({ deck: pile("Shove", 3), hand: [card("Overcharged Battery"), card("Shove")] }),
+      Gray: player({ deck: [], hand: [card("Pick The Lock")], lastStand: true }),
+    });
+    const r = ids(state, "Red");
+    const charged = must(state, {
+      type: "PLAY_CARD",
+      character: "Red",
+      cardId: r[0] as CardId,
+      payWith: [r[1] as CardId],
+    });
+    // §9 pays for Gray's card, not the Battery, so the discount is still there.
+    const spent = must(
+      charged.state,
+      free("Gray", handCard(charged.state, "Gray", "Pick The Lock").id),
+    );
+    expect(spent.state.thisTurn.freePlays).toBe(1);
   });
 });
 

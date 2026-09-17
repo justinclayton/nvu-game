@@ -136,7 +136,7 @@ export const GRAY: Registry = {
 
   /* "Move 1 Stuff from your hand to Red's hand."
    *
-   * §9: no card may be put into a Down character's hand, so with Red out this
+   * Rulebook, Last Stand: Going Down: no card may be put into a Down character's hand, so with Red out this
    * does nothing. */
   "Here, Catch": {
     onPlay(state, ctx) {
@@ -153,7 +153,7 @@ export const GRAY: Registry = {
       });
     },
     onChoice(answer, state, ctx) {
-      // §9: nothing may be parked on a Down partner, so the Stuff stays put.
+      // Rulebook, Last Stand: Going Down: nothing may be parked on a Down partner, so the Stuff stays put.
       if (answer.kind !== "cards" || state.Red.down) return nothing(state);
       const events: DomainEvent[] = [];
       let s = takeFromHand(state, ctx.character, answer.cards);
@@ -212,7 +212,7 @@ export const GRAY: Registry = {
   /* "Scrap a card from your hand. If you do, draw the top card from the Gray
    * Rewards deck directly into your hand."
    *
-   * The Gray Rewards deck is Gray's reward pool (§10). Its top card goes to the
+   * The Gray Rewards deck is Gray's reward pool (rulebook, Setup). Its top card goes to the
    * hand, not the deck. */
   "Level Up": {
     onPlay(state, ctx) {

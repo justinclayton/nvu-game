@@ -153,7 +153,7 @@ export function placements(state: GameState, debug = false): readonly Placement[
       zoneOf(c, "play"),
       { topFirst: false, faceUp: true, owner: c },
     );
-    // §10: on ascending, the top three of the pool are offered. They stay in the
+    // Rulebook, Ascending: on ascending, the top three of the pool are offered. They stay in the
     // pool until the choice is made, but they are picked up off the table and
     // held face up while the character looks them over.
     const offered = state.phase === "Ascend" ? (state.offer?.[c] ?? []) : [];

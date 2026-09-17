@@ -166,7 +166,7 @@ describe("A Pair Of Stich-Em-Ups — 'Choose a character, move 2 cards from thei
     const chosen = pending.options.slice(0, 2).map((c) => c.id);
     const { state: next } = must(asked.state, { type: "CHOOSE_CARDS", cardIds: chosen });
     expect(next.Gray.deck).toHaveLength(2);
-    // Last Stand only ends at Cleanup (§9); refilling the deck mid-turn does
+    // Last Stand only ends at Cleanup (rulebook, Last Stand); refilling the deck mid-turn does
     // not stand Gray back up on its own.
     expect(next.Gray.lastStand).toBe(true);
   });
@@ -353,7 +353,7 @@ describe("Overcharged Battery — 'The next card played this turn costs 0'", () 
       cardId: r[0] as CardId,
       payWith: [r[1] as CardId],
     });
-    // §9 pays for Gray's card, not the Battery, so the discount is still there.
+    // Rulebook, Last Stand pays for Gray's card, not the Battery, so the discount is still there.
     const spent = must(
       charged.state,
       free("Gray", handCard(charged.state, "Gray", "Pick The Lock").id),

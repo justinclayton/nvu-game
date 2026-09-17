@@ -1,6 +1,6 @@
 /* Good Stuff and Bad Stuff. Keyed by the name design/cards.yaml makes unique.
  *
- * §8: Stuff is ordinary energy — you may discard it from hand to pay another
+ * Rulebook, Card anatomy: Stuff cards: Stuff is ordinary energy — you may discard it from hand to pay another
  * card's cost. Bad Stuff behaves like any other Stuff except that it
  * contributes no stats.
  */

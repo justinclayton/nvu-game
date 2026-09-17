@@ -27,7 +27,7 @@ export type CardName = string;
 
 /* ----------------------------------------------------------- value objects */
 
-/** One physical copy of a printed card (rulebook §8). */
+/** One physical copy of a printed card (rulebook, Card anatomy). */
 export interface Card {
   readonly id: CardId;
   readonly name: CardName;
@@ -51,25 +51,25 @@ export interface Room {
   readonly id: RoomId;
   readonly name: string;
   readonly kind: RoomKind;
-  /** Enemy rooms name the floor they guard (§8). */
+  /** Enemy rooms name the floor they guard (rulebook, Card anatomy: Room Cards). */
   readonly floor: number | null;
   readonly thresholds: readonly Threshold[];
   readonly flee: FleeLine;
 }
 
-/** A card face up in the play zone. The zone is split by character (§3). */
+/** A card face up in the play zone. The zone is split by character (rulebook, Setup). */
 export interface PlayedCard {
   readonly owner: Character;
   readonly card: Card;
 }
 
-/** Three cards from a character's own reward pool, offered on ascending (§10). */
+/** Three cards from a character's own reward pool, offered on ascending (rulebook, Ascending). */
 export interface RewardOffer {
   readonly Red: readonly Card[];
   readonly Gray: readonly Card[];
 }
 
-/** The four piles at the side of the table (§3). */
+/** The four piles at the side of the table (rulebook, Setup). */
 export interface Pools {
   readonly Red: readonly Card[];
   readonly Gray: readonly Card[];
@@ -77,17 +77,17 @@ export interface Pools {
   readonly badStuff: readonly Card[];
 }
 
-/** One character's three piles, plus the two states §9 puts them in. */
+/** One character's three piles, plus the two states Rulebook, Last Stand puts them in. */
 export interface PlayerState {
-  /** Face down. This is health and energy both — the deck is stamina (§3). */
+  /** Face down. This is health and energy both — the deck is stamina (rulebook, About the game). */
   readonly deck: readonly Card[];
   /** What they drew this turn. Maximum 5. */
   readonly hand: readonly Card[];
   /** Face up. Cards spent or lost, gone for the floor. There is no discard pile. */
   readonly discard: readonly Card[];
-  /** Down is out: skipped in Draw and in Play, no rewards, no punishments (§9). */
+  /** Down is out: skipped in Draw and in Play, no rewards, no punishments (rulebook, Last Stand: Going Down). */
   readonly down: boolean;
-  /** Set the moment the deck runs out, and swept for again at cleanup (§9). */
+  /** Set the moment the deck runs out, and swept for again at cleanup (rulebook, Last Stand). */
   readonly lastStand: boolean;
   /** Reset at Flip. The opening draw is the first of these; a draw cap counts them. */
   readonly drewThisTurn: number;
@@ -175,9 +175,9 @@ export type Pending =
  */
 export interface Resolution {
   readonly effects: readonly RoomEffect[];
-  /** How the room ended. §9 reads this, not how it got there. */
+  /** How the room ended. Rulebook, Last Stand reads this, not how it got there. */
   readonly roomEnded: "Cleared" | "Fled";
-  /** Who was in last stand when the room ended Cleared — they get the escape (§9). */
+  /** Who was in last stand when the room ended Cleared — they get the escape (rulebook, Last Stand). */
   readonly lastStandAtClear: Readonly<Record<Character, boolean>>;
 }
 
@@ -190,7 +190,7 @@ export interface GameState {
   readonly turn: number;
   readonly phase: Phase;
 
-  /** The floor deck's draw pile, its Fled pile, and the Cleared heap (§3). */
+  /** The floor deck's draw pile, its Fled pile, and the Cleared heap (rulebook, Setup). */
   readonly floorDeck: readonly Room[];
   readonly activeRoom: Room | null;
   readonly fled: readonly Room[];
@@ -202,7 +202,7 @@ export interface GameState {
   readonly Gray: PlayerState;
   readonly playZone: readonly PlayedCard[];
 
-  /** One shared heap. Nothing ever leaves it (§10). */
+  /** One shared heap. Nothing ever leaves it (rulebook, Setup). */
   readonly scrapyard: readonly Card[];
   readonly pools: Pools;
   /** Populated while the phase is Ascend. */
@@ -216,7 +216,7 @@ export interface GameState {
 
 /* ------------------------------------------------------------- commands */
 
-/** The Scrap tax and the reward, both decided at the moment of ascending (§10). */
+/** The Scrap tax and the reward, both decided at the moment of ascending (rulebook, Ascending). */
 export interface AscendChoice {
   /** Keep this Stuff from your own discard pile out of the Scrapyard... */
   readonly keepStuffId: CardId | null;
@@ -247,7 +247,7 @@ export type CommandType = Command["type"];
 
 /* --------------------------------------------------------------- events */
 
-/** Where a card was when it was discarded. `deck` is the loss you did not choose (§8). */
+/** Where a card was when it was discarded. `deck` is the loss you did not choose (rulebook, Card anatomy: Keywords). */
 export type DiscardedFrom = "hand" | "deck" | "playZone";
 
 export type DomainEvent =

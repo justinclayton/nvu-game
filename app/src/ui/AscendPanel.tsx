@@ -1,4 +1,4 @@
-/* §10 Ascending: the Scrap tax and the card reward, both decided at once.
+/* Rulebook, Ascending: the Scrap tax and the card reward, both decided at once.
  *
  * The three cards each character is offered float above the mat, held up for a
  * look, and are chosen by clicking them there; this panel decides the Scrap tax

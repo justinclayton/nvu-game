@@ -34,7 +34,7 @@ interface Props {
   readonly delays: ReadonlyMap<string, number>;
   readonly paying: Paying | null;
   readonly onPickCard: (character: Character, card: Card) => void;
-  /** §10: the reward each character has chosen from the cards floating above the mat. */
+  /** Rulebook, Ascending: the reward each character has chosen from the cards floating above the mat. */
   readonly reward?: Readonly<Record<Character, Card["id"] | null>> | undefined;
   readonly onPickReward?: ((character: Character, card: Card) => void) | undefined;
   readonly onInspect: (item: Inspected | null) => void;

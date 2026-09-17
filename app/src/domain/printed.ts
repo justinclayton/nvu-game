@@ -7,19 +7,19 @@
  * sentence.
  */
 
-/** Rulebook §2. Both characters are always in play. */
+/** Rulebook, About the game. Both characters are always in play. */
 export type Character = "Red" | "Gray";
 
-/** Rulebook §8. The two stat keywords at level 1. */
+/** Rulebook, Card anatomy: Character cards. The two stat keywords at level 1. */
 export type Stat = "Oomph" | "Scramble";
 
-/** Rulebook §8. Purely printed: no rule anywhere reads it. */
+/** Rulebook, Card anatomy: Character cards. Purely printed: no rule anywhere reads it. */
 export type Rarity = "Fine" | "Cool" | "Woah";
 
-/** The type line of a player card (rulebook §8). There is no neutral card but Stuff. */
+/** The type line of a player card (rulebook, Card anatomy: Character cards). There is no neutral card but Stuff. */
 export type CardKind = "player" | "good_stuff" | "bad_stuff";
 
-/** The type line of a room card (rulebook §8). */
+/** The type line of a room card (rulebook, Card anatomy: Room Cards). */
 export type RoomKind = "enemy" | "hazard" | "stuff";
 
 /** Whether a card is ratified or still a proposal. Only official cards gate the build. */
@@ -41,7 +41,7 @@ export type RoomEffect =
   | { readonly type: "RevealReward"; readonly who: EffectTarget };
 
 /**
- * One `threshold: outcome` line (rulebook §8).
+ * One `threshold: outcome` line (rulebook, Card anatomy: Room Cards).
  *
  * `measuredOn` is the whole of what makes a Stuff room different: a line that
  * names one character is measured against that character's own side of the play
@@ -62,7 +62,7 @@ export interface Threshold {
 }
 
 /**
- * The Flee line every room prints (rulebook §8). No Stuff room in
+ * The Flee line every room prints (rulebook, Card anatomy: Room Cards). No Stuff room in
  * design/cards.yaml prints one of its own, so the generator supplies
  * "Leave empty-handed." for display; it Flees like any other room, with no
  * Clear and no effects.
@@ -74,7 +74,7 @@ export interface FleeLine {
   readonly effects: readonly RoomEffect[];
 }
 
-/** A player card or a piece of Stuff, exactly as printed (rulebook §8). */
+/** A player card or a piece of Stuff, exactly as printed (rulebook, Card anatomy). */
 export interface CardFace {
   readonly name: string;
   readonly set: CardSet;
@@ -93,7 +93,7 @@ export interface CardFace {
   readonly text: string;
 }
 
-/** A room card, exactly as printed (rulebook §8). */
+/** A room card, exactly as printed (rulebook, Card anatomy: Room Cards). */
 export interface RoomFace {
   readonly name: string;
   readonly set: CardSet;

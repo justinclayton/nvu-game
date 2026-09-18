@@ -621,7 +621,7 @@ export const CARD_CONTENT = {
           outcome: "Ascend",
           clears: true,
           fleeFree: false,
-          measuredOn: null,
+          ascends: true,
           effects: [],
         },
       ],
@@ -650,7 +650,7 @@ export const CARD_CONTENT = {
           outcome: "Ascend",
           clears: true,
           fleeFree: false,
-          measuredOn: null,
+          ascends: true,
           effects: [],
         },
       ],
@@ -679,7 +679,7 @@ export const CARD_CONTENT = {
           outcome: "Ascend",
           clears: true,
           fleeFree: false,
-          measuredOn: null,
+          ascends: true,
           effects: [],
         },
         {
@@ -688,7 +688,7 @@ export const CARD_CONTENT = {
           outcome: "Flee this room for free.",
           clears: false,
           fleeFree: true,
-          measuredOn: null,
+          ascends: false,
           effects: [],
         },
       ],
@@ -717,7 +717,7 @@ export const CARD_CONTENT = {
           outcome: "Clear, but both of you Exhaust 1.",
           clears: true,
           fleeFree: false,
-          measuredOn: null,
+          ascends: false,
           effects: [
             {
               type: "ExhaustFromDeck",
@@ -732,7 +732,7 @@ export const CARD_CONTENT = {
           outcome: "Clear, and one of you reveals a reward.",
           clears: true,
           fleeFree: false,
-          measuredOn: null,
+          ascends: false,
           effects: [
             {
               type: "RevealReward",
@@ -766,7 +766,7 @@ export const CARD_CONTENT = {
           outcome: "Clear, but both of you get Bad Stuff.",
           clears: true,
           fleeFree: false,
-          measuredOn: null,
+          ascends: false,
           effects: [
             {
               type: "DealBadStuff",
@@ -780,7 +780,7 @@ export const CARD_CONTENT = {
           outcome: "Clear, and one of you reveals a reward.",
           clears: true,
           fleeFree: false,
-          measuredOn: null,
+          ascends: false,
           effects: [
             {
               type: "RevealReward",
@@ -818,7 +818,7 @@ export const CARD_CONTENT = {
           outcome: "Red gets Good Stuff.",
           clears: true,
           fleeFree: false,
-          measuredOn: "Red",
+          ascends: false,
           effects: [
             {
               type: "TakeGoodStuff",
@@ -833,7 +833,7 @@ export const CARD_CONTENT = {
           outcome: "Gray gets Good Stuff.",
           clears: true,
           fleeFree: false,
-          measuredOn: "Gray",
+          ascends: false,
           effects: [
             {
               type: "TakeGoodStuff",
@@ -862,7 +862,7 @@ export const CARD_CONTENT = {
           outcome: "Red gets Good Stuff.",
           clears: true,
           fleeFree: false,
-          measuredOn: "Red",
+          ascends: false,
           effects: [
             {
               type: "TakeGoodStuff",
@@ -877,7 +877,7 @@ export const CARD_CONTENT = {
           outcome: "Gray gets Good Stuff.",
           clears: true,
           fleeFree: false,
-          measuredOn: "Gray",
+          ascends: false,
           effects: [
             {
               type: "TakeGoodStuff",
@@ -892,7 +892,7 @@ export const CARD_CONTENT = {
           outcome: "Red gets 2 instead.",
           clears: true,
           fleeFree: false,
-          measuredOn: "Red",
+          ascends: false,
           effects: [
             {
               type: "TakeGoodStuff",
@@ -907,7 +907,7 @@ export const CARD_CONTENT = {
           outcome: "Gray gets 2 instead.",
           clears: true,
           fleeFree: false,
-          measuredOn: "Gray",
+          ascends: false,
           effects: [
             {
               type: "TakeGoodStuff",
@@ -936,7 +936,7 @@ export const CARD_CONTENT = {
           outcome: "Both of you get Good Stuff.",
           clears: true,
           fleeFree: false,
-          measuredOn: null,
+          ascends: false,
           effects: [
             {
               type: "TakeGoodStuff",
@@ -951,7 +951,7 @@ export const CARD_CONTENT = {
           outcome: "Red gets 2 instead.",
           clears: true,
           fleeFree: false,
-          measuredOn: "Red",
+          ascends: false,
           effects: [
             {
               type: "TakeGoodStuff",
@@ -980,7 +980,7 @@ export const CARD_CONTENT = {
           outcome: "Both of you get Good Stuff.",
           clears: true,
           fleeFree: false,
-          measuredOn: null,
+          ascends: false,
           effects: [
             {
               type: "TakeGoodStuff",
@@ -995,7 +995,7 @@ export const CARD_CONTENT = {
           outcome: "Gray gets 2 instead.",
           clears: true,
           fleeFree: false,
-          measuredOn: "Gray",
+          ascends: false,
           effects: [
             {
               type: "TakeGoodStuff",

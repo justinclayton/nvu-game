@@ -17,7 +17,7 @@ The face-down deck in the middle of the table that new Rooms are drawn from. Bui
 
 **Room**
 
-A card presenting one or more Challenges, turned face up from the Floor deck onto the Rooms pile at the start of a turn.
+A card presenting one or more Challenges, turned face up from the Floor deck onto the Rooms pile at the start of a turn. Its printed type — `Enemy`, `Hazard`, or `Stuff` — is an archetype, read for flavor and for floor-deck composition (see Floor deck); every Room works the same way regardless of it. `[you, 2026-09-17]`
 
 **Active room**
 
@@ -25,23 +25,11 @@ The Room card on top of the Rooms pile — the one the players are currently fac
 
 **Challenge**
 
-A `threshold: outcome` line on a Room card. Players compare their Stat pool against the threshold during the Outcome phase; meeting or exceeding it clears that challenge.
+A `threshold: outcome` line on a Room card. Players compare their Stat pool against the threshold during the Outcome phase; meeting or exceeding it clears that challenge. A line naming one character says who an outcome pays or targets, never whose side of the play zone counts — every Challenge, on every Room, reads the same shared Stat pool. `[you, 2026-09-17]`
 
 **Flee line**
 
-The `Flee:` line on a Room card, resolved when no Challenge is cleared this turn.
-
-**Enemy room**
-
-The Room unique to a floor, one per floor, marked with that floor's number (`Enemy 1`, etc.). Clearing it Ascends the players to the next floor.
-
-**Hazard room**
-
-A Room with two Scramble challenges. The lower threshold clears the room; the higher threshold also reveals the top card of the named character's reward pool as a reward, which that character takes or skips (a skipped card goes to the bottom of the reward pool). Every Hazard room has a Flee line.
-
-**Stuff room**
-
-A Room whose Flee line, like any other room's, leaves the players empty-handed without clearing it. Its challenges are split per character (e.g. a Oomph threshold for Red, a Scramble threshold for Gray), each measured against only that character's side of the play zone. Some Stuff rooms have a second, higher challenge. A Down character earns nothing from a Stuff room.
+The `Flee:` line on a Room card, resolved when no Challenge is cleared this turn. A Room that prints no Flee line of its own (no Stuff room does) Flees empty-handed, the same as one whose printed line happens to do nothing.
 
 **Stuff**
 

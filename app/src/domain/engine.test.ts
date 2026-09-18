@@ -427,9 +427,9 @@ describe("Room kinds: Enemy, Hazard, Stuff", () => {
     expect(next.Red.deck).toHaveLength(5);
   });
 
-  it("a Stuff room measures each character on their own side of the play zone only", () => {
-    // Sorting Room: Oomph 2 pays Red, Scramble 2 pays Gray. Red plays Oomph and
-    // Gray plays Scramble, so each pays for their own item.
+  it("a Stuff room's per-character lines still read the shared pool", () => {
+    // Sorting Room: Oomph 2 pays Red, Scramble 2 pays Gray. Each line names who
+    // is paid, not whose side of the play zone counts.
     const state = rig({
       phase: "Play",
       activeRoom: room("Sorting Room"),
@@ -451,8 +451,9 @@ describe("Room kinds: Enemy, Hazard, Stuff", () => {
     expect(next.Gray.hand.length).toBeGreaterThanOrEqual(1);
   });
 
-  it("a Stuff room's split line pays nobody when the pool is on the wrong side", () => {
-    // Tool Cage asks Red for Oomph 5 on Red's own side; Red plays Scramble.
+  it("a Room's Challenge is met from either character's side, not just the one it names", () => {
+    // Sorting Room's Scramble 2 line pays Gray, but Red is the one who plays
+    // Scramble — the shared pool reads it anyway, so Gray is still paid.
     const state = rig({
       phase: "Play",
       activeRoom: room("Sorting Room"),
@@ -464,10 +465,12 @@ describe("Room kinds: Enemy, Hazard, Stuff", () => {
       playFree("Red", r[0] as CardId),
       { type: "END_PLAY" },
     ]);
-    // Scramble 3 on Red's side meets nothing: Sorting Room asks Red for Oomph.
-    // Gray's line reads Gray's own side, which is empty.
+    // Oomph never reached 2, so Red gets nothing.
     expect(next.Red.hand).toHaveLength(0);
-    expect(next.Gray.hand).toHaveLength(0);
+    // Scramble reached 2 from Red's card alone; Gray is the line's named
+    // character, so Gray is paid from that same shared pool.
+    expect(next.Gray.hand.every((c) => c.kind === "good_stuff")).toBe(true);
+    expect(next.Gray.hand.length).toBeGreaterThanOrEqual(1);
   });
 
   it("a met threshold against an empty Good Stuff pool pays nothing and says so", () => {

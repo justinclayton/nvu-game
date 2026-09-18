@@ -32,19 +32,30 @@ line was also met. See #3 for that line met on its own.
 
 ---
 
-## 2. A Stuff-room line naming both characters reads the shared pool
+## 2. A Room's Challenge always reads the shared pool — the character it names is who is paid, not whose side counts
 
-**Where:** the generator, `tools/cards.mjs`, and the room check.
+`[you, 2026-09-17]`
 
-A Stuff room's challenges are split per character: Sorting Room prints `Oomph 2: Red gets Good
-Stuff.` and `Scramble 2: Gray gets Good Stuff.`, one line per character. Tool Cage and Spill Of
-Cargo instead print a line that names both (`Scramble 3: Both of you get Good Stuff.`), and a line
-naming both names no single side.
+**Where:** `statPool`/`thresholdIsMet` in `app/src/domain/queries.ts`, and the generator, `tools/cards.mjs`.
 
-**What the code does.** A line naming exactly one character is measured on that character's side; a
-line naming both is measured on the shared pool and pays both standing characters. Each character
-then takes the largest amount any met line awards them, so `Red gets 2 instead` replaces rather than
-adds to `Both of you get Good Stuff`.
+This entry previously read a Stuff room's challenges as split per character — a line naming one
+character (Sorting Room's `Oomph 2: Red gets Good Stuff.`) measured only that character's own side
+of the play zone, never the shared pool. That reading was never in the rulebook: Outcome's whole
+rule is "players add their combined stats... and check to see if they Cleared", with no exception
+for any room type, and `GLOSSARY.md`'s old **Stuff room** entry asserting the per-side split was
+itself the bug, not a citation for it. The consequence was concrete: a Stuff room could sit fully
+paid-for by the shared pool and still pay nobody, because the team's Oomph happened to come from
+the character whose line asked for Scramble.
+
+**What the code does now.** Every Challenge, on every kind of Room, is checked against
+`statPool(state)` — the same combined pool an Enemy or Hazard room reads. A threshold naming one
+character still says who that outcome pays (Sorting Room's Scramble line still pays Gray, never
+Red), same as `who: "both"` says both are paid; naming a character was never about measuring a
+side. The one thing that still needs a rule of its own: when more than one met line would pay the
+same character Good Stuff, each character takes the largest amount any met line awards them, so
+`Red gets 2 instead` replaces rather than adds to `Both of you get Good Stuff`. That dedupe is not
+Stuff-specific either — it applies to whatever met lines a Room has, and happens to only ever fire
+today because only Stuff rooms print more than one Good-Stuff-paying line.
 
 ---
 
@@ -377,3 +388,22 @@ shuffles back into the Floor deck once the Floor deck itself runs out. Both read
 room in circulation for the floor; they disagree on when it can come up again. This predates the
 citation cleanup that added this entry and was not itself re-derived from the rulebook — flagging
 it here rather than changing engine behavior or the rulebook text.
+
+---
+
+## 22. Ascend is read off the outcome, not off which room printed it
+
+`[you, 2026-09-17]`
+
+**Where:** `roomOutcome`/`finishTurn` in `app/src/domain/engine.ts`, and `Threshold.ascends`.
+
+Each Turn, Outcome: *"If any challenge's outcome says to `Ascend`, the entire Floor is cleared."*
+The Floor only ever ends because a met challenge's text says `Ascend` — the code used to check this
+indirectly instead, asking at Cleanup whether the room just Cleared had `kind === "enemy"`. That
+happened to work only because the printed card list never puts `Ascend` on anything but an Enemy
+room; it was a room-kind check standing in for a text check, the same shape of mistake as #2.
+
+**What the code does now.** Every threshold carries its own `ascends` flag, set from parsing its
+outcome text for the word `Ascend`, the same way `fleeFree` is set from "Flee this room for free".
+`roomOutcome` reports whether any met threshold ascends; `finishTurn` reads that flag straight off
+this turn's resolution to decide whether to run the Ascending steps, never the room's type line.

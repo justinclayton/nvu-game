@@ -41,23 +41,22 @@ export type RoomEffect =
   | { readonly type: "RevealReward"; readonly who: EffectTarget };
 
 /**
- * One `threshold: outcome` line (rulebook, Card anatomy: Room Cards).
- *
- * `measuredOn` is the whole of what makes a Stuff room different: a line that
- * names one character is measured against that character's own side of the play
- * zone, never the shared pool. See open-questions.md #2.
+ * One `threshold: outcome` line (rulebook, Card anatomy: Room Cards). Every
+ * threshold, on every kind of room, is read the same way: against the shared
+ * pool (rulebook, Outcome). A room's `Enemy`/`Hazard`/`Stuff` type line is
+ * flavor — it names an archetype, not a different rule.
  */
 export interface Threshold {
   readonly stat: Stat;
   readonly value: number;
   /** The printed prose, kept for display. No rule reads it. */
   readonly outcome: string;
-  /** Meeting this line Clears the room. */
+  /** Meeting this line Clears the room (rulebook, Outcome) unless it's `fleeFree`. */
   readonly clears: boolean;
   /** "Flee this room for free" — the room is Fled, but its Flee line does not resolve. */
   readonly fleeFree: boolean;
-  /** A character's own side of the play zone, or null for the shared pool. */
-  readonly measuredOn: Character | null;
+  /** The outcome says `Ascend`: the Floor is cleared instead of running Cleanup. */
+  readonly ascends: boolean;
   readonly effects: readonly RoomEffect[];
 }
 

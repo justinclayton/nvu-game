@@ -108,8 +108,10 @@ export function contributionOf(state: GameState, played: PlayedCard): StatTotals
 
 /**
  * Each Turn, Play: the stats on played cards form one shared pool across both characters.
- * `side` narrows it to one character's own side of the play zone, which is the
- * only thing a Stuff room ever measures. See open-questions.md #2.
+ * Every Room's Challenge is checked against this pool, whatever the room's
+ * printed type (rulebook, Outcome). `side` narrows it to one character's own
+ * contribution, which no rule measures a Challenge against — it exists for
+ * display only.
  */
 export function statPool(state: GameState, side?: Character): StatTotals {
   let oomph = 0;
@@ -143,9 +145,9 @@ export function thresholdTarget(state: GameState, threshold: Threshold): number 
 const statOf = (totals: StatTotals, stat: Stat): number =>
   stat === "Oomph" ? totals.oomph : totals.scramble;
 
-/** Is this line's threshold met? A Stuff room's line reads one character's own side. */
+/** Is this line's threshold met? Every Challenge reads the shared pool. */
 export function thresholdIsMet(state: GameState, threshold: Threshold): boolean {
-  const pool = statPool(state, threshold.measuredOn ?? undefined);
+  const pool = statPool(state);
   return statOf(pool, threshold.stat) >= thresholdTarget(state, threshold);
 }
 

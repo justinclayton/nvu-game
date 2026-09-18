@@ -187,6 +187,8 @@ export interface Resolution {
   readonly effects: readonly RoomEffect[];
   /** How the room ended. Rulebook, Last Stand reads this, not how it got there. */
   readonly roomEnded: "Cleared" | "Fled";
+  /** A met challenge said `Ascend`: Cleanup runs the Ascending steps instead of the usual ones. */
+  readonly ascends: boolean;
   /** Who was in last stand when the room ended Cleared — they get the escape (rulebook, Last Stand). */
   readonly lastStandAtClear: Readonly<Record<Character, boolean>>;
 }

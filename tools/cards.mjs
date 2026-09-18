@@ -246,16 +246,17 @@ if (typeof module !== "undefined") module.exports = NVU_CARDS;
    turned into structure here.  Anything this does not recognise is an error,
    not a silently dropped rule.
 
-   Rulebook, Card anatomy: Room Cards for Flee lines; the three kinds of room are Enemy, Hazard, and
-   Stuff (rulebook, Card anatomy: Room Cards, and see open-questions.md #2, #7, #8). */
+   Rulebook, Card anatomy: Room Cards: every room works the same way, whatever its printed
+   type line (`Enemy`, `Hazard`, or `Stuff`) says — that line is flavor, read only for display
+   and for floor-deck composition (setup.ts), never for how a threshold or a Flee line resolves. */
 
 const CARD_KINDS = new Set(["player", "good_stuff", "bad_stuff"]);
 const ROOM_KIND = { enemy_room: "enemy", hazard_room: "hazard", stuff_room: "stuff" };
 
-/** No Stuff room in cards.yaml prints a Flee line of its own; this is the text
- * shown when one is fled without meeting a threshold. It has no effect and,
- * like any other Flee, does not clear the room. */
-const STUFF_FLEE = "Leave empty-handed.";
+/** The text shown when a room with no printed Flee line of its own is fled
+ * without meeting a threshold. It has no effect and, like any other Flee,
+ * does not clear the room. */
+const NO_FLEE_PRINTED = "Leave empty-handed.";
 
 function who(word) {
   const w = word.trim().toLowerCase();
@@ -266,10 +267,10 @@ function who(word) {
   throw new Error(`unrecognised target: "${word}"`);
 }
 
-/* Each entry reads one clause. `clears` and `fleeFree` are flags the clause
-   raises; `effect` is what it does. */
+/* Each entry reads one clause. `clears`, `ascends`, and `fleeFree` are flags
+   the clause raises; `effect` is what it does. */
 const CLAUSES = [
-  [/^(?:and )?ascend$/i, () => ({ clears: true })],
+  [/^(?:and )?ascend$/i, () => ({ clears: true, ascends: true })],
   [/^(?:and )?clear(?: the room)?$/i, () => ({ clears: true })],
   [/^(?:and )?flee this room for free$/i, () => ({ fleeFree: true })],
   [/^(?:and )?leave empty-handed$/i, () => ({})],
@@ -304,31 +305,20 @@ function clausesOf(prose) {
 }
 
 function readProse(prose, where) {
-  const out = { clears: false, fleeFree: false, effects: [] };
+  const out = { clears: false, ascends: false, fleeFree: false, effects: [] };
   for (const clause of clausesOf(prose)) {
     const hit = CLAUSES.find(([re]) => re.test(clause));
     if (!hit) throw new Error(`${where}: unparsed clause "${clause}" in "${prose}"`);
     const read = hit[1](clause.match(hit[0]));
     if (read.clears) out.clears = true;
+    if (read.ascends) out.ascends = true;
     if (read.fleeFree) out.fleeFree = true;
     if (read.effect) out.effects.push(read.effect);
   }
   return out;
 }
 
-/**
- * A Stuff room's challenge is split per character, and each line is measured
- * against that character's own side of the play zone.  A line naming both
- * characters names no single side, so it reads the shared pool. See
- * open-questions.md #2.
- */
-function measuredOn(kind, effects) {
-  if (kind !== "stuff") return null;
-  const named = new Set(effects.map((e) => e.who).filter((w) => w === "Red" || w === "Gray"));
-  return named.size === 1 ? [...named][0] : null;
-}
-
-function threshold(raw, kind, where) {
+function threshold(raw, where) {
   if (!raw || typeof raw.value !== "number" || (raw.stat !== "Oomph" && raw.stat !== "Scramble")) {
     throw new Error(`${where}: a threshold needs a Oomph or Scramble stat and a value`);
   }
@@ -338,20 +328,18 @@ function threshold(raw, kind, where) {
     stat: raw.stat,
     value: raw.value,
     outcome,
-    // Each Turn, Outcome: meeting any threshold Clears the room. A Stuff room's lines
-    // never say "clear" themselves, so this is where that rule reaches them.
-    clears: kind === "stuff" ? true : read.clears,
+    // Each Turn, Outcome: any met threshold Clears the room, full stop — a line's own
+    // prose need not say "Clear" (most Stuff lines never do). The one exception a line
+    // can print for itself is "Flee this room for free", which does not.
+    clears: !read.fleeFree,
     fleeFree: read.fleeFree,
-    measuredOn: measuredOn(kind, read.effects),
+    ascends: read.ascends,
     effects: read.effects,
   };
 }
 
-function fleeLine(card, kind) {
-  if (kind === "stuff") {
-    return { text: STUFF_FLEE, clears: false, effects: [] };
-  }
-  if (!card.flee) throw new Error(`${card.name}: every Enemy and Hazard room prints a Flee line`);
+function fleeLine(card) {
+  if (!card.flee) return { text: NO_FLEE_PRINTED, clears: false, effects: [] };
   const read = readProse(card.flee, `${card.name} Flee line`);
   return { text: card.flee, clears: read.clears, effects: read.effects };
 }
@@ -375,7 +363,7 @@ function cardFace(c) {
 
 function roomFace(c) {
   const kind = ROOM_KIND[c.kind];
-  const thresholds = (c.thresholds ?? []).map((t) => threshold(t, kind, c.name));
+  const thresholds = (c.thresholds ?? []).map((t) => threshold(t, c.name));
   if (thresholds.length === 0) throw new Error(`${c.name}: a room prints at least one threshold`);
   return {
     name: c.name,
@@ -384,7 +372,7 @@ function roomFace(c) {
     floor: typeof c.floor === "number" ? c.floor : null,
     count: c.count ?? 1,
     thresholds,
-    flee: fleeLine(c, kind),
+    flee: fleeLine(c),
   };
 }
 

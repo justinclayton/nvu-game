@@ -34,19 +34,19 @@ describe("content", () => {
     }
   });
 
-  it("measures a Stuff room's single-character lines on that character's own side", () => {
-    // A Stuff room measures each character's own side of the play zone. See
-    // open-questions.md #2.
-    for (const room of CARD_CONTENT.rooms.filter((r) => r.kind === "stuff")) {
-      for (const t of room.thresholds) {
-        const named = t.effects.filter((e) => e.who === "Red" || e.who === "Gray");
-        if (named.length === 1) expect(t.measuredOn).toBe(named[0]?.who);
-        else expect(t.measuredOn).toBeNull();
-      }
+  it("gives every room's threshold the same shape, whatever the room's printed kind", () => {
+    // A room's type line (Enemy/Hazard/Stuff) is flavor: every Challenge is checked
+    // the same way, so no threshold carries a kind-specific reading of the pool.
+    for (const room of CARD_CONTENT.rooms) {
+      for (const t of room.thresholds) expect(t).not.toHaveProperty("measuredOn");
     }
-    // Every other kind of room reads the shared pool.
-    for (const room of CARD_CONTENT.rooms.filter((r) => r.kind !== "stuff")) {
-      for (const t of room.thresholds) expect(t.measuredOn).toBeNull();
+  });
+
+  it("only an `Ascend` outcome sets `ascends`", () => {
+    for (const room of CARD_CONTENT.rooms) {
+      for (const t of room.thresholds) {
+        expect(t.ascends).toBe(/ascend/i.test(t.outcome));
+      }
     }
   });
 });

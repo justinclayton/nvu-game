@@ -42,8 +42,7 @@ export function RoomBrief({ state }: { readonly state: GameState }) {
             {room.thresholds.map((t, i) => {
               const met = thresholdIsMet(state, t);
               const target = thresholdTarget(state, t);
-              const side = statPool(state, t.measuredOn ?? undefined);
-              const have = t.stat === "Oomph" ? side.oomph : side.scramble;
+              const have = t.stat === "Oomph" ? pool.oomph : pool.scramble;
               return (
                 <li key={i} className={met ? "bline is-met" : "bline"}>
                   <span className="bline__need">
@@ -51,7 +50,6 @@ export function RoomBrief({ state }: { readonly state: GameState }) {
                   </span>
                   <span className="bline__outcome">{t.outcome}</span>
                   <span className="bline__have">
-                    {t.measuredOn ? `${t.measuredOn}'s side ` : ""}
                     {have}/{target}
                   </span>
                 </li>

@@ -165,7 +165,7 @@ describe("Crowbar — 'Play: if you get any Good Stuff this turn, get an additio
       }),
     });
     const r = ids(state, "Red");
-    // Charge In is Oomph 4 on Red's own side, which pays Red 2 Good Stuff.
+    // Charge In is Oomph 4, meeting Ration Locker's Oomph 4 line, which pays Red 2 Good Stuff.
     // Whether or not Crowbar itself is one of the two, arriving unplayed in a
     // hand is not Crowbar being played — the pool never grows a third piece
     // from that arrival, only playing Crowbar afterward could.
@@ -340,20 +340,19 @@ describe("Grav Harness — 'One of you draws 1 card, even if their hand is full'
 
 describe("Riot Shield — 'If the room is Cleared, return this to your hand at the end of the turn'", () => {
   it("comes back to hand when the room is Cleared", () => {
-    // Riot Shield alone only pays Scramble, which Sorting Room measures on
-    // Gray's side — Red also needs to meet the Oomph 2 on their own side for
-    // this room to Clear, so Red plays a Shove too.
+    // Riot Shield's Scramble 3 alone meets Sorting Room's Scramble 2 line —
+    // every Challenge reads the shared pool, so it does not matter that Red
+    // is the one playing it while the line pays Gray.
     const state = playing({
       activeRoom: room("Sorting Room"),
       Red: player({
-        deck: pile("Shove", 3),
-        hand: [card("Riot Shield"), card("Shove"), card("Shove"), card("Shove")],
+        deck: pile("Shove", 1),
+        hand: [card("Riot Shield"), card("Shove")],
       }),
     });
     const r = ids(state, "Red");
     const { state: next } = play(state, [
       { type: "PLAY_CARD", character: "Red", cardId: r[0] as CardId, payWith: [r[1] as CardId] },
-      { type: "PLAY_CARD", character: "Red", cardId: r[2] as CardId, payWith: [r[3] as CardId] },
       { type: "END_PLAY" },
     ]);
     expect(next.cleared).toHaveLength(1);

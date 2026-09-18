@@ -192,11 +192,11 @@ describe("walkthrough 5 — nothing resolves until play is declared over", () =>
   });
 });
 
-describe("walkthrough 6 — a Stuff room reads each character's own side", () => {
-  it("pays nobody when the shared pool looks right but the sides do not", () => {
-    // Sorting Room asks Red for Oomph and Gray for Scramble. Red brings
-    // Scramble and Gray brings Oomph, so the shared pool has both and neither
-    // side has what its own line wants.
+describe("walkthrough 6 — a Room's Challenge reads the shared pool, not either character's side", () => {
+  it("pays both lines even with the stats swapped between characters", () => {
+    // Sorting Room asks for Oomph (pays Red) and Scramble (pays Gray). Red
+    // brings Scramble and Gray brings Oomph — the shared pool has both, so
+    // both lines are met and both characters are paid.
     const state = rig({
       phase: "Play",
       activeRoom: room("Sorting Room"),
@@ -210,14 +210,12 @@ describe("walkthrough 6 — a Stuff room reads each character's own side", () =>
     expect(statPool(played.state)).toEqual({ oomph: 3, scramble: 3 });
 
     const { state: next, events } = play(played.state, [{ type: "END_PLAY" }]);
-    expect(eventTypes(events)).not.toContain("STUFF_TAKEN");
-    // The empty floor deck reshuffles Fled back in during cleanup, so the room
-    // does not linger in `fled` — check the events for how it actually ended.
-    expect(eventTypes(events)).toContain("ROOM_FLED");
-    expect(eventTypes(events)).not.toContain("ROOM_CLEARED");
-    expect(next.cleared).toEqual([]);
-    expect(next.Red.hand).toEqual([]);
-    expect(next.Gray.hand).toEqual([]);
+    expect(eventTypes(events)).toContain("STUFF_TAKEN");
+    expect(eventTypes(events)).toContain("ROOM_CLEARED");
+    expect(eventTypes(events)).not.toContain("ROOM_FLED");
+    expect(next.cleared).toHaveLength(1);
+    expect(next.Red.hand.every((c) => c.kind === "good_stuff")).toBe(true);
+    expect(next.Gray.hand.every((c) => c.kind === "good_stuff")).toBe(true);
   });
 });
 

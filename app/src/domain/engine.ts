@@ -464,11 +464,12 @@ const goodStuffFor = (t: Threshold, c: Character): number =>
     .reduce((most, e) => Math.max(most, e.type === "TakeGoodStuff" ? e.count : 0), 0);
 
 /**
- * A Stuff room's challenge is split per character, and a richer tier says
- * "instead" — so each character takes the largest amount any met line awards
- * them rather than the sum. See open-questions.md #2.
+ * Every challenge met resolves (see below), but a richer tier's "instead"
+ * replaces a poorer one's Good Stuff rather than adding to it: each character
+ * takes the largest amount any met line awards them, not the sum. Any other
+ * kind of effect from a met line is simply collected.
  */
-function stuffRoomEffects(met: readonly Threshold[]): readonly RoomEffect[] {
+function resolveMetEffects(met: readonly Threshold[]): readonly RoomEffect[] {
   const out: RoomEffect[] = [];
   for (const c of CHARACTERS) {
     const count = met.reduce((most, t) => Math.max(most, goodStuffFor(t, c)), 0);
@@ -483,34 +484,32 @@ function stuffRoomEffects(met: readonly Threshold[]): readonly RoomEffect[] {
 interface RoomOutcome {
   readonly met: readonly Threshold[];
   readonly cleared: boolean;
+  readonly ascends: boolean;
   readonly effects: readonly RoomEffect[];
 }
 
 /**
- * Each Turn, Outcome: the room is checked once, when both characters have stopped playing. If
- * any challenge's threshold is met the room is Cleared, and the card text of
- * *every* challenge met resolves — a Hazard's higher tier also reveals a
- * reward, on top of the lower tier rather than instead of it. See
- * open-questions.md #1.
+ * Each Turn, Outcome: the room is checked once, when both characters have stopped playing,
+ * the same way whatever the room's printed type. If any challenge's threshold
+ * is met the room is Cleared, and the card text of *every* challenge met
+ * resolves — a Hazard's higher tier also reveals a reward, on top of the
+ * lower tier rather than instead of it. See open-questions.md #1.
  */
 function roomOutcome(state: GameState, room: Room): RoomOutcome {
   const met = room.thresholds.filter((t) => thresholdIsMet(state, t));
 
   if (met.length === 0) {
     // Each Turn, Outcome: if no threshold is met, the characters Flee. Resolve the Flee line.
-    // A Stuff room prints no Flee line of its own; it Fled empty-handed like
-    // any other room, and does not Clear.
-    return { met, cleared: room.flee.clears, effects: room.flee.effects };
-  }
-  if (room.kind === "stuff") {
-    return { met, cleared: true, effects: stuffRoomEffects(met) };
+    // A room with no Flee line of its own Flees empty-handed, and does not Clear.
+    return { met, cleared: room.flee.clears, ascends: false, effects: room.flee.effects };
   }
   // A line that says "Flee this room for free" cannot un-Clear a room another
   // met line Cleared: Outcome's first sentence is that any met threshold Clears it.
   return {
     met,
     cleared: met.some((t) => t.clears),
-    effects: met.flatMap((t) => t.effects),
+    ascends: met.some((t) => t.ascends),
+    effects: resolveMetEffects(met),
   };
 }
 
@@ -540,6 +539,7 @@ function endPlay(state: GameState, run: Run): GameState {
     resolution: {
       effects: outcome.effects,
       roomEnded: outcome.cleared ? "Cleared" : "Fled",
+      ascends: outcome.ascends,
       // Rulebook, Last Stand: what matters is how the room ends, not how it got there.
       lastStandAtClear: {
         Red: outcome.cleared && s.Red.lastStand,
@@ -653,6 +653,7 @@ function drain(state: GameState, run: Run): GameState {
 
 function finishTurn(state: GameState, run: Run): GameState {
   const resolution = state.resolution;
+  const ascends = resolution?.ascends ?? false;
   // The resolution stays readable through cleanup: a card that asks whether the
   // room was Cleared reads it there. It is cleared at the end of the turn.
   let s: GameState = { ...state, pending: null };
@@ -693,9 +694,9 @@ function finishTurn(state: GameState, run: Run): GameState {
   s = { ...s, resolution: null };
   run.events.push({ type: "TURN_ENDED", turn: s.turn });
 
-  // Rulebook, Ascending: clearing the Enemy room ends the floor. You do not have to empty the
-  // deck; you have to kill the thing on the stairs.
-  if (s.cleared.some((r) => r.kind === "enemy")) {
+  // Each Turn, Outcome: an outcome that says Ascend ends the floor, whichever room printed
+  // it — the room's kind ("Enemy" and all) is a printed label, not what triggers this.
+  if (ascends) {
     run.events.push({ type: "FLOOR_CLEARED", floor: s.floor });
     if (s.floor >= TOP_FLOOR) {
       run.events.push({ type: "GAME_OVER", outcome: "Victory" });

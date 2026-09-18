@@ -40,6 +40,8 @@ A coordinator session can work a batch of `ready-for-agent` issues by launching 
   ( cd .claude/worktrees/issue-<n> && make app-install )
   ```
 - **Verify:** `make check` (regenerates and checks the card modules against `design/cards.yaml`) and `make app-check` (lint, typecheck, test the web game) in the worktree. Both must pass before opening a PR. Run `make build` after any change to `design/cards.yaml` so the generated modules aren't stale.
+- **Own preview.** A worktree agent that wants to look at its own app runs the dev server from inside the worktree — `npm run dev -- --port <n>` in `app/` — not `preview_start`. `preview_start` and `.claude/launch.json` serve the main checkout's `app/`, not the worktree's, so a screenshot taken through them can show unmodified code and get called verified. `?fixture=<name>` works the same on that port; see **Screenshots and video** below for shooting it headlessly.
+- **Port per issue.** Use port `5000 + <n>` (`<n>` the issue number), so parallel agents never collide.
 - **Conflict hotspots** when merging the base branch into a still-open issue branch: `design/cards.yaml`, `tools/cards.js` (generated — regenerate rather than hand-merge), and the engine/rules files under `app/src/`.
 - **Recovery.** On resuming a run after a limit or a sleep: launch a fresh agent with an explicit "state you inherit" section (commits, PR, scratchpad artifacts, how `main` moved).
 

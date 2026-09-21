@@ -1,5 +1,5 @@
 /* The terminal. Everything that reads a clock, a file or stdin is here and
- * nowhere below it. `npm run sim -- help` prints the usage. */
+ * nowhere below it. `./nvu help` prints the usage. */
 
 import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
@@ -33,7 +33,7 @@ const out = (text: string): void => {
   stdout.write(text.endsWith("\n") ? text : text + "\n");
 };
 
-// `npm run sim -- replay run.json | head` closes the pipe early; that is not an error.
+// `./nvu replay run.json | head` closes the pipe early; that is not an error.
 stdout.on("error", (error: NodeJS.ErrnoException) => {
   if (error.code === "EPIPE") process.exit(0);
   throw error;
@@ -229,7 +229,7 @@ async function play(request: PlayRequest): Promise<number> {
   if (request.save !== null) saveSession(session, request.save);
   else
     out(
-      `Start this seed again with: npm run sim -- play --seed ${String(seed)}  (save the run next time with --save DIR)`,
+      `Start this seed again with: ./nvu play --seed ${String(seed)}  (save the run next time with --save DIR)`,
     );
   return 0;
 }

@@ -1,0 +1,15 @@
+#!/bin/sh
+# North vs Up in a terminal. The same rules engine as the web game.
+#
+#   ./nvu sim --games 200 --policy greedy     simulate runs and print the report
+#   ./nvu play --seed 7                       play a run, one numbered move at a time
+#   ./nvu replay runs/some-run.json           replay an export and print its transcript
+#   ./nvu help
+#
+# Installs app/node_modules on first use and regenerates the card modules if
+# design/cards.yaml has changed, so a fresh clone can run it straight away.
+set -e
+root=$(cd "$(dirname "$0")" && pwd)
+[ -d "$root/app/node_modules" ] || (cd "$root/app" && npm install --silent)
+make -s -C "$root" build
+exec "$root/app/node_modules/.bin/tsx" --tsconfig "$root/app/tsconfig.json" "$root/app/src/cli/main.ts" "$@"

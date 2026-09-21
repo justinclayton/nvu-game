@@ -8,11 +8,10 @@
 #   make check      fail if anything has drifted from the card list
 #   make app        run the web game's dev server
 #   make app-check  lint, typecheck and test the web game
-#   make sim        simulate runs in the terminal with the same engine (ARGS="...")
-#   make play       play a run in the terminal
+#   ./nvu           the CLI simulator: ./nvu sim, ./nvu play, ./nvu replay
 #   make sheet      open the print-and-cut card sheet
 
-.PHONY: help build check app app-check app-install sim play sheet all
+.PHONY: help build check app app-check app-install sheet all
 default: build
 
 help:
@@ -20,8 +19,7 @@ help:
 	@echo "make check   fail if a generated card module is stale or the card sheet stops printing it"
 	@echo "make app        run the web game's dev server"
 	@echo "make app-check  lint, typecheck and test the web game"
-	@echo "make sim        simulate runs in the terminal; e.g. make sim ARGS=\"sim --games 500 --policy random\""
-	@echo "make play       play a run in the terminal (make play ARGS=\"--seed 7\")"
+	@echo "./nvu           the CLI simulator: ./nvu sim --games 200, ./nvu play, ./nvu replay FILE"
 	@echo "make sheet   open the print-and-cut card sheet in a browser"
 	@echo ""
 	@echo "Change a card in design/cards.yaml, then: make build check"
@@ -54,13 +52,6 @@ app: app/node_modules build
 
 app-check: app/node_modules build
 	cd app && npm run check
-
-# The CLI simulator (app/src/cli, app/src/sim). See design/cli-sim/spec.md.
-sim: app/node_modules build
-	cd app && npm run --silent sim -- $(or $(ARGS),sim)
-
-play: app/node_modules build
-	cd app && npm run --silent play -- $(ARGS)
 
 # The print-and-cut card sheet, for playing on a table (tools/card-sheet.html).
 sheet: build

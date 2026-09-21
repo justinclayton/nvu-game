@@ -70,10 +70,14 @@ terminal, or the same numbers as JSON for a spreadsheet.
 **`cli/main.ts`** — three subcommands:
 
 ```
-npm run sim -- sim     --games 200 --seed 1 --policy greedy [--json] [--save-runs DIR]
-npm run sim -- play    [--seed N] [--save DIR]
-npm run sim -- replay  FILE.json [--quiet]
+./nvu sim     --games 200 --seed 1 --policy greedy [--json] [--save-runs DIR]
+./nvu play    [--seed N] [--save DIR]
+./nvu replay  FILE.json [--quiet]
 ```
+
+`nvu` is a shell script at the repo root, so the command is the game's name and the subcommand, with
+nothing about npm in between. It installs `app/node_modules` and regenerates the card modules on
+first use.
 
 `sim` runs N seeds from a starting seed and prints the report. `play` is the game in the terminal:
 the table drawn as text, every legal move numbered, `u` to undo (the session's undo, checkpointed on

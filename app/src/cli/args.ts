@@ -42,10 +42,10 @@ export class UsageError extends Error {}
 
 export const USAGE = `North vs Up — the CLI simulator. The same rules engine as the web game, in a terminal.
 
-  npm run sim -- sim    [--games N] [--seed N] [--policy NAME] [--json] [--save-runs DIR]
-                        [--max-commands N] [--top-cards N]
-  npm run sim -- play   [--seed N] [--save DIR] [--policy NAME]
-  npm run sim -- replay FILE.json [--quiet]
+  ./nvu sim    [--games N] [--seed N] [--policy NAME] [--json] [--save-runs DIR]
+               [--max-commands N] [--top-cards N]
+  ./nvu play   [--seed N] [--save DIR] [--policy NAME]
+  ./nvu replay FILE.json [--quiet]
 
 sim     play N seeded runs with a policy and print the report (--json for the numbers)
 play    play a run in the terminal: numbered moves, u to undo, q to quit

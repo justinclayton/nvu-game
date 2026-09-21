@@ -12,8 +12,7 @@
     "test": "vitest run",
     "format": "prettier --write .",
     "check": "npm run lint && npm run typecheck && npm run test",
-    "sim": "tsx src/cli/main.ts",
-    "play": "tsx src/cli/main.ts play"
+    "sim": "tsx src/cli/main.ts"
   },
   "dependencies": {
     "react": "^19.2.8",

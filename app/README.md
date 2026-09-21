@@ -8,8 +8,7 @@ The rules are [`design/rulebook.md`](../design/rulebook.md); the vocabulary is
 ```
 make app        the dev server
 make app-check  lint, typecheck, tests
-make sim        simulate runs in the terminal (ARGS="sim --games 500 --policy random")
-make play       play a run in the terminal
+../nvu          the CLI simulator: ./nvu sim, ./nvu play, ./nvu replay
 ```
 
 ## Layers
@@ -73,12 +72,13 @@ command log rebuilds the run, and the notes go back where they were typed.
 ## The CLI simulator
 
 The same engine, driven from a terminal instead of a browser. The plan is
-[`design/cli-sim/spec.md`](../design/cli-sim/spec.md).
+[`design/cli-sim/spec.md`](../design/cli-sim/spec.md). The launcher is `nvu` at the repo root; it
+installs and regenerates whatever it needs on first use.
 
 ```
-npm run sim -- sim    --games 200 --seed 1 --policy greedy [--json] [--save-runs DIR]
-npm run sim -- play   [--seed N] [--save DIR] [--policy NAME]
-npm run sim -- replay FILE.json [--quiet]
+./nvu sim    --games 200 --seed 1 --policy greedy [--json] [--save-runs DIR]
+./nvu play   [--seed N] [--save DIR] [--policy NAME]
+./nvu replay FILE.json [--quiet]
 ```
 
 `sim` plays N seeded runs with a policy and prints the report: win rate, floor reached, who went

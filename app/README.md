@@ -8,6 +8,8 @@ The rules are [`design/rulebook.md`](../design/rulebook.md); the vocabulary is
 ```
 make app        the dev server
 make app-check  lint, typecheck, tests
+make sim        simulate runs in the terminal (ARGS="sim --games 500 --policy random")
+make play       play a run in the terminal
 ```
 
 ## Layers
@@ -21,6 +23,8 @@ Dependencies point inward, and `eslint.config.js` enforces the table.
 | `src/application`    | the session: store, command log, event log, undo, replay                | domain, content              |
 | `src/infrastructure` | adapters: seed source, storage                                          | domain, application          |
 | `src/ui`             | React components and hooks                                              | domain, application, content |
+| `src/sim`            | the simulator: legal-move list, policies, the run loop, reports; pure   | domain, content, application |
+| `src/cli`            | the terminal: arguments, printing, stdin, files                         | domain, content, application, infrastructure, sim |
 
 The domain has no React, no `fetch`, no `Math.random` and no `Date.now`; its randomness is the
 seed carried in `GameState`.
@@ -65,3 +69,27 @@ export read the same log. `application/exportRun.ts` writes the three files:
 
 `loadSession(run, content, notes)` takes a `.json` export back: a fold of `execute` over the
 command log rebuilds the run, and the notes go back where they were typed.
+
+## The CLI simulator
+
+The same engine, driven from a terminal instead of a browser. The plan is
+[`design/cli-sim/spec.md`](../design/cli-sim/spec.md).
+
+```
+npm run sim -- sim    --games 200 --seed 1 --policy greedy [--json] [--save-runs DIR]
+npm run sim -- play   [--seed N] [--save DIR] [--policy NAME]
+npm run sim -- replay FILE.json [--quiet]
+```
+
+`sim` plays N seeded runs with a policy and prints the report: win rate, floor reached, who went
+Down and when, each room's Clear rate, the most played cards. `--json` prints the same numbers as
+data; `--save-runs` writes every run as the `.json` export the web game loads. `play` is the game as
+text: every legal move numbered, `u` to undo back to the last revealed card, `n <text>` to write a
+note into the log, and the run exported through the same three files the browser writes. `replay`
+folds an export back through the engine and prints its transcript, and says so if the rules now
+reach a different end than the export recorded.
+
+`src/sim` computes no rule. `moves.ts` lists what is legal by asking the same queries the UI asks;
+a policy picks from that list, looking ahead with `execute` where it wants to. Its randomness is a
+seed derived from the game's, so a run is reproduced by seed and policy name alone. `src/cli` is the
+only place that reads a clock, a file or the keyboard.

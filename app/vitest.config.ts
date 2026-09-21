@@ -13,6 +13,8 @@ export default defineConfig({
       "@application": fileURLToPath(new URL("./src/application", import.meta.url)),
       "@infrastructure": fileURLToPath(new URL("./src/infrastructure", import.meta.url)),
       "@ui": fileURLToPath(new URL("./src/ui", import.meta.url)),
+      "@sim": fileURLToPath(new URL("./src/sim", import.meta.url)),
+      "@cli": fileURLToPath(new URL("./src/cli", import.meta.url)),
     },
   },
   test: {

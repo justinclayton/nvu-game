@@ -1,17 +1,18 @@
-/* Rulebook, Ascending: the Scrap tax and the card reward, both decided at once.
+/* Rulebook, Ascending: Settle your Stuff, then the card reward.
  *
- * The three cards each character is offered float above the mat, held up for a
- * look, and are chosen by clicking them there; this panel decides the Scrap tax
- * and shows the whole choice before it is sent. The offer and what may be kept
- * come from the state; whether the whole choice is legal is `validate`'s
- * answer, not this component's. The table owns the choice, so the floating
- * cards and the panel are reading the same one. */
+ * Every Stuff card in a character's deck, hand or discard pile has a free
+ * default fate — Good Stuff goes to its pool, Bad Stuff stays with you — that
+ * can be flipped by Scrapping one non-Stuff card of that character's. The
+ * offer floats above the mat and is chosen by clicking it there; this panel
+ * decides the Settle choices and shows the whole thing before it is sent.
+ * Whether the whole choice is legal is `validate`'s answer, not this
+ * component's. */
 
-import type { AscendChoice, Character, Command, GameState } from "@domain/types";
+import type { AscendChoice, Card, CardId, Character, Command, GameState } from "@domain/types";
 import { CardView } from "./CardView";
 import { isLegal, whyNot } from "./legal";
 
-export const NO_CHOICE: AscendChoice = { keepStuffId: null, scrapId: null, takeRewardId: null };
+export const NO_CHOICE: AscendChoice = { settle: [], takeRewardId: null };
 
 export type AscendChoices = Readonly<Record<Character, AscendChoice>>;
 
@@ -24,6 +25,11 @@ interface Props {
   readonly onChoose: (character: Character, patch: Partial<AscendChoice>) => void;
 }
 
+const fateLabel = (card: Card, flipped: boolean): string => {
+  if (card.kind === "good_stuff") return flipped ? "kept, paid for" : "→ Good Stuff pool";
+  return flipped ? "→ Bad Stuff pool, paid for" : "kept";
+};
+
 export function AscendPanel({ state, dispatch, choices, onChoose }: Props) {
   const command: Command = { type: "ASCEND", Red: choices.Red, Gray: choices.Gray };
 
@@ -31,55 +37,97 @@ export function AscendPanel({ state, dispatch, choices, onChoose }: Props) {
     <section className="ascend">
       <h2>The floor is clear. Up the stairs.</h2>
       <p className="ascend__note">
-        Every Stuff card in a discard pile is Scrapped, then the pile shuffles back into the deck —
-        a floor cleared is a full heal. The Scrap tax keeps one piece of Stuff by Scrapping another
-        card in its place. Each of you is offered three cards from your own reward pool: they are
-        floating above your side of the table. Take one, or take none.
+        Settle your Stuff: each piece of Stuff in your deck, hand or discard pile has a free
+        default — Good Stuff goes to its pool, Bad Stuff stays with you — or Scrap one non-Stuff
+        card to flip it: keep the Good Stuff, or shed the Bad Stuff to its pool. Each of you is
+        also offered three cards from your own reward pool: they are floating above your side of
+        the table. Take one, or take none.
       </p>
 
       {(["Red", "Gray"] as const).map((c) => {
         const choice = choices[c];
-        const stuff = state[c].discard.filter((x) => x.kind !== "player");
-        const payers = state[c].discard.filter((x) => x.id !== choice.keepStuffId);
+        const p = state[c];
+        const stuff = [...p.deck, ...p.hand, ...p.discard].filter((x) => x.kind !== "player");
+        const usedPayers = new Set(
+          choice.settle.flatMap((d) => (d.pay !== null ? [d.pay] : [])),
+        );
+        const payable = [...p.deck, ...p.hand, ...p.discard].filter((x) => x.kind === "player");
         const offered = state.offer?.[c] ?? [];
         const taking = offered.find((x) => x.id === choice.takeRewardId) ?? null;
+
+        const decisionFor = (id: CardId) => choice.settle.find((d) => d.stuffId === id) ?? null;
+
+        const toggleFlip = (stuffId: CardId) => {
+          const exists = decisionFor(stuffId);
+          onChoose(
+            c,
+            exists
+              ? { settle: choice.settle.filter((d) => d.stuffId !== stuffId) }
+              : { settle: [...choice.settle, { stuffId, pay: null }] },
+          );
+        };
+
+        const setPayer = (stuffId: CardId, payId: CardId) => {
+          onChoose(c, {
+            settle: choice.settle.map((d) =>
+              d.stuffId === stuffId ? { ...d, pay: d.pay === payId ? null : payId } : d,
+            ),
+          });
+        };
+
         return (
           <div key={c} className="ascend__character">
             <h3>{c}</h3>
 
-            <h4>Scrap tax — keep one piece of Stuff</h4>
+            <h4>Settle your Stuff</h4>
             <div className="zone">
-              {stuff.length === 0 ? <p className="zone__empty">No Stuff to keep.</p> : null}
-              {stuff.map((card) => (
-                <CardView
-                  key={card.id}
-                  card={card}
-                  selected={choice.keepStuffId === card.id}
-                  onClick={() => {
-                    onChoose(c, {
-                      keepStuffId: choice.keepStuffId === card.id ? null : card.id,
-                      scrapId: null,
-                    });
-                  }}
-                />
-              ))}
+              {stuff.length === 0 ? <p className="zone__empty">No Stuff to settle.</p> : null}
+              {stuff.map((card) => {
+                const decision = decisionFor(card.id);
+                return (
+                  <CardView
+                    key={card.id}
+                    card={card}
+                    selected={decision !== null}
+                    badge={fateLabel(card, decision !== null)}
+                    onClick={() => {
+                      toggleFlip(card.id);
+                    }}
+                  />
+                );
+              })}
             </div>
 
-            {choice.keepStuffId ? (
+            {choice.settle.length > 0 ? (
               <>
-                <h4>...by Scrapping this card in its place</h4>
-                <div className="zone">
-                  {payers.map((card) => (
-                    <CardView
-                      key={card.id}
-                      card={card}
-                      selected={choice.scrapId === card.id}
-                      onClick={() => {
-                        onChoose(c, { scrapId: choice.scrapId === card.id ? null : card.id });
-                      }}
-                    />
-                  ))}
-                </div>
+                <h4>...paid for by Scrapping</h4>
+                {choice.settle.map((d) => {
+                  const stuffCard = stuff.find((x) => x.id === d.stuffId);
+                  if (!stuffCard) return null;
+                  const options = payable.filter(
+                    (x) => x.id === d.pay || !usedPayers.has(x.id),
+                  );
+                  return (
+                    <div key={d.stuffId} className="ascend__settle-row">
+                      <p className="ascend__settle-label">Pay for {stuffCard.name} with:</p>
+                      <div className="zone">
+                        {options.length === 0 ? (
+                          <p className="zone__empty">Nothing left to pay with.</p>
+                        ) : null}
+                        {options.map((payer) => (
+                          <CardView
+                            key={payer.id}
+                            card={payer}
+                            selected={d.pay === payer.id}
+                            onClick={() => {
+                              setPayer(d.stuffId, payer.id);
+                            }}
+                          />
+                        ))}
+                      </div>
+                    </div>
+                  );
+                })}
               </>
             ) : null}
 

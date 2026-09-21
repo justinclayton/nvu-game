@@ -28,7 +28,9 @@ export type ZoneId =
   | "red-play"
   | "gray-play"
   | "red-discard"
-  | "gray-discard";
+  | "gray-discard"
+  | "red-exhaust"
+  | "gray-exhaust";
 
 /**
  * A stack is one pile; a row lays its cards out side by side; a float holds the
@@ -56,6 +58,8 @@ export const ZONE_SHAPE: Readonly<Record<ZoneId, ZoneShape>> = {
   "gray-play": "row",
   "red-discard": "stack",
   "gray-discard": "stack",
+  "red-exhaust": "stack",
+  "gray-exhaust": "stack",
 };
 
 /** Piles that cards are tossed onto rather than squared up, so each one settles askew. */
@@ -65,6 +69,8 @@ export const LOOSE_ZONES: ReadonlySet<ZoneId> = new Set<ZoneId>([
   "scrap",
   "red-discard",
   "gray-discard",
+  "red-exhaust",
+  "gray-exhaust",
 ]);
 
 interface Placed {
@@ -83,7 +89,7 @@ export type Placement =
 
 const zoneOf = (
   c: Character,
-  part: "deck" | "hand" | "play" | "discard" | "rewards" | "offer",
+  part: "deck" | "hand" | "play" | "discard" | "exhaust" | "rewards" | "offer",
 ): ZoneId => `${c.toLowerCase() as "red" | "gray"}-${part}`;
 
 /**
@@ -148,6 +154,7 @@ export function placements(state: GameState, debug = false): readonly Placement[
     cards(p.deck, zoneOf(c, "deck"), { topFirst: true, faceUp: false, owner: c });
     cards(p.hand, zoneOf(c, "hand"), { topFirst: false, faceUp: true, owner: c });
     cards(p.discard, zoneOf(c, "discard"), { topFirst: false, faceUp: true, owner: c });
+    cards(p.exhaust, zoneOf(c, "exhaust"), { topFirst: false, faceUp: true, owner: c });
     cards(
       state.playZone.filter((x) => x.owner === c).map((x) => x.card),
       zoneOf(c, "play"),
@@ -208,7 +215,6 @@ export function moveDelays(
     if ("room" in e) note(e.room.id);
     if ("card" in e) note(e.card.id);
     if ("cards" in e) for (const c of e.cards) note(c.id);
-    if ("price" in e) for (const c of e.price) note(c.id);
   }
   const delays = new Map<string, number>();
   for (const [id, i] of order) delays.set(id, Math.min(i, 8) * stepMs);

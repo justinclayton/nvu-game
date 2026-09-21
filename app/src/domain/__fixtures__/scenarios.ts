@@ -29,7 +29,7 @@ export interface Fixture {
 const SORTING_ROOM = "Sorting Room";
 const CLEARED_ROOM = "Gross Thing That Looks Like A Cherry";
 
-/** Draw phase, opening draws done, Play not yet started. */
+/** Just flipped: both hands already drawn up to 5, Play not yet started. */
 function drawing(): GameState {
   const state = rig({
     phase: "Flip",
@@ -37,18 +37,13 @@ function drawing(): GameState {
     Red: player({ deck: pile("Shove", 8) }),
     Gray: player({ deck: pile("Duck Under", 8) }),
   });
-  const { state: next } = play(state, [
-    { type: "FLIP_ROOM" },
-    { type: "DRAW", character: "Red" },
-    { type: "DRAW", character: "Gray" },
-  ]);
+  const { state: next } = play(state, [{ type: "FLIP_ROOM" }]);
   return next;
 }
 
 /** Play phase, both hands holding cards they can afford. */
 function playing(): GameState {
-  const { state } = play(drawing(), [{ type: "END_DRAW" }]);
-  return state;
+  return drawing();
 }
 
 /** A pending `ChooseCharacter`: Grav Harness asks who draws. */
@@ -95,12 +90,16 @@ function choosingCards(): GameState {
   return asked;
 }
 
-/** Red in last stand, mid-Play, with a hand every card in it is free to play. */
-function lastStand(): GameState {
+/** Red's deck is empty but the discard pile is not — the next draw or Exhaust reshuffles it. */
+function emptyDeck(): GameState {
   return rig({
     phase: "Play",
     activeRoom: room(SORTING_ROOM),
-    Red: player({ deck: [], hand: [card("Charge In"), card("Pry Bar")], lastStand: true }),
+    Red: player({
+      deck: [],
+      hand: [card("Charge In"), card("Pry Bar")],
+      discard: pile("Shove", 6),
+    }),
     Gray: player({ deck: pile("Duck Under", 4) }),
   });
 }
@@ -200,9 +199,9 @@ export const FIXTURES: readonly Fixture[] = [
     build: stable(choosingCards),
   },
   {
-    name: "last-stand",
-    description: "Red in last stand, mid-Play.",
-    build: stable(lastStand),
+    name: "empty-deck",
+    description: "Red's deck is empty; the discard pile is not, mid-Play.",
+    build: stable(emptyDeck),
   },
   {
     name: "ascend",

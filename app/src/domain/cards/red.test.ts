@@ -45,8 +45,10 @@ describe("Reckless Swing — 'Exhaust 1'", () => {
       payWith: [hand[1] as CardId],
     });
     expect(next.Red.deck).toHaveLength(3);
-    // One paid from hand and one off the top of the deck.
-    expect(next.Red.discard).toHaveLength(2);
+    // One paid from hand, into the discard pile; one Exhausted off the top of
+    // the deck, into the Exhaust pile — two different piles.
+    expect(next.Red.discard).toHaveLength(1);
+    expect(next.Red.exhaust).toHaveLength(1);
   });
 });
 
@@ -188,21 +190,16 @@ describe("Deadweight Grip — 'Cards you play have +1 Oomph, draw no more than 2
     expect(statPool(next).oomph).toBe(3);
   });
 
-  it("caps its holder's draw at 2", () => {
+  it("caps its holder's draw at 2, short of the usual fill to 5", () => {
     const state = rig({
-      phase: "Draw",
-      activeRoom: room("Sorting Room"),
+      phase: "Flip",
+      floorDeck: [room("Sorting Room")],
       Red: player({ deck: pile("Shove", 6), hand: [card("Deadweight Grip")] }),
       Gray: player({ deck: pile("Duck Under", 6) }),
     });
-    const twice = play(state, [
-      { type: "DRAW", character: "Red" },
-      { type: "DRAW", character: "Red" },
-    ]);
-    expect(twice.state.Red.drewThisTurn).toBe(2);
-    const rejected = play(twice.state, []);
-    void rejected;
-    expect(twice.state.Red.hand).toHaveLength(3);
+    const { state: next } = must(state, { type: "FLIP_ROOM" });
+    expect(next.Red.drewThisTurn).toBe(2);
+    expect(next.Red.hand).toHaveLength(3);
   });
 });
 
@@ -346,7 +343,7 @@ describe("Zen Mode — \"Holding: you don't `Exhaust`\"", () => {
     expect(next.Red.hand.map((c) => c.name)).toEqual(["Zen Mode", "Shove"]);
   });
 
-  it("does not stop the burned draw of a full hand", () => {
+  it("does not stop the automatic fill to 5 — a hand already at 5 just draws nothing", () => {
     const state = rig({
       phase: "Flip",
       floorDeck: [room("Sorting Room")],
@@ -356,35 +353,9 @@ describe("Zen Mode — \"Holding: you don't `Exhaust`\"", () => {
       }),
       Gray: player({ deck: pile("Duck Under", 4) }),
     });
-    // The opening draw is the only draw a full hand ever takes.
     const { state: next, events } = must(state, { type: "FLIP_ROOM" });
-    expect(next.Red.discard).toHaveLength(1);
-    expect(eventTypes(events)).toEqual([
-      "ROOM_FLIPPED",
-      "DRAW_BURNED",
-      "CARD_DISCARDED",
-      "CARD_DRAWN",
-    ]);
-  });
-
-  it("does not stop the price of getting out of last stand", () => {
-    const state = playing({
-      activeRoom: room("Sorting Room"),
-      Red: player({
-        deck: [],
-        hand: [card("Zen Mode"), card("Shove"), card("Shove"), card("Shove")],
-        lastStand: true,
-      }),
-      Gray: player({ deck: pile("Duck Under", 4) }),
-    });
-    const shoves = state.Red.hand.filter((c) => c.name === "Shove");
-    const { state: next, events } = play(state, [
-      ...shoves.map((c) => free("Red", c.id)),
-      { type: "END_PLAY" },
-    ]);
-    // Three played, shuffled back, two Exhausted as the price: one left.
-    expect(next.Red.deck).toHaveLength(1);
-    expect(eventTypes(events)).toContain("LAST_STAND_ESCAPED");
-    expect(eventTypes(events)).not.toContain("EXHAUST_PREVENTED");
+    expect(next.Red.hand).toHaveLength(5);
+    expect(next.Red.deck).toHaveLength(4);
+    expect(events.filter((e) => e.type === "CARD_DRAWN" && e.character === "Red")).toHaveLength(0);
   });
 });

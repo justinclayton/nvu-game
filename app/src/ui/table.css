@@ -271,7 +271,6 @@ body {
   letter-spacing: 0.08em;
   color: var(--print);
 }
-.status--last-stand,
 .status--down {
   color: var(--red-light);
   font-weight: 700;

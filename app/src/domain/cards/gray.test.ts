@@ -337,13 +337,15 @@ describe("Level Up — 'Scrap a card from your hand for the top of the Gray Rewa
 
 describe("I Know Kung Fu — 'Holding: when you play a card with Scramble, draw 1'", () => {
   it("draws while it is held, and not once it is played", () => {
+    // A hand of 5 to start, so playing the Coil dips it to 4 before the draw
+    // check — the automatic fill to 5 no longer burns a card into a hand
+    // already at cap, so a draw this test relies on has to land below it.
     const state = playing({
       Red: player({ deck: pile("Shove", 4), hand: [card("Coil Of Cable")] }),
       Gray: player({
         deck: pile("Duck Under", 6),
         hand: [
           card("I Know Kung Fu"),
-          card("Coil Of Cable"),
           card("Coil Of Cable"),
           card("Pry Bar"),
           card("Pry Bar"),
@@ -352,11 +354,9 @@ describe("I Know Kung Fu — 'Holding: when you play a card with Scramble, draw 
       }),
     });
     const kungFu = state.Gray.hand[0];
-    const coils = state.Gray.hand.filter((c) => c.name === "Coil Of Cable");
+    const firstCoil = state.Gray.hand.find((c) => c.name === "Coil Of Cable");
     const pryBars = state.Gray.hand.filter((c) => c.name === "Pry Bar");
-    const firstCoil = coils[0];
-    const secondCoil = coils[1];
-    if (!kungFu || !firstCoil || !secondCoil) throw new Error("rig");
+    if (!kungFu || !firstCoil) throw new Error("rig");
 
     // Red playing Scramble does nothing: the card says "when *you* play".
     const byRed = must(state, free("Red", ids(state, "Red")[0] as CardId));
@@ -365,6 +365,8 @@ describe("I Know Kung Fu — 'Holding: when you play a card with Scramble, draw 
     // Gray playing Scramble while holding it draws.
     const byGray = must(byRed.state, free("Gray", firstCoil.id));
     expect(byGray.state.Gray.deck).toHaveLength(5);
+    const drawn = byGray.state.Gray.hand.find((c) => c.name === "Duck Under");
+    if (!drawn) throw new Error("expected the draw to land a Duck Under");
 
     // Playing it moves it to the play zone, where a `Holding:` line is no
     // longer running.
@@ -375,7 +377,17 @@ describe("I Know Kung Fu — 'Holding: when you play a card with Scramble, draw 
       payWith: pryBars.map((c) => c.id),
     });
     const deckAfter = played.state.Gray.deck.length;
-    const silent = must(played.state, free("Gray", secondCoil.id));
+    // A fresh, free scramble card, staged straight into the hand rather than
+    // drawn — kungFu's cost already spent everything that could pay for one.
+    // Coil Of Cable has Scramble too, so this would draw again if the
+    // `Holding:` line were still running now that kungFu is in the play zone.
+    const staged = {
+      ...played.state,
+      Gray: { ...played.state.Gray, hand: [...played.state.Gray.hand, card("Coil Of Cable")] },
+    };
+    const freshCoil = staged.Gray.hand[staged.Gray.hand.length - 1];
+    if (!freshCoil) throw new Error("rig");
+    const silent = must(staged, free("Gray", freshCoil.id));
     expect(silent.state.Gray.deck).toHaveLength(deckAfter);
   });
 });

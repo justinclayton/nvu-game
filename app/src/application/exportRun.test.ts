@@ -46,8 +46,6 @@ function nextCommand(state: GameState): Command {
   switch (state.phase) {
     case "Flip":
       return { type: "FLIP_ROOM" };
-    case "Draw":
-      return { type: "END_DRAW" };
     case "Play": {
       for (const character of ["Red", "Gray"] as const) {
         const play = affordablePlay(state, character);
@@ -78,8 +76,7 @@ function affordablePlay(state: GameState, character: Character) {
 }
 
 const ascendChoice = (state: GameState, character: Character): AscendChoice => ({
-  keepStuffId: null,
-  scrapId: null,
+  settle: [],
   takeRewardId: state.offer?.[character][0]?.id ?? null,
 });
 

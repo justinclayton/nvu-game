@@ -10,8 +10,23 @@ import { CARD_CONTENT } from "@content/index";
 import { replay } from "@application/session";
 import type { RunFile } from "@application/exportRun";
 
+/**
+ * Runs recorded under an earlier rulebook version, kept as history but no
+ * longer replayable: their command log names commands (or phases) the rules
+ * have since dropped. `replay`'s own "a command the rules now refuse" report
+ * is exactly this signal working as designed (design/cli-sim/spec.md,
+ * "replay") — these are the ones it already caught.
+ */
+const STALE_RUNS: ReadonlySet<string> = new Set([
+  // Rulebook 0.2 (issue #86): recorded against the 0.1 Draw phase's DRAW/
+  // END_DRAW commands, which no longer exist.
+  "03-first-agent-cli-run.json",
+]);
+
 const dir = join(process.cwd(), "..", "design", "playtests");
-const files = existsSync(dir) ? readdirSync(dir).filter((name) => name.endsWith(".json")) : [];
+const files = existsSync(dir)
+  ? readdirSync(dir).filter((name) => name.endsWith(".json") && !STALE_RUNS.has(name))
+  : [];
 
 describe("saved playtest runs", () => {
   if (files.length === 0) {

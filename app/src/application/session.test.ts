@@ -25,14 +25,9 @@ function mustSave(session: Session): SavedRun {
   return saved;
 }
 
-/** The commands a session needs to get from a new run into the Play phase. */
+/** The command a session needs to get from a new run into the Play phase. */
 function throughATurn(): readonly Command[] {
-  return [
-    { type: "FLIP_ROOM" },
-    { type: "DRAW", character: "Red" },
-    { type: "DRAW", character: "Gray" },
-    { type: "END_DRAW" },
-  ];
+  return [{ type: "FLIP_ROOM" }];
 }
 
 describe("dispatch", () => {
@@ -75,11 +70,8 @@ describe("undo", () => {
   it("cannot reach back past a command that revealed hidden information", () => {
     const session = newSession();
     for (const command of throughATurn()) session.getState().dispatch(command);
-    // The flip and both draws each showed somebody a card, so there is nothing
-    // to take back — END_DRAW revealed nothing, so it alone can be undone.
-    expect(canUndo(session.getState())).toBe(true);
-    expect(session.getState().undo()).toBe(true);
-    expect(session.getState().state.phase).toBe("Draw");
+    // FLIP_ROOM both flips the room and draws both hands up to 5 — all of it
+    // revealing — so there is nothing before it left to take back.
     expect(canUndo(session.getState())).toBe(false);
     expect(session.getState().undo()).toBe(false);
   });
@@ -95,8 +87,9 @@ describe("undo", () => {
     const cost = card.cost;
     const payWith = red.hand.filter((c) => c.id !== card.id).slice(0, cost);
     if (payWith.length < cost) {
-      // Nothing affordable was drawn; the point still stands on END_DRAW alone.
-      expect(canUndo(beforePlay)).toBe(true);
+      // Nothing affordable was drawn; FLIP_ROOM itself was revealing, so there
+      // is nothing to undo back to regardless.
+      expect(canUndo(beforePlay)).toBe(false);
       return;
     }
 
@@ -179,22 +172,22 @@ describe("notes", () => {
   });
 
   it("keeps a note about the thing being undone, at the new end of the log", () => {
-    // In last stand every card is free, so the play needs no payment and is
-    // still takeable back — a play reveals nothing.
+    // Pry Bar's printed cost is 0, so the play needs no payment and is still
+    // takeable back — a play reveals nothing.
     const session = createSessionFrom(
       rig({
         phase: "Play",
         activeRoom: room("Sorting Room"),
-        Red: player({ deck: [], hand: [card("Charge In")], lastStand: true }),
+        Red: player({ deck: [], hand: [card("Pry Bar")] }),
         Gray: player({ deck: pile("Duck Under", 4) }),
       }),
     );
-    const charge = session.getState().state.Red.hand[0];
-    if (!charge) throw new Error("rig");
+    const pryBar = session.getState().state.Red.hand[0];
+    if (!pryBar) throw new Error("rig");
     session.getState().dispatch({
       type: "PLAY_CARD",
       character: "Red",
-      cardId: charge.id,
+      cardId: pryBar.id,
       payWith: [],
     });
     session.getState().note("that play should not have been free");
@@ -218,7 +211,8 @@ describe("subscribing outside React", () => {
       (events) => seen.push(events.length),
     );
     session.getState().dispatch({ type: "FLIP_ROOM" });
-    session.getState().dispatch({ type: "END_PLAY" });
+    // Already flipped into Play, so a second flip is illegal.
+    session.getState().dispatch({ type: "FLIP_ROOM" });
     stop();
     // One notification for the flip; the rejection changed no events.
     expect(seen).toHaveLength(1);

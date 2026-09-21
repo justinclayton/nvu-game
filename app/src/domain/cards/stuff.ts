@@ -84,9 +84,7 @@ export const STUFF: Registry = {
    *
    * Either character can be healed, so a character with cards in both discard
    * piles is asked which one first; a character with only one eligible pile
-   * skips straight to picking the cards from it. Healing a partner in Last
-   * Stand only refills their deck — nothing here clears the `lastStand` flag,
-   * so the rulebook's "Last Stand ends at Cleanup" still holds. */
+   * skips straight to picking the cards from it. */
   "A Pair Of Stich-Em-Ups": {
     onPlay(state, ctx) {
       const eligible = CHARACTERS.filter((c) => playerOf(state, c).discard.length > 0);
@@ -199,14 +197,12 @@ export const STUFF: Registry = {
   /* "Holding: whenever you draw a card, your partner must also draw a card."
    *
    * One-way: the holder's draw forces the partner's, never the reverse. Any
-   * draw counts — the opening draw, a chosen draw in Draw/Play, or one a card's
-   * text causes — so this listens for both `CARD_DRAWN` and `DRAW_BURNED`,
-   * which are the two shapes a draw can take (Each Turn). The forced draw itself is
-   * stamped `forced` by `drawOne` and is skipped here, so it cannot chain: it
-   * does not count as a draw that forces one, whether it lands on this same
-   * copy or on a copy the partner is holding. Full Hand and Last Stand for the
-   * forced draw come from `drawOne` and the same last-stand check `openingDraw`
-   * uses — no new rule for either.
+   * draw counts — the automatic fill to 5, or one a card's text causes — so
+   * this listens for `CARD_DRAWN`. The forced draw itself is stamped `forced`
+   * by `drawOne` and is skipped here, so it cannot chain: it does not count as
+   * a draw that forces one, whether it lands on this same copy or on a copy
+   * the partner is holding. A partner already Down draws nothing, straight
+   * from `drawOne`'s own check.
    *
    * Ruled for Faceful Of Slime: a draw cap already reached stops a forced draw
    * from happening at all — no card moves, and nothing is pushed to `events`,
@@ -217,11 +213,11 @@ export const STUFF: Registry = {
   "My Head Is Quantum Spinning": {
     onEvent(event, state, ctx) {
       if (ctx.zone !== "hand") return nothing(state);
-      if (event.type !== "CARD_DRAWN" && event.type !== "DRAW_BURNED") return nothing(state);
+      if (event.type !== "CARD_DRAWN") return nothing(state);
       if (event.character !== ctx.character || event.forced) return nothing(state);
       const partner = ctx.character === "Red" ? "Gray" : "Red";
       const partnerState = playerOf(state, partner);
-      if (partnerState.lastStand) return nothing(state);
+      if (partnerState.down) return nothing(state);
       if (partnerState.drewThisTurn >= drawCapFor(state, partner)) return nothing(state);
       const events: DomainEvent[] = [];
       return done(drawOne(state, partner, events, false, true), events);

@@ -42,8 +42,8 @@ function roomLines(state: GameState, room: Room): string[] {
 
 function playerLines(state: GameState, c: Character): string[] {
   const p = playerOf(state, c);
-  const flags = [p.down ? "DOWN" : "", p.lastStand ? "LAST STAND" : ""].filter((s) => s !== "");
-  const head = `${c}: deck ${String(p.deck.length)}, discard ${String(p.discard.length)}, hand ${String(p.hand.length)}${flags.length ? "  " + flags.join(" ") : ""}`;
+  const flags = p.down ? "  DOWN" : "";
+  const head = `${c}: deck ${String(p.deck.length)}, discard ${String(p.discard.length)}, exhaust ${String(p.exhaust.length)}, hand ${String(p.hand.length)}${flags}`;
   const lines = [head];
   for (const card of p.hand) lines.push(`    ${cardLine(state, c, card)}`);
   const played = state.playZone.filter((x) => x.owner === c).map((x) => x.card.name);
@@ -100,11 +100,7 @@ const nameOf = (state: GameState, id: string): string => {
 export function describeCommand(state: GameState, command: Command): string {
   switch (command.type) {
     case "FLIP_ROOM":
-      return "Flip the next room";
-    case "DRAW":
-      return `${command.character} draws`;
-    case "END_DRAW":
-      return "End the Draw phase";
+      return "Flip the next room (draws both hands up to 5)";
     case "PLAY_CARD": {
       const card = playerOf(state, command.character).hand.find((x) => x.id === command.cardId);
       const paying =
@@ -130,11 +126,17 @@ export function describeCommand(state: GameState, command: Command): string {
         const ch = command[c];
         const reward =
           ch.takeRewardId === null ? "declines" : `takes ${nameOf(state, ch.takeRewardId)}`;
-        const tax =
-          ch.keepStuffId === null || ch.scrapId === null
+        const settle =
+          ch.settle.length === 0
             ? ""
-            : `, keeps ${nameOf(state, ch.keepStuffId)} by Scrapping ${nameOf(state, ch.scrapId)}`;
-        return `${c} ${reward}${tax}`;
+            : `, settles ${ch.settle
+                .map((d) =>
+                  d.pay === null
+                    ? nameOf(state, d.stuffId)
+                    : `${nameOf(state, d.stuffId)} (paid with ${nameOf(state, d.pay)})`,
+                )
+                .join(", ")}`;
+        return `${c} ${reward}${settle}`;
       };
       return `Ascend: ${one("Red")}; ${one("Gray")}`;
     }

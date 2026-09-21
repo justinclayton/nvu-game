@@ -7,11 +7,12 @@
  *
  * The contract, which moves.test.ts holds this file to: every command returned
  * passes `validate`. The reverse holds too, with two exceptions noted below
- * where the full set is too large to enumerate: an `OrderCards` answer over more
- * than four cards, and the cross product of two characters' ascension choices.
+ * where the full set is too large to enumerate: an `OrderCards` answer over
+ * more than four cards, and the cross product of two characters' ascension
+ * choices.
  */
 
-import { canDraw, costOf, payOptions, playableCards } from "@domain/queries";
+import { costOf, payOptions, playableCards } from "@domain/queries";
 import type {
   AscendChoice,
   Card,
@@ -20,6 +21,7 @@ import type {
   Command,
   GameState,
   Pending,
+  SettleDecision,
 } from "@domain/types";
 import { CHARACTERS, playerOf } from "@domain/verbs";
 
@@ -107,29 +109,63 @@ export function playsOf(state: GameState, c: Character, card: Card): readonly Co
 
 /* ---------------------------------------------------------------- Ascend */
 
+/** Every Stuff card a character could still Settle: their deck, hand and discard pile. */
+function settleableStuff(state: GameState, c: Character): readonly Card[] {
+  const p = playerOf(state, c);
+  return [...p.deck, ...p.hand, ...p.discard].filter((x) => x.kind !== "player");
+}
+
+/** Every non-Stuff card of a character's that could pay a Settle-your-Stuff Scrap. */
+function payableCards(state: GameState, c: Character): readonly Card[] {
+  const p = playerOf(state, c);
+  return [...p.deck, ...p.hand, ...p.discard].filter((x) => x.kind === "player");
+}
+
 /**
- * Everything one character may decide at ascension: each reward or none,
- * crossed with each way of paying the Scrap tax or not paying it.
+ * Every way one character could settle their Stuff: each piece either takes
+ * its default fate (no `SettleDecision` at all) or is flipped by paying with
+ * one of the non-Stuff cards available, one card paying for at most one flip.
+ * The pool of possible settlements grows fast, so this stops offering more
+ * than one flipped piece past a small hand of Stuff — a policy that wants the
+ * full space reads `settleableStuff`/`payableCards` directly. See
+ * design/cli-sim/spec.md, "The move generator".
  */
+const SETTLE_FLIPS_UP_TO = 2;
+
+function settlementsOf(state: GameState, c: Character): readonly (readonly SettleDecision[])[] {
+  const stuff = settleableStuff(state, c);
+  const payers = payableCards(state, c);
+  if (stuff.length === 0) return [[]];
+
+  const flipSome = (howMany: number): readonly (readonly SettleDecision[])[] => {
+    if (howMany === 0 || payers.length === 0) return [];
+    const out: (readonly SettleDecision[])[] = [];
+    for (const flipped of combinations(stuff, howMany)) {
+      for (const paidBy of combinations(payers, howMany)) {
+        for (const pairing of permutations(paidBy)) {
+          out.push(flipped.map((s, i) => ({ stuffId: s.id, pay: pairing[i]?.id ?? null })));
+        }
+      }
+    }
+    return out;
+  };
+
+  const out: (readonly SettleDecision[])[] = [[]];
+  for (let n = 1; n <= Math.min(SETTLE_FLIPS_UP_TO, stuff.length, payers.length); n++) {
+    out.push(...flipSome(n));
+  }
+  return out;
+}
+
+/** Everything one character may decide at ascension: each settlement crossed with each reward. */
 export function ascendChoices(state: GameState, c: Character): readonly AscendChoice[] {
   const offered = state.offer?.[c] ?? [];
   const rewards: (CardId | null)[] = [null, ...ids(offered)];
-
-  const pile = playerOf(state, c).discard;
-  const taxes: { keepStuffId: CardId | null; scrapId: CardId | null }[] = [
-    { keepStuffId: null, scrapId: null },
-  ];
-  for (const keep of pile) {
-    if (keep.kind === "player") continue;
-    for (const payer of pile) {
-      if (payer.id === keep.id) continue;
-      taxes.push({ keepStuffId: keep.id, scrapId: payer.id });
-    }
-  }
+  const settlements = settlementsOf(state, c);
 
   const out: AscendChoice[] = [];
-  for (const tax of taxes) {
-    for (const takeRewardId of rewards) out.push({ ...tax, takeRewardId });
+  for (const settle of settlements) {
+    for (const takeRewardId of rewards) out.push({ settle, takeRewardId });
   }
   return out;
 }
@@ -162,16 +198,7 @@ export function legalCommands(state: GameState): readonly Command[] {
 
   switch (state.phase) {
     case "Flip":
-      // Both Down: the flip is still the legal command, and it ends the run.
-      if (state.Red.down && state.Gray.down) return [{ type: "FLIP_ROOM" }];
       return state.floorDeck.length > 0 ? [{ type: "FLIP_ROOM" }] : [];
-
-    case "Draw": {
-      const out: Command[] = [];
-      for (const c of CHARACTERS) if (canDraw(state, c)) out.push({ type: "DRAW", character: c });
-      out.push({ type: "END_DRAW" });
-      return out;
-    }
 
     case "Play": {
       const out: Command[] = [];

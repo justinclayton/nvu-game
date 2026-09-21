@@ -46,7 +46,6 @@ function Harness({
         delays={new Map()}
         paying={null}
         onPickCard={vi.fn()}
-        onDraw={vi.fn()}
         reward={{ Red: choices.Red.takeRewardId, Gray: choices.Gray.takeRewardId }}
         onPickReward={(c, picked) => {
           choose(c, { takeRewardId: choices[c].takeRewardId === picked.id ? null : picked.id });
@@ -86,12 +85,12 @@ describe("the ascension panel", () => {
     expect(screen.getByRole("button", { name: "Ascend to floor 2" })).toBeDefined();
   });
 
-  it("asks for the other half of the Scrap tax only once a piece of Stuff is picked", () => {
+  it("asks for a Scrap payer only once a piece of Stuff is picked to flip", () => {
     const state = atAscension();
     render(<Harness state={state} dispatch={vi.fn()} />);
-    expect(screen.queryByText(/by Scrapping this card in its place/)).toBeNull();
+    expect(screen.queryByText(/paid for by Scrapping/)).toBeNull();
     fireEvent.click(panel().getAllByText("Pry Bar")[0] as HTMLElement);
-    expect(screen.getByText(/by Scrapping this card in its place/)).toBeDefined();
+    expect(screen.getByText(/paid for by Scrapping/)).toBeDefined();
   });
 
   it("takes a floating card on click, and declines it on a second click", () => {
@@ -126,9 +125,8 @@ describe("the ascension panel", () => {
     const sent = dispatch.mock.calls[0]?.[0] as Command | undefined;
     expect(sent?.type).toBe("ASCEND");
     if (sent?.type !== "ASCEND") throw new Error("expected an ascend");
-    expect(sent.Red.keepStuffId).toBe(pryBar.id);
-    expect(sent.Red.scrapId).toBe(payer.id);
+    expect(sent.Red.settle).toEqual([{ stuffId: pryBar.id, pay: payer.id }]);
     expect(sent.Red.takeRewardId).toBe(reward.id);
-    expect(sent.Gray.keepStuffId).toBeNull();
+    expect(sent.Gray.settle).toEqual([]);
   });
 });

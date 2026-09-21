@@ -15,7 +15,7 @@ var NVU_CARDS = {
   cards: [
     {"name":"Shove","set":"official","kind":"player","owner":"Red","starter":true,"cost":1,"oomph":2,"count":5},
     {"name":"Charge In","set":"official","kind":"player","owner":"Red","starter":true,"cost":2,"oomph":4,"count":5},
-    {"name":"Overdrive","set":"official","kind":"player","owner":"Red","starter":true,"cost":0,"oomph":2,"text":"Exhaust 2 (the top 2 cards of your deck go to your discard pile).","count":2},
+    {"name":"Overdrive","set":"official","kind":"player","owner":"Red","starter":true,"cost":0,"oomph":2,"text":"Exhaust 2 (the top 2 cards of your deck go to your Exhaust pile).","count":2},
     {"name":"Duck Under","set":"official","kind":"player","owner":"Gray","starter":true,"cost":1,"scramble":2,"count":5},
     {"name":"Pick The Lock","set":"official","kind":"player","owner":"Gray","starter":true,"cost":2,"scramble":4,"count":5},
     {"name":"Peek Around Corner","set":"official","kind":"player","owner":"Gray","starter":true,"cost":1,"scramble":1,"text":"Look at the top card of any deck, then put it back on top. (Peek 1?)","count":2},

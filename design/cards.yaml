@@ -57,7 +57,7 @@ cards:
     owner: Red
     cost: 0
     oomph: 2
-    text: Exhaust 2 (the top 2 cards of your deck go to your discard pile).
+    text: Exhaust 2 (the top 2 cards of your deck go to your Exhaust pile).
 
   ### Gray
 

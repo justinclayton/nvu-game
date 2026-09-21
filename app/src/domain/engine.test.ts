@@ -30,33 +30,23 @@ const playFree = (c: "Red" | "Gray", cardId: CardId): Command => ({
 });
 
 describe("Flip", () => {
-  it("turns the top card of the floor deck face up before anything is spent", () => {
+  it("turns the top card of the floor deck face up before anything is drawn", () => {
     const first = room("Sorting Room");
     const state = rig({
       phase: "Flip",
       floorDeck: [first, room("Ration Locker")],
-      Red: player({ deck: pile("Shove", 3) }),
-      Gray: player({ deck: pile("Duck Under", 3) }),
+      Red: player({ deck: pile("Shove", 5) }),
+      Gray: player({ deck: pile("Duck Under", 5) }),
     });
     const { state: next, events } = must(state, { type: "FLIP_ROOM" });
     expect(next.activeRoom?.id).toBe(first.id);
     expect(next.floorDeck).toHaveLength(1);
-    expect(next.phase).toBe("Draw");
-    // The flip opens Draw, and Draw opens with one card each.
-    expect(eventTypes(events)).toEqual(["ROOM_FLIPPED", "CARD_DRAWN", "CARD_DRAWN"]);
-  });
-
-  it("ends the run when both characters are Down at the start of a turn", () => {
-    const state = rig({
-      phase: "Flip",
-      floorDeck: [room("Sorting Room")],
-      Red: player({ down: true }),
-      Gray: player({ down: true }),
-    });
-    const { state: next, events } = must(state, { type: "FLIP_ROOM" });
-    expect(next.phase).toBe("GameOver");
-    expect(next.outcome).toBe("Defeat");
-    expect(eventTypes(events)).toEqual(["GAME_OVER"]);
+    expect(next.phase).toBe("Play");
+    // The flip is announced, then both hands draw up to 5 (5 cards each).
+    expect(eventTypes(events)).toEqual([
+      "ROOM_FLIPPED",
+      ...Array.from({ length: 10 }, () => "CARD_DRAWN"),
+    ]);
   });
 });
 
@@ -65,75 +55,40 @@ describe("Draw", () => {
     rig({
       phase: "Flip",
       floorDeck: [room("Sorting Room")],
-      Red: player({ deck: pile("Shove", 5) }),
-      Gray: player({ deck: pile("Duck Under", 5) }),
+      Red: player({ deck: pile("Shove", 8) }),
+      Gray: player({ deck: pile("Duck Under", 8) }),
       ...over,
     });
 
-  const drawState = (over = {}) =>
-    rig({
-      phase: "Draw",
-      activeRoom: room("Sorting Room"),
-      Red: player({ deck: pile("Shove", 5) }),
-      Gray: player({ deck: pile("Duck Under", 5) }),
-      ...over,
-    });
-
-  it("'both players draw 1 card at the same time' — the opening draw", () => {
+  it("'draw until you hold 5' — both at once, and no further", () => {
     const { state: next } = must(flipState(), { type: "FLIP_ROOM" });
-    expect(next.phase).toBe("Draw");
-    expect(next.Red.hand).toHaveLength(1);
-    expect(next.Gray.hand).toHaveLength(1);
-    expect(next.Red.deck).toHaveLength(4);
-    expect(next.Gray.deck).toHaveLength(4);
-    expect(next.Red.drewThisTurn).toBe(1);
-    expect(next.Gray.drewThisTurn).toBe(1);
+    expect(next.phase).toBe("Play");
+    expect(next.Red.hand).toHaveLength(5);
+    expect(next.Gray.hand).toHaveLength(5);
+    expect(next.Red.deck).toHaveLength(3);
+    expect(next.Gray.deck).toHaveLength(3);
+    expect(next.Red.drewThisTurn).toBe(5);
+    expect(next.Gray.drewThisTurn).toBe(5);
   });
 
-  it("'if you are forced to draw with a Full Hand' — the opening draw is discarded", () => {
+  it("'if you already hold 5 or more, do not draw' — the hand may exceed 5", () => {
     const state = flipState({
-      Red: player({ deck: pile("Shove", 5), hand: pile("Charge In", 5) }),
+      Red: player({ deck: pile("Shove", 8), hand: pile("Charge In", 6) }),
     });
     const { state: next, events } = must(state, { type: "FLIP_ROOM" });
-    expect(next.Red.hand).toHaveLength(5);
-    expect(next.Red.discard).toHaveLength(1);
-    expect(next.Red.deck).toHaveLength(4);
-    expect(eventTypes(events)).toContain("DRAW_BURNED");
+    expect(next.Red.hand).toHaveLength(6);
+    expect(next.Red.deck).toHaveLength(8);
+    expect(events.filter((e) => e.type === "CARD_DRAWN" && e.character === "Red")).toHaveLength(0);
   });
 
-  it("'if you are in Last Stand, skip the opening draw'", () => {
+  it("a card may tighten how deep a character draws (Spore Cloud's hand cap)", () => {
     const state = flipState({
-      Red: player({ deck: pile("Shove", 5), hand: pile("Charge In", 2), lastStand: true }),
+      Red: player({ deck: pile("Shove", 8), hand: [card("Spore Cloud")] }),
     });
     const { state: next } = must(state, { type: "FLIP_ROOM" });
-    expect(next.Red.hand).toHaveLength(2);
-    expect(next.Red.deck).toHaveLength(5);
-    expect(next.Red.drewThisTurn).toBe(0);
-    expect(next.Gray.hand).toHaveLength(1);
-  });
-
-  it("'you may not draw up while holding 5 or more cards'", () => {
-    const state = drawState({
-      Red: player({ deck: pile("Shove", 5), hand: pile("Charge In", 5) }),
-    });
-    const rejected = execute(state, { type: "DRAW", character: "Red" });
-    expect(rejected.ok).toBe(false);
-    if (!rejected.ok) expect(rejected.reason.code).toBe("HandIsFull");
-  });
-
-  it("'the phase ends when both players pass' — and it ends for both at once", () => {
-    const { state: next } = play(drawState(), [
-      { type: "DRAW", character: "Red" },
-      { type: "DRAW", character: "Gray" },
-      { type: "END_DRAW" },
-    ]);
-    expect(next.phase).toBe("Play");
-    expect(next.Red.drewThisTurn).toBe(1);
-  });
-
-  it("nobody owes a draw — the phase may end with nothing drawn", () => {
-    const { state: next } = must(drawState(), { type: "END_DRAW" });
-    expect(next.phase).toBe("Play");
+    // Spore Cloud's own "Holding: you can't have more than 3 cards" caps the
+    // fill well short of 5.
+    expect(next.Red.hand).toHaveLength(3);
   });
 });
 
@@ -146,12 +101,6 @@ describe("Play", () => {
       Gray: player({ deck: pile("Duck Under", 5) }),
       ...over,
     });
-
-  it("'you may not draw during this phase' — the draw is rejected, not thrown", () => {
-    const rejected = execute(playState(), { type: "DRAW", character: "Red" });
-    expect(rejected.ok).toBe(false);
-    if (!rejected.ok) expect(rejected.reason.code).toBe("WrongPhase");
-  });
 
   it("'to play a card, discard cards from your hand equal to its Cost'", () => {
     const state = playState();
@@ -347,7 +296,7 @@ describe("Room kinds: Enemy, Hazard, Stuff", () => {
     ]);
     expect(events.filter((e) => e.type === "THRESHOLD_MET")).toHaveLength(2);
     expect(next.cleared).toHaveLength(1);
-    expect(next.Red.discard).toHaveLength(1);
+    expect(next.Red.exhaust).toHaveLength(1);
   });
 
   it("a Hazard's higher threshold also reveals a reward — taken or skipped", () => {

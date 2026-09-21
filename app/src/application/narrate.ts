@@ -18,14 +18,16 @@ export function describeEvent(event: DomainEvent): string {
       return `You are in: ${event.room.name}.`;
     case "CARD_DRAWN":
       return `${event.character} draws ${event.card.name}.`;
-    case "DRAW_BURNED":
-      return `${event.character}'s hand is full — ${event.card.name} is discarded instead.`;
     case "CARD_PLAYED":
       return `${event.character} plays ${event.card.name}.`;
     case "COST_PAID":
       return `${event.character} pays with ${event.cards.map((c) => c.name).join(", ")}.`;
     case "CARD_DISCARDED":
       return `${event.character} discards ${event.card.name} from their ${event.from === "playZone" ? "play zone" : event.from}.`;
+    case "CARD_EXHAUSTED":
+      return `${event.character} Exhausts ${event.card.name}.`;
+    case "DECK_RESHUFFLED":
+      return `${event.character}'s discard pile shuffles into a new deck: ${String(event.count)} card(s).`;
     case "CARD_SCRAPPED":
       return `${event.card.name} is Scrapped.`;
     case "EXHAUST_PREVENTED":
@@ -50,10 +52,6 @@ export function describeEvent(event: DomainEvent): string {
       return `You Flee ${event.room.name}.`;
     case "FLED_RESHUFFLED":
       return `The Fled pile shuffles back in: ${String(event.rooms)} rooms.`;
-    case "LAST_STAND":
-      return `${event.character}'s deck is empty — last stand.`;
-    case "LAST_STAND_ESCAPED":
-      return `${event.character} gets out of last stand, ${String(event.price.length)} cards the poorer.`;
     case "WENT_DOWN":
       return `${event.character} is Down — ${event.cause}.`;
     case "REWARD_REVEALED":
@@ -62,6 +60,10 @@ export function describeEvent(event: DomainEvent): string {
       return `${event.character} takes ${event.card.name}.`;
     case "REWARD_DECLINED":
       return `${event.character} declines the reward.`;
+    case "STUFF_SETTLED":
+      return event.kept
+        ? `${event.character} keeps ${event.card.name}.`
+        : `${event.character}'s ${event.card.name} goes to its pool.`;
     case "CLEANUP_BEGAN":
       return "Cleanup.";
     case "TURN_ENDED":

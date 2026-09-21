@@ -35,37 +35,26 @@ describe("the table", () => {
     expect(screen.queryByRole("button", { name: /check the room/ })).toBeNull();
   });
 
-  it("names the room once it is flipped, and starts the Draw phase", () => {
+  it("names the room once it is flipped, and draws both hands up to 5 in one step", () => {
     fireEvent.click(screen.getByRole("button", { name: /Flip the next room/ }));
-    const room = session.getState().state.activeRoom;
-    expect(room).not.toBeNull();
-    expect(screen.getAllByText(room?.name ?? "").length).toBeGreaterThan(0);
-    expect(screen.getAllByRole("button", { name: "Draw a card" })).toHaveLength(2);
-  });
-
-  it("offers the end of the Draw phase, and the room check only after it", () => {
-    fireEvent.click(screen.getByRole("button", { name: /Flip the next room/ }));
-    expect(screen.queryByRole("button", { name: /check the room/ })).toBeNull();
-
-    fireEvent.click(screen.getByRole("button", { name: /finished drawing/ }));
-    expect(screen.queryByRole("button", { name: "Draw a card" })).toBeNull();
+    const state = session.getState().state;
+    expect(state.activeRoom).not.toBeNull();
+    expect(screen.getAllByText(state.activeRoom?.name ?? "").length).toBeGreaterThan(0);
+    expect(state.Red.hand).toHaveLength(5);
+    expect(state.Gray.hand).toHaveLength(5);
     expect(screen.getByRole("button", { name: /check the room/ }).hasAttribute("disabled")).toBe(
       false,
     );
   });
 
-  it("puts a drawn card in that character's hand", () => {
-    // The flip opens Draw by dealing both characters one card; Red then takes
-    // a second.
+  it("puts the drawn cards in each character's hand", () => {
     fireEvent.click(screen.getByRole("button", { name: /Flip the next room/ }));
-    fireEvent.click(screen.getAllByRole("button", { name: "Draw a card" })[0] as HTMLElement);
-    const drawn = session.getState().state.Red.hand[1];
-    expect(drawn).toBeDefined();
+    const { Red } = session.getState().state;
+    expect(Red.hand).toHaveLength(5);
     // Cards live in one layer over the mat; a sprite says which zone it is in.
     const inRedHand = Array.from(document.querySelectorAll('[data-zone="red-hand"]'));
-    expect(inRedHand).toHaveLength(2);
-    expect(inRedHand[1]?.textContent).toContain(drawn?.name ?? "");
-    expect(document.querySelectorAll('[data-zone="gray-hand"]')).toHaveLength(1);
+    expect(inRedHand).toHaveLength(5);
+    expect(document.querySelectorAll('[data-zone="gray-hand"]')).toHaveLength(5);
   });
 
   it("shows the rejection when a command the rules refuse gets through", () => {
@@ -92,15 +81,13 @@ describe("the table", () => {
     expect(sprites().every((s) => s.classList.contains("is-down"))).toBe(true);
 
     fireEvent.click(screen.getByRole("button", { name: /Flip the next room/ }));
-    fireEvent.click(screen.getAllByRole("button", { name: "Draw a card" })[0] as HTMLElement);
     expect(sprites()).toHaveLength(onTable);
     const faceUp = sprites().filter((s) => !s.classList.contains("is-down"));
-    expect(faceUp.map((s) => s.getAttribute("data-zone")).sort()).toEqual([
-      "gray-hand",
-      "red-hand",
-      "red-hand",
-      "room",
-    ]);
+    const zones = faceUp.map((s) => s.getAttribute("data-zone"));
+    expect(zones.filter((z) => z === "red-hand")).toHaveLength(5);
+    expect(zones.filter((z) => z === "gray-hand")).toHaveLength(5);
+    expect(zones.filter((z) => z === "room")).toHaveLength(1);
+    expect(zones).toHaveLength(11);
   });
 
   it("writes the log outside React", () => {

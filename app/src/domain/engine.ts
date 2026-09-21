@@ -5,14 +5,13 @@
  * here reads a clock, a network or Math.random — randomness is the seed carried
  * in the state, so a run replays exactly from its seed and its command log.
  *
- * Section numbers point at design/rulebook.md, which is the authority. Where a
- * rule allowed more than one reading, the reading is marked here and written up
- * in design/web-game/open-questions.md.
+ * Section numbers point at design/rulebook-0.2-draft.md, which is the
+ * authority. Where a rule allowed more than one reading, the reading is marked
+ * here and written up in design/web-game/open-questions.md.
  */
 
 import { behaviourOf, type BehaviourContext, type ChoiceAnswer } from "./cards/behaviours";
 import {
-  canDraw,
   costOf,
   costOverrideSpentBy,
   drawCapFor,
@@ -22,32 +21,28 @@ import {
   thresholdIsMet,
 } from "./queries";
 import { shuffle } from "./rng";
-import {
-  buildFloor,
-  emptyTurnRecord,
-  LAST_STAND_PRICE,
-  returnRoomsToSupply,
-  TOP_FLOOR,
-} from "./setup";
+import { buildFloor, emptyTurnRecord, HAND_CAP, returnRoomsToSupply, TOP_FLOOR } from "./setup";
 import type {
   AscendChoice,
   Card,
+  CardId,
   Character,
   Command,
   DomainEvent,
   GameState,
   Pending,
+  PlayerState,
   Rejection,
   RejectionCode,
   Result,
   Room,
   RoomEffect,
+  SettleDecision,
   Threshold,
   TurnRecord,
 } from "./types";
 import { CorruptStateError } from "./types";
 import {
-  activateLastStand,
   CHARACTERS,
   clearFreePlays,
   dealBadStuff,
@@ -55,10 +50,8 @@ import {
   discard,
   exhaustFromDeck,
   discardFromHand,
-  goDown,
   playerOf,
   scrap,
-  shuffleIntoDeck,
   spendFreePlay,
   standing,
   takeGoodStuff,
@@ -90,39 +83,9 @@ export function validate(state: GameState, command: Command): Rejection | null {
 
     case "FLIP_ROOM": {
       if (state.phase !== "Flip") return wrongPhase(state, "flip a room");
-      // Rulebook, Last Stand: Going Down: both Down at the start of a turn ends the run, so the command is
-      // still legal — there is simply no flip.
-      if (state.Red.down && state.Gray.down) return null;
       if (state.floorDeck.length === 0) {
         return reject("FloorDeckEmpty", "The floor deck and the Fled pile are both empty.");
       }
-      return null;
-    }
-
-    case "DRAW": {
-      if (state.phase !== "Draw") return wrongPhase(state, "draw");
-      const p = playerOf(state, command.character);
-      if (p.down) return reject("CharacterIsDown", `${command.character} is Down.`);
-      if (p.lastStand) {
-        return reject("InLastStand", `${command.character} is in last stand and does not draw.`);
-      }
-      if (p.deck.length === 0) {
-        return reject("DeckIsEmpty", `${command.character} has nothing left to draw.`);
-      }
-      if (p.drewThisTurn >= drawCapFor(state, command.character)) {
-        return reject("DrawCapReached", `${command.character} may not draw any deeper this turn.`);
-      }
-      if (!canDraw(state, command.character)) {
-        return reject(
-          "HandIsFull",
-          `${command.character} is holding ${String(handCapFor(state, command.character))} and has a Full Hand.`,
-        );
-      }
-      return null;
-    }
-
-    case "END_DRAW": {
-      if (state.phase !== "Draw") return wrongPhase(state, "end the draw phase");
       return null;
     }
 
@@ -216,25 +179,43 @@ function validateAnswer(pending: Pending, command: Command): Rejection | null {
   }
 }
 
+/** Every Stuff card this character could still Settle: their deck, hand and discard pile. */
+function settleableStuff(p: PlayerState): readonly Card[] {
+  return [...p.deck, ...p.hand, ...p.discard].filter((x) => x.kind !== "player");
+}
+
+/** Every non-Stuff card of this character's that could pay a Settle-your-Stuff Scrap. */
+function payableCards(p: PlayerState): readonly Card[] {
+  return [...p.deck, ...p.hand, ...p.discard].filter((x) => x.kind === "player");
+}
+
 function validateAscendChoice(
   state: GameState,
   c: Character,
   choice: AscendChoice,
 ): Rejection | null {
-  const pile = playerOf(state, c).discard;
-  const hasKeep = choice.keepStuffId !== null;
-  const hasScrap = choice.scrapId !== null;
-  if (hasKeep !== hasScrap) {
-    return reject("ScrapTaxIncomplete", "The Scrap tax is both halves or neither.");
-  }
-  if (hasKeep) {
-    const keep = pile.find((x) => x.id === choice.keepStuffId);
-    if (!keep || keep.kind === "player") {
-      return reject("NotAnOption", `That is not Stuff in ${c}'s discard pile.`);
+  const p = playerOf(state, c);
+  const stuff = new Map(settleableStuff(p).map((x) => [x.id, x]));
+  const payable = new Map(payableCards(p).map((x) => [x.id, x]));
+
+  const seenStuff = new Set<CardId>();
+  const seenPayer = new Set<CardId>();
+  for (const decision of choice.settle) {
+    if (!stuff.has(decision.stuffId)) {
+      return reject("NotAnOption", `That is not Stuff ${c} could Settle.`);
     }
-    const payer = pile.find((x) => x.id === choice.scrapId);
-    if (!payer || payer.id === choice.keepStuffId) {
-      return reject("NotAnOption", `That is not another card in ${c}'s discard pile.`);
+    if (seenStuff.has(decision.stuffId)) {
+      return reject("NotAnOption", "The same Stuff card was Settled twice.");
+    }
+    seenStuff.add(decision.stuffId);
+    if (decision.pay !== null) {
+      if (!payable.has(decision.pay)) {
+        return reject("NotAnOption", `That is not a card of ${c}'s that could pay a Scrap.`);
+      }
+      if (seenPayer.has(decision.pay)) {
+        return reject("NotAnOption", "The same card was offered to pay twice.");
+      }
+      seenPayer.add(decision.pay);
     }
   }
   if (choice.takeRewardId !== null) {
@@ -262,19 +243,25 @@ export function execute(state: GameState, command: Command): Result {
   const run: Run = { events: [], scanned: 0 };
   let next = apply(state, command, run);
   next = flush(next, run);
+  // Rulebook, Winning and losing: either character going Down ends the run, at
+  // once rather than at the next turn boundary. Checking once here, after
+  // every command, catches it wherever in the pipeline it happened — a draw,
+  // an Exhaust, a room's punishment — without threading a guard through each.
+  next = checkGameOver(next, run);
   return { ok: true, state: next, events: run.events };
+}
+
+function checkGameOver(state: GameState, run: Run): GameState {
+  if (state.phase === "GameOver") return state;
+  if (!state.Red.down && !state.Gray.down) return state;
+  run.events.push({ type: "GAME_OVER", outcome: "Defeat" });
+  return { ...state, phase: "GameOver", outcome: "Defeat" };
 }
 
 function apply(state: GameState, command: Command, run: Run): GameState {
   switch (command.type) {
     case "FLIP_ROOM":
       return flipRoom(state, run);
-    case "DRAW":
-      // Rulebook, Last Stand: `drawOne` itself sweeps for last stand right away if this empties
-      // the deck — see the note on `activateLastStand`.
-      return drawOne(state, command.character, run.events);
-    case "END_DRAW":
-      return { ...state, phase: "Play" };
     case "PLAY_CARD":
       return playCard(state, command.character, command.cardId, command.payWith, run);
     case "END_PLAY":
@@ -330,13 +317,6 @@ function flush(state: GameState, run: Run): GameState {
 /**
  * A bare `Exhaust X` line: X cards off the top of that character's own deck.
  * Rooms print it as their punishment and some cards print it as their own cost.
- * `exhaustFromDeck` sweeps for last stand right away if this empties the deck
- * (rulebook, Last Stand), whichever of the two prints it.
- *
- * This is the only shape a card can turn off. `Discard X cards from your hand`
- * names its zone, and so do cleanup, the burned draw of a full hand and the
- * price of getting out of last stand — none of those is an `Exhaust X` line, so
- * a card that stops `Exhaust X` does not stop them.
  */
 function printedExhaust(
   state: GameState,
@@ -356,12 +336,6 @@ function printedExhaust(
 /* ------------------------------------------------------------ Flip */
 
 function flipRoom(state: GameState, run: Run): GameState {
-  // Rulebook, Last Stand: Going Down: the run ends when both characters are Down, checked at the start of a
-  // turn. If both are Down when a turn begins, there is no flip.
-  if (state.Red.down && state.Gray.down) {
-    run.events.push({ type: "GAME_OVER", outcome: "Defeat" });
-    return { ...state, phase: "GameOver", outcome: "Defeat" };
-  }
   const room = state.floorDeck[0];
   if (!room) throw new CorruptStateError("Flipped an empty floor deck.");
 
@@ -372,29 +346,38 @@ function flipRoom(state: GameState, run: Run): GameState {
     turn: state.turn + 1,
     floorDeck: state.floorDeck.slice(1),
     activeRoom: room,
-    phase: "Draw",
+    phase: "Play",
     Red: { ...state.Red, drewThisTurn: 0 },
     Gray: { ...state.Gray, drewThisTurn: 0 },
     thisTurn: emptyTurnRecord(),
   };
-  return openingDraw(flipped, run);
+  return drawUpToFive(flipped, run);
 }
 
 /* ------------------------------------------------------------ Draw */
 
 /**
- * Each Turn, Draw: opens with both characters drawing 1 card at the same time.
- * The engine draws them one after the other, Red first, which is the same
- * result: neither draw can see or change the other. A `Full Hand` burns the
- * card to the discard pile and a character in last stand does not draw at
- * all (rulebook, Last Stand).
+ * Rulebook, Draw: each character draws until holding 5, both at once — there
+ * is no decision here, so no phase waits for a command. The engine draws Red's
+ * cards, one after another, then Gray's; neither draw can see or change the
+ * other, so the order makes no difference to what either one sees. `Holding:`
+ * cards can tighten how many draw (Spore Cloud's hand cap, Deadweight Grip's
+ * and Faceful Of Slime's draw caps).
  */
-function openingDraw(state: GameState, run: Run): GameState {
+function drawUpToFive(state: GameState, run: Run): GameState {
   let s = state;
   for (const c of CHARACTERS) {
-    if (playerOf(s, c).lastStand) continue;
-    // Rulebook, Last Stand: `drawOne` sweeps for last stand right away if this draw empties the deck.
-    s = drawOne(s, c, run.events);
+    if (playerOf(s, c).down) continue;
+    for (;;) {
+      const p = playerOf(s, c);
+      const cap = Math.min(HAND_CAP, handCapFor(s, c));
+      if (p.hand.length >= cap || p.drewThisTurn >= drawCapFor(s, c)) break;
+      // The loop above is already the source of truth for how many to draw,
+      // so `drawOne` is told to ignore its own (tighter, Full-Hand-shaped)
+      // default cap here.
+      s = drawOne(s, c, run.events, true);
+      if (playerOf(s, c).down) break;
+    }
   }
   return s;
 }
@@ -422,9 +405,7 @@ function playCard(
   });
 
   let s = state;
-  // A one-shot cost override is used up here. Last stand is not one of those,
-  // so a character playing their whole hand for nothing (rulebook, Last Stand) never burns the
-  // team's free play, and neither does a card that already cost nothing.
+  // A one-shot cost override is used up here.
   if (costOverrideSpentBy(s, c, card)?.reason === "free play") {
     s = spendFreePlay(s);
   }
@@ -540,11 +521,6 @@ function endPlay(state: GameState, run: Run): GameState {
       effects: outcome.effects,
       roomEnded: outcome.cleared ? "Cleared" : "Fled",
       ascends: outcome.ascends,
-      // Rulebook, Last Stand: what matters is how the room ends, not how it got there.
-      lastStandAtClear: {
-        Red: outcome.cleared && s.Red.lastStand,
-        Gray: outcome.cleared && s.Gray.lastStand,
-      },
     },
   };
   return drain(s, run);
@@ -596,7 +572,7 @@ function applyEffect(state: GameState, effect: RoomEffect, who: Character, run: 
  * Work through what the room owes, stopping at the first thing that needs a
  * decision. Where a line says *1 character*, the team chooses which one and
  * they take all of it — there is no splitting. With a partner Down there is
- * nothing to choose and it all falls on the survivor (rulebook, Last Stand: Going Down).
+ * nothing to choose and it all falls on the survivor.
  */
 function drain(state: GameState, run: Run): GameState {
   let s = state;
@@ -654,34 +630,18 @@ function drain(state: GameState, run: Run): GameState {
 function finishTurn(state: GameState, run: Run): GameState {
   const resolution = state.resolution;
   const ascends = resolution?.ascends ?? false;
-  // The resolution stays readable through cleanup: a card that asks whether the
-  // room was Cleared reads it there. It is cleared at the end of the turn.
   let s: GameState = { ...state, pending: null };
 
   // The Play phase is over, so a free play nobody used is gone: it discounts a
   // card played this turn or nothing at all. See open-questions.md #14.
   s = clearFreePlays(s);
 
-  // Rulebook, Last Stand: the team Fleeing the room while a character is in last stand puts that
-  // character Down. In last stand you have to keep clearing rooms.
-  if (resolution?.roomEnded === "Fled") {
-    for (const c of CHARACTERS) {
-      if (playerOf(s, c).lastStand) {
-        s = goDown(s, c, "the team fled while they were in last stand", run.events);
-      }
-    }
-  }
-
   run.events.push({ type: "CLEANUP_BEGAN" });
   // A card that takes itself back out of the play zone does it now, before the
   // piles are cleaned.
   s = flush(s, run);
 
-  s = cleanupPiles(s, resolution?.lastStandAtClear ?? { Red: false, Gray: false }, run);
-
-  // Rulebook, Last Stand: a backstop. `drawOne` and `exhaustFromDeck` already sweep for last
-  // stand the moment a deck empties, so this ordinarily finds nothing to do.
-  s = activateLastStand(s, run.events);
+  s = cleanupPiles(s, run);
 
   // If the floor draw pile is empty, shuffle the Fled pile back in. See
   // open-questions.md #21.
@@ -694,8 +654,8 @@ function finishTurn(state: GameState, run: Run): GameState {
   s = { ...s, resolution: null };
   run.events.push({ type: "TURN_ENDED", turn: s.turn });
 
-  // Each Turn, Outcome: an outcome that says Ascend ends the floor, whichever room printed
-  // it — the room's kind ("Enemy" and all) is a printed label, not what triggers this.
+  // Each Turn, Outcome: an outcome that says Ascend runs Cleanup as normal
+  // first (just did), then the Ascending steps — whichever room printed it.
   if (ascends) {
     run.events.push({ type: "FLOOR_CLEARED", floor: s.floor });
     if (s.floor >= TOP_FLOOR) {
@@ -713,19 +673,8 @@ function finishTurn(state: GameState, run: Run): GameState {
   return { ...s, phase: "Flip", playZone: [] };
 }
 
-/**
- * Each Turn, Cleanup: discard the entire play zone. The hand carries over untouched.
- *
- * Rulebook, Last Stand: if the room was Cleared while a character was in last stand, the last
- * stand cleanup replaces their play-zone cleanup — the play zone shuffles into
- * their deck and 2 off the top are the price of getting out. See
- * open-questions.md #4.
- */
-function cleanupPiles(
-  state: GameState,
-  lastStandAtClear: Readonly<Record<Character, boolean>>,
-  run: Run,
-): GameState {
+/** Each Turn, Cleanup: discard the entire play zone. The hand carries over untouched. */
+function cleanupPiles(state: GameState, run: Run): GameState {
   let s = state;
 
   // Any played card that takes itself somewhere else. It has to happen
@@ -746,19 +695,6 @@ function cleanupPiles(
   // Then the play zone itself.
   for (const c of CHARACTERS) {
     const played = s.playZone.filter((x) => x.owner === c).map((x) => x.card);
-
-    if (lastStandAtClear[c] && !playerOf(s, c).down) {
-      s = shuffleIntoDeck(s, c, played, run.events);
-      s = withPlayer(s, c, { ...playerOf(s, c), lastStand: false });
-      // The price is read off the top of the deck before it is paid, not
-      // after: what's sitting there right now is exactly what `exhaustFromDeck`
-      // is about to take, so the event can announce the escape — and report
-      // what it cost — before the exhaust (and any Down it causes) happens.
-      const price = playerOf(s, c).deck.slice(0, LAST_STAND_PRICE);
-      run.events.push({ type: "LAST_STAND_ESCAPED", character: c, price });
-      s = exhaustFromDeck(s, c, LAST_STAND_PRICE, "the price of getting out", run.events);
-      continue;
-    }
     for (const card of played) s = discard(s, c, card, "playZone", run.events);
   }
   return { ...s, playZone: [] };
@@ -870,43 +806,98 @@ function ascend(state: GameState, red: AscendChoice, gray: AscendChoice, run: Ru
   return { ...s, phase: "Flip", playZone: [], thisTurn: emptyTurnRecord() };
 }
 
+type Location = "deck" | "hand" | "discard";
+
+function locate(p: PlayerState, id: CardId): Location | null {
+  if (p.deck.some((x) => x.id === id)) return "deck";
+  if (p.hand.some((x) => x.id === id)) return "hand";
+  if (p.discard.some((x) => x.id === id)) return "discard";
+  return null;
+}
+
+function withoutCard(p: PlayerState, id: CardId, at: Location): PlayerState {
+  if (at === "deck") return { ...p, deck: p.deck.filter((x) => x.id !== id) };
+  if (at === "hand") return { ...p, hand: p.hand.filter((x) => x.id !== id) };
+  return { ...p, discard: p.discard.filter((x) => x.id !== id) };
+}
+
+function withCardReturned(p: PlayerState, card: Card, at: Location): PlayerState {
+  if (at === "deck") return { ...p, deck: [...p.deck, card] };
+  if (at === "hand") return { ...p, hand: [...p.hand, card] };
+  return { ...p, discard: [...p.discard, card] };
+}
+
+/**
+ * Rulebook, Ascending, step 1: Settle your Stuff. Every Stuff card in a
+ * character's deck, hand or discard pile has a default, free fate — Good
+ * Stuff shuffles into its pool, Bad Stuff stays put — that a Settle decision
+ * may flip by Scrapping one non-Stuff card of that character's (from any of
+ * the same three piles; a card already in the Exhaust pile cannot pay). Kept
+ * cards return to whichever pile they were found in, then the deck shuffles.
+ */
 function ascendOne(state: GameState, c: Character, choice: AscendChoice, run: Run): GameState {
   let s = state;
-  let pile = [...playerOf(s, c).discard];
+  let p = playerOf(s, c);
+  const stuffToSettle = settleableStuff(p);
+  const decisions = new Map(choice.settle.map((d): [CardId, SettleDecision] => [d.stuffId, d]));
 
-  // Rulebook, Ascending: all Stuff in the discard pile moves to the Scrapyard, for good.
-  // The Scrap tax keeps one piece by Scrapping another card of that pile in its
-  // place. Kept Stuff stays ordinary Stuff; nothing is tracked.
-  if (choice.keepStuffId !== null && choice.scrapId !== null) {
-    const payer = pile.find((x) => x.id === choice.scrapId);
-    if (payer) {
-      pile = pile.filter((x) => x.id !== payer.id);
-      s = scrap(s, c, payer, run.events);
+  for (const stuffCard of stuffToSettle) {
+    const at = locate(p, stuffCard.id);
+    if (!at) continue; // already moved as another decision's payment
+    const decision = decisions.get(stuffCard.id) ?? null;
+    const payerId = decision?.pay ?? null;
+
+    p = withoutCard(p, stuffCard.id, at);
+
+    if (payerId !== null) {
+      const payerAt = locate(p, payerId);
+      if (payerAt) {
+        const payer = p[payerAt].find((x) => x.id === payerId);
+        if (payer) {
+          p = withoutCard(p, payerId, payerAt);
+          s = withPlayer(s, c, p);
+          s = scrap(s, c, payer, run.events);
+          p = playerOf(s, c);
+        }
+      }
+      if (stuffCard.kind === "good_stuff") {
+        // Paid to keep it.
+        p = withCardReturned(p, stuffCard, at);
+        run.events.push({ type: "STUFF_SETTLED", character: c, card: stuffCard, kept: true });
+      } else {
+        // Paid to shed it: into the Bad Stuff pool.
+        s = { ...s, pools: { ...s.pools, badStuff: [...s.pools.badStuff, stuffCard] } };
+        run.events.push({ type: "STUFF_SETTLED", character: c, card: stuffCard, kept: false });
+      }
+    } else if (stuffCard.kind === "good_stuff") {
+      // Default: shuffle into the Good Stuff pool.
+      s = { ...s, pools: { ...s.pools, goodStuff: [...s.pools.goodStuff, stuffCard] } };
+      run.events.push({ type: "STUFF_SETTLED", character: c, card: stuffCard, kept: false });
+    } else {
+      // Default: Bad Stuff stays with you.
+      p = withCardReturned(p, stuffCard, at);
+      run.events.push({ type: "STUFF_SETTLED", character: c, card: stuffCard, kept: true });
     }
   }
-  for (const card of pile) {
-    if (card.kind !== "player" && card.id !== choice.keepStuffId) s = scrap(s, c, card, run.events);
-  }
-  pile = pile.filter((x) => x.kind === "player" || x.id === choice.keepStuffId);
+  s = withPlayer(s, c, p);
 
-  // Rulebook, Ascending: three cards from their own pool; take one or decline. A declined
-  // card goes to the bottom of its pool.
+  // "...then shuffle your deck."
+  const deckNow = playerOf(s, c).deck;
+  const [shuffled, seed] = shuffle(deckNow, s.seed);
+  s = withPlayer({ ...s, seed }, c, { ...playerOf(s, c), deck: shuffled });
+
+  // Rulebook, Ascending, step 2: three cards from their own pool; take one or
+  // decline. A declined card goes to the bottom of its pool.
   const offered = state.offer?.[c] ?? [];
   const taken = offered.find((x) => x.id === choice.takeRewardId) ?? null;
-  if (taken) run.events.push({ type: "REWARD_TAKEN", character: c, card: taken });
-  else run.events.push({ type: "REWARD_DECLINED", character: c });
+  if (taken) {
+    run.events.push({ type: "REWARD_TAKEN", character: c, card: taken });
+    s = topDeck(s, c, taken);
+  } else {
+    run.events.push({ type: "REWARD_DECLINED", character: c });
+  }
   const returned = offered.filter((x) => x.id !== taken?.id);
   s = setPool(s, c, [...s.pools[c].slice(offered.length), ...returned]);
 
-  // Rulebook, Ascending: the discard pile shuffles back into the deck. A floor cleared is
-  // a full heal, including for a character who was Down. Nothing bad crosses a
-  // floor boundary. A hand carries over untouched, Stuff included.
-  s = withPlayer(s, c, {
-    ...playerOf(s, c),
-    discard: [],
-    down: false,
-    lastStand: false,
-    drewThisTurn: 0,
-  });
-  return shuffleIntoDeck(s, c, [...pile, ...(taken ? [taken] : [])], run.events);
+  return s;
 }

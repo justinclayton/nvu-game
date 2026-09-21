@@ -10,7 +10,6 @@
 
 import { useRef, type CSSProperties } from "react";
 
-import { canDraw } from "@domain/queries";
 import type { Card, Character, GameState } from "@domain/types";
 import { CardLayer, type Inspected, type Paying } from "./CardLayer";
 import type { Metrics } from "./metrics";
@@ -24,7 +23,6 @@ interface Props {
   readonly delays: ReadonlyMap<string, number>;
   readonly paying: Paying | null;
   readonly onPickCard: (character: Character, card: Card) => void;
-  readonly onDraw: (character: Character) => void;
   readonly reward?: Readonly<Record<Character, Card["id"] | null>> | undefined;
   readonly onPickReward?: ((character: Character, card: Card) => void) | undefined;
   readonly onInspect: (item: Inspected | null) => void;
@@ -75,20 +73,15 @@ function Slot({ id, label, count, row, tone, onOpenPile }: SlotProps) {
 }
 
 function statusOf(state: GameState, c: Character): string {
-  const p = state[c];
-  if (p.down) return "Down";
-  if (p.lastStand) return "Last stand";
-  return "Standing";
+  return state[c].down ? "Down" : "Standing";
 }
 
 function HandSlot({
   state,
   character,
-  onDraw,
 }: {
   readonly state: GameState;
   readonly character: Character;
-  readonly onDraw: () => void;
 }) {
   const status = statusOf(state, character);
   const tone = character.toLowerCase();
@@ -103,16 +96,6 @@ function HandSlot({
         <span className="slot__label slot__label--inline">
           hand · {state[character].hand.length}
         </span>
-        {state.phase === "Draw" ? (
-          <button
-            type="button"
-            className="button button--small"
-            disabled={!canDraw(state, character)}
-            onClick={onDraw}
-          >
-            Draw a card
-          </button>
-        ) : null}
       </header>
       <div className="well well--hand" data-slot={`${tone}-hand`} />
       {/* The band over this character's side of the play zone, where the cards
@@ -128,7 +111,6 @@ export function Mat({
   delays,
   paying,
   onPickCard,
-  onDraw,
   reward,
   onPickReward,
   onInspect,
@@ -182,6 +164,13 @@ export function Mat({
             tone="red"
             onOpenPile={openPile}
           />
+          <Slot
+            id="red-exhaust"
+            label="Exhaust"
+            count={state.Red.exhaust.length}
+            tone="red"
+            onOpenPile={openPile}
+          />
           <div className="mat__divider" />
           <Slot
             id="gray-deck"
@@ -198,24 +187,19 @@ export function Mat({
             tone="gray"
             onOpenPile={openPile}
           />
+          <Slot
+            id="gray-exhaust"
+            label="Exhaust"
+            count={state.Gray.exhaust.length}
+            tone="gray"
+            onOpenPile={openPile}
+          />
         </div>
 
         <div className="mat-row mat-row--hands">
-          <HandSlot
-            state={state}
-            character="Red"
-            onDraw={() => {
-              onDraw("Red");
-            }}
-          />
+          <HandSlot state={state} character="Red" />
           <div className="mat__divider" />
-          <HandSlot
-            state={state}
-            character="Gray"
-            onDraw={() => {
-              onDraw("Gray");
-            }}
-          />
+          <HandSlot state={state} character="Gray" />
         </div>
       </div>
 

@@ -14,11 +14,8 @@ import type { Card, DomainEvent, GameState, PlayerState, Room, TurnRecord } from
 /** The tenth floor is the roof: clearing its Enemy room wins the run (rulebook, Winning and losing). */
 export const TOP_FLOOR = 10;
 
-/** Maximum hand size (Each Turn, Draw). */
+/** Draw up to this many each turn (rulebook, Draw). A card may tighten it; see `handCapFor`. */
 export const HAND_CAP = 5;
-
-/** The price of getting out of last stand (rulebook, Last Stand). */
-export const LAST_STAND_PRICE = 2;
 
 /**
  * Every floor holds exactly one Enemy room and three Hazards. The rulebook's
@@ -178,8 +175,8 @@ const freshPlayer = (deck: readonly Card[]): PlayerState => ({
   deck,
   hand: [],
   discard: [],
+  exhaust: [],
   down: false,
-  lastStand: false,
   drewThisTurn: 0,
 });
 

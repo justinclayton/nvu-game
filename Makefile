@@ -6,8 +6,9 @@
 #   make            what each target does
 #   make build      regenerate the generated card modules from design/cards.yaml
 #   make check      fail if anything has drifted from the card list
-#   make app        run the web game's dev server
-#   make app-check  lint, typecheck and test the web game
+#   make app        run the web game's dev server (an alias for bin/nvu web)
+#   make app-check  lint, typecheck and test the web game, the sim and the CLI
+#   bin/nvu         the CLI: bin/nvu play, bin/nvu replay, bin/nvu fuzz, bin/nvu help
 #   make sheet      open the print-and-cut card sheet
 
 .PHONY: help build check app app-check app-install sheet all
@@ -16,8 +17,9 @@ default: build
 help:
 	@echo "make build   regenerate the generated card modules from design/cards.yaml"
 	@echo "make check   fail if a generated card module is stale or the card sheet stops printing it"
-	@echo "make app        run the web game's dev server"
-	@echo "make app-check  lint, typecheck and test the web game"
+	@echo "make app        run the web game's dev server (an alias for bin/nvu web)"
+	@echo "make app-check  lint, typecheck and test the web game, the sim and the CLI"
+	@echo "bin/nvu         the CLI: bin/nvu play, bin/nvu replay, bin/nvu fuzz, bin/nvu help"
 	@echo "make sheet   open the print-and-cut card sheet in a browser"
 	@echo ""
 	@echo "Change a card in design/cards.yaml, then: make build check"
@@ -46,7 +48,7 @@ app/node_modules: app/package.json
 app-install: app/node_modules
 
 app: app/node_modules build
-	cd app && npm run dev
+	bin/nvu web
 
 app-check: app/node_modules build
 	cd app && npm run check

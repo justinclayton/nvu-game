@@ -9,11 +9,13 @@ import tseslint from "typescript-eslint";
  *   application     domain, content
  *   infrastructure  domain, application
  *   ui              domain, application, content. Never infrastructure directly.
+ *   sim             domain, content, application. Pure: no IO, no clock, no Math.random.
+ *   cli             domain, content, application, infrastructure, sim. The terminal.
  *
  * Every layer is named twice in a pattern — once as an alias (`@ui/...`) and once
  * as a path segment (`../ui/...`) — so neither spelling sneaks past.
  */
-const LAYERS = ["domain", "content", "application", "infrastructure", "ui"];
+const LAYERS = ["domain", "content", "application", "infrastructure", "ui", "sim", "cli"];
 
 function forbidLayers(path, allowed, extraPackages = []) {
   const layer = path.split("/")[0];
@@ -69,11 +71,18 @@ export default tseslint.config(
   forbidLayers("application", ["domain", "content"]),
   forbidLayers("infrastructure", ["domain", "application"]),
   forbidLayers("ui", ["domain", "content", "application"]),
+  forbidLayers("sim", ["domain", "content", "application"], ["react", "react-dom"]),
+  forbidLayers(
+    "cli",
+    ["domain", "content", "application", "infrastructure", "sim"],
+    ["react", "react-dom"],
+  ),
 
   {
-    // The domain is pure: no clock, no ambient randomness, no network. The seed
-    // lives in GameState and every shuffle returns the advanced seed.
-    files: ["src/domain/**/*.ts"],
+    // The domain and the simulator are pure: no clock, no ambient randomness,
+    // no network. The seed lives in GameState and every shuffle returns the
+    // advanced seed, and the simulator's own randomness is a derived seed.
+    files: ["src/domain/**/*.ts", "src/sim/**/*.ts"],
     rules: {
       "no-restricted-properties": [
         "error",

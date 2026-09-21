@@ -79,12 +79,24 @@ function loadRunIndexed(saved: SavedRun, notes: readonly Note[] = []): Session {
 
 /* ----------------------------------------------------------------- play */
 
+/** `play new` records the run it started here; later calls default to it. */
+const CURRENT = join("runs", "current");
+
 function runPathFor(action: string, run: string | null, seed: number | null): string {
   if (run !== null) return run;
   if (seed !== null) return join("runs", `${String(seed)}.json`);
+  if (existsSync(CURRENT)) {
+    const current = readFileSync(CURRENT, "utf8").trim();
+    if (current !== "") return current;
+  }
   throw new UsageError(
-    `play ${action} needs --run FILE — only "play new" can default it, to runs/<seed>.json.`,
+    `play ${action} has no run to act on: start one with play new, or pass --run FILE.`,
   );
+}
+
+function rememberRun(path: string): void {
+  mkdirSync(dirname(CURRENT), { recursive: true });
+  writeFileSync(CURRENT, `${path}\n`);
 }
 
 function play(request: PlayRequest): number {
@@ -93,6 +105,7 @@ function play(request: PlayRequest): number {
     action.kind === "new"
       ? runPathFor("new", request.run, action.seed)
       : runPathFor(action.kind, request.run, null);
+  rememberRun(path);
 
   let session: Session;
   let before: number;

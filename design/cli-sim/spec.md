@@ -68,7 +68,9 @@ exactly as in the browser. `note` appends a note to the log at the current posit
 `Note` the web game stores. The file is the `nvu-run/1` format `application/exportRun.ts` writes,
 so the web game can open any run the CLI wrote and the CLI can continue any run the web game saved.
 
-`--run FILE` defaults to `runs/<seed>.json`. `runs/` is gitignored. `[agent, accepted]` A run that
+`--run FILE` defaults to `runs/<seed>.json` for `play new`, which also writes that path to
+`runs/current`. The other `play` calls default to the run named there, so an agent names the file
+once per run. `[you]` `runs/` is gitignored. `[agent, accepted]` A run that
 backs a playtest note is copied into `design/playtests/` by hand next to the note. Only those runs
 are guarded by the replay check below.
 

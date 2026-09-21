@@ -50,7 +50,8 @@ export const USAGE = `North vs Up — the CLI. The same rules engine as the web 
   bin/nvu help
 
 play    the run file is the only state; every call loads it, applies one move, writes it back
-        (--run defaults to runs/<seed>.json, which only "new" can resolve on its own)
+        (--run defaults to runs/<seed>.json for "new"; later calls default to the run
+        "new" last started, recorded in runs/current)
 replay  fold a run file back through the engine and print its transcript
 fuzz    play N seeds of uniformly random legal play under a command budget; prints failures only
 web     run the web game's dev server

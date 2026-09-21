@@ -10,6 +10,10 @@
 # design/cards.yaml has changed, so a fresh clone can run it straight away.
 set -e
 root=$(cd "$(dirname "$0")" && pwd)
-[ -d "$root/app/node_modules" ] || (cd "$root/app" && npm install --silent)
+tsx="$root/app/node_modules/.bin/tsx"
+# Not just "does node_modules exist" — a checkout from before this launcher
+# added tsx can have node_modules without it, and would otherwise never
+# reinstall.
+[ -x "$tsx" ] || (cd "$root/app" && npm install --silent)
 make -s -C "$root" build
-exec "$root/app/node_modules/.bin/tsx" --tsconfig "$root/app/tsconfig.json" "$root/app/src/cli/main.ts" "$@"
+exec "$tsx" --tsconfig "$root/app/tsconfig.json" "$root/app/src/cli/main.ts" "$@"

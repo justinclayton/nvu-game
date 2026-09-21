@@ -1,9 +1,9 @@
 # Spec: the North vs Up CLI
 
-Status: ruled on by the designer, 2026-09-21. Each decision below is tagged: `[you]` is the
-designer's, `[agent, accepted]` is one the agent proposed and the designer took. The first draft of
-this tool was built without a plan and is being rebuilt to this spec; the earlier version is in git
-history on the closed PR #67.
+Status: ruled on by the designer, 2026-09-21, and revised the same day after playtest 3 (issue #81).
+Each decision below is tagged: `[you]` is the designer's, `[agent, accepted]` is one the agent
+proposed and the designer took. The first draft of this tool was built without a plan and rebuilt to
+this spec in PR #68; the earlier version is in git history on the closed PR #67.
 
 ## What it is for
 
@@ -47,19 +47,22 @@ The layer rules hold as in the web game's ADR: `sim` may import domain, content 
 
 ```
 bin/nvu web
-bin/nvu play new  --seed N [--run FILE]
-bin/nvu play move N        [--run FILE]
-bin/nvu play undo          [--run FILE]
-bin/nvu play note "text"   [--run FILE]
-bin/nvu play show          [--run FILE]
+bin/nvu play new --seed N [--run FILE]
+bin/nvu play <move>            one named move; see below
+bin/nvu play undo
+bin/nvu play note "text"
+bin/nvu play show [--events N] [--table] [--moves]
+bin/nvu play pile <Red|Gray> <hand|discard|play>
+bin/nvu card <name>
 bin/nvu replay FILE [--quiet]
 bin/nvu fuzz --seeds N [--from SEED]
 bin/nvu help
 ```
 
-### play `[agent, accepted]`
+### play
 
 One shell call per move, because that is how an agent works. There is no interactive loop.
+`[agent, accepted]`
 
 The run file is the only state. Every `play` call reads the file, replays its command log from the
 seed through `application/session.ts`, applies the move, and writes the file back. `undo` is the
@@ -67,31 +70,88 @@ session's undo: it truncates the log to the last checkpoint, which falls on hidd
 exactly as in the browser. `note` appends a note to the log at the current position, the same
 `Note` the web game stores. The file is the `nvu-run/1` format `application/exportRun.ts` writes,
 so the web game can open any run the CLI wrote and the CLI can continue any run the web game saved.
+`[agent, accepted]`
 
 `--run FILE` defaults to `runs/<seed>.json` for `play new`, which also writes that path to
 `runs/current`. The other `play` calls default to the run named there, so an agent names the file
-once per run. `[you]` `runs/` is gitignored. `[agent, accepted]` A run that
-backs a playtest note is copied into `design/playtests/` by hand next to the note. Only those runs
-are guarded by the replay check below.
+once per run. `[you]` `runs/` is gitignored. `[agent, accepted]` A run that backs a playtest note is
+copied into `design/playtests/` by hand next to the note. Only those runs are guarded by the replay
+check below.
 
-After every move the CLI prints, in this order: `[you]`
+### Moves are named, not numbered `[you]`
+
+The agent types what a player would say. The engine's `validate` decides legality, as it does for
+the web game. When a move is refused the CLI prints the engine's reason and stops; nothing is
+undone. An illegal attempt is playtest signal, not something to prevent. Playtest 3 showed the
+numbered list hiding legal moves and shifting under the agent between calls, which is worse than
+either failure a named move can have.
+
+The moves, one per engine command: `[agent, accepted]`
+
+| Call | Engine command |
+| --- | --- |
+| `play flip` | `FLIP_ROOM` |
+| `play draw Red` | `DRAW` |
+| `play end` | `END_DRAW` or `END_PLAY`, whichever phase is open |
+| `play card Red CI pay Rope Flare` | `PLAY_CARD`, paying with the named cards; `pay` and its list are omitted for a cost of 0 |
+| `play choose Red` | `CHOOSE_CHARACTER` |
+| `play choose Rope Flare`, `play choose none` | `CHOOSE_CARDS` |
+| `play order Rope Flare Shove` | `ORDER_CARDS`, top first |
+| `play take`, `play skip` | `TAKE_REWARD` |
+| `play ascend Red keep Crowbar scrap Rope take BB` | half of `ASCEND`, see below |
+
+The moves hint printed after each call and by `show --moves` lists the verbs open in this phase
+with the cards eligible for each, not every combination. In the Play phase that is each character's
+playable cards with their costs, and the payer candidates.
+
+**Card names.** `[you]` A name resolves against the cards eligible for that slot: the hand for
+`card`, the payer candidates for `pay`, the offer for `take`, and so on. It matches the full name,
+the initials, or an unambiguous prefix, case-insensitively, so `CI` is Charge In and `Pick` is Pick
+The Lock. Quoting is only shell quoting for names with spaces. When more than one eligible card
+matches, the CLI refuses and lists the candidates; when the eligible cards are several copies of the
+same card, any copy is taken. A content test in `app/src/content` reports every pair of cards in
+`design/cards.yaml` that share initials, so the designer sees a new collision when it lands. Today
+those are Reckless Swing and Riot Shield, Reckless and Rust, Shove and Sluggish.
+
+**Ascending, one character at a time.** `[you]` The engine takes one `ASCEND` command holding both
+characters' choices. The CLI collects them in two calls, one per character, each naming that
+character's keep, its payer and its reward pick in one line: `play ascend Red keep Crowbar scrap
+Rope take BB`, `play ascend Gray keep none take none`. The first call is staged in a sidecar file
+next to the run file and reported back; the second composes the command, executes it, and removes
+the sidecar. `undo` during staging clears the sidecar. `show` during Ascend prints each character's
+Stuff in the discard pile, the payer candidates, the offered cards as full faces, and what is
+staged so far. The flat cross product of both characters' choices is gone. `[agent, accepted]`
+
+### What each call prints `[you]`
+
+After a move, in this order:
 
 1. What just happened, one narrated line per event, from `application/narrate.ts`. These are the
-   same lines the web game's log shows, so the agent's account of a run and the log agree word
-   for word.
-2. The table: floor, turn, phase, the room and its thresholds, each character's deck, discard and
-   hand with each card's cost, stats and text.
-3. The legal moves, numbered.
+   same lines the web game's log shows, so the agent's account of a run and the log agree word for
+   word. A call that produced no event says so in one line, naming what it did, so an answer that
+   only narrows the next question is never silent.
+2. The table: floor, turn, phase, the room and its thresholds, each character's deck and discard
+   counts and hand with each card's cost, stats and text. The room stays on the table while a
+   prompt about it is open. Anywhere a card is offered, in a reward reveal as in the Ascend offer,
+   the full face is printed.
+3. The moves hint.
 
-`show` prints 2 and 3 without moving.
+`show` prints 2 and 3. `show --events N` prints the last N narrated lines, `--table` and `--moves`
+print only that part. `note` confirms itself in one line and prints nothing else. A refused move
+prints the engine's reason and the moves hint, never the help text. `pile` prints the named pile as
+card faces. `card NAME` prints a card's face from the content, with no run needed.
+
+Playtest 3 recorded what the table got right, and it stays: the tick beside a met threshold, a
+modified number shown next to the printed one, the name of the card that stopped an effect, the
+pool counters in the header, and the line that says a pool is empty.
 
 ### The move generator `[agent, accepted]`
 
 `sim/moves.ts` exports `legalCommands(state)`: every command the engine would accept right now.
 The engine's `validate` answers yes or no for one command and produces no list. The generator
-builds the candidates from `state.pending`, the phase and the domain queries the UI already uses,
-and the CLI numbers them. The engine still checks every command it is handed; the list only saves
-the agent from guessing.
+builds the candidates from `state.pending`, the phase and the domain queries the UI already uses.
+It serves `fuzz` and the future solver. The agent does not go through it: `play` takes named
+moves and hands them to the engine directly.
 
 `Turn Start` (rulebook, Each Turn) bundles both its steps, Flip the room and Draw up to five, into
 `FLIP_ROOM`, with no decision between them — so there is one case for the whole phase here, not
@@ -101,7 +161,7 @@ The contract, held by `moves.test.ts`: every command returned passes `validate`,
 of seeded states every command `validate` accepts is one it returned.
 
 Three places cap the list where the full set is large, and all three are recorded here as debt the
-solver must pay before it can claim completeness:
+solver must pay before it can claim completeness. None touches `play`, which enumerates nothing:
 
 - An `OrderCards` answer over more than four cards offers only the order shown and its reverse.
 - The cross product of the two characters' ascension choices is not crossed past 256 entries.
@@ -126,7 +186,7 @@ the budget ran out; the engine refused a command the generator offered.
 `replay FILE` folds a run file back through the engine and prints the narrated transcript with
 notes in place. This transcript is the appendix of a playtest note. A command the rules now refuse
 is reported with its index, which is how a rules change that broke a saved run shows itself.
-`--quiet` prints only the verdict.
+`--quiet` prints only the verdict, one line, and nothing before it.
 
 ## Checks `[agent, accepted]`
 
@@ -136,16 +196,20 @@ is reported with its index, which is how a rules change that broke a saved run s
   and outcome it recorded. A rules change that breaks one fails the check.
 - **Fuzz sweep.** A fixed set of fifty seeds plays through with no failure of any kind above.
 
-Tests kept or written for the new tree: `moves.test.ts` (the contract), `run.test.ts` (every seed
-ends or hits the budget, never throws, and the log replays to the same state), `cli/args.test.ts`.
+Tests: `moves.test.ts` (the contract), `run.test.ts` (every seed ends or hits the budget, never
+throws, and the log replays to the same state), `cli/args.test.ts`, a test of card-name resolution
+(full name, initials, prefix, ambiguity refused, copies interchangeable), and the initials-collision
+report in `app/src/content`.
 
 ## The playtest note `[you]`
 
 The agent writes the prose sections of a playtest note by hand, in the format of the notes already
 in `design/playtests/`. The appendix is the output of `replay`. The run file sits next to the note.
 
-A short instructions file for agent playtesting (start a run, play, note as you go, replay for the
-appendix, write the note) is written after the first agent playtest, not before. `[agent, accepted]`
+The instructions for an agent playtest are the `playtest` skill in `.claude/skills/playtest/`. The
+playtester reads the rulebook, the glossary, the card list and what the CLI prints, and nothing in
+`app/src`. Checking a suspected bug against the engine is a separate pass by a separate agent.
+`[you]`
 
 ## What this does not decide
 

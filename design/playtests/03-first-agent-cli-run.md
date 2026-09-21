@@ -5,9 +5,10 @@ Recorded: 2026-09-21. Played by an agent standing in for a human playtester, in 
 turn-25 limit with both characters alive. Neither character ever entered Last Stand.
 
 Notes are the agent's, verbatim, tagged `[agent]`, in the order they were written into the run. The
-analysis under each one is also the agent's. Nothing here is a ruling. Where a note suspects a bug
-it was checked against `design/rulebook.md`, `design/cards.yaml` and, where those did not settle it,
-the engine source. The rulebook says what is true.
+analysis under each one is also the agent's. Nothing here is a ruling. A playtester checks a suspected
+bug against `design/rulebook.md` and `design/cards.yaml` only. This run's agent also read the engine
+source in several notes; those findings were verified separately before the note was merged, and the
+ones that held are filed as issues. The rulebook says what is true.
 
 The run file is `03-first-agent-cli-run.json`. The full transcript is the appendix, and notes cite
 it by line.
@@ -431,10 +432,10 @@ a loss after floor 1.
     each floor has one fewer room than the last. Either there is a lower bound nobody wrote down or
     floor 8 is wrong.** `[agent]` (log 521)
 
-    There is a lower bound, and it is deliberate. `domain/setup.ts` fixes one Enemy room and three
-    Hazards on every floor and lets Stuff rooms carry the whole decrease, so Stuff rooms hit zero at
-    floor 7 and floors 7 through 10 are all four rooms. The code cites `open-questions.md` #18. The
-    rulebook still says each floor is one smaller than the last, which stops being true at floor 7.
+    There is a lower bound in the engine: one Enemy room and three Hazards on every floor, with Stuff
+    rooms carrying the whole decrease, so floors 7 through 10 are all four rooms. Whether that is the
+    intended shape is open in issue #52. The rulebook still says each floor is one smaller than the
+    last, which stops being true at floor 7.
 
 46. **Here, Catch moves a Stuff card from Gray's hand to Red's, and Gray had none. It resolved
     silently with nothing said. Riot Shield was in the play zone at the time, so the card read as

@@ -29,10 +29,10 @@ export interface Fixture {
 const SORTING_ROOM = "Sorting Room";
 const CLEARED_ROOM = "Gross Thing That Looks Like A Cherry";
 
-/** Play phase, just flipped: both hands already drawn to 5 (Each Turn, Draw runs inside the flip). */
+/** Play phase, just flipped: both hands already drawn to 5 (Turn Start runs both steps at once). */
 function playing(): GameState {
   const state = rig({
-    phase: "Flip",
+    phase: "Turn Start",
     floorDeck: [room(SORTING_ROOM)],
     Red: player({ deck: pile("Shove", 8) }),
     Gray: player({ deck: pile("Duck Under", 8) }),

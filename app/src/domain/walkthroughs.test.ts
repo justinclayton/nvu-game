@@ -31,7 +31,7 @@ const free = (c: Character, cardId: CardId) =>
 describe("walkthrough 1 — the deck runs dry mid-draw and the discard pile becomes the new deck", () => {
   it("reshuffles once, then keeps drawing to 5", () => {
     const state = rig({
-      phase: "Flip",
+      phase: "Turn Start",
       floorDeck: [room("Sorting Room")],
       Red: player({ deck: pile("Shove", 2), discard: pile("Charge In", 3) }),
       Gray: player({ deck: pile("Duck Under", 5) }),
@@ -91,7 +91,7 @@ describe("walkthrough 3 — Exhaust is permanent; only the discard pile recycles
   it("a reshuffle draws from the discard pile, and never from the Exhaust pile", () => {
     const exhausted = pile("Charge In", 2);
     const state = rig({
-      phase: "Flip",
+      phase: "Turn Start",
       floorDeck: [room("Sorting Room")],
       Red: player({ deck: [], discard: pile("Shove", 5), exhaust: exhausted }),
       Gray: player({ deck: pile("Duck Under", 5) }),
@@ -279,7 +279,7 @@ describe("walkthrough 8 — ascending end to end: Settle your Stuff, then the re
     });
 
     expect(next.floor).toBe(2);
-    expect(next.phase).toBe("Flip");
+    expect(next.phase).toBe("Turn Start");
     // No heal: the 3 Charge Ins from before this floor are still there, plus
     // the 2 Shoves that paid for Charge In and the Charge In itself, both
     // discarded at Cleanup. The Pry Bar played alongside it was Good Stuff,

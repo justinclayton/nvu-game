@@ -29,11 +29,11 @@ const playFree = (c: "Red" | "Gray", cardId: CardId): Command => ({
   payWith: [],
 });
 
-describe("Flip", () => {
-  it("turns the top card of the floor deck face up before anything is spent, then draws both to 5", () => {
+describe("Turn Start", () => {
+  it("step 1, Flip the room: turns the top card of the floor deck face up before anything is spent", () => {
     const first = room("Sorting Room");
     const state = rig({
-      phase: "Flip",
+      phase: "Turn Start",
       floorDeck: [first, room("Ration Locker")],
       Red: player({ deck: pile("Shove", 5) }),
       Gray: player({ deck: pile("Duck Under", 5) }),
@@ -41,19 +41,17 @@ describe("Flip", () => {
     const { state: next, events } = must(state, { type: "FLIP_ROOM" });
     expect(next.activeRoom?.id).toBe(first.id);
     expect(next.floorDeck).toHaveLength(1);
-    // Draw has no phase of its own to wait in — it runs inside the flip, with
-    // no decision to make, and lands straight in Play.
+    // Both steps run together with no decision between them, so the state
+    // moves straight from Turn Start to Play.
     expect(next.phase).toBe("Play");
     expect(next.Red.hand).toHaveLength(5);
     expect(next.Gray.hand).toHaveLength(5);
     expect(eventTypes(events)).toEqual(["ROOM_FLIPPED", ...Array<string>(10).fill("CARD_DRAWN")]);
   });
-});
 
-describe("Draw", () => {
-  it("'draw cards from your deck until you hold 5' — all at once, no decision", () => {
+  it("step 2, Draw up to five: 'draw cards from your deck until you hold 5' — all at once, no decision", () => {
     const state = rig({
-      phase: "Flip",
+      phase: "Turn Start",
       floorDeck: [room("Sorting Room")],
       Red: player({ deck: pile("Shove", 5) }),
       Gray: player({ deck: pile("Duck Under", 5) }),
@@ -66,9 +64,9 @@ describe("Draw", () => {
     expect(next.Red.drewThisTurn).toBe(5);
   });
 
-  it("'if you already hold 5 or more, do not draw'", () => {
+  it("step 2, Draw up to five: 'if you already hold 5 or more, do not draw'", () => {
     const state = rig({
-      phase: "Flip",
+      phase: "Turn Start",
       floorDeck: [room("Sorting Room")],
       Red: player({ deck: pile("Shove", 5), hand: pile("Charge In", 5) }),
       Gray: player({ deck: pile("Duck Under", 5) }),
@@ -80,9 +78,9 @@ describe("Draw", () => {
     expect(eventTypes(events).filter((t) => t === "CARD_DRAWN")).toHaveLength(5);
   });
 
-  it("draws only as many as it takes to reach 5 from a hand already holding some", () => {
+  it("step 2, Draw up to five: draws only as many as it takes to reach 5 from a hand already holding some", () => {
     const state = rig({
-      phase: "Flip",
+      phase: "Turn Start",
       floorDeck: [room("Sorting Room")],
       Red: player({ deck: pile("Shove", 5), hand: pile("Charge In", 2) }),
       Gray: player({ deck: pile("Duck Under", 5) }),

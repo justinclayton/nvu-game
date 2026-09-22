@@ -17,7 +17,7 @@ export const RULES_VERSION = "0.2.0-draft";
 /** The tenth floor is the roof: clearing its Enemy room wins the run (rulebook, Winning and losing). */
 export const TOP_FLOOR = 10;
 
-/** Draw up to this many, each turn (Each Turn, Draw). A card may tighten it. */
+/** Draw up to this many, each turn (Each Turn, Turn Start: Draw up to five). A card may tighten it. */
 export const HAND_CAP = 5;
 
 /**
@@ -214,7 +214,7 @@ export function createInitialState(
     seed: s4,
     floor: 1,
     turn: 0,
-    phase: "Flip",
+    phase: "Turn Start",
     floorDeck: [],
     activeRoom: null,
     fled: [],

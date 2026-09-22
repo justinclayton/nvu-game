@@ -230,7 +230,7 @@ describe("Ascending, build the next floor", () => {
     const state = atAscension();
     const { state: next, events } = must(state, { type: "ASCEND", Red: NOTHING, Gray: NOTHING });
     expect(next.floor).toBe(2);
-    expect(next.phase).toBe("Flip");
+    expect(next.phase).toBe("Turn Start");
     const kinds = next.floorDeck.map((r) => r.kind);
     expect(kinds.filter((k) => k === "enemy")).toHaveLength(1);
     expect(kinds.filter((k) => k === "hazard")).toHaveLength(3);

@@ -107,9 +107,13 @@ A character's HP, tracked as the size of their deck and discard pile together. R
 
 The cards a player has drawn and is holding, used to play cards and pay Costs. Stuff cards are added directly to hand when gained. Draw brings a hand to 5 each turn; nothing else caps it, so a hand can hold more.
 
+**Turn Start**
+
+The turn phase that opens each turn: Flip the room, then Draw up to five. Both steps run together, with no decision between them.
+
 **Draw**
 
-The turn phase where each player draws from their deck until holding 5, all at once — no decision to make. A draw that reaches an empty deck triggers Empty deck.
+The second step of Turn Start: each player draws from their deck until holding 5, all at once — no decision to make. A draw that reaches an empty deck triggers Empty deck.
 
 **Empty deck**
 
@@ -149,7 +153,7 @@ The keyword marking a passive effect that applies only while the card is in hand
 
 **Turn**
 
-One pass through the five phases: New Room, Draw, Play, Outcome, and Cleanup. Repeats until the floor is cleared (Ascend) or the game ends.
+One pass through four phases: Turn Start, Play, Outcome, and Cleanup. Repeats until the floor is cleared (Ascend) or the game ends.
 
 **Down**
 

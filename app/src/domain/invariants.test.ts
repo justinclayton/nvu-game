@@ -38,7 +38,7 @@ function nextCommand(state: GameState): Command | null {
   }
 
   switch (state.phase) {
-    case "Flip":
+    case "Turn Start":
       return { type: "FLIP_ROOM" };
     case "Play": {
       for (const c of CHARACTERS) {

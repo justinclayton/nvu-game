@@ -136,10 +136,10 @@ export function discardFromHand(
 /* ----------------------------------------------------------------- drawing */
 
 /**
- * Each Turn, Draw: draw one card, straight to hand. Nothing caps a single draw — the
- * Draw phase's own "until you hold 5" is a stopping condition the caller
+ * Each Turn, Turn Start: draw one card, straight to hand. Nothing caps a single draw
+ * — Turn Start's own "until you hold 5" is a stopping condition the caller
  * applies, not a rule this verb enforces, so a card that draws you a card
- * outside that phase is never burned or refused; the hand may exceed 5
+ * outside that step is never burned or refused; the hand may exceed 5
  * (rulebook, About the game).
  *
  * `forced` marks a draw that a card's text made someone else take, as opposed

@@ -115,10 +115,10 @@ describe("legalCommands", () => {
 
   it("offers the flip once a room is queued, and nothing while the floor deck is empty", () => {
     resetRig();
-    const empty = rig({ phase: "Flip" });
+    const empty = rig({ phase: "Turn Start" });
     expect(legalCommands(empty)).toEqual([]);
 
-    const queued = rig({ phase: "Flip", floorDeck: [room("Sorting Room")] });
+    const queued = rig({ phase: "Turn Start", floorDeck: [room("Sorting Room")] });
     expect(legalCommands(queued)).toEqual([{ type: "FLIP_ROOM" }]);
   });
 

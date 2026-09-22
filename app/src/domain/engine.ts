@@ -97,7 +97,7 @@ export function validate(state: GameState, command: Command): Rejection | null {
       return reject("NoPendingChoice", "Nothing is waiting to be answered.");
 
     case "FLIP_ROOM": {
-      if (state.phase !== "Flip") return wrongPhase(state, "flip a room");
+      if (state.phase !== "Turn Start") return wrongPhase(state, "flip a room");
       if (state.floorDeck.length === 0) {
         return reject("FloorDeckEmpty", "The floor deck and the Fled pile are both empty.");
       }
@@ -375,13 +375,17 @@ function printedExhaust(
   return exhaustFromDeck(state, c, amount, cause, run.events);
 }
 
-/* ------------------------------------------------------------ Flip, Draw */
+/* ------------------------------------------------------------ Turn Start */
 
+/**
+ * Rulebook, Each Turn, Turn Start: one phase, two steps, both run by `FLIP_ROOM` with no
+ * decision in between — flip the room, then draw both hands to 5.
+ */
 function flipRoom(state: GameState, run: Run): GameState {
   const room = state.floorDeck[0];
   if (!room) throw new CorruptStateError("Flipped an empty floor deck.");
 
-  // Each Turn, New Room: you always see what you are facing before you spend anything.
+  // Step 1, Flip the room: you always see what you are facing before you spend anything.
   run.events.push({ type: "ROOM_FLIPPED", room });
   const flipped: GameState = {
     ...state,
@@ -397,11 +401,11 @@ function flipRoom(state: GameState, run: Run): GameState {
 }
 
 /**
- * Each Turn, Draw: both characters draw until holding 5, all at once — no opening
- * draw, no alternating turns, no decision to make, so Draw has no phase of
- * its own to pause in (see `types.ts`, `Phase`). A card can still lower a
- * character's own target (`handCapFor`) or cap how many they draw this turn
- * (`drawCapFor`).
+ * Step 2, Draw up to five: both characters draw until holding 5, all at once —
+ * no opening draw, no alternating turns, no decision to make, so this never
+ * pauses on its own (see `types.ts`, `Phase`: `Turn Start` covers both steps).
+ * A card can still lower a character's own target (`handCapFor`) or cap how
+ * many they draw this turn (`drawCapFor`).
  */
 function drawPhase(state: GameState, run: Run): GameState {
   let s = state;
@@ -720,7 +724,7 @@ function finishTurn(state: GameState, run: Run): GameState {
       offer: { Red: s.pools.Red.slice(0, 3), Gray: s.pools.Gray.slice(0, 3) },
     };
   }
-  return { ...s, phase: "Flip", playZone: [] };
+  return { ...s, phase: "Turn Start", playZone: [] };
 }
 
 /** Each Turn, Cleanup: discard the entire play zone. The hand carries over untouched. */
@@ -853,7 +857,7 @@ function ascend(state: GameState, red: AscendChoice, gray: AscendChoice, run: Ru
   // Setup: build the next floor's deck, with one fewer Stuff room than last time.
   s = returnRoomsToSupply(s);
   s = buildFloor({ ...s, floor: s.floor + 1, offer: null }, run.events);
-  return { ...s, phase: "Flip", playZone: [], thisTurn: emptyTurnRecord() };
+  return { ...s, phase: "Turn Start", playZone: [], thisTurn: emptyTurnRecord() };
 }
 
 /**

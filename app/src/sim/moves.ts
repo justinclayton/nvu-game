@@ -9,8 +9,9 @@
  * passes `validate`. The reverse holds too, with two exceptions noted below
  * where the full set is too large to enumerate: an `OrderCards` answer over
  * more than four cards, and the cross product of two characters' ascension
- * choices. Draw has no phase of its own — it runs inside `FLIP_ROOM` with no
- * decision to make (rulebook, Each Turn, Draw) — so there is no case for it here.
+ * choices. Turn Start's two steps, Flip the room and Draw up to five, run
+ * together inside `FLIP_ROOM` with no decision between them (rulebook, Each
+ * Turn, Turn Start), so there is no separate case for either here.
  */
 
 import { costOf, payOptions, playableCards } from "@domain/queries";
@@ -169,7 +170,7 @@ export function legalCommands(state: GameState): readonly Command[] {
   if (state.pending) return answers(state.pending);
 
   switch (state.phase) {
-    case "Flip":
+    case "Turn Start":
       return state.floorDeck.length > 0 ? [{ type: "FLIP_ROOM" }] : [];
 
     case "Play": {

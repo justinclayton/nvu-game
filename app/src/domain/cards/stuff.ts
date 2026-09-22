@@ -179,8 +179,9 @@ export const STUFF: Registry = {
 
   /* "Holding: You can't have more than 3 cards in your hand."
    *
-   * Each Turn, Draw's hand cap is a draw-phase limit, so this is too: it stops you drawing
-   * up past 3, and Stuff pushed into your hand by a room ignores it as ever. */
+   * Each Turn, Turn Start's own hand cap is a limit on Draw up to five, so this is too: it
+   * stops you drawing up past 3, and Stuff pushed into your hand by a room
+   * ignores it as ever. */
   "Spore Cloud": {
     whileHeld: { handCap: 3 },
   },

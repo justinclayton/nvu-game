@@ -177,7 +177,7 @@ const drew = (c: Character): "red_drew" | "gray_drew" => (c === "Red" ? "red_dre
 /**
  * The run as one row per turn, read off the event log.
  *
- * The domain keeps no per-turn tally — `TurnRecord` is reset every Flip — so
+ * The domain keeps no per-turn tally — `TurnRecord` is reset every Turn Start — so
  * everything here is counted from the events themselves, and a column only
  * exists where an event says enough to fill it. The turn in progress gets a
  * row too, with an empty outcome.

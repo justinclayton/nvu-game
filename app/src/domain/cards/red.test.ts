@@ -191,7 +191,7 @@ describe("Deadweight Grip — 'Cards you play have +1 Oomph, draw no more than 2
 
   it("caps its holder's draw at 2 during the automatic draw", () => {
     const state = rig({
-      phase: "Flip",
+      phase: "Turn Start",
       floorDeck: [room("Sorting Room")],
       Red: player({ deck: pile("Shove", 6), hand: [card("Deadweight Grip")] }),
       Gray: player({ deck: pile("Duck Under", 6) }),
@@ -347,7 +347,7 @@ describe("Zen Mode — \"Holding: you don't `Exhaust`\"", () => {
     // Rulebook, Keywords: Empty deck is a draw or an Exhaust reaching an empty deck; it is
     // not itself an `Exhaust X` line, so Zen Mode never sees it.
     const state = rig({
-      phase: "Flip",
+      phase: "Turn Start",
       floorDeck: [room("Sorting Room")],
       Red: player({
         deck: [],

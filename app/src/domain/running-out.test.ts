@@ -24,7 +24,7 @@ const free = (c: Character, cardId: CardId) =>
 describe("Keywords: Empty deck", () => {
   it("'first shuffle your discard pile to form a new deck' — on a draw", () => {
     const state = rig({
-      phase: "Flip",
+      phase: "Turn Start",
       floorDeck: [room("Sorting Room")],
       Red: player({ deck: [], discard: pile("Shove", 5) }),
       Gray: player({ deck: pile("Duck Under", 5) }),
@@ -53,7 +53,7 @@ describe("Keywords: Empty deck", () => {
 
   it("'if your discard pile is also empty, you go Down' — on a draw", () => {
     const state = rig({
-      phase: "Flip",
+      phase: "Turn Start",
       floorDeck: [room("Sorting Room")],
       Red: player({ deck: [], discard: [] }),
       Gray: player({ deck: pile("Duck Under", 5) }),
@@ -144,7 +144,7 @@ describe("Winning and losing", () => {
     // Sorting Room has no Flee line of its own — it Flees empty-handed. The
     // very next turn's own automatic draw is what sends Red Down.
     const fled = play(state, [{ type: "END_PLAY" }]);
-    expect(fled.state.phase).toBe("Flip");
+    expect(fled.state.phase).toBe("Turn Start");
     const { state: next, events } = must(fled.state, { type: "FLIP_ROOM" });
     expect(next.phase).toBe("GameOver");
     expect(next.outcome).toBe("Defeat");

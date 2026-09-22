@@ -427,7 +427,7 @@ describe("Overcharged Battery — 'The next card played this turn costs 0'", () 
 describe("Faceful Of Slime — 'Holding: you may not draw more than 1 card'", () => {
   it("caps the automatic draw at one", () => {
     const state = rig({
-      phase: "Flip",
+      phase: "Turn Start",
       floorDeck: [room("Sorting Room")],
       Red: player({ deck: pile("Shove", 6), hand: [card("Faceful Of Slime")] }),
       Gray: player({ deck: pile("Duck Under", 6) }),
@@ -466,7 +466,7 @@ describe("Rust — 'Holding: Stuff you play has -1 Oomph'", () => {
 describe("Spore Cloud — \"Holding: You can't have more than 3 cards in your hand\"", () => {
   it("tightens the automatic draw's target to 3", () => {
     const state = rig({
-      phase: "Flip",
+      phase: "Turn Start",
       floorDeck: [room("Sorting Room")],
       Red: player({ deck: pile("Shove", 6), hand: [card("Spore Cloud")] }),
       Gray: player({ deck: pile("Duck Under", 6) }),
@@ -514,7 +514,7 @@ describe("My Head Is Quantum Spinning — 'whenever you draw a card, your partne
     // the automatic draw owes Gray nothing — the only card Gray draws is the
     // one Red's own single draw forces, landing Gray above 5.
     const state = rig({
-      phase: "Flip",
+      phase: "Turn Start",
       floorDeck: [room("Sorting Room")],
       Red: player({
         deck: pile("Shove", 6),
@@ -535,7 +535,7 @@ describe("My Head Is Quantum Spinning — 'whenever you draw a card, your partne
   // reading, not a ruling — see open-questions.md #17 and #19.
   it("does not draw a partner who already drew their capped card this turn (Faceful Of Slime)", () => {
     const state = rig({
-      phase: "Flip",
+      phase: "Turn Start",
       floorDeck: [room("Sorting Room")],
       Red: player({
         deck: pile("Shove", 6),

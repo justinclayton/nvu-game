@@ -74,7 +74,7 @@ export function exhaustXPreventedBy(state: GameState, c: Character): Card | null
   return null;
 }
 
-/** Each Turn, Draw: maximum hand size is 5. A card may tighten it. */
+/** Each Turn, Turn Start: draw up to 5. A card may tighten that target. */
 export const handCapFor = (state: GameState, c: Character): number =>
   heldModifiers(state, c).handCap;
 

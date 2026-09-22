@@ -7,7 +7,7 @@ import { statPool, thresholdIsMet, thresholdTarget } from "@domain/queries";
 import type { GameState } from "@domain/types";
 
 const PHASE_BLURB: Record<GameState["phase"], string> = {
-  Flip: "Turn the top card of the floor deck face up, then both of you draw to 5.",
+  "Turn Start": "Turn the top card of the floor deck face up, then both of you draw to 5.",
   Play: "Play into your own side. Nothing resolves until you both stop.",
   Ascend: "The Enemy is dead. Pack up the floor.",
   GameOver: "The run is over.",

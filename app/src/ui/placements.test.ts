@@ -125,7 +125,7 @@ describe("the reward offer", () => {
     expect(floating.every((p) => p.faceUp)).toBe(true);
     expect(placed.filter((p) => p.zone === "red-rewards")).toHaveLength(base.pools.Red.length - 3);
     // Outside the Ascend phase the offer is not picked up, even if one is set.
-    const notYet = placements({ ...state, phase: "Flip" });
+    const notYet = placements({ ...state, phase: "Turn Start" });
     expect(notYet.filter((p) => p.zone === "red-offer")).toHaveLength(0);
   });
 });

@@ -57,7 +57,7 @@ describe("the table", () => {
     act(() => {
       session.getState().dispatch({ type: "END_PLAY" });
     });
-    expect(screen.getByText(/Cannot end the play phase during the Flip phase/)).toBeDefined();
+    expect(screen.getByText(/Cannot end the play phase during the Turn Start phase/)).toBeDefined();
   });
 
   it("draws every card exactly once, face down in a deck until it is drawn", () => {

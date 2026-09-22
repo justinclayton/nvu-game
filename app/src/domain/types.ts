@@ -124,12 +124,13 @@ export interface TurnRecord {
 /* ------------------------------------------------------------ the phases */
 
 /**
- * Draw has no phase of its own to wait in: it is a step of `FLIP_ROOM`, drawing
- * both characters to 5 with no decision to make (Each Turn, Draw), so it never
- * appears here. Outcome and Cleanup are likewise steps of `END_PLAY`, not
- * waiting phases.
+ * Rulebook, Each Turn, Turn Start: bundles both its steps, Flip the room and Draw up
+ * to five, into `FLIP_ROOM` — there is no decision between them, so the state
+ * rests at `Turn Start` before that command and moves straight to `Play`
+ * after it. Outcome and Cleanup are likewise steps of `END_PLAY`, not
+ * waiting phases of their own.
  */
-export type Phase = "Flip" | "Play" | "Ascend" | "GameOver";
+export type Phase = "Turn Start" | "Play" | "Ascend" | "GameOver";
 
 export type Outcome = "Victory" | "Defeat";
 

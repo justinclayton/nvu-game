@@ -93,9 +93,9 @@ builds the candidates from `state.pending`, the phase and the domain queries the
 and the CLI numbers them. The engine still checks every command it is handed; the list only saves
 the agent from guessing.
 
-Draw has no phase of its own to generate a move list for: rulebook, Each Turn, Draw draws both
-characters to 5 inside `FLIP_ROOM`, with no decision to make, so `Phase` never rests at `Draw`
-and there is no case for it here.
+`Turn Start` (rulebook, Each Turn) bundles both its steps, Flip the room and Draw up to five, into
+`FLIP_ROOM`, with no decision between them — so there is one case for the whole phase here, not
+one per step.
 
 The contract, held by `moves.test.ts`: every command returned passes `validate`, and for a sample
 of seeded states every command `validate` accepts is one it returned.

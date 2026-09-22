@@ -18,9 +18,19 @@ import type { RunFile } from "@application/exportRun";
 
 const PRE_0_2 = new Set(["03-first-agent-cli-run.json"]);
 
+/* Turn Start's draws used to let a `Holding:` card that arrived on the last
+ * draw hear the draws that happened before it was in hand. Turn 19 of this
+ * run relied on that bug (My Head Is Quantum Spinning forcing Gray to draw
+ * for draws it was not yet present for); fixed in engine.ts ("Engine:
+ * Holding triggers hear only draws made while held"), so this run no longer
+ * replays to its recorded state. */
+const HOLDING_TRIGGER_FIX = new Set(["04-first-run-on-rules-0.2.json"]);
+
+const EXCLUDED = new Set([...PRE_0_2, ...HOLDING_TRIGGER_FIX]);
+
 const dir = join(process.cwd(), "..", "design", "playtests");
 const files = existsSync(dir)
-  ? readdirSync(dir).filter((name) => name.endsWith(".json") && !PRE_0_2.has(name))
+  ? readdirSync(dir).filter((name) => name.endsWith(".json") && !EXCLUDED.has(name))
   : [];
 
 describe("saved playtest runs", () => {

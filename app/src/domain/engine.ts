@@ -275,16 +275,21 @@ function validateAscendChoice(
    The engine
    ========================================================================== */
 
-/** One command's worth of events, plus how far the trigger dispatch has read. */
+/**
+ * One command's worth of events, how far the trigger dispatch has read, and
+ * the event index each card most recently arrived in hand or the play zone
+ * at — unset for a card that was already there before this command started.
+ */
 interface Run {
   readonly events: DomainEvent[];
   scanned: number;
+  readonly enteredAt: Map<CardId, number>;
 }
 
 export function execute(state: GameState, command: Command): Result {
   const reason = validate(state, command);
   if (reason) return { ok: false, reason };
-  const run: Run = { events: [], scanned: 0 };
+  const run: Run = { events: [], scanned: 0, enteredAt: new Map() };
   let next = apply(state, command, run);
   next = flush(next, run);
   return { ok: true, state: next, events: run.events };
@@ -336,13 +341,25 @@ function listeners(state: GameState): readonly BehaviourContext[] {
  */
 function flush(state: GameState, run: Run): GameState {
   let s = state;
+  // Events already queued when this call started (Turn Start's draws, all at
+  // once, are the usual case) are already baked into `state`; back-fill their
+  // arrivals before scanning so a card drawn last does not out-run its own
+  // index and look like it was there for the earlier draws too.
+  const alreadyQueued = run.events.length;
+  for (let i = run.scanned; i < alreadyQueued; i++) {
+    const queued = run.events[i];
+    if (queued) trackEntry(run, queued, i);
+  }
   while (run.scanned < run.events.length) {
     if (s.phase === "GameOver") return s;
-    const event = run.events[run.scanned];
+    const index = run.scanned;
+    const event = run.events[index];
     run.scanned += 1;
     if (!event) continue;
+    if (index >= alreadyQueued) trackEntry(run, event, index);
     for (const ctx of listeners(s)) {
       if (s.phase === "GameOver") return s;
+      if (!heldSince(run, ctx.card.id, index)) continue;
       const onEvent = behaviourOf(ctx.card.name)?.onEvent;
       if (!onEvent) continue;
       const step = onEvent(event, s, ctx);
@@ -354,6 +371,19 @@ function flush(state: GameState, run: Run): GameState {
     }
   }
   return s;
+}
+
+/** A card arriving in hand or the play zone — the moment a `Holding:` effect starts hearing events. */
+function trackEntry(run: Run, event: DomainEvent, index: number): void {
+  if (event.type === "CARD_DRAWN" || event.type === "CARD_TO_HAND" || event.type === "CARD_PLAYED") {
+    run.enteredAt.set(event.card.id, index);
+  }
+}
+
+/** Whether a card was already in its zone before the event at `index` — false for the arrival itself. */
+function heldSince(run: Run, cardId: CardId, index: number): boolean {
+  const entered = run.enteredAt.get(cardId);
+  return entered === undefined || entered < index;
 }
 
 /**

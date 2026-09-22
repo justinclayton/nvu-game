@@ -13,7 +13,7 @@ import {
   rig,
   room,
 } from "../__fixtures__/rig";
-import type { Card, CardId, Character, GameState } from "../types";
+import type { Card, CardId, Character, DomainEvent, GameState } from "../types";
 
 beforeEach(resetRig);
 
@@ -554,5 +554,52 @@ describe("My Head Is Quantum Spinning — 'whenever you draw a card, your partne
     expect(next.Gray.drewThisTurn).toBe(1);
     expect(next.Red.hand).toHaveLength(5);
     expect(eventTypes(events).filter((t) => t === "CARD_DRAWN")).toHaveLength(2);
+  });
+
+  // Regression: Playtest 4, turn 19. Red's Turn Start draws filled the hand
+  // with Shove, Shove, then this card last. The engine used to check who was
+  // in hand at the end of all the draws, so the copy that had just arrived
+  // "heard" the two draws that happened before it existed.
+  it("drawn last in Turn Start, does not fire for the draws that filled the hand around it", () => {
+    const state = rig({
+      phase: "Turn Start",
+      floorDeck: [room("Sorting Room")],
+      Red: player({
+        deck: [...pile("Shove", 2), card("My Head Is Quantum Spinning"), ...pile("Shove", 2)],
+        hand: pile("Charge In", 2),
+      }),
+      Gray: player({ deck: pile("Duck Under", 5), hand: pile("Duck Under", 5) }),
+    });
+    const { state: next, events } = must(state, { type: "FLIP_ROOM" });
+    expect(next.Red.hand).toHaveLength(5);
+    expect(next.Red.drewThisTurn).toBe(3);
+    // Gray already held 5; nothing forces another draw.
+    expect(next.Gray.hand).toHaveLength(5);
+    expect(next.Gray.drewThisTurn).toBe(0);
+    expect(eventTypes(events).filter((t) => t === "CARD_DRAWN")).toHaveLength(3);
+  });
+
+  it("already in hand at Turn Start, fires for every draw, and the forced draws land after both players finish drawing to five", () => {
+    const state = rig({
+      phase: "Turn Start",
+      floorDeck: [room("Sorting Room")],
+      Red: player({ deck: pile("Shove", 6), hand: [card("My Head Is Quantum Spinning")] }),
+      Gray: player({ deck: pile("Duck Under", 10), hand: [] }),
+    });
+    const { state: next, events } = must(state, { type: "FLIP_ROOM" });
+    const drawEvents = events.filter(
+      (e): e is Extract<DomainEvent, { type: "CARD_DRAWN" }> => e.type === "CARD_DRAWN",
+    );
+    // Turn Start's own share: Red draws 4 to reach 5 (this card already fills
+    // one slot), then Gray draws 5 to reach 5 — 9 draws, none forced.
+    const natural = drawEvents.slice(0, 9);
+    expect(natural.every((e) => !e.forced)).toBe(true);
+    // Red's own 4 draws each force one more for Gray — after every natural
+    // draw above, never interleaved with them.
+    const forced = drawEvents.slice(9);
+    expect(forced).toHaveLength(4);
+    expect(forced.every((e) => e.forced && e.character === "Gray")).toBe(true);
+    expect(next.Red.hand).toHaveLength(5);
+    expect(next.Gray.hand).toHaveLength(9);
   });
 });

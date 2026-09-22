@@ -58,7 +58,7 @@ export const CARD_CONTENT = {
       oomph: 2,
       scramble: 0,
       conditionalStat: false,
-      text: "Exhaust 2 (the top 2 cards of your deck go to your discard pile).",
+      text: "Exhaust 2.",
     },
     {
       name: "Duck Under",
@@ -478,7 +478,7 @@ export const CARD_CONTENT = {
       oomph: 3,
       scramble: 3,
       conditionalStat: false,
-      text: "One of you draws 1 card, (even if their hand is full).",
+      text: "One of you draws 1 card.",
     },
     {
       name: "Riot Shield",

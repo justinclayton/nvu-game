@@ -32,8 +32,7 @@ export type ChoiceAnswer =
  * What a `Holding:` line changes for as long as the card sits in hand.
  *
  * `handCap` and `drawCap` are ceilings — the tightest one in a hand wins. The
- * deltas add up. `thresholdScrambleDelta` is read from both hands, because the
- * card that has it says "ALL rooms".
+ * deltas add up. `thresholdScrambleDelta` is read from both hands (Panic).
  */
 export interface HeldModifiers {
   readonly costDelta?: number;
@@ -47,10 +46,7 @@ export interface HeldModifiers {
 }
 
 export interface CardBehaviour {
-  /**
-   * A bare `Exhaust X` printed on the card: X cards off the top of the player's
-   * own deck, into their discard pile. Resolved as the card is played.
-   */
+  /** A bare `Exhaust X` printed on the card. */
   exhaustX?: number;
   /** Conditional stats, recalculated every time the pool is read. */
   stats?(state: GameState, owner: Character, card: Card): { oomph: number; scramble: number };

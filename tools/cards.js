@@ -15,7 +15,7 @@ var NVU_CARDS = {
   cards: [
     {"name":"Shove","set":"official","kind":"player","owner":"Red","starter":true,"cost":1,"oomph":2,"count":5},
     {"name":"Charge In","set":"official","kind":"player","owner":"Red","starter":true,"cost":2,"oomph":4,"count":5},
-    {"name":"Overdrive","set":"official","kind":"player","owner":"Red","starter":true,"cost":0,"oomph":2,"text":"Exhaust 2 (the top 2 cards of your deck go to your discard pile).","count":2},
+    {"name":"Overdrive","set":"official","kind":"player","owner":"Red","starter":true,"cost":0,"oomph":2,"text":"Exhaust 2.","count":2},
     {"name":"Duck Under","set":"official","kind":"player","owner":"Gray","starter":true,"cost":1,"scramble":2,"count":5},
     {"name":"Pick The Lock","set":"official","kind":"player","owner":"Gray","starter":true,"cost":2,"scramble":4,"count":5},
     {"name":"Peek Around Corner","set":"official","kind":"player","owner":"Gray","starter":true,"cost":1,"scramble":1,"text":"Look at the top card of any deck, then put it back on top. (Peek 1?)","count":2},
@@ -45,7 +45,7 @@ var NVU_CARDS = {
     {"name":"Crowbar","set":"proposed","kind":"good_stuff","rarity":"Fine","cost":0,"oomph":1,"scramble":1,"text":"Play: if you get any Good Stuff this turn, get an additional one."},
     {"name":"A Pair Of Stich-Em-Ups","set":"proposed","kind":"good_stuff","rarity":"Cool","cost":1,"text":"Choose a character. Move 2 cards from that character's discard pile to the bottom of their deck."},
     {"name":"Cutting Torch","set":"proposed","kind":"good_stuff","rarity":"Cool","cost":2,"oomph":5},
-    {"name":"Grav Harness","set":"proposed","kind":"good_stuff","rarity":"Woah","cost":2,"oomph":3,"scramble":3,"text":"One of you draws 1 card, (even if their hand is full)."},
+    {"name":"Grav Harness","set":"proposed","kind":"good_stuff","rarity":"Woah","cost":2,"oomph":3,"scramble":3,"text":"One of you draws 1 card."},
     {"name":"Riot Shield","set":"proposed","kind":"good_stuff","rarity":"Cool","cost":1,"scramble":3,"text":"If the room is Cleared, return this to your hand at the end of the turn."},
     {"name":"Overcharged Battery","set":"proposed","kind":"good_stuff","rarity":"Cool","cost":1,"oomph":2,"text":"The next card played this turn costs 0."},
     {"name":"Faceful Of Slime","set":"proposed","kind":"bad_stuff","cost":2,"text":"Holding: you may not draw more than 1 card per turn."},

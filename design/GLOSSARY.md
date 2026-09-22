@@ -2,8 +2,8 @@
 
 The project's domain terms and nothing else: what each thing is, the rulebook section that governs
 it, and the ticket or ruling that settled it. The rules themselves live in
-[`rulebook.md`](rulebook.md), which wins wherever this file disagrees with it. Code
-uses these terms spelled this way.
+[`rulebook-0.2-draft.md`](rulebook-0.2-draft.md) (rules version 0.2.0-draft), which wins
+wherever this file disagrees with it. Code uses these terms spelled this way.
 
 ---
 
@@ -53,7 +53,7 @@ The combined Oomph and/or Scramble total from every card both players played thi
 
 **Play zone**
 
-The blank area in front of each player where cards are played during the Play phase. Cards here are moved to the discard pile at Cleanup, unless the player is leaving Last Stand after a Clear, in which case they're shuffled into that player's deck instead.
+The blank area in front of each player where cards are played during the Play phase. Cards here are moved to the discard pile at Cleanup.
 
 **Type line**
 
@@ -65,7 +65,7 @@ The border on a Character or Good Stuff card — `Fine`, `Cool`, or `Woah` — w
 
 **Cost**
 
-The number of cards a player must discard from their hand to play a card. A Cost of 0 or less means the card is played for free. While in Last Stand, a player ignores Cost entirely.
+The number of cards a player must discard from their hand to play a card. A Cost of 0 or less means the card is played for free.
 
 **Cleared**
 
@@ -77,7 +77,11 @@ The result when no Challenge clears this turn. The players resolve the Room's Fl
 
 **Ascend**
 
-The outcome, printed on some Challenges, that clears the entire floor rather than just the Room. Triggering it skips Cleanup and moves straight into the Ascending steps.
+The outcome, printed on some Challenges, that clears the entire floor rather than just the Room. Triggering it runs Cleanup as normal first, then moves into the Ascending steps.
+
+**Settle your Stuff**
+
+Ascending's second step, once the hand has been shuffled into the deck. Every Stuff card in a player's deck and discard pile is found: a Good Stuff card shuffles into the Good Stuff pool unless kept by Scrapping one other owned, non-Stuff card from the deck or discard pile; a Bad Stuff card stays unless shed into the Bad Stuff pool the same way. A kept card is returned to wherever it was found.
 
 **Card reward**
 
@@ -93,23 +97,27 @@ One of the two playable roles, Red or Gray, each with its own deck, Character ca
 
 **Deck**
 
-A player's face-down pile of cards, built from their character's starter cards at Setup. A deck's size is that character's Stamina; an empty deck puts the character into Last Stand.
+A player's face-down pile of cards, built from their character's starter cards at Setup. A deck's size is that character's Stamina. An empty deck reshuffles the discard pile to form a new deck (see Empty deck); if the discard pile is empty too, the character goes Down.
 
 **Stamina**
 
-A character's HP, tracked as the size of their deck. Running out (entering Last Stand and then failing to recover) risks going Down.
+A character's HP, tracked as the size of their deck and discard pile together. Running out — needing a card with both empty — puts the character Down.
 
 **Hand**
 
-The cards a player has drawn and is holding, used to play cards and pay Costs. Stuff cards are added directly to hand when gained. Limited by Maximum hand size.
+The cards a player has drawn and is holding, used to play cards and pay Costs. Stuff cards are added directly to hand when gained. Draw brings a hand to 5 each turn; nothing else caps it, so a hand can hold more. Ascending's first step shuffles the whole hand into the deck.
 
-**Maximum hand size**
+**Turn Start**
 
-Five cards. A player holding 5 or more has a Full Hand and cannot draw; if forced to draw anyway, the card goes to the discard pile instead.
+The turn phase that opens each turn: Flip the room, then Draw up to five. Both steps run together, with no decision between them.
 
 **Draw**
 
-The turn phase where both players first draw 1 card at the same time, then take turns drawing a card, one at a time, for as long as they like. A player in Last Stand does not draw, even if forced.
+The second step of Turn Start: each player draws from their deck until holding 5, all at once — no decision to make. A draw that reaches an empty deck triggers Empty deck.
+
+**Empty deck**
+
+What a draw or an Exhaust does when it needs a card and the deck is empty: the discard pile shuffles to form a new deck first. If the discard pile is empty too, the character goes Down.
 
 **Play**
 
@@ -117,15 +125,19 @@ The turn phase where players take turns playing a card from their hand into thei
 
 **Discard**
 
-To move a card to its owner's discard pile, from wherever it was: paying a Cost, the `Discard X cards from your hand` keyword, the play zone at Cleanup, the burned draw of a Full Hand, or the hand of a character going Down.
+To move a card to its owner's discard pile, from wherever it was: paying a Cost, the `Discard X cards from your hand` keyword, the play zone at Cleanup, or the hand of a character going Down.
 
 **Discard pile**
 
-A player's face-up pile of spent or lost cards. Played cards move here at Cleanup; cards in it can be shuffled back into the deck (Ascending) or Scrapped.
+A player's face-up pile of spent or lost cards. Played cards move here at Cleanup. It recycles: an empty deck reshuffles it to form a new deck (Empty deck). A card in it can also be shuffled back into the deck directly (Ascending, Settle your Stuff) or Scrapped.
 
 **Exhaust**
 
-The keyword `Exhaust X`, also written `Exhaust X cards from your deck`: discard the top X cards of your own deck.
+The keyword `Exhaust X`, also written `Exhaust X cards from your deck`: move the top X cards of your own deck to your Exhaust pile.
+
+**Exhaust pile**
+
+A player's face-up pile of cards Exhausted off their deck. Permanent: unlike the discard pile, nothing here ever returns.
 
 **Scrap**
 
@@ -141,12 +153,8 @@ The keyword marking a passive effect that applies only while the card is in hand
 
 **Turn**
 
-One pass through the five phases: New Room, Draw, Play, Outcome, and Cleanup. Repeats until the floor is cleared (Ascend) or the game ends.
-
-**Last Stand**
-
-The state a character enters immediately when their deck becomes empty. While in it, they ignore Cost when playing cards and do not draw, even if forced. It ends at the next Cleanup: if the room was Cleared, the player shuffles their play zone into a new deck and Exhausts its top 2 cards instead of discarding their play zone as normal; if the room was Fled, the player goes Down instead.
+One pass through four phases: Turn Start, Play, Outcome, and Cleanup. Repeats until the floor is cleared (Ascend) or the game ends.
 
 **Down**
 
-The state a character enters from Last Stand after a Fled room. A Down character moves their hand to the discard pile and cannot act. If both characters are Down, the game ends in a loss.
+The state a character enters when they must draw or Exhaust and both their deck and discard pile are empty (Empty deck). A Down character's hand moves to the discard pile. One character going Down ends the run in a loss (Winning and losing).

@@ -18,7 +18,7 @@ import {
   rig,
   room,
 } from "./__fixtures__/rig";
-import type { AscendChoice, CardId, Character, GameState } from "./types";
+import type { CardId, Character, GameState } from "./types";
 
 beforeEach(resetRig);
 
@@ -28,99 +28,94 @@ const hand = (state: GameState, c: Character): readonly CardId[] =>
 const free = (c: Character, cardId: CardId) =>
   ({ type: "PLAY_CARD", character: c, cardId, payWith: [] }) as const;
 
-const NOTHING: AscendChoice = { keepStuffId: null, scrapId: null, takeRewardId: null };
-
-describe("walkthrough 1 — a full hand costs you a card", () => {
-  it("puts the drawn card straight into the discard pile", () => {
+describe("walkthrough 1 — the deck runs dry mid-draw and the discard pile becomes the new deck", () => {
+  it("reshuffles once, then keeps drawing to 5", () => {
     const state = rig({
-      phase: "Flip",
+      phase: "Turn Start",
       floorDeck: [room("Sorting Room")],
-      Red: player({ deck: pile("Shove", 6), hand: pile("Shove", 5) }),
-      Gray: player({ deck: pile("Duck Under", 6) }),
+      Red: player({ deck: pile("Shove", 2), discard: pile("Charge In", 3) }),
+      Gray: player({ deck: pile("Duck Under", 5) }),
     });
     const { state: next, events } = must(state, { type: "FLIP_ROOM" });
+    expect(next.Red.hand).toHaveLength(5);
+    expect(next.Red.deck).toEqual([]);
+    expect(next.Red.discard).toEqual([]);
+    // Red: 2 off the original deck, the reshuffle, then 3 more. Gray: a plain 5.
     expect(eventTypes(events)).toEqual([
       "ROOM_FLIPPED",
-      "DRAW_BURNED",
-      "CARD_DISCARDED",
+      "CARD_DRAWN",
+      "CARD_DRAWN",
+      "DISCARD_RESHUFFLED",
+      "CARD_DRAWN",
+      "CARD_DRAWN",
+      "CARD_DRAWN",
+      "CARD_DRAWN",
+      "CARD_DRAWN",
+      "CARD_DRAWN",
+      "CARD_DRAWN",
       "CARD_DRAWN",
     ]);
-    expect(next.Red.hand).toHaveLength(5);
-    expect(next.Red.deck).toHaveLength(5);
-    expect(next.Red.discard).toHaveLength(1);
-    expect(next.Gray.hand).toHaveLength(1);
   });
 });
 
-describe("walkthrough 2 — into last stand, and out the wrong way", () => {
-  it("flees while Red is in last stand, which puts Red Down", () => {
-    const state = rig({
-      phase: "Draw",
-      activeRoom: room("Gross Thing That Looks Like A Cherry"),
-      floorDeck: [room("Sorting Room")],
-      Red: player({ deck: [card("Charge In")] }),
-      Gray: player({ deck: pile("Duck Under", 4) }),
-    });
-    const drawn = play(state, [
-      { type: "DRAW", character: "Red" },
-      { type: "DRAW", character: "Gray" },
-      { type: "DRAW", character: "Gray" },
-      { type: "END_DRAW" },
-    ]);
-    // The draw that emptied Red's deck put them in last stand right away.
-    expect(drawn.state.Red.lastStand).toBe(true);
-
-    const grayHand = hand(drawn.state, "Gray");
-    const played = play(drawn.state, [
-      // In last stand, Red's Charge In costs nothing.
-      free("Red", hand(drawn.state, "Red")[0] as CardId),
-      { type: "PLAY_CARD", character: "Gray", cardId: grayHand[0] as CardId, payWith: [grayHand[1] as CardId] },
-    ]);
-    // Oomph 4 against the Cherry's Oomph 5. Gray's Scramble does nothing here.
-    expect(statPool(played.state)).toEqual({ oomph: 4, scramble: 2 });
-
-    const ended = play(played.state, [{ type: "END_PLAY" }]);
-    expect(eventTypes(ended.events)).toContain("ROOM_FLED");
-    expect(eventTypes(ended.events)).toContain("WENT_DOWN");
-    expect(ended.state.Red.down).toBe(true);
-    expect(ended.state.Red.hand).toEqual([]);
-  });
-});
-
-describe("walkthrough 3 — the escape that actually works", () => {
-  it("shuffles the play zone back in and charges 2 off the top", () => {
-    const state = rig({
-      phase: "Draw",
-      activeRoom: room("Sorting Room"),
-      floorDeck: [room("Gross Thing That Looks Like A Cherry")],
-      Red: player({ deck: [], hand: pile("Shove", 4), lastStand: true }),
-      Gray: player({ deck: pile("Duck Under", 4) }),
-    });
-    const drawn = play(state, [{ type: "DRAW", character: "Gray" }, { type: "END_DRAW" }]);
-    const redHand = hand(drawn.state, "Red");
-    const { state: next, events } = play(drawn.state, [
-      free("Red", redHand[0] as CardId),
-      free("Red", redHand[1] as CardId),
-      free("Red", redHand[2] as CardId),
-      { type: "END_PLAY" },
-    ]);
-    expect(eventTypes(events)).toContain("LAST_STAND_ESCAPED");
-    expect(next.Red.deck).toHaveLength(1);
-    expect(next.Red.lastStand).toBe(false);
-    // The fourth Shove was never played, so it carries over along with the
-    // Good Stuff Red's side earned by beating the Sorting Room's Oomph 2 —
-    // the hand is never touched at Cleanup. Crowbar sits there unplayed, so
-    // its own "Play:" effect never runs — it cannot count its own arrival.
-    expect(next.Red.hand.map((c) => c.name)).toEqual(["Shove", "Crowbar"]);
-  });
-});
-
-describe("walkthrough 4 — spending Stuff spends it for good", () => {
-  it("leaves a spent Pry Bar in the discard pile, then Scraps it at ascension", () => {
+describe("walkthrough 2 — Down when the deck and discard are both empty ends the run on the spot", () => {
+  it("stops a room's own punishment from finishing, and everything after it", () => {
     const state = rig({
       phase: "Play",
+      activeRoom: room("Collapsed Stairwell"),
+      Red: player({ deck: [], discard: [], hand: [card("Shove")] }),
+      Gray: player({ deck: pile("Duck Under", 4) }),
+    });
+    // Collapsed Stairwell's Flee line: "One of you Exhausts 3." Nobody played
+    // anything, so no threshold is met and the room Flees.
+    const { state: next, events } = play(state, [
+      { type: "END_PLAY" },
+      { type: "CHOOSE_CHARACTER", character: "Red" },
+    ]);
+    expect(next.phase).toBe("GameOver");
+    expect(next.outcome).toBe("Defeat");
+    // Going Down still empties the hand into the discard pile.
+    expect(next.Red.hand).toEqual([]);
+    expect(next.Red.discard.map((c) => c.name)).toEqual(["Shove"]);
+    const types = eventTypes(events);
+    expect(types).toContain("WENT_DOWN");
+    expect(types).toContain("GAME_OVER");
+    expect(types.indexOf("WENT_DOWN")).toBeLessThan(types.indexOf("GAME_OVER"));
+    // Cleanup, the turn ending, and everything after never ran.
+    expect(types).not.toContain("CLEANUP_BEGAN");
+    expect(types).not.toContain("TURN_ENDED");
+  });
+});
+
+describe("walkthrough 3 — Exhaust is permanent; only the discard pile recycles", () => {
+  it("a reshuffle draws from the discard pile, and never from the Exhaust pile", () => {
+    const exhausted = pile("Charge In", 2);
+    const state = rig({
+      phase: "Turn Start",
+      floorDeck: [room("Sorting Room")],
+      Red: player({ deck: [], discard: pile("Shove", 5), exhaust: exhausted }),
+      Gray: player({ deck: pile("Duck Under", 5) }),
+    });
+    const { state: next, events } = must(state, { type: "FLIP_ROOM" });
+    expect(next.Red.hand).toHaveLength(5);
+    // The Exhaust pile is untouched, and none of it ever reached the hand.
+    expect(next.Red.exhaust.map((c) => c.id)).toEqual(exhausted.map((c) => c.id));
+    expect(next.Red.hand.every((c) => exhausted.every((e) => e.id !== c.id))).toBe(true);
+    expect(eventTypes(events)).toContain("DISCARD_RESHUFFLED");
+  });
+});
+
+describe("walkthrough 4 — Settle your Stuff: four cards, four different fates, in one Ascend", () => {
+  it("keeps what was paid for, defaults the rest, and returns every kept card to where it was found", () => {
+    const keptGood = card("Pry Bar");
+    const defaultGood = card("Coil Of Cable");
+    const defaultBad = card("Sluggish");
+    const shedBad = card("Rust");
+    const payerA = card("Charge In");
+    const payerB = card("Shove");
+    const state = rig({
+      phase: "Ascend",
       floor: 1,
-      activeRoom: room("Gross Thing That Looks Like A Cherry"),
       roomSupply: [
         room("Coney, The Thing In The Stairwell"),
         room("Collapsed Stairwell"),
@@ -128,67 +123,74 @@ describe("walkthrough 4 — spending Stuff spends it for good", () => {
         room("Ruptured Coolant Line"),
         ...Array.from({ length: 8 }, () => room("Sorting Room")),
       ],
+      cleared: [room("Gross Thing That Looks Like A Cherry")],
+      Red: player({
+        deck: [defaultGood, ...pile("Shove", 2)],
+        hand: [defaultBad],
+        discard: [keptGood, shedBad, payerA, payerB],
+      }),
+      Gray: player({ deck: pile("Duck Under", 2) }),
+    });
+    const { state: next, events } = must(state, {
+      type: "ASCEND",
+      Red: {
+        settle: [
+          { cardId: keptGood.id, payWith: payerA.id },
+          { cardId: shedBad.id, payWith: payerB.id },
+        ],
+        takeRewardId: null,
+      },
+      Gray: { settle: [], takeRewardId: null },
+    });
+
+    // Kept Good Stuff stayed in the discard pile, where it was found.
+    expect(next.Red.discard.some((c) => c.id === keptGood.id)).toBe(true);
+    // Defaulted Good Stuff, found in the deck, went to the Good Stuff pool.
+    expect(next.Red.deck.some((c) => c.id === defaultGood.id)).toBe(false);
+    expect(next.pools.goodStuff.some((c) => c.id === defaultGood.id)).toBe(true);
+    // Defaulted Bad Stuff started in hand, which step 1 shuffles into the
+    // deck before Settle your Stuff ever runs — so it was found, and kept,
+    // in the deck, not the hand.
+    expect(next.Red.hand).toEqual([]);
+    expect(next.Red.deck.some((c) => c.id === defaultBad.id)).toBe(true);
+    // Shed Bad Stuff left the discard pile for its pool.
+    expect(next.Red.discard.some((c) => c.id === shedBad.id)).toBe(false);
+    expect(next.pools.badStuff.some((c) => c.id === shedBad.id)).toBe(true);
+    // Both payers are gone for good.
+    expect(next.scrapyard.map((c) => c.id).sort()).toEqual([payerA.id, payerB.id].sort());
+    expect(eventTypes(events).filter((t) => t === "CARD_SCRAPPED")).toHaveLength(2);
+  });
+});
+
+describe("walkthrough 5 — Cleanup runs before Ascending", () => {
+  it("discards the play zone, then clears the floor and offers the reward", () => {
+    const state = rig({
+      phase: "Play",
+      activeRoom: room("Gross Thing That Looks Like A Cherry"),
       Red: player({
         deck: pile("Shove", 5),
-        hand: [card("Charge In"), card("Pry Bar"), card("Shove"), card("Pry Bar")],
+        hand: [card("Charge In"), card("Shove"), card("Shove"), card("Pry Bar")],
       }),
       Gray: player({ deck: pile("Duck Under", 5) }),
     });
     const h = hand(state, "Red");
-    // Charge In (Oomph 4, Cost 2) paid for with a Pry Bar and a Shove. The Pry
-    // Bar lands in the discard pile looking recoverable — and is not.
-    const played = play(state, [
-      { type: "PLAY_CARD", character: "Red", cardId: h[0] as CardId, payWith: [h[1] as CardId, h[2] as CardId] },
-    ]);
-    expect(played.state.Red.discard.map((c) => c.name)).toContain("Pry Bar");
-
-    const cleared = play(played.state, [
-      free("Red", h[3] as CardId),
+    const [chargeIn, payA, payB, pryBar] = h;
+    if (!chargeIn || !payA || !payB || !pryBar) throw new Error("rig");
+    const { state: next, events } = play(state, [
+      { type: "PLAY_CARD", character: "Red", cardId: chargeIn, payWith: [payA, payB] },
+      { type: "PLAY_CARD", character: "Red", cardId: pryBar, payWith: [] },
       { type: "END_PLAY" },
     ]);
-    // Oomph 4 + 3 beats the Cherry's Oomph 5, so the floor is cleared.
-    expect(cleared.state.phase).toBe("Ascend");
-
-    const ascended = play(cleared.state, [{ type: "ASCEND", Red: NOTHING, Gray: NOTHING }]);
-    // Both Pry Bars — the one spent as fuel and the one played — are gone for
-    // the run. Neither shuffles back with the rest of the discard pile.
-    expect(ascended.state.scrapyard.map((c) => c.name)).toEqual(["Pry Bar", "Pry Bar"]);
-    expect(ascended.state.Red.deck.some((c) => c.name === "Pry Bar")).toBe(false);
-  });
-});
-
-describe("walkthrough 5 — nothing resolves until play is declared over", () => {
-  it("checks the room once, and resolves every line the pool met", () => {
-    // Collapsed Stairwell: Scramble 2 clears and costs both a card; Scramble 5
-    // clears too. Passing the low line does nothing until play ends, and when
-    // it does, both lines resolve — Each Turn, Outcome says every challenge you met.
-    const state = rig({
-      phase: "Play",
-      activeRoom: room("Collapsed Stairwell"),
-      floorDeck: [room("Sorting Room")],
-      Red: player({ deck: pile("Shove", 5) }),
-      Gray: player({
-        deck: pile("Duck Under", 5),
-        hand: [card("Pick The Lock"), card("Coil Of Cable"), card("Duck Under"), card("Duck Under")],
-      }),
-    });
-    const g = hand(state, "Gray");
-    const low = play(state, [
-      { type: "PLAY_CARD", character: "Gray", cardId: g[0] as CardId, payWith: [g[2] as CardId, g[3] as CardId] },
-    ]);
-    // Scramble 4: past the low tier, and the room is still in the zone.
-    expect(statPool(low.state).scramble).toBe(4);
-    expect(low.state.activeRoom).not.toBeNull();
-
-    const high = play(low.state, [free("Gray", g[1] as CardId), { type: "END_PLAY" }]);
-    expect(eventTypes(high.events)).toContain("ROOM_CLEARED");
-    expect(high.state.cleared).toHaveLength(1);
-    // Both lines were met, so both were announced — and the lower one's "both of
-    // you Exhaust 1" is still owed, because the higher tier adds to it rather
-    // than replacing it.
-    expect(high.events.filter((e) => e.type === "THRESHOLD_MET")).toHaveLength(2);
-    expect(high.state.Red.discard).toHaveLength(1);
-    expect(high.state.Red.deck).toHaveLength(4);
+    const types = eventTypes(events);
+    expect(types.indexOf("CLEANUP_BEGAN")).toBeLessThan(types.indexOf("FLOOR_CLEARED"));
+    // The play zone's two cards were discarded during that cleanup.
+    const playZoneDiscards = events.filter(
+      (e) => e.type === "CARD_DISCARDED" && e.from === "playZone",
+    );
+    expect(playZoneDiscards).toHaveLength(2);
+    expect(next.playZone).toEqual([]);
+    expect(next.phase).toBe("Ascend");
+    expect(next.offer?.Red).toHaveLength(3);
   });
 });
 
@@ -219,36 +221,34 @@ describe("walkthrough 6 — a Room's Challenge reads the shared pool, not either
   });
 });
 
-describe("walkthrough 7 — Down, and everything landing on the survivor", () => {
-  it("puts the whole Flee line on the one who is left", () => {
+describe("walkthrough 7 — one Down ends the run immediately, mid multi-effect resolution", () => {
+  it("stops a Flee line's own later effect from ever running", () => {
     const state = rig({
       phase: "Play",
       activeRoom: room("Ruptured Coolant Line"),
-      floorDeck: [room("Gross Thing That Looks Like A Cherry")],
-      Red: player({ deck: [], hand: [], down: true }),
-      Gray: player({ deck: pile("Duck Under", 3), hand: pile("Duck Under", 2) }),
+      Red: player({ deck: [], discard: [], hand: [] }),
+      Gray: player({ deck: pile("Duck Under", 4), hand: [] }),
     });
-    const g = hand(state, "Gray");
-    const { state: next, events } = play(state, [
-      { type: "PLAY_CARD", character: "Gray", cardId: g[0] as CardId, payWith: [g[1] as CardId] },
-      { type: "END_PLAY" },
-    ]);
-    // "Both of you Exhaust 1, and one of you gets Bad Stuff." Red takes nothing.
-    expect(next.Red.discard).toEqual([]);
-    expect(next.Gray.deck).toHaveLength(2);
-    expect(next.Gray.hand.map((c) => c.kind)).toEqual(["bad_stuff"]);
-    // Nobody was asked who: there was nobody to choose between.
-    expect(eventTypes(events)).not.toContain("REWARD_REVEALED");
-    expect(next.pending).toBeNull();
+    // "Both of you Exhaust 1, and one of you gets Bad Stuff." Nobody played
+    // anything, so the room Flees; Red's own Exhaust is first in the queue,
+    // and Red has nothing left to lose it from.
+    const { state: next, events } = must(state, { type: "END_PLAY" });
+    expect(next.phase).toBe("GameOver");
+    expect(next.Red.down).toBe(true);
+    // Gray's own Exhaust 1, and the Bad Stuff besides, never ran.
+    expect(next.Gray.deck).toHaveLength(4);
+    expect(next.Gray.hand).toEqual([]);
+    expect(eventTypes(events)).not.toContain("STUFF_TAKEN");
+    expect(eventTypes(events)).toContain("WENT_DOWN");
   });
 });
 
-describe("walkthrough 8 — ascending: full heal, Scrap tax, reward", () => {
-  it("heals both characters, Scraps the Stuff, and takes one card", () => {
+describe("walkthrough 8 — ascending end to end: Settle your Stuff, then the reward, no heal", () => {
+  it("clears the floor, takes a reward, and starts the next floor with the old discard pile intact", () => {
     const state = rig({
-      phase: "Ascend",
+      phase: "Play",
       floor: 1,
-      cleared: [room("Gross Thing That Looks Like A Cherry")],
+      activeRoom: room("Gross Thing That Looks Like A Cherry"),
       roomSupply: [
         room("Coney, The Thing In The Stairwell"),
         room("Collapsed Stairwell"),
@@ -257,35 +257,38 @@ describe("walkthrough 8 — ascending: full heal, Scrap tax, reward", () => {
         ...Array.from({ length: 8 }, () => room("Sorting Room")),
       ],
       Red: player({
-        deck: pile("Shove", 2),
-        discard: [...pile("Shove", 4), card("Pry Bar"), card("Coil Of Cable")],
+        deck: pile("Shove", 5),
+        hand: [card("Charge In"), card("Shove"), card("Shove"), card("Pry Bar")],
+        discard: pile("Charge In", 3),
       }),
-      Gray: player({ deck: pile("Duck Under", 3), discard: pile("Duck Under", 5), down: true }),
+      Gray: player({ deck: pile("Duck Under", 5) }),
     });
-    const withOffer = {
-      ...state,
-      offer: { Red: state.pools.Red.slice(0, 3), Gray: state.pools.Gray.slice(0, 3) },
-    };
-    const keep = withOffer.Red.discard.find((c) => c.name === "Pry Bar");
-    const payer = withOffer.Red.discard.find((c) => c.name === "Shove");
-    const reward = withOffer.offer.Red[0];
-    if (!keep || !payer || !reward) throw new Error("rig");
+    const h = hand(state, "Red");
+    const [chargeIn, payA, payB, pryBar] = h;
+    if (!chargeIn || !payA || !payB || !pryBar) throw new Error("rig");
+    const cleared = play(state, [
+      { type: "PLAY_CARD", character: "Red", cardId: chargeIn, payWith: [payA, payB] },
+      { type: "PLAY_CARD", character: "Red", cardId: pryBar, payWith: [] },
+      { type: "END_PLAY" },
+    ]);
+    expect(cleared.state.phase).toBe("Ascend");
 
-    const { state: next } = must(withOffer, {
+    const offer = cleared.state.offer?.Red[0];
+    if (!offer) throw new Error("rig");
+    const { state: next } = must(cleared.state, {
       type: "ASCEND",
-      Red: { keepStuffId: keep.id, scrapId: payer.id, takeRewardId: reward.id },
-      Gray: NOTHING,
+      Red: { settle: [], takeRewardId: offer.id },
+      Gray: { settle: [], takeRewardId: null },
     });
 
-    // Red: 2 in deck + 3 remaining Shoves + the kept Pry Bar + the reward = 7.
-    expect(next.Red.deck).toHaveLength(7);
-    expect(next.Red.deck.some((c) => c.id === keep.id)).toBe(true);
-    expect(next.Red.deck.some((c) => c.id === reward.id)).toBe(true);
-    // The Coil Of Cable was not kept, so it is gone for the run; so is the payer.
-    expect(next.scrapyard.map((c) => c.name).sort()).toEqual(["Coil Of Cable", "Shove"]);
-    // Gray was Down and is now at full health.
-    expect(next.Gray.down).toBe(false);
-    expect(next.Gray.deck).toHaveLength(8);
     expect(next.floor).toBe(2);
+    expect(next.phase).toBe("Turn Start");
+    // No heal: the 3 Charge Ins from before this floor are still there, plus
+    // the 2 Shoves that paid for Charge In and the Charge In itself, both
+    // discarded at Cleanup. The Pry Bar played alongside it was Good Stuff,
+    // so Settle your Stuff swept it back to its pool by default instead.
+    expect(next.Red.discard).toHaveLength(6);
+    // The reward is shuffled into the deck.
+    expect(next.Red.deck.some((c) => c.id === offer.id)).toBe(true);
   });
 });

@@ -7,7 +7,7 @@
 import { describe, expect, it } from "vitest";
 import { CARD_CONTENT } from "../content";
 import { execute } from "./engine";
-import { canDraw, costOf, payOptions, playableCards } from "./queries";
+import { costOf, payOptions, playableCards } from "./queries";
 import { createInitialState } from "./setup";
 import type { AscendChoice, Card, CardId, Command, GameState } from "./types";
 import { CHARACTERS } from "./verbs";
@@ -15,10 +15,7 @@ import { CHARACTERS } from "./verbs";
 const SEEDS = [1, 2, 3, 7, 11, 42, 99, 12345];
 const MAX_COMMANDS = 4000;
 
-/** How deep the actor draws. Shallow enough to finish, deep enough to play. */
-const DRAW_DEPTH = 2;
-
-const DECLINE: AscendChoice = { keepStuffId: null, scrapId: null, takeRewardId: null };
+const DECLINE: AscendChoice = { settle: [], takeRewardId: null };
 
 function nextCommand(state: GameState): Command | null {
   const pending = state.pending;
@@ -41,18 +38,8 @@ function nextCommand(state: GameState): Command | null {
   }
 
   switch (state.phase) {
-    case "Flip":
+    case "Turn Start":
       return { type: "FLIP_ROOM" };
-    case "Draw": {
-      for (const c of CHARACTERS) {
-        // A card in hand can cap how deep this character may draw, so the
-        // domain is what says whether another draw is legal.
-        if (state[c].drewThisTurn < DRAW_DEPTH && canDraw(state, c)) {
-          return { type: "DRAW", character: c };
-        }
-      }
-      return { type: "END_DRAW" };
-    }
     case "Play": {
       for (const c of CHARACTERS) {
         const card = playableCards(state, c)[0];
@@ -102,6 +89,7 @@ function allCards(state: GameState): readonly Card[] {
     ...state[c].deck,
     ...state[c].hand,
     ...state[c].discard,
+    ...state[c].exhaust,
   ]);
   return [
     ...perCharacter,
@@ -169,7 +157,7 @@ describe("seeded-run invariants", () => {
     const [start] = createInitialState(1, CARD_CONTENT);
     const illegal: Command[] = [
       { type: "END_PLAY" },
-      { type: "DRAW", character: "Red" },
+      { type: "ASCEND", Red: DECLINE, Gray: DECLINE },
       { type: "TAKE_REWARD", take: true },
       { type: "CHOOSE_CHARACTER", character: "Gray" },
     ];

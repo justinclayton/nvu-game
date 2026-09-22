@@ -33,13 +33,13 @@ export const RED: Registry = {
 
   /* "Holding: you don't `Exhaust`."
    *
-   * `Exhaust X` written on its own means X off the top of your own deck, so
-   * this stops exactly those lines: a room's printed punishment, and its
-   * holder's own Overdrive, Reckless and Panic. It does not stop anything that
-   * names its zone or is spelled out by a rule — paying a cost, cleanup, the
-   * burned draw of a full hand, or the price of getting out of last stand — so
-   * the drain still runs. It protects its holder only, and it can never be
-   * spent, so it sits in one of their five slots for the rest of the run. */
+   * `Exhaust X` written on its own means X off the top of your own deck, into
+   * the Exhaust pile, so this stops exactly those lines: a room's printed
+   * punishment, and its holder's own Overdrive, Reckless and Panic. It does
+   * not stop anything that names its zone or is spelled out by a rule —
+   * paying a cost or cleanup — so the drain still runs. It protects its
+   * holder only, and it can never be spent, so it sits in one of their hand
+   * slots for the rest of the run. */
   "Zen Mode": {
     whileHeld: { ignoresExhaustX: true },
   },

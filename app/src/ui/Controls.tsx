@@ -22,13 +22,11 @@ export function Controls({ state, dispatch, hint }: Props) {
   if (state.pending) return <PendingChoice state={state} dispatch={dispatch} />;
 
   const buttons: readonly { label: string; command: Command }[] =
-    state.phase === "Flip"
+    state.phase === "Turn Start"
       ? [{ label: "Flip the next room", command: { type: "FLIP_ROOM" } }]
-      : state.phase === "Draw"
-        ? [{ label: "Everyone has finished drawing", command: { type: "END_DRAW" } }]
-        : state.phase === "Play"
-          ? [{ label: "Both of us have stopped — check the room", command: { type: "END_PLAY" } }]
-          : [];
+      : state.phase === "Play"
+        ? [{ label: "Both of us have stopped — check the room", command: { type: "END_PLAY" } }]
+        : [];
 
   return (
     <div className="controls">

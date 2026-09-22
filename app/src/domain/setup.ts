@@ -11,14 +11,14 @@ import type { CardContent, CardFace, Character, RoomFace } from "./printed";
 import { shuffle } from "./rng";
 import type { Card, DomainEvent, GameState, PlayerState, Room, TurnRecord } from "./types";
 
+/** The rulebook this engine implements (design/rulebook-0.2-draft.md). See #83. */
+export const RULES_VERSION = "0.2.0-draft";
+
 /** The tenth floor is the roof: clearing its Enemy room wins the run (rulebook, Winning and losing). */
 export const TOP_FLOOR = 10;
 
-/** Maximum hand size (Each Turn, Draw). */
+/** Draw up to this many, each turn (Each Turn, Turn Start: Draw up to five). A card may tighten it. */
 export const HAND_CAP = 5;
-
-/** The price of getting out of last stand (rulebook, Last Stand). */
-export const LAST_STAND_PRICE = 2;
 
 /**
  * Every floor holds exactly one Enemy room and three Hazards. The rulebook's
@@ -178,8 +178,8 @@ const freshPlayer = (deck: readonly Card[]): PlayerState => ({
   deck,
   hand: [],
   discard: [],
+  exhaust: [],
   down: false,
-  lastStand: false,
   drewThisTurn: 0,
 });
 
@@ -214,7 +214,7 @@ export function createInitialState(
     seed: s4,
     floor: 1,
     turn: 0,
-    phase: "Flip",
+    phase: "Turn Start",
     floorDeck: [],
     activeRoom: null,
     fled: [],

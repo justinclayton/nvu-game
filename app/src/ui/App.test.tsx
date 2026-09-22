@@ -35,37 +35,20 @@ describe("the table", () => {
     expect(screen.queryByRole("button", { name: /check the room/ })).toBeNull();
   });
 
-  it("names the room once it is flipped, and starts the Draw phase", () => {
+  it("names the room once it is flipped, and draws both hands to 5", () => {
     fireEvent.click(screen.getByRole("button", { name: /Flip the next room/ }));
     const room = session.getState().state.activeRoom;
     expect(room).not.toBeNull();
     expect(screen.getAllByText(room?.name ?? "").length).toBeGreaterThan(0);
-    expect(screen.getAllByRole("button", { name: "Draw a card" })).toHaveLength(2);
+    expect(document.querySelectorAll('[data-zone="red-hand"]')).toHaveLength(5);
+    expect(document.querySelectorAll('[data-zone="gray-hand"]')).toHaveLength(5);
   });
 
-  it("offers the end of the Draw phase, and the room check only after it", () => {
+  it("offers the room check once the flip has drawn both hands — there is no Draw phase to wait in", () => {
     fireEvent.click(screen.getByRole("button", { name: /Flip the next room/ }));
-    expect(screen.queryByRole("button", { name: /check the room/ })).toBeNull();
-
-    fireEvent.click(screen.getByRole("button", { name: /finished drawing/ }));
-    expect(screen.queryByRole("button", { name: "Draw a card" })).toBeNull();
     expect(screen.getByRole("button", { name: /check the room/ }).hasAttribute("disabled")).toBe(
       false,
     );
-  });
-
-  it("puts a drawn card in that character's hand", () => {
-    // The flip opens Draw by dealing both characters one card; Red then takes
-    // a second.
-    fireEvent.click(screen.getByRole("button", { name: /Flip the next room/ }));
-    fireEvent.click(screen.getAllByRole("button", { name: "Draw a card" })[0] as HTMLElement);
-    const drawn = session.getState().state.Red.hand[1];
-    expect(drawn).toBeDefined();
-    // Cards live in one layer over the mat; a sprite says which zone it is in.
-    const inRedHand = Array.from(document.querySelectorAll('[data-zone="red-hand"]'));
-    expect(inRedHand).toHaveLength(2);
-    expect(inRedHand[1]?.textContent).toContain(drawn?.name ?? "");
-    expect(document.querySelectorAll('[data-zone="gray-hand"]')).toHaveLength(1);
   });
 
   it("shows the rejection when a command the rules refuse gets through", () => {
@@ -74,7 +57,7 @@ describe("the table", () => {
     act(() => {
       session.getState().dispatch({ type: "END_PLAY" });
     });
-    expect(screen.getByText(/Cannot end the play phase during the Flip phase/)).toBeDefined();
+    expect(screen.getByText(/Cannot end the play phase during the Turn Start phase/)).toBeDefined();
   });
 
   it("draws every card exactly once, face down in a deck until it is drawn", () => {
@@ -92,15 +75,15 @@ describe("the table", () => {
     expect(sprites().every((s) => s.classList.contains("is-down"))).toBe(true);
 
     fireEvent.click(screen.getByRole("button", { name: /Flip the next room/ }));
-    fireEvent.click(screen.getAllByRole("button", { name: "Draw a card" })[0] as HTMLElement);
     expect(sprites()).toHaveLength(onTable);
     const faceUp = sprites().filter((s) => !s.classList.contains("is-down"));
-    expect(faceUp.map((s) => s.getAttribute("data-zone")).sort()).toEqual([
-      "gray-hand",
-      "red-hand",
-      "red-hand",
+    const { state: next } = session.getState();
+    const expectedFaceUp = [
       "room",
-    ]);
+      ...Array<string>(next.Red.hand.length).fill("red-hand"),
+      ...Array<string>(next.Gray.hand.length).fill("gray-hand"),
+    ].sort();
+    expect(faceUp.map((s) => s.getAttribute("data-zone")).sort()).toEqual(expectedFaceUp);
   });
 
   it("writes the log outside React", () => {

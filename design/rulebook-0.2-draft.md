@@ -66,19 +66,14 @@ In the middle of the table:
 ---
 ## Each Turn
 
-### 1. New Room
+### 1. Turn Start
 
-Turn the top card of the Floor deck face up onto the Rooms pile. This is the new Active Room.
-
-### 2. Draw
-
-Each player does the following:
-
-1. **Draw up to five:** Draw cards from your deck until you hold **5**. If you already hold 5 or more, do not draw.
+1. **Flip the room:** Turn the top card of the Floor deck face up onto the Rooms pile. This is the new Active Room.
+2. **Draw up to five:** Each player draws cards from their deck until they hold **5**. If you already hold 5 or more, do not draw.
 
 - **Draw**: Move the top card of your deck into your hand. If your deck is empty, see `Empty deck` (section 8).
 
-### 3. Play
+### 2. Play
 
 Players take turns playing a card. You may not draw during this phase.
 
@@ -89,7 +84,7 @@ Players take turns playing a card. You may not draw during this phase.
 
 The phase ends when both players pass.
 
-### 4. Outcome
+### 3. Outcome
 
 Players add their combined stats they accumulated this turn and check to see if they Cleared one or more challenges, or if they must Flee.
 
@@ -99,7 +94,7 @@ Players add their combined stats they accumulated this turn and check to see if 
 
 **Flee**: If *no challenges* have been cleared, the players must Flee the room. Resolve the `Flee:` outcome according to the text on the card, then **shuffle the room card back into the Floor deck**.
 
-### 5. Cleanup (end of turn)
+### 4. Cleanup (end of turn)
 
 Each player does the following:
 

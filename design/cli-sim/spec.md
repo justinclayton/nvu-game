@@ -97,7 +97,7 @@ The moves, one per engine command: `[agent, accepted]`
 | `play choose Rope Flare`, `play choose none` | `CHOOSE_CARDS` |
 | `play order Rope Flare Shove` | `ORDER_CARDS`, top first |
 | `play take`, `play skip` | `TAKE_REWARD` |
-| `play ascend Red keep Crowbar scrap Shove shed Rust scrap Charge In take Zen Mode` | half of `ASCEND`, see below |
+| `play keep Crowbar paying Shove`, `play return Pry Bar`, `play keep Torn Seal`, `play shed Rust paying Charge In`, `play take Zen Mode`, `play take none` | one Ascend question's answer, composed into `ASCEND`, see below |
 
 There is no Draw phase and no draw move. `[agent]` Rulebook 0.2 folded Draw up to five into Turn
 Start as an automatic second step with no decision in it (rulebook, Each Turn): `play flip` resolves
@@ -116,41 +116,39 @@ same card, any copy is taken. A content test in `app/src/content` reports every 
 `design/cards.yaml` that share initials, so the designer sees a new collision when it lands. Today
 those are Reckless Swing and Riot Shield, Reckless and Rust, Shove and Sluggish.
 
-**Ascending, one character at a time.** `[you]` The engine takes one `ASCEND` command holding both
+**Ascending, one question at a time.** `[you]` The engine takes one `ASCEND` command holding both
 characters' choices, `Red` and `Gray`, each an `AscendChoice`: a `settle` list of `{cardId,
-payWith}` and a `takeRewardId` (`app/src/domain/types.ts`). The CLI collects the two characters'
-choices in two calls, one per character, and composes them into the one command. `[agent, accepted]`
+payWith}` and a `takeRewardId` (`app/src/domain/types.ts`). The CLI does not ask for a character's
+whole Ascend in one line. It asks one question at a time, and every call prints the next one, e.g.
+`Red: Pry Bar (Good Stuff). Keep or return?`. Every Stuff card found is asked about in turn; there
+are no silent defaults. `[you]`
 
 The hand shuffles into the deck automatically before Settle your Stuff; there is no move for it.
-`[agent]` Rulebook 0.2, section 10, then asks the character to settle each Stuff card found across
-their deck and discard: keep a Good Stuff card by Scrapping one other, non-Stuff card, or let it
-return to the pool for free; keep a Bad Stuff card for free, or shed it to the pool by Scrapping one
-other, non-Stuff card. A card not mentioned takes the free default (Good Stuff to the pool, Bad
-Stuff kept), matching `AscendChoice.settle` omitting it. `[agent]`
+`[agent]` Rulebook 0.2, section 10, then asks about each Stuff card found across the character's
+deck and discard, then the reward, last. `Red` is asked first, then `Gray`; either order is
+equally valid and this one was picked for being simpler to implement and to read in a transcript.
+`[agent]`
 
-One line per character states every Stuff card it is settling the costed way, then the reward pick:
+Answers reuse the Play phase's `paying` wording: `[you]`
 
-```
-play ascend <Red|Gray> [keep <good stuff card> scrap <card>]... [shed <bad stuff card> scrap <card>]... take <reward card|none>
-```
+| Question | Answer |
+| --- | --- |
+| A Good Stuff card: keep or return? | `play keep Crowbar paying Shove` (keep it by Scrapping one non-Stuff card), or `play return Pry Bar` (back to the Good Stuff pool, free) |
+| A Bad Stuff card: keep or shed? | `play keep Torn Seal` (stays, free), or `play shed Rust paying Charge In` (to the Bad Stuff pool by Scrapping one non-Stuff card) |
+| The reward, last | `play take Zen Mode`, or `play take none` |
 
-`keep X scrap Y` pays `Y` to keep the Good Stuff card `X` instead of returning it to the pool.
-`shed X scrap Y` pays `Y` to shed the Bad Stuff card `X` to the pool instead of keeping it. Either
-clause may repeat, for a character settling several Stuff cards, in any order; a Stuff card left out
-gets its free default. `take` is required and takes a card from the reveal of three or `none` to
-decline. For example: `play ascend Red keep Crowbar scrap Shove shed Rust scrap Charge In take Zen
-Mode` keeps the Good Stuff Crowbar by scrapping Shove, sheds the Bad Stuff Rust by scrapping Charge
-In, and takes the reward Zen Mode. A character with nothing to settle and no reward wanted is
-`play ascend Gray take none`. `[agent]`
+An answer must name the card being asked about; naming any other card is refused with the engine-
+style reason, naming the card that was actually asked about. `take` ends that character's Ascend.
 
-The first call is staged in a sidecar file next to the run file and reported back; the second
-composes the command, executes it, and removes the sidecar. `undo` during staging clears the
-sidecar. `show` during Ascend prints each character's Stuff found in deck and discard, the payer
-candidates, the offered cards as full faces, and what is staged so far. The flat cross product of
-both characters' choices is gone. `[agent, accepted]`
+The answers are staged in a sidecar file next to the run file, one question at a time, and composed
+into the single `ASCEND` command once both characters have answered `take`; the sidecar is then
+removed. `undo` during staging steps back one question and clears its staged answer. `show` during
+Ascend prints the character and card currently being asked about, each character's Stuff found in
+deck and discard, the payer candidates, the offered cards as full faces, and what is staged so far.
+The flat cross product of both characters' choices is gone. `[agent, accepted]`
 
-Stuff rent (what a kept or shed Stuff card costs to Scrap) is pinned by the designer; this syntax
-follows whatever the designer rules replaces it with. `[agent]`
+Stuff rent (what a kept or shed Stuff card costs to Scrap) is pinned by the designer; when it
+changes, only the `keep`/`shed`/`return` verbs' cost changes, not this form. `[agent]`
 
 ### What each call prints `[you]`
 

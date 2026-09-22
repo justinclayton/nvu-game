@@ -57,7 +57,7 @@ cards:
     owner: Red
     cost: 0
     oomph: 2
-    text: Exhaust 2 (the top 2 cards of your deck go to your discard pile).
+    text: Exhaust 2.
 
   ### Gray
 
@@ -333,7 +333,7 @@ cards:
     cost: 2
     oomph: 3
     scramble: 3
-    text: One of you draws 1 card, (even if their hand is full).
+    text: One of you draws 1 card.
 
 
 
@@ -359,31 +359,39 @@ cards:
     set: proposed
     kind: bad_stuff
     cost: 2
-    text: Holding: you may not draw more than 1 card per turn.
+    text: >-
+      Holding: you may not draw more than 1 card per turn.
+      Ascend: keep this, or shuffle it into the Bad Stuff pool and Scrap a non-Stuff card.
 
   - name: Torn Seal
     set: proposed
     kind: bad_stuff
     cost: 2
-    text: null
+    text: "Ascend: keep this, or shuffle it into the Bad Stuff pool and Scrap a non-Stuff card."
 
   - name: Sluggish
     set: proposed
     kind: bad_stuff
     cost: 1
-    text: Holding: cards cost +1 to play.
+    text: >-
+      Holding: cards cost +1 to play.
+      Ascend: keep this, or shuffle it into the Bad Stuff pool and Scrap a non-Stuff card.
 
   - name: Rust
     set: proposed
     kind: bad_stuff
     cost: 2
-    text: Holding: Stuff you play has -1 Oomph.
+    text: >-
+      Holding: Stuff you play has -1 Oomph.
+      Ascend: keep this, or shuffle it into the Bad Stuff pool and Scrap a non-Stuff card.
 
   - name: Spore Cloud
     set: proposed
     kind: bad_stuff
     cost: 2
-    text: Holding: You can't have more than 3 cards in your hand.
+    text: >-
+      Holding: You can't have more than 3 cards in your hand.
+      Ascend: keep this, or shuffle it into the Bad Stuff pool and Scrap a non-Stuff card.
 
   - name: Panic
     set: proposed
@@ -392,12 +400,15 @@ cards:
     text: >-
       Holding: ALL rooms require an additional 2 `Scramble` to clear.
       Play: Exhaust 2.
+      Ascend: keep this, or shuffle it into the Bad Stuff pool and Scrap a non-Stuff card.
 
   - name: My Head Is Quantum Spinning
     set: proposed
     kind: bad_stuff
     cost: 1
-    text: "Holding: whenever you draw a card, your partner must also draw a card."
+    text: >-
+      Holding: whenever you draw a card, your partner must also draw a card.
+      Ascend: keep this, or shuffle it into the Bad Stuff pool and Scrap a non-Stuff card.
 
   # Rooms
 

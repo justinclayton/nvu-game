@@ -22,7 +22,7 @@ const playedBy = (state: GameState, c: Character): number =>
   state.playZone.filter((p) => p.owner === c).length;
 
 export const RED: Registry = {
-  /* "Exhaust 2 (the top 2 cards of your deck go to your discard pile)." */
+  /* "Exhaust 2." */
   Overdrive: { exhaustX: 2 },
 
   /* "Exhaust 1." */
@@ -33,21 +33,15 @@ export const RED: Registry = {
 
   /* "Holding: you don't `Exhaust`."
    *
-   * `Exhaust X` written on its own means X off the top of your own deck, into
-   * the Exhaust pile, so this stops exactly those lines: a room's printed
-   * punishment, and its holder's own Overdrive, Reckless and Panic. It does
-   * not stop anything that names its zone or is spelled out by a rule —
-   * paying a cost or cleanup — so the drain still runs. It protects its
-   * holder only, and it can never be spent, so it sits in one of their hand
-   * slots for the rest of the run. */
+   * Stops only bare `Exhaust X` lines (room punishments, Overdrive, Reckless,
+   * Panic), not costs or cleanup. Holder-only. */
   "Zen Mode": {
     whileHeld: { ignoresExhaustX: true },
   },
 
   /* "If Gray played a card this turn, this costs 0."
    *
-   * A printed cost, not a discount, so a `Holding:` line that raises costs still
-   * raises this one. See open-questions.md #11. */
+   * A printed cost, not a discount. See open-questions.md #11. */
   "Fast Follow": {
     cost(state, _owner, card) {
       return playedBy(state, "Gray") > 0 ? 0 : card.cost;
@@ -112,8 +106,7 @@ export const RED: Registry = {
     },
   },
 
-  /* "Holding: Cards you play have +1 Oomph, but you may not draw more than 2
-   * cards per turn." */
+  /* "Holding: Cards you play have +1 Oomph, but you may not draw more than 2 cards per turn." */
   "Deadweight Grip": {
     whileHeld: { playedPowerDelta: 1, drawCap: 2 },
   },

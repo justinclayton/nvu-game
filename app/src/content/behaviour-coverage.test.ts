@@ -18,8 +18,13 @@ const withText = CARD_CONTENT.cards.filter((c) => hasText(c.text));
  * implements them yet. Each one is written up in
  * design/web-game/open-questions.md. Adding a card without code changes this
  * list, which is the point: it stays a decision rather than an accident.
+ *
+ * Torn Seal prints only the Bad Stuff Ascend line every Bad Stuff card
+ * carries (rulebook §10 step 2), which engine.ts's settleStuff implements
+ * generically for every card of kind bad_stuff — it needs no registry entry
+ * of its own.
  */
-const UNIMPLEMENTED: readonly string[] = [];
+const UNIMPLEMENTED: readonly string[] = ["Torn Seal"];
 
 describe("behaviour coverage", () => {
   it("names every card whose printed text nothing implements yet", () => {

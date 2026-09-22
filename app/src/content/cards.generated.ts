@@ -58,7 +58,7 @@ export const CARD_CONTENT = {
       oomph: 2,
       scramble: 0,
       conditionalStat: false,
-      text: "Exhaust 2 (the top 2 cards of your deck go to your discard pile).",
+      text: "Exhaust 2.",
     },
     {
       name: "Duck Under",
@@ -478,7 +478,7 @@ export const CARD_CONTENT = {
       oomph: 3,
       scramble: 3,
       conditionalStat: false,
-      text: "One of you draws 1 card, (even if their hand is full).",
+      text: "One of you draws 1 card.",
     },
     {
       name: "Riot Shield",
@@ -520,7 +520,7 @@ export const CARD_CONTENT = {
       oomph: 0,
       scramble: 0,
       conditionalStat: false,
-      text: "Holding: you may not draw more than 1 card per turn.",
+      text: "Holding: you may not draw more than 1 card per turn. Ascend: keep this, or shuffle it into the Bad Stuff pool and Scrap a non-Stuff card.",
     },
     {
       name: "Torn Seal",
@@ -534,7 +534,7 @@ export const CARD_CONTENT = {
       oomph: 0,
       scramble: 0,
       conditionalStat: false,
-      text: "",
+      text: "Ascend: keep this, or shuffle it into the Bad Stuff pool and Scrap a non-Stuff card.",
     },
     {
       name: "Sluggish",
@@ -548,7 +548,7 @@ export const CARD_CONTENT = {
       oomph: 0,
       scramble: 0,
       conditionalStat: false,
-      text: "Holding: cards cost +1 to play.",
+      text: "Holding: cards cost +1 to play. Ascend: keep this, or shuffle it into the Bad Stuff pool and Scrap a non-Stuff card.",
     },
     {
       name: "Rust",
@@ -562,7 +562,7 @@ export const CARD_CONTENT = {
       oomph: 0,
       scramble: 0,
       conditionalStat: false,
-      text: "Holding: Stuff you play has -1 Oomph.",
+      text: "Holding: Stuff you play has -1 Oomph. Ascend: keep this, or shuffle it into the Bad Stuff pool and Scrap a non-Stuff card.",
     },
     {
       name: "Spore Cloud",
@@ -576,7 +576,7 @@ export const CARD_CONTENT = {
       oomph: 0,
       scramble: 0,
       conditionalStat: false,
-      text: "Holding: You can't have more than 3 cards in your hand.",
+      text: "Holding: You can't have more than 3 cards in your hand. Ascend: keep this, or shuffle it into the Bad Stuff pool and Scrap a non-Stuff card.",
     },
     {
       name: "Panic",
@@ -590,7 +590,7 @@ export const CARD_CONTENT = {
       oomph: 0,
       scramble: 0,
       conditionalStat: false,
-      text: "Holding: ALL rooms require an additional 2 `Scramble` to clear. Play: Exhaust 2.",
+      text: "Holding: ALL rooms require an additional 2 `Scramble` to clear. Play: Exhaust 2. Ascend: keep this, or shuffle it into the Bad Stuff pool and Scrap a non-Stuff card.",
     },
     {
       name: "My Head Is Quantum Spinning",
@@ -604,7 +604,7 @@ export const CARD_CONTENT = {
       oomph: 0,
       scramble: 0,
       conditionalStat: false,
-      text: "Holding: whenever you draw a card, your partner must also draw a card.",
+      text: "Holding: whenever you draw a card, your partner must also draw a card. Ascend: keep this, or shuffle it into the Bad Stuff pool and Scrap a non-Stuff card.",
     },
   ],
   rooms: [

@@ -1,8 +1,5 @@
 /* Good Stuff and Bad Stuff. Keyed by the name design/cards.yaml makes unique.
- *
- * Rulebook, Card anatomy: Stuff cards: Stuff is ordinary energy — you may discard it from hand to pay another
- * card's cost. Bad Stuff behaves like any other Stuff except that it
- * contributes no stats.
+ * See rulebook §8, Card anatomy: Stuff cards.
  */
 
 import type { Character, DomainEvent, GameState, Pending } from "../types";
@@ -39,27 +36,8 @@ export const STUFF: Registry = {
 
   /* "Play: if you get any Good Stuff this turn, get an additional one."
    *
-   * Once played, "this turn" covers the rest of the turn Crowbar sits in the
-   * play zone — including a room's payout at Outcome, after the whole Play
-   * phase (and so this card's own `onPlay`) has already run. That is the
-   * primary case: a Crowbar played earlier in Play, paid off by the room
-   * later. It is split across two hooks accordingly:
-   *
-   * - `onPlay` looks backward, once, at `thisTurn.goodStuffTaken` — whatever
-   *   its controller was already handed earlier in the same turn, before
-   *   Crowbar was played.
-   * - `onEvent`, listening only from the play zone (the shape Covering Fire
-   *   uses for the same reason), catches a later gain — the room's Outcome
-   *   payout being the one there is today.
-   *
-   * Either hook can fire, but only one ever does: a `fired` marker keyed by
-   * this copy's own card id is set the moment either pays out, so a Crowbar
-   * that already looked back at play does not also react to the room's
-   * payout minutes later, and its own bonus piece (itself a `STUFF_TAKEN` for
-   * good_stuff) can never retrigger it. Two Crowbars each carry their own
-   * key, so two played this turn pay two. Neither hook ever sees Crowbar's
-   * own arrival — a room handing Crowbar to a hand is not Crowbar being
-   * played, and while it sits in a hand `onEvent` is not listening at all.
+   * Two hooks share one `fired` marker per copy so the bonus pays out exactly
+   * once, whether the Good Stuff arrives before or after Crowbar is played.
    * See open-questions.md #16. */
   Crowbar: {
     onPlay(state, ctx) {
@@ -82,9 +60,7 @@ export const STUFF: Registry = {
   /* "Choose a character. Move 2 cards from that character's discard pile to the
    * bottom of their deck."
    *
-   * Either character can be healed, so a character with cards in both discard
-   * piles is asked which one first; a character with only one eligible pile
-   * skips straight to picking the cards from it. */
+   * Skips the character choice when only one side has discard to draw from. */
   "A Pair Of Stich-Em-Ups": {
     onPlay(state, ctx) {
       const eligible = CHARACTERS.filter((c) => playerOf(state, c).discard.length > 0);
@@ -113,7 +89,7 @@ export const STUFF: Registry = {
     },
   },
 
-  /* "One of you draws 1 card, (even if their hand is full)." */
+  /* "One of you draws 1 card." */
   "Grav Harness": {
     onPlay(state, ctx) {
       const options = CHARACTERS.filter((c) => {
@@ -131,8 +107,6 @@ export const STUFF: Registry = {
     onChoice(answer, state) {
       if (answer.kind !== "character") return nothing(state);
       const events: DomainEvent[] = [];
-      // No draw is ever capped outside the Draw phase's own "until you hold
-      // 5", so "even if their hand is full" already holds without special-casing it.
       return done(drawOne(state, answer.character, events), events);
     },
   },
@@ -160,58 +134,57 @@ export const STUFF: Registry = {
 
   /* ------------------------------------------------------------- Bad Stuff */
 
-  /* "Holding: you may not draw more than 1 card per turn." */
+  /* "Holding: you may not draw more than 1 card per turn.
+   *  Ascend: keep this, or shuffle it into the Bad Stuff pool and Scrap a
+   *  non-Stuff card." */
   "Faceful Of Slime": {
     whileHeld: { drawCap: 1 },
   },
 
-  /* "Holding: cards cost +1 to play."
+  /* "Holding: cards cost +1 to play.
+   *  Ascend: keep this, or shuffle it into the Bad Stuff pool and Scrap a
+   *  non-Stuff card."
    *
-   * It bites its holder only: Red never pays for Gray (Each Turn, Play). */
+   * Bites its holder only: Red never pays for Gray (rulebook §7, Play). */
   Sluggish: {
     whileHeld: { costDelta: 1 },
   },
 
-  /* "Holding: Stuff you play has -1 Oomph." */
+  /* "Holding: Stuff you play has -1 Oomph.
+   *  Ascend: keep this, or shuffle it into the Bad Stuff pool and Scrap a
+   *  non-Stuff card." */
   Rust: {
     whileHeld: { stuffPowerDelta: -1 },
   },
 
-  /* "Holding: You can't have more than 3 cards in your hand."
+  /* "Holding: You can't have more than 3 cards in your hand.
+   *  Ascend: keep this, or shuffle it into the Bad Stuff pool and Scrap a
+   *  non-Stuff card."
    *
-   * Each Turn, Turn Start's own hand cap is a limit on Draw up to five, so this is too: it
-   * stops you drawing up past 3, and Stuff pushed into your hand by a room
-   * ignores it as ever. */
+   * A ceiling on Turn Start's "draw up to five"; Stuff pushed into hand by a
+   * room ignores it. Flagged for the economy pass (fights draw-to-five). */
   "Spore Cloud": {
     whileHeld: { handCap: 3 },
   },
 
-  /* "Holding: ALL rooms require an additional 2 Scramble to clear.
-   *  Play: Exhaust 2."
+  /* "Holding: ALL rooms require an additional 2 `Scramble` to clear.
+   *  Play: Exhaust 2.
+   *  Ascend: keep this, or shuffle it into the Bad Stuff pool and Scrap a
+   *  non-Stuff card."
    *
-   * "ALL rooms" is read from either hand — one held Panic taxes the team. */
+   * Read from either hand — one held Panic taxes the team. */
   Panic: {
     whileHeld: { thresholdScrambleDelta: 2 },
     exhaustX: 2,
   },
 
-  /* "Holding: whenever you draw a card, your partner must also draw a card."
+  /* "Holding: whenever you draw a card, your partner must also draw a card.
+   *  Ascend: keep this, or shuffle it into the Bad Stuff pool and Scrap a
+   *  non-Stuff card."
    *
-   * One-way: the holder's draw forces the partner's, never the reverse. Any
-   * draw counts — the Draw phase's own draws or one a card's text causes — so
-   * this listens for `CARD_DRAWN`. The forced draw itself is stamped `forced`
-   * by `drawOne` and is skipped here, so it cannot chain: it does not count
-   * as a draw that forces one, whether it lands on this same copy or on a
-   * copy the partner is holding. Nothing ever caps or burns a single draw
-   * outside the Draw phase's own target, so the forced draw always lands in
-   * the partner's hand.
-   *
-   * Ruled for Faceful Of Slime: a draw cap already reached stops a forced draw
-   * from happening at all — no card moves, and nothing is pushed to `events`,
-   * so there is no draw event for anything else to see. `drawCapFor` reads
-   * every `Holding:` line in the partner's hand, so Deadweight Grip's cap of 2
-   * is stopped the same way; that extension is this engine's own reading, not
-   * a ruling. See open-questions.md #17 and #19. */
+   * One-way, and the forced draw can't chain (see `drawOne`'s `forced` flag).
+   * Draw caps in the partner's hand block it same as any draw. See
+   * open-questions.md #17, #19. */
   "My Head Is Quantum Spinning": {
     onEvent(event, state, ctx) {
       if (ctx.zone !== "hand") return nothing(state);

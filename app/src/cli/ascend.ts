@@ -123,19 +123,24 @@ export function parseAnswers(text: string): StagedAnswer[] {
 
 /** A one-line account of a staged answer, for the narration section. */
 export function describeStagedAnswer(state: GameState, answer: StagedAnswer): string {
-  const nameOf = (c: Character, id: CardId): string => {
-    const found = [...settleableStuff(state, c), ...settlePayOptions(state, c)].find(
-      (x) => x.id === id,
-    );
-    return found ? found.name : id;
-  };
+  const find = (c: Character, id: CardId): Card | undefined =>
+    [...settleableStuff(state, c), ...settlePayOptions(state, c)].find((x) => x.id === id);
+  const nameOf = (c: Character, id: CardId): string => find(c, id)?.name ?? id;
+
   if (answer.kind === "reward") {
     return answer.takeRewardId === null
       ? `${answer.character} declines the reward. (staged, not yet played)`
       : `${answer.character} will take ${nameOf(answer.character, answer.takeRewardId)}. (staged, not yet played)`;
   }
-  const card = nameOf(answer.character, answer.cardId);
-  return answer.payWith === null
-    ? `${answer.character} keeps ${card}, free. (staged, not yet played)`
-    : `${answer.character} settles ${card} by Scrapping ${nameOf(answer.character, answer.payWith)}. (staged, not yet played)`;
+  const card = find(answer.character, answer.cardId);
+  const name = card?.name ?? answer.cardId;
+  if (answer.payWith === null) {
+    return card?.kind === "good_stuff"
+      ? `${answer.character} returns ${name} to the pool. (staged, not yet played)`
+      : `${answer.character} keeps ${name}, free. (staged, not yet played)`;
+  }
+  const payer = nameOf(answer.character, answer.payWith);
+  return card?.kind === "good_stuff"
+    ? `${answer.character} keeps ${name} by Scrapping ${payer}. (staged, not yet played)`
+    : `${answer.character} sheds ${name} by Scrapping ${payer}. (staged, not yet played)`;
 }

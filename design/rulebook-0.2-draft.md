@@ -167,12 +167,13 @@ When you have Cleared the Enemy room, you escape the current floor and `Ascend` 
 
 After Cleanup, each player does the following:
 
-1. **Settle your Stuff:** Search your deck, hand and discard pile for `Stuff` cards.
-   - For each `Good Stuff` card, shuffle it into the Good Stuff pool, or keep it by Scrapping **one** non-Stuff card from your deck, hand or discard pile.
-   - For each `Bad Stuff` card, keep it, or shuffle it into the Bad Stuff pool and Scrap **one** non-Stuff card from your deck, hand or discard pile.
+1. **Shuffle your hand into your deck.**
+2. **Settle your Stuff:** Search your deck and discard pile for `Stuff` cards.
+   - For each `Good Stuff` card, shuffle it into the Good Stuff pool, or keep it by Scrapping **one** non-Stuff card from your deck or discard pile.
+   - For each `Bad Stuff` card, keep it, or shuffle it into the Bad Stuff pool and Scrap **one** non-Stuff card from your deck or discard pile.
    Return each kept card to where you found it, then shuffle your deck.
-2. **Choose a reward:** Reveal the top **3** cards of your reward pool. You may shuffle **one** into your deck. Put the cards you did not take on the bottom of your reward pool.
-3. **Build the next floor:** Setup, *Floor deck*.
+3. **Choose a reward:** Reveal the top **3** cards of your reward pool. You may shuffle **one** into your deck. Put the cards you did not take on the bottom of your reward pool.
+4. **Build the next floor:** Setup, *Floor deck*.
 
 ---
 

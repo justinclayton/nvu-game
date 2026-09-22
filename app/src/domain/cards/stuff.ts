@@ -134,32 +134,24 @@ export const STUFF: Registry = {
 
   /* ------------------------------------------------------------- Bad Stuff */
 
-  /* "Holding: you may not draw more than 1 card per turn.
-   *  Ascend: keep this, or shuffle it into the Bad Stuff pool and Scrap a
-   *  non-Stuff card." */
+  /* "Holding: you may not draw more than 1 card per turn." */
   "Faceful Of Slime": {
     whileHeld: { drawCap: 1 },
   },
 
-  /* "Holding: cards cost +1 to play.
-   *  Ascend: keep this, or shuffle it into the Bad Stuff pool and Scrap a
-   *  non-Stuff card."
+  /* "Holding: cards cost +1 to play."
    *
    * Bites its holder only: Red never pays for Gray (rulebook §7, Play). */
   Sluggish: {
     whileHeld: { costDelta: 1 },
   },
 
-  /* "Holding: Stuff you play has -1 Oomph.
-   *  Ascend: keep this, or shuffle it into the Bad Stuff pool and Scrap a
-   *  non-Stuff card." */
+  /* "Holding: Stuff you play has -1 Oomph." */
   Rust: {
     whileHeld: { stuffPowerDelta: -1 },
   },
 
-  /* "Holding: You can't have more than 3 cards in your hand.
-   *  Ascend: keep this, or shuffle it into the Bad Stuff pool and Scrap a
-   *  non-Stuff card."
+  /* "Holding: You can't have more than 3 cards in your hand."
    *
    * A ceiling on Turn Start's "draw up to five"; Stuff pushed into hand by a
    * room ignores it. Flagged for the economy pass (fights draw-to-five). */
@@ -168,9 +160,7 @@ export const STUFF: Registry = {
   },
 
   /* "Holding: ALL rooms require an additional 2 `Scramble` to clear.
-   *  Play: Exhaust 2.
-   *  Ascend: keep this, or shuffle it into the Bad Stuff pool and Scrap a
-   *  non-Stuff card."
+   *  Play: Exhaust 2."
    *
    * Read from either hand — one held Panic taxes the team. */
   Panic: {
@@ -178,9 +168,7 @@ export const STUFF: Registry = {
     exhaustX: 2,
   },
 
-  /* "Holding: whenever you draw a card, your partner must also draw a card.
-   *  Ascend: keep this, or shuffle it into the Bad Stuff pool and Scrap a
-   *  non-Stuff card."
+  /* "Holding: whenever you draw a card, your partner must also draw a card."
    *
    * One-way, and the forced draw can't chain (see `drawOne`'s `forced` flag).
    * Draw caps in the partner's hand block it same as any draw. See

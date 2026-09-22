@@ -520,7 +520,7 @@ export const CARD_CONTENT = {
       oomph: 0,
       scramble: 0,
       conditionalStat: false,
-      text: "Holding: you may not draw more than 1 card per turn. Ascend: keep this, or shuffle it into the Bad Stuff pool and Scrap a non-Stuff card.",
+      text: "Holding: you may not draw more than 1 card per turn.",
     },
     {
       name: "Torn Seal",
@@ -534,7 +534,7 @@ export const CARD_CONTENT = {
       oomph: 0,
       scramble: 0,
       conditionalStat: false,
-      text: "Ascend: keep this, or shuffle it into the Bad Stuff pool and Scrap a non-Stuff card.",
+      text: "",
     },
     {
       name: "Sluggish",
@@ -548,7 +548,7 @@ export const CARD_CONTENT = {
       oomph: 0,
       scramble: 0,
       conditionalStat: false,
-      text: "Holding: cards cost +1 to play. Ascend: keep this, or shuffle it into the Bad Stuff pool and Scrap a non-Stuff card.",
+      text: "Holding: cards cost +1 to play.",
     },
     {
       name: "Rust",
@@ -562,7 +562,7 @@ export const CARD_CONTENT = {
       oomph: 0,
       scramble: 0,
       conditionalStat: false,
-      text: "Holding: Stuff you play has -1 Oomph. Ascend: keep this, or shuffle it into the Bad Stuff pool and Scrap a non-Stuff card.",
+      text: "Holding: Stuff you play has -1 Oomph.",
     },
     {
       name: "Spore Cloud",
@@ -576,7 +576,7 @@ export const CARD_CONTENT = {
       oomph: 0,
       scramble: 0,
       conditionalStat: false,
-      text: "Holding: You can't have more than 3 cards in your hand. Ascend: keep this, or shuffle it into the Bad Stuff pool and Scrap a non-Stuff card.",
+      text: "Holding: You can't have more than 3 cards in your hand.",
     },
     {
       name: "Panic",
@@ -590,7 +590,7 @@ export const CARD_CONTENT = {
       oomph: 0,
       scramble: 0,
       conditionalStat: false,
-      text: "Holding: ALL rooms require an additional 2 `Scramble` to clear. Play: Exhaust 2. Ascend: keep this, or shuffle it into the Bad Stuff pool and Scrap a non-Stuff card.",
+      text: "Holding: ALL rooms require an additional 2 `Scramble` to clear. Play: Exhaust 2.",
     },
     {
       name: "My Head Is Quantum Spinning",
@@ -604,7 +604,7 @@ export const CARD_CONTENT = {
       oomph: 0,
       scramble: 0,
       conditionalStat: false,
-      text: "Holding: whenever you draw a card, your partner must also draw a card. Ascend: keep this, or shuffle it into the Bad Stuff pool and Scrap a non-Stuff card.",
+      text: "Holding: whenever you draw a card, your partner must also draw a card.",
     },
   ],
   rooms: [

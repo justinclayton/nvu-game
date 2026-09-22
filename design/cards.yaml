@@ -359,39 +359,31 @@ cards:
     set: proposed
     kind: bad_stuff
     cost: 2
-    text: >-
-      Holding: you may not draw more than 1 card per turn.
-      Ascend: keep this, or shuffle it into the Bad Stuff pool and Scrap a non-Stuff card.
+    text: Holding: you may not draw more than 1 card per turn.
 
   - name: Torn Seal
     set: proposed
     kind: bad_stuff
     cost: 2
-    text: "Ascend: keep this, or shuffle it into the Bad Stuff pool and Scrap a non-Stuff card."
+    text: null
 
   - name: Sluggish
     set: proposed
     kind: bad_stuff
     cost: 1
-    text: >-
-      Holding: cards cost +1 to play.
-      Ascend: keep this, or shuffle it into the Bad Stuff pool and Scrap a non-Stuff card.
+    text: Holding: cards cost +1 to play.
 
   - name: Rust
     set: proposed
     kind: bad_stuff
     cost: 2
-    text: >-
-      Holding: Stuff you play has -1 Oomph.
-      Ascend: keep this, or shuffle it into the Bad Stuff pool and Scrap a non-Stuff card.
+    text: Holding: Stuff you play has -1 Oomph.
 
   - name: Spore Cloud
     set: proposed
     kind: bad_stuff
     cost: 2
-    text: >-
-      Holding: You can't have more than 3 cards in your hand.
-      Ascend: keep this, or shuffle it into the Bad Stuff pool and Scrap a non-Stuff card.
+    text: Holding: You can't have more than 3 cards in your hand.
 
   - name: Panic
     set: proposed
@@ -400,15 +392,12 @@ cards:
     text: >-
       Holding: ALL rooms require an additional 2 `Scramble` to clear.
       Play: Exhaust 2.
-      Ascend: keep this, or shuffle it into the Bad Stuff pool and Scrap a non-Stuff card.
 
   - name: My Head Is Quantum Spinning
     set: proposed
     kind: bad_stuff
     cost: 1
-    text: >-
-      Holding: whenever you draw a card, your partner must also draw a card.
-      Ascend: keep this, or shuffle it into the Bad Stuff pool and Scrap a non-Stuff card.
+    text: "Holding: whenever you draw a card, your partner must also draw a card."
 
   # Rooms
 

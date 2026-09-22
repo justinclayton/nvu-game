@@ -148,6 +148,10 @@ export function discardFromHand(
  * toward triggering it again (see `My Head Is Quantum Spinning`, which must
  * not chain off the draw it just forced).
  *
+ * `turnStart` marks one of Turn Start's own automatic draws, as opposed to a
+ * card-driven draw during Play — see `My Head Is Quantum Spinning`, which
+ * only hears the latter.
+ *
  * Rulebook, Keywords: Empty deck: a draw from an empty deck and discard pile puts that
  * character Down, which ends the run (rulebook, Going Down) — every draw goes
  * through here, so this is the one place that needs to know.
@@ -157,13 +161,14 @@ export function drawOne(
   c: Character,
   events: DomainEvent[],
   forced = false,
+  turnStart = false,
 ): GameState {
   const p = playerOf(state, c);
   if (p.down) return state;
   const [after, card] = takeTopOfDeck(state, c, "drew from an empty deck and discard pile", events);
   if (!card) return after; // Went Down — the run is over.
   const drawing = playerOf(after, c);
-  events.push({ type: "CARD_DRAWN", character: c, card, forced });
+  events.push({ type: "CARD_DRAWN", character: c, card, forced, turnStart });
   return withPlayer(after, c, {
     ...drawing,
     hand: [...drawing.hand, card],
@@ -229,6 +234,21 @@ export function takeFromDiscard(
   const ids = new Set(cards.map((x) => x.id));
   const p = playerOf(state, c);
   return withPlayer(state, c, { ...p, discard: p.discard.filter((x) => !ids.has(x.id)) });
+}
+
+/**
+ * Cards lifted back out of the Exhaust pile, for a card that says it can.
+ * Rulebook, Setup: the Exhaust pile is otherwise permanent — nothing else
+ * takes a card back out of it.
+ */
+export function takeFromExhaust(
+  state: GameState,
+  c: Character,
+  cards: readonly Card[],
+): GameState {
+  const ids = new Set(cards.map((x) => x.id));
+  const p = playerOf(state, c);
+  return withPlayer(state, c, { ...p, exhaust: p.exhaust.filter((x) => !ids.has(x.id)) });
 }
 
 /** Under the deck, so it is the last thing you will see rather than the next. */

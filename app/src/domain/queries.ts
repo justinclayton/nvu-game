@@ -30,8 +30,7 @@ interface Modifiers {
   readonly ignoresExhaustX: boolean;
   readonly playedPowerDelta: number;
   readonly stuffPowerDelta: number;
-  readonly handCap: number;
-  readonly drawCap: number;
+  readonly drawTargetDelta: number;
 }
 
 const NO_MODIFIERS: Modifiers = {
@@ -39,13 +38,12 @@ const NO_MODIFIERS: Modifiers = {
   ignoresExhaustX: false,
   playedPowerDelta: 0,
   stuffPowerDelta: 0,
-  handCap: HAND_CAP,
-  drawCap: Number.POSITIVE_INFINITY,
+  drawTargetDelta: 0,
 };
 
 const held = (card: Card): HeldModifiers | undefined => behaviourOf(card.name)?.whileHeld;
 
-/** Every `Holding:` line in one character's hand, added up. Caps take the tightest. */
+/** Every `Holding:` line in one character's hand, added up. */
 export function heldModifiers(state: GameState, c: Character): Modifiers {
   let m = NO_MODIFIERS;
   for (const card of playerOf(state, c).hand) {
@@ -56,8 +54,7 @@ export function heldModifiers(state: GameState, c: Character): Modifiers {
       ignoresExhaustX: m.ignoresExhaustX || (h.ignoresExhaustX ?? false),
       playedPowerDelta: m.playedPowerDelta + (h.playedPowerDelta ?? 0),
       stuffPowerDelta: m.stuffPowerDelta + (h.stuffPowerDelta ?? 0),
-      handCap: Math.min(m.handCap, h.handCap ?? HAND_CAP),
-      drawCap: Math.min(m.drawCap, h.drawCap ?? Number.POSITIVE_INFINITY),
+      drawTargetDelta: m.drawTargetDelta + (h.drawTargetDelta ?? 0),
     };
   }
   return m;
@@ -74,13 +71,12 @@ export function exhaustXPreventedBy(state: GameState, c: Character): Card | null
   return null;
 }
 
-/** Each Turn, Turn Start: draw up to 5. A card may tighten that target. */
-export const handCapFor = (state: GameState, c: Character): number =>
-  heldModifiers(state, c).handCap;
-
-/** How deep a character may draw this turn. Unlimited unless a card says otherwise. */
-export const drawCapFor = (state: GameState, c: Character): number =>
-  heldModifiers(state, c).drawCap;
+/**
+ * Each Turn, Turn Start: draw up to 5. A "draw N fewer" `Holding:` line comes
+ * off that target; copies stack, and the target never goes below 0.
+ */
+export const drawTargetFor = (state: GameState, c: Character): number =>
+  Math.max(0, HAND_CAP - heldModifiers(state, c).drawTargetDelta);
 
 /* ------------------------------------------------------------- the stat pool */
 

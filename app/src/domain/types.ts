@@ -190,6 +190,13 @@ export interface Resolution {
   readonly roomEnded: "Cleared" | "Fled";
   /** A met challenge said `Ascend`: Cleanup runs, then the Ascending steps (rulebook, Outcome). */
   readonly ascends: boolean;
+  /**
+   * Set once Cleanup's own one-time steps (the `CLEANUP_BEGAN` event, dropping
+   * free plays, flushing this-turn triggers) have run, so a held card's own
+   * Cleanup question — Spore Cloud's discard — can pause here and resume
+   * without repeating them.
+   */
+  readonly cleanupStarted?: boolean;
 }
 
 /* --------------------------------------------------------- the aggregate */
@@ -276,6 +283,8 @@ export type DomainEvent =
       readonly card: Card;
       /** True for a draw a card's text forced on someone else — see `drawOne`. */
       readonly forced?: boolean;
+      /** True for one of Turn Start's own automatic draws, as opposed to a card-driven draw during Play. */
+      readonly turnStart?: boolean;
     }
   | { readonly type: "CARD_PLAYED"; readonly character: Character; readonly card: Card }
   | { readonly type: "COST_PAID"; readonly character: Character; readonly cards: readonly Card[] }

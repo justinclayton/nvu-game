@@ -199,7 +199,13 @@ function validateAnswer(pending: Pending, command: Command): Rejection | null {
 
 /* --------------------------------------------------------- Rulebook, Ascending */
 
-/** Where one of a character's own cards currently sits — never the Exhaust pile. */
+/**
+ * Where one of a character's own cards currently sits — never the Exhaust
+ * pile. `hand` only ever matters before Ascending's step 1 (Shuffle your
+ * hand into your deck) runs: `validateAscendChoice` checks the state as
+ * submitted, where the hand can still hold cards, but `settleStuff` (step 2)
+ * always sees an empty one.
+ */
 type Pile = "deck" | "hand" | "discard";
 
 /** Find a card of this character's, wherever among deck, hand or discard it sits. */
@@ -860,12 +866,28 @@ function ascend(state: GameState, red: AscendChoice, gray: AscendChoice, run: Ru
   return { ...s, phase: "Turn Start", playZone: [], thisTurn: emptyTurnRecord() };
 }
 
+/** Rulebook, Ascending, step 1: Shuffle your hand into your deck. */
+function shuffleHandIntoDeck(state: GameState, c: Character, run: Run): GameState {
+  const hand = playerOf(state, c).hand;
+  const s = shuffleIntoDeck(state, c, hand, run.events);
+  return withPlayer(s, c, { ...playerOf(s, c), hand: [] });
+}
+
 /**
- * Rulebook, Ascending, step 1: Settle your Stuff. Search deck, hand and discard for
- * Stuff. A Good Stuff card shuffles into the Good Stuff pool unless kept by
- * Scrapping one other owned, non-Stuff card; a Bad Stuff card stays unless
- * shed the same way. A kept card is left exactly where it was found. No heal,
- * no hand discard — only Stuff moves here.
+ * Rulebook, Ascending, step 2: Settle your Stuff. Search deck and discard for
+ * Stuff — the hand is empty by now, already shuffled into the deck in step 1.
+ * A Good Stuff card shuffles into the Good Stuff pool unless kept by
+ * Scrapping one other owned, non-Stuff card from deck or discard; a Bad
+ * Stuff card stays unless shed the same way. A kept card is left exactly
+ * where it was found. No heal: the discard pile is untouched apart from
+ * Stuff settled out of it. No hand discard either — step 1 shuffles the
+ * hand into the deck, it does not spend it.
+ *
+ * `stuffOnHand` and `locate` still search all three piles: harmless here,
+ * since step 1 already emptied the hand, and it lets the same helpers back
+ * `validateAscendChoice`, which runs before step 1 and so must still accept
+ * a Stuff card or a payer sitting in hand — it will be deck by the time this
+ * runs.
  */
 function settleStuff(state: GameState, c: Character, choice: AscendChoice, run: Run): GameState {
   let s = state;
@@ -897,9 +919,10 @@ function settleStuff(state: GameState, c: Character, choice: AscendChoice, run: 
 }
 
 function ascendOne(state: GameState, c: Character, choice: AscendChoice, run: Run): GameState {
-  let s = settleStuff(state, c, choice, run);
+  let s = shuffleHandIntoDeck(state, c, run);
+  s = settleStuff(s, c, choice, run);
 
-  // Rulebook, Ascending, step 2: Choose a reward. Three cards from their own pool;
+  // Rulebook, Ascending, step 3: Choose a reward. Three cards from their own pool;
   // take one, shuffled into the deck, or decline. A declined card goes to the
   // bottom of its pool.
   const offered = state.offer?.[c] ?? [];

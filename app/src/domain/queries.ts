@@ -252,7 +252,13 @@ export function playableCards(state: GameState, c: Character): readonly Card[] {
 
 /* ------------------------------------------------------------- Rulebook, Ascending */
 
-/** Every Stuff card in this character's deck, hand or discard pile — what Settle your Stuff works through. */
+/**
+ * Every Stuff card in this character's deck, hand or discard pile — what
+ * Settle your Stuff works through, once Ascending's first step has shuffled
+ * the hand into the deck. A Stuff card sitting in hand right now is included
+ * here, since that shuffle is what it goes through on its way to being
+ * settled.
+ */
 export function settleableStuff(state: GameState, c: Character): readonly Card[] {
   const p = playerOf(state, c);
   return [...p.deck, ...p.hand, ...p.discard].filter((x) => x.kind !== "player");

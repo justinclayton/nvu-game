@@ -1,4 +1,5 @@
-/* Rulebook, Ascending — Settle your Stuff, the reward, building the next floor. */
+/* Rulebook, Ascending — shuffle the hand into the deck, Settle your Stuff, the
+ * reward, building the next floor. */
 
 import { beforeEach, describe, expect, it } from "vitest";
 import { execute } from "./engine";
@@ -41,6 +42,33 @@ function atAscension(over: Partial<GameState> = {}): GameState {
     offer: { Red: base.pools.Red.slice(0, 3), Gray: base.pools.Gray.slice(0, 3) },
   };
 }
+
+describe("Ascending, shuffle your hand into your deck", () => {
+  it("'Shuffle your hand into your deck' — the hand's cards join the deck, not lost", () => {
+    const held = card("Shove");
+    const state = atAscension({
+      Red: player({ deck: pile("Shove", 2), hand: [held], discard: pile("Charge In", 3) }),
+    });
+    const { state: next, events } = must(state, { type: "ASCEND", Red: NOTHING, Gray: NOTHING });
+    expect(next.Red.hand).toEqual([]);
+    expect(next.Red.deck.some((c) => c.id === held.id)).toBe(true);
+    expect(eventTypes(events)).toContain("CARDS_SHUFFLED_IN");
+  });
+
+  it("runs before Settle your Stuff, so a Stuff card starting in hand is settled as deck Stuff", () => {
+    const inHand = card("Pry Bar");
+    const state = atAscension({
+      Red: player({ deck: pile("Shove", 2), hand: [inHand], discard: [] }),
+    });
+    const before = state.pools.goodStuff.length;
+    const { state: next } = must(state, { type: "ASCEND", Red: NOTHING, Gray: NOTHING });
+    // The default for Good Stuff: it went to its pool, exactly as it would
+    // from the deck — the hand it started in no longer matters by then.
+    expect(next.Red.hand).toEqual([]);
+    expect(next.Red.deck.some((c) => c.id === inHand.id)).toBe(false);
+    expect(next.pools.goodStuff).toHaveLength(before + 1);
+  });
+});
 
 describe("Ascending, Settle your Stuff", () => {
   it("'shuffle it into the Good Stuff pool' — the default for a Good Stuff card", () => {
@@ -97,20 +125,20 @@ describe("Ascending, Settle your Stuff", () => {
     expect(eventTypes(events)).toContain("CARD_SCRAPPED");
   });
 
-  it("searches the deck and hand too, not only the discard pile", () => {
+  it("searches the deck as well as the discard pile", () => {
     const inDeck = card("Pry Bar");
-    const inHand = card("Sluggish");
+    const inDiscard = card("Sluggish");
     const state = atAscension({
-      Red: player({ deck: [inDeck, ...pile("Shove", 2)], hand: [inHand], discard: [] }),
+      Red: player({ deck: [inDeck, ...pile("Shove", 2)], discard: [inDiscard] }),
     });
     const { state: next } = must(state, { type: "ASCEND", Red: NOTHING, Gray: NOTHING });
     // The Good Stuff in the deck went to its pool by default...
     expect(next.Red.deck.some((c) => c.id === inDeck.id)).toBe(false);
-    // ...and the Bad Stuff in hand stayed, by its own default, right where it was.
-    expect(next.Red.hand.map((c) => c.id)).toEqual([inHand.id]);
+    // ...and the Bad Stuff in the discard pile stayed, by its own default, right where it was.
+    expect(next.Red.discard.some((c) => c.id === inDiscard.id)).toBe(true);
   });
 
-  it("a payer can come from the deck or hand, not only the discard pile", () => {
+  it("a payer that started in hand still pays, once the hand has joined the deck", () => {
     const pryBar = card("Pry Bar");
     const payer = card("Shove");
     const state = atAscension({
@@ -179,15 +207,6 @@ describe("Ascending, Settle your Stuff", () => {
     const { state: next } = must(state, { type: "ASCEND", Red: NOTHING, Gray: NOTHING });
     expect(next.Red.discard).toHaveLength(4);
     expect(next.Red.deck).toHaveLength(2);
-  });
-
-  it("'no hand discard' — the hand carries up the stairs untouched", () => {
-    const held = card("Shove");
-    const state = atAscension({
-      Red: player({ deck: pile("Shove", 2), hand: [held], discard: pile("Charge In", 3) }),
-    });
-    const { state: next } = must(state, { type: "ASCEND", Red: NOTHING, Gray: NOTHING });
-    expect(next.Red.hand.map((c) => c.id)).toEqual([held.id]);
   });
 
   it("'nothing ever leaves the Scrapyard'", () => {

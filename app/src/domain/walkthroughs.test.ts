@@ -148,8 +148,11 @@ describe("walkthrough 4 — Settle your Stuff: four cards, four different fates,
     // Defaulted Good Stuff, found in the deck, went to the Good Stuff pool.
     expect(next.Red.deck.some((c) => c.id === defaultGood.id)).toBe(false);
     expect(next.pools.goodStuff.some((c) => c.id === defaultGood.id)).toBe(true);
-    // Defaulted Bad Stuff, found in hand, was kept right where it was.
-    expect(next.Red.hand.map((c) => c.id)).toEqual([defaultBad.id]);
+    // Defaulted Bad Stuff started in hand, which step 1 shuffles into the
+    // deck before Settle your Stuff ever runs — so it was found, and kept,
+    // in the deck, not the hand.
+    expect(next.Red.hand).toEqual([]);
+    expect(next.Red.deck.some((c) => c.id === defaultBad.id)).toBe(true);
     // Shed Bad Stuff left the discard pile for its pool.
     expect(next.Red.discard.some((c) => c.id === shedBad.id)).toBe(false);
     expect(next.pools.badStuff.some((c) => c.id === shedBad.id)).toBe(true);

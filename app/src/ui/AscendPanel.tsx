@@ -1,14 +1,17 @@
-/* Rulebook, Ascending: Settle your Stuff, then the card reward, both decided at once.
+/* Rulebook, Ascending: shuffle the hand into the deck, Settle your Stuff, then the
+ * card reward, all decided at once.
  *
  * Every Stuff card in a character's deck, hand or discard pile is listed with
  * its default (Good Stuff to its pool, Bad Stuff kept) and the option to pay
- * for the opposite by Scrapping one other card that character owns. The three
- * cards each character is offered float above the mat and are chosen by
- * clicking them there; this panel shows the whole choice before it is sent.
- * The offer and what may be settled come from the state; whether the whole
- * choice is legal is `validate`'s answer, not this component's. The table
- * owns the choice, so the floating cards and the panel are reading the same
- * one. */
+ * for the opposite by Scrapping one other card that character owns — hand
+ * included, since by the time Settle your Stuff runs the hand has already
+ * been shuffled into the deck, so a card sitting in hand right now is
+ * settled exactly like one already there. The three cards each character is
+ * offered float above the mat and are chosen by clicking them there; this
+ * panel shows the whole choice before it is sent. The offer and what may be
+ * settled come from the state; whether the whole choice is legal is
+ * `validate`'s answer, not this component's. The table owns the choice, so
+ * the floating cards and the panel are reading the same one. */
 
 import { settleableStuff, settlePayOptions } from "@domain/queries";
 import type { AscendChoice, Card, Character, Command, GameState, StuffSettlement } from "@domain/types";
@@ -35,10 +38,11 @@ export function AscendPanel({ state, dispatch, choices, onChoose }: Props) {
     <section className="ascend">
       <h2>The floor is clear. Up the stairs.</h2>
       <p className="ascend__note">
-        Every Stuff card in your deck, hand and discard pile is settled: Good Stuff goes to its
-        pool unless you keep it, Bad Stuff stays unless you shed it — either way, by Scrapping one
-        other card you own. Each of you is offered three cards from your own reward pool: they are
-        floating above your side of the table. Take one, or take none.
+        Your hand shuffles into your deck. Then every Stuff card in your deck and discard pile is
+        settled: Good Stuff goes to its pool unless you keep it, Bad Stuff stays unless you shed
+        it — either way, by Scrapping one other card you own. Each of you is offered three cards
+        from your own reward pool: they are floating above your side of the table. Take one, or
+        take none.
       </p>
 
       {(["Red", "Gray"] as const).map((c) => (

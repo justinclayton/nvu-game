@@ -81,7 +81,7 @@ The outcome, printed on some Challenges, that clears the entire floor rather tha
 
 **Settle your Stuff**
 
-The first step of Ascending. Every Stuff card in a player's deck, hand and discard pile is found: a Good Stuff card shuffles into the Good Stuff pool unless kept by Scrapping one other owned, non-Stuff card; a Bad Stuff card stays unless shed into the Bad Stuff pool the same way. A kept card is returned to wherever it was found.
+Ascending's second step, once the hand has been shuffled into the deck. Every Stuff card in a player's deck and discard pile is found: a Good Stuff card shuffles into the Good Stuff pool unless kept by Scrapping one other owned, non-Stuff card from the deck or discard pile; a Bad Stuff card stays unless shed into the Bad Stuff pool the same way. A kept card is returned to wherever it was found.
 
 **Card reward**
 
@@ -105,7 +105,7 @@ A character's HP, tracked as the size of their deck and discard pile together. R
 
 **Hand**
 
-The cards a player has drawn and is holding, used to play cards and pay Costs. Stuff cards are added directly to hand when gained. Draw brings a hand to 5 each turn; nothing else caps it, so a hand can hold more.
+The cards a player has drawn and is holding, used to play cards and pay Costs. Stuff cards are added directly to hand when gained. Draw brings a hand to 5 each turn; nothing else caps it, so a hand can hold more. Ascending's first step shuffles the whole hand into the deck.
 
 **Turn Start**
 

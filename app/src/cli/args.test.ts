@@ -19,13 +19,108 @@ describe("parseRequest", () => {
     expect(() => parseRequest(["play", "new"])).toThrow(UsageError);
   });
 
-  it("reads a move number", () => {
-    expect(parseRequest(["play", "move", "3", "--run", "r.json"])).toEqual({
+  it("reads flip and end", () => {
+    expect(parseRequest(["play", "flip"])).toEqual({
       command: "play",
-      action: { kind: "move", index: 3 },
+      action: { kind: "flip" },
+      run: null,
+    });
+    expect(parseRequest(["play", "end", "--run", "r.json"])).toEqual({
+      command: "play",
+      action: { kind: "end" },
       run: "r.json",
     });
-    expect(() => parseRequest(["play", "move", "many"])).toThrow(UsageError);
+  });
+
+  it("reads a card play, with and without payment", () => {
+    expect(parseRequest(["play", "card", "Red", "CI"])).toEqual({
+      command: "play",
+      action: { kind: "card", character: "Red", name: "CI", pay: [] },
+      run: null,
+    });
+    expect(parseRequest(["play", "card", "Red", "Charge In", "pay", "Rope", "Flare"])).toEqual({
+      command: "play",
+      action: { kind: "card", character: "Red", name: "Charge In", pay: ["Rope", "Flare"] },
+      run: null,
+    });
+  });
+
+  it("reads choose, with a character, cards, or none", () => {
+    expect(parseRequest(["play", "choose", "Red"])).toEqual({
+      command: "play",
+      action: { kind: "choose", names: ["Red"] },
+      run: null,
+    });
+    expect(parseRequest(["play", "choose", "Rope", "Flare"])).toEqual({
+      command: "play",
+      action: { kind: "choose", names: ["Rope", "Flare"] },
+      run: null,
+    });
+    expect(parseRequest(["play", "choose", "none"])).toEqual({
+      command: "play",
+      action: { kind: "choose", names: [] },
+      run: null,
+    });
+    expect(() => parseRequest(["play", "choose"])).toThrow(UsageError);
+  });
+
+  it("reads order", () => {
+    expect(parseRequest(["play", "order", "Rope", "Flare", "Shove"])).toEqual({
+      command: "play",
+      action: { kind: "order", names: ["Rope", "Flare", "Shove"] },
+      run: null,
+    });
+    expect(() => parseRequest(["play", "order"])).toThrow(UsageError);
+  });
+
+  it("reads take and skip for a reward reveal", () => {
+    expect(parseRequest(["play", "take"])).toEqual({
+      command: "play",
+      action: { kind: "take" },
+      run: null,
+    });
+    expect(parseRequest(["play", "skip"])).toEqual({
+      command: "play",
+      action: { kind: "skip" },
+      run: null,
+    });
+  });
+
+  it("reads take with a name or none as the Ascend reward answer", () => {
+    expect(parseRequest(["play", "take", "Zen Mode"])).toEqual({
+      command: "play",
+      action: { kind: "takeAscend", name: "Zen Mode" },
+      run: null,
+    });
+    expect(parseRequest(["play", "take", "none"])).toEqual({
+      command: "play",
+      action: { kind: "takeAscend", name: null },
+      run: null,
+    });
+  });
+
+  it("reads the Ascend Stuff answers", () => {
+    expect(parseRequest(["play", "keep", "Crowbar", "paying", "Shove"])).toEqual({
+      command: "play",
+      action: { kind: "keep", name: "Crowbar", pay: "Shove" },
+      run: null,
+    });
+    expect(parseRequest(["play", "keep", "Torn Seal"])).toEqual({
+      command: "play",
+      action: { kind: "keep", name: "Torn Seal", pay: null },
+      run: null,
+    });
+    expect(parseRequest(["play", "return", "Pry Bar"])).toEqual({
+      command: "play",
+      action: { kind: "return", name: "Pry Bar" },
+      run: null,
+    });
+    expect(parseRequest(["play", "shed", "Rust", "paying", "Charge In"])).toEqual({
+      command: "play",
+      action: { kind: "shed", name: "Rust", pay: "Charge In" },
+      run: null,
+    });
+    expect(() => parseRequest(["play", "shed", "Rust"])).toThrow(UsageError);
   });
 
   it("reads undo and show with no positionals", () => {
@@ -36,9 +131,36 @@ describe("parseRequest", () => {
     });
     expect(parseRequest(["play", "show"])).toEqual({
       command: "play",
-      action: { kind: "show" },
+      action: { kind: "show", events: null, table: false, moves: false },
       run: null,
     });
+  });
+
+  it("reads show's output flags", () => {
+    expect(parseRequest(["play", "show", "--events", "5"])).toEqual({
+      command: "play",
+      action: { kind: "show", events: 5, table: false, moves: false },
+      run: null,
+    });
+    expect(parseRequest(["play", "show", "--table"])).toEqual({
+      command: "play",
+      action: { kind: "show", events: null, table: true, moves: false },
+      run: null,
+    });
+    expect(parseRequest(["play", "show", "--moves"])).toEqual({
+      command: "play",
+      action: { kind: "show", events: null, table: false, moves: true },
+      run: null,
+    });
+  });
+
+  it("reads a pile request", () => {
+    expect(parseRequest(["play", "pile", "Red", "discard"])).toEqual({
+      command: "play",
+      action: { kind: "pile", character: "Red", pile: "discard" },
+      run: null,
+    });
+    expect(() => parseRequest(["play", "pile", "Red"])).toThrow(UsageError);
   });
 
   it("reads a note's text", () => {
@@ -50,9 +172,14 @@ describe("parseRequest", () => {
     expect(() => parseRequest(["play", "note"])).toThrow(UsageError);
   });
 
-  it("refuses an unknown play subcommand", () => {
+  it("refuses an unknown play move", () => {
     expect(() => parseRequest(["play", "dance"])).toThrow(UsageError);
     expect(() => parseRequest(["play"])).toThrow(UsageError);
+  });
+
+  it("prints a card's face with no run needed", () => {
+    expect(parseRequest(["card", "Charge In"])).toEqual({ command: "card", name: "Charge In" });
+    expect(() => parseRequest(["card"])).toThrow(UsageError);
   });
 
   it("replays the named file", () => {

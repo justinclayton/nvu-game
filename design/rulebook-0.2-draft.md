@@ -69,13 +69,13 @@ In the middle of the table:
 ### 1. Turn Start
 
 1. **Flip the room:** Turn the top card of the Floor deck face up onto the Rooms pile. This is the new Active Room.
-2. **Draw up to five:** Each player draws cards from their deck until they hold **5**. If you already hold 5 or more, do not draw.
+2. **Draw up to five:** Each player draws cards from their deck until they hold **5**. If you already hold 5 or more, do not draw. Resolve effects triggered by these draws after both players have drawn.
 
 - **Draw**: Move the top card of your deck into your hand. If your deck is empty, see `Empty deck` (section 8).
 
 ### 2. Play
 
-Players take turns playing a card. You may not draw during this phase.
+Players take turns playing a card.
 
 - **Play**: Move a card from your hand into your play zone and pay for it: look at its `Cost`, then move that number of cards from your hand to your discard pile. Unless otherwise specified, you can only pay for a card with other cards from your own hand. If a card's cost is 0 or less, play the card for free.
 - **Add up stats**: Stats on played cards add together across both sides of the play zone into one team pool.
@@ -135,7 +135,7 @@ A Character card shows:
 
 ### Stuff cards
 
-`Stuff` is `Good Stuff` or `Bad Stuff`. Unless a card says otherwise, Stuff you gain goes into your hand.
+`Stuff` is `Good Stuff` or `Bad Stuff`. Unless a card says otherwise, Stuff you gain goes into your hand. If the Bad Stuff pool is empty when you would gain Bad Stuff, you gain nothing.
 
 Play and pay with Stuff cards as with Character cards. Either player may gain and use any Stuff card.
 

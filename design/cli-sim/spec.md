@@ -90,15 +90,18 @@ The moves, one per engine command: `[agent, accepted]`
 
 | Call | Engine command |
 | --- | --- |
-| `play flip` | `FLIP_ROOM` |
-| `play draw Red` | `DRAW` |
-| `play end` | `END_DRAW` or `END_PLAY`, whichever phase is open |
+| `play flip` | `FLIP_ROOM`; Turn Start is one step, see below |
+| `play end` | `END_PLAY` |
 | `play card Red CI pay Rope Flare` | `PLAY_CARD`, paying with the named cards; `pay` and its list are omitted for a cost of 0 |
 | `play choose Red` | `CHOOSE_CHARACTER` |
 | `play choose Rope Flare`, `play choose none` | `CHOOSE_CARDS` |
 | `play order Rope Flare Shove` | `ORDER_CARDS`, top first |
 | `play take`, `play skip` | `TAKE_REWARD` |
-| `play ascend Red keep Crowbar scrap Rope take BB` | half of `ASCEND`, see below |
+| `play ascend Red keep Crowbar scrap Shove shed Rust scrap Charge In take Zen Mode` | half of `ASCEND`, see below |
+
+There is no Draw phase and no draw move. `[agent]` Rulebook 0.2 folded Draw up to five into Turn
+Start as an automatic second step with no decision in it (rulebook, Each Turn): `play flip` resolves
+both, the room and every character's draw, in one call.
 
 The moves hint printed after each call and by `show --moves` lists the verbs open in this phase
 with the cards eligible for each, not every combination. In the Play phase that is each character's
@@ -114,13 +117,40 @@ same card, any copy is taken. A content test in `app/src/content` reports every 
 those are Reckless Swing and Riot Shield, Reckless and Rust, Shove and Sluggish.
 
 **Ascending, one character at a time.** `[you]` The engine takes one `ASCEND` command holding both
-characters' choices. The CLI collects them in two calls, one per character, each naming that
-character's keep, its payer and its reward pick in one line: `play ascend Red keep Crowbar scrap
-Rope take BB`, `play ascend Gray keep none take none`. The first call is staged in a sidecar file
-next to the run file and reported back; the second composes the command, executes it, and removes
-the sidecar. `undo` during staging clears the sidecar. `show` during Ascend prints each character's
-Stuff in the discard pile, the payer candidates, the offered cards as full faces, and what is
-staged so far. The flat cross product of both characters' choices is gone. `[agent, accepted]`
+characters' choices, `Red` and `Gray`, each an `AscendChoice`: a `settle` list of `{cardId,
+payWith}` and a `takeRewardId` (`app/src/domain/types.ts`). The CLI collects the two characters'
+choices in two calls, one per character, and composes them into the one command. `[agent, accepted]`
+
+The hand shuffles into the deck automatically before Settle your Stuff; there is no move for it.
+`[agent]` Rulebook 0.2, section 10, then asks the character to settle each Stuff card found across
+their deck and discard: keep a Good Stuff card by Scrapping one other, non-Stuff card, or let it
+return to the pool for free; keep a Bad Stuff card for free, or shed it to the pool by Scrapping one
+other, non-Stuff card. A card not mentioned takes the free default (Good Stuff to the pool, Bad
+Stuff kept), matching `AscendChoice.settle` omitting it. `[agent]`
+
+One line per character states every Stuff card it is settling the costed way, then the reward pick:
+
+```
+play ascend <Red|Gray> [keep <good stuff card> scrap <card>]... [shed <bad stuff card> scrap <card>]... take <reward card|none>
+```
+
+`keep X scrap Y` pays `Y` to keep the Good Stuff card `X` instead of returning it to the pool.
+`shed X scrap Y` pays `Y` to shed the Bad Stuff card `X` to the pool instead of keeping it. Either
+clause may repeat, for a character settling several Stuff cards, in any order; a Stuff card left out
+gets its free default. `take` is required and takes a card from the reveal of three or `none` to
+decline. For example: `play ascend Red keep Crowbar scrap Shove shed Rust scrap Charge In take Zen
+Mode` keeps the Good Stuff Crowbar by scrapping Shove, sheds the Bad Stuff Rust by scrapping Charge
+In, and takes the reward Zen Mode. A character with nothing to settle and no reward wanted is
+`play ascend Gray take none`. `[agent]`
+
+The first call is staged in a sidecar file next to the run file and reported back; the second
+composes the command, executes it, and removes the sidecar. `undo` during staging clears the
+sidecar. `show` during Ascend prints each character's Stuff found in deck and discard, the payer
+candidates, the offered cards as full faces, and what is staged so far. The flat cross product of
+both characters' choices is gone. `[agent, accepted]`
+
+Stuff rent (what a kept or shed Stuff card costs to Scrap) is pinned by the designer; this syntax
+follows whatever the designer rules replaces it with. `[agent]`
 
 ### What each call prints `[you]`
 
@@ -168,6 +198,11 @@ solver must pay before it can claim completeness. None touches `play`, which enu
 - An ascension's Settle your Stuff answer tries one Stuff card at a time, each way of paying for
   it alone; settling several Stuff cards in the same `ASCEND` is not crossed.
 
+Playtest 4 (`design/playtests/04-first-run-on-rules-0.2.md`) hit the 256-entry cross-product cap
+with only two Stuff cards to settle, and it silently dropped a legal combination rather than just
+making the list unwieldy; the marathon deck sizes 0.2 produces make this worse than under 0.1. The
+per-question `play` form above is unaffected, but `fuzz` and the solver still owe this fix. `[agent]`
+
 The web game's ADR ruled a generator out for the UI, which has a better source in `pending` and
 targeted queries. That ruling stands; this generator lives in `sim`, not `domain`.
 
@@ -186,7 +221,9 @@ the budget ran out; the engine refused a command the generator offered.
 `replay FILE` folds a run file back through the engine and prints the narrated transcript with
 notes in place. This transcript is the appendix of a playtest note. A command the rules now refuse
 is reported with its index, which is how a rules change that broke a saved run shows itself.
-`--quiet` prints only the verdict, one line, and nothing before it.
+`--quiet` prints only the verdict, one line, and nothing before it. Playtest 3 and playtest 4 both
+found the current build still prints the full table first; the spec above is what `--quiet` owes,
+still unfixed. `[agent]`
 
 ## Checks `[agent, accepted]`
 

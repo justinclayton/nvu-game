@@ -223,7 +223,10 @@ body {
 }
 .slot--row {
   flex: 1 1 auto;
-  min-width: 0;
+  /* Enough to hold its own label ("Play zone") without it running into the
+   * fixed-width stack slot beside it — the table now has four of those per
+   * side (deck, play zone, discard, Exhaust) instead of three. */
+  min-width: 72px;
 }
 .slot--row .well {
   width: auto;
@@ -1024,6 +1027,24 @@ body {
   letter-spacing: 0.14em;
   text-transform: uppercase;
   color: var(--print);
+}
+.ascend__stuff {
+  display: flex;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding: 6px 0;
+  border-bottom: 1px dotted var(--print-faint);
+}
+.ascend__default {
+  font-size: 12px;
+  color: var(--print);
+  white-space: nowrap;
+  align-self: center;
+}
+.ascend__stuff .zone {
+  flex-basis: 100%;
+  padding-left: 4px;
 }
 
 .over {

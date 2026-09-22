@@ -13,8 +13,6 @@ describe("placements", () => {
   it("place every card and room in the state exactly once", () => {
     const session = createSession(7, CARD_CONTENT);
     session.getState().dispatch({ type: "FLIP_ROOM" });
-    session.getState().dispatch({ type: "DRAW", character: "Red" });
-    session.getState().dispatch({ type: "DRAW", character: "Gray" });
     const { state } = session.getState();
 
     const placed = placements(state);
@@ -29,9 +27,11 @@ describe("placements", () => {
       state.Red.deck.length +
       state.Red.hand.length +
       state.Red.discard.length +
+      state.Red.exhaust.length +
       state.Gray.deck.length +
       state.Gray.hand.length +
       state.Gray.discard.length +
+      state.Gray.exhaust.length +
       state.playZone.length +
       state.pools.Red.length +
       state.pools.Gray.length +
@@ -53,12 +53,11 @@ describe("placements", () => {
 
   it("lays a hand out left to right in hand order, face up", () => {
     const session = createSession(7, CARD_CONTENT);
-    // The flip deals the opening draw, so one more makes two.
+    // The flip draws both hands to 5, all at once.
     session.getState().dispatch({ type: "FLIP_ROOM" });
-    session.getState().dispatch({ type: "DRAW", character: "Red" });
     const { state } = session.getState();
     const hand = placements(state).filter((p) => p.zone === "red-hand");
-    expect(hand.map((p) => p.index)).toEqual([0, 1]);
+    expect(hand.map((p) => p.index)).toEqual(state.Red.hand.map((_, i) => i));
     expect(hand.map((p) => p.id)).toEqual(state.Red.hand.map((c) => c.id));
     expect(hand.every((p) => p.faceUp)).toBe(true);
   });

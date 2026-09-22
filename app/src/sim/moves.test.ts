@@ -70,12 +70,7 @@ describe("legalCommands", () => {
       for (const state of statesAlong(seed)) {
         if (state.pending || state.phase === "Ascend") continue;
         const listed = new Set(legalCommands(state).map((c) => JSON.stringify(c)));
-        const candidates: Command[] = [
-          { type: "FLIP_ROOM" },
-          { type: "END_DRAW" },
-          { type: "END_PLAY" },
-          ...CHARACTERS.map((c): Command => ({ type: "DRAW", character: c })),
-        ];
+        const candidates: Command[] = [{ type: "FLIP_ROOM" }, { type: "END_PLAY" }];
         for (const c of CHARACTERS) {
           for (const card of state[c].hand) {
             for (const payment of combinations(
@@ -118,14 +113,13 @@ describe("legalCommands", () => {
     expect(legalCommands(over)).toEqual([]);
   });
 
-  it("offers the flip when both are Down, because the flip is what ends the run", () => {
+  it("offers the flip once a room is queued, and nothing while the floor deck is empty", () => {
     resetRig();
-    const state = rig({
-      phase: "Flip",
-      Red: player({ down: true }),
-      Gray: player({ down: true }),
-    });
-    expect(legalCommands(state)).toEqual([{ type: "FLIP_ROOM" }]);
+    const empty = rig({ phase: "Flip" });
+    expect(legalCommands(empty)).toEqual([]);
+
+    const queued = rig({ phase: "Flip", floorDeck: [room("Sorting Room")] });
+    expect(legalCommands(queued)).toEqual([{ type: "FLIP_ROOM" }]);
   });
 
   it("answers a TakeReward both ways and a ChooseCharacter with each option", () => {
@@ -149,7 +143,7 @@ describe("legalCommands", () => {
 });
 
 describe("ascendChoices", () => {
-  it("crosses every reward with every way of paying the Scrap tax, and with not paying it", () => {
+  it("crosses every reward with every way of settling one Stuff card, and with settling none", () => {
     resetRig();
     const pryBar = card("Pry Bar");
     const state = rig({
@@ -161,14 +155,16 @@ describe("ascendChoices", () => {
     const offered = { Red: state.pools.Red.slice(0, 3), Gray: state.pools.Gray.slice(0, 3) };
     const ready = { ...state, offer: offered };
 
-    // Red: (none + 2 payers for the one Stuff) × (decline + 3 rewards) = 12. Gray: 1 × 4.
+    // Red: (settle nothing + 4 payers for the one Stuff card — a payer may
+    // come from the deck too, not only the discard pile) × (decline + 3
+    // rewards) = 20. Gray: 1 × 4.
     const red = ascendChoices(ready, "Red");
     const gray = ascendChoices(ready, "Gray");
-    expect(red).toHaveLength(12);
+    expect(red).toHaveLength(20);
     expect(gray).toHaveLength(4);
     for (const choice of red) {
       expect(validate(ready, { type: "ASCEND", Red: choice, Gray: gray[0]! })).toBeNull();
     }
-    expect(legalCommands(ready)).toHaveLength(48);
+    expect(legalCommands(ready)).toHaveLength(80);
   });
 });

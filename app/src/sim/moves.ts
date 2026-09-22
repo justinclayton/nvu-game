@@ -7,11 +7,13 @@
  *
  * The contract, which moves.test.ts holds this file to: every command returned
  * passes `validate`. The reverse holds too, with two exceptions noted below
- * where the full set is too large to enumerate: an `OrderCards` answer over more
- * than four cards, and the cross product of two characters' ascension choices.
+ * where the full set is too large to enumerate: an `OrderCards` answer over
+ * more than four cards, and the cross product of two characters' ascension
+ * choices. Draw has no phase of its own — it runs inside `FLIP_ROOM` with no
+ * decision to make (rulebook, Each Turn, Draw) — so there is no case for it here.
  */
 
-import { canDraw, costOf, payOptions, playableCards } from "@domain/queries";
+import { costOf, payOptions, playableCards } from "@domain/queries";
 import type {
   AscendChoice,
   Card,
@@ -20,6 +22,7 @@ import type {
   Command,
   GameState,
   Pending,
+  StuffSettlement,
 } from "@domain/types";
 import { CHARACTERS, playerOf } from "@domain/verbs";
 
@@ -109,27 +112,32 @@ export function playsOf(state: GameState, c: Character, card: Card): readonly Co
 
 /**
  * Everything one character may decide at ascension: each reward or none,
- * crossed with each way of paying the Scrap tax or not paying it.
+ * crossed with every way of settling a single Stuff card (deck, hand or
+ * discard pile) by paying for it with a single payer. Settling more than one
+ * Stuff card simultaneously is not crossed — recorded as debt alongside
+ * `OrderCards` and the ascend cross product below (design/cli-sim/spec.md).
+ * A policy that wants to settle several at once builds its own
+ * `AscendChoice.settle`.
  */
 export function ascendChoices(state: GameState, c: Character): readonly AscendChoice[] {
   const offered = state.offer?.[c] ?? [];
   const rewards: (CardId | null)[] = [null, ...ids(offered)];
 
-  const pile = playerOf(state, c).discard;
-  const taxes: { keepStuffId: CardId | null; scrapId: CardId | null }[] = [
-    { keepStuffId: null, scrapId: null },
+  const p = playerOf(state, c);
+  const owned = [...p.deck, ...p.hand, ...p.discard];
+  const stuff = owned.filter((x) => x.kind !== "player");
+  const payers = owned.filter((x) => x.kind === "player");
+
+  const settlements: readonly (readonly StuffSettlement[])[] = [
+    [],
+    ...stuff.flatMap((s): (readonly StuffSettlement[])[] =>
+      payers.map((payer): readonly StuffSettlement[] => [{ cardId: s.id, payWith: payer.id }]),
+    ),
   ];
-  for (const keep of pile) {
-    if (keep.kind === "player") continue;
-    for (const payer of pile) {
-      if (payer.id === keep.id) continue;
-      taxes.push({ keepStuffId: keep.id, scrapId: payer.id });
-    }
-  }
 
   const out: AscendChoice[] = [];
-  for (const tax of taxes) {
-    for (const takeRewardId of rewards) out.push({ ...tax, takeRewardId });
+  for (const settle of settlements) {
+    for (const takeRewardId of rewards) out.push({ settle, takeRewardId });
   }
   return out;
 }
@@ -162,16 +170,7 @@ export function legalCommands(state: GameState): readonly Command[] {
 
   switch (state.phase) {
     case "Flip":
-      // Both Down: the flip is still the legal command, and it ends the run.
-      if (state.Red.down && state.Gray.down) return [{ type: "FLIP_ROOM" }];
       return state.floorDeck.length > 0 ? [{ type: "FLIP_ROOM" }] : [];
-
-    case "Draw": {
-      const out: Command[] = [];
-      for (const c of CHARACTERS) if (canDraw(state, c)) out.push({ type: "DRAW", character: c });
-      out.push({ type: "END_DRAW" });
-      return out;
-    }
 
     case "Play": {
       const out: Command[] = [];

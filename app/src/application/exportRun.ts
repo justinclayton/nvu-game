@@ -118,8 +118,6 @@ export interface TurnRow {
   readonly outcome: string;
   readonly red_drew: number;
   readonly gray_drew: number;
-  readonly red_burned: number;
-  readonly gray_burned: number;
   readonly cards_played: number;
   readonly cards_paid: number;
   readonly stuff_taken: number;
@@ -137,8 +135,6 @@ export const TURN_COLUMNS: readonly (keyof TurnRow)[] = [
   "outcome",
   "red_drew",
   "gray_drew",
-  "red_burned",
-  "gray_burned",
   "cards_played",
   "cards_paid",
   "stuff_taken",
@@ -166,8 +162,6 @@ const draft = (turn: number, floor: number, start: number): Draft => ({
     outcome: "",
     red_drew: 0,
     gray_drew: 0,
-    red_burned: 0,
-    gray_burned: 0,
     cards_played: 0,
     cards_paid: 0,
     stuff_taken: 0,
@@ -179,8 +173,6 @@ const draft = (turn: number, floor: number, start: number): Draft => ({
 });
 
 const drew = (c: Character): "red_drew" | "gray_drew" => (c === "Red" ? "red_drew" : "gray_drew");
-const burned = (c: Character): "red_burned" | "gray_burned" =>
-  c === "Red" ? "red_burned" : "gray_burned";
 
 /**
  * The run as one row per turn, read off the event log.
@@ -212,9 +204,6 @@ export function turnRows(
         break;
       case "CARD_DRAWN":
         current.row[drew(event.character)] += 1;
-        break;
-      case "DRAW_BURNED":
-        current.row[burned(event.character)] += 1;
         break;
       case "CARD_PLAYED":
         current.row.cards_played += 1;

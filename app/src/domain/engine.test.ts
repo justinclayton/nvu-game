@@ -30,110 +30,66 @@ const playFree = (c: "Red" | "Gray", cardId: CardId): Command => ({
 });
 
 describe("Flip", () => {
-  it("turns the top card of the floor deck face up before anything is spent", () => {
+  it("turns the top card of the floor deck face up before anything is spent, then draws both to 5", () => {
     const first = room("Sorting Room");
     const state = rig({
       phase: "Flip",
       floorDeck: [first, room("Ration Locker")],
-      Red: player({ deck: pile("Shove", 3) }),
-      Gray: player({ deck: pile("Duck Under", 3) }),
+      Red: player({ deck: pile("Shove", 5) }),
+      Gray: player({ deck: pile("Duck Under", 5) }),
     });
     const { state: next, events } = must(state, { type: "FLIP_ROOM" });
     expect(next.activeRoom?.id).toBe(first.id);
     expect(next.floorDeck).toHaveLength(1);
-    expect(next.phase).toBe("Draw");
-    // The flip opens Draw, and Draw opens with one card each.
-    expect(eventTypes(events)).toEqual(["ROOM_FLIPPED", "CARD_DRAWN", "CARD_DRAWN"]);
-  });
-
-  it("ends the run when both characters are Down at the start of a turn", () => {
-    const state = rig({
-      phase: "Flip",
-      floorDeck: [room("Sorting Room")],
-      Red: player({ down: true }),
-      Gray: player({ down: true }),
-    });
-    const { state: next, events } = must(state, { type: "FLIP_ROOM" });
-    expect(next.phase).toBe("GameOver");
-    expect(next.outcome).toBe("Defeat");
-    expect(eventTypes(events)).toEqual(["GAME_OVER"]);
+    // Draw has no phase of its own to wait in — it runs inside the flip, with
+    // no decision to make, and lands straight in Play.
+    expect(next.phase).toBe("Play");
+    expect(next.Red.hand).toHaveLength(5);
+    expect(next.Gray.hand).toHaveLength(5);
+    expect(eventTypes(events)).toEqual(["ROOM_FLIPPED", ...Array<string>(10).fill("CARD_DRAWN")]);
   });
 });
 
 describe("Draw", () => {
-  const flipState = (over = {}) =>
-    rig({
+  it("'draw cards from your deck until you hold 5' — all at once, no decision", () => {
+    const state = rig({
       phase: "Flip",
       floorDeck: [room("Sorting Room")],
       Red: player({ deck: pile("Shove", 5) }),
       Gray: player({ deck: pile("Duck Under", 5) }),
-      ...over,
     });
-
-  const drawState = (over = {}) =>
-    rig({
-      phase: "Draw",
-      activeRoom: room("Sorting Room"),
-      Red: player({ deck: pile("Shove", 5) }),
-      Gray: player({ deck: pile("Duck Under", 5) }),
-      ...over,
-    });
-
-  it("'both players draw 1 card at the same time' — the opening draw", () => {
-    const { state: next } = must(flipState(), { type: "FLIP_ROOM" });
-    expect(next.phase).toBe("Draw");
-    expect(next.Red.hand).toHaveLength(1);
-    expect(next.Gray.hand).toHaveLength(1);
-    expect(next.Red.deck).toHaveLength(4);
-    expect(next.Gray.deck).toHaveLength(4);
-    expect(next.Red.drewThisTurn).toBe(1);
-    expect(next.Gray.drewThisTurn).toBe(1);
+    const { state: next } = must(state, { type: "FLIP_ROOM" });
+    expect(next.Red.hand).toHaveLength(5);
+    expect(next.Gray.hand).toHaveLength(5);
+    expect(next.Red.deck).toEqual([]);
+    expect(next.Gray.deck).toEqual([]);
+    expect(next.Red.drewThisTurn).toBe(5);
   });
 
-  it("'if you are forced to draw with a Full Hand' — the opening draw is discarded", () => {
-    const state = flipState({
+  it("'if you already hold 5 or more, do not draw'", () => {
+    const state = rig({
+      phase: "Flip",
+      floorDeck: [room("Sorting Room")],
       Red: player({ deck: pile("Shove", 5), hand: pile("Charge In", 5) }),
+      Gray: player({ deck: pile("Duck Under", 5) }),
     });
     const { state: next, events } = must(state, { type: "FLIP_ROOM" });
     expect(next.Red.hand).toHaveLength(5);
-    expect(next.Red.discard).toHaveLength(1);
-    expect(next.Red.deck).toHaveLength(4);
-    expect(eventTypes(events)).toContain("DRAW_BURNED");
+    expect(next.Red.deck).toHaveLength(5);
+    // Only Gray's five draws — Red owed none.
+    expect(eventTypes(events).filter((t) => t === "CARD_DRAWN")).toHaveLength(5);
   });
 
-  it("'if you are in Last Stand, skip the opening draw'", () => {
-    const state = flipState({
-      Red: player({ deck: pile("Shove", 5), hand: pile("Charge In", 2), lastStand: true }),
+  it("draws only as many as it takes to reach 5 from a hand already holding some", () => {
+    const state = rig({
+      phase: "Flip",
+      floorDeck: [room("Sorting Room")],
+      Red: player({ deck: pile("Shove", 5), hand: pile("Charge In", 2) }),
+      Gray: player({ deck: pile("Duck Under", 5) }),
     });
     const { state: next } = must(state, { type: "FLIP_ROOM" });
-    expect(next.Red.hand).toHaveLength(2);
-    expect(next.Red.deck).toHaveLength(5);
-    expect(next.Red.drewThisTurn).toBe(0);
-    expect(next.Gray.hand).toHaveLength(1);
-  });
-
-  it("'you may not draw up while holding 5 or more cards'", () => {
-    const state = drawState({
-      Red: player({ deck: pile("Shove", 5), hand: pile("Charge In", 5) }),
-    });
-    const rejected = execute(state, { type: "DRAW", character: "Red" });
-    expect(rejected.ok).toBe(false);
-    if (!rejected.ok) expect(rejected.reason.code).toBe("HandIsFull");
-  });
-
-  it("'the phase ends when both players pass' — and it ends for both at once", () => {
-    const { state: next } = play(drawState(), [
-      { type: "DRAW", character: "Red" },
-      { type: "DRAW", character: "Gray" },
-      { type: "END_DRAW" },
-    ]);
-    expect(next.phase).toBe("Play");
-    expect(next.Red.drewThisTurn).toBe(1);
-  });
-
-  it("nobody owes a draw — the phase may end with nothing drawn", () => {
-    const { state: next } = must(drawState(), { type: "END_DRAW" });
-    expect(next.phase).toBe("Play");
+    expect(next.Red.hand).toHaveLength(5);
+    expect(next.Red.deck).toHaveLength(2);
   });
 });
 
@@ -146,12 +102,6 @@ describe("Play", () => {
       Gray: player({ deck: pile("Duck Under", 5) }),
       ...over,
     });
-
-  it("'you may not draw during this phase' — the draw is rejected, not thrown", () => {
-    const rejected = execute(playState(), { type: "DRAW", character: "Red" });
-    expect(rejected.ok).toBe(false);
-    if (!rejected.ok) expect(rejected.reason.code).toBe("WrongPhase");
-  });
 
   it("'to play a card, discard cards from your hand equal to its Cost'", () => {
     const state = playState();
@@ -347,7 +297,8 @@ describe("Room kinds: Enemy, Hazard, Stuff", () => {
     ]);
     expect(events.filter((e) => e.type === "THRESHOLD_MET")).toHaveLength(2);
     expect(next.cleared).toHaveLength(1);
-    expect(next.Red.discard).toHaveLength(1);
+    // "Both of you Exhaust 1" — to the Exhaust pile, not the discard pile.
+    expect(next.Red.exhaust).toHaveLength(1);
   });
 
   it("a Hazard's higher threshold also reveals a reward — taken or skipped", () => {

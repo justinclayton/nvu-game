@@ -9,7 +9,6 @@
  * the new state. Nothing mutates the state handed to it.
  */
 
-import { HAND_CAP } from "./setup";
 import type {
   Card,
   Character,
@@ -29,7 +28,7 @@ export const playerOf = (state: GameState, c: Character): PlayerState => state[c
 export const withPlayer = (state: GameState, c: Character, p: PlayerState): GameState =>
   c === "Red" ? { ...state, Red: p } : { ...state, Gray: p };
 
-/** Everyone not Down. A Down character is skipped by everything (rulebook, Last Stand: Going Down). */
+/** Everyone not Down. A Down character is skipped by everything (rulebook, Going Down). */
 export const standing = (state: GameState): readonly Character[] =>
   CHARACTERS.filter((c) => !state[c].down);
 
@@ -52,7 +51,7 @@ export function discard(
   return withPlayer(state, c, { ...p, discard: [...p.discard, card] });
 }
 
-/** Rulebook, Last Stand: Going Down: going Down empties your hand into your discard pile. */
+/** Rulebook, Going Down: one character going Down ends the run (rulebook, Winning and losing). */
 export function goDown(
   state: GameState,
   c: Character,
@@ -62,20 +61,42 @@ export function goDown(
   const p = playerOf(state, c);
   if (p.down) return state;
   events.push({ type: "WENT_DOWN", character: c, cause });
-  let next = withPlayer(state, c, { ...p, down: true, lastStand: false, hand: [] });
+  let next = withPlayer(state, c, { ...p, down: true, hand: [] });
   for (const card of p.hand) next = discard(next, c, card, "hand", events);
-  return next;
+  events.push({ type: "GAME_OVER", outcome: "Defeat" });
+  return { ...next, phase: "GameOver", outcome: "Defeat" };
 }
 
 /**
- * Rulebook, Card anatomy: Keywords: `Exhaust X cards from your deck` — a loss you did not choose. Off the top,
- * face up, no choices.
- *
- * A card that would be moved from the top of an empty deck puts that
- * character Down (rulebook, About the game: running out of Stamina). Emptying the deck instead — the last card just exhausted was
- * the last one there — puts them in Last Stand right away (rulebook, Last Stand; see
- * `activateLastStand`), whether this call is a room's printed punishment or a
- * card's own `Exhaust X`.
+ * Rulebook, Keywords: Empty deck — shared by draw and Exhaust, the two ways a card can be
+ * taken off the top of a deck. If the deck is empty, the discard pile
+ * reshuffles into a new deck first. If the discard pile is empty too, the
+ * character goes Down, which ends the run right there — the caller sees that
+ * as a `null` card and a state already moved to `GameOver`.
+ */
+function takeTopOfDeck(
+  state: GameState,
+  c: Character,
+  cause: string,
+  events: DomainEvent[],
+): readonly [GameState, Card | null] {
+  let next = state;
+  let p = playerOf(next, c);
+  if (p.deck.length === 0) {
+    if (p.discard.length === 0) return [goDown(next, c, cause, events), null];
+    const [deck, seed] = shuffle(p.discard, next.seed);
+    events.push({ type: "DISCARD_RESHUFFLED", character: c, cards: deck.length });
+    next = withPlayer({ ...next, seed }, c, { ...p, deck, discard: [] });
+    p = playerOf(next, c);
+  }
+  const card = p.deck[0];
+  if (!card) return [goDown(next, c, cause, events), null];
+  return [withPlayer(next, c, { ...p, deck: p.deck.slice(1) }), card];
+}
+
+/**
+ * Rulebook, Card anatomy: Keywords: `Exhaust X cards from your deck` — a loss you did not
+ * choose, off the top, face up, into the Exhaust pile, gone for the run.
  */
 export function exhaustFromDeck(
   state: GameState,
@@ -86,13 +107,14 @@ export function exhaustFromDeck(
 ): GameState {
   let next = state;
   for (let i = 0; i < amount; i++) {
+    if (next.phase === "GameOver") return next;
     const p = playerOf(next, c);
-    if (p.down) return next; // A Down character takes no punishments (rulebook, Last Stand: Going Down).
-    const card = p.deck[0];
-    if (!card) return goDown(next, c, cause, events);
-    next = withPlayer(next, c, { ...p, deck: p.deck.slice(1) });
-    next = discard(next, c, card, "deck", events);
-    next = activateLastStand(next, events);
+    if (p.down) return next; // A Down character takes no punishments.
+    const [after, card] = takeTopOfDeck(next, c, cause, events);
+    if (!card) return after; // Went Down — the run is over.
+    const exhausting = playerOf(after, c);
+    events.push({ type: "CARD_EXHAUSTED", character: c, card });
+    next = withPlayer(after, c, { ...exhausting, exhaust: [...exhausting.exhaust, card] });
   }
   return next;
 }
@@ -114,47 +136,44 @@ export function discardFromHand(
 /* ----------------------------------------------------------------- drawing */
 
 /**
- * Each Turn, Draw: draw one card. A full hand does not excuse the opening draw — the card is
- * put straight into the discard pile instead of the hand, so a full hand costs
- * you a card a turn rather than saving you one.
- *
- * `ignoreHandCap` is for a card that says so in its own text.
+ * Each Turn, Draw: draw one card, straight to hand. Nothing caps a single draw — the
+ * Draw phase's own "until you hold 5" is a stopping condition the caller
+ * applies, not a rule this verb enforces, so a card that draws you a card
+ * outside that phase is never burned or refused; the hand may exceed 5
+ * (rulebook, About the game).
  *
  * `forced` marks a draw that a card's text made someone else take, as opposed
- * to one they chose or the opening draw. It is stamped onto the resulting
- * event so a card that triggers off draws can tell its own forced draw apart
- * from one that counts toward triggering it again (see `My Head Is Quantum
- * Spinning`, which must not chain off the draw it just forced).
+ * to one they chose. It is stamped onto the resulting event so a card that
+ * triggers off draws can tell its own forced draw apart from one that counts
+ * toward triggering it again (see `My Head Is Quantum Spinning`, which must
+ * not chain off the draw it just forced).
  *
- * Rulebook, Last Stand: a draw that leaves the deck empty puts that character in Last Stand right
- * away (see `activateLastStand`) — every draw goes through here, chosen,
- * opening, or a card's own text, so this is the one place that needs to know.
+ * Rulebook, Keywords: Empty deck: a draw from an empty deck and discard pile puts that
+ * character Down, which ends the run (rulebook, Going Down) — every draw goes
+ * through here, so this is the one place that needs to know.
  */
 export function drawOne(
   state: GameState,
   c: Character,
   events: DomainEvent[],
-  ignoreHandCap = false,
   forced = false,
 ): GameState {
   const p = playerOf(state, c);
   if (p.down) return state;
-  const card = p.deck[0];
-  if (!card) return goDown(state, c, "drew from an empty deck", events);
-
-  const rest = { ...p, deck: p.deck.slice(1), drewThisTurn: p.drewThisTurn + 1 };
-  if (!ignoreHandCap && p.hand.length >= HAND_CAP) {
-    events.push({ type: "DRAW_BURNED", character: c, card, forced });
-    return activateLastStand(discard(withPlayer(state, c, rest), c, card, "deck", events), events);
-  }
+  const [after, card] = takeTopOfDeck(state, c, "drew from an empty deck and discard pile", events);
+  if (!card) return after; // Went Down — the run is over.
+  const drawing = playerOf(after, c);
   events.push({ type: "CARD_DRAWN", character: c, card, forced });
-  return activateLastStand(withPlayer(state, c, { ...rest, hand: [...p.hand, card] }), events);
+  return withPlayer(after, c, {
+    ...drawing,
+    hand: [...drawing.hand, card],
+    drewThisTurn: drawing.drewThisTurn + 1,
+  });
 }
 
 /**
- * Rulebook, Last Stand: Going Down: no card may be put into a Down character's hand — you cannot park Stuff on
- * a partner who is out. Stuff pushed into a hand by a room ignores the hand cap
- * entirely, and so does anything else that moves a card to a hand.
+ * Rulebook, Going Down: no card may be put into a Down character's hand — you cannot park Stuff on
+ * a partner who is out.
  */
 export function moveToHand(
   state: GameState,
@@ -227,7 +246,7 @@ export function moveToBottomOfDeck(
 /**
  * A card taking itself back out of the play zone, at cleanup.
  *
- * Rulebook, Last Stand: Going Down: no card may be put into a Down character's hand, so a card whose owner is
+ * Rulebook, Going Down: no card may be put into a Down character's hand, so a card whose owner is
  * out stays in the play zone and is discarded with everything else.
  */
 export function returnToHand(
@@ -313,7 +332,7 @@ export function dealBadStuff(
   c: Character,
   events: DomainEvent[],
 ): GameState {
-  if (playerOf(state, c).down) return state; // takes no punishments (rulebook, Last Stand: Going Down)
+  if (playerOf(state, c).down) return state; // takes no punishments (rulebook, Going Down)
   const [card, rest, seed] = drawFromPool(state.pools.badStuff, state.seed);
   if (!card) {
     events.push({ type: "STUFF_POOL_EMPTY", character: c, pool: "bad_stuff" });
@@ -340,28 +359,5 @@ function drawFromPool(
   if (pool.length === 0) return [null, pool, seed];
   const [shuffled, next] = shuffle(pool, seed);
   return [shuffled[0] as Card, shuffled.slice(1), next];
-}
-
-/* --------------------------------------------------------------- last stand */
-
-/**
- * Rulebook, Last Stand: your character enters last stand the moment your deck becomes empty.
- * `drawOne` and `exhaustFromDeck` each call this on themselves right after
- * removing a card, so every cause is covered from the one place that moves
- * cards off the top of a deck: a chosen or opening draw, a forced draw, a
- * card's own `Exhaust X`, and a room's printed punishment all see it land in
- * the same step the deck empties, not at the end of the phase. `engine.ts`
- * also sweeps once more at cleanup as a backstop; that call finds nothing left
- * to do in the ordinary case.
- */
-export function activateLastStand(state: GameState, events: DomainEvent[]): GameState {
-  let next = state;
-  for (const c of CHARACTERS) {
-    const p = playerOf(next, c);
-    if (p.down || p.lastStand || p.deck.length > 0) continue;
-    events.push({ type: "LAST_STAND", character: c });
-    next = withPlayer(next, c, { ...p, lastStand: true });
-  }
-  return next;
 }
 

@@ -46,8 +46,8 @@ export const player = (over: Partial<PlayerState> = {}): PlayerState => ({
   deck: [],
   hand: [],
   discard: [],
+  exhaust: [],
   down: false,
-  lastStand: false,
   drewThisTurn: 0,
   ...over,
 });
@@ -72,7 +72,7 @@ export function rig(over: Partial<GameState> = {}): GameState {
     seed: 1,
     floor: 1,
     turn: 1,
-    phase: "Draw",
+    phase: "Play",
     floorDeck: [],
     activeRoom: null,
     fled: [],

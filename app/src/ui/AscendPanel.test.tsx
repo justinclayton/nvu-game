@@ -9,9 +9,10 @@ import { AscendPanel, NO_CHOICES, type AscendChoices } from "./AscendPanel";
 import { Mat } from "./Mat";
 import { FULL } from "./metrics";
 
-/* The ascension panel offers both halves of the Scrap tax; the reward is chosen
- * from the three cards floating above the mat. Both read one choice, which the
- * table owns, so the test stands in for the table. */
+/* The ascension panel settles every Stuff card found in a deck, hand or
+ * discard pile; the reward is chosen from the three cards floating above the
+ * mat. Both read one choice, which the table owns, so the test stands in for
+ * the table. */
 
 function atAscension(): GameState {
   const base = rig({
@@ -46,7 +47,6 @@ function Harness({
         delays={new Map()}
         paying={null}
         onPickCard={vi.fn()}
-        onDraw={vi.fn()}
         reward={{ Red: choices.Red.takeRewardId, Gray: choices.Gray.takeRewardId }}
         onPickReward={(c, picked) => {
           choose(c, { takeRewardId: choices[c].takeRewardId === picked.id ? null : picked.id });
@@ -86,12 +86,19 @@ describe("the ascension panel", () => {
     expect(screen.getByRole("button", { name: "Ascend to floor 2" })).toBeDefined();
   });
 
-  it("asks for the other half of the Scrap tax only once a piece of Stuff is picked", () => {
+  it("lists every Stuff card found in the deck, hand and discard pile", () => {
     const state = atAscension();
     render(<Harness state={state} dispatch={vi.fn()} />);
-    expect(screen.queryByText(/by Scrapping this card in its place/)).toBeNull();
-    fireEvent.click(panel().getAllByText("Pry Bar")[0] as HTMLElement);
-    expect(screen.getByText(/by Scrapping this card in its place/)).toBeDefined();
+    expect(panel().getAllByText("Pry Bar").length).toBeGreaterThan(0);
+    expect(panel().getByText(/Good Stuff pool by default/)).toBeDefined();
+  });
+
+  it("keeps a Good Stuff card once a payer is picked, and reports it", () => {
+    const state = atAscension();
+    render(<Harness state={state} dispatch={vi.fn()} />);
+    expect(panel().getByText(/Good Stuff pool by default/)).toBeDefined();
+    fireEvent.click(panel().getAllByText("Charge In")[0] as HTMLElement);
+    expect(panel().getByText(/kept in place by Scrapping/)).toBeDefined();
   });
 
   it("takes a floating card on click, and declines it on a second click", () => {
@@ -118,7 +125,6 @@ describe("the ascension panel", () => {
     const reward = state.offer?.Red[0];
     if (!pryBar || !payer || !reward) throw new Error("rig");
 
-    fireEvent.click(panel().getAllByText("Pry Bar")[0] as HTMLElement);
     fireEvent.click(panel().getAllByText("Charge In")[0] as HTMLElement);
     fireEvent.click(document.querySelector('[data-zone="red-offer"]') as HTMLElement);
     fireEvent.click(screen.getByRole("button", { name: "Ascend to floor 2" }));
@@ -126,9 +132,8 @@ describe("the ascension panel", () => {
     const sent = dispatch.mock.calls[0]?.[0] as Command | undefined;
     expect(sent?.type).toBe("ASCEND");
     if (sent?.type !== "ASCEND") throw new Error("expected an ascend");
-    expect(sent.Red.keepStuffId).toBe(pryBar.id);
-    expect(sent.Red.scrapId).toBe(payer.id);
+    expect(sent.Red.settle).toEqual([{ cardId: pryBar.id, payWith: payer.id }]);
     expect(sent.Red.takeRewardId).toBe(reward.id);
-    expect(sent.Gray.keepStuffId).toBeNull();
+    expect(sent.Gray.settle).toEqual([]);
   });
 });

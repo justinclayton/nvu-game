@@ -153,9 +153,6 @@ export function Table({ onNewRun }: { readonly onNewRun: () => void }) {
         delays={delays}
         paying={paying}
         onPickCard={pickCard}
-        onDraw={(c) => {
-          dispatch({ type: "DRAW", character: c });
-        }}
         reward={{ Red: ascend.Red.takeRewardId, Gray: ascend.Gray.takeRewardId }}
         onPickReward={(c, card) => {
           choose(c, { takeRewardId: ascend[c].takeRewardId === card.id ? null : card.id });

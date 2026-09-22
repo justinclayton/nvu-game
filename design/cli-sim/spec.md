@@ -93,14 +93,20 @@ builds the candidates from `state.pending`, the phase and the domain queries the
 and the CLI numbers them. The engine still checks every command it is handed; the list only saves
 the agent from guessing.
 
+Draw has no phase of its own to generate a move list for: rulebook, Each Turn, Draw draws both
+characters to 5 inside `FLIP_ROOM`, with no decision to make, so `Phase` never rests at `Draw`
+and there is no case for it here.
+
 The contract, held by `moves.test.ts`: every command returned passes `validate`, and for a sample
 of seeded states every command `validate` accepts is one it returned.
 
-Two places cap the list where the full set is large, and both are recorded here as debt the solver
-must pay before it can claim completeness:
+Three places cap the list where the full set is large, and all three are recorded here as debt the
+solver must pay before it can claim completeness:
 
 - An `OrderCards` answer over more than four cards offers only the order shown and its reverse.
 - The cross product of the two characters' ascension choices is not crossed past 256 entries.
+- An ascension's Settle your Stuff answer tries one Stuff card at a time, each way of paying for
+  it alone; settling several Stuff cards in the same `ASCEND` is not crossed.
 
 The web game's ADR ruled a generator out for the UI, which has a better source in `pending` and
 targeted queries. That ruling stands; this generator lives in `sim`, not `domain`.

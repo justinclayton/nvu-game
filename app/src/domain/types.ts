@@ -1,8 +1,8 @@
 /* The domain model. One aggregate, `GameState`; one way in, `execute`.
  *
  * Every name here is a term from design/GLOSSARY.md, spelled the same way: discard pile,
- * Fled, Cleared, Scrapyard, last stand, Down, stat pool, play zone. Section
- * numbers in the comments point at design/rulebook.md.
+ * Exhaust pile, Fled, Cleared, Scrapyard, Down, stat pool, play zone. Section
+ * numbers in the comments point at design/rulebook-0.2-draft.md, rules version 0.2.0-draft.
  *
  * Everything is readonly. The engine never mutates; it returns a new state.
  */
@@ -77,19 +77,19 @@ export interface Pools {
   readonly badStuff: readonly Card[];
 }
 
-/** One character's three piles, plus the two states Rulebook, Last Stand puts them in. */
+/** One character's three piles (rulebook, Setup). */
 export interface PlayerState {
   /** Face down. This is health and energy both — the deck is stamina (rulebook, About the game). */
   readonly deck: readonly Card[];
-  /** What they drew this turn. Maximum 5. */
+  /** What they are holding. Draw brings this to 5; nothing else caps it. */
   readonly hand: readonly Card[];
-  /** Face up. Cards spent or lost, gone for the floor. There is no discard pile. */
+  /** Face up. Cards spent, discarded or lost from the deck — it recycles into a new deck when the deck runs out (rulebook, Keywords: Empty deck). */
   readonly discard: readonly Card[];
-  /** Down is out: skipped in Draw and in Play, no rewards, no punishments (rulebook, Last Stand: Going Down). */
+  /** Face up. Cards Exhausted off the top of the deck. Permanent: nothing returns from here (rulebook, Setup; Keywords: Exhaust). */
+  readonly exhaust: readonly Card[];
+  /** One character going Down ends the run (rulebook, Going Down; Winning and losing). */
   readonly down: boolean;
-  /** Set the moment the deck runs out, and swept for again at cleanup (rulebook, Last Stand). */
-  readonly lastStand: boolean;
-  /** Reset at Flip. The opening draw is the first of these; a draw cap counts them. */
+  /** Reset at Flip. How many cards this character has drawn this turn, for a card's own draw cap. */
   readonly drewThisTurn: number;
 }
 
@@ -124,12 +124,12 @@ export interface TurnRecord {
 /* ------------------------------------------------------------ the phases */
 
 /**
- * Draw and Play are two phases (Each Turn). Both characters draw one card at the same
- * time as Draw opens, then take turns drawing until both pass; nobody draws
- * during Play. Cleanup is not a waiting phase of its own; it is the last step
- * of `END_PLAY`.
+ * Draw has no phase of its own to wait in: it is a step of `FLIP_ROOM`, drawing
+ * both characters to 5 with no decision to make (Each Turn, Draw), so it never
+ * appears here. Outcome and Cleanup are likewise steps of `END_PLAY`, not
+ * waiting phases.
  */
-export type Phase = "Flip" | "Draw" | "Play" | "Ascend" | "GameOver";
+export type Phase = "Flip" | "Play" | "Ascend" | "GameOver";
 
 export type Outcome = "Victory" | "Defeat";
 
@@ -185,12 +185,10 @@ export type Pending =
  */
 export interface Resolution {
   readonly effects: readonly RoomEffect[];
-  /** How the room ended. Rulebook, Last Stand reads this, not how it got there. */
+  /** How the room ended. */
   readonly roomEnded: "Cleared" | "Fled";
-  /** A met challenge said `Ascend`: Cleanup runs the Ascending steps instead of the usual ones. */
+  /** A met challenge said `Ascend`: Cleanup runs, then the Ascending steps (rulebook, Outcome). */
   readonly ascends: boolean;
-  /** Who was in last stand when the room ended Cleared — they get the escape (rulebook, Last Stand). */
-  readonly lastStandAtClear: Readonly<Record<Character, boolean>>;
 }
 
 /* --------------------------------------------------------- the aggregate */
@@ -228,20 +226,26 @@ export interface GameState {
 
 /* ------------------------------------------------------------- commands */
 
-/** The Scrap tax and the reward, both decided at the moment of ascending (rulebook, Ascending). */
+/**
+ * Settle one Stuff card found in a character's deck, hand or discard pile
+ * (rulebook, Ascending). Omitting a card from `AscendChoice.settle` takes the
+ * default: a Good Stuff card goes to its pool, a Bad Stuff card is kept.
+ */
+export interface StuffSettlement {
+  readonly cardId: CardId;
+  /** Pay by Scrapping this other owned, non-Stuff card: keeps Good Stuff, or sheds Bad Stuff. */
+  readonly payWith: CardId | null;
+}
+
+/** Settling Stuff and the reward, both decided at the moment of ascending (rulebook, Ascending). */
 export interface AscendChoice {
-  /** Keep this Stuff from your own discard pile out of the Scrapyard... */
-  readonly keepStuffId: CardId | null;
-  /** ...by Scrapping this other card of that pile in its place. Both or neither. */
-  readonly scrapId: CardId | null;
+  readonly settle: readonly StuffSettlement[];
   /** One of the three offered, or null to decline. */
   readonly takeRewardId: CardId | null;
 }
 
 export type Command =
   | { readonly type: "FLIP_ROOM" }
-  | { readonly type: "DRAW"; readonly character: Character }
-  | { readonly type: "END_DRAW" }
   | {
       readonly type: "PLAY_CARD";
       readonly character: Character;
@@ -259,8 +263,8 @@ export type CommandType = Command["type"];
 
 /* --------------------------------------------------------------- events */
 
-/** Where a card was when it was discarded. `deck` is the loss you did not choose (rulebook, Card anatomy: Keywords). */
-export type DiscardedFrom = "hand" | "deck" | "playZone";
+/** Where a card was when it was discarded (rulebook, Card anatomy: Keywords). */
+export type DiscardedFrom = "hand" | "playZone";
 
 export type DomainEvent =
   | { readonly type: "FLOOR_BUILT"; readonly floor: number; readonly rooms: number }
@@ -270,12 +274,6 @@ export type DomainEvent =
       readonly character: Character;
       readonly card: Card;
       /** True for a draw a card's text forced on someone else — see `drawOne`. */
-      readonly forced?: boolean;
-    }
-  | {
-      readonly type: "DRAW_BURNED";
-      readonly character: Character;
-      readonly card: Card;
       readonly forced?: boolean;
     }
   | { readonly type: "CARD_PLAYED"; readonly character: Character; readonly card: Card }
@@ -288,6 +286,11 @@ export type DomainEvent =
     }
   | { readonly type: "CARD_SCRAPPED"; readonly character: Character | null; readonly card: Card }
   | {
+      readonly type: "CARD_EXHAUSTED";
+      readonly character: Character;
+      readonly card: Card;
+    }
+  | {
       readonly type: "EXHAUST_PREVENTED";
       readonly character: Character;
       readonly amount: number;
@@ -297,6 +300,12 @@ export type DomainEvent =
       readonly type: "CARDS_SHUFFLED_IN";
       readonly character: Character;
       readonly cards: readonly Card[];
+    }
+  | {
+      /** Rulebook, Keywords: Empty deck — the discard pile became a new deck. */
+      readonly type: "DISCARD_RESHUFFLED";
+      readonly character: Character;
+      readonly cards: number;
     }
   | { readonly type: "CARD_TO_HAND"; readonly character: Character; readonly card: Card }
   | {
@@ -316,12 +325,6 @@ export type DomainEvent =
   | { readonly type: "ROOM_CLEARED"; readonly room: Room }
   | { readonly type: "ROOM_FLED"; readonly room: Room }
   | { readonly type: "FLED_RESHUFFLED"; readonly rooms: number }
-  | { readonly type: "LAST_STAND"; readonly character: Character }
-  | {
-      readonly type: "LAST_STAND_ESCAPED";
-      readonly character: Character;
-      readonly price: readonly Card[];
-    }
   | { readonly type: "WENT_DOWN"; readonly character: Character; readonly cause: string }
   | { readonly type: "REWARD_REVEALED"; readonly character: Character; readonly card: Card }
   | { readonly type: "REWARD_TAKEN"; readonly character: Character; readonly card: Card }
@@ -341,16 +344,11 @@ export type RejectionCode =
   | "NoPendingChoice"
   | "GameIsOver"
   | "CharacterIsDown"
-  | "InLastStand"
-  | "DeckIsEmpty"
-  | "HandIsFull"
-  | "DrawCapReached"
   | "NotInHand"
   | "WrongPayment"
   | "CannotPayWithThat"
   | "NotAnOption"
   | "NotOffered"
-  | "ScrapTaxIncomplete"
   | "FloorDeckEmpty";
 
 /** An illegal command is a value, not a throw. */

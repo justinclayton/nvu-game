@@ -18,7 +18,8 @@ import { resolveCardName } from "@content/names";
 import { costOf, payOptions, playableCards } from "@domain/queries";
 import type { Card, CardId, Character, Command, GameState } from "@domain/types";
 import { CHARACTERS, playerOf } from "@domain/verbs";
-import { randomPolicy } from "@sim/policy";
+import { POLICIES, randomPolicy } from "@sim/policy";
+import { buildReport, type BalanceReport } from "@sim/report";
 import { seedsFrom, simulate, type RunResult, type StopReason } from "@sim/run";
 import {
   ascendComplete,
@@ -40,6 +41,7 @@ import {
   type PlayAction,
   type PlayRequest,
   type ReplayRequest,
+  type SimRequest,
 } from "./args";
 import { cardLine, moveHint, printedFaceLine, renderTable } from "./render";
 
@@ -583,6 +585,49 @@ function fuzz(request: FuzzRequest): number {
   return 1;
 }
 
+/* ------------------------------------------------------------------ sim */
+
+function pct(n: number): string {
+  return `${(n * 100).toFixed(1)}%`;
+}
+
+function renderReport(report: BalanceReport): string {
+  const lines: string[] = [];
+  lines.push(`Policy: ${report.policy}. Seeds ${String(report.from)}-${String(report.from + report.seeds - 1)}, ${String(report.runs)} run(s).`);
+  lines.push(`Win rate: ${pct(report.winRate)} (${String(report.wins)}/${String(report.runs)}).`);
+  lines.push("");
+  lines.push("Floor reached:");
+  for (const f of report.floors) lines.push(`  ${String(f.floor)}: ${String(f.runs)}`);
+  lines.push("");
+  lines.push("Why runs ended:");
+  for (const e of report.endReasons) lines.push(`  ${e.reason}: ${String(e.runs)}`);
+  lines.push("");
+  lines.push("After each Ascend, mean pile sizes:");
+  for (const c of CHARACTERS) {
+    const s = report.characters[c];
+    lines.push(
+      `  ${c}: ${String(s.ascends)} Ascend(s), deck ${s.meanDeckSize.toFixed(1)}, exhaust ${s.meanExhaustSize.toFixed(1)}`,
+    );
+  }
+  lines.push("");
+  lines.push("Per card — played / taken / kept:");
+  for (const card of report.cards) {
+    lines.push(`  ${card.name}: ${String(card.played)} / ${String(card.taken)} / ${String(card.kept)}`);
+  }
+  if (report.ascendFallbacks !== null) {
+    lines.push("");
+    lines.push(`Ascend commands composed directly, falling back to the generator's list ${String(report.ascendFallbacks)} time(s).`);
+  }
+  return lines.join("\n");
+}
+
+function sim(request: SimRequest): number {
+  const policy = POLICIES[request.policy];
+  const report = buildReport(policy, content, request.from, request.seeds);
+  out(request.json ? JSON.stringify(report, null, 2) : renderReport(report));
+  return 0;
+}
+
 /* ----------------------------------------------------------------- main */
 
 function main(argv: readonly string[]): number {
@@ -599,6 +644,8 @@ function main(argv: readonly string[]): number {
       return replayRun(request);
     case "fuzz":
       return fuzz(request);
+    case "sim":
+      return sim(request);
   }
 }
 

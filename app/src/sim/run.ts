@@ -8,7 +8,7 @@
 import { execute } from "@domain/engine";
 import type { CardContent } from "@domain/printed";
 import { createInitialState } from "@domain/setup";
-import type { Command, GameState, Result } from "@domain/types";
+import type { Command, DomainEvent, GameState, Result } from "@domain/types";
 import { legalCommands } from "./moves";
 import type { Policy } from "./policy";
 import { policySeed } from "./rng";
@@ -16,6 +16,13 @@ import { policySeed } from "./rng";
 export interface RunOptions {
   /** A policy that never ends a phase would spin forever; this stops it. */
   readonly maxCommands?: number;
+  /**
+   * Called after each command the engine accepts, with the state right
+   * before it and the state and events it produced. A report builds its
+   * per-card and per-Ascend statistics off this instead of replaying the
+   * command log a second time.
+   */
+  readonly onStep?: (before: GameState, command: Command, after: GameState, events: readonly DomainEvent[]) => void;
 }
 
 const DEFAULT_MAX_COMMANDS = 5_000;
@@ -99,6 +106,7 @@ export function simulate(
       break;
     }
     commands.push(command);
+    options.onStep?.(state, command, result.state, result.events);
     state = result.state;
   }
   if (state.phase === "GameOver") stopped = "GameOver";

@@ -58,11 +58,21 @@ export interface FuzzRequest {
   readonly from: number;
 }
 
+export type PolicyName = "random" | "greedy";
+
+export interface SimRequest {
+  readonly command: "sim";
+  readonly seeds: number;
+  readonly from: number;
+  readonly policy: PolicyName;
+  readonly json: boolean;
+}
+
 export interface HelpRequest {
   readonly command: "help";
 }
 
-export type Request = PlayRequest | CardRequest | ReplayRequest | FuzzRequest | HelpRequest;
+export type Request = PlayRequest | CardRequest | ReplayRequest | FuzzRequest | SimRequest | HelpRequest;
 
 export class UsageError extends Error {}
 
@@ -88,6 +98,7 @@ export const USAGE = `North vs Up — the CLI. The same rules engine as the web 
   bin/nvu card "Charge In"
   bin/nvu replay FILE [--quiet]
   bin/nvu fuzz --seeds N [--from SEED]
+  bin/nvu sim --seeds N [--from SEED] [--policy random|greedy] [--json]
   bin/nvu web
   bin/nvu help
 
@@ -100,6 +111,7 @@ play    the run file is the only state; every call loads it, applies one move, w
 card    print a card's face from the content — no run needed
 replay  fold a run file back through the engine and print its transcript
 fuzz    play N seeds of uniformly random legal play under a command budget; prints failures only
+sim     play N seeds with a policy and print a balance report (win rate, floors, per-card stats)
 web     run the web game's dev server
 `;
 
@@ -322,6 +334,32 @@ export function parseRequest(argv: readonly string[]): Request {
       const seeds = requiredInteger("seeds", values.seeds);
       if (seeds < 1) throw new UsageError("--seeds wants at least 1.");
       return { command: "fuzz", seeds, from: integer("from", values.from, 1) };
+    }
+
+    case "sim": {
+      const { values } = parseArgs({
+        args: [...rest],
+        options: {
+          seeds: { type: "string" },
+          from: { type: "string" },
+          policy: { type: "string" },
+          json: { type: "boolean" },
+        },
+        strict: true,
+      });
+      const seeds = requiredInteger("seeds", values.seeds);
+      if (seeds < 1) throw new UsageError("--seeds wants at least 1.");
+      const policyRaw = values.policy ?? "greedy";
+      if (policyRaw !== "random" && policyRaw !== "greedy") {
+        throw new UsageError(`--policy wants "random" or "greedy", not "${policyRaw}".`);
+      }
+      return {
+        command: "sim",
+        seeds,
+        from: integer("from", values.from, 1),
+        policy: policyRaw,
+        json: values.json ?? false,
+      };
     }
 
     default:

@@ -1,10 +1,20 @@
 /* The table as text. No rule is computed here: every number is a domain query. */
 
-import { costOf, metThresholds, statPool, thresholdTarget } from "@domain/queries";
-import type { Card, Character, Command, GameState, Room } from "@domain/types";
+import {
+  costOf,
+  metThresholds,
+  payOptions,
+  playableCards,
+  settleableStuff,
+  statPool,
+  thresholdTarget,
+} from "@domain/queries";
+import type { Card, Character, GameState, Room } from "@domain/types";
+import type { CardFace } from "@domain/printed";
 import { CHARACTERS, playerOf } from "@domain/verbs";
+import { currentQuestion, describeStagedAnswer, payerCandidates, type StagedAnswer } from "./ascend";
 
-const statsOf = (card: Card): string => {
+const statsOf = (card: Card | CardFace): string => {
   const parts: string[] = [];
   if (card.oomph > 0) parts.push(`Oomph ${String(card.oomph)}`);
   if (card.scramble > 0) parts.push(`Scramble ${String(card.scramble)}`);
@@ -12,10 +22,10 @@ const statsOf = (card: Card): string => {
   return parts.join(", ");
 };
 
-const kindOf = (card: Card): string =>
+const kindOf = (card: Card | CardFace): string =>
   card.kind === "good_stuff" ? "Good Stuff" : card.kind === "bad_stuff" ? "Bad Stuff" : "";
 
-/** One line for a card, as a hand or a menu lists it. */
+/** One line for a card, as a hand, an offer or an answer to `card NAME` shows it. */
 export function cardLine(state: GameState, c: Character, card: Card): string {
   const cost = costOf(state, c, card);
   const costNote =
@@ -23,6 +33,13 @@ export function cardLine(state: GameState, c: Character, card: Card): string {
       ? `cost ${String(cost)} (printed ${String(card.cost)})`
       : `cost ${String(cost)}`;
   const bits = [costNote, statsOf(card), kindOf(card)].filter((s) => s !== "");
+  const text = card.text.trim() === "" ? "" : ` — ${card.text.trim()}`;
+  return `${card.name} [${bits.join("; ")}]${text}`;
+}
+
+/** A card's printed face, with no state or character to price it against — `bin/nvu card NAME`. */
+export function printedFaceLine(card: CardFace): string {
+  const bits = [`cost ${String(card.cost)}`, statsOf(card), kindOf(card)].filter((s) => s !== "");
   const text = card.text.trim() === "" ? "" : ` — ${card.text.trim()}`;
   return `${card.name} [${bits.join("; ")}]${text}`;
 }
@@ -51,7 +68,37 @@ function playerLines(state: GameState, c: Character): string[] {
   return lines;
 }
 
-export function renderTable(state: GameState): string {
+function ascendStatusLines(state: GameState, staged: readonly StagedAnswer[]): string[] {
+  const lines: string[] = ["Ascending."];
+  const q = currentQuestion(state, staged);
+  if (q) {
+    lines.push(
+      `Asking: ${q.character} — ${q.kind === "reward" ? "the reward, last" : `${q.card?.name ?? ""} (${kindOf(q.card as Card)})`}`,
+    );
+  } else {
+    lines.push("Every question is staged; composing ASCEND.");
+  }
+  for (const c of CHARACTERS) {
+    const stuff = settleableStuff(state, c);
+    lines.push(
+      `  ${c} settleable Stuff: ${stuff.length > 0 ? stuff.map((x) => `${x.name} (${kindOf(x)})`).join(", ") : "none"}`,
+    );
+    const payers = payerCandidates(state, c, staged);
+    lines.push(`  ${c} payer candidates: ${payers.length > 0 ? payers.map((x) => x.name).join(", ") : "none"}`);
+  }
+  lines.push("Offered:");
+  for (const c of CHARACTERS) {
+    const offer = state.offer?.[c] ?? [];
+    lines.push(`  ${c}: ${offer.length > 0 ? offer.map((card) => cardLine(state, c, card)).join(" | ") : "nothing"}`);
+  }
+  if (staged.length > 0) {
+    lines.push("Staged so far:");
+    for (const a of staged) lines.push(`  ${describeStagedAnswer(state, a)}`);
+  }
+  return lines;
+}
+
+export function renderTable(state: GameState, staged: readonly StagedAnswer[] = []): string {
   const lines: string[] = [];
   lines.push(
     `Floor ${String(state.floor)} · turn ${String(state.turn)} · ${state.phase}` +
@@ -64,78 +111,91 @@ export function renderTable(state: GameState): string {
     lines.push(`Stat pool: Oomph ${String(pool.oomph)}, Scramble ${String(pool.scramble)}`);
   }
   for (const c of CHARACTERS) lines.push(...playerLines(state, c));
-  if (state.phase === "Ascend" && state.offer) {
-    lines.push("Ascending. Offered:");
-    for (const c of CHARACTERS) {
-      lines.push(
-        `  ${c}: ${state.offer[c].map((card) => cardLine(state, c, card)).join(" | ") || "nothing"}`,
-      );
-    }
-  }
+  if (state.phase === "Ascend") lines.push(...ascendStatusLines(state, staged));
   if (state.pending) lines.push(`Waiting on: ${state.pending.prompt}`);
   if (state.outcome) lines.push(`Outcome: ${state.outcome}`);
   return lines.join("\n");
 }
 
-const nameOf = (state: GameState, id: string): string => {
-  for (const c of CHARACTERS) {
-    const p = playerOf(state, c);
-    const found = [...p.hand, ...p.discard, ...p.deck].find((x) => x.id === id);
-    if (found) return found.name;
-  }
-  const offered = [...(state.offer?.Red ?? []), ...(state.offer?.Gray ?? [])].find(
-    (x) => x.id === id,
-  );
-  if (offered) return offered.name;
-  const pending = state.pending;
-  if (pending?.kind === "ChooseCards" || pending?.kind === "OrderCards") {
-    const shown = pending.kind === "ChooseCards" ? pending.options : pending.cards;
-    const found = shown.find((x) => x.id === id);
-    if (found) return found.name;
-  }
-  return id;
-};
+/**
+ * The verbs open right now, with the cards eligible for each — not every
+ * combination a command could take (design/cli-sim/spec.md, "the moves hint
+ * printed after each call ... lists the verbs open in this phase with the
+ * cards eligible for each, not every combination").
+ */
+export function moveHint(state: GameState, staged: readonly StagedAnswer[] = []): string {
+  if (state.phase === "GameOver") return "No legal moves — the run is over.";
 
-/** A command as a menu line. */
-export function describeCommand(state: GameState, command: Command): string {
-  switch (command.type) {
-    case "FLIP_ROOM":
-      return "Flip the next room (draws both hands to 5)";
-    case "PLAY_CARD": {
-      const card = playerOf(state, command.character).hand.find((x) => x.id === command.cardId);
-      const paying =
-        command.payWith.length === 0
-          ? "for free"
-          : `paying ${command.payWith.map((id) => nameOf(state, id)).join(", ")}`;
-      return `${command.character} plays ${card ? card.name : command.cardId} ${paying}`;
+  const lines: string[] = [];
+  const pending = state.pending;
+  if (pending) {
+    switch (pending.kind) {
+      case "ChooseCharacter":
+        lines.push(`choose <Name> — one of: ${pending.options.join(", ")}`);
+        break;
+      case "ChooseCards": {
+        const names = pending.options.map((c) => c.name).join(", ") || "nothing";
+        const want = Math.min(pending.count, pending.options.length);
+        const plural = want > 1 ? " <Name>..." : "";
+        const optional = pending.optional ? ", or choose none" : "";
+        lines.push(`choose <Name>${plural} — choose ${String(want)} of: ${names}${optional}`);
+        break;
+      }
+      case "OrderCards":
+        lines.push(`order <Name> <Name>... — top first, every one of: ${pending.cards.map((c) => c.name).join(", ")}`);
+        break;
+      case "TakeReward":
+        lines.push(`take | skip — ${pending.card.name}`);
+        break;
     }
-    case "END_PLAY":
-      return "End the Play phase and resolve the room";
-    case "CHOOSE_CHARACTER":
-      return command.character;
-    case "CHOOSE_CARDS":
-      return command.cardIds.length === 0
-        ? "None"
-        : command.cardIds.map((id) => nameOf(state, id)).join(", ");
-    case "ORDER_CARDS":
-      return command.cardIds.map((id) => nameOf(state, id)).join(" → ");
-    case "TAKE_REWARD":
-      return command.take ? "Take it" : "Skip it";
-    case "ASCEND": {
-      const one = (c: Character) => {
-        const ch = command[c];
-        const reward =
-          ch.takeRewardId === null ? "declines" : `takes ${nameOf(state, ch.takeRewardId)}`;
-        const settled = ch.settle
-          .map(
-            (s) =>
-              `${s.payWith === null ? "" : `keeps ${nameOf(state, s.cardId)} by Scrapping ${nameOf(state, s.payWith)}`}`,
-          )
-          .filter((s) => s !== "");
-        const settle = settled.length === 0 ? "" : `, ${settled.join(", ")}`;
-        return `${c} ${reward}${settle}`;
-      };
-      return `Ascend: ${one("Red")}; ${one("Gray")}`;
+    lines.push("undo — step back to the last checkpoint");
+    return lines.join("\n");
+  }
+
+  switch (state.phase) {
+    case "Turn Start":
+      lines.push(
+        state.floorDeck.length > 0
+          ? "flip — flip the next room and draw"
+          : "No legal moves — the run is over.",
+      );
+      break;
+
+    case "Play": {
+      for (const c of CHARACTERS) {
+        if (playerOf(state, c).down) continue;
+        for (const card of playableCards(state, c)) {
+          const cost = costOf(state, c, card);
+          const payers = payOptions(state, c, card.id).map((x) => x.name);
+          const pay = cost > 0 ? ` pay <${String(cost)} of: ${payers.join(", ")}>` : "";
+          lines.push(`card ${c} ${card.name} (cost ${String(cost)})${pay}`);
+        }
+      }
+      lines.push("end — end the Play phase and resolve the room");
+      break;
+    }
+
+    case "Ascend": {
+      const q = currentQuestion(state, staged);
+      if (!q) {
+        lines.push("Every question is staged; composing ASCEND.");
+        break;
+      }
+      if (q.kind === "reward") {
+        const offered = state.offer?.[q.character] ?? [];
+        const names = offered.map((c) => c.name).join(", ") || "nothing";
+        lines.push(`${q.character}: the reward. take <Name> — one of: ${names} — or take none`);
+      } else if (q.card) {
+        const payers = payerCandidates(state, q.character, staged).map((c) => c.name).join(", ") || "none";
+        lines.push(
+          q.card.kind === "good_stuff"
+            ? `${q.character}: ${q.card.name} (Good Stuff). keep ${q.card.name} paying <Payer: ${payers}> | return ${q.card.name}`
+            : `${q.character}: ${q.card.name} (Bad Stuff). keep ${q.card.name} | shed ${q.card.name} paying <Payer: ${payers}>`,
+        );
+      }
+      lines.push("undo — step back one staged question");
+      break;
     }
   }
+  return lines.join("\n");
 }

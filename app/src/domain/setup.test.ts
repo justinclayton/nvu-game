@@ -16,11 +16,11 @@ describe("Setting up a floor", () => {
     expect(state.Gray.deck).toHaveLength(12);
   });
 
-  it("builds floor 1 from 1 Enemy room and 9 Hazard/Stuff rooms", () => {
+  it("builds floor 1 from 1 Stairwell and 9 Rooms", () => {
     const [state] = createInitialState(1, content);
     const kinds = state.floorDeck.map((r) => r.kind);
-    expect(kinds.filter((k) => k === "enemy")).toHaveLength(1);
-    expect(kinds.filter((k) => k === "hazard" || k === "stuff")).toHaveLength(9);
+    expect(kinds.filter((k) => k === "stairwell")).toHaveLength(1);
+    expect(kinds.filter((k) => k === "room")).toHaveLength(9);
     expect(state.floorDeck).toHaveLength(10);
   });
 
@@ -28,30 +28,47 @@ describe("Setting up a floor", () => {
   // you move up, each subsequent floor will have one fewer card than the
   // previous one."
   it("floor size is 11 - floor, per rulebook Setup > Floor deck", () => {
-    const [initial] = createInitialState(1, content);
-    const fullSupply = returnRoomsToSupply(initial);
     for (let floor = 1; floor <= TOP_FLOOR; floor += 1) {
-      const state = buildFloor({ ...fullSupply, floor }, []);
-      expect(state.floorDeck).toHaveLength(roomsOnFloor(floor));
       expect(roomsOnFloor(floor)).toBe(11 - floor);
     }
     expect(roomsOnFloor(TOP_FLOOR)).toBe(1);
   });
 
-  it("the Hazard count on a floor varies with the seed", () => {
-    const hazardCounts = new Set(
-      Array.from({ length: 20 }, (_, i) => {
-        const [state] = createInitialState(i, content);
-        return state.floorDeck.filter((r) => r.kind === "hazard").length;
-      }),
-    );
-    expect(hazardCounts.size).toBeGreaterThan(1);
+  it("builds a full floor deck for every floor in band 1 (floors 1-3)", () => {
+    const [initial] = createInitialState(1, content);
+    const fullSupply = returnRoomsToSupply(initial);
+    for (let floor = 1; floor <= 3; floor += 1) {
+      const state = buildFloor({ ...fullSupply, floor }, []);
+      expect(state.floorDeck).toHaveLength(roomsOnFloor(floor));
+      expect(state.floorDeck.every((r) => r.band === 1)).toBe(true);
+    }
   });
 
-  it("takes the Enemy room that guards the floor being built", () => {
+  // Bands 2 and 3, and floor 10's fixed Stairwell, are follow-ups (#122, #123, #125).
+  it("builds an empty deck for a floor outside band 1", () => {
+    const [initial] = createInitialState(1, content);
+    const fullSupply = returnRoomsToSupply(initial);
+    for (const floor of [4, 7, 10]) {
+      const state = buildFloor({ ...fullSupply, floor }, []);
+      expect(state.floorDeck).toHaveLength(0);
+    }
+  });
+
+  it("floor 1's room composition varies with the seed", () => {
+    const compositions = new Set(
+      Array.from({ length: 20 }, (_, i) => {
+        const [state] = createInitialState(i, content);
+        return state.floorDeck.map((r) => r.name).sort().join(",");
+      }),
+    );
+    expect(compositions.size).toBeGreaterThan(1);
+  });
+
+  it("takes the Stairwell and Rooms from the floor's own band", () => {
     const [state] = createInitialState(1, content);
-    const enemy = state.floorDeck.find((r) => r.kind === "enemy");
-    expect(enemy?.floor).toBe(1);
+    const stairwell = state.floorDeck.find((r) => r.kind === "stairwell");
+    expect(stairwell?.band).toBe(1);
+    expect(state.floorDeck.every((r) => r.band === 1)).toBe(true);
   });
 
   it("gives every physical copy its own id", () => {

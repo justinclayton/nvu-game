@@ -20,9 +20,8 @@ const TYPE_LINE: Record<Card["kind"], string> = {
 };
 
 const ROOM_KIND: Record<Room["kind"], string> = {
-  enemy: "Enemy room",
-  hazard: "Hazard room",
-  stuff: "Stuff room",
+  room: "Room",
+  stairwell: "Stairwell",
 };
 
 /** The class that colours a card: its type line, or for a room its kind. */

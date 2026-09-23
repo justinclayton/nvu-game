@@ -9,15 +9,23 @@ wherever this file disagrees with it. Code uses these terms spelled this way.
 
 **Floor**
 
-One level of the tower. A floor is cleared when the players clear its Enemy room, which triggers Ascend. Floor 1's Floor deck has 10 cards; each floor after that has one fewer than the last.
+One level of the tower. A floor is cleared when a Challenge's outcome says `Ascend` — only a Stairwell prints one. Floor 1's Floor deck has 10 cards; each floor after that has one fewer than the last.
 
 **Floor deck**
 
-The face-down deck in the middle of the table that new Rooms are drawn from. Built by adding the current floor's Enemy Room card, then adding randomly-selected Floor cards until the deck reaches that floor's card count.
+The face-down deck in the middle of the table that new Rooms are drawn from. Built from the floor's band: one Stairwell plus Rooms drawn at random until the deck reaches that floor's card count (rulebook, Setup > Floor deck). `[you, 2026-09-23]`
+
+**Band**
+
+One of the three floor ranges — 1–3, 4–6, 7–9 — that each share a Room pool and a Stairwell pool. Floor 10 has no band: it uses one fixed Stairwell instead. `[agent → you, 2026-09-23]`
 
 **Room**
 
-A card presenting one or more Challenges, turned face up from the Floor deck onto the Rooms pile at the start of a turn. Its printed type — `Enemy`, `Hazard`, or `Stuff` — is an archetype, read for flavor and for floor-deck composition (see Floor deck); every Room works the same way regardless of it. `[you, 2026-09-17]`
+A card presenting one or more Challenges, turned face up from the Floor deck onto the Rooms pile at the start of a turn. Every Room prints as either a `Room` or a `Stairwell`; every Challenge is checked the same way regardless of which. `[you, 2026-09-23]`
+
+**Stairwell**
+
+The Room kind that guards a floor: the only kind whose Challenges can print `Ascend`. One is shuffled into every floor deck, drawn from the floor's band. `[you, 2026-09-23]`
 
 **Active room**
 
@@ -29,7 +37,7 @@ A `threshold: outcome` line on a Room card. Players compare their Stat pool agai
 
 **Flee line**
 
-The `Flee:` line on a Room card, resolved when no Challenge is cleared this turn. A Room that prints no Flee line of its own (no Stuff room does) Flees empty-handed, the same as one whose printed line happens to do nothing.
+The `Flee:` line on a Room card, resolved when no Challenge is cleared this turn. A Room that prints no Flee line of its own Flees empty-handed, the same as one whose printed line happens to do nothing.
 
 **Stuff**
 
@@ -57,7 +65,7 @@ The blank area in front of each player where cards are played during the Play ph
 
 **Type line**
 
-The line on a card stating what it is: `Red` or `Gray` (and whether it's a starter) on Character cards, `Good Stuff` or `Bad Stuff` on Stuff cards, and `Enemy`/`Hazard`/`Stuff` on Room cards.
+The line on a card stating what it is: `Red` or `Gray` (and whether it's a starter) on Character cards, `Good Stuff` or `Bad Stuff` on Stuff cards, and `Room` or `Stairwell` plus its band's floors (`Room · Floors 4–6`) on Room cards.
 
 **Rarity**
 
@@ -85,7 +93,7 @@ Ascending's second step, once the hand has been shuffled into the deck. Every St
 
 **Card reward**
 
-A card offered to a player from their reward pool. Comes from a Hazard room's higher threshold (one card, take or skip) or from Ascending (top 3 cards revealed, take up to one into your deck).
+A card offered to a player from their reward pool. Comes from a Room's higher threshold (one card, take or skip) or from Ascending (top 3 cards revealed, take up to one into your deck).
 
 **Reward pool**
 

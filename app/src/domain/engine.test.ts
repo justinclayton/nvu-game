@@ -251,8 +251,8 @@ describe("Cleanup", () => {
   });
 });
 
-describe("Room kinds: Enemy, Hazard, Stuff", () => {
-  it("an Enemy room ends the floor when it is Cleared", () => {
+describe("Room kinds: Room and Stairwell", () => {
+  it("a Stairwell ends the floor when it is Cleared", () => {
     // The Cherry wants Oomph 5: Charge In (Oomph 4, Cost 2) plus a free Pry Bar
     // (Oomph 3) gets there with two Shoves as the payment.
     const state = rig({
@@ -299,7 +299,7 @@ describe("Room kinds: Enemy, Hazard, Stuff", () => {
     expect(next.Red.exhaust).toHaveLength(1);
   });
 
-  it("a Hazard's higher threshold also reveals a reward — taken or skipped", () => {
+  it("a Room's higher threshold also reveals a reward — taken or skipped", () => {
     // Two Coil Of Cables (Scramble 3 each, cost 0) clear both of Collapsed
     // Stairwell's lines: Scramble 2 (Exhaust 1 each) and Scramble 5 (one of
     // you reveals a reward).
@@ -359,7 +359,7 @@ describe("Room kinds: Enemy, Hazard, Stuff", () => {
     expect(next.fled).toEqual([]);
   });
 
-  it("a Stuff room that meets no threshold Flees, empty-handed and unpunished", () => {
+  it("a room that meets no threshold Flees, empty-handed and unpunished", () => {
     const state = rig({
       phase: "Play",
       activeRoom: room("Sorting Room"),
@@ -376,7 +376,7 @@ describe("Room kinds: Enemy, Hazard, Stuff", () => {
     expect(next.Red.deck).toHaveLength(5);
   });
 
-  it("a Stuff room's per-character lines still read the shared pool", () => {
+  it("a room's per-character lines still read the shared pool", () => {
     // Sorting Room: Oomph 2 pays Red, Scramble 2 pays Gray. Each line names who
     // is paid, not whose side of the play zone counts.
     const state = rig({

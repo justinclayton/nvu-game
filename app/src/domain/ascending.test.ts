@@ -251,14 +251,14 @@ describe("Ascending, build the next floor", () => {
     expect(next.floor).toBe(2);
     expect(next.phase).toBe("Turn Start");
     const kinds = next.floorDeck.map((r) => r.kind);
-    expect(kinds.filter((k) => k === "enemy")).toHaveLength(1);
+    expect(kinds.filter((k) => k === "stairwell")).toHaveLength(1);
     expect(next.floorDeck).toHaveLength(9);
     expect(eventTypes(events)).toContain("FLOOR_BUILT");
   });
 });
 
 describe("Winning and losing", () => {
-  it("'you win by clearing the Enemy room on floor 10'", () => {
+  it("'you win by clearing floor 10's Stairwell'", () => {
     const state = rig({
       phase: "Play",
       floor: 10,

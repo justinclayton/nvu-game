@@ -611,8 +611,9 @@ export const CARD_CONTENT = {
     {
       name: "Gross Thing That Looks Like A Cherry",
       set: "proposed",
-      kind: "enemy",
-      floor: 1,
+      kind: "stairwell",
+      band: 1,
+      flavor: "",
       count: 1,
       thresholds: [
         {
@@ -640,8 +641,9 @@ export const CARD_CONTENT = {
     {
       name: "Coney, The Thing In The Stairwell",
       set: "proposed",
-      kind: "enemy",
-      floor: 2,
+      kind: "stairwell",
+      band: 1,
+      flavor: "",
       count: 1,
       thresholds: [
         {
@@ -669,8 +671,9 @@ export const CARD_CONTENT = {
     {
       name: "Villy, Coney's Work Husband",
       set: "proposed",
-      kind: "enemy",
-      floor: 3,
+      kind: "stairwell",
+      band: 1,
+      flavor: "",
       count: 1,
       thresholds: [
         {
@@ -707,8 +710,9 @@ export const CARD_CONTENT = {
     {
       name: "Collapsed Stairwell",
       set: "proposed",
-      kind: "hazard",
-      floor: null,
+      kind: "room",
+      band: 1,
+      flavor: "",
       count: 3,
       thresholds: [
         {
@@ -756,8 +760,9 @@ export const CARD_CONTENT = {
     {
       name: "Ruptured Coolant Line",
       set: "proposed",
-      kind: "hazard",
-      floor: null,
+      kind: "room",
+      band: 1,
+      flavor: "",
       count: 3,
       thresholds: [
         {
@@ -808,8 +813,9 @@ export const CARD_CONTENT = {
     {
       name: "Sorting Room",
       set: "proposed",
-      kind: "stuff",
-      floor: null,
+      kind: "room",
+      band: 1,
+      flavor: "",
       count: 3,
       thresholds: [
         {
@@ -852,8 +858,9 @@ export const CARD_CONTENT = {
     {
       name: "Ration Locker",
       set: "proposed",
-      kind: "stuff",
-      floor: null,
+      kind: "room",
+      band: 1,
+      flavor: "",
       count: 2,
       thresholds: [
         {
@@ -926,8 +933,9 @@ export const CARD_CONTENT = {
     {
       name: "Tool Cage",
       set: "proposed",
-      kind: "stuff",
-      floor: null,
+      kind: "room",
+      band: 1,
+      flavor: "",
       count: 2,
       thresholds: [
         {
@@ -970,8 +978,9 @@ export const CARD_CONTENT = {
     {
       name: "Spill Of Cargo",
       set: "proposed",
-      kind: "stuff",
-      floor: null,
+      kind: "room",
+      band: 1,
+      flavor: "",
       count: 2,
       thresholds: [
         {

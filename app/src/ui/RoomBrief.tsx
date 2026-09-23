@@ -9,14 +9,13 @@ import type { GameState } from "@domain/types";
 const PHASE_BLURB: Record<GameState["phase"], string> = {
   "Turn Start": "Turn the top card of the floor deck face up, then both of you draw to 5.",
   Play: "Play into your own side. Nothing resolves until you both stop.",
-  Ascend: "The Enemy is dead. Pack up the floor.",
+  Ascend: "The Stairwell is clear. Pack up the floor.",
   GameOver: "The run is over.",
 };
 
 const KIND_LABEL: Record<NonNullable<GameState["activeRoom"]>["kind"], string> = {
-  enemy: "Enemy",
-  hazard: "Hazard",
-  stuff: "Stuff",
+  room: "Room",
+  stairwell: "Stairwell",
 };
 
 export function RoomBrief({ state }: { readonly state: GameState }) {

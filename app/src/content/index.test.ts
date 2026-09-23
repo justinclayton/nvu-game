@@ -35,8 +35,8 @@ describe("content", () => {
   });
 
   it("gives every room's threshold the same shape, whatever the room's printed kind", () => {
-    // A room's type line (Enemy/Hazard/Stuff) is flavor: every Challenge is checked
-    // the same way, so no threshold carries a kind-specific reading of the pool.
+    // A Room and a Stairwell check a Challenge the same way, so no threshold
+    // carries a kind-specific reading of the pool.
     for (const room of CARD_CONTENT.rooms) {
       for (const t of room.thresholds) expect(t).not.toHaveProperty("measuredOn");
     }

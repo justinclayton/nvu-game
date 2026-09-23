@@ -85,7 +85,7 @@ export const drawTargetFor = (state: GameState, c: Character): number =>
  * they do. Conditional stats are recalculated every time the pool is read.
  *
  * A contribution never goes below zero: a card that is reduced past nothing
- * contributes nothing rather than draining the pool. See open-questions.md #10.
+ * contributes nothing rather than draining the pool.
  */
 export function contributionOf(state: GameState, played: PlayedCard): StatTotals {
   const { owner, card } = played;
@@ -194,7 +194,6 @@ interface CostOverrideRule extends CostOverride {
 const COST_OVERRIDES: readonly CostOverrideRule[] = [
   {
     // Overcharged Battery: the next card played this turn, by either character.
-    // See open-questions.md #14.
     reason: "free play",
     oneShot: true,
     available: (state) => state.thisTurn.freePlays > 0,

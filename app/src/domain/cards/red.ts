@@ -1,8 +1,4 @@
-/* Red's cards. Keyed by the name design/cards.yaml makes unique.
- *
- * Where a card's printed text allowed more than one reading, the reading is
- * marked here and written up in design/web-game/open-questions.md.
- */
+/* Red's cards. Keyed by the name design/cards.yaml makes unique. */
 
 import type { Card, Character, DomainEvent, GameState } from "../types";
 import {
@@ -110,9 +106,7 @@ export const RED: Registry = {
   },
 
   /* "If Gray has already played at least one card this turn, +2 Oomph. If the
-   * room is Cleared, return this to your hand at the end of the turn."
-   *
-   * See open-questions.md #12. */
+   * room is Cleared, return this to your hand at the end of the turn." */
   "Both Barrels": {
     stats(state, _owner, card) {
       const bonus = playedBy(state, "Gray") > 0 ? 2 : 0;

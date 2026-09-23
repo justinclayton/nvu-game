@@ -501,7 +501,7 @@ describe("Rust — 'Holding: Stuff you play has -1 Oomph'", () => {
   });
 });
 
-describe("Spore Cloud — 'Holding: At Cleanup, discard down to 3 cards'", () => {
+describe("Spore Cloud — 'Holding: At Cleanup, discard cards other than this one until you hold 3'", () => {
   it("does nothing to a hand already at or under 3", () => {
     const state = playing({
       activeRoom: room("Gross Thing That Looks Like A Cherry"),
@@ -513,7 +513,7 @@ describe("Spore Cloud — 'Holding: At Cleanup, discard down to 3 cards'", () =>
     expect(next.Red.hand).toHaveLength(2);
   });
 
-  it("asks its holder to discard down to 3 at Cleanup — any card, Spore Cloud included", () => {
+  it("asks its holder to discard down to 3 at Cleanup, Spore Cloud itself not offered", () => {
     const state = playing({
       activeRoom: room("Gross Thing That Looks Like A Cherry"),
       Red: player({
@@ -527,18 +527,44 @@ describe("Spore Cloud — 'Holding: At Cleanup, discard down to 3 cards'", () =>
     if (pending?.kind !== "ChooseCards") throw new Error("expected a card choice");
     expect(pending.character).toBe("Red");
     expect(pending.count).toBe(1);
-    expect(pending.options.map((c) => c.name)).toContain("Spore Cloud");
+    // Spore Cloud still counts toward the 3, but is not an option to discard.
+    expect(pending.options.map((c) => c.name)).not.toContain("Spore Cloud");
+    expect(pending.options).toHaveLength(3);
 
-    const choice = pending.options.find((c) => c.name === "Spore Cloud");
+    const choice = pending.options[0];
     if (!choice) throw new Error("rig");
     const { state: next, events } = must(asked.state, {
       type: "CHOOSE_CARDS",
       cardIds: [choice.id],
     });
     expect(next.Red.hand).toHaveLength(3);
-    expect(next.Red.hand.some((c) => c.name === "Spore Cloud")).toBe(false);
+    expect(next.Red.hand.some((c) => c.name === "Spore Cloud")).toBe(true);
     expect(next.phase).toBe("Turn Start");
     expect(eventTypes(events)).toContain("CARD_DISCARDED");
+  });
+
+  it("stays uneraseable even holding two copies", () => {
+    const state = playing({
+      activeRoom: room("Gross Thing That Looks Like A Cherry"),
+      Red: player({
+        deck: pile("Shove", 3),
+        hand: [card("Spore Cloud"), card("Spore Cloud"), card("Shove"), card("Shove")],
+      }),
+      Gray: player({ deck: pile("Duck Under", 3) }),
+    });
+    const asked = must(state, { type: "END_PLAY" });
+    const pending = asked.state.pending;
+    if (pending?.kind !== "ChooseCards") throw new Error("expected a card choice");
+    // Two Spore Clouds count toward the 3 the same as any other card, and
+    // neither is offered — down to 3 leaves both plus one Shove.
+    expect(pending.count).toBe(1);
+    expect(pending.options.map((c) => c.name)).toEqual(["Shove", "Shove"]);
+
+    const choice = pending.options[0];
+    if (!choice) throw new Error("rig");
+    const { state: next } = must(asked.state, { type: "CHOOSE_CARDS", cardIds: [choice.id] });
+    expect(next.Red.hand).toHaveLength(3);
+    expect(next.Red.hand.filter((c) => c.name === "Spore Cloud")).toHaveLength(2);
   });
 });
 

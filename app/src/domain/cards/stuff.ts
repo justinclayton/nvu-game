@@ -156,20 +156,24 @@ export const STUFF: Registry = {
     whileHeld: { stuffPowerDelta: -1 },
   },
 
-  /* "Holding: At Cleanup, discard down to 3 cards."
+  /* "Holding: At Cleanup, discard cards other than this one until you hold
+   * 3."
    *
-   * The holder's own choice — any card in hand, Spore Cloud included. A no-op
-   * once the hand is already 3 or fewer. */
+   * The holder's own choice, from every OTHER card in hand — Spore Cloud
+   * itself (any copy) is not an option, but still counts toward the 3. A
+   * no-op once the hand is already 3 or fewer. */
   "Spore Cloud": {
     onCleanup(state, ctx) {
       const hand = playerOf(state, ctx.character).hand;
       const excess = hand.length - 3;
       if (excess <= 0) return nothing(state);
+      const options = hand.filter((c) => c.name !== "Spore Cloud");
+      if (options.length === 0) return nothing(state);
       return ask(state, {
         kind: "ChooseCards",
         prompt: "Discard down to 3 cards.",
         character: ctx.character,
-        options: hand,
+        options,
         count: excess,
         optional: false,
         source: source(ctx, "spore-cloud"),

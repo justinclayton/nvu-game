@@ -576,7 +576,7 @@ export const CARD_CONTENT = {
       oomph: 0,
       scramble: 0,
       conditionalStat: false,
-      text: "Holding: At Cleanup, discard down to 3 cards.",
+      text: "Holding: At Cleanup, discard cards other than this one until you hold 3.",
     },
     {
       name: "Panic",

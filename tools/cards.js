@@ -52,7 +52,7 @@ var NVU_CARDS = {
     {"name":"Torn Seal","set":"proposed","kind":"bad_stuff","cost":2,"text":null},
     {"name":"Sluggish","set":"proposed","kind":"bad_stuff","cost":1,"text":"Holding: cards cost +1 to play."},
     {"name":"Rust","set":"proposed","kind":"bad_stuff","cost":2,"text":"Holding: Stuff you play has -1 Oomph."},
-    {"name":"Spore Cloud","set":"proposed","kind":"bad_stuff","cost":2,"text":"Holding: At Cleanup, discard down to 3 cards."},
+    {"name":"Spore Cloud","set":"proposed","kind":"bad_stuff","cost":2,"text":"Holding: At Cleanup, discard cards other than this one until you hold 3."},
     {"name":"Panic","set":"proposed","kind":"bad_stuff","cost":1,"text":"Holding: ALL rooms require an additional 2 `Scramble` to clear. Play: Exhaust 2."},
     {"name":"My Head Is Quantum Spinning","set":"proposed","kind":"bad_stuff","cost":1,"text":"Holding: Whenever your partner draws a card during Play, Exhaust 1."},
     {"name":"Gross Thing That Looks Like A Cherry","set":"proposed","kind":"enemy_room","thresholds":[{"stat":"Oomph","value":5,"outcome":"Ascend"}],"flee":"Both of you Exhaust 1.","floor":1},

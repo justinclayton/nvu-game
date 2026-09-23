@@ -383,7 +383,8 @@ cards:
     set: proposed
     kind: bad_stuff
     cost: 2
-    text: Holding: At Cleanup, discard down to 3 cards.
+    text: >-
+      Holding: At Cleanup, discard cards other than this one until you hold 3.
 
   - name: Panic
     set: proposed

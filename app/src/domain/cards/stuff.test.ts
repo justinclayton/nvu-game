@@ -499,6 +499,19 @@ describe("Rust — 'Holding: Stuff you play has -1 Oomph'", () => {
     // Shove is Oomph 2 and is not Stuff.
     expect(statPool(withCard.state).oomph).toBe(4);
   });
+
+  it("floors a Stuff card's Oomph at zero rather than going negative", () => {
+    const state = playing({
+      Red: player({
+        deck: pile("Shove", 3),
+        hand: [card("Rust"), card("Coil Of Cable")],
+      }),
+    });
+    const r = ids(state, "Red");
+    // Coil Of Cable is Oomph 0, so Rust's -1 would drain the pool if not floored.
+    const withCard = must(state, free("Red", r[1] as CardId));
+    expect(statPool(withCard.state).oomph).toBe(0);
+  });
 });
 
 describe("Spore Cloud — 'Holding: At Cleanup, discard cards other than this one until you hold 3'", () => {

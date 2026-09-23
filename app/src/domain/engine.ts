@@ -5,8 +5,8 @@
  * here reads a clock, a network or Math.random — randomness is the seed carried
  * in the state, so a run replays exactly from its seed and its command log.
  *
- * Section numbers point at design/rulebook-0.2-draft.md, rules version
- * 0.2.0-draft, which is the authority. Where a rule allowed more than one
+ * Section numbers point at design/rulebook.md, rules version
+ * 0.2.0, which is the authority. Where a rule allowed more than one
  * reading, the reading is marked here and written up in
  * design/web-game/open-questions.md.
  */

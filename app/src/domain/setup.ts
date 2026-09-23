@@ -11,8 +11,8 @@ import type { CardContent, CardFace, Character, RoomFace } from "./printed";
 import { shuffle } from "./rng";
 import type { Card, DomainEvent, GameState, PlayerState, Room, TurnRecord } from "./types";
 
-/** The rulebook this engine implements (design/rulebook-0.2-draft.md). See #83. */
-export const RULES_VERSION = "0.2.0-draft";
+/** The rulebook this engine implements (design/rulebook.md). See #83. */
+export const RULES_VERSION = "0.2.0";
 
 /** The tenth floor is the roof: clearing its Enemy room wins the run (rulebook, Winning and losing). */
 export const TOP_FLOOR = 10;

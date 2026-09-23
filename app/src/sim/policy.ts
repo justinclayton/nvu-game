@@ -125,32 +125,86 @@ function choosePlay(state: GameState, legal: readonly Command[]): Command {
   return best;
 }
 
-/** "Keep Good Stuff when you can pay for it, and shed Bad Stuff when you can." */
-function scoreAscend(state: GameState, red: AscendChoice, gray: AscendChoice): number {
-  let score = 0;
-  for (const [character, choice] of [
-    ["Red", red],
-    ["Gray", gray],
-  ] as const) {
-    if (choice.takeRewardId !== null) score += 100;
-    const stuff = settleableStuff(state, character);
-    for (const settlement of choice.settle) {
-      const card = stuff.find((s) => s.id === settlement.cardId);
-      if (!card || settlement.payWith === null) continue;
-      score += card.kind === "good_stuff" ? 50 : card.kind === "bad_stuff" ? 25 : 0;
-    }
+/** "Keep Good Stuff when you can pay for it, and shed Bad Stuff when you can", for one character. */
+function scoreChoice(state: GameState, character: Character, choice: AscendChoice): number {
+  let score = choice.takeRewardId !== null ? 100 : 0;
+  const stuff = settleableStuff(state, character);
+  for (const settlement of choice.settle) {
+    const card = stuff.find((s) => s.id === settlement.cardId);
+    if (!card || settlement.payWith === null) continue;
+    score += card.kind === "good_stuff" ? 50 : card.kind === "bad_stuff" ? 25 : 0;
   }
   return score;
 }
 
+function choiceEqual(a: AscendChoice, b: AscendChoice): boolean {
+  if (a.takeRewardId !== b.takeRewardId || a.settle.length !== b.settle.length) return false;
+  return a.settle.every((s, i) => {
+    const t = b.settle[i];
+    return t !== undefined && s.cardId === t.cardId && s.payWith === t.payWith;
+  });
+}
+
+/** The distinct choices offered this character, across every `ASCEND` command in `legal`. */
+function choicesFor(
+  ascends: readonly Extract<Command, { type: "ASCEND" }>[],
+  side: "Red" | "Gray",
+): readonly AscendChoice[] {
+  const out: AscendChoice[] = [];
+  for (const cmd of ascends) {
+    if (!out.some((c) => choiceEqual(c, cmd[side]))) out.push(cmd[side]);
+  }
+  return out;
+}
+
+function bestChoice(state: GameState, side: Character, choices: readonly AscendChoice[]): AscendChoice {
+  let best = choices[0];
+  if (!best) throw new Error(`greedy: ${side} was offered no Ascend choice`);
+  let bestScore = scoreChoice(state, side, best);
+  for (const choice of choices.slice(1)) {
+    const score = scoreChoice(state, side, choice);
+    if (score > bestScore) {
+      best = choice;
+      bestScore = score;
+    }
+  }
+  return best;
+}
+
+/**
+ * Past `moves.ts`'s 256-entry Ascend cross-product cap, no single legal
+ * command lets both characters take their own best choice at once — one
+ * side is always forced to "none" (design/cli-sim/spec.md, "The move
+ * generator"). Always breaking that tie toward whichever character's
+ * command happens to come first would starve the other one every time the
+ * cap bites — this alternates who gets priority by floor instead, so both
+ * get their turn across a run.
+ */
 function chooseAscend(state: GameState, legal: readonly Command[]): Command {
   const ascends = legal.filter((c): c is Extract<Command, { type: "ASCEND" }> => c.type === "ASCEND");
-  const first = ascends[0];
-  if (!first) throw new Error("greedy: Ascend phase offered no ASCEND command");
-  let best = first;
-  let bestScore = scoreAscend(state, first.Red, first.Gray);
+  if (ascends.length === 0) throw new Error("greedy: Ascend phase offered no ASCEND command");
+
+  const bestRed = bestChoice(state, "Red", choicesFor(ascends, "Red"));
+  const bestGray = bestChoice(state, "Gray", choicesFor(ascends, "Gray"));
+
+  const exact = ascends.find((c) => choiceEqual(c.Red, bestRed) && choiceEqual(c.Gray, bestGray));
+  if (exact) return exact;
+
+  const redFirst = state.floor % 2 === 0;
+  const primary = redFirst
+    ? ascends.find((c) => choiceEqual(c.Red, bestRed))
+    : ascends.find((c) => choiceEqual(c.Gray, bestGray));
+  if (primary) return primary;
+  const secondary = redFirst
+    ? ascends.find((c) => choiceEqual(c.Gray, bestGray))
+    : ascends.find((c) => choiceEqual(c.Red, bestRed));
+  if (secondary) return secondary;
+
+  let best = ascends[0];
+  if (!best) throw new Error("greedy: Ascend phase offered no ASCEND command");
+  let bestScore = scoreChoice(state, "Red", best.Red) + scoreChoice(state, "Gray", best.Gray);
   for (const c of ascends.slice(1)) {
-    const score = scoreAscend(state, c.Red, c.Gray);
+    const score = scoreChoice(state, "Red", c.Red) + scoreChoice(state, "Gray", c.Gray);
     if (score > bestScore) {
       best = c;
       bestScore = score;

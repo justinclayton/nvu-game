@@ -152,4 +152,39 @@ describe("greedy", () => {
     const [chosen] = greedyPolicy.choose(state, legal, policySeed(1));
     expect(chosen).toEqual(greedyChoice);
   });
+
+  it("does not always favor Red when the Ascend cross-product cap forces a choice", () => {
+    // Past moves.ts's 256-entry cap, no legal command lets both characters
+    // act at once — one side is always "none". A tie between an equally
+    // good Red-only and Gray-only command must not always resolve the same
+    // way, or the other character never benefits from Ascend.
+    resetRig();
+    const redReward = card("Fast Follow");
+    const grayReward = card("Covering Fire");
+    const state: GameState = rig({
+      phase: "Ascend",
+      offer: { Red: [redReward], Gray: [grayReward] },
+    });
+    const none: Command = {
+      type: "ASCEND",
+      Red: { settle: [], takeRewardId: null },
+      Gray: { settle: [], takeRewardId: null },
+    };
+    const redTakes: Command = {
+      type: "ASCEND",
+      Red: { settle: [], takeRewardId: redReward.id },
+      Gray: { settle: [], takeRewardId: null },
+    };
+    const grayTakes: Command = {
+      type: "ASCEND",
+      Red: { settle: [], takeRewardId: null },
+      Gray: { settle: [], takeRewardId: grayReward.id },
+    };
+    const legal: readonly Command[] = [none, redTakes, grayTakes];
+
+    const [onEvenFloor] = greedyPolicy.choose({ ...state, floor: 2 }, legal, policySeed(1));
+    const [onOddFloor] = greedyPolicy.choose({ ...state, floor: 3 }, legal, policySeed(1));
+    expect(onEvenFloor).toEqual(redTakes);
+    expect(onOddFloor).toEqual(grayTakes);
+  });
 });

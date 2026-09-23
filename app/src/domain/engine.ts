@@ -15,9 +15,8 @@ import { behaviourOf, type BehaviourContext, type ChoiceAnswer } from "./cards/b
 import {
   costOf,
   costOverrideSpentBy,
-  drawCapFor,
+  drawTargetFor,
   exhaustXPreventedBy,
-  handCapFor,
   payOptions,
   thresholdIsMet,
 } from "./queries";
@@ -440,8 +439,7 @@ function flipRoom(state: GameState, run: Run): GameState {
  * Step 2, Draw up to five: both characters draw until holding 5, all at once —
  * no opening draw, no alternating turns, no decision to make, so this never
  * pauses on its own (see `types.ts`, `Phase`: `Turn Start` covers both steps).
- * A card can still lower a character's own target (`handCapFor`) or cap how
- * many they draw this turn (`drawCapFor`).
+ * A card can still lower a character's own target (`drawTargetFor`).
  */
 function drawPhase(state: GameState, run: Run): GameState {
   let s = state;
@@ -456,9 +454,8 @@ function drawToCap(state: GameState, c: Character, run: Run): GameState {
   let s = state;
   for (;;) {
     const p = playerOf(s, c);
-    if (p.hand.length >= handCapFor(s, c)) return s;
-    if (p.drewThisTurn >= drawCapFor(s, c)) return s;
-    s = drawOne(s, c, run.events);
+    if (p.hand.length >= drawTargetFor(s, c)) return s;
+    s = drawOne(s, c, run.events, false, true);
     if (s.phase === "GameOver") return s;
   }
 }
@@ -714,23 +711,59 @@ function drain(state: GameState, run: Run): GameState {
 
 /* ------------------------------------------------------------ Cleanup */
 
+/**
+ * Cleanup's own one-time steps run once, guarded by `resolution.cleanupStarted`
+ * — a held card's own Cleanup question (Spore Cloud) can pause the rest of
+ * cleanup on a `pending` and this is re-entered to resume, so nothing before
+ * that guard may run twice.
+ */
 function finishTurn(state: GameState, run: Run): GameState {
+  let s: GameState = state;
+  if (!s.resolution?.cleanupStarted) {
+    // The resolution stays readable through cleanup: a card that asks whether the
+    // room was Cleared reads it there. It is cleared at the end of the turn.
+    s = { ...s, pending: null };
+
+    // The Play phase is over, so a free play nobody used is gone: it discounts a
+    // card played this turn or nothing at all. See open-questions.md #14.
+    s = clearFreePlays(s);
+
+    run.events.push({ type: "CLEANUP_BEGAN" });
+    // A card that takes itself back out of the play zone does it now, before the
+    // piles are cleaned.
+    s = flush(s, run);
+    if (s.resolution) s = { ...s, resolution: { ...s.resolution, cleanupStarted: true } };
+  }
+  return cleanupHands(s, run);
+}
+
+/**
+ * A held card's own Cleanup line (Spore Cloud's discard). Read one hand at a
+ * time so a question it asks can suspend here — every held Cleanup line is
+ * written to stop asking once satisfied, so a resume simply starts this scan
+ * over from Red's hand without repeating anything already settled.
+ */
+function cleanupHands(state: GameState, run: Run): GameState {
+  let s = state;
+  for (const c of CHARACTERS) {
+    for (const card of playerOf(s, c).hand) {
+      const onCleanup = behaviourOf(card.name)?.onCleanup;
+      if (!onCleanup) continue;
+      const step = onCleanup(s, { card, character: c, zone: "hand" });
+      s = step.state;
+      run.events.push(...step.events);
+      if (s.phase === "GameOver") return s;
+      if (s.pending) return s;
+    }
+  }
+  return finishCleanup(s, run);
+}
+
+/** The rest of Cleanup, once nothing held is still asking a question. */
+function finishCleanup(state: GameState, run: Run): GameState {
   const resolution = state.resolution;
   const ascends = resolution?.ascends ?? false;
-  // The resolution stays readable through cleanup: a card that asks whether the
-  // room was Cleared reads it there. It is cleared at the end of the turn.
-  let s: GameState = { ...state, pending: null };
-
-  // The Play phase is over, so a free play nobody used is gone: it discounts a
-  // card played this turn or nothing at all. See open-questions.md #14.
-  s = clearFreePlays(s);
-
-  run.events.push({ type: "CLEANUP_BEGAN" });
-  // A card that takes itself back out of the play zone does it now, before the
-  // piles are cleaned.
-  s = flush(s, run);
-
-  s = cleanupPiles(s, run);
+  let s = cleanupPiles(state, run);
 
   // If the floor draw pile is empty, shuffle the Fled pile back in. See
   // open-questions.md #21.

@@ -9,7 +9,7 @@ import {
   playerOf,
   returnToHand,
   shuffleIntoDeck,
-  takeFromDiscard,
+  takeFromExhaust,
   takeFromHand,
 } from "../verbs";
 import { ask, done, nothing, source, type Registry } from "./behaviour";
@@ -48,16 +48,16 @@ export const RED: Registry = {
     },
   },
 
-  /* "Shuffle a Red card from your discard pile back into your deck."
+  /* "Shuffle a Red card from your Exhaust pile into your deck."
    *
-   * Red's own cards only: Stuff in the discard pile is not a Red card. */
+   * Red's own cards only: Stuff in the Exhaust pile is not a Red card. */
   "Second Wind": {
     onPlay(state, ctx) {
-      const options = playerOf(state, ctx.character).discard.filter((c) => c.owner === "Red");
+      const options = playerOf(state, ctx.character).exhaust.filter((c) => c.owner === "Red");
       if (options.length === 0) return nothing(state);
       return ask(state, {
         kind: "ChooseCards",
-        prompt: "Shuffle which Red card from your discard pile back into your deck?",
+        prompt: "Shuffle which Red card from your Exhaust pile into your deck?",
         character: ctx.character,
         options,
         count: 1,
@@ -68,7 +68,7 @@ export const RED: Registry = {
     onChoice(answer, state, ctx) {
       if (answer.kind !== "cards") return nothing(state);
       const events: DomainEvent[] = [];
-      const lifted = takeFromDiscard(state, ctx.character, answer.cards);
+      const lifted = takeFromExhaust(state, ctx.character, answer.cards);
       return done(shuffleIntoDeck(lifted, ctx.character, answer.cards, events), events);
     },
   },
@@ -106,9 +106,9 @@ export const RED: Registry = {
     },
   },
 
-  /* "Holding: Cards you play have +1 Oomph, but you may not draw more than 2 cards per turn." */
+  /* "Holding: Cards you play have +1 Oomph. At Turn Start, draw 1 fewer card." */
   "Deadweight Grip": {
-    whileHeld: { playedPowerDelta: 1, drawCap: 2 },
+    whileHeld: { playedPowerDelta: 1, drawTargetDelta: 1 },
   },
 
   /* "If Gray has already played at least one card this turn, +2 Oomph. If the

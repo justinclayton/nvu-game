@@ -87,13 +87,13 @@ describe("Fast Follow — 'If Gray played a card this turn, this costs 0'", () =
   });
 });
 
-describe("Second Wind — 'Shuffle a Red card from your discard pile back into your deck'", () => {
-  it("offers Red's own discarded cards, and nothing else", () => {
+describe("Second Wind — 'Shuffle a Red card from your Exhaust pile into your deck'", () => {
+  it("offers Red's own Exhausted cards, and nothing else", () => {
     const state = playing({
       Red: player({
         deck: pile("Shove", 3),
         hand: [card("Second Wind"), card("Shove"), card("Shove")],
-        discard: [card("Charge In"), card("Pry Bar")],
+        exhaust: [card("Charge In"), card("Pry Bar")],
       }),
     });
     const hand = ids(state, "Red");
@@ -106,8 +106,7 @@ describe("Second Wind — 'Shuffle a Red card from your discard pile back into y
     const pending = asked.state.pending;
     expect(pending?.kind).toBe("ChooseCards");
     if (pending?.kind !== "ChooseCards") throw new Error("expected a card choice");
-    // The Pry Bar is Stuff, not a Red card. The two Shoves that paid for this
-    // are in the pile by now, and are Red cards, so they are offered too.
+    // The Pry Bar is Stuff, not a Red card.
     const offered = pending.options.map((c) => c.name);
     expect(offered).toContain("Charge In");
     expect(offered).not.toContain("Pry Bar");
@@ -119,7 +118,7 @@ describe("Second Wind — 'Shuffle a Red card from your discard pile back into y
       cardIds: [chosen.id],
     });
     expect(next.Red.deck.some((c) => c.id === chosen.id)).toBe(true);
-    expect(next.Red.discard.some((c) => c.id === chosen.id)).toBe(false);
+    expect(next.Red.exhaust.some((c) => c.id === chosen.id)).toBe(false);
     expect(eventTypes(events)).toContain("CARDS_SHUFFLED_IN");
   });
 });
@@ -170,7 +169,7 @@ describe("Heavy Pockets — 'Shuffle 1 Stuff from your hand into your deck'", ()
   });
 });
 
-describe("Deadweight Grip — 'Cards you play have +1 Oomph, draw no more than 2'", () => {
+describe("Deadweight Grip — 'Cards you play have +1 Oomph. At Turn Start, draw 1 fewer card'", () => {
   it("adds a Oomph to everything its holder plays", () => {
     const state = playing({
       Red: player({
@@ -189,7 +188,7 @@ describe("Deadweight Grip — 'Cards you play have +1 Oomph, draw no more than 2
     expect(statPool(next).oomph).toBe(3);
   });
 
-  it("caps its holder's draw at 2 during the automatic draw", () => {
+  it("trims its holder's Turn Start target from 5 to 4", () => {
     const state = rig({
       phase: "Turn Start",
       floorDeck: [room("Sorting Room")],
@@ -197,9 +196,9 @@ describe("Deadweight Grip — 'Cards you play have +1 Oomph, draw no more than 2
       Gray: player({ deck: pile("Duck Under", 6) }),
     });
     const { state: next } = must(state, { type: "FLIP_ROOM" });
-    expect(next.Red.drewThisTurn).toBe(2);
-    // Deadweight Grip plus the two draws it allowed: 3, short of the usual 5.
-    expect(next.Red.hand).toHaveLength(3);
+    expect(next.Red.drewThisTurn).toBe(3);
+    // Deadweight Grip plus the three draws that fill it to 4.
+    expect(next.Red.hand).toHaveLength(4);
   });
 });
 

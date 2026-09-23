@@ -127,7 +127,7 @@ cards:
     rarity: Cool
     cost: 2
     oomph: 4
-    text: Shuffle a Red card from your discard pile back into your deck.
+    text: Shuffle a Red card from your Exhaust pile into your deck.
 
   - name: Junk Launcher
     set: proposed
@@ -155,7 +155,7 @@ cards:
     cost: 1
     scramble: 2
     text: >-
-      Holding: Cards you play have +1 Oomph, but you may not draw more than 2 cards per turn.
+      Holding: Cards you play have +1 Oomph. At Turn Start, draw 1 fewer card.
 
   - name: Both Barrels
     set: proposed
@@ -239,7 +239,7 @@ cards:
     rarity: Fine
     cost: 1
     oomph: 2
-    text: Shuffle a Gray card from your discard pile back into your deck.
+    text: Shuffle a Gray card from your Exhaust pile into your deck.
 
   - name: I'll Take That
     set: proposed
@@ -317,7 +317,7 @@ cards:
     kind: good_stuff
     rarity: Cool
     cost: 1
-    text: Choose a character. Move 2 cards from that character's discard pile to the bottom of their deck.
+    text: Choose a character. Move 2 cards from that character's Exhaust pile to the bottom of their deck.
 
   - name: Cutting Torch
     set: proposed
@@ -359,7 +359,7 @@ cards:
     set: proposed
     kind: bad_stuff
     cost: 2
-    text: Holding: you may not draw more than 1 card per turn.
+    text: Holding: At Turn Start, draw 1 fewer card.
 
   - name: Torn Seal
     set: proposed
@@ -383,7 +383,8 @@ cards:
     set: proposed
     kind: bad_stuff
     cost: 2
-    text: Holding: You can't have more than 3 cards in your hand.
+    text: >-
+      Holding: At Cleanup, discard cards other than this one until you hold 3.
 
   - name: Panic
     set: proposed
@@ -397,7 +398,7 @@ cards:
     set: proposed
     kind: bad_stuff
     cost: 1
-    text: "Holding: whenever you draw a card, your partner must also draw a card."
+    text: "Holding: Whenever your partner draws a card during Play, Exhaust 1."
 
   # Rooms
 

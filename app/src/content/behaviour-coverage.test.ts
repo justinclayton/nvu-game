@@ -15,9 +15,7 @@ const withText = CARD_CONTENT.cards.filter((c) => hasText(c.text));
 
 /**
  * Cards whose printed text has no reading the rulebook settles, so nothing
- * implements them yet. Each one is written up in
- * design/web-game/open-questions.md. Adding a card without code changes this
- * list, which is the point: it stays a decision rather than an accident.
+ * implements them yet. Adding a card without code changes this list, which is the point: it stays a decision rather than an accident.
  */
 const UNIMPLEMENTED: readonly string[] = [];
 

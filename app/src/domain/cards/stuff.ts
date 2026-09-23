@@ -40,8 +40,7 @@ export const STUFF: Registry = {
   /* "Play: if you get any Good Stuff this turn, get an additional one."
    *
    * Two hooks share one `fired` marker per copy so the bonus pays out exactly
-   * once, whether the Good Stuff arrives before or after Crowbar is played.
-   * See open-questions.md #16. */
+   * once, whether the Good Stuff arrives before or after Crowbar is played. */
   Crowbar: {
     onPlay(state, ctx) {
       if (state.thisTurn.goodStuffTaken[ctx.character] === 0) return nothing(state);
@@ -116,9 +115,7 @@ export const STUFF: Registry = {
     },
   },
 
-  /* "If the room is Cleared, return this to your hand at the end of the turn."
-   *
-   * See open-questions.md #12. */
+  /* "If the room is Cleared, return this to your hand at the end of the turn." */
   "Riot Shield": {
     onCleanup(state, ctx) {
       if (state.resolution?.roomEnded !== "Cleared") return nothing(state);
@@ -129,8 +126,7 @@ export const STUFF: Registry = {
 
   /* "The next card played this turn costs 0."
    *
-   * The next card either character plays, and gone when the Play phase ends.
-   * See open-questions.md #14. */
+   * The next card either character plays, and gone when the Play phase ends. */
   "Overcharged Battery": {
     onPlay(state) {
       return done(grantFreePlay(state));

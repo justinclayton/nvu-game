@@ -1,8 +1,4 @@
-/* Gray's cards. Keyed by the name design/cards.yaml makes unique.
- *
- * Where a card's printed text allowed more than one reading, the reading is
- * marked here and written up in design/web-game/open-questions.md.
- */
+/* Gray's cards. Keyed by the name design/cards.yaml makes unique. */
 
 import type { Card, Character, DomainEvent, GameState, Pending } from "../types";
 import {
@@ -183,7 +179,7 @@ export const GRAY: Registry = {
 
   /* "Every time Red plays a card this turn, draw 1 card."
    *
-   * A card-driven exception to Play's no-draw rule. See open-questions.md #13. */
+   * A card-driven exception to Play's no-draw rule. */
   "Covering Fire": {
     onEvent(event, state, ctx) {
       if (ctx.zone !== "playZone") return nothing(state);

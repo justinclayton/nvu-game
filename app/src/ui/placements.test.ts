@@ -22,7 +22,6 @@ describe("placements", () => {
     const expected =
       state.floorDeck.length +
       (state.activeRoom ? 1 : 0) +
-      state.fled.length +
       state.cleared.length +
       state.Red.deck.length +
       state.Red.hand.length +

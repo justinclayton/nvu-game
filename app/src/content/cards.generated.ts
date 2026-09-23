@@ -128,7 +128,7 @@ export const CARD_CONTENT = {
       oomph: 3,
       scramble: 0,
       conditionalStat: false,
-      text: "If Gray played a card this turn, this costs 0.",
+      text: "If Gray played a card this turn, play this card for free.",
     },
     {
       name: "Reckless",
@@ -506,7 +506,7 @@ export const CARD_CONTENT = {
       oomph: 2,
       scramble: 0,
       conditionalStat: false,
-      text: "The next card played this turn costs 0.",
+      text: "The next card played this turn is played for free.",
     },
     {
       name: "Faceful Of Slime",

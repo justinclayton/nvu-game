@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { room } from "./__fixtures__/rig";
 import { CARD_CONTENT } from "../content";
 import { buildFloor, createInitialState, returnRoomsToSupply, roomsOnFloor, TOP_FLOOR } from "./setup";
 
@@ -92,5 +93,42 @@ describe("Setting up a floor", () => {
     expect(a).toEqual(b);
     const [c] = createInitialState(100, content);
     expect(c.Red.deck.map((x) => x.id)).not.toEqual(a.Red.deck.map((x) => x.id));
+  });
+});
+
+// Rulebook, Ascending step 4: "Return every room still in the floor deck, Fled
+// rooms included, to its band's pool. Rooms you cleared, the Stairwell
+// included, stay on the Rooms pile." (#66)
+describe("Ending a floor (Ascending, Build the next floor)", () => {
+  it("returns an unseen or Fled room (still in the floor deck) to the pool", () => {
+    const [initial] = createInitialState(1, content);
+    const stillInDeck = room("Sorting Room");
+    const state = { ...initial, floorDeck: [stillInDeck], cleared: [], roomSupply: [] };
+
+    const after = returnRoomsToSupply(state);
+
+    expect(after.roomSupply).toContainEqual(stillInDeck);
+  });
+
+  it("keeps a cleared room out of the pool, on the cleared pile, across an Ascend", () => {
+    const [initial] = createInitialState(1, content);
+    const clearedRoom = room("Coney, The Thing In The Stairwell");
+    const state = { ...initial, floorDeck: [], cleared: [clearedRoom], roomSupply: [] };
+
+    const after = returnRoomsToSupply(state);
+
+    expect(after.roomSupply).not.toContainEqual(clearedRoom);
+    expect(after.cleared).toEqual([clearedRoom]);
+  });
+
+  it("does not reset the cleared pile when building the next floor", () => {
+    const [initial] = createInitialState(1, content);
+    const clearedRoom = room("Collapsed Stairwell");
+    const fullSupply = returnRoomsToSupply({ ...initial, cleared: [] });
+    const state = { ...fullSupply, floor: 2, cleared: [clearedRoom] };
+
+    const next = buildFloor(state, []);
+
+    expect(next.cleared).toEqual([clearedRoom]);
   });
 });

@@ -75,7 +75,6 @@ export function rig(over: Partial<GameState> = {}): GameState {
     phase: "Play",
     floorDeck: [],
     activeRoom: null,
-    fled: [],
     cleared: [],
     roomSupply: [],
     Red: player(),

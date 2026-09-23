@@ -137,7 +137,6 @@ export function buildFloor(state: GameState, events: DomainEvent[]): GameState {
     floorDeck,
     roomSupply: supply,
     activeRoom: null,
-    fled: [],
   };
 }
 
@@ -147,12 +146,11 @@ export function buildFloor(state: GameState, events: DomainEvent[]): GameState {
  * the rest of the run (rulebook, Ascending).
  */
 export function returnRoomsToSupply(state: GameState): GameState {
-  const used = [...state.floorDeck, ...state.fled, ...(state.activeRoom ? [state.activeRoom] : [])];
+  const used = [...state.floorDeck, ...(state.activeRoom ? [state.activeRoom] : [])];
   return {
     ...state,
     roomSupply: [...state.roomSupply, ...used],
     floorDeck: [],
-    fled: [],
     activeRoom: null,
   };
 }
@@ -209,7 +207,6 @@ export function createInitialState(
     phase: "Turn Start",
     floorDeck: [],
     activeRoom: null,
-    fled: [],
     cleared: [],
     roomSupply: content.rooms.flatMap(roomCopiesOf),
     Red: freshPlayer(redDeck),

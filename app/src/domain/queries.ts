@@ -83,9 +83,6 @@ export const drawTargetFor = (state: GameState, c: Character): number =>
 /**
  * Bad Stuff cards print no Stats line, so they contribute none, whatever else
  * they do. Conditional stats are recalculated every time the pool is read.
- *
- * A contribution never goes below zero: a card that is reduced past nothing
- * contributes nothing rather than draining the pool.
  */
 export function contributionOf(state: GameState, played: PlayedCard): StatTotals {
   const { owner, card } = played;
@@ -188,8 +185,8 @@ interface CostOverrideRule extends CostOverride {
 
 /**
  * Everything that can zero a cost, in the order `costOf` reads it. A card that
- * makes a play free says so with a rule here and a verb that arms it, rather
- * than with another branch inside `costOf`.
+ * makes a play free says so with a rule here, rather than with another branch
+ * inside `costOf`.
  */
 const COST_OVERRIDES: readonly CostOverrideRule[] = [
   {
@@ -197,6 +194,11 @@ const COST_OVERRIDES: readonly CostOverrideRule[] = [
     reason: "free play",
     oneShot: true,
     available: (state) => state.thisTurn.freePlays > 0,
+  },
+  {
+    reason: "free play",
+    oneShot: false,
+    available: (state, c, card) => behaviourOf(card.name)?.freeIf?.(state, c, card) ?? false,
   },
 ];
 
@@ -208,8 +210,7 @@ export function costOverrideFor(state: GameState, c: Character, card: Card): Cos
 
 /**
  * What the card asks for with nothing overriding it: the number in the corner,
- * or what the card says instead, and then any `Holding:` line. A printed
- * "costs 0" is set first and modifiers apply after.
+ * or what the card says instead, and then any `Holding:` line.
  */
 export function printedCostOf(state: GameState, c: Character, card: Card): number {
   const behaviour = behaviourOf(card.name);

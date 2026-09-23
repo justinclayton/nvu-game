@@ -129,10 +129,12 @@ export interface TurnRecord {
  * Rulebook, Each Turn, Turn Start: bundles both its steps, Flip the room and Draw up
  * to five, into `FLIP_ROOM` — there is no decision between them, so the state
  * rests at `Turn Start` before that command and moves straight to `Play`
- * after it. Outcome and Cleanup are likewise steps of `END_PLAY`, not
- * waiting phases of their own.
+ * after it. `END_PLAY` moves the state into `Outcome`, and once the room's
+ * effects are drained, into `Cleanup`. Both rest there only while a card or
+ * the room has raised a `pending` choice — otherwise the transition runs
+ * straight through to `Turn Start` or `Ascend`.
  */
-export type Phase = "Turn Start" | "Play" | "Ascend" | "GameOver";
+export type Phase = "Turn Start" | "Play" | "Outcome" | "Cleanup" | "Ascend" | "GameOver";
 
 export type Outcome = "Victory" | "Defeat";
 
@@ -190,15 +192,10 @@ export interface Resolution {
   readonly effects: readonly RoomEffect[];
   /** How the room ended. */
   readonly roomEnded: "Cleared" | "Fled";
+  /** The room that ended, so Cleanup can shuffle a Fled one back into the Floor deck. */
+  readonly room: Room;
   /** A met challenge said `Ascend`: Cleanup runs, then the Ascending steps (rulebook, Outcome). */
   readonly ascends: boolean;
-  /**
-   * Set once Cleanup's own one-time steps (the `CLEANUP_BEGAN` event, dropping
-   * free plays, flushing this-turn triggers) have run, so a held card's own
-   * Cleanup question — Spore Cloud's discard — can pause here and resume
-   * without repeating them.
-   */
-  readonly cleanupStarted?: boolean;
 }
 
 /* --------------------------------------------------------- the aggregate */
@@ -210,10 +207,9 @@ export interface GameState {
   readonly turn: number;
   readonly phase: Phase;
 
-  /** The floor deck's draw pile, its Fled pile, and the Cleared heap (rulebook, Setup). */
+  /** The floor deck's draw pile and the Cleared heap (rulebook, Setup). */
   readonly floorDeck: readonly Room[];
   readonly activeRoom: Room | null;
-  readonly fled: readonly Room[];
   readonly cleared: readonly Room[];
   /** Every printed room copy not currently built into a floor (Setup). */
   readonly roomSupply: readonly Room[];
@@ -336,7 +332,7 @@ export type DomainEvent =
     }
   | { readonly type: "ROOM_CLEARED"; readonly room: Room }
   | { readonly type: "ROOM_FLED"; readonly room: Room }
-  | { readonly type: "FLED_RESHUFFLED"; readonly rooms: number }
+  | { readonly type: "FLED_RESHUFFLED"; readonly room: Room }
   | { readonly type: "WENT_DOWN"; readonly character: Character; readonly cause: string }
   | { readonly type: "REWARD_REVEALED"; readonly character: Character; readonly card: Card }
   | { readonly type: "REWARD_TAKEN"; readonly character: Character; readonly card: Card }

@@ -52,14 +52,19 @@ export interface CardBehaviour {
   stats?(state: GameState, owner: Character, card: Card): { oomph: number; scramble: number };
   /** A printed cost that is not the number in the corner. */
   cost?(state: GameState, owner: Character, card: Card): number;
+  /**
+   * "Play this card for free": paying is skipped entirely, overriding any
+   * `Holding:` cost modifier rather than being one itself.
+   */
+  freeIf?(state: GameState, owner: Character, card: Card): boolean;
   /** A one-shot effect, resolved as the card enters the play zone. */
   onPlay?(state: GameState, ctx: BehaviourContext): StepResult;
   /** A `Holding:` line, in force while the card is in hand. */
   whileHeld?: HeldModifiers;
   /**
    * A this-turn trigger. Listens while the card is in hand or in the play zone,
-   * and must not ask a question — the engine's resolution queue is not a place
-   * to suspend.
+   * and must not ask a question — it resolves in the middle of whatever set it
+   * off, which is not a place to suspend.
    */
   onEvent?(event: DomainEvent, state: GameState, ctx: BehaviourContext): StepResult;
   /** The follow-up to a question this card asked. */

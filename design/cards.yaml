@@ -111,7 +111,7 @@ cards:
     rarity: Fine
     cost: 1
     oomph: 3
-    text: If Gray played a card this turn, this costs 0.
+    text: If Gray played a card this turn, play this card for free.
 
   - name: Reckless
     set: proposed
@@ -353,7 +353,7 @@ cards:
     rarity: Cool
     cost: 1
     oomph: 2
-    text: The next card played this turn costs 0.
+    text: The next card played this turn is played for free.
 
   ## Bad Stuff
 

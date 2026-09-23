@@ -105,7 +105,7 @@ export function renderTable(state: GameState, staged: readonly StagedAnswer[] = 
   const lines: string[] = [];
   lines.push(
     `Floor ${String(state.floor)} · turn ${String(state.turn)} · ${state.phase}` +
-      `   floor deck ${String(state.floorDeck.length)}, fled ${String(state.fled.length)}, cleared ${String(state.cleared.length)}` +
+      `   floor deck ${String(state.floorDeck.length)}, cleared ${String(state.cleared.length)}` +
       `   Good Stuff ${String(state.pools.goodStuff.length)}, Bad Stuff ${String(state.pools.badStuff.length)}`,
   );
   if (state.activeRoom) lines.push(...roomLines(state, state.activeRoom));

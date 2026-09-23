@@ -12,7 +12,6 @@ import type { Card, Character, DomainEvent, GameState, Room } from "@domain/type
 export type ZoneId =
   | "floor"
   | "room"
-  | "fled"
   | "cleared"
   | "good"
   | "bad"
@@ -41,7 +40,6 @@ export type ZoneShape = "stack" | "row" | "float";
 export const ZONE_SHAPE: Readonly<Record<ZoneId, ZoneShape>> = {
   floor: "stack",
   room: "stack",
-  fled: "stack",
   cleared: "stack",
   good: "stack",
   bad: "stack",
@@ -64,7 +62,6 @@ export const ZONE_SHAPE: Readonly<Record<ZoneId, ZoneShape>> = {
 
 /** Piles that cards are tossed onto rather than squared up, so each one settles askew. */
 export const LOOSE_ZONES: ReadonlySet<ZoneId> = new Set<ZoneId>([
-  "fled",
   "cleared",
   "scrap",
   "red-discard",
@@ -146,7 +143,6 @@ export function placements(state: GameState, debug = false): readonly Placement[
 
   rooms(state.floorDeck, "floor", true, false);
   if (state.activeRoom) rooms([state.activeRoom], "room", true, true);
-  rooms(state.fled, "fled", false, true);
   rooms(state.cleared, "cleared", false, true);
 
   for (const c of ["Red", "Gray"] as const) {

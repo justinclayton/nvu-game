@@ -113,6 +113,8 @@ Each player does the following:
 
 ## 8. Card anatomy
 
+A number never goes below zero. If an effect would take a card's stat, cost, or a threshold lower than zero, it stops at zero instead.
+
 ### Room Cards
 
 A room card presents one or more **challenges** to the players. Each turn players will work together to play cards from their hand until they either meet or exceed one or more of the challenges, or, if they are unwilling or unable to complete any challenges, they `Flee`.
@@ -155,6 +157,7 @@ A `Stuff` card shows the same parts as a player card, with these differences:
 ### Keywords
 
 - `Holding:` a passive effect that applies while the card is in your hand. If the card is played or discarded, the effect no longer applies.
+- `for free`: Play the card without paying, whatever cost modifiers you hold.
 - `Discard X cards from your hand`: Choose **X** cards from your hand and move them to your discard pile.
 - `Exhaust X cards from your deck`: Move the top **X** cards of your deck to your Exhaust pile. If your deck is empty, see `Empty deck`.
 - `Exhaust X`: the same as `Exhaust X cards from your deck`.

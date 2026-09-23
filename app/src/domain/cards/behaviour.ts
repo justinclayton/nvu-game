@@ -58,8 +58,8 @@ export interface CardBehaviour {
   whileHeld?: HeldModifiers;
   /**
    * A this-turn trigger. Listens while the card is in hand or in the play zone,
-   * and must not ask a question — the engine's resolution queue is not a place
-   * to suspend.
+   * and must not ask a question — it resolves in the middle of whatever set it
+   * off, which is not a place to suspend.
    */
   onEvent?(event: DomainEvent, state: GameState, ctx: BehaviourContext): StepResult;
   /** The follow-up to a question this card asked. */

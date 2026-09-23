@@ -273,22 +273,22 @@ function validateAscendChoice(
    ========================================================================== */
 
 /**
- * One command's worth of events, how far the trigger dispatch has read, and
- * the event index each card most recently arrived in hand or the play zone
- * at — unset for a card that was already there before this command started.
+ * One command's worth of events, how many of them `settle` has already
+ * resolved, and the event index each card most recently arrived in hand or
+ * the play zone at — unset for a card that was already there before this
+ * command started.
  */
 interface Run {
   readonly events: DomainEvent[];
-  scanned: number;
+  settled: number;
   readonly enteredAt: Map<CardId, number>;
 }
 
 export function execute(state: GameState, command: Command): Result {
   const reason = validate(state, command);
   if (reason) return { ok: false, reason };
-  const run: Run = { events: [], scanned: 0, enteredAt: new Map() };
-  let next = apply(state, command, run);
-  next = flush(next, run);
+  const run: Run = { events: [], settled: 0, enteredAt: new Map() };
+  const next = settle(apply(state, command, run), run);
   return { ok: true, state: next, events: run.events };
 }
 
@@ -330,44 +330,53 @@ function listeners(state: GameState): readonly BehaviourContext[] {
 }
 
 /**
- * Hand every event produced so far to every card that might be listening. A
- * card's trigger can go Down its own or a partner's character (a forced
- * Exhaust or draw off an empty deck and discard pile), which ends the run
- * right there — the scan stops the moment it sees that, rather than reading
- * cards for a game that is already over.
+ * Resolve every card reaction to the events emitted since the last settle,
+ * in order. Each reaction finishes, along with anything it sets off, before
+ * the next listener hears the event. A reaction can put a character Down,
+ * which ends the run right there.
  */
-function flush(state: GameState, run: Run): GameState {
-  let s = state;
-  // Events already queued when this call started (Turn Start's draws, all at
-  // once, are the usual case) are already baked into `state`; back-fill their
-  // arrivals before scanning so a card drawn last does not out-run its own
-  // index and look like it was there for the earlier draws too.
-  const alreadyQueued = run.events.length;
-  for (let i = run.scanned; i < alreadyQueued; i++) {
-    const queued = run.events[i];
-    if (queued) trackEntry(run, queued, i);
+function settle(state: GameState, run: Run): GameState {
+  const from = run.settled;
+  const to = run.events.length;
+  run.settled = to;
+  // Every arrival in this batch is already in `state`, so a card drawn last
+  // must not hear the draws before it.
+  for (let i = from; i < to; i++) {
+    const event = run.events[i];
+    if (event) trackEntry(run, event, i);
   }
-  while (run.scanned < run.events.length) {
+  let s = state;
+  for (let i = from; i < to; i++) {
     if (s.phase === "GameOver") return s;
-    const index = run.scanned;
-    const event = run.events[index];
-    run.scanned += 1;
-    if (!event) continue;
-    if (index >= alreadyQueued) trackEntry(run, event, index);
-    for (const ctx of listeners(s)) {
-      if (s.phase === "GameOver") return s;
-      if (!heldSince(run, ctx.card.id, index)) continue;
-      const onEvent = behaviourOf(ctx.card.name)?.onEvent;
-      if (!onEvent) continue;
-      const step = onEvent(event, s, ctx);
-      s = step.state;
-      run.events.push(...step.events);
-    }
+    s = hear(s, run, i);
+  }
+  return s;
+}
+
+function hear(state: GameState, run: Run, index: number): GameState {
+  const event = run.events[index];
+  if (!event) return state;
+  let s = state;
+  for (const ctx of listeners(s)) {
+    if (s.phase === "GameOver") return s;
+    if (!heldSince(run, ctx.card.id, index) || !stillThere(s, ctx)) continue;
+    const onEvent = behaviourOf(ctx.card.name)?.onEvent;
+    if (!onEvent) continue;
+    const step = onEvent(event, s, ctx);
+    run.events.push(...step.events);
     if (run.events.length > TRIGGER_LIMIT) {
       throw new CorruptStateError("A card trigger is feeding itself.");
     }
+    s = settle(step.state, run);
   }
   return s;
+}
+
+/** Whether a listener is still where it was when the event happened. */
+function stillThere(state: GameState, ctx: BehaviourContext): boolean {
+  const zone =
+    ctx.zone === "hand" ? playerOf(state, ctx.character).hand : state.playZone.map((p) => p.card);
+  return zone.some((x) => x.id === ctx.card.id);
 }
 
 /** A card arriving in hand or the play zone — the moment a `Holding:` effect starts hearing events. */
@@ -430,14 +439,17 @@ function flipRoom(state: GameState, run: Run): GameState {
     Gray: { ...state.Gray, drewThisTurn: 0 },
     thisTurn: emptyTurnRecord(),
   };
-  return drawPhase(flipped, run);
+  const faced = settle(flipped, run);
+  if (faced.phase === "GameOver") return faced;
+  return settle(drawPhase(faced, run), run);
 }
 
 /**
  * Step 2, Draw up to five: both characters draw until holding 5, all at once —
  * no opening draw, no alternating turns, no decision to make, so this never
  * pauses on its own (see `types.ts`, `Phase`: `Turn Start` covers both steps).
- * A card can still lower a character's own target (`drawTargetFor`).
+ * A card can still lower a character's own target (`drawTargetFor`). Nothing
+ * here settles: effects triggered by these draws resolve after both have drawn.
  */
 function drawPhase(state: GameState, run: Run): GameState {
   let s = state;
@@ -493,24 +505,28 @@ function playCard(
     run.events.push({ type: "COST_PAID", character: c, cards: payment });
     s = { ...s, thisTurn: addPaid(s.thisTurn, c, payment.length) };
   }
+  s = settle(s, run);
+  if (s.phase === "GameOver") return s;
 
   const after = playerOf(s, c);
   s = withPlayer(s, c, { ...after, hand: after.hand.filter((x) => x.id !== cardId) });
   s = { ...s, playZone: [...s.playZone, { owner: c, card }] };
   run.events.push({ type: "CARD_PLAYED", character: c, card });
+  s = settle(s, run);
+  if (s.phase === "GameOver") return s;
 
   // Each Turn: nothing resolves while you play — the *room* is checked once, at
   // the end of the phase. A card's own printed effect still happens as it is played.
   const behaviour = behaviourOf(card.name);
   if (behaviour?.exhaustX !== undefined) {
-    s = printedExhaust(s, c, behaviour.exhaustX, card.name, run);
+    s = settle(printedExhaust(s, c, behaviour.exhaustX, card.name, run), run);
   }
   if (s.phase === "GameOver") return s;
   const onPlay = behaviour?.onPlay;
   if (onPlay) {
     const step = onPlay(s, { card, character: c, zone: "playZone" });
-    s = step.state;
     run.events.push(...step.events);
+    s = settle(step.state, run);
   }
   return s;
 }
@@ -600,7 +616,7 @@ function endPlay(state: GameState, run: Run): GameState {
       ascends: outcome.ascends,
     },
   };
-  return drain(s, run);
+  return drain(settle(s, run), run);
 }
 
 const withEffects = (state: GameState, effects: readonly RoomEffect[]): GameState =>
@@ -688,6 +704,8 @@ function drain(state: GameState, run: Run): GameState {
       s = withEffects(s, rest);
       if (!card) continue;
       run.events.push({ type: "REWARD_REVEALED", character: head.who, card });
+      s = settle(s, run);
+      if (s.phase === "GameOver") return s;
       return {
         ...s,
         pending: {
@@ -700,7 +718,7 @@ function drain(state: GameState, run: Run): GameState {
       };
     }
 
-    s = applyEffect(s, head, head.who, run);
+    s = settle(applyEffect(s, head, head.who, run), run);
     if (s.phase === "GameOver") return s;
     s = withEffects(s, rest);
   }
@@ -726,9 +744,8 @@ function finishTurn(state: GameState, run: Run): GameState {
     s = clearFreePlays(s);
 
     run.events.push({ type: "CLEANUP_BEGAN" });
-    // A card that takes itself back out of the play zone does it now, before the
-    // piles are cleaned.
-    s = flush(s, run);
+    s = settle(s, run);
+    if (s.phase === "GameOver") return s;
   }
   return cleanupHands(s, run);
 }
@@ -746,8 +763,8 @@ function cleanupHands(state: GameState, run: Run): GameState {
       const onCleanup = behaviourOf(card.name)?.onCleanup;
       if (!onCleanup) continue;
       const step = onCleanup(s, { card, character: c, zone: "hand" });
-      s = step.state;
       run.events.push(...step.events);
+      s = settle(step.state, run);
       if (s.phase === "GameOver") return s;
       if (s.pending) return s;
     }
@@ -760,6 +777,7 @@ function finishCleanup(state: GameState, run: Run): GameState {
   const resolution = state.resolution;
   const ascends = resolution?.ascends ?? false;
   let s = cleanupPiles(state, run);
+  if (s.phase === "GameOver") return s;
 
   // If the floor draw pile is empty, shuffle the Fled pile back in.
   if (s.floorDeck.length === 0 && s.fled.length > 0) {
@@ -806,8 +824,9 @@ function cleanupPiles(state: GameState, run: Run): GameState {
       character: played.owner,
       zone: "playZone",
     });
-    s = step.state;
     run.events.push(...step.events);
+    s = settle(step.state, run);
+    if (s.phase === "GameOver") return s;
   }
 
   // Then the play zone itself.
@@ -815,7 +834,7 @@ function cleanupPiles(state: GameState, run: Run): GameState {
     const played = s.playZone.filter((x) => x.owner === c).map((x) => x.card);
     for (const card of played) s = discard(s, c, card, "playZone", run.events);
   }
-  return { ...s, playZone: [] };
+  return settle({ ...s, playZone: [] }, run);
 }
 
 /* ------------------------------------------------------ answering a choice */
@@ -838,7 +857,8 @@ function runChoice(state: GameState, answer: ChoiceAnswer, run: Run): GameState 
   if (!onChoice) throw new CorruptStateError(`${ctx.card.name} asked a question it cannot answer.`);
   const step = onChoice(answer, cleared, ctx);
   run.events.push(...step.events);
-  return step.state.pending ? step.state : drain(step.state, run);
+  const s = settle(step.state, run);
+  return s.pending || s.phase === "GameOver" ? s : drain(s, run);
 }
 
 function answerCharacter(state: GameState, character: Character, run: Run): GameState {
@@ -902,7 +922,7 @@ function answerReward(state: GameState, take: boolean, run: Run): GameState {
     s = setPool(s, character, [...rest, card]);
     run.events.push({ type: "REWARD_DECLINED", character });
   }
-  return drain(s, run);
+  return drain(settle(s, run), run);
 }
 
 const setPool = (state: GameState, c: Character, cards: readonly Card[]): GameState =>

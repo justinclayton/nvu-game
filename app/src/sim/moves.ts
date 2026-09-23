@@ -184,5 +184,10 @@ export function legalCommands(state: GameState): readonly Command[] {
 
     case "Ascend":
       return ascends(state);
+
+    case "Outcome":
+    case "Cleanup":
+      // Automatic: these only rest on a `pending`, handled above.
+      return [];
   }
 }

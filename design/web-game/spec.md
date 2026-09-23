@@ -65,10 +65,13 @@ folder.
   same game.
 - `createInitialState(seed, content)` is the only place content enters. After that `execute` takes
   no content.
-- `phase` is `Flip | Draw | Play | Ascend | GameOver`. `FLIP_ROOM` opens Draw by drawing one card
-  for each standing character; `END_DRAW` and `END_PLAY` each end their phase for both characters at
-  once. Cleanup runs as the last step of `END_PLAY` and is announced by events. `pending: Pending |
-  null` is a separate field for a choice the engine is waiting on.
+- `phase` is `Turn Start | Play | Outcome | Cleanup | Ascend | GameOver`. `FLIP_ROOM` runs Turn
+  Start's two steps (flip the room, draw both hands to 5) at once and opens Play. `END_PLAY` moves
+  to Outcome, which resolves the room against what was played; once its effects are drained, the
+  state moves to Cleanup, which discards the play zone and runs held cards' own Cleanup lines.
+  Outcome and Cleanup rest only while something has raised a choice; otherwise the transition runs
+  straight through to Turn Start or Ascend. `pending: Pending | null` is a separate field for a
+  choice the engine is waiting on.
 - `Command` and `DomainEvent` are discriminated unions on `type`, switched exhaustively with a
   `never` default. Both live in domain.
 

@@ -2,7 +2,7 @@
 
 The project's domain terms and nothing else: what each thing is, the rulebook section that governs
 it, and the ticket or ruling that settled it. The rules themselves live in
-[`rulebook-0.2-draft.md`](rulebook-0.2-draft.md) (rules version 0.2.0-draft), which wins
+[`rulebook.md`](rulebook.md) (rules version 0.2.0), which wins
 wherever this file disagrees with it. Code uses these terms spelled this way.
 
 ---

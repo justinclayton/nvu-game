@@ -1,6 +1,6 @@
 # Playtest 4 — first agent run on rules 0.2
 
-Recorded 2026-09-22. Rules version 0.2.0 (draft), as in `design/rulebook-0.2-draft.md`. Played by an
+Recorded 2026-09-22. Rules version 0.2.0 (draft), as in `design/rulebook.md`. Played by an
 agent standing in for a human playtester, in the CLI (`bin/nvu`), seed 4, one shell call per move.
 The run reached floor 5 of 10 and was stopped at the turn-25 limit with both characters alive and
 nowhere near a loss.
@@ -14,7 +14,7 @@ for that re-tuning pass, not as verdicts.
 
 Notes are the agent's, verbatim, tagged `[agent]`, in the order they were written into the run. The
 analysis under each one is also the agent's. Nothing here is a ruling. A playtester checks a
-suspected bug against `design/rulebook-0.2-draft.md` and `design/cards.yaml` only; this run's agent
+suspected bug against `design/rulebook.md` and `design/cards.yaml` only; this run's agent
 did not read the engine source under `app/src/` to diagnose anything.
 
 The run file is `04-first-run-on-rules-0.2.json`. The full transcript is the appendix, and notes cite

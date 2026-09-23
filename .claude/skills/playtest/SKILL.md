@@ -10,7 +10,7 @@ write them down at the moment you notice them. You do not read the engine.
 
 ## What you may read
 
-- `design/rulebook-0.2-draft.md`. The authority on every rule.
+- `design/rulebook.md`. The authority on every rule.
 - `design/GLOSSARY.md`.
 - `design/cards.yaml`, when you need to check what a card says. A rulebook line can itself be wrong;
   the yaml is the truth for printed card text.

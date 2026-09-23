@@ -2,7 +2,7 @@
  * outcome it recorded. A rules change that breaks a saved playtest fails this
  * check (design/cli-sim/spec.md, Checks: "Saved runs replay").
  *
- * `PRE_0_2` is every run recorded before design/rulebook-0.2-draft.md: they
+ * `PRE_0_2` is every run recorded before design/rulebook.md: they
  * played DRAW and END_DRAW commands and the 0.1 shape of ASCEND, neither of
  * which the engine accepts any more, so they cannot replay against it. #83
  * (not yet landed) is where a run's own rules version becomes the thing this

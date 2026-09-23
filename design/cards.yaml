@@ -11,14 +11,16 @@
 #
 # Fields
 #   set     official | proposed
-#   kind    player | good_stuff | bad_stuff | enemy_room | hazard_room | stuff_room
+#   kind    player | good_stuff | bad_stuff | room | stairwell
 #   owner   Red | Gray           player cards only
 #   rarity  Fine | Cool | Woah
 #   cost    integer              null means not yet set
-#   oomph / scramble  integer    
+#   oomph / scramble  integer
 #   conditional_stat  true       stat lives in the text instead of a field
 #   starter true                 part of a starting deck rather than a reward pool
 #   text    string               the literal printed rules text
+#   band    1 | 2 | 3            room and stairwell only: which floors' pool the card is drawn from
+#   flavor  string               room and stairwell only: the printed flavor line, empty for now
 
 meta:
   updated: 2026-09-16
@@ -404,8 +406,8 @@ cards:
 
   - name: Gross Thing That Looks Like A Cherry
     set: proposed
-    kind: enemy_room
-    floor: 1
+    kind: stairwell
+    band: 1
     thresholds:
       - stat: Oomph
         value: 5
@@ -414,8 +416,8 @@ cards:
 
   - name: Coney, The Thing In The Stairwell
     set: proposed
-    kind: enemy_room
-    floor: 2
+    kind: stairwell
+    band: 1
     thresholds:
       - stat: Oomph
         value: 9
@@ -424,8 +426,8 @@ cards:
 
   - name: Villy, Coney's Work Husband
     set: proposed
-    kind: enemy_room
-    floor: 3
+    kind: stairwell
+    band: 1
     thresholds:
       - stat: Oomph
         value: 9
@@ -438,7 +440,8 @@ cards:
   - name: Collapsed Stairwell
     count: 3
     set: proposed
-    kind: hazard_room
+    kind: room
+    band: 1
     thresholds:
     - stat: Scramble
       value: 2
@@ -451,7 +454,8 @@ cards:
   - name: Ruptured Coolant Line
     count: 3
     set: proposed
-    kind: hazard_room
+    kind: room
+    band: 1
     thresholds:
     - stat: Scramble
       value: 4
@@ -464,7 +468,8 @@ cards:
   - name: Sorting Room
     count: 3
     set: proposed
-    kind: stuff_room
+    kind: room
+    band: 1
     thresholds:
       - stat: Oomph
         value: 2
@@ -476,7 +481,8 @@ cards:
   - name: Ration Locker
     count: 2
     set: proposed
-    kind: stuff_room
+    kind: room
+    band: 1
     thresholds:
       - stat: Oomph
         value: 2
@@ -494,7 +500,8 @@ cards:
   - name: Tool Cage
     count: 2
     set: proposed
-    kind: stuff_room
+    kind: room
+    band: 1
     thresholds:
       - stat: Scramble
         value: 3
@@ -506,7 +513,8 @@ cards:
   - name: Spill Of Cargo
     count: 2
     set: proposed
-    kind: stuff_room
+    kind: room
+    band: 1
     thresholds:
       - stat: Scramble
         value: 3

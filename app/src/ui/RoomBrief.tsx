@@ -11,14 +11,13 @@ const PHASE_BLURB: Record<GameState["phase"], string> = {
   Play: "Play into your own side. Nothing resolves until you both stop.",
   Outcome: "Checking the room against what you played.",
   Cleanup: "Discarding the play zone and settling what's left of the turn.",
-  Ascend: "The Enemy is dead. Pack up the floor.",
+  Ascend: "The Stairwell is clear. Pack up the floor.",
   GameOver: "The run is over.",
 };
 
 const KIND_LABEL: Record<NonNullable<GameState["activeRoom"]>["kind"], string> = {
-  enemy: "Enemy",
-  hazard: "Hazard",
-  stuff: "Stuff",
+  room: "Room",
+  stairwell: "Stairwell",
 };
 
 export function RoomBrief({ state }: { readonly state: GameState }) {

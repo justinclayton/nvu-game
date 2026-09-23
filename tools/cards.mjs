@@ -195,7 +195,7 @@ export function parseCardsYaml(text) {
 const FIELD_ORDER = [
   "name", "set", "kind", "owner", "starter", "rarity",
   "rarity_status", "cost", "oomph", "scramble", "conditional_stat",
-  "thresholds", "flee", "text", "note", "flagged",
+  "band", "flavor", "thresholds", "flee", "text", "note", "flagged",
 ];
 
 function ordered(card) {
@@ -247,12 +247,12 @@ if (typeof module !== "undefined") module.exports = NVU_CARDS;
    turned into structure here.  Anything this does not recognise is an error,
    not a silently dropped rule.
 
-   Rulebook, Card anatomy: Room Cards: every room works the same way, whatever its printed
-   type line (`Enemy`, `Hazard`, or `Stuff`) says — that line is flavor, read only for display
-   and for floor-deck composition (setup.ts), never for how a threshold or a Flee line resolves. */
+   Rulebook, Card anatomy: Room Cards: a threshold or a Flee line resolves the same way whether
+   it is printed on a Room or a Stairwell. Kind only decides which pool a card is drawn from and,
+   for a Stairwell, that it is the one card in the floor that can print `Ascend` (setup.ts). */
 
 const CARD_KINDS = new Set(["player", "good_stuff", "bad_stuff"]);
-const ROOM_KIND = { enemy_room: "enemy", hazard_room: "hazard", stuff_room: "stuff" };
+const ROOM_KINDS = new Set(["room", "stairwell"]);
 
 /** The text shown when a room with no printed Flee line of its own is fled
  * without meeting a threshold. It has no effect and, like any other Flee,
@@ -363,14 +363,17 @@ function cardFace(c) {
 }
 
 function roomFace(c) {
-  const kind = ROOM_KIND[c.kind];
   const thresholds = (c.thresholds ?? []).map((t) => threshold(t, c.name));
   if (thresholds.length === 0) throw new Error(`${c.name}: a room prints at least one threshold`);
+  if (c.band !== 1 && c.band !== 2 && c.band !== 3) {
+    throw new Error(`${c.name}: a room needs a band of 1, 2 or 3`);
+  }
   return {
     name: c.name,
     set: c.set,
-    kind,
-    floor: typeof c.floor === "number" ? c.floor : null,
+    kind: c.kind,
+    band: c.band,
+    flavor: c.flavor ?? "",
     count: c.count ?? 1,
     thresholds,
     flee: fleeLine(c),
@@ -383,7 +386,7 @@ export function structure(doc) {
   const rooms = [];
   for (const c of doc.cards) {
     if (CARD_KINDS.has(c.kind)) cards.push(cardFace(c));
-    else if (c.kind in ROOM_KIND) rooms.push(roomFace(c));
+    else if (ROOM_KINDS.has(c.kind)) rooms.push(roomFace(c));
     else throw new Error(`${c.name}: unknown kind ${JSON.stringify(c.kind)}`);
   }
   return { meta: { updated: String(doc.meta.updated ?? "") }, cards, rooms };

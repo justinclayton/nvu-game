@@ -789,8 +789,7 @@ function finishCleanup(state: GameState, run: Run): GameState {
   run.events.push({ type: "TURN_ENDED", turn: s.turn });
 
   // Each Turn, Outcome: an outcome that says Ascend runs Cleanup as normal first, then ends
-  // the floor, whichever room printed it — the room's kind ("Enemy" and all)
-  // is a printed label, not what triggers this.
+  // the floor — a met threshold triggers this, whichever room printed it.
   if (ascends) {
     run.events.push({ type: "FLOOR_CLEARED", floor: s.floor });
     if (s.floor >= TOP_FLOOR) {
@@ -936,7 +935,7 @@ function ascend(state: GameState, red: AscendChoice, gray: AscendChoice, run: Ru
   s = ascendOne(s, "Red", red, run);
   s = ascendOne(s, "Gray", gray, run);
 
-  // Setup: build the next floor's deck, with one fewer Stuff room than last time.
+  // Setup: build the next floor's deck, one card smaller than this one's.
   s = returnRoomsToSupply(s);
   s = buildFloor({ ...s, floor: s.floor + 1, offer: null }, run.events);
   return { ...s, phase: "Turn Start", playZone: [], thisTurn: emptyTurnRecord() };

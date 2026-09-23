@@ -20,7 +20,10 @@ export type Rarity = "Fine" | "Cool" | "Woah";
 export type CardKind = "player" | "good_stuff" | "bad_stuff";
 
 /** The type line of a room card (rulebook, Card anatomy: Room Cards). */
-export type RoomKind = "enemy" | "hazard" | "stuff";
+export type RoomKind = "room" | "stairwell";
+
+/** Rooms and Stairwells pool by band: floors 1–3, 4–6, 7–9 (rulebook Setup, "Floor deck"). */
+export type Band = 1 | 2 | 3;
 
 /** Whether a card is ratified or still a proposal. Only official cards gate the build. */
 export type CardSet = "official" | "proposed";
@@ -42,9 +45,9 @@ export type RoomEffect =
 
 /**
  * One `threshold: outcome` line (rulebook, Card anatomy: Room Cards). Every
- * threshold, on every kind of room, is read the same way: against the shared
- * pool (rulebook, Outcome). A room's `Enemy`/`Hazard`/`Stuff` type line is
- * flavor — it names an archetype, not a different rule.
+ * threshold, on every room, is read the same way: against the shared pool
+ * (rulebook, Outcome). A room's `Room`/`Stairwell` type line decides which
+ * pool it is drawn from, not how its thresholds resolve.
  */
 export interface Threshold {
   readonly stat: Stat;
@@ -97,8 +100,10 @@ export interface RoomFace {
   readonly name: string;
   readonly set: CardSet;
   readonly kind: RoomKind;
-  /** Enemy rooms name the floor they guard. */
-  readonly floor: number | null;
+  /** Which floors' pool the card is drawn from (rulebook Setup, "Floor deck"). */
+  readonly band: Band;
+  /** The printed flavor line. Empty until a card is given one. */
+  readonly flavor: string;
   readonly count: number;
   readonly thresholds: readonly Threshold[];
   readonly flee: FleeLine;

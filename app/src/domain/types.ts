@@ -9,6 +9,7 @@
 
 import type { CardId, RoomId } from "./ids";
 import type {
+  Band,
   CardKind,
   CardSet,
   Character,
@@ -51,8 +52,9 @@ export interface Room {
   readonly id: RoomId;
   readonly name: string;
   readonly kind: RoomKind;
-  /** Enemy rooms name the floor they guard (rulebook, Card anatomy: Room Cards). */
-  readonly floor: number | null;
+  /** Which floors' pool the card is drawn from (rulebook Setup, "Floor deck"). */
+  readonly band: Band;
+  readonly flavor: string;
   readonly thresholds: readonly Threshold[];
   readonly flee: FleeLine;
 }

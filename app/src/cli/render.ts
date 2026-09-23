@@ -2,6 +2,7 @@
 
 import {
   costOf,
+  extraScrambleRequirement,
   metThresholds,
   payOptions,
   playableCards,
@@ -51,7 +52,9 @@ function roomLines(state: GameState, room: Room): string[] {
     const target = thresholdTarget(state, t);
     const mark = met.has(t) ? "✔" : " ";
     const raised = target !== t.value ? ` (printed ${String(t.value)})` : "";
-    lines.push(`  ${mark} ${t.stat} ${String(target)}${raised}: ${t.outcome}`);
+    const extra = extraScrambleRequirement(state, t);
+    const extraNote = extra > 0 ? ` and Scramble ${String(extra)}` : "";
+    lines.push(`  ${mark} ${t.stat} ${String(target)}${raised}${extraNote}: ${t.outcome}`);
   }
   lines.push(`    Flee: ${room.flee.text}`);
   return lines;

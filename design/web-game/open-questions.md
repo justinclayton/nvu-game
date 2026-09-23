@@ -308,3 +308,46 @@ room; it was a room-kind check standing in for a text check, the same shape of m
 outcome text for the word `Ascend`, the same way `fleeFree` is set from "Flee this room for free".
 `roomOutcome` reports whether any met threshold ascends; `finishTurn` reads that flag straight off
 this turn's resolution to decide whether to run the Ascending steps, never the room's type line.
+
+---
+
+## 23. Card reactions resolve in order, nested, with no stack
+
+`[you, 2026-09-23]`
+
+**Where:** `flush` in `app/src/domain/engine.ts`, and every `onEvent` in `app/src/domain/cards/`.
+
+The rulebook says nothing about when a card that reacts to an event resolves. Card games use one
+of two shapes. A stack, where the newest thing resolves first, exists so that one player can respond
+to another; every game with one is adversarial and has instant-speed play. Cooperative and
+single-player games resolve reactions in order, because nobody has a reason to interrupt anybody.
+This is a cooperative game, so it resolves in order.
+
+**The rule.** A reaction resolves where its event happens, and finishes, including anything it
+sets off, before the next reaction to the same event starts. There is no stack and no responding.
+Gray's Covering Fire is in the play zone and Red holds My Head Is Quantum Spinning: Red plays a
+card, Gray draws, Red Exhausts, in that order, each complete before the next.
+
+The one batched moment is the one the rulebook states. Turn Start: *"Resolve effects triggered by
+these draws after both players have drawn."*
+
+Where several cards react to one event, they resolve in a fixed order: cards in hand before cards
+in the play zone, Red's before Gray's. `[agent]` No card today has company on an event, so this
+order is the engine's and has never mattered at the table.
+
+**What the code does today**, until #108 lands: reactions resolve once per command, at the end,
+breadth-first, so a reaction to a room's Outcome line lands after Cleanup has begun.
+
+---
+
+## 24. Outcome and Cleanup are phases the engine names
+
+`[you, 2026-09-23]`
+
+**Where:** `Phase` in `app/src/domain/types.ts`; `endPlay`, `drain` and `finishTurn` in
+`app/src/domain/engine.ts`.
+
+Each Turn has four phases: Turn Start, Play, Outcome, Cleanup. The engine named a phase only where
+it waits for a command, so Outcome and Cleanup ran as unnamed steps of `END_PLAY`, and a choice
+raised at Outcome read `Play`. They are named phases. Transitions stay automatic where nothing needs
+a decision, as Flip and Draw are inside Turn Start. Lands in #107.

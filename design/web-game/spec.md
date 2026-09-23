@@ -65,10 +65,14 @@ folder.
   same game.
 - `createInitialState(seed, content)` is the only place content enters. After that `execute` takes
   no content.
-- `phase` is `Flip | Draw | Play | Ascend | GameOver`. `FLIP_ROOM` opens Draw by drawing one card
-  for each standing character; `END_DRAW` and `END_PLAY` each end their phase for both characters at
-  once. Cleanup runs as the last step of `END_PLAY` and is announced by events. `pending: Pending |
-  null` is a separate field for a choice the engine is waiting on.
+- `phase` is `Turn Start | Play | Outcome | Cleanup | Ascend | GameOver`, the rulebook's four
+  turn phases plus the two the turn loop leaves. `FLIP_ROOM` runs Turn Start's Flip and Draw
+  together and rests at Play. `END_PLAY` ends Play for both characters at once and runs Outcome,
+  then Cleanup; a choice raised in either pauses inside that phase. `pending: Pending | null` is a
+  separate field for a choice the engine is waiting on.
+- Card reactions resolve in order, nested: a reaction runs where its event happens and finishes,
+  including what it sets off, before the next listener runs. No stack. Turn Start's draws are the
+  rulebook's one batched moment (open-questions.md #23, #24).
 - `Command` and `DomainEvent` are discriminated unions on `type`, switched exhaustively with a
   `never` default. Both live in domain.
 

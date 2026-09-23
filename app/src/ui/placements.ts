@@ -163,7 +163,7 @@ export function placements(state: GameState, debug = false): readonly Placement[
     const offeredIds = new Set(offered.map((x) => x.id));
     cards(offered, zoneOf(c, "offer"), { topFirst: false, faceUp: true, owner: c });
     // A revealed reward is the top of the pool, turned face up while the
-    // character decides. See open-questions.md #7.
+    // character decides.
     const revealing = state.pending?.kind === "TakeReward" && state.pending.character === c;
     cards(
       state.pools[c].filter((x) => !offeredIds.has(x.id)),
@@ -172,8 +172,7 @@ export function placements(state: GameState, debug = false): readonly Placement[
     );
   }
 
-  // Stuff is drawn face down from its pool (see open-questions.md #20), so the
-  // pools stay face down.
+  // Stuff is drawn face down from its pool, so the pools stay face down.
   cards(state.pools.goodStuff, "good", { topFirst: true, faceUp: false });
   cards(state.pools.badStuff, "bad", { topFirst: true, faceUp: false });
   cards(state.scrapyard, "scrap", { topFirst: false, faceUp: true });

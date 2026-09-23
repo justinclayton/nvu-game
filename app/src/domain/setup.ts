@@ -87,7 +87,7 @@ function takeRooms(
  * The floor gets no harder as you climb — it gets emptier.
  *
  * Enemy rooms name the floor they guard. Nothing is printed above floor 3, so a
- * higher floor falls back to any Enemy room; see open-questions.md #9.
+ * higher floor falls back to any Enemy room.
  */
 export function buildFloor(state: GameState, events: DomainEvent[]): GameState {
   let seed = state.seed;

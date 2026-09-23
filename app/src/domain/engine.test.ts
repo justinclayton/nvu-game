@@ -4,6 +4,7 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import { execute } from "./engine";
 import { statPool } from "./queries";
+import { shuffle } from "./rng";
 import {
   card,
   eventTypes,
@@ -15,7 +16,7 @@ import {
   rig,
   room,
 } from "./__fixtures__/rig";
-import type { CardId, Command, GameState } from "./types";
+import type { CardId, Command, GameState, Room } from "./types";
 
 beforeEach(resetRig);
 
@@ -194,7 +195,7 @@ describe("Play", () => {
       Gray: player({ deck: pile("Duck Under", 3) }),
     });
     const { state: next } = must(state, { type: "END_PLAY" });
-    expect(next.fled).toHaveLength(1);
+    expect(next.resolution?.roomEnded).toBe("Fled");
   });
 });
 
@@ -232,22 +233,27 @@ describe("Cleanup", () => {
     expect(next.Red.hand.map((c) => c.name)).toEqual(["Pry Bar", "Shove"]);
   });
 
-  it("'if the floor draw pile is empty, shuffle the Fled pile back into it'", () => {
+  it("Outcome: 'shuffle the room card back into the Floor deck' — the same turn it Flees", () => {
+    const rest = room("Ruptured Coolant Line");
     const state = rig({
+      seed: 4242,
       phase: "Play",
       activeRoom: room("Collapsed Stairwell"),
-      floorDeck: [],
-      fled: [room("Ruptured Coolant Line")],
+      floorDeck: [rest],
       Red: player({ deck: pile("Shove", 5) }),
       Gray: player({ deck: pile("Duck Under", 5) }),
     });
+    const fledRoom = state.activeRoom as Room;
+    // The Exhaust 3 pulls from a deck of 5, so it never touches the discard
+    // pile or the RNG — the only shuffle left to check is the one at Cleanup.
     const { state: next, events } = play(state, [
       { type: "END_PLAY" },
       { type: "CHOOSE_CHARACTER", character: "Red" },
     ]);
-    expect(next.fled).toEqual([]);
-    expect(next.floorDeck).toHaveLength(2);
     expect(eventTypes(events)).toContain("FLED_RESHUFFLED");
+    const [expectedDeck, expectedSeed] = shuffle([rest, fledRoom], state.seed);
+    expect(next.floorDeck).toEqual(expectedDeck);
+    expect(next.seed).toBe(expectedSeed);
   });
 });
 
@@ -356,7 +362,6 @@ describe("Room kinds: Enemy, Hazard, Stuff", () => {
       { type: "END_PLAY" },
     ]);
     expect(next.cleared).toHaveLength(1);
-    expect(next.fled).toEqual([]);
   });
 
   it("a Stuff room that meets no threshold Flees, empty-handed and unpunished", () => {
@@ -367,13 +372,13 @@ describe("Room kinds: Enemy, Hazard, Stuff", () => {
       Gray: player({ deck: pile("Duck Under", 5) }),
     });
     const { state: next, events } = must(state, { type: "END_PLAY" });
-    // The empty floor deck reshuffles Fled back in during cleanup, so the room
-    // does not linger in `fled` — check the events for how it actually ended.
     expect(eventTypes(events)).toContain("ROOM_FLED");
     expect(eventTypes(events)).not.toContain("ROOM_CLEARED");
     expect(next.cleared).toEqual([]);
     expect(eventTypes(events)).not.toContain("STUFF_TAKEN");
     expect(next.Red.deck).toHaveLength(5);
+    // Same turn: it is already back in the Floor deck by the time Cleanup ends.
+    expect(next.floorDeck).toHaveLength(1);
   });
 
   it("a Stuff room's per-character lines still read the shared pool", () => {

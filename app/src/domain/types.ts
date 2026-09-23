@@ -188,6 +188,8 @@ export interface Resolution {
   readonly effects: readonly RoomEffect[];
   /** How the room ended. */
   readonly roomEnded: "Cleared" | "Fled";
+  /** The room that ended, so Cleanup can shuffle a Fled one back into the Floor deck. */
+  readonly room: Room;
   /** A met challenge said `Ascend`: Cleanup runs, then the Ascending steps (rulebook, Outcome). */
   readonly ascends: boolean;
   /**
@@ -208,10 +210,10 @@ export interface GameState {
   readonly turn: number;
   readonly phase: Phase;
 
-  /** The floor deck's draw pile, its Fled pile, and the Cleared heap (rulebook, Setup). */
+  /** The floor deck's draw pile and the Cleared heap (rulebook, Setup). A Fled
+   * room shuffles straight back into `floorDeck` at Cleanup (rulebook, Outcome). */
   readonly floorDeck: readonly Room[];
   readonly activeRoom: Room | null;
-  readonly fled: readonly Room[];
   readonly cleared: readonly Room[];
   /** Every printed room copy not currently built into a floor (Setup). */
   readonly roomSupply: readonly Room[];
@@ -334,7 +336,7 @@ export type DomainEvent =
     }
   | { readonly type: "ROOM_CLEARED"; readonly room: Room }
   | { readonly type: "ROOM_FLED"; readonly room: Room }
-  | { readonly type: "FLED_RESHUFFLED"; readonly rooms: number }
+  | { readonly type: "FLED_RESHUFFLED"; readonly room: Room }
   | { readonly type: "WENT_DOWN"; readonly character: Character; readonly cause: string }
   | { readonly type: "REWARD_REVEALED"; readonly character: Character; readonly card: Card }
   | { readonly type: "REWARD_TAKEN"; readonly character: Character; readonly card: Card }

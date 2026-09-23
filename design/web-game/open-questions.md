@@ -67,8 +67,7 @@ Villy, Coney's Work Husband prints `Scramble 9: Flee this room for free.` alongs
 `Oomph 9: Ascend`. Each Turn, Outcome's *"if any challenge's threshold has been met or exceeded, the
 players Clear the room"* would Clear Villy on Scramble alone, which contradicts the line's own words.
 
-**What the code does.** The line does not Clear: the room goes to the Fled pile and its Flee line
-does not resolve.
+**What the code does.** The line does not Clear: the room Flees and its Flee line does not resolve.
 
 ---
 
@@ -274,20 +273,21 @@ straight into the earning character's hand. A `Down` character is skipped and ea
 
 ---
 
-## 21. A Fled room waits in a Fled pile instead of returning straight to the Floor deck
+## 21. A Fled room shuffles straight back into the Floor deck, the same turn
 
-**Where:** `endPlay` and `finishTurn` in `app/src/domain/engine.ts`.
+`[you, 2026-09-23]`
+
+**Where:** `endPlay` and `finishCleanup` in `app/src/domain/engine.ts`.
 
 The Outcome section reads: *"Flee: If no challenges have been cleared, the players must Flee the
 room. Resolve the `Flee:` outcome according to the text on the card, then shuffle the room card
 back into the Floor deck."* Read plainly, a Fled room reshuffles into the Floor deck the same turn
 it Fled.
 
-**What the code does.** A Fled room instead moves to a separate Fled pile at Cleanup, and only
-shuffles back into the Floor deck once the Floor deck itself runs out. Both readings keep a Fled
-room in circulation for the floor; they disagree on when it can come up again. This predates the
-citation cleanup that added this entry and was not itself re-derived from the rulebook — flagging
-it here rather than changing engine behavior or the rulebook text.
+**What the code does now.** A Fled room shuffles into the Floor deck at Cleanup, the same turn —
+there is no separate Fled pile to wait in. This entry previously described the opposite: a Fled
+room parked in its own pile until the Floor deck ran dry. That reading predated the citation
+cleanup that added this entry and was never itself re-derived from the rulebook.
 
 ---
 

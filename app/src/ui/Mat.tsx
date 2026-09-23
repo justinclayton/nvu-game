@@ -142,7 +142,6 @@ export function Mat({
       <div className="mat__main">
         <div className="mat-row mat-row--floor">
           <Slot id="floor" label="Floor deck" count={state.floorDeck.length} onOpenPile={openPile} />
-          <Slot id="fled" label="Fled" count={state.fled.length} onOpenPile={openPile} />
           <Slot id="cleared" label="Cleared" count={state.cleared.length} onOpenPile={openPile} />
           <Slot id="room" label="Active room" />
           <RoomBrief state={state} />

@@ -98,7 +98,7 @@ export function validate(state: GameState, command: Command): Rejection | null {
     case "FLIP_ROOM": {
       if (state.phase !== "Turn Start") return wrongPhase(state, "flip a room");
       if (state.floorDeck.length === 0) {
-        return reject("FloorDeckEmpty", "The floor deck and the Fled pile are both empty.");
+        return reject("FloorDeckEmpty", "The floor deck is empty.");
       }
       return null;
     }
@@ -589,10 +589,9 @@ function endPlay(state: GameState, run: Run): GameState {
     run.events.push({ type: "ROOM_CLEARED", room });
     s = { ...s, cleared: [...s.cleared, room] };
   } else {
-    // A Fled room comes back around when the Fled pile shuffles in. See
-    // open-questions.md #21.
+    // A Fled room shuffles back into the Floor deck at Cleanup, the same
+    // turn (rulebook, Outcome). See open-questions.md #21.
     run.events.push({ type: "ROOM_FLED", room });
-    s = { ...s, fled: [...s.fled, room] };
   }
 
   s = {
@@ -600,6 +599,7 @@ function endPlay(state: GameState, run: Run): GameState {
     resolution: {
       effects: outcome.effects,
       roomEnded: outcome.cleared ? "Cleared" : "Fled",
+      room,
       ascends: outcome.ascends,
     },
   };
@@ -765,12 +765,12 @@ function finishCleanup(state: GameState, run: Run): GameState {
   const ascends = resolution?.ascends ?? false;
   let s = cleanupPiles(state, run);
 
-  // If the floor draw pile is empty, shuffle the Fled pile back in. See
+  // Outcome: "then shuffle the room card back into the Floor deck." See
   // open-questions.md #21.
-  if (s.floorDeck.length === 0 && s.fled.length > 0) {
-    const [deck, seed] = shuffle(s.fled, s.seed);
-    run.events.push({ type: "FLED_RESHUFFLED", rooms: deck.length });
-    s = { ...s, floorDeck: deck, fled: [], seed };
+  if (resolution?.roomEnded === "Fled") {
+    const [deck, seed] = shuffle([...s.floorDeck, resolution.room], s.seed);
+    run.events.push({ type: "FLED_RESHUFFLED", room: resolution.room });
+    s = { ...s, floorDeck: deck, seed };
   }
 
   s = { ...s, resolution: null };

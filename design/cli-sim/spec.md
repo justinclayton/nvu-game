@@ -16,14 +16,15 @@ them, and the designer was the only playtester. The CLI exists for three jobs, i
 2. **Random play shakes the engine.** `[you]` Many seeds of uniformly random legal play, reporting
    only failures: a throw, a state with no legal move, a run that never ends, a move the generator
    offered that the rules refused.
-3. **A seed solver, later.** `[agent, accepted]` Not built now, but named so two constraints hold
+3. **A greedy bot gives balance volume.** `[you]` (issue #93) A fixed, deterministic policy plays
+   many seeds so pass 3 (the numbers) can tune against evidence instead of one agent playtest. It
+   measures itself as much as the game — it is not a stand-in for a human, and it does not replace
+   the agent playtest, which stays for fidelity and rulebook gaps.
+4. **A seed solver, later.** `[agent, accepted]` Not built now, but named so two constraints hold
    from the start: the run loop is pure, and the move generator is complete. A solver walks every
    line of play for one seed and answers, with no policy and no opinion, whether that seed is
    winnable and by how many lines. Over many seeds that is a balance fact about the game rather
    than about a bot.
-
-Balance volume with a scripted policy is not a job. `[you]` A greedy or heuristic bot measures the
-bot as much as the game, and the solver gives a baseline with no policy in it. There is no bot.
 
 ## Where it lives
 
@@ -56,6 +57,7 @@ bin/nvu play pile <Red|Gray> <hand|discard|play>
 bin/nvu card <name>
 bin/nvu replay FILE [--quiet]
 bin/nvu fuzz --seeds N [--from SEED]
+bin/nvu sim --seeds N [--from SEED] [--policy random|greedy] [--json]
 bin/nvu help
 ```
 
@@ -214,6 +216,29 @@ that seed under `runs/fuzz/`. A clean sweep prints one line saying so. There are
 Failure kinds: the engine threw; the generator returned no moves in a state that is not game over;
 the budget ran out; the engine refused a command the generator offered.
 
+### sim `[you]` (issue #93)
+
+`sim --seeds N` plays N seeds under `app/src/sim/policy.ts`'s `greedy` policy (the default) or
+`random`, from `--from` (default 1), and prints a balance report: win rate, the floor each run
+reached, why each run ended, each character's mean deck and Exhaust pile size right after each
+Ascend, and every card's play, take and keep counts across the sweep. `--json` prints the same
+report as data, for comparing two versions of the card numbers.
+
+The greedy policy is fixed and simple, and answers only from the move generator's own list
+(`sim/moves.ts`), never a command it invents: play whatever would meet a Clearing threshold the
+pool has not met yet, or otherwise the play worth the most Oomph and Scramble combined; pay for it
+with the cheapest cards in hand; always take a reward when one is offered; at Ascend, keep a Good
+Stuff card when a payer is available and shed a Bad Stuff card when one is, always via whichever
+single legal `ASCEND` command scores best on those rules. It never draws on its own randomness, so
+a seed always plays the same game. It is not a playtester and does not read the rulebook; the
+agent playtest is still the check for fidelity and rulebook gaps.
+
+"Why runs ended" and "the turn limit" in the issue map onto the engine's own outcomes, not an
+invented one: `Victory` (floor 10 Cleared), `Defeat (Down)` (rulebook, Going Down — the engine has
+one losing state, whatever drove a character's deck and discard both empty), and, for a run `sim`
+itself stopped rather than the rules, `sim`'s own command budget, a state the generator found no
+move in, or a move the engine refused — the same `StopReason`s `fuzz` already reports. `[agent]`
+
 ### replay `[agent, accepted]`
 
 `replay FILE` folds a run file back through the engine and prints the narrated transcript with
@@ -234,7 +259,10 @@ still unfixed. `[agent]`
 Tests: `moves.test.ts` (the contract), `run.test.ts` (every seed ends or hits the budget, never
 throws, and the log replays to the same state), `cli/args.test.ts`, a test of card-name resolution
 (full name, initials, prefix, ambiguity refused, copies interchangeable), and the initials-collision
-report in `app/src/content`.
+report in `app/src/content`. `policy.test.ts` holds the greedy policy's key choices — the play that
+clears, the cheapest payment, keeping paid-for Good Stuff, shedding paid-for Bad Stuff, taking the
+reward — and `report.test.ts` holds the balance report's aggregation, both deterministic on a fixed
+seed set.
 
 ## The playtest note `[you]`
 

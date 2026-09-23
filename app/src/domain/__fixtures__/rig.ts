@@ -89,6 +89,7 @@ export function rig(over: Partial<GameState> = {}): GameState {
     },
     offer: null,
     pending: null,
+    unfinishedPlay: null,
     resolution: null,
     thisTurn: emptyTurnRecord(),
     outcome: null,

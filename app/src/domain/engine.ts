@@ -36,6 +36,7 @@ import type {
   RoomEffect,
   Threshold,
   TurnRecord,
+  UnfinishedPlay,
 } from "./types";
 import { CorruptStateError } from "./types";
 import {
@@ -341,25 +342,26 @@ function settle(state: GameState, run: Run): GameState {
   run.settled = to;
   // Every arrival in this batch is already in `state`, so a card drawn last
   // must not hear the draws before it.
-  for (let i = from; i < to; i++) {
-    const event = run.events[i];
-    if (event) trackEntry(run, event, i);
-  }
+  trackEntries(run, from, to);
   let s = state;
   for (let i = from; i < to; i++) {
     if (s.phase === "GameOver") return s;
-    s = hear(s, run, i);
+    const event = run.events[i];
+    if (event) s = hear(s, run, event, (id) => heldSince(run, id, i));
   }
   return s;
 }
 
-function hear(state: GameState, run: Run, index: number): GameState {
-  const event = run.events[index];
-  if (!event) return state;
+function hear(
+  state: GameState,
+  run: Run,
+  event: DomainEvent,
+  hears: (id: CardId) => boolean,
+): GameState {
   let s = state;
   for (const ctx of listeners(s)) {
     if (s.phase === "GameOver") return s;
-    if (!heldSince(run, ctx.card.id, index) || !stillThere(s, ctx)) continue;
+    if (!hears(ctx.card.id) || !stillThere(s, ctx)) continue;
     const onEvent = behaviourOf(ctx.card.name)?.onEvent;
     if (!onEvent) continue;
     const step = onEvent(event, s, ctx);
@@ -380,9 +382,16 @@ function stillThere(state: GameState, ctx: BehaviourContext): boolean {
 }
 
 /** A card arriving in hand or the play zone — the moment a `Holding:` effect starts hearing events. */
-function trackEntry(run: Run, event: DomainEvent, index: number): void {
-  if (event.type === "CARD_DRAWN" || event.type === "CARD_TO_HAND" || event.type === "CARD_PLAYED") {
-    run.enteredAt.set(event.card.id, index);
+function trackEntries(run: Run, from: number, to: number): void {
+  for (let i = from; i < to; i++) {
+    const event = run.events[i];
+    if (
+      event?.type === "CARD_DRAWN" ||
+      event?.type === "CARD_TO_HAND" ||
+      event?.type === "CARD_PLAYED"
+    ) {
+      run.enteredAt.set(event.card.id, i);
+    }
   }
 }
 
@@ -500,33 +509,57 @@ function playCard(
   }
 
   // Each Turn, Play: you pay in *other* cards from your own hand. Red never pays for Gray.
+  const from = run.events.length;
   s = discardFromHand(s, c, payment, run.events);
   if (payment.length > 0) {
     run.events.push({ type: "COST_PAID", character: c, cards: payment });
     s = { ...s, thisTurn: addPaid(s.thisTurn, c, payment.length) };
   }
-  s = settle(s, run);
-  if (s.phase === "GameOver") return s;
 
   const after = playerOf(s, c);
   s = withPlayer(s, c, { ...after, hand: after.hand.filter((x) => x.id !== cardId) });
   s = { ...s, playZone: [...s.playZone, { owner: c, card }] };
   run.events.push({ type: "CARD_PLAYED", character: c, card });
-  s = settle(s, run);
-  if (s.phase === "GameOver") return s;
+  const to = run.events.length;
+  trackEntries(run, from, to);
+  run.settled = to;
 
-  // Each Turn: nothing resolves while you play — the *room* is checked once, at
-  // the end of the phase. A card's own printed effect still happens as it is played.
   const behaviour = behaviourOf(card.name);
   if (behaviour?.exhaustX !== undefined) {
     s = settle(printedExhaust(s, c, behaviour.exhaustX, card.name, run), run);
   }
-  if (s.phase === "GameOver") return s;
   const onPlay = behaviour?.onPlay;
-  if (onPlay) {
+  if (onPlay && s.phase !== "GameOver") {
     const step = onPlay(s, { card, character: c, zone: "playZone" });
     run.events.push(...step.events);
     s = settle(step.state, run);
+  }
+  return finishPlay(s, run, {
+    events: run.events.slice(from, to),
+    listeners: presentSince(s, run, from),
+  });
+}
+
+/** Every card that can hear events and has been where it is since before the event at `index`. */
+function presentSince(state: GameState, run: Run, index: number): readonly CardId[] {
+  return listeners(state)
+    .filter((ctx) => heldSince(run, ctx.card.id, index))
+    .map((ctx) => ctx.card.id);
+}
+
+/**
+ * Paying for a card and playing it are heard once its own effect is done. An
+ * effect waiting on a question keeps them in the state until it is answered.
+ */
+function finishPlay(state: GameState, run: Run, play: UnfinishedPlay): GameState {
+  if (state.phase === "GameOver") return state;
+  if (state.pending) return { ...state, unfinishedPlay: play };
+  const since = run.events.length;
+  const hears = (id: CardId) => play.listeners.includes(id) && heldSince(run, id, since);
+  let s = state;
+  for (const event of play.events) {
+    if (s.phase === "GameOver") return s;
+    s = hear(s, run, event, hears);
   }
   return s;
 }
@@ -848,14 +881,19 @@ function runChoice(state: GameState, answer: ChoiceAnswer, run: Run): GameState 
   const pending = state.pending;
   if (!pending) throw new CorruptStateError("Answered a choice that was not being asked.");
   const ctx = contextFor(state, pending);
-  const cleared: GameState = { ...state, pending: null };
+  const play = state.unfinishedPlay;
+  const cleared: GameState = { ...state, pending: null, unfinishedPlay: null };
   if (!ctx) return drain(cleared, run);
 
   const onChoice = behaviourOf(ctx.card.name)?.onChoice;
   if (!onChoice) throw new CorruptStateError(`${ctx.card.name} asked a question it cannot answer.`);
   const step = onChoice(answer, cleared, ctx);
   run.events.push(...step.events);
-  const s = settle(step.state, run);
+  let s = settle(step.state, run);
+  if (play) {
+    const stayed = new Set(presentSince(s, run, 0));
+    s = finishPlay(s, run, { ...play, listeners: play.listeners.filter((id) => stayed.has(id)) });
+  }
   return s.pending || s.phase === "GameOver" ? s : drain(s, run);
 }
 

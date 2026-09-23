@@ -1,6 +1,6 @@
 /* The mat: the printed layout every card sits on.
  *
- * Rulebook, Setup, drawn. The floor deck, its Fled and Cleared piles and the active
+ * Rulebook, Setup, drawn. The floor deck, its Cleared pile and the active
  * room across the top with the room's brief beside them; each character's deck,
  * side of the play zone, discard pile and Exhaust pile in the middle; their
  * hands along the near edge. The pools sit off to the right, as the rulebook

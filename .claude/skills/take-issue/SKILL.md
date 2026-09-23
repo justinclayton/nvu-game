@@ -1,7 +1,7 @@
 ---
 name: take-issue
 description: Implement one ready-for-agent issue end to end in this checkout. Open in a Sonnet session.
-disable-model-invocation: true
+disable-model-invocation: false
 ---
 
 # Take issue

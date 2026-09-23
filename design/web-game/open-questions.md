@@ -104,8 +104,8 @@ A skipped reward card goes to the bottom of its pool.
 
 **Where:** floor setup.
 
-Enemy rooms name the floor they guard (`floor: 1`, `2`, `3`). Every floor is built from 1 Enemy, 3
-Hazards and 10-minus-the-floor Stuff rooms (the printed-count reading of #18), and there is no Enemy
+Enemy rooms name the floor they guard (`floor: 1`, `2`, `3`). Every floor is built from 1 Enemy plus
+Hazard and Stuff rooms drawn at random until the floor is full (see #18), and there is no Enemy
 printed for floors 4 upward.
 
 **What the code does.** Takes the Enemy whose printed floor matches; failing that, any Enemy room.
@@ -247,19 +247,18 @@ unplayed in a hand.
 
 ---
 
-## 18. The floor deck's Hazard count is fixed at 3, not left to chance
+## 18. The floor deck's Hazard count is left to chance
 
-**Where:** `HAZARD_ROOMS_PER_FLOOR` in `app/src/domain/setup.ts`.
+`[you, 2026-09-23]`
+
+**Where:** `buildFloor` in `app/src/domain/setup.ts`.
 
 The Floor deck section says only: *"select randomly from the available Floor cards until you have
-the right number."* It does not say how many of those are Hazards and how many are Stuff. The card list
-prints exactly 6 Hazard rooms (3 Collapsed Stairwell, 3 Ruptured Coolant Line), and every used room
-returns to the supply at Ascending, so a fixed 3 Hazards a floor is what the printed counts support.
+the right number."* An earlier reading fixed the Hazard count at 3 a floor; that was an agent's
+invention, not a ruling.
 
-**What the code does.** Takes exactly 3 Hazard rooms and 1 Enemy room every floor, then fills the
-rest with Stuff rooms up to the rulebook's floor size — 10 on floor 1, one fewer each floor above. A
-draw at random from the whole Floor-card supply, Hazard and Stuff mixed together, would also fit the
-rulebook's words, and could leave a floor with more or fewer than 3 Hazards.
+**What the code does.** Takes the Enemy room, then draws the rest of the floor at random from Hazard
+and Stuff rooms mixed together. The Hazard count on a floor varies with the seed.
 
 ---
 

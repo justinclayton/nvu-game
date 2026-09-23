@@ -20,22 +20,14 @@ export const TOP_FLOOR = 10;
 /** Draw up to this many, each turn (Each Turn, Turn Start: Draw up to five). A card may tighten it. */
 export const HAND_CAP = 5;
 
-/**
- * Every floor holds exactly one Enemy room and three Hazards. The rulebook's
- * Floor deck section doesn't say so; this is the printed-count reading of an
- * unruled question. See open-questions.md #18.
- */
+/** Every floor holds exactly one Enemy room (rulebook Setup, "Floor deck"). */
 export const ENEMY_ROOMS_PER_FLOOR = 1;
-export const HAZARD_ROOMS_PER_FLOOR = 3;
 
 /**
  * The floor deck is 10 cards on floor 1 and one fewer each floor above it
- * (rulebook Setup, "Floor deck"). Enemy and Hazard counts are fixed, so Stuff
- * rooms carry the whole decrease: six on floor 1, none from floor 7 up. See
- * open-questions.md #18.
+ * (rulebook Setup, "Floor deck"): 11 - floor.
  */
-export const stuffRoomsOnFloor = (floor: number): number =>
-  Math.max(0, TOP_FLOOR - ENEMY_ROOMS_PER_FLOOR - HAZARD_ROOMS_PER_FLOOR - (floor - 1));
+export const roomsOnFloor = (floor: number): number => TOP_FLOOR + 1 - floor;
 
 /* ------------------------------------------------------ minting the cards */
 
@@ -90,9 +82,8 @@ function takeRooms(
 }
 
 /**
- * 1 Enemy room, 3 Hazard rooms, and however many Stuff rooms it takes to make
- * a 10-card floor on floor 1 and one fewer each floor above, shuffled
- * together face down — the printed-count reading of open-questions.md #18.
+ * The Enemy room that guards the floor, plus Hazard and Stuff rooms drawn at
+ * random together until the floor is full (rulebook Setup, "Floor deck").
  * The floor gets no harder as you climb — it gets emptier.
  *
  * Enemy rooms name the floor they guard. Nothing is printed above floor 3, so a
@@ -114,25 +105,15 @@ export function buildFloor(state: GameState, events: DomainEvent[]): GameState {
   supply = afterEnemy;
   seed = s1;
 
-  const [hazards, afterHazards, s2] = takeRooms(
+  const [rest, afterRest, s2] = takeRooms(
     supply,
-    (r) => r.kind === "hazard",
-    HAZARD_ROOMS_PER_FLOOR,
+    (r) => r.kind === "hazard" || r.kind === "stuff",
+    roomsOnFloor(state.floor) - ENEMY_ROOMS_PER_FLOOR,
     seed,
   );
-  rooms.push(...hazards);
-  supply = afterHazards;
+  rooms.push(...rest);
+  supply = afterRest;
   seed = s2;
-
-  const [stuff, afterStuff, s3] = takeRooms(
-    supply,
-    (r) => r.kind === "stuff",
-    stuffRoomsOnFloor(state.floor),
-    seed,
-  );
-  rooms.push(...stuff);
-  supply = afterStuff;
-  seed = s3;
 
   const [floorDeck, s4] = shuffle(rooms, seed);
   events.push({ type: "FLOOR_BUILT", floor: state.floor, rooms: floorDeck.length });

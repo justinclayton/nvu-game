@@ -325,9 +325,9 @@ export function takeGoodStuff(
   for (let i = 0; i < count; i++) {
     if (playerOf(next, c).down) return next;
     const [card, rest, seed] = drawFromPool(next.pools.goodStuff, next.seed);
-    // The pool never refills: spent Stuff goes to the Scrapyard at ascension.
-    // See open-questions.md #6. Say so — a reward the log announced but the
-    // pool could not pay must not go silent (issue #37).
+    // Unkept Good Stuff returns to this pool at Ascend, but it can still run
+    // dry mid-floor. Say so — a reward the log announced but the pool could
+    // not pay must not go silent (issue #37).
     if (!card) {
       events.push({ type: "STUFF_POOL_EMPTY", character: c, pool: "good_stuff" });
       return next;

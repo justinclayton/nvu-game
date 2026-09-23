@@ -224,13 +224,20 @@ reached, why each run ended, each character's mean deck and Exhaust pile size ri
 Ascend, and every card's play, take and keep counts across the sweep. `--json` prints the same
 report as data, for comparing two versions of the card numbers.
 
-The greedy policy is fixed and simple, and answers only from the move generator's own list
-(`sim/moves.ts`), never a command it invents: play whatever would meet a Clearing threshold the
-pool has not met yet, or otherwise the play worth the most Oomph and Scramble combined; pay for it
-with the cheapest cards in hand; always take a reward when one is offered; at Ascend, keep a Good
-Stuff card when a payer is available and shed a Bad Stuff card when one is, always via whichever
-single legal `ASCEND` command scores best on those rules. It never draws on its own randomness, so
-a seed always plays the same game. It is not a playtester and does not read the rulebook; the
+The greedy policy is fixed and simple: play whatever would meet a Clearing threshold the pool has
+not met yet, or otherwise the play worth the most Oomph and Scramble combined; pay for it with the
+cheapest cards in hand; always take a reward when one is offered; at Ascend, pay to keep every Good
+Stuff card it can and pay to shed every Bad Stuff card it can with whatever payers are left, then
+take a reward. Everywhere but Ascend it answers only from the move generator's own list
+(`sim/moves.ts`), never a command it invents. At Ascend it composes each character's whole choice
+independently — the same shape the CLI's per-question staging builds (`cli/ascend.ts`,
+`composeAscend`) — and validates the composed command against the engine, because the generator's
+own list crosses both characters' choices and caps out at 256 combined options; past that cap every
+command it offers forces one character's choice to "none", which forfeited about half of every
+Ascend's rewards and Stuff settlements when the policy could only pick from that list. `sim` reports
+how often the composed command had to fall back to the generator's own list instead (`ascendFallbacks`
+in `--json`; zero across the 500-seed sweep this shipped with). It never draws on its own randomness,
+so a seed always plays the same game. It is not a playtester and does not read the rulebook; the
 agent playtest is still the check for fidelity and rulebook gaps.
 
 "Why runs ended" and "the turn limit" in the issue map onto the engine's own outcomes, not an

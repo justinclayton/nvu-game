@@ -1,15 +1,17 @@
 #!/bin/sh
 # North vs Up in a terminal. The same rules engine as the web game.
 #
-#   bin/nvu play new --seed 7           start a run, one numbered move at a time
-#   bin/nvu play move 1                 make move 1
+#   bin/nvu play new --seed 7           start a run, one named move at a time
+#   bin/nvu play flip                   flip the room and draw
+#   bin/nvu play card Red Charge In     play a card, named
 #   bin/nvu play undo                   undo back to the last checkpoint
 #   bin/nvu play note "text"            write a note into the log
-#   bin/nvu play show                   print the table and the legal moves
+#   bin/nvu play show                   print the table and the open moves
+#   bin/nvu card "Charge In"            print a card's face, no run needed
 #   bin/nvu replay runs/7.json          replay a run file and print its transcript
 #   bin/nvu fuzz --seeds 50             random legal play, failures only
 #   bin/nvu web                         the web game's dev server
-#   bin/nvu help
+#   bin/nvu help                        the full grammar
 #
 # Installs app/node_modules on first use and regenerates the card modules if
 # design/cards.yaml has changed, so a fresh clone can run it straight away.

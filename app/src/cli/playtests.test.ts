@@ -1,8 +1,14 @@
 /* Every run file under design/playtests/ replays to the final state and
  * outcome it recorded. A rules change that breaks a saved playtest fails this
- * check (design/cli-sim/spec.md, Checks: "Saved runs replay"). There are none
- * yet, so this passes trivially until the first one is copied in by hand. */
-
+ * check (design/cli-sim/spec.md, Checks: "Saved runs replay").
+ *
+ * `PRE_0_2` is every run recorded before design/rulebook.md: they
+ * played DRAW and END_DRAW commands and the 0.1 shape of ASCEND, neither of
+ * which the engine accepts any more, so they cannot replay against it. #83
+ * (not yet landed) is where a run's own rules version becomes the thing this
+ * check reads, so this list can retire itself; until then it is named by
+ * hand. The files stay in the repo as the record they are — this only stops
+ * the automated replay check from reading them. */
 import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
@@ -10,8 +16,22 @@ import { CARD_CONTENT } from "@content/index";
 import { replay } from "@application/session";
 import type { RunFile } from "@application/exportRun";
 
+const PRE_0_2 = new Set(["03-first-agent-cli-run.json"]);
+
+/* Turn Start's draws used to let a `Holding:` card that arrived on the last
+ * draw hear the draws that happened before it was in hand. Turn 19 of this
+ * run relied on that bug (My Head Is Quantum Spinning forcing Gray to draw
+ * for draws it was not yet present for); fixed in engine.ts ("Engine:
+ * Holding triggers hear only draws made while held"), so this run no longer
+ * replays to its recorded state. */
+const HOLDING_TRIGGER_FIX = new Set(["04-first-run-on-rules-0.2.json"]);
+
+const EXCLUDED = new Set([...PRE_0_2, ...HOLDING_TRIGGER_FIX]);
+
 const dir = join(process.cwd(), "..", "design", "playtests");
-const files = existsSync(dir) ? readdirSync(dir).filter((name) => name.endsWith(".json")) : [];
+const files = existsSync(dir)
+  ? readdirSync(dir).filter((name) => name.endsWith(".json") && !EXCLUDED.has(name))
+  : [];
 
 describe("saved playtest runs", () => {
   if (files.length === 0) {

@@ -18,8 +18,6 @@ export function describeEvent(event: DomainEvent): string {
       return `You are in: ${event.room.name}.`;
     case "CARD_DRAWN":
       return `${event.character} draws ${event.card.name}.`;
-    case "DRAW_BURNED":
-      return `${event.character}'s hand is full — ${event.card.name} is discarded instead.`;
     case "CARD_PLAYED":
       return `${event.character} plays ${event.card.name}.`;
     case "COST_PAID":
@@ -28,10 +26,14 @@ export function describeEvent(event: DomainEvent): string {
       return `${event.character} discards ${event.card.name} from their ${event.from === "playZone" ? "play zone" : event.from}.`;
     case "CARD_SCRAPPED":
       return `${event.card.name} is Scrapped.`;
+    case "CARD_EXHAUSTED":
+      return `${event.character} Exhausts ${event.card.name}.`;
     case "EXHAUST_PREVENTED":
       return `${event.by.name} stops it: ${event.character} Exhausts nothing.`;
     case "CARDS_SHUFFLED_IN":
       return `${event.character} shuffles ${String(event.cards.length)} card(s) back in.`;
+    case "DISCARD_RESHUFFLED":
+      return `${event.character}'s deck is empty — the discard pile shuffles in to make a new one (${String(event.cards)} cards).`;
     case "CARD_TO_HAND":
       return `${event.character} takes ${event.card.name} into hand.`;
     case "CARD_MOVED":
@@ -50,12 +52,8 @@ export function describeEvent(event: DomainEvent): string {
       return `You Flee ${event.room.name}.`;
     case "FLED_RESHUFFLED":
       return `The Fled pile shuffles back in: ${String(event.rooms)} rooms.`;
-    case "LAST_STAND":
-      return `${event.character}'s deck is empty — last stand.`;
-    case "LAST_STAND_ESCAPED":
-      return `${event.character} gets out of last stand, ${String(event.price.length)} cards the poorer.`;
     case "WENT_DOWN":
-      return `${event.character} is Down — ${event.cause}.`;
+      return `${event.character} is Down — ${event.cause}. The run is lost.`;
     case "REWARD_REVEALED":
       return `${event.character}'s reward pool shows ${event.card.name}.`;
     case "REWARD_TAKEN":
@@ -69,9 +67,7 @@ export function describeEvent(event: DomainEvent): string {
     case "FLOOR_CLEARED":
       return `Floor ${String(event.floor)} is clear.`;
     case "GAME_OVER":
-      return event.outcome === "Victory"
-        ? "You reach the rooftop. You win."
-        : "Both of you are Down.";
+      return event.outcome === "Victory" ? "You reach the rooftop. You win." : "You lose.";
   }
 }
 

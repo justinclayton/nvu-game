@@ -68,61 +68,7 @@ Villy, Coney's Work Husband prints `Scramble 9: Flee this room for free.` alongs
 players Clear the room"* would Clear Villy on Scramble alone, which contradicts the line's own words.
 
 **What the code does.** The line does not Clear: the room goes to the Fled pile and its Flee line
-does not resolve. Because the room ends Fled, the rule in Rulebook, Last Stand that a character in last stand goes Down
-when the room was Fled still applies. The test in Rulebook, Last Stand is how the room ends, not how it got there.
-
----
-
-## 4. Last stand shuffles the play zone only; the hand carries over untouched
-
-`[you, 2026-09-01]`
-
-**Where:** the cleanup step of `END_PLAY`.
-
-Rulebook, Last Stand: *"If the room was Cleared, instead of discarding your side of the play zone, shuffle
-your play zone to form your new remaining deck, then Exhaust 2 cards from the top of your deck."*
-Cleanup never touches a hand, in or out of last stand — every card in hand carries over to the next
-turn.
-
-**What the code does.** Follows the rulebook: only the play zone shuffles in and pays the price; the
-hand is left exactly as it was.
-
----
-
-## 5. A full hand does not skip the opening draw; it burns the card instead
-
-**Where:** `drawOne` in `app/src/domain/verbs.ts`, called from the opening draw in `engine.ts`.
-
-Rulebook, Each Turn: Draw gives two rules that meet on a turn's first draw: *"Both players draw 1 card at the same time"*
-and *"If you are holding 5 or more cards, you have a Full Hand and cannot draw. If you are forced to
-draw with a Full Hand, that card goes into your discard pile instead."*
-
-**What the code does.** The opening draw always happens, full hand or not; a Full Hand character's
-opening card goes straight to their discard pile instead of their hand. "Cannot draw" governs only
-the later, voluntary draws in the phase — those are refused outright while the hand is full. Reading
-the opening draw as skipped instead would leave "if you are forced to draw with a Full Hand"
-describing nothing, since nothing else in the Draw phase forces a draw.
-
----
-
-## 6. Stuff in a discard pile goes to the Scrapyard at ascension, not back to its pool
-
-`[you, 2026-09-01]` for the rule. The consequence below is still open.
-
-**Where:** `ascendOne` in `app/src/domain/engine.ts`.
-
-Rulebook, Ascending steps 1–2: *"Separate your discard pile: Split it into Stuff cards and non-Stuff cards.
-Say Goodbye to Your Stuff: Scrap the Stuff cards. You may keep one Stuff card by Scrapping one
-non-Stuff card from your discard pile in its place."*
-
-**What the code does.** Every Stuff card in the discard pile is Scrapped, except the one card a
-player keeps by Scrapping a non-Stuff card from that pile in its place.
-
-**Consequence worth ruling on:** the Good Stuff pool never refills. The card list prints one copy of
-each of the eight Good Stuff cards, and floor 1 alone holds nine Stuff rooms. The pool is empty
-well before the run ends, and a met Stuff threshold then pays nothing. That is a content question
-(how many copies of each piece of Stuff the game ships) rather than a rules one, but the rules as
-written give the pool no way back.
+does not resolve.
 
 ---
 
@@ -230,10 +176,10 @@ The card names no character.
 discount belongs to the team rather than to whoever played the Battery, so Red playing the Battery
 can pay for Gray's next card. It is spent by the card that uses it, and the Play phase ending drops
 whatever is left of it. It is spent only when it saved something — a card that already cost nothing
-does not use it up, and neither does a card played for free in last stand.
+does not use it up.
 
-The discount is one of the cost overrides `costOf` consults, which is also how last stand's free
-plays work, so another card that wants to make a play free has somewhere to say so.
+The discount is one of the cost overrides `costOf` consults, so another card that wants to make a
+play free has somewhere to say so.
 
 ---
 
@@ -250,8 +196,8 @@ names its zone and is unaffected.
 That is the only shape a card can turn off. **Zen Mode** — *"Holding: you don't `Exhaust`"* —
 stops bare `Exhaust X` lines aimed at its holder: a room's printed punishment, and the
 holder's own Overdrive, Reckless, Reckless Swing and Panic. It reaches nothing that names its zone
-or that a rule spells out in its own words, so it does not stop paying a cost, cleanup, the burned
-draw of a full hand, or the price of getting out of last stand. The drain still runs.
+or that a rule spells out in its own words, so it does not stop paying a cost or cleanup. The drain
+still runs.
 
 Two consequences worth knowing, neither of them a question: Zen Mode protects its holder and not
 their partner, so a team holding one can send every *"one of you Exhausts X"* line into that
@@ -301,35 +247,6 @@ unplayed in a hand.
 
 ---
 
-## 17. Last stand activates the instant any deck becomes empty
-
-`[you, 2026-09-17]`
-
-**Where:** `drawOne` and `exhaustFromDeck` in `app/src/domain/verbs.ts`, which call
-`activateLastStand` on themselves; `engine.ts`'s cleanup sweeps once more as a backstop.
-
-Rulebook, Last Stand: *"When your deck becomes empty, your character immediately enters Last Stand."* A draw or an
-Exhaust is what empties a deck, and the turn runs on after either: the partner may draw, a card may
-trigger, the room may still owe more of its punishment. Waiting for the phase to end would leave a
-character acting, or being acted on, while Rulebook, Last Stand says they are already in Last Stand.
-
-**What the code does.** `drawOne` and `exhaustFromDeck` are the only two places a card ever leaves
-the top of a deck, so each sweeps for last stand on itself the moment it empties one. Every cause
-goes through one or the other: a chosen or opening draw, a draw a card's text forces, a card's own
-`Exhaust X`, and a room's printed punishment. The state is live in the same step the deck empties,
-not at the end of the phase. `engine.ts` still sweeps once more at cleanup as a backstop, which
-ordinarily finds nothing left to do.
-
-**Consequence, ruled with it** `[you, 2026-09-17]`**:** a character whose deck a room's Flee punishment empties enters Last
-Stand during Outcome, before Cleanup runs. Rulebook, Last Stand sends a character Down at Cleanup if they are in Last
-Stand and the room Fled, with no exception for how recently they entered it — so this character goes
-Down at that same Cleanup, exactly as a character who had already been in Last Stand since an
-earlier draw does. The only difference is how much of the turn each spent there: the
-earlier-emptied character got a Play phase with every card free before going Down, and the one
-emptied by the Flee punishment did not, since Play had already ended.
-
----
-
 ## 18. The floor deck's Hazard count is fixed at 3, not left to chance
 
 **Where:** `HAZARD_ROOMS_PER_FLOOR` in `app/src/domain/setup.ts`.
@@ -343,22 +260,6 @@ returns to the supply at Ascending, so a fixed 3 Hazards a floor is what the pri
 rest with Stuff rooms up to the rulebook's floor size — 10 on floor 1, one fewer each floor above. A
 draw at random from the whole Floor-card supply, Hazard and Stuff mixed together, would also fit the
 rulebook's words, and could leave a floor with more or fewer than 3 Hazards.
-
----
-
-## 19. Deadweight Grip's draw cap also stops a forced draw
-
-**Where:** `My Head Is Quantum Spinning`'s `onEvent`, `app/src/domain/cards/stuff.ts`.
-
-The designer ruled that Faceful Of Slime's draw cap stops a forced draw outright — no card moves,
-and no draw event fires — rather than letting the forced draw happen and only then discarding it
-the way a Full Hand does. Deadweight Grip prints its own draw cap of 2 the same way Faceful Of Slime
-prints 1, and both are read by the same `drawCapFor`.
-
-**What the code does.** The forced draw checks `drawCapFor` for whoever it would land on, whichever
-card is capping them. A Deadweight Grip holder who has already drawn their 2 cards this turn is
-skipped exactly as a Faceful Of Slime holder at 1 is. This extension to Deadweight Grip was not
-itself ruled on — it follows from reading the same code the ruling named.
 
 ---
 

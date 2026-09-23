@@ -12,7 +12,7 @@ import {
   playerOf,
   scrap,
   shuffleIntoDeck,
-  takeFromDiscard,
+  takeFromExhaust,
   takeFromHand,
 } from "../verbs";
 import {
@@ -31,12 +31,7 @@ const playedBy = (state: GameState, c: Character): number =>
 const othersPlayed = (state: GameState, c: Character, self: Card): number =>
   state.playZone.filter((p) => p.owner === c && p.card.id !== self.id).length;
 
-/**
- * "Look at the top N cards of any deck, then put them back in any order."
- *
- * Two questions: whose deck, then what order. One card has no order to choose,
- * so the look is the whole of it.
- */
+/** Two questions: whose deck, then what order. Depth 1 has no order to choose. */
 function peek(depth: number): CardBehaviour {
   const orderPrompt =
     depth === 1
@@ -79,7 +74,7 @@ function peek(depth: number): CardBehaviour {
   };
 }
 
-/** "Shuffle 1 Stuff from X's hand into X's deck." */
+/** Shared behaviour: shuffle a chosen Stuff card from one character's hand into their own deck. */
 function shuffleStuffFromHand(whose: (ctx: BehaviourContext) => Character): CardBehaviour {
   return {
     onPlay(state, ctx) {
@@ -107,7 +102,7 @@ function shuffleStuffFromHand(whose: (ctx: BehaviourContext) => Character): Card
 }
 
 export const GRAY: Registry = {
-  /* "Look at the top card of any deck, then put it back on top." */
+  /* "Look at the top card of any deck, then put it back on top. (Peek 1?)" */
   "Peek Around Corner": peek(1),
 
   /* "Look at the top 2 cards of any deck. Put them back in either order." */
@@ -136,8 +131,7 @@ export const GRAY: Registry = {
 
   /* "Move 1 Stuff from your hand to Red's hand."
    *
-   * Rulebook, Last Stand: Going Down: no card may be put into a Down character's hand, so with Red out this
-   * does nothing. */
+   * Rulebook §9, Going Down: no card may be put into a Down character's hand. */
   "Here, Catch": {
     onPlay(state, ctx) {
       const options = playerOf(state, ctx.character).hand.filter((c) => c.kind !== "player");
@@ -153,7 +147,6 @@ export const GRAY: Registry = {
       });
     },
     onChoice(answer, state, ctx) {
-      // Rulebook, Last Stand: Going Down: nothing may be parked on a Down partner, so the Stuff stays put.
       if (answer.kind !== "cards" || state.Red.down) return nothing(state);
       const events: DomainEvent[] = [];
       let s = takeFromHand(state, ctx.character, answer.cards);
@@ -162,14 +155,14 @@ export const GRAY: Registry = {
     },
   },
 
-  /* "Shuffle a Gray card from your discard pile back into your deck." */
+  /* "Shuffle a Gray card from your Exhaust pile into your deck." */
   "Hit 'n Run": {
     onPlay(state, ctx) {
-      const options = playerOf(state, ctx.character).discard.filter((c) => c.owner === "Gray");
+      const options = playerOf(state, ctx.character).exhaust.filter((c) => c.owner === "Gray");
       if (options.length === 0) return nothing(state);
       return ask(state, {
         kind: "ChooseCards",
-        prompt: "Shuffle which Gray card from your discard pile back into your deck?",
+        prompt: "Shuffle which Gray card from your Exhaust pile into your deck?",
         character: ctx.character,
         options,
         count: 1,
@@ -180,7 +173,7 @@ export const GRAY: Registry = {
     onChoice(answer, state, ctx) {
       if (answer.kind !== "cards") return nothing(state);
       const events: DomainEvent[] = [];
-      const lifted = takeFromDiscard(state, ctx.character, answer.cards);
+      const lifted = takeFromExhaust(state, ctx.character, answer.cards);
       return done(shuffleIntoDeck(lifted, ctx.character, answer.cards, events), events);
     },
   },
@@ -190,9 +183,7 @@ export const GRAY: Registry = {
 
   /* "Every time Red plays a card this turn, draw 1 card."
    *
-   * A card-driven draw during Play. Each Turn, Play's "you may not draw during
-   * this phase" is the rule; the card is the exception that says so. See
-   * open-questions.md #13. */
+   * A card-driven exception to Play's no-draw rule. See open-questions.md #13. */
   "Covering Fire": {
     onEvent(event, state, ctx) {
       if (ctx.zone !== "playZone") return nothing(state);
@@ -212,8 +203,7 @@ export const GRAY: Registry = {
   /* "Scrap a card from your hand. If you do, draw the top card from the Gray
    * Rewards deck directly into your hand."
    *
-   * The Gray Rewards deck is Gray's reward pool (rulebook, Setup). Its top card goes to the
-   * hand, not the deck. */
+   * The Gray Rewards deck is Gray's reward pool (rulebook §5, Setup); its top card goes to hand, not deck. */
   "Level Up": {
     onPlay(state, ctx) {
       const options = playerOf(state, ctx.character).hand;
@@ -247,10 +237,7 @@ export const GRAY: Registry = {
     },
   },
 
-  /* "Holding: when you play a card with Scramble, draw 1 card."
-   *
-   * Only from the hand: playing it moves it to the play zone, where a `Holding:`
-   * line is no longer running. */
+  /* "Holding: when you play a card with Scramble, draw 1 card." */
   "I Know Kung Fu": {
     onEvent(event, state, ctx) {
       if (ctx.zone !== "hand") return nothing(state);

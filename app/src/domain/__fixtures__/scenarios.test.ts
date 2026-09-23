@@ -12,6 +12,7 @@ function allCards(state: GameState): readonly Card[] {
     ...state[c].deck,
     ...state[c].hand,
     ...state[c].discard,
+    ...state[c].exhaust,
   ]);
   return [
     ...perCharacter,

@@ -18,6 +18,8 @@ const PILE_LABEL: Partial<Record<ZoneId, string>> = {
   "gray-deck": "Gray deck",
   "red-discard": "Red discard",
   "gray-discard": "Gray discard",
+  "red-exhaust": "Red exhaust",
+  "gray-exhaust": "Gray exhaust",
   good: "Good Stuff",
   bad: "Bad Stuff",
   "red-rewards": "Red rewards",

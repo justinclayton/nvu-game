@@ -31,9 +31,9 @@ export type ChoiceAnswer =
 /**
  * What a `Holding:` line changes for as long as the card sits in hand.
  *
- * `handCap` and `drawCap` are ceilings — the tightest one in a hand wins. The
- * deltas add up. `thresholdScrambleDelta` is read from both hands, because the
- * card that has it says "ALL rooms".
+ * The deltas add up across a hand. `thresholdScrambleDelta` is read from both
+ * hands (Panic). `drawTargetDelta` is "draw N fewer": it comes off Turn
+ * Start's draw-to-5 target (floor 0), and copies stack (see `drawTargetFor`).
  */
 export interface HeldModifiers {
   readonly costDelta?: number;
@@ -41,16 +41,12 @@ export interface HeldModifiers {
   readonly ignoresExhaustX?: boolean;
   readonly playedPowerDelta?: number;
   readonly stuffPowerDelta?: number;
-  readonly handCap?: number;
-  readonly drawCap?: number;
+  readonly drawTargetDelta?: number;
   readonly thresholdScrambleDelta?: number;
 }
 
 export interface CardBehaviour {
-  /**
-   * A bare `Exhaust X` printed on the card: X cards off the top of the player's
-   * own deck, into their discard pile. Resolved as the card is played.
-   */
+  /** A bare `Exhaust X` printed on the card. */
   exhaustX?: number;
   /** Conditional stats, recalculated every time the pool is read. */
   stats?(state: GameState, owner: Character, card: Card): { oomph: number; scramble: number };
@@ -69,9 +65,11 @@ export interface CardBehaviour {
   /** The follow-up to a question this card asked. */
   onChoice?(answer: ChoiceAnswer, state: GameState, ctx: BehaviourContext): StepResult;
   /**
-   * A card in the play zone taking itself somewhere other than the discard pile,
-   * at cleanup. Called before the play zone is swept; a card still in the zone
-   * afterwards is discarded as normal (Each Turn, Cleanup).
+   * A card's own Cleanup step. For a played card taking itself somewhere other
+   * than the discard pile: called before the play zone is swept, and a card
+   * still in the zone afterwards is discarded as normal (Each Turn, Cleanup).
+   * For a `Holding:` line that acts at Cleanup (Spore Cloud): called on the
+   * held card before the play zone is swept, and may `ask` a question.
    */
   onCleanup?(state: GameState, ctx: BehaviourContext): StepResult;
 }

@@ -58,7 +58,7 @@ export const CARD_CONTENT = {
       oomph: 2,
       scramble: 0,
       conditionalStat: false,
-      text: "Exhaust 2 (the top 2 cards of your deck go to your discard pile).",
+      text: "Exhaust 2.",
     },
     {
       name: "Duck Under",
@@ -156,7 +156,7 @@ export const CARD_CONTENT = {
       oomph: 4,
       scramble: 0,
       conditionalStat: false,
-      text: "Shuffle a Red card from your discard pile back into your deck.",
+      text: "Shuffle a Red card from your Exhaust pile into your deck.",
     },
     {
       name: "Junk Launcher",
@@ -198,7 +198,7 @@ export const CARD_CONTENT = {
       oomph: 0,
       scramble: 2,
       conditionalStat: false,
-      text: "Holding: Cards you play have +1 Oomph, but you may not draw more than 2 cards per turn.",
+      text: "Holding: Cards you play have +1 Oomph. At Turn Start, draw 1 fewer card.",
     },
     {
       name: "Both Barrels",
@@ -324,7 +324,7 @@ export const CARD_CONTENT = {
       oomph: 2,
       scramble: 0,
       conditionalStat: false,
-      text: "Shuffle a Gray card from your discard pile back into your deck.",
+      text: "Shuffle a Gray card from your Exhaust pile into your deck.",
     },
     {
       name: "I'll Take That",
@@ -450,7 +450,7 @@ export const CARD_CONTENT = {
       oomph: 0,
       scramble: 0,
       conditionalStat: false,
-      text: "Choose a character. Move 2 cards from that character's discard pile to the bottom of their deck.",
+      text: "Choose a character. Move 2 cards from that character's Exhaust pile to the bottom of their deck.",
     },
     {
       name: "Cutting Torch",
@@ -478,7 +478,7 @@ export const CARD_CONTENT = {
       oomph: 3,
       scramble: 3,
       conditionalStat: false,
-      text: "One of you draws 1 card, (even if their hand is full).",
+      text: "One of you draws 1 card.",
     },
     {
       name: "Riot Shield",
@@ -520,7 +520,7 @@ export const CARD_CONTENT = {
       oomph: 0,
       scramble: 0,
       conditionalStat: false,
-      text: "Holding: you may not draw more than 1 card per turn.",
+      text: "Holding: At Turn Start, draw 1 fewer card.",
     },
     {
       name: "Torn Seal",
@@ -576,7 +576,7 @@ export const CARD_CONTENT = {
       oomph: 0,
       scramble: 0,
       conditionalStat: false,
-      text: "Holding: You can't have more than 3 cards in your hand.",
+      text: "Holding: At Cleanup, discard cards other than this one until you hold 3.",
     },
     {
       name: "Panic",
@@ -604,7 +604,7 @@ export const CARD_CONTENT = {
       oomph: 0,
       scramble: 0,
       conditionalStat: false,
-      text: "Holding: whenever you draw a card, your partner must also draw a card.",
+      text: "Holding: Whenever your partner draws a card during Play, Exhaust 1.",
     },
   ],
   rooms: [

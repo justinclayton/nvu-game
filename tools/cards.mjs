@@ -22,6 +22,7 @@ import { readFileSync, writeFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
 import { createContext, runInContext } from "node:vm";
+import { checkCardComments } from "./check-card-comments.mjs";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 const YAML = join(ROOT, "design/cards.yaml");
@@ -526,6 +527,7 @@ if (cmd === "build") {
   }
 
   problems.push(...checkRenders(doc, want));
+  problems.push(...checkCardComments());
 
   if (problems.length) {
     console.error(`card list has drifted — ${problems.length} problem(s):\n`);

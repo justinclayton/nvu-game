@@ -30,8 +30,7 @@ interface Modifiers {
   readonly ignoresExhaustX: boolean;
   readonly playedPowerDelta: number;
   readonly stuffPowerDelta: number;
-  readonly handCap: number;
-  readonly drawCap: number;
+  readonly drawTargetDelta: number;
 }
 
 const NO_MODIFIERS: Modifiers = {
@@ -39,13 +38,12 @@ const NO_MODIFIERS: Modifiers = {
   ignoresExhaustX: false,
   playedPowerDelta: 0,
   stuffPowerDelta: 0,
-  handCap: HAND_CAP,
-  drawCap: Number.POSITIVE_INFINITY,
+  drawTargetDelta: 0,
 };
 
 const held = (card: Card): HeldModifiers | undefined => behaviourOf(card.name)?.whileHeld;
 
-/** Every `Holding:` line in one character's hand, added up. Caps take the tightest. */
+/** Every `Holding:` line in one character's hand, added up. */
 export function heldModifiers(state: GameState, c: Character): Modifiers {
   let m = NO_MODIFIERS;
   for (const card of playerOf(state, c).hand) {
@@ -56,8 +54,7 @@ export function heldModifiers(state: GameState, c: Character): Modifiers {
       ignoresExhaustX: m.ignoresExhaustX || (h.ignoresExhaustX ?? false),
       playedPowerDelta: m.playedPowerDelta + (h.playedPowerDelta ?? 0),
       stuffPowerDelta: m.stuffPowerDelta + (h.stuffPowerDelta ?? 0),
-      handCap: Math.min(m.handCap, h.handCap ?? HAND_CAP),
-      drawCap: Math.min(m.drawCap, h.drawCap ?? Number.POSITIVE_INFINITY),
+      drawTargetDelta: m.drawTargetDelta + (h.drawTargetDelta ?? 0),
     };
   }
   return m;
@@ -74,13 +71,12 @@ export function exhaustXPreventedBy(state: GameState, c: Character): Card | null
   return null;
 }
 
-/** Each Turn, Draw: maximum hand size is 5. A card may tighten it. */
-export const handCapFor = (state: GameState, c: Character): number =>
-  heldModifiers(state, c).handCap;
-
-/** How deep a character may draw this turn. Unlimited unless a card says otherwise. */
-export const drawCapFor = (state: GameState, c: Character): number =>
-  heldModifiers(state, c).drawCap;
+/**
+ * Each Turn, Turn Start: draw up to 5. A "draw N fewer" `Holding:` line comes
+ * off that target; copies stack, and the target never goes below 0.
+ */
+export const drawTargetFor = (state: GameState, c: Character): number =>
+  Math.max(0, HAND_CAP - heldModifiers(state, c).drawTargetDelta);
 
 /* ------------------------------------------------------------- the stat pool */
 
@@ -169,7 +165,7 @@ export function metThresholds(state: GameState): readonly Threshold[] {
  */
 export interface CostOverride {
   /** Named, so a log line or a label can say why a card was free. */
-  readonly reason: "last stand" | "free play";
+  readonly reason: "free play";
   /** Playing a card through this override uses it up. */
   readonly oneShot: boolean;
 }
@@ -183,17 +179,8 @@ interface CostOverrideRule extends CostOverride {
  * Everything that can zero a cost, in the order `costOf` reads it. A card that
  * makes a play free says so with a rule here and a verb that arms it, rather
  * than with another branch inside `costOf`.
- *
- * Last stand is first, so a character already playing their whole hand for
- * nothing does not swallow the team's free play.
  */
 const COST_OVERRIDES: readonly CostOverrideRule[] = [
-  {
-    // Rulebook, Last Stand: while in last stand, every card in that hand may be played at no cost.
-    reason: "last stand",
-    oneShot: false,
-    available: (state, c) => playerOf(state, c).lastStand,
-  },
   {
     // Overcharged Battery: the next card played this turn, by either character.
     // See open-questions.md #14.
@@ -259,16 +246,24 @@ export function playableCards(state: GameState, c: Character): readonly Card[] {
   return p.hand.filter((card) => payOptions(state, c, card.id).length >= costOf(state, c, card));
 }
 
-/* ---------------------------------------------------------------- the draw */
+/* ------------------------------------------------------------- Rulebook, Ascending */
 
-/** Each Turn, Draw: may this character draw another card right now? */
-export function canDraw(state: GameState, c: Character): boolean {
-  if (state.phase !== "Draw" || state.pending !== null) return false;
+/**
+ * Every Stuff card in this character's deck, hand or discard pile — what
+ * Settle your Stuff works through, once Ascending's first step has shuffled
+ * the hand into the deck. A Stuff card sitting in hand right now is included
+ * here, since that shuffle is what it goes through on its way to being
+ * settled.
+ */
+export function settleableStuff(state: GameState, c: Character): readonly Card[] {
   const p = playerOf(state, c);
-  if (p.down || p.lastStand) return false;
-  if (p.deck.length === 0) return false;
-  if (p.drewThisTurn >= drawCapFor(state, c)) return false;
-  return p.hand.length < handCapFor(state, c);
+  return [...p.deck, ...p.hand, ...p.discard].filter((x) => x.kind !== "player");
+}
+
+/** Every other owned, non-Stuff card that could pay to settle a Stuff card. */
+export function settlePayOptions(state: GameState, c: Character): readonly Card[] {
+  const p = playerOf(state, c);
+  return [...p.deck, ...p.hand, ...p.discard].filter((x) => x.kind === "player");
 }
 
 /* -------------------------------------------------------------------- undo */
@@ -277,7 +272,7 @@ const REVEALING: ReadonlySet<DomainEvent["type"]> = new Set([
   "FLOOR_BUILT",
   "ROOM_FLIPPED",
   "CARD_DRAWN",
-  "DRAW_BURNED",
+  "CARD_EXHAUSTED",
   "STUFF_TAKEN",
   "CARDS_PEEKED",
   "REWARD_REVEALED",
@@ -287,10 +282,9 @@ const REVEALING: ReadonlySet<DomainEvent["type"]> = new Set([
 /**
  * Did this command show anybody something they cannot unsee? Undo is allowed
  * back to the last command that did. Playing and paying can be taken back;
- * seeing a card cannot.
+ * seeing a card cannot — drawing and Exhausting both turn a hidden top-of-deck
+ * card face up, so both count.
  */
 export function revealsHiddenInfo(events: readonly DomainEvent[]): boolean {
-  return events.some(
-    (e) => REVEALING.has(e.type) || (e.type === "CARD_DISCARDED" && e.from === "deck"),
-  );
+  return events.some((e) => REVEALING.has(e.type));
 }

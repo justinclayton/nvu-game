@@ -1,7 +1,7 @@
 /* One test per entry in the Stuff registry, beside the behaviour. */
 
 import { beforeEach, describe, expect, it } from "vitest";
-import { costOf, drawCapFor, handCapFor, statPool, thresholdTarget } from "../queries";
+import { costOf, statPool, thresholdTarget } from "../queries";
 import {
   card,
   eventTypes,
@@ -183,13 +183,13 @@ describe("Crowbar — 'Play: if you get any Good Stuff this turn, get an additio
   });
 });
 
-describe("A Pair Of Stich-Em-Ups — 'Choose a character, move 2 cards from their discard pile'", () => {
-  it("heals the caster with no choice offered when only they have a discard pile", () => {
+describe("A Pair Of Stich-Em-Ups — 'Choose a character, move 2 cards from their Exhaust pile'", () => {
+  it("heals the caster with no choice offered when only they have an Exhaust pile", () => {
     const state = playing({
       Red: player({
         deck: pile("Shove", 2),
         hand: [card("A Pair Of Stich-Em-Ups"), card("Shove")],
-        discard: pile("Charge In", 3),
+        exhaust: pile("Charge In", 3),
       }),
     });
     const r = ids(state, "Red");
@@ -208,19 +208,20 @@ describe("A Pair Of Stich-Em-Ups — 'Choose a character, move 2 cards from thei
     const { state: next, events } = must(asked.state, { type: "CHOOSE_CARDS", cardIds: chosen });
     expect(next.Red.deck.slice(-2).map((c) => c.id)).toEqual(chosen);
     expect(next.Red.deck).toHaveLength(4);
+    expect(next.Red.exhaust).toHaveLength(1);
     expect(eventTypes(events)).toContain("CARD_MOVED");
   });
 
-  it("asks which character when both have a discard pile, and heals the other one", () => {
+  it("asks which character when both have an Exhaust pile, and heals the other one", () => {
     const state = playing({
       Red: player({
         deck: pile("Shove", 2),
         hand: [card("A Pair Of Stich-Em-Ups"), card("Shove")],
-        discard: pile("Charge In", 3),
+        exhaust: pile("Charge In", 3),
       }),
       Gray: player({
         deck: pile("Duck Under", 2),
-        discard: pile("Duck Under", 3),
+        exhaust: pile("Duck Under", 3),
       }),
     });
     const r = ids(state, "Red");
@@ -236,7 +237,7 @@ describe("A Pair Of Stich-Em-Ups — 'Choose a character, move 2 cards from thei
     const pending = chosen.state.pending;
     if (pending?.kind !== "ChooseCards") throw new Error("expected a card choice for Gray");
     expect(pending.character).toBe("Gray");
-    expect(pending.options).toEqual(state.Gray.discard);
+    expect(pending.options).toEqual(state.Gray.exhaust);
 
     const chosenCards = pending.options.slice(0, 2).map((c) => c.id);
     const { state: next, events } = must(chosen.state, {
@@ -245,48 +246,34 @@ describe("A Pair Of Stich-Em-Ups — 'Choose a character, move 2 cards from thei
     });
     expect(next.Gray.deck.slice(-2).map((c) => c.id)).toEqual(chosenCards);
     expect(next.Gray.deck).toHaveLength(4);
-    expect(next.Gray.discard).toHaveLength(1);
-    // Red's own pile picked up the payment card that was discarded to play it,
-    // on top of the 3 it started with — the choice still landed on Gray.
-    expect(next.Red.discard).toHaveLength(4);
+    expect(next.Gray.exhaust).toHaveLength(1);
     expect(eventTypes(events)).toContain("CARD_MOVED");
   });
 
-  it("heals a partner in Last Stand without ending it early", () => {
+  it("moves fewer than 2 when the Exhaust pile is that short", () => {
     const state = playing({
-      // Red is in Last Stand too, so playing costs nothing and Red's own
-      // discard pile stays empty — the only eligible target is Gray.
       Red: player({
-        deck: [],
-        hand: [card("A Pair Of Stich-Em-Ups")],
-        discard: [],
-        lastStand: true,
-      }),
-      Gray: player({
-        deck: [],
-        discard: pile("Duck Under", 3),
-        lastStand: true,
+        deck: pile("Shove", 2),
+        hand: [card("A Pair Of Stich-Em-Ups"), card("Shove")],
+        exhaust: pile("Charge In", 1),
       }),
     });
     const r = ids(state, "Red");
-    // Only Gray has anything in their discard pile, so the heal goes straight to Gray
-    // with no character prompt.
     const asked = must(state, {
       type: "PLAY_CARD",
       character: "Red",
       cardId: r[0] as CardId,
-      payWith: [],
+      payWith: [r[1] as CardId],
     });
     const pending = asked.state.pending;
-    if (pending?.kind !== "ChooseCards") throw new Error("expected a card choice for Gray");
-    expect(pending.character).toBe("Gray");
-
-    const chosen = pending.options.slice(0, 2).map((c) => c.id);
-    const { state: next } = must(asked.state, { type: "CHOOSE_CARDS", cardIds: chosen });
-    expect(next.Gray.deck).toHaveLength(2);
-    // Last Stand only ends at Cleanup (rulebook, Last Stand); refilling the deck mid-turn does
-    // not stand Gray back up on its own.
-    expect(next.Gray.lastStand).toBe(true);
+    if (pending?.kind !== "ChooseCards") throw new Error("expected a card choice");
+    expect(pending.options).toHaveLength(1);
+    const { state: next } = must(asked.state, {
+      type: "CHOOSE_CARDS",
+      cardIds: pending.options.map((c) => c.id),
+    });
+    expect(next.Red.exhaust).toHaveLength(0);
+    expect(next.Red.deck).toHaveLength(3);
   });
 });
 
@@ -458,40 +445,35 @@ describe("Overcharged Battery — 'The next card played this turn costs 0'", () 
     expect(next.thisTurn.freePlays).toBe(0);
   });
 
-  it("is not swallowed by a character playing for free in last stand", () => {
-    const state = playing({
-      Red: player({ deck: pile("Shove", 3), hand: [card("Overcharged Battery"), card("Shove")] }),
-      Gray: player({ deck: [], hand: [card("Pick The Lock")], lastStand: true }),
-    });
-    const r = ids(state, "Red");
-    const charged = must(state, {
-      type: "PLAY_CARD",
-      character: "Red",
-      cardId: r[0] as CardId,
-      payWith: [r[1] as CardId],
-    });
-    // Rulebook, Last Stand pays for Gray's card, not the Battery, so the discount is still there.
-    const spent = must(
-      charged.state,
-      free("Gray", handCard(charged.state, "Gray", "Pick The Lock").id),
-    );
-    expect(spent.state.thisTurn.freePlays).toBe(1);
-  });
 });
 
-describe("Faceful Of Slime — 'Holding: you may not draw more than 1 card'", () => {
-  it("caps the draw at one", () => {
+describe("Faceful Of Slime — 'Holding: At Turn Start, draw 1 fewer card'", () => {
+  it("trims the automatic draw's target from 5 to 4", () => {
     const state = rig({
-      phase: "Draw",
-      activeRoom: room("Sorting Room"),
+      phase: "Turn Start",
+      floorDeck: [room("Sorting Room")],
       Red: player({ deck: pile("Shove", 6), hand: [card("Faceful Of Slime")] }),
       Gray: player({ deck: pile("Duck Under", 6) }),
     });
-    expect(drawCapFor(state, "Red")).toBe(1);
-    const once = must(state, { type: "DRAW", character: "Red" });
-    const twice = play(once.state, []);
-    void twice;
-    expect(once.state.Red.drewThisTurn).toBe(1);
+    const { state: next } = must(state, { type: "FLIP_ROOM" });
+    expect(next.Red.drewThisTurn).toBe(3);
+    expect(next.Red.hand).toHaveLength(4);
+  });
+
+  it("stacks with another 'draw 1 fewer' source (Deadweight Grip)", () => {
+    const state = rig({
+      phase: "Turn Start",
+      floorDeck: [room("Sorting Room")],
+      Red: player({
+        deck: pile("Shove", 6),
+        hand: [card("Faceful Of Slime"), card("Deadweight Grip")],
+      }),
+      Gray: player({ deck: pile("Duck Under", 6) }),
+    });
+    const { state: next } = must(state, { type: "FLIP_ROOM" });
+    // Two sources: target 5 - 1 - 1 = 3, one draw short of the two already held.
+    expect(next.Red.drewThisTurn).toBe(1);
+    expect(next.Red.hand).toHaveLength(3);
   });
 });
 
@@ -519,24 +501,70 @@ describe("Rust — 'Holding: Stuff you play has -1 Oomph'", () => {
   });
 });
 
-describe("Spore Cloud — \"Holding: You can't have more than 3 cards in your hand\"", () => {
-  it("tightens the hand cap to 3", () => {
-    const state = rig({
-      phase: "Draw",
-      activeRoom: room("Sorting Room"),
-      Red: player({ deck: pile("Shove", 6), hand: [card("Spore Cloud")] }),
-      Gray: player({ deck: pile("Duck Under", 6) }),
+describe("Spore Cloud — 'Holding: At Cleanup, discard cards other than this one until you hold 3'", () => {
+  it("does nothing to a hand already at or under 3", () => {
+    const state = playing({
+      activeRoom: room("Gross Thing That Looks Like A Cherry"),
+      Red: player({ deck: pile("Shove", 3), hand: [card("Spore Cloud"), card("Shove")] }),
+      Gray: player({ deck: pile("Duck Under", 3) }),
     });
-    expect(handCapFor(state, "Red")).toBe(3);
-    const drawn = play(state, [
-      { type: "DRAW", character: "Red" },
-      { type: "DRAW", character: "Red" },
-    ]);
-    expect(drawn.state.Red.hand).toHaveLength(3);
-    // A fourth draw would be drawing up past the cap.
-    const rejected = play(drawn.state, []);
-    void rejected;
-    expect(handCapFor(drawn.state, "Red")).toBe(3);
+    const { state: next } = play(state, [{ type: "END_PLAY" }]);
+    expect(next.phase).toBe("Turn Start");
+    expect(next.Red.hand).toHaveLength(2);
+  });
+
+  it("asks its holder to discard down to 3 at Cleanup, Spore Cloud itself not offered", () => {
+    const state = playing({
+      activeRoom: room("Gross Thing That Looks Like A Cherry"),
+      Red: player({
+        deck: pile("Shove", 3),
+        hand: [card("Spore Cloud"), card("Shove"), card("Shove"), card("Shove")],
+      }),
+      Gray: player({ deck: pile("Duck Under", 3) }),
+    });
+    const asked = must(state, { type: "END_PLAY" });
+    const pending = asked.state.pending;
+    if (pending?.kind !== "ChooseCards") throw new Error("expected a card choice");
+    expect(pending.character).toBe("Red");
+    expect(pending.count).toBe(1);
+    // Spore Cloud still counts toward the 3, but is not an option to discard.
+    expect(pending.options.map((c) => c.name)).not.toContain("Spore Cloud");
+    expect(pending.options).toHaveLength(3);
+
+    const choice = pending.options[0];
+    if (!choice) throw new Error("rig");
+    const { state: next, events } = must(asked.state, {
+      type: "CHOOSE_CARDS",
+      cardIds: [choice.id],
+    });
+    expect(next.Red.hand).toHaveLength(3);
+    expect(next.Red.hand.some((c) => c.name === "Spore Cloud")).toBe(true);
+    expect(next.phase).toBe("Turn Start");
+    expect(eventTypes(events)).toContain("CARD_DISCARDED");
+  });
+
+  it("stays uneraseable even holding two copies", () => {
+    const state = playing({
+      activeRoom: room("Gross Thing That Looks Like A Cherry"),
+      Red: player({
+        deck: pile("Shove", 3),
+        hand: [card("Spore Cloud"), card("Spore Cloud"), card("Shove"), card("Shove")],
+      }),
+      Gray: player({ deck: pile("Duck Under", 3) }),
+    });
+    const asked = must(state, { type: "END_PLAY" });
+    const pending = asked.state.pending;
+    if (pending?.kind !== "ChooseCards") throw new Error("expected a card choice");
+    // Two Spore Clouds count toward the 3 the same as any other card, and
+    // neither is offered — down to 3 leaves both plus one Shove.
+    expect(pending.count).toBe(1);
+    expect(pending.options.map((c) => c.name)).toEqual(["Shove", "Shove"]);
+
+    const choice = pending.options[0];
+    if (!choice) throw new Error("rig");
+    const { state: next } = must(asked.state, { type: "CHOOSE_CARDS", cardIds: [choice.id] });
+    expect(next.Red.hand).toHaveLength(3);
+    expect(next.Red.hand.filter((c) => c.name === "Spore Cloud")).toHaveLength(2);
   });
 });
 
@@ -570,69 +598,90 @@ describe("Panic — 'ALL rooms require an additional 2 Scramble, and Play: Exhau
   });
 });
 
-describe("My Head Is Quantum Spinning — 'whenever you draw a card, your partner must also draw'", () => {
-  it("forces the partner to draw immediately, and does not chain back", () => {
+describe("My Head Is Quantum Spinning — 'Holding: whenever your partner draws during Play, Exhaust 1'", () => {
+  it("does not fire for Turn Start's own automatic draws", () => {
     const state = rig({
-      phase: "Draw",
-      activeRoom: room("Sorting Room"),
-      Red: player({ deck: pile("Shove", 6), hand: [card("My Head Is Quantum Spinning")] }),
+      phase: "Turn Start",
+      floorDeck: [room("Sorting Room")],
+      Red: player({
+        deck: pile("Shove", 6),
+        hand: [card("My Head Is Quantum Spinning"), ...pile("Shove", 3)],
+      }),
       Gray: player({ deck: pile("Duck Under", 6) }),
     });
-    const { state: next, events } = must(state, { type: "DRAW", character: "Red" });
-    // Red's chosen draw plus the held card.
-    expect(next.Red.hand).toHaveLength(2);
-    // The forced draw landed on Gray right away, and only once — if it chained
-    // back to Red (or bounced off Gray's own forced draw) this would be higher.
-    expect(next.Gray.hand).toHaveLength(1);
-    expect(next.Gray.drewThisTurn).toBe(1);
-    expect(eventTypes(events)).toEqual(["CARD_DRAWN", "CARD_DRAWN"]);
-  });
-
-  it("discards the forced draw when the partner has a Full Hand", () => {
-    const state = rig({
-      phase: "Draw",
-      activeRoom: room("Sorting Room"),
-      Red: player({ deck: pile("Shove", 6), hand: [card("My Head Is Quantum Spinning")] }),
-      Gray: player({ deck: pile("Duck Under", 6), hand: pile("Shove", 5) }),
-    });
-    const { state: next } = must(state, { type: "DRAW", character: "Red" });
+    const { state: next, events } = must(state, { type: "FLIP_ROOM" });
+    expect(next.Red.hand).toHaveLength(5);
     expect(next.Gray.hand).toHaveLength(5);
-    expect(next.Gray.discard).toHaveLength(1);
-    expect(next.Gray.drewThisTurn).toBe(1);
+    expect(next.Red.deck).toHaveLength(5);
+    expect(eventTypes(events)).not.toContain("CARD_EXHAUSTED");
   });
 
-  it("does not draw a partner in Last Stand", () => {
-    const state = rig({
-      phase: "Draw",
-      activeRoom: room("Sorting Room"),
-      Red: player({ deck: pile("Shove", 6), hand: [card("My Head Is Quantum Spinning")] }),
-      Gray: player({ deck: pile("Duck Under", 6), lastStand: true }),
-    });
-    const { state: next } = must(state, { type: "DRAW", character: "Red" });
-    expect(next.Gray.hand).toHaveLength(0);
-    expect(next.Gray.deck).toHaveLength(6);
-    expect(next.Gray.drewThisTurn).toBe(0);
-  });
-
-  // Ruled for Faceful Of Slime: a draw cap already reached stops a forced draw
-  // outright. Deadweight Grip's cap of 2 is the same code and is the agent's own
-  // reading, not a ruling — see open-questions.md #17 and #19.
-  it("does not draw a partner who already drew their capped card this turn (Faceful Of Slime)", () => {
-    const state = rig({
-      phase: "Draw",
-      activeRoom: room("Sorting Room"),
-      Red: player({ deck: pile("Shove", 6), hand: [card("My Head Is Quantum Spinning")] }),
-      Gray: player({
-        deck: pile("Duck Under", 6),
-        hand: [card("Faceful Of Slime")],
-        drewThisTurn: 1,
+  it("Exhausts 1 when the partner draws during Play", () => {
+    const state = playing({
+      Red: player({
+        deck: pile("Shove", 4),
+        hand: [card("My Head Is Quantum Spinning"), card("Grav Harness"), card("Shove"), card("Shove")],
       }),
+      Gray: player({ deck: pile("Duck Under", 3) }),
     });
-    const { state: next, events } = must(state, { type: "DRAW", character: "Red" });
-    // No card moved for Gray, and no draw event at all for the forced draw.
+    const r = ids(state, "Red");
+    const asked = must(state, {
+      type: "PLAY_CARD",
+      character: "Red",
+      cardId: r[1] as CardId,
+      payWith: [r[2] as CardId, r[3] as CardId],
+    });
+    const pending = asked.state.pending;
+    if (pending?.kind !== "ChooseCharacter") throw new Error("expected a character choice");
+    const { state: next, events } = must(asked.state, { type: "CHOOSE_CHARACTER", character: "Gray" });
     expect(next.Gray.hand).toHaveLength(1);
-    expect(next.Gray.deck).toHaveLength(6);
-    expect(next.Gray.drewThisTurn).toBe(1);
-    expect(eventTypes(events)).toEqual(["CARD_DRAWN"]);
+    expect(next.Red.deck).toHaveLength(3);
+    expect(eventTypes(events)).toContain("CARD_EXHAUSTED");
+  });
+
+  it("does not fire for its own holder's draw", () => {
+    const state = playing({
+      Red: player({
+        deck: pile("Shove", 4),
+        hand: [card("My Head Is Quantum Spinning"), card("Grav Harness"), card("Shove"), card("Shove")],
+      }),
+      Gray: player({ deck: pile("Duck Under", 3) }),
+    });
+    const r = ids(state, "Red");
+    const asked = must(state, {
+      type: "PLAY_CARD",
+      character: "Red",
+      cardId: r[1] as CardId,
+      payWith: [r[2] as CardId, r[3] as CardId],
+    });
+    const { state: next, events } = must(asked.state, { type: "CHOOSE_CHARACTER", character: "Red" });
+    expect(next.Red.deck).toHaveLength(3);
+    expect(eventTypes(events)).not.toContain("CARD_EXHAUSTED");
+  });
+
+  it("is stopped by its holder's own Zen Mode", () => {
+    const state = playing({
+      Red: player({
+        deck: pile("Shove", 4),
+        hand: [
+          card("My Head Is Quantum Spinning"),
+          card("Zen Mode"),
+          card("Grav Harness"),
+          card("Shove"),
+          card("Shove"),
+        ],
+      }),
+      Gray: player({ deck: pile("Duck Under", 3) }),
+    });
+    const r = ids(state, "Red");
+    const asked = must(state, {
+      type: "PLAY_CARD",
+      character: "Red",
+      cardId: r[2] as CardId,
+      payWith: [r[3] as CardId, r[4] as CardId],
+    });
+    const { state: next, events } = must(asked.state, { type: "CHOOSE_CHARACTER", character: "Gray" });
+    expect(next.Red.deck).toHaveLength(4);
+    expect(eventTypes(events)).toContain("EXHAUST_PREVENTED");
   });
 });

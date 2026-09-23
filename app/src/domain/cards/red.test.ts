@@ -33,7 +33,7 @@ const playing = (over: Partial<GameState> = {}) =>
   });
 
 describe("Reckless Swing — 'Exhaust 1'", () => {
-  it("takes one off the top of your own deck", () => {
+  it("takes one off the top of your own deck, into the Exhaust pile", () => {
     const state = playing({
       Red: player({ deck: pile("Shove", 4), hand: [card("Reckless Swing"), card("Shove")] }),
     });
@@ -45,8 +45,9 @@ describe("Reckless Swing — 'Exhaust 1'", () => {
       payWith: [hand[1] as CardId],
     });
     expect(next.Red.deck).toHaveLength(3);
-    // One paid from hand and one off the top of the deck.
-    expect(next.Red.discard).toHaveLength(2);
+    // Paid from hand, not Exhausted.
+    expect(next.Red.discard).toHaveLength(1);
+    expect(next.Red.exhaust).toHaveLength(1);
   });
 });
 
@@ -86,13 +87,13 @@ describe("Fast Follow — 'If Gray played a card this turn, this costs 0'", () =
   });
 });
 
-describe("Second Wind — 'Shuffle a Red card from your discard pile back into your deck'", () => {
-  it("offers Red's own discarded cards, and nothing else", () => {
+describe("Second Wind — 'Shuffle a Red card from your Exhaust pile into your deck'", () => {
+  it("offers Red's own Exhausted cards, and nothing else", () => {
     const state = playing({
       Red: player({
         deck: pile("Shove", 3),
         hand: [card("Second Wind"), card("Shove"), card("Shove")],
-        discard: [card("Charge In"), card("Pry Bar")],
+        exhaust: [card("Charge In"), card("Pry Bar")],
       }),
     });
     const hand = ids(state, "Red");
@@ -105,8 +106,7 @@ describe("Second Wind — 'Shuffle a Red card from your discard pile back into y
     const pending = asked.state.pending;
     expect(pending?.kind).toBe("ChooseCards");
     if (pending?.kind !== "ChooseCards") throw new Error("expected a card choice");
-    // The Pry Bar is Stuff, not a Red card. The two Shoves that paid for this
-    // are in the pile by now, and are Red cards, so they are offered too.
+    // The Pry Bar is Stuff, not a Red card.
     const offered = pending.options.map((c) => c.name);
     expect(offered).toContain("Charge In");
     expect(offered).not.toContain("Pry Bar");
@@ -118,7 +118,7 @@ describe("Second Wind — 'Shuffle a Red card from your discard pile back into y
       cardIds: [chosen.id],
     });
     expect(next.Red.deck.some((c) => c.id === chosen.id)).toBe(true);
-    expect(next.Red.discard.some((c) => c.id === chosen.id)).toBe(false);
+    expect(next.Red.exhaust.some((c) => c.id === chosen.id)).toBe(false);
     expect(eventTypes(events)).toContain("CARDS_SHUFFLED_IN");
   });
 });
@@ -169,7 +169,7 @@ describe("Heavy Pockets — 'Shuffle 1 Stuff from your hand into your deck'", ()
   });
 });
 
-describe("Deadweight Grip — 'Cards you play have +1 Oomph, draw no more than 2'", () => {
+describe("Deadweight Grip — 'Cards you play have +1 Oomph. At Turn Start, draw 1 fewer card'", () => {
   it("adds a Oomph to everything its holder plays", () => {
     const state = playing({
       Red: player({
@@ -188,21 +188,17 @@ describe("Deadweight Grip — 'Cards you play have +1 Oomph, draw no more than 2
     expect(statPool(next).oomph).toBe(3);
   });
 
-  it("caps its holder's draw at 2", () => {
+  it("trims its holder's Turn Start target from 5 to 4", () => {
     const state = rig({
-      phase: "Draw",
-      activeRoom: room("Sorting Room"),
+      phase: "Turn Start",
+      floorDeck: [room("Sorting Room")],
       Red: player({ deck: pile("Shove", 6), hand: [card("Deadweight Grip")] }),
       Gray: player({ deck: pile("Duck Under", 6) }),
     });
-    const twice = play(state, [
-      { type: "DRAW", character: "Red" },
-      { type: "DRAW", character: "Red" },
-    ]);
-    expect(twice.state.Red.drewThisTurn).toBe(2);
-    const rejected = play(twice.state, []);
-    void rejected;
-    expect(twice.state.Red.hand).toHaveLength(3);
+    const { state: next } = must(state, { type: "FLIP_ROOM" });
+    expect(next.Red.drewThisTurn).toBe(3);
+    // Deadweight Grip plus the three draws that fill it to 4.
+    expect(next.Red.hand).toHaveLength(4);
   });
 });
 
@@ -346,45 +342,23 @@ describe("Zen Mode — \"Holding: you don't `Exhaust`\"", () => {
     expect(next.Red.hand.map((c) => c.name)).toEqual(["Zen Mode", "Shove"]);
   });
 
-  it("does not stop the burned draw of a full hand", () => {
+  it("does not stop the Empty deck reshuffle", () => {
+    // Rulebook, Keywords: Empty deck is a draw or an Exhaust reaching an empty deck; it is
+    // not itself an `Exhaust X` line, so Zen Mode never sees it.
     const state = rig({
-      phase: "Flip",
+      phase: "Turn Start",
       floorDeck: [room("Sorting Room")],
       Red: player({
-        deck: pile("Shove", 4),
-        hand: [card("Zen Mode"), ...pile("Shove", 4)],
-      }),
-      Gray: player({ deck: pile("Duck Under", 4) }),
-    });
-    // The opening draw is the only draw a full hand ever takes.
-    const { state: next, events } = must(state, { type: "FLIP_ROOM" });
-    expect(next.Red.discard).toHaveLength(1);
-    expect(eventTypes(events)).toEqual([
-      "ROOM_FLIPPED",
-      "DRAW_BURNED",
-      "CARD_DISCARDED",
-      "CARD_DRAWN",
-    ]);
-  });
-
-  it("does not stop the price of getting out of last stand", () => {
-    const state = playing({
-      activeRoom: room("Sorting Room"),
-      Red: player({
         deck: [],
-        hand: [card("Zen Mode"), card("Shove"), card("Shove"), card("Shove")],
-        lastStand: true,
+        hand: [card("Zen Mode")],
+        discard: pile("Shove", 4),
       }),
       Gray: player({ deck: pile("Duck Under", 4) }),
     });
-    const shoves = state.Red.hand.filter((c) => c.name === "Shove");
-    const { state: next, events } = play(state, [
-      ...shoves.map((c) => free("Red", c.id)),
-      { type: "END_PLAY" },
-    ]);
-    // Three played, shuffled back, two Exhausted as the price: one left.
-    expect(next.Red.deck).toHaveLength(1);
-    expect(eventTypes(events)).toContain("LAST_STAND_ESCAPED");
+    const { state: next, events } = must(state, { type: "FLIP_ROOM" });
+    expect(next.Red.hand).toHaveLength(5);
+    expect(next.Red.discard).toEqual([]);
+    expect(eventTypes(events)).toContain("DISCARD_RESHUFFLED");
     expect(eventTypes(events)).not.toContain("EXHAUST_PREVENTED");
   });
 });

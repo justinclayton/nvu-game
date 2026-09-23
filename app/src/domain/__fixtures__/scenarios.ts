@@ -4,7 +4,7 @@
  * lines and cannot drift from the engine's types. Every state here is one the
  * engine actually produced: either played to from a rigged starting point, or
  * hand-set the same way the tests in `../ascending.test.ts` and
- * `../running-out.test.ts` already do for a phase, a flag, or an offer.
+ * `../going-down.test.ts` already do for a phase, a flag, or an offer.
  *
  * Test scaffolding, not content — no vitest import here, so this stays
  * reachable from the app's dev-only bundle without pulling a test runner in.
@@ -29,26 +29,16 @@ export interface Fixture {
 const SORTING_ROOM = "Sorting Room";
 const CLEARED_ROOM = "Gross Thing That Looks Like A Cherry";
 
-/** Draw phase, opening draws done, Play not yet started. */
-function drawing(): GameState {
+/** Play phase, just flipped: both hands already drawn to 5 (Turn Start runs both steps at once). */
+function playing(): GameState {
   const state = rig({
-    phase: "Flip",
+    phase: "Turn Start",
     floorDeck: [room(SORTING_ROOM)],
     Red: player({ deck: pile("Shove", 8) }),
     Gray: player({ deck: pile("Duck Under", 8) }),
   });
-  const { state: next } = play(state, [
-    { type: "FLIP_ROOM" },
-    { type: "DRAW", character: "Red" },
-    { type: "DRAW", character: "Gray" },
-  ]);
+  const { state: next } = play(state, [{ type: "FLIP_ROOM" }]);
   return next;
-}
-
-/** Play phase, both hands holding cards they can afford. */
-function playing(): GameState {
-  const { state } = play(drawing(), [{ type: "END_DRAW" }]);
-  return state;
 }
 
 /** A pending `ChooseCharacter`: Grav Harness asks who draws. */
@@ -95,13 +85,13 @@ function choosingCards(): GameState {
   return asked;
 }
 
-/** Red in last stand, mid-Play, with a hand every card in it is free to play. */
-function lastStand(): GameState {
+/** The run lost: Red went Down, which ended it on the spot (rulebook, Going Down). */
+function gameOver(): GameState {
   return rig({
-    phase: "Play",
-    activeRoom: room(SORTING_ROOM),
-    Red: player({ deck: [], hand: [card("Charge In"), card("Pry Bar")], lastStand: true }),
-    Gray: player({ deck: pile("Duck Under", 4) }),
+    phase: "GameOver",
+    outcome: "Defeat",
+    Red: player({ deck: [], hand: [], discard: pile("Shove", 3), down: true }),
+    Gray: player({ deck: pile("Duck Under", 4), hand: pile("Duck Under", 2) }),
   });
 }
 
@@ -187,8 +177,11 @@ function stableRan(build: () => Ran): () => Ran {
  * wherever the screen wants to be looked at.
  */
 export const FIXTURES: readonly Fixture[] = [
-  { name: "draw", description: "Draw phase, both hands already holding cards.", build: stable(drawing) },
-  { name: "play", description: "Play phase, a playable hand for both.", build: stable(playing) },
+  {
+    name: "play",
+    description: "Play phase, just flipped: both hands drawn to 5.",
+    build: stable(playing),
+  },
   {
     name: "choose-character",
     description: "Grav Harness pending a ChooseCharacter answer.",
@@ -200,9 +193,9 @@ export const FIXTURES: readonly Fixture[] = [
     build: stable(choosingCards),
   },
   {
-    name: "last-stand",
-    description: "Red in last stand, mid-Play.",
-    build: stable(lastStand),
+    name: "game-over",
+    description: "Red went Down, which ended the run on the spot.",
+    build: stable(gameOver),
   },
   {
     name: "ascend",

@@ -181,13 +181,13 @@ describe("Here, Catch — 'Move 1 Stuff from your hand to Red's hand'", () => {
   });
 });
 
-describe("Hit 'n Run — 'Shuffle a Gray card from your discard pile back into your deck'", () => {
+describe("Hit 'n Run — 'Shuffle a Gray card from your Exhaust pile into your deck'", () => {
   it("offers only Gray's own cards", () => {
     const state = playing({
       Gray: player({
         deck: pile("Duck Under", 3),
         hand: [card("Hit 'n Run"), card("Duck Under")],
-        discard: [card("Pick The Lock"), card("Coil Of Cable")],
+        exhaust: [card("Pick The Lock"), card("Coil Of Cable")],
       }),
     });
     const g = ids(state, "Gray");

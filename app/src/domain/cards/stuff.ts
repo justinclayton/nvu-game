@@ -1,22 +1,22 @@
 /* Good Stuff and Bad Stuff. Keyed by the name design/cards.yaml makes unique.
- *
- * Rulebook, Card anatomy: Stuff cards: Stuff is ordinary energy — you may discard it from hand to pay another
- * card's cost. Bad Stuff behaves like any other Stuff except that it
- * contributes no stats.
+ * See rulebook §8, Card anatomy: Stuff cards.
  */
 
 import type { Character, DomainEvent, GameState, Pending } from "../types";
-import { drawCapFor } from "../queries";
+import { exhaustXPreventedBy } from "../queries";
 import {
   CHARACTERS,
+  discardFromHand,
   drawOne,
+  exhaustFromDeck,
   grantFreePlay,
   hasFired,
   markFired,
   moveToBottomOfDeck,
+  other,
   playerOf,
   returnToHand,
-  takeFromDiscard,
+  takeFromExhaust,
   takeGoodStuff,
 } from "../verbs";
 import { ask, done, nothing, source, type BehaviourContext, type Registry } from "./behaviour";
@@ -25,9 +25,9 @@ import { ask, done, nothing, source, type BehaviourContext, type Registry } from
 function healCardsAsk(state: GameState, ctx: BehaviourContext, target: Character): Pending {
   return {
     kind: "ChooseCards",
-    prompt: `Move which 2 cards to the bottom of ${target}'s deck?`,
+    prompt: `Move which 2 cards from ${target}'s Exhaust pile to the bottom of their deck?`,
     character: target,
-    options: playerOf(state, target).discard,
+    options: playerOf(state, target).exhaust,
     count: 2,
     optional: false,
     source: source(ctx, `stich-em-ups:${target}`),
@@ -39,27 +39,8 @@ export const STUFF: Registry = {
 
   /* "Play: if you get any Good Stuff this turn, get an additional one."
    *
-   * Once played, "this turn" covers the rest of the turn Crowbar sits in the
-   * play zone — including a room's payout at Outcome, after the whole Play
-   * phase (and so this card's own `onPlay`) has already run. That is the
-   * primary case: a Crowbar played earlier in Play, paid off by the room
-   * later. It is split across two hooks accordingly:
-   *
-   * - `onPlay` looks backward, once, at `thisTurn.goodStuffTaken` — whatever
-   *   its controller was already handed earlier in the same turn, before
-   *   Crowbar was played.
-   * - `onEvent`, listening only from the play zone (the shape Covering Fire
-   *   uses for the same reason), catches a later gain — the room's Outcome
-   *   payout being the one there is today.
-   *
-   * Either hook can fire, but only one ever does: a `fired` marker keyed by
-   * this copy's own card id is set the moment either pays out, so a Crowbar
-   * that already looked back at play does not also react to the room's
-   * payout minutes later, and its own bonus piece (itself a `STUFF_TAKEN` for
-   * good_stuff) can never retrigger it. Two Crowbars each carry their own
-   * key, so two played this turn pay two. Neither hook ever sees Crowbar's
-   * own arrival — a room handing Crowbar to a hand is not Crowbar being
-   * played, and while it sits in a hand `onEvent` is not listening at all.
+   * Two hooks share one `fired` marker per copy so the bonus pays out exactly
+   * once, whether the Good Stuff arrives before or after Crowbar is played.
    * See open-questions.md #16. */
   Crowbar: {
     onPlay(state, ctx) {
@@ -79,17 +60,15 @@ export const STUFF: Registry = {
     },
   },
 
-  /* "Choose a character. Move 2 cards from that character's discard pile to the
-   * bottom of their deck."
+  /* "Choose a character. Move 2 cards from that character's Exhaust pile to
+   * the bottom of their deck."
    *
-   * Either character can be healed, so a character with cards in both discard
-   * piles is asked which one first; a character with only one eligible pile
-   * skips straight to picking the cards from it. Healing a partner in Last
-   * Stand only refills their deck — nothing here clears the `lastStand` flag,
-   * so the rulebook's "Last Stand ends at Cleanup" still holds. */
+   * Skips the character choice when only one side has an Exhaust pile to draw
+   * from, and moves fewer than 2 if that pile is that short (validation's own
+   * `Math.min(count, options.length)` already covers it). */
   "A Pair Of Stich-Em-Ups": {
     onPlay(state, ctx) {
-      const eligible = CHARACTERS.filter((c) => playerOf(state, c).discard.length > 0);
+      const eligible = CHARACTERS.filter((c) => playerOf(state, c).exhaust.length > 0);
       if (eligible.length === 0) return nothing(state);
       if (eligible.length === 1) {
         const target = eligible[0];
@@ -110,12 +89,12 @@ export const STUFF: Registry = {
       if (answer.kind !== "cards") return nothing(state);
       const target = answer.tag.split(":")[1] === "Red" ? "Red" : "Gray";
       const events: DomainEvent[] = [];
-      const lifted = takeFromDiscard(state, target, answer.cards);
+      const lifted = takeFromExhaust(state, target, answer.cards);
       return done(moveToBottomOfDeck(lifted, target, answer.cards, events), events);
     },
   },
 
-  /* "One of you draws 1 card, (even if their hand is full)." */
+  /* "One of you draws 1 card." */
   "Grav Harness": {
     onPlay(state, ctx) {
       const options = CHARACTERS.filter((c) => {
@@ -133,9 +112,7 @@ export const STUFF: Registry = {
     onChoice(answer, state) {
       if (answer.kind !== "character") return nothing(state);
       const events: DomainEvent[] = [];
-      // The card says "even if their hand is full", so the cap does not apply
-      // and nothing is burned.
-      return done(drawOne(state, answer.character, events, true), events);
+      return done(drawOne(state, answer.character, events), events);
     },
   },
 
@@ -162,14 +139,14 @@ export const STUFF: Registry = {
 
   /* ------------------------------------------------------------- Bad Stuff */
 
-  /* "Holding: you may not draw more than 1 card per turn." */
+  /* "Holding: At Turn Start, draw 1 fewer card." */
   "Faceful Of Slime": {
-    whileHeld: { drawCap: 1 },
+    whileHeld: { drawTargetDelta: 1 },
   },
 
   /* "Holding: cards cost +1 to play."
    *
-   * It bites its holder only: Red never pays for Gray (Each Turn, Play). */
+   * Bites its holder only: Red never pays for Gray (rulebook §7, Play). */
   Sluggish: {
     whileHeld: { costDelta: 1 },
   },
@@ -179,52 +156,62 @@ export const STUFF: Registry = {
     whileHeld: { stuffPowerDelta: -1 },
   },
 
-  /* "Holding: You can't have more than 3 cards in your hand."
+  /* "Holding: At Cleanup, discard cards other than this one until you hold
+   * 3."
    *
-   * Each Turn, Draw's hand cap is a draw-phase limit, so this is too: it stops you drawing
-   * up past 3, and Stuff pushed into your hand by a room ignores it as ever. */
+   * The holder's own choice, from every OTHER card in hand — Spore Cloud
+   * itself (any copy) is not an option, but still counts toward the 3. A
+   * no-op once the hand is already 3 or fewer. */
   "Spore Cloud": {
-    whileHeld: { handCap: 3 },
+    onCleanup(state, ctx) {
+      const hand = playerOf(state, ctx.character).hand;
+      const excess = hand.length - 3;
+      if (excess <= 0) return nothing(state);
+      const options = hand.filter((c) => c.name !== "Spore Cloud");
+      if (options.length === 0) return nothing(state);
+      return ask(state, {
+        kind: "ChooseCards",
+        prompt: "Discard down to 3 cards.",
+        character: ctx.character,
+        options,
+        count: excess,
+        optional: false,
+        source: source(ctx, "spore-cloud"),
+      });
+    },
+    onChoice(answer, state, ctx) {
+      if (answer.kind !== "cards") return nothing(state);
+      const events: DomainEvent[] = [];
+      return done(discardFromHand(state, ctx.character, answer.cards, events), events);
+    },
   },
 
-  /* "Holding: ALL rooms require an additional 2 Scramble to clear.
+  /* "Holding: ALL rooms require an additional 2 `Scramble` to clear.
    *  Play: Exhaust 2."
    *
-   * "ALL rooms" is read from either hand — one held Panic taxes the team. */
+   * Read from either hand — one held Panic taxes the team. */
   Panic: {
     whileHeld: { thresholdScrambleDelta: 2 },
     exhaustX: 2,
   },
 
-  /* "Holding: whenever you draw a card, your partner must also draw a card."
+  /* "Holding: Whenever your partner draws a card during Play, Exhaust 1."
    *
-   * One-way: the holder's draw forces the partner's, never the reverse. Any
-   * draw counts — the opening draw, a chosen draw in Draw/Play, or one a card's
-   * text causes — so this listens for both `CARD_DRAWN` and `DRAW_BURNED`,
-   * which are the two shapes a draw can take (Each Turn). The forced draw itself is
-   * stamped `forced` by `drawOne` and is skipped here, so it cannot chain: it
-   * does not count as a draw that forces one, whether it lands on this same
-   * copy or on a copy the partner is holding. Full Hand and Last Stand for the
-   * forced draw come from `drawOne` and the same last-stand check `openingDraw`
-   * uses — no new rule for either.
-   *
-   * Ruled for Faceful Of Slime: a draw cap already reached stops a forced draw
-   * from happening at all — no card moves, and nothing is pushed to `events`,
-   * so there is no draw event for anything else to see. `drawCapFor` reads
-   * every `Holding:` line in the partner's hand, so Deadweight Grip's cap of 2
-   * is stopped the same way; that extension is this engine's own reading, not
-   * a ruling. See open-questions.md #17 and #19. */
+   * Only the partner's draws, and only ones a card's text causes during
+   * Play — Turn Start's own automatic draw does not trigger it (`drawOne`'s
+   * `turnStart` flag). A bare `Exhaust 1` line, so Zen Mode can stop it. */
   "My Head Is Quantum Spinning": {
     onEvent(event, state, ctx) {
       if (ctx.zone !== "hand") return nothing(state);
-      if (event.type !== "CARD_DRAWN" && event.type !== "DRAW_BURNED") return nothing(state);
-      if (event.character !== ctx.character || event.forced) return nothing(state);
-      const partner = ctx.character === "Red" ? "Gray" : "Red";
-      const partnerState = playerOf(state, partner);
-      if (partnerState.lastStand) return nothing(state);
-      if (partnerState.drewThisTurn >= drawCapFor(state, partner)) return nothing(state);
+      if (event.type !== "CARD_DRAWN" || event.turnStart) return nothing(state);
+      if (event.character !== other(ctx.character)) return nothing(state);
       const events: DomainEvent[] = [];
-      return done(drawOne(state, partner, events, false, true), events);
+      const stoppedBy = exhaustXPreventedBy(state, ctx.character);
+      if (stoppedBy) {
+        events.push({ type: "EXHAUST_PREVENTED", character: ctx.character, amount: 1, by: stoppedBy });
+        return done(state, events);
+      }
+      return done(exhaustFromDeck(state, ctx.character, 1, ctx.card.name, events), events);
     },
   },
 };

@@ -25,14 +25,9 @@ function mustSave(session: Session): SavedRun {
   return saved;
 }
 
-/** The commands a session needs to get from a new run into the Play phase. */
+/** The command a session needs to get from a new run into the Play phase. */
 function throughATurn(): readonly Command[] {
-  return [
-    { type: "FLIP_ROOM" },
-    { type: "DRAW", character: "Red" },
-    { type: "DRAW", character: "Gray" },
-    { type: "END_DRAW" },
-  ];
+  return [{ type: "FLIP_ROOM" }];
 }
 
 describe("dispatch", () => {
@@ -75,11 +70,8 @@ describe("undo", () => {
   it("cannot reach back past a command that revealed hidden information", () => {
     const session = newSession();
     for (const command of throughATurn()) session.getState().dispatch(command);
-    // The flip and both draws each showed somebody a card, so there is nothing
-    // to take back — END_DRAW revealed nothing, so it alone can be undone.
-    expect(canUndo(session.getState())).toBe(true);
-    expect(session.getState().undo()).toBe(true);
-    expect(session.getState().state.phase).toBe("Draw");
+    // The flip drew both hands to 5, all in the one command — that is itself
+    // the checkpoint, so there is nothing before it in this run to undo to.
     expect(canUndo(session.getState())).toBe(false);
     expect(session.getState().undo()).toBe(false);
   });
@@ -95,8 +87,8 @@ describe("undo", () => {
     const cost = card.cost;
     const payWith = red.hand.filter((c) => c.id !== card.id).slice(0, cost);
     if (payWith.length < cost) {
-      // Nothing affordable was drawn; the point still stands on END_DRAW alone.
-      expect(canUndo(beforePlay)).toBe(true);
+      // Nothing affordable was drawn; the point still stands on the flip alone.
+      expect(canUndo(beforePlay)).toBe(false);
       return;
     }
 
@@ -179,31 +171,31 @@ describe("notes", () => {
   });
 
   it("keeps a note about the thing being undone, at the new end of the log", () => {
-    // In last stand every card is free, so the play needs no payment and is
-    // still takeable back — a play reveals nothing.
+    // A card printed at Cost 0 needs no payment, so the play is still
+    // takeable back — a play reveals nothing.
     const session = createSessionFrom(
       rig({
         phase: "Play",
         activeRoom: room("Sorting Room"),
-        Red: player({ deck: [], hand: [card("Charge In")], lastStand: true }),
+        Red: player({ deck: pile("Shove", 4), hand: [card("Pry Bar")] }),
         Gray: player({ deck: pile("Duck Under", 4) }),
       }),
     );
-    const charge = session.getState().state.Red.hand[0];
-    if (!charge) throw new Error("rig");
+    const pryBar = session.getState().state.Red.hand[0];
+    if (!pryBar) throw new Error("rig");
     session.getState().dispatch({
       type: "PLAY_CARD",
       character: "Red",
-      cardId: charge.id,
+      cardId: pryBar.id,
       payWith: [],
     });
-    session.getState().note("that play should not have been free");
+    session.getState().note("that play should be easy to take back");
     const noted = session.getState().events.length;
     expect(noted).toBeGreaterThan(0);
 
     expect(session.getState().undo()).toBe(true);
     const [note] = session.getState().notes;
-    expect(note?.text).toBe("that play should not have been free");
+    expect(note?.text).toBe("that play should be easy to take back");
     expect(note?.at).toBe(session.getState().events.length);
     expect(note?.at).toBeLessThan(noted);
   });
@@ -218,9 +210,11 @@ describe("subscribing outside React", () => {
       (events) => seen.push(events.length),
     );
     session.getState().dispatch({ type: "FLIP_ROOM" });
-    session.getState().dispatch({ type: "END_PLAY" });
+    // The flip already lands in Play, so a second flip is what the rules
+    // refuse here.
+    session.getState().dispatch({ type: "FLIP_ROOM" });
     stop();
-    // One notification for the flip; the rejection changed no events.
+    // One notification for the first flip; the rejection changed no events.
     expect(seen).toHaveLength(1);
   });
 });

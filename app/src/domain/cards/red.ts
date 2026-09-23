@@ -9,7 +9,7 @@ import {
   playerOf,
   returnToHand,
   shuffleIntoDeck,
-  takeFromDiscard,
+  takeFromExhaust,
   takeFromHand,
 } from "../verbs";
 import { ask, done, nothing, source, type Registry } from "./behaviour";
@@ -22,7 +22,7 @@ const playedBy = (state: GameState, c: Character): number =>
   state.playZone.filter((p) => p.owner === c).length;
 
 export const RED: Registry = {
-  /* "Exhaust 2 (the top 2 cards of your deck go to your discard pile)." */
+  /* "Exhaust 2." */
   Overdrive: { exhaustX: 2 },
 
   /* "Exhaust 1." */
@@ -33,37 +33,31 @@ export const RED: Registry = {
 
   /* "Holding: you don't `Exhaust`."
    *
-   * `Exhaust X` written on its own means X off the top of your own deck, so
-   * this stops exactly those lines: a room's printed punishment, and its
-   * holder's own Overdrive, Reckless and Panic. It does not stop anything that
-   * names its zone or is spelled out by a rule — paying a cost, cleanup, the
-   * burned draw of a full hand, or the price of getting out of last stand — so
-   * the drain still runs. It protects its holder only, and it can never be
-   * spent, so it sits in one of their five slots for the rest of the run. */
+   * Stops only bare `Exhaust X` lines (room punishments, Overdrive, Reckless,
+   * Panic), not costs or cleanup. Holder-only. */
   "Zen Mode": {
     whileHeld: { ignoresExhaustX: true },
   },
 
   /* "If Gray played a card this turn, this costs 0."
    *
-   * A printed cost, not a discount, so a `Holding:` line that raises costs still
-   * raises this one. See open-questions.md #11. */
+   * A printed cost, not a discount. See open-questions.md #11. */
   "Fast Follow": {
     cost(state, _owner, card) {
       return playedBy(state, "Gray") > 0 ? 0 : card.cost;
     },
   },
 
-  /* "Shuffle a Red card from your discard pile back into your deck."
+  /* "Shuffle a Red card from your Exhaust pile into your deck."
    *
-   * Red's own cards only: Stuff in the discard pile is not a Red card. */
+   * Red's own cards only: Stuff in the Exhaust pile is not a Red card. */
   "Second Wind": {
     onPlay(state, ctx) {
-      const options = playerOf(state, ctx.character).discard.filter((c) => c.owner === "Red");
+      const options = playerOf(state, ctx.character).exhaust.filter((c) => c.owner === "Red");
       if (options.length === 0) return nothing(state);
       return ask(state, {
         kind: "ChooseCards",
-        prompt: "Shuffle which Red card from your discard pile back into your deck?",
+        prompt: "Shuffle which Red card from your Exhaust pile into your deck?",
         character: ctx.character,
         options,
         count: 1,
@@ -74,7 +68,7 @@ export const RED: Registry = {
     onChoice(answer, state, ctx) {
       if (answer.kind !== "cards") return nothing(state);
       const events: DomainEvent[] = [];
-      const lifted = takeFromDiscard(state, ctx.character, answer.cards);
+      const lifted = takeFromExhaust(state, ctx.character, answer.cards);
       return done(shuffleIntoDeck(lifted, ctx.character, answer.cards, events), events);
     },
   },
@@ -112,10 +106,9 @@ export const RED: Registry = {
     },
   },
 
-  /* "Holding: Cards you play have +1 Oomph, but you may not draw more than 2
-   * cards per turn." */
+  /* "Holding: Cards you play have +1 Oomph. At Turn Start, draw 1 fewer card." */
   "Deadweight Grip": {
-    whileHeld: { playedPowerDelta: 1, drawCap: 2 },
+    whileHeld: { playedPowerDelta: 1, drawTargetDelta: 1 },
   },
 
   /* "If Gray has already played at least one card this turn, +2 Oomph. If the

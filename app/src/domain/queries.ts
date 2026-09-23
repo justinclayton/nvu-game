@@ -83,9 +83,6 @@ export const drawTargetFor = (state: GameState, c: Character): number =>
 /**
  * Bad Stuff cards print no Stats line, so they contribute none, whatever else
  * they do. Conditional stats are recalculated every time the pool is read.
- *
- * A contribution never goes below zero: a card that is reduced past nothing
- * contributes nothing rather than draining the pool.
  */
 export function contributionOf(state: GameState, played: PlayedCard): StatTotals {
   const { owner, card } = played;

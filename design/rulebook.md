@@ -109,6 +109,8 @@ Each player does the following:
 
 ## 8. Card anatomy
 
+A number never goes below zero. If an effect would take a card's stat, cost, or a threshold lower than zero, it stops at zero instead.
+
 ### Room Cards
 
 A room card presents one or more **challenges** to the players. Each turn players will work together to play cards from their hand until they either meet or exceed one or more of the challenges, or, if they are unwilling or unable to complete any challenges, they `Flee`.

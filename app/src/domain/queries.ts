@@ -191,7 +191,6 @@ interface CostOverrideRule extends CostOverride {
 const COST_OVERRIDES: readonly CostOverrideRule[] = [
   {
     // Overcharged Battery: the next card played this turn, by either character.
-    // See open-questions.md #14.
     reason: "free play",
     oneShot: true,
     available: (state) => state.thisTurn.freePlays > 0,
@@ -207,7 +206,7 @@ export function costOverrideFor(state: GameState, c: Character, card: Card): Cos
 /**
  * What the card asks for with nothing overriding it: the number in the corner,
  * or what the card says instead, and then any `Holding:` line. A printed
- * "costs 0" is set first and modifiers apply after; see open-questions.md #11.
+ * "costs 0" is set first and modifiers apply after.
  */
 export function printedCostOf(state: GameState, c: Character, card: Card): number {
   const behaviour = behaviourOf(card.name);

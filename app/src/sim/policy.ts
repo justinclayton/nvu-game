@@ -8,6 +8,7 @@
  * spec is updated alongside this file.
  */
 
+import { behaviourOf } from "@domain/cards/behaviours";
 import { validate } from "@domain/engine";
 import {
   contributionOf,
@@ -136,44 +137,144 @@ function choosePlay(state: GameState, legal: readonly Command[]): Command {
   return best;
 }
 
-/** "Keep Good Stuff when you can pay for it, and shed Bad Stuff when you can", for one character. */
+/**
+ * Below this many live cards (deck + hand + discard — the pool a Scrap
+ * actually shrinks; the Exhaust pile is already gone for the run and the
+ * Scrapyard doesn't come back), the bot stops paying at Settle your Stuff
+ * altogether. 8 is a full hand (`HAND_CAP`) plus 3 spare: enough to survive a
+ * turn's plays and an `Exhaust 2` hit without forcing a reshuffle, with a
+ * little headroom left for the floors still ahead. [agent] — a designer with
+ * playtest data may want to move this.
+ */
+const MIN_LIVE_DECK = 8;
+
+function liveDeckSize(state: GameState, character: Character): number {
+  const p = playerOf(state, character);
+  return p.deck.length + p.hand.length + p.discard.length;
+}
+
+/** What a Good Stuff card is worth: its stats, plus a point for doing something besides. */
+function goodStuffValue(card: Card): number {
+  return card.oomph + card.scramble + (card.text ? 1 : 0);
+}
+
+/** A Bad Stuff card is dead weight even with no `Holding:` line; add a point per kind of tax it levies. */
+function badStuffSeverity(card: Card): number {
+  const held = behaviourOf(card.name)?.whileHeld;
+  if (!held) return 1;
+  const taxes = [held.costDelta, held.drawTargetDelta, held.stuffPowerDelta, held.thresholdScrambleDelta];
+  return 1 + taxes.filter((delta) => (delta ?? 0) !== 0).length;
+}
+
+/** What keeping (Good Stuff) or shedding (Bad Stuff) this card is worth. */
+function stuffValue(card: Card): number {
+  return card.kind === "good_stuff" ? goodStuffValue(card) : badStuffSeverity(card);
+}
+
+function findOwned(state: GameState, character: Character, id: CardId): Card | undefined {
+  const p = playerOf(state, character);
+  return [...p.deck, ...p.hand, ...p.discard].find((c) => c.id === id);
+}
+
+const byValueDesc = (a: Card, b: Card): number => stuffValue(b) - stuffValue(a) || a.id.localeCompare(b.id);
+
+/** Which stat this character's non-Stuff cards lean on least, going by what's still in deck, hand and discard. */
+function weakerStat(state: GameState, character: Character): Stat {
+  let oomph = 0;
+  let scramble = 0;
+  for (const card of settlePayOptions(state, character)) {
+    oomph += card.oomph;
+    scramble += card.scramble;
+  }
+  return oomph <= scramble ? "Oomph" : "Scramble";
+}
+
+/** Favor the character's weaker stat, then raw power as a tie-break. */
+function rewardScore(card: Card, weak: Stat): number {
+  return statValue({ oomph: card.oomph, scramble: card.scramble }, weak) * 2 + card.oomph + card.scramble;
+}
+
+function chooseReward(state: GameState, character: Character): CardId | null {
+  const offered = state.offer?.[character] ?? [];
+  const first = offered[0];
+  if (!first) return null;
+  const weak = weakerStat(state, character);
+  let best = first;
+  let bestScore = rewardScore(first, weak);
+  for (const card of offered.slice(1)) {
+    const score = rewardScore(card, weak);
+    if (score > bestScore || (score === bestScore && card.id < best.id)) {
+      best = card;
+      bestScore = score;
+    }
+  }
+  return best.id;
+}
+
+/**
+ * "Only pay at Settle your Stuff when the deck can afford it and the Stuff is
+ * worth more than what it costs", scored the same way `composeChoice` below
+ * decides it, for one already-generated settlement.
+ */
 function scoreChoice(state: GameState, character: Character, choice: AscendChoice): number {
-  let score = choice.takeRewardId !== null ? 100 : 0;
+  let score = 0;
+  if (choice.takeRewardId !== null) {
+    const offered = state.offer?.[character] ?? [];
+    const reward = offered.find((c) => c.id === choice.takeRewardId);
+    if (reward) score += 100 + rewardScore(reward, weakerStat(state, character));
+  }
   const stuff = settleableStuff(state, character);
+  const budget = liveDeckSize(state, character);
   for (const settlement of choice.settle) {
     const card = stuff.find((s) => s.id === settlement.cardId);
-    if (!card || settlement.payWith === null) continue;
-    score += card.kind === "good_stuff" ? 50 : card.kind === "bad_stuff" ? 25 : 0;
+    const payer = settlement.payWith !== null ? findOwned(state, character, settlement.payWith) : undefined;
+    if (!card || !payer) continue;
+    const value = stuffValue(card);
+    if (value > payer.cost && budget - 1 >= MIN_LIVE_DECK) score += value * 10;
   }
   return score;
 }
 
 /**
  * One character's whole Ascend, decided independently of the other's: pay to
- * keep every Good Stuff card it can, then pay to shed every Bad Stuff card it
- * can with whatever payers are left, then take a reward. This is the same
- * shape the CLI composes from its per-question staging (`cli/ascend.ts`,
- * `composeAscend`) — a full `settle` list, not the move generator's
- * single-item one — so it isn't limited by the generator's Ascend
- * cross-product cap (design/cli-sim/spec.md, "The move generator").
+ * keep the Good Stuff most worth keeping, then pay to shed the Bad Stuff most
+ * worth shedding, with whatever payers are left — but only while the deck can
+ * afford it and the card is worth more than its cheapest payer — then take
+ * the reward that best fits the deck. This is the same shape the CLI composes
+ * from its per-question staging (`cli/ascend.ts`, `composeAscend`) — a full
+ * `settle` list, not the move generator's single-item one — so it isn't
+ * limited by the generator's Ascend cross-product cap (design/cli-sim/spec.md,
+ * "The move generator").
  */
 function composeChoice(state: GameState, character: Character): AscendChoice {
-  const payers = [...settlePayOptions(state, character)];
-  const takePayer = (): CardId | null => payers.shift()?.id ?? null;
+  const payers = [...settlePayOptions(state, character)].sort(
+    (a, b) => a.cost - b.cost || a.id.localeCompare(b.id),
+  );
+  let payerIndex = 0;
+  let liveBudget = liveDeckSize(state, character);
+
+  const takePayer = (value: number): CardId | null => {
+    const payer = payers[payerIndex];
+    if (!payer) return null;
+    if (value <= payer.cost) return null;
+    if (liveBudget - 1 < MIN_LIVE_DECK) return null;
+    payerIndex += 1;
+    liveBudget -= 1;
+    return payer.id;
+  };
 
   const stuff = settleableStuff(state, character);
   const settle: StuffSettlement[] = [];
-  for (const card of stuff.filter((c) => c.kind === "good_stuff")) {
-    const payWith = takePayer();
+  for (const card of stuff.filter((c) => c.kind === "good_stuff").sort(byValueDesc)) {
+    const payWith = takePayer(stuffValue(card));
     if (payWith !== null) settle.push({ cardId: card.id, payWith });
   }
-  for (const card of stuff.filter((c) => c.kind === "bad_stuff")) {
-    const payWith = takePayer();
+  for (const card of stuff.filter((c) => c.kind === "bad_stuff").sort(byValueDesc)) {
+    const payWith = takePayer(stuffValue(card));
     if (payWith !== null) settle.push({ cardId: card.id, payWith });
   }
 
-  const offered = state.offer?.[character] ?? [];
-  return { settle, takeRewardId: offered[0]?.id ?? null };
+  return { settle, takeRewardId: chooseReward(state, character) };
 }
 
 /**

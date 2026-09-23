@@ -581,7 +581,7 @@ function endPlay(state: GameState, run: Run): GameState {
     run.events.push({ type: "THRESHOLD_MET", room, threshold });
   }
 
-  let s: GameState = { ...state, activeRoom: null };
+  let s: GameState = { ...state, activeRoom: null, phase: "Outcome" };
   if (outcome.cleared) {
     // A Cleared room is out of the game. Nobody counts that heap.
     run.events.push({ type: "ROOM_CLEARED", room });
@@ -708,17 +708,17 @@ function drain(state: GameState, run: Run): GameState {
 /* ------------------------------------------------------------ Cleanup */
 
 /**
- * Cleanup's own one-time steps run once, guarded by `resolution.cleanupStarted`
- * — a held card's own Cleanup question (Spore Cloud) can pause the rest of
- * cleanup on a `pending` and this is re-entered to resume, so nothing before
- * that guard may run twice.
+ * Cleanup's own one-time steps run once, guarded by the move into `Cleanup`
+ * itself — a held card's own Cleanup question (Spore Cloud) can pause the
+ * rest of cleanup on a `pending` and this is re-entered to resume, already
+ * in `Cleanup`, so nothing before that guard may run twice.
  */
 function finishTurn(state: GameState, run: Run): GameState {
   let s: GameState = state;
-  if (!s.resolution?.cleanupStarted) {
+  if (s.phase !== "Cleanup") {
     // The resolution stays readable through cleanup: a card that asks whether the
     // room was Cleared reads it there. It is cleared at the end of the turn.
-    s = { ...s, pending: null };
+    s = { ...s, phase: "Cleanup", pending: null };
 
     // The Play phase is over, so a free play nobody used is gone: it discounts a
     // card played this turn or nothing at all.
@@ -728,7 +728,6 @@ function finishTurn(state: GameState, run: Run): GameState {
     // A card that takes itself back out of the play zone does it now, before the
     // piles are cleaned.
     s = flush(s, run);
-    if (s.resolution) s = { ...s, resolution: { ...s.resolution, cleanupStarted: true } };
   }
   return cleanupHands(s, run);
 }

@@ -326,6 +326,7 @@ describe("Room kinds: Enemy, Hazard, Stuff", () => {
       { type: "END_PLAY" },
     ]);
     expect(afterPlay.pending?.kind).toBe("ChooseCharacter");
+    expect(afterPlay.phase).toBe("Outcome");
 
     const { state: afterChoice, events: choiceEvents } = must(afterPlay, {
       type: "CHOOSE_CHARACTER",
@@ -333,6 +334,7 @@ describe("Room kinds: Enemy, Hazard, Stuff", () => {
     });
     expect(eventTypes(choiceEvents)).toContain("REWARD_REVEALED");
     expect(afterChoice.pending?.kind).toBe("TakeReward");
+    expect(afterChoice.phase).toBe("Outcome");
 
     const { state: afterTake, events: takeEvents } = must(afterChoice, {
       type: "TAKE_REWARD",

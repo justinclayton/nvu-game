@@ -127,10 +127,12 @@ export interface TurnRecord {
  * Rulebook, Each Turn, Turn Start: bundles both its steps, Flip the room and Draw up
  * to five, into `FLIP_ROOM` — there is no decision between them, so the state
  * rests at `Turn Start` before that command and moves straight to `Play`
- * after it. Outcome and Cleanup are likewise steps of `END_PLAY`, not
- * waiting phases of their own.
+ * after it. `END_PLAY` moves the state into `Outcome`, and once the room's
+ * effects are drained, into `Cleanup`. Both rest there only while a card or
+ * the room has raised a `pending` choice — otherwise the transition runs
+ * straight through to `Turn Start` or `Ascend`.
  */
-export type Phase = "Turn Start" | "Play" | "Ascend" | "GameOver";
+export type Phase = "Turn Start" | "Play" | "Outcome" | "Cleanup" | "Ascend" | "GameOver";
 
 export type Outcome = "Victory" | "Defeat";
 
@@ -192,13 +194,6 @@ export interface Resolution {
   readonly room: Room;
   /** A met challenge said `Ascend`: Cleanup runs, then the Ascending steps (rulebook, Outcome). */
   readonly ascends: boolean;
-  /**
-   * Set once Cleanup's own one-time steps (the `CLEANUP_BEGAN` event, dropping
-   * free plays, flushing this-turn triggers) have run, so a held card's own
-   * Cleanup question — Spore Cloud's discard — can pause here and resume
-   * without repeating them.
-   */
-  readonly cleanupStarted?: boolean;
 }
 
 /* --------------------------------------------------------- the aggregate */

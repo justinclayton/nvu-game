@@ -186,10 +186,8 @@ export const STUFF: Registry = {
     },
   },
 
-  /* "Holding: ALL rooms require an additional 2 `Scramble` to clear.
-   *  Play: Exhaust 2."
-   *
-   * Read from either hand — one held Panic taxes the team. */
+  /* "Holding: Every challenge also requires 2 `Scramble` to clear. A `Scramble` challenge requires 2 more instead.
+   *  Play: Exhaust 2." */
   Panic: {
     whileHeld: { thresholdScrambleDelta: 2 },
     exhaustX: 2,

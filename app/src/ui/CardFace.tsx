@@ -10,7 +10,7 @@
  * a field of the type's colour, which is what tells a hand apart at a glance.
  */
 
-import { costOf, thresholdIsMet, thresholdTarget } from "@domain/queries";
+import { allThresholds, costOf, thresholdIsMet, thresholdTarget } from "@domain/queries";
 import type { Card, Character, GameState, Room } from "@domain/types";
 
 const TYPE_LINE: Record<Card["kind"], string> = {
@@ -26,7 +26,7 @@ const ROOM_KIND: Record<Room["kind"], string> = {
 
 /** The class that colours a card: its type line, or for a room its kind. */
 export function toneOf(item: Card | Room): string {
-  if ("thresholds" in item) return `tone--${item.kind}`;
+  if ("challenges" in item) return `tone--${item.kind}`;
   if (item.kind === "player") return `tone--${(item.owner ?? "red").toLowerCase()}`;
   return item.kind === "good_stuff" ? "tone--good" : "tone--bad";
 }
@@ -57,7 +57,7 @@ const LONG_NAME = 16;
  */
 function roomTextTierOf(room: Room): TextTier {
   const weight =
-    room.thresholds.reduce((sum, t) => sum + 30 + t.outcome.length, 0) + room.flee.text.length;
+    allThresholds(room).reduce((sum, t) => sum + 30 + t.outcome.length, 0) + room.flee.text.length;
   if (weight > 160) return "xl";
   if (weight > 110) return "l";
   if (weight > 70) return "m";
@@ -138,7 +138,7 @@ export function RoomFace({ room, state }: RoomFaceProps) {
       <div className="name">{room.name}</div>
       <div className="face__art" aria-hidden="true" />
       <ul className="lines">
-        {room.thresholds.map((t, i) => {
+        {allThresholds(room).map((t, i) => {
           const met = state ? thresholdIsMet(state, t) : false;
           const target = state ? thresholdTarget(state, t) : t.value;
           return (

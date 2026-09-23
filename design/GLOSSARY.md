@@ -33,11 +33,15 @@ The Room card on top of the Rooms pile — the one the players are currently fac
 
 **Challenge**
 
-A `threshold: outcome` line on a Room card. Players compare their Stat pool against the threshold during the Outcome phase; meeting or exceeding it clears that challenge. A line naming one character says who an outcome pays or targets, never whose side of the play zone counts — every Challenge, on every Room, reads the same shared Stat pool. `[you, 2026-09-17]`
+A group of one or more Thresholds on a Room card. A challenge is met when the Stat pool meets or exceeds any of its Thresholds. Every met challenge resolves the outcome of one Threshold: the lowest-printed Threshold met in that challenge. Several challenges on one card may be met on the same turn. `[you, 2026-09-23]`
+
+**Threshold**
+
+A `threshold: outcome` line within a Challenge. Players compare their Stat pool against it during the Outcome phase. A line naming one character says who an outcome pays or targets, never whose side of the play zone counts — every Threshold, on every Room, reads the same shared Stat pool. `[you, 2026-09-17, 2026-09-23]`
 
 **Flee line**
 
-The `Flee:` line on a Room card, resolved when no Challenge is cleared this turn. A Room that prints no Flee line of its own Flees empty-handed, the same as one whose printed line happens to do nothing.
+The `Flee:` line on a Room card, resolved when no Challenge is met this turn. A Room that prints no Flee line of its own Flees empty-handed, the same as one whose printed line happens to do nothing.
 
 **Stuff**
 
@@ -53,11 +57,11 @@ The face-down piles in the middle of the table that Good Stuff and Bad Stuff car
 
 **Oomph** / **Scramble**
 
-The two stat types a card can carry. Stats from all cards played in a turn add together into the team's Stat pool, which is compared against Room challenge thresholds.
+The two stat types a card can carry. Stats from all cards played in a turn add together into the team's Stat pool, which is compared against Room Thresholds.
 
 **Stat pool**
 
-The combined Oomph and/or Scramble total from every card both players played this turn, across both sides of the play zone. Checked against Challenge thresholds during the Outcome phase.
+The combined Oomph and/or Scramble total from every card both players played this turn, across both sides of the play zone. Checked against Thresholds during the Outcome phase.
 
 **Play zone**
 
@@ -77,15 +81,15 @@ The number of cards a player must discard from their hand to play a card. A Cost
 
 **Cleared**
 
-The result when a turn's Stat pool meets or exceeds at least one Challenge's threshold. The players resolve each cleared Challenge's outcome, in any order if more than one clears.
+The result when at least one Challenge is met this turn. The players resolve each met Challenge's outcome, in any order if more than one is met.
 
 **Fled**
 
-The result when no Challenge clears this turn. The players resolve the Room's Flee line, then shuffle the Room card back into the Floor deck.
+The result when no Challenge is met this turn. The players resolve the Room's Flee line, then shuffle the Room card back into the Floor deck.
 
 **Ascend**
 
-The outcome, printed on some Challenges, that clears the entire floor rather than just the Room. Triggering it runs Cleanup as normal first, then moves into the Ascending steps.
+The outcome, printed on some Thresholds, that clears the entire floor rather than just the Room. Triggering it runs Cleanup as normal first, then moves into the Ascending steps.
 
 **Settle your Stuff**
 
@@ -93,7 +97,7 @@ Ascending's second step, once the hand has been shuffled into the deck. Every St
 
 **Card reward**
 
-A card offered to a player from their reward pool. Comes from a Room's higher threshold (one card, take or skip) or from Ascending (top 3 cards revealed, take up to one into your deck).
+A card offered to a player from their reward pool. Comes from a Room's Threshold outcome (one card, take or skip) or from Ascending (top 3 cards revealed, take up to one into your deck).
 
 **Reward pool**
 

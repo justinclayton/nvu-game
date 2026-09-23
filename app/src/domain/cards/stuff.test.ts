@@ -587,7 +587,7 @@ describe("Panic — 'ALL rooms require an additional 2 Scramble, and Play: Exhau
       activeRoom: room("Collapsed Stairwell"),
       Gray: player({ deck: pile("Duck Under", 4), hand: [card("Panic")] }),
     });
-    const room1 = state.activeRoom?.thresholds[0];
+    const room1 = state.activeRoom?.challenges[0]?.thresholds[0];
     if (!room1) throw new Error("rig");
     expect(room1.value).toBe(2);
     expect(thresholdTarget(state, room1)).toBe(4);
@@ -598,7 +598,7 @@ describe("Panic — 'ALL rooms require an additional 2 Scramble, and Play: Exhau
       activeRoom: room("Gross Thing That Looks Like A Cherry"),
       Gray: player({ deck: pile("Duck Under", 4), hand: [card("Panic")] }),
     });
-    const line = state.activeRoom?.thresholds[0];
+    const line = state.activeRoom?.challenges[0]?.thresholds[0];
     if (!line) throw new Error("rig");
     expect(line.stat).toBe("Oomph");
     expect(extraScrambleRequirement(state, line)).toBe(2);
@@ -609,7 +609,7 @@ describe("Panic — 'ALL rooms require an additional 2 Scramble, and Play: Exhau
       activeRoom: room("Collapsed Stairwell"),
       Gray: player({ deck: pile("Duck Under", 4), hand: [card("Panic")] }),
     });
-    const line = state.activeRoom?.thresholds[0];
+    const line = state.activeRoom?.challenges[0]?.thresholds[0];
     if (!line) throw new Error("rig");
     expect(line.stat).toBe("Scramble");
     expect(extraScrambleRequirement(state, line)).toBe(0);
@@ -622,7 +622,7 @@ describe("Panic — 'ALL rooms require an additional 2 Scramble, and Play: Exhau
       Red: player({ hand: [card("Panic")] }),
       Gray: player({ deck: pile("Duck Under", 4), hand: [card("Panic")] }),
     });
-    const line = state.activeRoom?.thresholds[0];
+    const line = state.activeRoom?.challenges[0]?.thresholds[0];
     if (!line) throw new Error("rig");
     expect(extraScrambleRequirement(state, line)).toBe(4);
   });
@@ -636,7 +636,7 @@ describe("Panic — 'ALL rooms require an additional 2 Scramble, and Play: Exhau
         { owner: "Red", card: card("Shove") },
       ],
     });
-    const line = state.activeRoom?.thresholds[0];
+    const line = state.activeRoom?.challenges[0]?.thresholds[0];
     if (!line) throw new Error("rig");
     expect(statPool(state).oomph).toBeGreaterThanOrEqual(line.value);
     expect(thresholdIsMet(state, line)).toBe(false);
@@ -656,7 +656,7 @@ describe("Panic — 'ALL rooms require an additional 2 Scramble, and Play: Exhau
         { owner: "Red", card: card("Shove") },
       ],
     });
-    const line = state.activeRoom?.thresholds[0];
+    const line = state.activeRoom?.challenges[0]?.thresholds[0];
     if (!line) throw new Error("rig");
     expect(extraScrambleRequirement(state, line)).toBe(0);
     expect(thresholdIsMet(state, line)).toBe(true);

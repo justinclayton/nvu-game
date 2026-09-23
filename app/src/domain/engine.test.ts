@@ -281,9 +281,10 @@ describe("Room kinds: Room and Stairwell", () => {
     expect(next.phase).toBe("Ascend");
   });
 
-  it("'resolve the card text of every challenge you met'", () => {
-    // Collapsed Stairwell clears at Scramble 2 and costs both a card; it also
-    // clears at Scramble 5. Meeting the higher line does not excuse the lower.
+  it("'if more than one threshold within a challenge is met, only the lowest-printed one resolves'", () => {
+    // Collapsed Stairwell's one challenge meets both its Scramble 2 line
+    // (Exhaust 1 each) and its Scramble 5 line (reveal a reward) at once.
+    // Only the lowest-printed of the two — Scramble 5 — resolves.
     const state = rig({
       phase: "Play",
       activeRoom: room("Collapsed Stairwell"),
@@ -299,16 +300,17 @@ describe("Room kinds: Room and Stairwell", () => {
       playFree("Gray", g[1] as CardId),
       { type: "END_PLAY" },
     ]);
-    expect(events.filter((e) => e.type === "THRESHOLD_MET")).toHaveLength(2);
+    expect(events.filter((e) => e.type === "THRESHOLD_MET")).toHaveLength(1);
     expect(next.cleared).toHaveLength(1);
-    // "Both of you Exhaust 1" — to the Exhaust pile, not the discard pile.
-    expect(next.Red.exhaust).toHaveLength(1);
+    // No Exhaust: the Scramble 2 line's outcome does not resolve alongside it.
+    expect(next.Red.exhaust).toHaveLength(0);
+    expect(next.pending?.kind).toBe("ChooseCharacter");
   });
 
-  it("a Room's higher threshold also reveals a reward — taken or skipped", () => {
-    // Two Coil Of Cables (Scramble 3 each, cost 0) clear both of Collapsed
-    // Stairwell's lines: Scramble 2 (Exhaust 1 each) and Scramble 5 (one of
-    // you reveals a reward).
+  it("a Room's higher threshold resolves instead of its lower one — taken or skipped", () => {
+    // Two Coil Of Cables (Scramble 3 each, cost 0) meet both of Collapsed
+    // Stairwell's lines; only the higher one (Scramble 5: one of you reveals
+    // a reward) resolves.
     const state = rig({
       phase: "Play",
       activeRoom: room("Collapsed Stairwell"),
@@ -343,6 +345,67 @@ describe("Room kinds: Room and Stairwell", () => {
     expect(eventTypes(takeEvents)).toContain("REWARD_TAKEN");
     expect(afterTake.Gray.deck[0]?.name).toBe(grayPool[0]?.name);
     expect(afterTake.pools.Gray).toHaveLength(grayPool.length - 1);
+  });
+
+  it("'only resolve the outcome from the lowest-printed met threshold' — different stats in one challenge", () => {
+    // Tool Cage's one challenge mixes stats: Scramble 3 and Oomph 5. Meeting
+    // both at once resolves only the lowest-printed line, Oomph 5.
+    const state = rig({
+      phase: "Play",
+      activeRoom: room("Tool Cage"),
+      Red: player({ deck: pile("Shove", 5), hand: [card("Reckless"), card("Shove")] }),
+      Gray: player({ deck: pile("Duck Under", 5), hand: [card("Coil Of Cable")] }),
+    });
+    const r = ids(state, "Red");
+    const g = ids(state, "Gray");
+    const { state: next, events } = play(state, [
+      { type: "PLAY_CARD", character: "Red", cardId: r[0] as CardId, payWith: [r[1] as CardId] },
+      playFree("Gray", g[0] as CardId),
+      { type: "END_PLAY" },
+    ]);
+    expect(events.filter((e) => e.type === "THRESHOLD_MET")).toHaveLength(1);
+    expect(next.Red.hand.filter((c) => c.kind === "good_stuff")).toHaveLength(2);
+    expect(next.Gray.hand.filter((c) => c.kind === "good_stuff")).toHaveLength(1);
+  });
+
+  it("each challenge on a card resolves on its own — Ration Locker", () => {
+    // Ration Locker's Oomph and Scramble challenges are independent: Oomph 4
+    // resolves its richer line for Red, while Scramble stops short of 4 and
+    // resolves its plain line for Gray.
+    const state = rig({
+      phase: "Play",
+      activeRoom: room("Ration Locker"),
+      Red: player({ deck: pile("Shove", 5), hand: [card("Charge In"), card("Shove"), card("Shove")] }),
+      Gray: player({ deck: pile("Duck Under", 5), hand: [card("Duck Under"), card("Duck Under")] }),
+    });
+    const r = ids(state, "Red");
+    const g = ids(state, "Gray");
+    const { state: next } = play(state, [
+      { type: "PLAY_CARD", character: "Red", cardId: r[0] as CardId, payWith: [r[1] as CardId, r[2] as CardId] },
+      { type: "PLAY_CARD", character: "Gray", cardId: g[0] as CardId, payWith: [g[1] as CardId] },
+      { type: "END_PLAY" },
+    ]);
+    expect(next.Red.hand.filter((c) => c.kind === "good_stuff")).toHaveLength(2);
+    expect(next.Gray.hand.filter((c) => c.kind === "good_stuff")).toHaveLength(1);
+  });
+
+  it("meeting more than one challenge resolves each of them — Sorting Room", () => {
+    const state = rig({
+      phase: "Play",
+      activeRoom: room("Sorting Room"),
+      Red: player({ deck: pile("Shove", 5), hand: [card("Shove"), card("Shove")] }),
+      Gray: player({ deck: pile("Duck Under", 5), hand: [card("Duck Under"), card("Duck Under")] }),
+    });
+    const r = ids(state, "Red");
+    const g = ids(state, "Gray");
+    const { state: next, events } = play(state, [
+      { type: "PLAY_CARD", character: "Red", cardId: r[0] as CardId, payWith: [r[1] as CardId] },
+      { type: "PLAY_CARD", character: "Gray", cardId: g[0] as CardId, payWith: [g[1] as CardId] },
+      { type: "END_PLAY" },
+    ]);
+    expect(events.filter((e) => e.type === "THRESHOLD_MET")).toHaveLength(2);
+    expect(next.Red.hand.some((c) => c.kind === "good_stuff")).toBe(true);
+    expect(next.Gray.hand.some((c) => c.kind === "good_stuff")).toBe(true);
   });
 
   it("a met line that Clears beats one that says to Flee for free", () => {

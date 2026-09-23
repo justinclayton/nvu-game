@@ -1,6 +1,6 @@
 # *North vs Up*: Rulebook
 
-Rules version: 0.2.0
+Rules version: 0.2.1
 
 ---
 
@@ -90,13 +90,13 @@ The phase ends when both players pass.
 
 ### 3. Outcome
 
-Players add their combined stats they accumulated this turn and check to see if they Cleared one or more challenges, or if they must Flee.
+Players add their combined stats they accumulated this turn and check to see if they met one or more challenges, or if they must Flee.
 
-**Clear**: If any challenge's threshold has been met or exceeded, the players `Clear` the room. Resolve each cleared challenge's outcome according to the text on the card. If more than one challenge has been cleared, their outcomes may be resolved in any order.
+**Clear**: A challenge is met when the players' stats meet or exceed any of its thresholds. If one or more challenges are met, the players `Clear` the room. For each met challenge, resolve the outcome of **one** threshold: the lowest-printed threshold met in that challenge. If more than one challenge is met, their outcomes may be resolved in any order.
 
-> If any challenge's outcome says to `Ascend`, the entire Floor is cleared. Perform the Cleanup phase as normal, then perform the steps in section 10: *Ascending*.
+> If a resolved outcome says to `Ascend`, the entire Floor is cleared. Perform the Cleanup phase as normal, then perform the steps in section 10: *Ascending*.
 
-**Flee**: If *no challenges* have been cleared, the players must Flee the room. Resolve the `Flee:` outcome according to the text on the card, then **shuffle the room card back into the Floor deck**.
+**Flee**: If *no challenges* have been met, the players must Flee the room. Resolve the `Flee:` outcome according to the text on the card, then **shuffle the room card back into the Floor deck**.
 
 ### 4. Cleanup (end of turn)
 
@@ -117,7 +117,7 @@ A number never goes below zero. If an effect would take a card's stat, cost, or 
 
 ### Room Cards
 
-A room card presents one or more **challenges** to the players. Each turn players will work together to play cards from their hand until they either meet or exceed one or more of the challenges, or, if they are unwilling or unable to complete any challenges, they `Flee`.
+A room card presents one or more **challenges** to the players. A challenge lists one or more **thresholds**, and each threshold has an outcome. Each turn players will work together to play cards from their hand until they either meet or exceed one or more of the challenges, or, if they are unwilling or unable to complete any challenges, they `Flee`.
 
 There are two kinds: `Room` and `Stairwell`. Only a `Stairwell`'s challenges print `Ascend`.
 
@@ -127,8 +127,8 @@ There are two kinds: `Room` and `Stairwell`. Only a `Stairwell`'s challenges pri
 - **Name.**
 - **Type line:** `Room` or `Stairwell`, and the band of floors it belongs to (`Room · Floors 4–6`).
 - **Flavor line.**
-- **Challenges:** one or more lines with `threshold: outcome`.
-- **`Flee`**: what happens when no challenges are completed.
+- **Challenges:** one or more, each listing one or more `threshold: outcome` lines.
+- **`Flee`**: what happens when no challenges are met.
 
 ### Character cards
 
@@ -173,7 +173,7 @@ If you must draw or Exhaust a card and your deck and discard pile are both empty
 
 ## 10. Ascending
 
-When a cleared challenge's outcome says `Ascend`, you escape the current floor and move to the next. On floor 10, skip this section: you have won (section 11).
+When a resolved outcome says `Ascend`, you escape the current floor and move to the next. On floor 10, skip this section: you have won (section 11).
 
 After Cleanup, each player does the following:
 

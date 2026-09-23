@@ -6,7 +6,7 @@
  * in the state, so a run replays exactly from its seed and its command log.
  *
  * Section numbers point at design/rulebook.md, rules version
- * 0.2.0, which is the authority.
+ * 0.2.1, which is the authority.
  */
 
 import { behaviourOf, type BehaviourContext, type ChoiceAnswer } from "./cards/behaviours";
@@ -24,6 +24,7 @@ import type {
   AscendChoice,
   Card,
   CardId,
+  Challenge,
   Character,
   Command,
   DomainEvent,
@@ -533,27 +534,15 @@ function playCard(
 
 /* ------------------------------------------------------------ Outcome */
 
-const goodStuffFor = (t: Threshold, c: Character): number =>
-  t.effects
-    .filter((e) => e.type === "TakeGoodStuff" && (e.who === c || e.who === "both"))
-    .reduce((most, e) => Math.max(most, e.type === "TakeGoodStuff" ? e.count : 0), 0);
-
 /**
- * Every challenge met resolves (see below), but a richer tier's "instead"
- * replaces a poorer one's Good Stuff rather than adding to it: each character
- * takes the largest amount any met line awards them, not the sum. Any other
- * kind of effect from a met line is simply collected.
+ * A challenge is met when any of its thresholds is met (rulebook, Outcome).
+ * When more than one is, only the lowest-printed met one resolves — the last
+ * threshold in printed order that the pool still meets.
  */
-function resolveMetEffects(met: readonly Threshold[]): readonly RoomEffect[] {
-  const out: RoomEffect[] = [];
-  for (const c of CHARACTERS) {
-    const count = met.reduce((most, t) => Math.max(most, goodStuffFor(t, c)), 0);
-    if (count > 0) out.push({ type: "TakeGoodStuff", who: c, count });
-  }
-  for (const t of met) {
-    for (const e of t.effects) if (e.type !== "TakeGoodStuff") out.push(e);
-  }
-  return out;
+function resolvedThresholdOf(state: GameState, challenge: Challenge): Threshold | null {
+  let resolved: Threshold | null = null;
+  for (const t of challenge.thresholds) if (thresholdIsMet(state, t)) resolved = t;
+  return resolved;
 }
 
 interface RoomOutcome {
@@ -565,26 +554,28 @@ interface RoomOutcome {
 
 /**
  * Each Turn, Outcome: the room is checked once, when both characters have stopped playing,
- * the same way whatever the room's printed type. If any challenge's threshold
- * is met the room is Cleared, and the card text of *every* challenge met
- * resolves — a Hazard's higher tier also reveals a reward, on top of the
- * lower tier rather than instead of it.
+ * the same way whatever the room's printed type. Every met challenge resolves, but only
+ * through its one chosen threshold — a Hazard's higher tier replaces its lower tier's
+ * outcome, on that challenge, rather than adding to it. A different challenge on the same
+ * card is untouched by that and resolves on its own.
  */
 function roomOutcome(state: GameState, room: Room): RoomOutcome {
-  const met = room.thresholds.filter((t) => thresholdIsMet(state, t));
+  const met = room.challenges
+    .map((c) => resolvedThresholdOf(state, c))
+    .filter((t): t is Threshold => t !== null);
 
   if (met.length === 0) {
-    // Each Turn, Outcome: if no threshold is met, the characters Flee. Resolve the Flee line.
+    // Each Turn, Outcome: if no challenge is met, the characters Flee. Resolve the Flee line.
     // A room with no Flee line of its own Flees empty-handed, and does not Clear.
     return { met, cleared: room.flee.clears, ascends: false, effects: room.flee.effects };
   }
   // A line that says "Flee this room for free" cannot un-Clear a room another
-  // met line Cleared: Outcome's first sentence is that any met threshold Clears it.
+  // met challenge Cleared: Outcome's first sentence is that any met challenge Clears it.
   return {
     met,
     cleared: met.some((t) => t.clears),
     ascends: met.some((t) => t.ascends),
-    effects: resolveMetEffects(met),
+    effects: met.flatMap((t) => t.effects),
   };
 }
 

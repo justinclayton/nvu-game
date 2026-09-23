@@ -2,7 +2,8 @@ import { describe, expect, it } from "vitest";
 import { CARD_CONTENT } from "@content/index";
 import { card, player, resetRig, rig, room } from "@domain/__fixtures__/rig";
 import type { Command, GameState, Room } from "@domain/types";
-import { greedyPolicy, randomPolicy } from "./policy";
+import { ascendChoices, legalCommands } from "./moves";
+import { greedyAscendStats, greedyPolicy, randomPolicy, resetGreedyAscendStats } from "./policy";
 import { policySeed } from "./rng";
 import { simulate } from "./run";
 
@@ -124,67 +125,65 @@ describe("greedy", () => {
     resetRig();
     const goodStuff = card("Crowbar");
     const badStuff = card("Rust");
-    const payer = card("Shove");
+    const payerA = card("Shove");
+    const payerB = card("Shove");
     const reward = card("Fast Follow");
     const state: GameState = rig({
       phase: "Ascend",
-      Red: player({ deck: [goodStuff, badStuff, payer] }),
+      Red: player({ deck: [goodStuff, badStuff, payerA, payerB] }),
       Gray: player(),
       offer: { Red: [reward], Gray: [] },
     });
-    const none: Command = {
-      type: "ASCEND",
-      Red: { settle: [], takeRewardId: null },
-      Gray: { settle: [], takeRewardId: null },
-    };
-    const greedyChoice: Command = {
+    const legal = legalCommands(state);
+    const [chosen] = greedyPolicy.choose(state, legal, policySeed(1));
+    expect(chosen).toEqual({
       type: "ASCEND",
       Red: {
         settle: [
-          { cardId: goodStuff.id, payWith: payer.id },
-          { cardId: badStuff.id, payWith: payer.id },
+          { cardId: goodStuff.id, payWith: payerA.id },
+          { cardId: badStuff.id, payWith: payerB.id },
         ],
         takeRewardId: reward.id,
       },
       Gray: { settle: [], takeRewardId: null },
-    };
-    const legal: readonly Command[] = [none, greedyChoice];
-    const [chosen] = greedyPolicy.choose(state, legal, policySeed(1));
-    expect(chosen).toEqual(greedyChoice);
+    });
   });
 
-  it("does not always favor Red when the Ascend cross-product cap forces a choice", () => {
-    // Past moves.ts's 256-entry cap, no legal command lets both characters
-    // act at once — one side is always "none". A tie between an equally
-    // good Red-only and Gray-only command must not always resolve the same
-    // way, or the other character never benefits from Ascend.
+  it("gets both characters their reward even when the generator's Ascend cross-product is capped", () => {
+    // Give each character enough Stuff and payers that ascendChoices(state, c)
+    // is large on both sides, so their cross product blows the generator's
+    // 256-entry cap (sim/moves.ts) and every legal ASCEND command it offers
+    // leaves one side at "none". Composing straight from each character's
+    // own options, instead of picking from that capped list, should still
+    // get both a reward.
     resetRig();
-    const redReward = card("Fast Follow");
-    const grayReward = card("Covering Fire");
+    resetGreedyAscendStats();
+    const redStuff = [card("Pry Bar"), card("Coil Of Cable"), card("Crowbar")];
+    const redPayers = [card("Shove"), card("Shove"), card("Shove")];
+    const redReward = [card("Reckless Swing"), card("Fast Follow"), card("Reckless")];
+    const grayStuff = [card("A Pair Of Stich-Em-Ups"), card("Cutting Torch"), card("Grav Harness")];
+    const grayPayers = [card("Duck Under"), card("Duck Under"), card("Duck Under")];
+    const grayReward = [card("Catch Your Breath"), card("In Step"), card("One Man's Junk")];
+
     const state: GameState = rig({
       phase: "Ascend",
-      offer: { Red: [redReward], Gray: [grayReward] },
+      Red: player({ deck: [...redStuff, ...redPayers] }),
+      Gray: player({ deck: [...grayStuff, ...grayPayers] }),
+      offer: { Red: redReward, Gray: grayReward },
     });
-    const none: Command = {
-      type: "ASCEND",
-      Red: { settle: [], takeRewardId: null },
-      Gray: { settle: [], takeRewardId: null },
-    };
-    const redTakes: Command = {
-      type: "ASCEND",
-      Red: { settle: [], takeRewardId: redReward.id },
-      Gray: { settle: [], takeRewardId: null },
-    };
-    const grayTakes: Command = {
-      type: "ASCEND",
-      Red: { settle: [], takeRewardId: null },
-      Gray: { settle: [], takeRewardId: grayReward.id },
-    };
-    const legal: readonly Command[] = [none, redTakes, grayTakes];
 
-    const [onEvenFloor] = greedyPolicy.choose({ ...state, floor: 2 }, legal, policySeed(1));
-    const [onOddFloor] = greedyPolicy.choose({ ...state, floor: 3 }, legal, policySeed(1));
-    expect(onEvenFloor).toEqual(redTakes);
-    expect(onOddFloor).toEqual(grayTakes);
+    const redOptions = ascendChoices(state, "Red").length;
+    const grayOptions = ascendChoices(state, "Gray").length;
+    expect(redOptions * grayOptions).toBeGreaterThan(256);
+
+    const legal = legalCommands(state);
+    const ascends = legal.filter((c): c is Extract<Command, { type: "ASCEND" }> => c.type === "ASCEND");
+    expect(ascends.every((c) => c.Red.takeRewardId === null || c.Gray.takeRewardId === null)).toBe(true);
+
+    const [chosen] = greedyPolicy.choose(state, legal, policySeed(1));
+    if (chosen.type !== "ASCEND") throw new Error("expected an ASCEND command");
+    expect(chosen.Red.takeRewardId).not.toBeNull();
+    expect(chosen.Gray.takeRewardId).not.toBeNull();
+    expect(greedyAscendStats.fallback).toBe(0);
   });
 });

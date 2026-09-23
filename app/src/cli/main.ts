@@ -614,6 +614,10 @@ function renderReport(report: BalanceReport): string {
   for (const card of report.cards) {
     lines.push(`  ${card.name}: ${String(card.played)} / ${String(card.taken)} / ${String(card.kept)}`);
   }
+  if (report.ascendFallbacks !== null) {
+    lines.push("");
+    lines.push(`Ascend commands composed directly, falling back to the generator's list ${String(report.ascendFallbacks)} time(s).`);
+  }
   return lines.join("\n");
 }
 

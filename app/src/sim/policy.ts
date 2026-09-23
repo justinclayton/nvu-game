@@ -8,16 +8,27 @@
  * spec is updated alongside this file.
  */
 
+import { validate } from "@domain/engine";
 import {
   contributionOf,
   metThresholds,
   settleableStuff,
+  settlePayOptions,
   statPool,
   thresholdIsMet,
   thresholdTarget,
   type StatTotals,
 } from "@domain/queries";
-import type { AscendChoice, Card, CardId, Character, Command, GameState, Stat } from "@domain/types";
+import type {
+  AscendChoice,
+  Card,
+  CardId,
+  Character,
+  Command,
+  GameState,
+  Stat,
+  StuffSettlement,
+} from "@domain/types";
 import { playerOf } from "@domain/verbs";
 import { pick, type Rng } from "./rng";
 
@@ -137,72 +148,53 @@ function scoreChoice(state: GameState, character: Character, choice: AscendChoic
   return score;
 }
 
-function choiceEqual(a: AscendChoice, b: AscendChoice): boolean {
-  if (a.takeRewardId !== b.takeRewardId || a.settle.length !== b.settle.length) return false;
-  return a.settle.every((s, i) => {
-    const t = b.settle[i];
-    return t !== undefined && s.cardId === t.cardId && s.payWith === t.payWith;
-  });
-}
+/**
+ * One character's whole Ascend, decided independently of the other's: pay to
+ * keep every Good Stuff card it can, then pay to shed every Bad Stuff card it
+ * can with whatever payers are left, then take a reward. This is the same
+ * shape the CLI composes from its per-question staging (`cli/ascend.ts`,
+ * `composeAscend`) — a full `settle` list, not the move generator's
+ * single-item one — so it isn't limited by the generator's Ascend
+ * cross-product cap (design/cli-sim/spec.md, "The move generator").
+ */
+function composeChoice(state: GameState, character: Character): AscendChoice {
+  const payers = [...settlePayOptions(state, character)];
+  const takePayer = (): CardId | null => payers.shift()?.id ?? null;
 
-/** The distinct choices offered this character, across every `ASCEND` command in `legal`. */
-function choicesFor(
-  ascends: readonly Extract<Command, { type: "ASCEND" }>[],
-  side: "Red" | "Gray",
-): readonly AscendChoice[] {
-  const out: AscendChoice[] = [];
-  for (const cmd of ascends) {
-    if (!out.some((c) => choiceEqual(c, cmd[side]))) out.push(cmd[side]);
+  const stuff = settleableStuff(state, character);
+  const settle: StuffSettlement[] = [];
+  for (const card of stuff.filter((c) => c.kind === "good_stuff")) {
+    const payWith = takePayer();
+    if (payWith !== null) settle.push({ cardId: card.id, payWith });
   }
-  return out;
-}
+  for (const card of stuff.filter((c) => c.kind === "bad_stuff")) {
+    const payWith = takePayer();
+    if (payWith !== null) settle.push({ cardId: card.id, payWith });
+  }
 
-function bestChoice(state: GameState, side: Character, choices: readonly AscendChoice[]): AscendChoice {
-  let best = choices[0];
-  if (!best) throw new Error(`greedy: ${side} was offered no Ascend choice`);
-  let bestScore = scoreChoice(state, side, best);
-  for (const choice of choices.slice(1)) {
-    const score = scoreChoice(state, side, choice);
-    if (score > bestScore) {
-      best = choice;
-      bestScore = score;
-    }
-  }
-  return best;
+  const offered = state.offer?.[character] ?? [];
+  return { settle, takeRewardId: offered[0]?.id ?? null };
 }
 
 /**
- * Past `moves.ts`'s 256-entry Ascend cross-product cap, no single legal
- * command lets both characters take their own best choice at once — one
- * side is always forced to "none" (design/cli-sim/spec.md, "The move
- * generator"). Always breaking that tie toward whichever character's
- * command happens to come first would starve the other one every time the
- * cap bites — this alternates who gets priority by floor instead, so both
- * get their turn across a run.
+ * Instrumentation only, read by `report.ts`: how often the composed command
+ * above validated versus how often it had to fall back to the move
+ * generator's own (capped) list. Doesn't affect what the policy chooses.
  */
-function chooseAscend(state: GameState, legal: readonly Command[]): Command {
+export const greedyAscendStats = { composed: 0, fallback: 0 };
+
+export function resetGreedyAscendStats(): void {
+  greedyAscendStats.composed = 0;
+  greedyAscendStats.fallback = 0;
+}
+
+/** The best of whatever the move generator did offer, for the rare case the composed command is refused. */
+function bestGeneratedAscend(state: GameState, legal: readonly Command[]): Command {
   const ascends = legal.filter((c): c is Extract<Command, { type: "ASCEND" }> => c.type === "ASCEND");
-  if (ascends.length === 0) throw new Error("greedy: Ascend phase offered no ASCEND command");
-
-  const bestRed = bestChoice(state, "Red", choicesFor(ascends, "Red"));
-  const bestGray = bestChoice(state, "Gray", choicesFor(ascends, "Gray"));
-
-  const exact = ascends.find((c) => choiceEqual(c.Red, bestRed) && choiceEqual(c.Gray, bestGray));
-  if (exact) return exact;
-
-  const redFirst = state.floor % 2 === 0;
-  const primary = redFirst
-    ? ascends.find((c) => choiceEqual(c.Red, bestRed))
-    : ascends.find((c) => choiceEqual(c.Gray, bestGray));
-  if (primary) return primary;
-  const secondary = redFirst
-    ? ascends.find((c) => choiceEqual(c.Gray, bestGray))
-    : ascends.find((c) => choiceEqual(c.Red, bestRed));
-  if (secondary) return secondary;
-
-  let best = ascends[0];
-  if (!best) throw new Error("greedy: Ascend phase offered no ASCEND command");
-  let bestScore = scoreChoice(state, "Red", best.Red) + scoreChoice(state, "Gray", best.Gray);
+  const first = ascends[0];
+  if (!first) throw new Error("greedy: Ascend phase offered no ASCEND command");
+  let best = first;
+  let bestScore = scoreChoice(state, "Red", first.Red) + scoreChoice(state, "Gray", first.Gray);
   for (const c of ascends.slice(1)) {
     const score = scoreChoice(state, "Red", c.Red) + scoreChoice(state, "Gray", c.Gray);
     if (score > bestScore) {
@@ -211,6 +203,20 @@ function chooseAscend(state: GameState, legal: readonly Command[]): Command {
     }
   }
   return best;
+}
+
+function chooseAscend(state: GameState, legal: readonly Command[]): Command {
+  const composed: Command = {
+    type: "ASCEND",
+    Red: composeChoice(state, "Red"),
+    Gray: composeChoice(state, "Gray"),
+  };
+  if (validate(state, composed) === null) {
+    greedyAscendStats.composed += 1;
+    return composed;
+  }
+  greedyAscendStats.fallback += 1;
+  return bestGeneratedAscend(state, legal);
 }
 
 function cardsDeepEqual(a: readonly CardId[], b: readonly CardId[]): boolean {
@@ -261,7 +267,11 @@ function choosePending(state: GameState, legal: readonly Command[]): Command {
  * A fixed, deterministic bot (issue #93): play what clears the room, pay
  * with the cheapest cards, take the reward, keep Good Stuff you can pay for
  * and shed Bad Stuff you can. It never draws on `rng` — ties are broken by
- * card id — so the same seed always plays the same game.
+ * card id — so the same seed always plays the same game. Everywhere but
+ * Ascend it only answers from the move generator's own legal list; at
+ * Ascend it composes its own `ASCEND` command (see `composeChoice`) and
+ * validates it against the engine, because the generator's own list caps
+ * out well before two independent characters' choices fit in it.
  */
 export const greedyPolicy: Policy = {
   name: "greedy",

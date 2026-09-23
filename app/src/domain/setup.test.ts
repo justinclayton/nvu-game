@@ -1,12 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { CARD_CONTENT } from "../content";
-import {
-  createInitialState,
-  ENEMY_ROOMS_PER_FLOOR,
-  HAZARD_ROOMS_PER_FLOOR,
-  stuffRoomsOnFloor,
-  TOP_FLOOR,
-} from "./setup";
+import { buildFloor, createInitialState, returnRoomsToSupply, roomsOnFloor, TOP_FLOOR } from "./setup";
 
 const content = CARD_CONTENT;
 
@@ -22,30 +16,36 @@ describe("Setting up a floor", () => {
     expect(state.Gray.deck).toHaveLength(12);
   });
 
-  it("builds floor 1 from 1 Enemy room, 3 Hazards and 6 Stuff rooms", () => {
+  it("builds floor 1 from 1 Enemy room and 9 Hazard/Stuff rooms", () => {
     const [state] = createInitialState(1, content);
     const kinds = state.floorDeck.map((r) => r.kind);
     expect(kinds.filter((k) => k === "enemy")).toHaveLength(1);
-    expect(kinds.filter((k) => k === "hazard")).toHaveLength(3);
-    expect(kinds.filter((k) => k === "stuff")).toHaveLength(6);
+    expect(kinds.filter((k) => k === "hazard" || k === "stuff")).toHaveLength(9);
     expect(state.floorDeck).toHaveLength(10);
   });
 
   // Rulebook Setup, "Floor deck": "The first floor consists of 10 cards. As
   // you move up, each subsequent floor will have one fewer card than the
-  // previous one." Enemy and Hazard counts are fixed, so Stuff rooms carry
-  // the whole decrease until there are none left to cut.
-  it("floor size is 10 on floor 1 and one fewer each floor above, per rulebook Setup > Floor deck", () => {
+  // previous one."
+  it("floor size is 11 - floor, per rulebook Setup > Floor deck", () => {
+    const [initial] = createInitialState(1, content);
+    const fullSupply = returnRoomsToSupply(initial);
     for (let floor = 1; floor <= TOP_FLOOR; floor += 1) {
-      const floorSize = ENEMY_ROOMS_PER_FLOOR + HAZARD_ROOMS_PER_FLOOR + stuffRoomsOnFloor(floor);
-      expect(floorSize).toBe(Math.max(ENEMY_ROOMS_PER_FLOOR + HAZARD_ROOMS_PER_FLOOR, 11 - floor));
+      const state = buildFloor({ ...fullSupply, floor }, []);
+      expect(state.floorDeck).toHaveLength(roomsOnFloor(floor));
+      expect(roomsOnFloor(floor)).toBe(11 - floor);
     }
+    expect(roomsOnFloor(TOP_FLOOR)).toBe(1);
   });
 
-  it("empties the floor of Stuff rooms as you climb", () => {
-    expect(stuffRoomsOnFloor(1)).toBe(6);
-    expect(stuffRoomsOnFloor(5)).toBe(2);
-    expect(stuffRoomsOnFloor(10)).toBe(0);
+  it("the Hazard count on a floor varies with the seed", () => {
+    const hazardCounts = new Set(
+      Array.from({ length: 20 }, (_, i) => {
+        const [state] = createInitialState(i, content);
+        return state.floorDeck.filter((r) => r.kind === "hazard").length;
+      }),
+    );
+    expect(hazardCounts.size).toBeGreaterThan(1);
   });
 
   it("takes the Enemy room that guards the floor being built", () => {

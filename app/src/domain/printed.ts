@@ -64,6 +64,15 @@ export interface Threshold {
 }
 
 /**
+ * A group of one or more Thresholds (rulebook, Card anatomy: Room Cards; GLOSSARY, Challenge).
+ * A challenge is met when the pool meets or exceeds any of its Thresholds. When more than one
+ * of a met challenge's Thresholds is met, only the lowest-printed one resolves (rulebook, Outcome).
+ */
+export interface Challenge {
+  readonly thresholds: readonly Threshold[];
+}
+
+/**
  * The Flee line every room prints (rulebook, Card anatomy: Room Cards). No Stuff room in
  * design/cards.yaml prints one of its own, so the generator supplies
  * "Leave empty-handed." for display; it Flees like any other room, with no
@@ -105,7 +114,7 @@ export interface RoomFace {
   /** The printed flavor line. Empty until a card is given one. */
   readonly flavor: string;
   readonly count: number;
-  readonly thresholds: readonly Threshold[];
+  readonly challenges: readonly Challenge[];
   readonly flee: FleeLine;
 }
 

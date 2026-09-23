@@ -12,7 +12,7 @@ import { shuffle } from "./rng";
 import type { Card, DomainEvent, GameState, PlayerState, Room, TurnRecord } from "./types";
 
 /** The rulebook this engine implements (design/rulebook.md). See #83. */
-export const RULES_VERSION = "0.2.0";
+export const RULES_VERSION = "0.2.1";
 
 /** The tenth floor is the roof: clearing it wins the run (rulebook, Winning and losing). */
 export const TOP_FLOOR = 10;
@@ -67,7 +67,7 @@ export function mintRoom(face: RoomFace, copy: number): Room {
     kind: face.kind,
     band: face.band,
     flavor: face.flavor,
-    thresholds: face.thresholds,
+    challenges: face.challenges,
     flee: face.flee,
   };
 }

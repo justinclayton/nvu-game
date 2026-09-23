@@ -15,7 +15,7 @@ import type { CardContent } from "../domain/printed";
 
 export const CARD_CONTENT = {
   meta: {
-    updated: "2026-09-16",
+    updated: "2026-09-23",
   },
   cards: [
     {
@@ -590,7 +590,7 @@ export const CARD_CONTENT = {
       oomph: 0,
       scramble: 0,
       conditionalStat: false,
-      text: "Holding: Every challenge also requires 2 `Scramble` to clear. A `Scramble` challenge requires 2 more instead. Play: Exhaust 2.",
+      text: "Holding: Every threshold also requires 2 `Scramble` to be met. A `Scramble` threshold requires 2 more instead. Play: Exhaust 2.",
     },
     {
       name: "My Head Is Quantum Spinning",
@@ -615,15 +615,19 @@ export const CARD_CONTENT = {
       band: 1,
       flavor: "",
       count: 1,
-      thresholds: [
+      challenges: [
         {
-          stat: "Oomph",
-          value: 5,
-          outcome: "Ascend",
-          clears: true,
-          fleeFree: false,
-          ascends: true,
-          effects: [],
+          thresholds: [
+            {
+              stat: "Oomph",
+              value: 5,
+              outcome: "Ascend",
+              clears: true,
+              fleeFree: false,
+              ascends: true,
+              effects: [],
+            },
+          ],
         },
       ],
       flee: {
@@ -645,15 +649,19 @@ export const CARD_CONTENT = {
       band: 1,
       flavor: "",
       count: 1,
-      thresholds: [
+      challenges: [
         {
-          stat: "Oomph",
-          value: 9,
-          outcome: "Ascend",
-          clears: true,
-          fleeFree: false,
-          ascends: true,
-          effects: [],
+          thresholds: [
+            {
+              stat: "Oomph",
+              value: 9,
+              outcome: "Ascend",
+              clears: true,
+              fleeFree: false,
+              ascends: true,
+              effects: [],
+            },
+          ],
         },
       ],
       flee: {
@@ -675,24 +683,32 @@ export const CARD_CONTENT = {
       band: 1,
       flavor: "",
       count: 1,
-      thresholds: [
+      challenges: [
         {
-          stat: "Oomph",
-          value: 9,
-          outcome: "Ascend",
-          clears: true,
-          fleeFree: false,
-          ascends: true,
-          effects: [],
+          thresholds: [
+            {
+              stat: "Oomph",
+              value: 9,
+              outcome: "Ascend",
+              clears: true,
+              fleeFree: false,
+              ascends: true,
+              effects: [],
+            },
+          ],
         },
         {
-          stat: "Scramble",
-          value: 9,
-          outcome: "Flee this room for free.",
-          clears: false,
-          fleeFree: true,
-          ascends: false,
-          effects: [],
+          thresholds: [
+            {
+              stat: "Scramble",
+              value: 9,
+              outcome: "Flee this room for free.",
+              clears: false,
+              fleeFree: true,
+              ascends: false,
+              effects: [],
+            },
+          ],
         },
       ],
       flee: {
@@ -714,33 +730,37 @@ export const CARD_CONTENT = {
       band: 1,
       flavor: "",
       count: 3,
-      thresholds: [
+      challenges: [
         {
-          stat: "Scramble",
-          value: 2,
-          outcome: "Clear, but both of you Exhaust 1.",
-          clears: true,
-          fleeFree: false,
-          ascends: false,
-          effects: [
+          thresholds: [
             {
-              type: "ExhaustFromDeck",
-              who: "both",
-              amount: 1,
+              stat: "Scramble",
+              value: 2,
+              outcome: "Clear, but both of you Exhaust 1.",
+              clears: true,
+              fleeFree: false,
+              ascends: false,
+              effects: [
+                {
+                  type: "ExhaustFromDeck",
+                  who: "both",
+                  amount: 1,
+                },
+              ],
             },
-          ],
-        },
-        {
-          stat: "Scramble",
-          value: 5,
-          outcome: "Clear, and one of you reveals a reward.",
-          clears: true,
-          fleeFree: false,
-          ascends: false,
-          effects: [
             {
-              type: "RevealReward",
-              who: "one",
+              stat: "Scramble",
+              value: 5,
+              outcome: "Clear, and one of you reveals a reward.",
+              clears: true,
+              fleeFree: false,
+              ascends: false,
+              effects: [
+                {
+                  type: "RevealReward",
+                  who: "one",
+                },
+              ],
             },
           ],
         },
@@ -764,32 +784,36 @@ export const CARD_CONTENT = {
       band: 1,
       flavor: "",
       count: 3,
-      thresholds: [
+      challenges: [
         {
-          stat: "Scramble",
-          value: 4,
-          outcome: "Clear, but both of you get Bad Stuff.",
-          clears: true,
-          fleeFree: false,
-          ascends: false,
-          effects: [
+          thresholds: [
             {
-              type: "DealBadStuff",
-              who: "both",
+              stat: "Scramble",
+              value: 4,
+              outcome: "Clear, but both of you get Bad Stuff.",
+              clears: true,
+              fleeFree: false,
+              ascends: false,
+              effects: [
+                {
+                  type: "DealBadStuff",
+                  who: "both",
+                },
+              ],
             },
-          ],
-        },
-        {
-          stat: "Scramble",
-          value: 7,
-          outcome: "Clear, and one of you reveals a reward.",
-          clears: true,
-          fleeFree: false,
-          ascends: false,
-          effects: [
             {
-              type: "RevealReward",
-              who: "one",
+              stat: "Scramble",
+              value: 7,
+              outcome: "Clear, and one of you reveals a reward.",
+              clears: true,
+              fleeFree: false,
+              ascends: false,
+              effects: [
+                {
+                  type: "RevealReward",
+                  who: "one",
+                },
+              ],
             },
           ],
         },
@@ -817,34 +841,42 @@ export const CARD_CONTENT = {
       band: 1,
       flavor: "",
       count: 3,
-      thresholds: [
+      challenges: [
         {
-          stat: "Oomph",
-          value: 2,
-          outcome: "Red gets Good Stuff.",
-          clears: true,
-          fleeFree: false,
-          ascends: false,
-          effects: [
+          thresholds: [
             {
-              type: "TakeGoodStuff",
-              who: "Red",
-              count: 1,
+              stat: "Oomph",
+              value: 2,
+              outcome: "Red gets Good Stuff.",
+              clears: true,
+              fleeFree: false,
+              ascends: false,
+              effects: [
+                {
+                  type: "TakeGoodStuff",
+                  who: "Red",
+                  count: 1,
+                },
+              ],
             },
           ],
         },
         {
-          stat: "Scramble",
-          value: 2,
-          outcome: "Gray gets Good Stuff.",
-          clears: true,
-          fleeFree: false,
-          ascends: false,
-          effects: [
+          thresholds: [
             {
-              type: "TakeGoodStuff",
-              who: "Gray",
-              count: 1,
+              stat: "Scramble",
+              value: 2,
+              outcome: "Gray gets Good Stuff.",
+              clears: true,
+              fleeFree: false,
+              ascends: false,
+              effects: [
+                {
+                  type: "TakeGoodStuff",
+                  who: "Gray",
+                  count: 1,
+                },
+              ],
             },
           ],
         },
@@ -862,64 +894,72 @@ export const CARD_CONTENT = {
       band: 1,
       flavor: "",
       count: 2,
-      thresholds: [
+      challenges: [
         {
-          stat: "Oomph",
-          value: 2,
-          outcome: "Red gets Good Stuff.",
-          clears: true,
-          fleeFree: false,
-          ascends: false,
-          effects: [
+          thresholds: [
             {
-              type: "TakeGoodStuff",
-              who: "Red",
-              count: 1,
+              stat: "Oomph",
+              value: 2,
+              outcome: "Red gets Good Stuff.",
+              clears: true,
+              fleeFree: false,
+              ascends: false,
+              effects: [
+                {
+                  type: "TakeGoodStuff",
+                  who: "Red",
+                  count: 1,
+                },
+              ],
+            },
+            {
+              stat: "Oomph",
+              value: 4,
+              outcome: "Red gets 2 Good Stuff.",
+              clears: true,
+              fleeFree: false,
+              ascends: false,
+              effects: [
+                {
+                  type: "TakeGoodStuff",
+                  who: "Red",
+                  count: 2,
+                },
+              ],
             },
           ],
         },
         {
-          stat: "Scramble",
-          value: 2,
-          outcome: "Gray gets Good Stuff.",
-          clears: true,
-          fleeFree: false,
-          ascends: false,
-          effects: [
+          thresholds: [
             {
-              type: "TakeGoodStuff",
-              who: "Gray",
-              count: 1,
+              stat: "Scramble",
+              value: 2,
+              outcome: "Gray gets Good Stuff.",
+              clears: true,
+              fleeFree: false,
+              ascends: false,
+              effects: [
+                {
+                  type: "TakeGoodStuff",
+                  who: "Gray",
+                  count: 1,
+                },
+              ],
             },
-          ],
-        },
-        {
-          stat: "Oomph",
-          value: 4,
-          outcome: "Red gets 2 instead.",
-          clears: true,
-          fleeFree: false,
-          ascends: false,
-          effects: [
             {
-              type: "TakeGoodStuff",
-              who: "Red",
-              count: 2,
-            },
-          ],
-        },
-        {
-          stat: "Scramble",
-          value: 4,
-          outcome: "Gray gets 2 instead.",
-          clears: true,
-          fleeFree: false,
-          ascends: false,
-          effects: [
-            {
-              type: "TakeGoodStuff",
-              who: "Gray",
-              count: 2,
+              stat: "Scramble",
+              value: 4,
+              outcome: "Gray gets 2 Good Stuff.",
+              clears: true,
+              fleeFree: false,
+              ascends: false,
+              effects: [
+                {
+                  type: "TakeGoodStuff",
+                  who: "Gray",
+                  count: 2,
+                },
+              ],
             },
           ],
         },
@@ -937,34 +977,43 @@ export const CARD_CONTENT = {
       band: 1,
       flavor: "",
       count: 2,
-      thresholds: [
+      challenges: [
         {
-          stat: "Scramble",
-          value: 3,
-          outcome: "Both of you get Good Stuff.",
-          clears: true,
-          fleeFree: false,
-          ascends: false,
-          effects: [
+          thresholds: [
             {
-              type: "TakeGoodStuff",
-              who: "both",
-              count: 1,
+              stat: "Scramble",
+              value: 3,
+              outcome: "Both of you get Good Stuff.",
+              clears: true,
+              fleeFree: false,
+              ascends: false,
+              effects: [
+                {
+                  type: "TakeGoodStuff",
+                  who: "both",
+                  count: 1,
+                },
+              ],
             },
-          ],
-        },
-        {
-          stat: "Oomph",
-          value: 5,
-          outcome: "Red gets 2 instead.",
-          clears: true,
-          fleeFree: false,
-          ascends: false,
-          effects: [
             {
-              type: "TakeGoodStuff",
-              who: "Red",
-              count: 2,
+              stat: "Oomph",
+              value: 5,
+              outcome: "Red gets 2 Good Stuff, and Gray gets Good Stuff.",
+              clears: true,
+              fleeFree: false,
+              ascends: false,
+              effects: [
+                {
+                  type: "TakeGoodStuff",
+                  who: "Red",
+                  count: 2,
+                },
+                {
+                  type: "TakeGoodStuff",
+                  who: "Gray",
+                  count: 1,
+                },
+              ],
             },
           ],
         },
@@ -982,34 +1031,43 @@ export const CARD_CONTENT = {
       band: 1,
       flavor: "",
       count: 2,
-      thresholds: [
+      challenges: [
         {
-          stat: "Scramble",
-          value: 3,
-          outcome: "Both of you get Good Stuff.",
-          clears: true,
-          fleeFree: false,
-          ascends: false,
-          effects: [
+          thresholds: [
             {
-              type: "TakeGoodStuff",
-              who: "both",
-              count: 1,
+              stat: "Scramble",
+              value: 3,
+              outcome: "Both of you get Good Stuff.",
+              clears: true,
+              fleeFree: false,
+              ascends: false,
+              effects: [
+                {
+                  type: "TakeGoodStuff",
+                  who: "both",
+                  count: 1,
+                },
+              ],
             },
-          ],
-        },
-        {
-          stat: "Scramble",
-          value: 5,
-          outcome: "Gray gets 2 instead.",
-          clears: true,
-          fleeFree: false,
-          ascends: false,
-          effects: [
             {
-              type: "TakeGoodStuff",
-              who: "Gray",
-              count: 2,
+              stat: "Scramble",
+              value: 5,
+              outcome: "Gray gets 2 Good Stuff, and Red gets Good Stuff.",
+              clears: true,
+              fleeFree: false,
+              ascends: false,
+              effects: [
+                {
+                  type: "TakeGoodStuff",
+                  who: "Gray",
+                  count: 2,
+                },
+                {
+                  type: "TakeGoodStuff",
+                  who: "Red",
+                  count: 1,
+                },
+              ],
             },
           ],
         },

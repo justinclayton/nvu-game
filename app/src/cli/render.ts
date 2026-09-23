@@ -1,6 +1,7 @@
 /* The table as text. No rule is computed here: every number is a domain query. */
 
 import {
+  allThresholds,
   costOf,
   extraScrambleRequirement,
   metThresholds,
@@ -48,7 +49,7 @@ export function printedFaceLine(card: CardFace): string {
 function roomLines(state: GameState, room: Room): string[] {
   const met = new Set(metThresholds(state));
   const lines = [`Room: ${room.name} (${room.kind})`];
-  for (const t of room.thresholds) {
+  for (const t of allThresholds(room)) {
     const target = thresholdTarget(state, t);
     const mark = met.has(t) ? "✔" : " ";
     const raised = target !== t.value ? ` (printed ${String(t.value)})` : "";

@@ -35,12 +35,10 @@ export const RED: Registry = {
     whileHeld: { ignoresExhaustX: true },
   },
 
-  /* "If Gray played a card this turn, this costs 0."
-   *
-   * A printed cost, not a discount. */
+  /* "If Gray played a card this turn, play this card for free." */
   "Fast Follow": {
-    cost(state, _owner, card) {
-      return playedBy(state, "Gray") > 0 ? 0 : card.cost;
+    freeIf(state) {
+      return playedBy(state, "Gray") > 0;
     },
   },
 

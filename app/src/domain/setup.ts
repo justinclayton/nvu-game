@@ -221,6 +221,7 @@ export function createInitialState(
     },
     offer: null,
     pending: null,
+    unfinishedPlay: null,
     resolution: null,
     thisTurn: emptyTurnRecord(),
     outcome: null,

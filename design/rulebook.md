@@ -150,6 +150,7 @@ A `Stuff` card shows the same parts as a player card, with these differences:
 ### Keywords
 
 - `Holding:` a passive effect that applies while the card is in your hand. If the card is played or discarded, the effect no longer applies.
+- `for free`: Play the card without paying, whatever cost modifiers you hold.
 - `Discard X cards from your hand`: Choose **X** cards from your hand and move them to your discard pile.
 - `Exhaust X cards from your deck`: Move the top **X** cards of your deck to your Exhaust pile. If your deck is empty, see `Empty deck`.
 - `Exhaust X`: the same as `Exhaust X cards from your deck`.

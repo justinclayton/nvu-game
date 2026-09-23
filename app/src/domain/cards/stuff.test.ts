@@ -361,7 +361,7 @@ describe("Riot Shield — 'If the room is Cleared, return this to your hand at t
   });
 });
 
-describe("Overcharged Battery — 'The next card played this turn costs 0'", () => {
+describe("Overcharged Battery — 'The next card played this turn is played for free'", () => {
   it("makes the next card free, and only the next one", () => {
     const state = playing({
       Red: player({

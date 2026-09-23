@@ -124,7 +124,7 @@ export const STUFF: Registry = {
     },
   },
 
-  /* "The next card played this turn costs 0."
+  /* "The next card played this turn is played for free."
    *
    * The next card either character plays, and gone when the Play phase ends. */
   "Overcharged Battery": {

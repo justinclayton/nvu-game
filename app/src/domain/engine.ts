@@ -6,9 +6,7 @@
  * in the state, so a run replays exactly from its seed and its command log.
  *
  * Section numbers point at design/rulebook.md, rules version
- * 0.2.0, which is the authority. Where a rule allowed more than one
- * reading, the reading is marked here and written up in
- * design/web-game/open-questions.md.
+ * 0.2.0, which is the authority.
  */
 
 import { behaviourOf, type BehaviourContext, type ChoiceAnswer } from "./cards/behaviours";
@@ -554,7 +552,7 @@ interface RoomOutcome {
  * the same way whatever the room's printed type. If any challenge's threshold
  * is met the room is Cleared, and the card text of *every* challenge met
  * resolves — a Hazard's higher tier also reveals a reward, on top of the
- * lower tier rather than instead of it. See open-questions.md #1.
+ * lower tier rather than instead of it.
  */
 function roomOutcome(state: GameState, room: Room): RoomOutcome {
   const met = room.thresholds.filter((t) => thresholdIsMet(state, t));
@@ -589,8 +587,7 @@ function endPlay(state: GameState, run: Run): GameState {
     run.events.push({ type: "ROOM_CLEARED", room });
     s = { ...s, cleared: [...s.cleared, room] };
   } else {
-    // A Fled room comes back around when the Fled pile shuffles in. See
-    // open-questions.md #21.
+    // A Fled room comes back around when the Fled pile shuffles in.
     run.events.push({ type: "ROOM_FLED", room });
     s = { ...s, fled: [...s.fled, room] };
   }
@@ -686,7 +683,7 @@ function drain(state: GameState, run: Run): GameState {
 
     if (head.type === "RevealReward") {
       // Turn the top card of that character's reward pool face up, and take
-      // it or skip it. See open-questions.md #7.
+      // it or skip it.
       const card = s.pools[head.who][0];
       s = withEffects(s, rest);
       if (!card) continue;
@@ -725,7 +722,7 @@ function finishTurn(state: GameState, run: Run): GameState {
     s = { ...s, pending: null };
 
     // The Play phase is over, so a free play nobody used is gone: it discounts a
-    // card played this turn or nothing at all. See open-questions.md #14.
+    // card played this turn or nothing at all.
     s = clearFreePlays(s);
 
     run.events.push({ type: "CLEANUP_BEGAN" });
@@ -765,8 +762,7 @@ function finishCleanup(state: GameState, run: Run): GameState {
   const ascends = resolution?.ascends ?? false;
   let s = cleanupPiles(state, run);
 
-  // If the floor draw pile is empty, shuffle the Fled pile back in. See
-  // open-questions.md #21.
+  // If the floor draw pile is empty, shuffle the Fled pile back in.
   if (s.floorDeck.length === 0 && s.fled.length > 0) {
     const [deck, seed] = shuffle(s.fled, s.seed);
     run.events.push({ type: "FLED_RESHUFFLED", rooms: deck.length });
@@ -903,8 +899,7 @@ function answerReward(state: GameState, take: boolean, run: Run): GameState {
     s = topDeck(s, character, card);
     run.events.push({ type: "REWARD_TAKEN", character, card });
   } else {
-    // Bottom of its pool, as a declined ascension reward does. Ruled;
-    // see open-questions.md #8.
+    // Bottom of its pool, as a declined ascension reward does.
     s = setPool(s, character, [...rest, card]);
     run.events.push({ type: "REWARD_DECLINED", character });
   }

@@ -51,8 +51,7 @@ describe("Crowbar — 'Play: if you get any Good Stuff this turn, get an additio
   });
 
   it("takes an extra piece when played after this character already got Good Stuff this turn", () => {
-    // The room's own payout normally lands after Play ends (open-questions.md
-    // #16), so this rigs the look-back condition directly rather than reaching
+    // The room's own payout normally lands after Play ends, so this rigs the look-back condition directly rather than reaching
     // it through a room: Red has already been handed one piece this turn.
     const rigged = playing({
       Red: player({ deck: pile("Shove", 4), hand: [card("Crowbar")] }),
@@ -65,7 +64,7 @@ describe("Crowbar — 'Play: if you get any Good Stuff this turn, get an additio
   });
 
   it("takes the extra piece from the room's own payout at Outcome, when it saw no earlier gain", () => {
-    // The primary case (open-questions.md #16, ruled 2026-09-17): Crowbar
+    // The primary case: Crowbar
     // played earlier in Play, with nothing yet to look back at, still catches
     // the room's own payout once Outcome hands it over — rigged through a
     // real Sorting Room clear, not by setting turn-record fields by hand.
@@ -90,7 +89,7 @@ describe("Crowbar — 'Play: if you get any Good Stuff this turn, get an additio
   });
 
   it("does not fire again at Outcome once it already fired on an earlier gain", () => {
-    // Once-per-copy (open-questions.md #16, the agent's reading): whichever
+    // Once-per-copy: whichever
     // hook pays first uses up this copy's only bonus for the turn.
     const rigged = playing({
       activeRoom: room("Sorting Room"),

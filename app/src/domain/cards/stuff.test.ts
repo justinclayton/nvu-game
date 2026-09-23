@@ -524,6 +524,7 @@ describe("Spore Cloud — 'Holding: At Cleanup, discard cards other than this on
     const asked = must(state, { type: "END_PLAY" });
     const pending = asked.state.pending;
     if (pending?.kind !== "ChooseCards") throw new Error("expected a card choice");
+    expect(asked.state.phase).toBe("Cleanup");
     expect(pending.character).toBe("Red");
     expect(pending.count).toBe(1);
     // Spore Cloud still counts toward the 3, but is not an option to discard.

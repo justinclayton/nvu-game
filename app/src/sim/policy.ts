@@ -470,6 +470,9 @@ export const greedyPolicy: Policy = {
         return [choosePlay(state, legal), rng];
       case "Ascend":
         return [chooseAscend(state, legal), rng];
+      case "Outcome":
+      case "Cleanup":
+        throw new Error(`greedy: asked to choose during automatic ${state.phase} with nothing pending`);
       case "GameOver":
         throw new Error("greedy: asked to choose after GameOver");
     }

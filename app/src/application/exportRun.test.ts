@@ -55,6 +55,9 @@ function nextCommand(state: GameState): Command {
     }
     case "Ascend":
       return { type: "ASCEND", Red: ascendChoice(state, "Red"), Gray: ascendChoice(state, "Gray") };
+    case "Outcome":
+    case "Cleanup":
+      throw new Error(`${state.phase} is automatic and should never rest without a pending choice`);
     case "GameOver":
       throw new Error("the run is over");
   }

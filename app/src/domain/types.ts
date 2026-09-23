@@ -198,6 +198,16 @@ export interface Resolution {
   readonly ascends: boolean;
 }
 
+/**
+ * A played card whose effect is waiting on `pending`. Once the effect
+ * finishes, the cards in `listeners` that are still where they were hear
+ * `events`: paying for the card and playing it.
+ */
+export interface UnfinishedPlay {
+  readonly events: readonly DomainEvent[];
+  readonly listeners: readonly CardId[];
+}
+
 /* --------------------------------------------------------- the aggregate */
 
 export interface GameState {
@@ -225,6 +235,7 @@ export interface GameState {
   readonly offer: RewardOffer | null;
 
   readonly pending: Pending | null;
+  readonly unfinishedPlay: UnfinishedPlay | null;
   readonly resolution: Resolution | null;
   readonly thisTurn: TurnRecord;
   readonly outcome: Outcome | null;

@@ -1,6 +1,7 @@
 # Spec: the North vs Up CLI
 
 Status: ruled on by the designer, 2026-09-21, and revised the same day after playtest 3 (issue #81).
+Rules version: 0.2.0.
 Each decision below is tagged: `[you]` is the designer's, `[agent, accepted]` is one the agent
 proposed and the designer took. The first draft of this tool was built without a plan and rebuilt to
 this spec in PR #68; the earlier version is in git history on the closed PR #67.

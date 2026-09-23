@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { CARD_CONTENT } from "@content/index";
-import { card, player, resetRig, rig, room } from "@domain/__fixtures__/rig";
+import { card, pile, player, resetRig, rig, room } from "@domain/__fixtures__/rig";
 import type { Command, GameState, Room } from "@domain/types";
 import { ascendChoices, legalCommands } from "./moves";
 import { greedyAscendStats, greedyPolicy, randomPolicy, resetGreedyAscendStats } from "./policy";
@@ -121,7 +121,31 @@ describe("greedy", () => {
     expect(chosen).toEqual({ type: "TAKE_REWARD", take: true });
   });
 
-  it("keeps Good Stuff it can pay for, and sheds Bad Stuff it can, at Ascend", () => {
+  it("keeps Good Stuff it can pay for, and sheds Bad Stuff it can, at Ascend, once the deck can afford it", () => {
+    resetRig();
+    const goodStuff = card("Crowbar");
+    const badStuff = card("Rust");
+    const payerA = card("Shove");
+    const payerB = card("Shove");
+    const filler = pile("Shove", 6); // enough live cards that both Scraps stay above the floor
+    const reward = card("Fast Follow");
+    const state: GameState = rig({
+      phase: "Ascend",
+      Red: player({ deck: [goodStuff, badStuff, payerA, payerB, ...filler] }),
+      Gray: player(),
+      offer: { Red: [reward], Gray: [] },
+    });
+    const legal = legalCommands(state);
+    const [chosen] = greedyPolicy.choose(state, legal, policySeed(1));
+    if (chosen.type !== "ASCEND") throw new Error("expected an ASCEND command");
+    const settledIds = chosen.Red.settle.map((s) => s.cardId).sort();
+    expect(settledIds).toEqual([badStuff.id, goodStuff.id].sort());
+    expect(chosen.Red.settle.every((s) => s.payWith !== null)).toBe(true);
+    expect(chosen.Red.takeRewardId).toBe(reward.id);
+    expect(chosen.Gray).toEqual({ settle: [], takeRewardId: null });
+  });
+
+  it("does not pay at Settle your Stuff once the deck is too small to afford it", () => {
     resetRig();
     const goodStuff = card("Crowbar");
     const badStuff = card("Rust");
@@ -130,6 +154,7 @@ describe("greedy", () => {
     const reward = card("Fast Follow");
     const state: GameState = rig({
       phase: "Ascend",
+      // Only 4 live cards — well under the floor, so no Scrap is worth it.
       Red: player({ deck: [goodStuff, badStuff, payerA, payerB] }),
       Gray: player(),
       offer: { Red: [reward], Gray: [] },
@@ -138,15 +163,43 @@ describe("greedy", () => {
     const [chosen] = greedyPolicy.choose(state, legal, policySeed(1));
     expect(chosen).toEqual({
       type: "ASCEND",
-      Red: {
-        settle: [
-          { cardId: goodStuff.id, payWith: payerA.id },
-          { cardId: badStuff.id, payWith: payerB.id },
-        ],
-        takeRewardId: reward.id,
-      },
+      Red: { settle: [], takeRewardId: reward.id },
       Gray: { settle: [], takeRewardId: null },
     });
+  });
+
+  it("does not pay a payer costlier than the Stuff it would settle", () => {
+    resetRig();
+    const badStuff = card("Torn Seal"); // no Holding: line — dead weight only, worth 1
+    const expensivePayer = card("Charge In"); // cost 2 — not worth spending on a 1-value card
+    const filler = pile("Shove", 8); // keep the deck comfortably above the floor
+    const state: GameState = rig({
+      phase: "Ascend",
+      Red: player({ deck: [badStuff, expensivePayer, ...filler] }),
+      Gray: player(),
+      offer: { Red: [], Gray: [] },
+    });
+    const legal = legalCommands(state);
+    const [chosen] = greedyPolicy.choose(state, legal, policySeed(1));
+    if (chosen.type !== "ASCEND") throw new Error("expected an ASCEND command");
+    expect(chosen.Red.settle).toEqual([]);
+  });
+
+  it("picks the reward that fits the character's weaker stat over the first one offered", () => {
+    resetRig();
+    const deck = pile("Shove", 6); // all Oomph — Red is weak on Scramble
+    const oomphReward = card("Fast Follow"); // Oomph 3
+    const scrambleReward = card("Deadweight Grip"); // Scramble 2
+    const state: GameState = rig({
+      phase: "Ascend",
+      Red: player({ deck }),
+      Gray: player(),
+      offer: { Red: [oomphReward, scrambleReward], Gray: [] },
+    });
+    const legal = legalCommands(state);
+    const [chosen] = greedyPolicy.choose(state, legal, policySeed(1));
+    if (chosen.type !== "ASCEND") throw new Error("expected an ASCEND command");
+    expect(chosen.Red.takeRewardId).toBe(scrambleReward.id);
   });
 
   it("gets both characters their reward even when the generator's Ascend cross-product is capped", () => {

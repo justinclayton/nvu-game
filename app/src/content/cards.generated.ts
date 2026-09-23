@@ -506,7 +506,7 @@ export const CARD_CONTENT = {
       oomph: 2,
       scramble: 0,
       conditionalStat: false,
-      text: "The next card played this turn costs 0.",
+      text: "The next card played this turn is played for free.",
     },
     {
       name: "Faceful Of Slime",

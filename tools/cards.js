@@ -47,7 +47,7 @@ var NVU_CARDS = {
     {"name":"Cutting Torch","set":"proposed","kind":"good_stuff","rarity":"Cool","cost":2,"oomph":5},
     {"name":"Grav Harness","set":"proposed","kind":"good_stuff","rarity":"Woah","cost":2,"oomph":3,"scramble":3,"text":"One of you draws 1 card."},
     {"name":"Riot Shield","set":"proposed","kind":"good_stuff","rarity":"Cool","cost":1,"scramble":3,"text":"If the room is Cleared, return this to your hand at the end of the turn."},
-    {"name":"Overcharged Battery","set":"proposed","kind":"good_stuff","rarity":"Cool","cost":1,"oomph":2,"text":"The next card played this turn costs 0."},
+    {"name":"Overcharged Battery","set":"proposed","kind":"good_stuff","rarity":"Cool","cost":1,"oomph":2,"text":"The next card played this turn is played for free."},
     {"name":"Faceful Of Slime","set":"proposed","kind":"bad_stuff","cost":2,"text":"Holding: At Turn Start, draw 1 fewer card."},
     {"name":"Torn Seal","set":"proposed","kind":"bad_stuff","cost":2,"text":null},
     {"name":"Sluggish","set":"proposed","kind":"bad_stuff","cost":1,"text":"Holding: cards cost +1 to play."},

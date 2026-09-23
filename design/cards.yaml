@@ -351,7 +351,7 @@ cards:
     rarity: Cool
     cost: 1
     oomph: 2
-    text: The next card played this turn costs 0.
+    text: The next card played this turn is played for free.
 
   ## Bad Stuff
 

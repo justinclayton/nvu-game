@@ -206,6 +206,26 @@ describe("parseRequest", () => {
     expect(() => parseRequest(["fuzz", "--seeds", "0"])).toThrow(UsageError);
   });
 
+  it("reads a sim run, defaulting --from to 1, --policy to greedy, and --json to false", () => {
+    expect(parseRequest(["sim", "--seeds", "500"])).toEqual({
+      command: "sim",
+      seeds: 500,
+      from: 1,
+      policy: "greedy",
+      json: false,
+    });
+    expect(parseRequest(["sim", "--seeds", "5", "--from", "100", "--policy", "random", "--json"])).toEqual({
+      command: "sim",
+      seeds: 5,
+      from: 100,
+      policy: "random",
+      json: true,
+    });
+    expect(() => parseRequest(["sim"])).toThrow(UsageError);
+    expect(() => parseRequest(["sim", "--seeds", "0"])).toThrow(UsageError);
+    expect(() => parseRequest(["sim", "--seeds", "5", "--policy", "clever"])).toThrow(UsageError);
+  });
+
   it("asks for help with nothing, help, or an unknown command", () => {
     expect(parseRequest([])).toEqual({ command: "help" });
     expect(parseRequest(["--help"])).toEqual({ command: "help" });

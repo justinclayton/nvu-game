@@ -1,6 +1,6 @@
 # Playtest 1 — first playtest
 
-Recorded: 2026-09-06. Notes are the designer's, verbatim, tagged `[you]`. Nothing here is a ruling:
+Recorded: 2026-09-06. Rules version: 0.1.0. Notes are the designer's, verbatim, tagged `[you]`. Nothing here is a ruling:
 each note is a question or an observation, with a pointer to the rule or card it touches so a
 later ticket has one place to start. The rulebook (`design/rulebook.md`) still says what is true.
 

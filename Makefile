@@ -34,6 +34,7 @@ tools/cards.js: design/cards.yaml tools/cards.mjs
 # on a fresh clone the generator's own check still stands on its own.
 check: build
 	node tools/cards.mjs check
+	node tools/check-rules-version.mjs
 	@if [ -d app/node_modules ]; then \
 		cd app && npx vitest run src/content; \
 	else \

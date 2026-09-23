@@ -1,6 +1,6 @@
 # Playtest 3 — first agent run through the CLI
 
-Recorded: 2026-09-21. Played by an agent standing in for a human playtester, in the CLI
+Recorded: 2026-09-21. Rules version: 0.1.0. Played by an agent standing in for a human playtester, in the CLI
 (`bin/nvu`), seed 3, one shell call per move. The run reached floor 8 of 10 and was stopped at the
 turn-25 limit with both characters alive. Neither character ever entered Last Stand.
 

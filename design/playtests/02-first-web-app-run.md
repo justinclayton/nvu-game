@@ -1,6 +1,6 @@
 # Playtest 2 — first web app run
 
-Recorded: 2026-09-17. Played in the web app (`app/`), floor 1, one session, ended in a loss.
+Recorded: 2026-09-17. Rules version: 0.1.0. Played in the web app (`app/`), floor 1, one session, ended in a loss.
 
 Notes are the designer's, verbatim, tagged `[you]`. Where a note was checked against the engine the
 finding follows it, tagged `[agent]`. Rulings the designer made on reading those findings are tagged

@@ -1,6 +1,6 @@
 # Playtest 4 — first agent run on rules 0.2
 
-Recorded 2026-09-22. Rules version 0.2.0 (draft), as in `design/rulebook.md`. Played by an
+Recorded 2026-09-22. Rules version: 0.2.0. Played by an
 agent standing in for a human playtester, in the CLI (`bin/nvu`), seed 4, one shell call per move.
 The run reached floor 5 of 10 and was stopped at the turn-25 limit with both characters alive and
 nowhere near a loss.

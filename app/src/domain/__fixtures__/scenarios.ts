@@ -85,6 +85,28 @@ function choosingCards(): GameState {
   return asked;
 }
 
+/** Fast Follow priced free despite Sluggish's +1, once Gray has played a card. */
+function fastFollowFree(): GameState {
+  const state = rig({
+    phase: "Play",
+    activeRoom: room(CLEARED_ROOM),
+    Red: player({
+      deck: pile("Shove", 4),
+      hand: [card("Fast Follow"), card("Sluggish"), ...pile("Shove", 3)],
+    }),
+    Gray: player({ deck: pile("Duck Under", 4), hand: [card("Coil Of Cable")] }),
+  });
+  const grayCard = state.Gray.hand[0];
+  if (!grayCard) throw new Error("rig");
+  const { state: next } = must(state, {
+    type: "PLAY_CARD",
+    character: "Gray",
+    cardId: grayCard.id,
+    payWith: [],
+  });
+  return next;
+}
+
 /** The run lost: Red went Down, which ended it on the spot (rulebook, Going Down). */
 function gameOver(): GameState {
   return rig({
@@ -191,6 +213,11 @@ export const FIXTURES: readonly Fixture[] = [
     name: "choose-cards",
     description: "Level Up pending a ChooseCards answer.",
     build: stable(choosingCards),
+  },
+  {
+    name: "fast-follow-free",
+    description: "Fast Follow priced free despite Sluggish's +1, once Gray has played.",
+    build: stable(fastFollowFree),
   },
   {
     name: "game-over",

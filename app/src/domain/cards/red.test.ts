@@ -67,7 +67,7 @@ describe("Reckless — 'Exhaust 3'", () => {
   });
 });
 
-describe("Fast Follow — 'If Gray played a card this turn, this costs 0'", () => {
+describe("Fast Follow — 'If Gray played a card this turn, play this card for free'", () => {
   it("costs its printed 1 while Gray has played nothing", () => {
     const state = playing({ Red: player({ deck: pile("Shove", 4), hand: [card("Fast Follow")] }) });
     const fastFollow = state.Red.hand[0];
@@ -84,6 +84,26 @@ describe("Fast Follow — 'If Gray played a card this turn, this costs 0'", () =
     const fastFollow = played.state.Red.hand[0];
     if (!fastFollow) throw new Error("rig");
     expect(costOf(played.state, "Red", fastFollow)).toBe(0);
+  });
+
+  it("is free even while Sluggish is held, once Gray has played", () => {
+    const state = playing({
+      Red: player({ deck: pile("Shove", 4), hand: [card("Fast Follow"), card("Sluggish")] }),
+      Gray: player({ deck: pile("Duck Under", 4), hand: [card("Coil Of Cable")] }),
+    });
+    const played = play(state, [free("Gray", ids(state, "Gray")[0] as CardId)]);
+    const fastFollow = played.state.Red.hand.find((c) => c.name === "Fast Follow");
+    if (!fastFollow) throw new Error("rig");
+    expect(costOf(played.state, "Red", fastFollow)).toBe(0);
+  });
+
+  it("pays its printed cost plus Sluggish's +1 while Gray has played nothing", () => {
+    const state = playing({
+      Red: player({ deck: pile("Shove", 4), hand: [card("Fast Follow"), card("Sluggish")] }),
+    });
+    const fastFollow = state.Red.hand.find((c) => c.name === "Fast Follow");
+    if (!fastFollow) throw new Error("rig");
+    expect(costOf(state, "Red", fastFollow)).toBe(2);
   });
 });
 

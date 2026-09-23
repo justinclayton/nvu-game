@@ -20,7 +20,7 @@ var NVU_CARDS = {
     {"name":"Pick The Lock","set":"official","kind":"player","owner":"Gray","starter":true,"cost":2,"scramble":4,"count":5},
     {"name":"Peek Around Corner","set":"official","kind":"player","owner":"Gray","starter":true,"cost":1,"scramble":1,"text":"Look at the top card of any deck, then put it back on top. (Peek 1?)","count":2},
     {"name":"Reckless Swing","set":"proposed","kind":"player","owner":"Red","rarity":"Fine","cost":1,"oomph":4,"text":"Exhaust 1."},
-    {"name":"Fast Follow","set":"proposed","kind":"player","owner":"Red","rarity":"Fine","cost":1,"oomph":3,"text":"If Gray played a card this turn, this costs 0."},
+    {"name":"Fast Follow","set":"proposed","kind":"player","owner":"Red","rarity":"Fine","cost":1,"oomph":3,"text":"If Gray played a card this turn, play this card for free."},
     {"name":"Reckless","set":"proposed","kind":"player","owner":"Red","rarity":"Fine","cost":1,"oomph":5,"text":"Exhaust 3."},
     {"name":"Second Wind","set":"proposed","kind":"player","owner":"Red","rarity":"Cool","cost":2,"oomph":4,"text":"Shuffle a Red card from your Exhaust pile into your deck."},
     {"name":"Junk Launcher","set":"proposed","kind":"player","owner":"Red","rarity":"Cool","cost":2,"oomph":2,"text":"This has Oomph +2 for each card you paid with this turn."},

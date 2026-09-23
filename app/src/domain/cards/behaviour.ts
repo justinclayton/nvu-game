@@ -52,6 +52,11 @@ export interface CardBehaviour {
   stats?(state: GameState, owner: Character, card: Card): { oomph: number; scramble: number };
   /** A printed cost that is not the number in the corner. */
   cost?(state: GameState, owner: Character, card: Card): number;
+  /**
+   * "Play this card for free": paying is skipped entirely, overriding any
+   * `Holding:` cost modifier rather than being one itself.
+   */
+  freeIf?(state: GameState, owner: Character, card: Card): boolean;
   /** A one-shot effect, resolved as the card enters the play zone. */
   onPlay?(state: GameState, ctx: BehaviourContext): StepResult;
   /** A `Holding:` line, in force while the card is in hand. */

@@ -128,7 +128,7 @@ export const CARD_CONTENT = {
       oomph: 3,
       scramble: 0,
       conditionalStat: false,
-      text: "If Gray played a card this turn, this costs 0.",
+      text: "If Gray played a card this turn, play this card for free.",
     },
     {
       name: "Reckless",

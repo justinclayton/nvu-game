@@ -125,16 +125,19 @@ contributes nothing.
 
 ---
 
-## 11. A printed "this costs 0" is set first, then modifiers apply
+## 11. Does a `Holding:` cost modifier apply on top of a printed "this costs 0"?
 
-**Where:** `costOf`.
+`[you, 2026-09-23]`
 
-Fast Follow reads *"If Gray played a card this turn, this costs 0"*, and Sluggish reads
-*"Holding: cards cost +1 to play."* Holding both, Fast Follow costs either 0 or 1.
+**Where:** `costOf`, `costOverrideFor`.
 
-**What the code does.** The printed cost is what the card says it is, and a `Holding:` line adjusts
-it afterwards — so Fast Follow costs 1 while Sluggish is in hand. The alternative reading, that a
-printed 0 cannot be raised, would make "costs 0" a stronger keyword than anything else on a card.
+Fast Follow read *"If Gray played a card this turn, this costs 0"*, and Sluggish reads *"Holding:
+cards cost +1 to play."* Holding both, Fast Follow cost either 0 or 1.
+
+**What the code does.** Fast Follow's text now reads *"If Gray played a card this turn, play this
+card for free"* (see the `for free` keyword). Playing it for free skips the paying step entirely,
+so it overrides any `Holding:` modifier instead of stacking with one — modeled as a cost override,
+the same mechanism Overcharged Battery uses, rather than as a printed cost of 0.
 
 ---
 

@@ -107,7 +107,7 @@ export function checkCardComments() {
   return problems;
 }
 
-if (import.meta.url === `file://${process.argv[1]}`) {
+if (fileURLToPath(import.meta.url) === process.argv[1]) {
   const problems = checkCardComments();
   if (problems.length) {
     console.error(`card comment quotes have drifted — ${problems.length} problem(s):\n`);

@@ -590,7 +590,7 @@ export const CARD_CONTENT = {
       oomph: 0,
       scramble: 0,
       conditionalStat: false,
-      text: "Holding: ALL rooms require an additional 2 `Scramble` to clear. Play: Exhaust 2.",
+      text: "Holding: Every challenge also requires 2 `Scramble` to clear. A `Scramble` challenge requires 2 more instead. Play: Exhaust 2.",
     },
     {
       name: "My Head Is Quantum Spinning",

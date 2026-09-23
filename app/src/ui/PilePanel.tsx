@@ -12,7 +12,6 @@ import { pileOf, type ZoneId } from "./placements";
 
 const PILE_LABEL: Partial<Record<ZoneId, string>> = {
   floor: "Floor deck",
-  fled: "Fled",
   cleared: "Cleared",
   "red-deck": "Red deck",
   "gray-deck": "Gray deck",

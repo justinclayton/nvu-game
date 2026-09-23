@@ -51,7 +51,7 @@ export function describeEvent(event: DomainEvent): string {
     case "ROOM_FLED":
       return `You Flee ${event.room.name}.`;
     case "FLED_RESHUFFLED":
-      return `The Fled pile shuffles back in: ${String(event.rooms)} rooms.`;
+      return `${event.room.name} shuffles back into the Floor deck.`;
     case "WENT_DOWN":
       return `${event.character} is Down — ${event.cause}. The run is lost.`;
     case "REWARD_REVEALED":

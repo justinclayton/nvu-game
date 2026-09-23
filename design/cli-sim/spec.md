@@ -226,9 +226,14 @@ report as data, for comparing two versions of the card numbers.
 
 The greedy policy is fixed and simple: play whatever would meet a Clearing threshold the pool has
 not met yet, or otherwise the play worth the most Oomph and Scramble combined; pay for it with the
-cheapest cards in hand; always take a reward when one is offered; at Ascend, pay to keep every Good
-Stuff card it can and pay to shed every Bad Stuff card it can with whatever payers are left, then
-take a reward. Everywhere but Ascend it answers only from the move generator's own list
+cheapest cards in hand. At Ascend (issue #97): pay to keep the Good Stuff and shed the Bad Stuff
+most worth it, cheapest payer first, but only while the character's deck, hand and discard together
+stay at or above a floor (`MIN_LIVE_DECK` in `sim/policy.ts`) and the card is worth more than the
+payer it costs — a Good Stuff's worth is its printed stats plus a point for having text; a Bad
+Stuff's is 1 for the dead weight of holding it plus a point per kind of ongoing tax its `Holding:`
+line levies. It then takes whichever offered reward best fits the deck: the character's weaker
+stat, doubled, plus the reward's own total stats, ties broken toward the lower card id. Everywhere
+but Ascend it answers only from the move generator's own list
 (`sim/moves.ts`), never a command it invents. At Ascend it composes each character's whole choice
 independently — the same shape the CLI's per-question staging builds (`cli/ascend.ts`,
 `composeAscend`) — and validates the composed command against the engine, because the generator's

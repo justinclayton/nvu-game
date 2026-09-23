@@ -587,8 +587,6 @@ function endPlay(state: GameState, run: Run): GameState {
     run.events.push({ type: "ROOM_CLEARED", room });
     s = { ...s, cleared: [...s.cleared, room] };
   } else {
-    // A Fled room shuffles back into the Floor deck at Cleanup, the same
-    // turn (rulebook, Outcome).
     run.events.push({ type: "ROOM_FLED", room });
   }
 

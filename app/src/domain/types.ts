@@ -210,8 +210,7 @@ export interface GameState {
   readonly turn: number;
   readonly phase: Phase;
 
-  /** The floor deck's draw pile and the Cleared heap (rulebook, Setup). A Fled
-   * room shuffles straight back into `floorDeck` at Cleanup (rulebook, Outcome). */
+  /** The floor deck's draw pile and the Cleared heap (rulebook, Setup). */
   readonly floorDeck: readonly Room[];
   readonly activeRoom: Room | null;
   readonly cleared: readonly Room[];

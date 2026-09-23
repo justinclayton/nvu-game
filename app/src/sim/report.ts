@@ -26,6 +26,8 @@ export interface CharacterAscendStats {
   readonly ascends: number;
   readonly meanDeckSize: number;
   readonly meanExhaustSize: number;
+  /** deck + hand + discard right after the Ascend — the same total `policy.ts`'s `liveDeckSize` reads. */
+  readonly meanLiveSize: number;
 }
 
 export interface CardStat {
@@ -33,6 +35,23 @@ export interface CardStat {
   readonly played: number;
   readonly taken: number;
   readonly kept: number;
+}
+
+/**
+ * Where one character's cards went on one floor: Exhausted (`CARD_EXHAUSTED`),
+ * Scrapped (`CARD_SCRAPPED`, e.g. paying to settle Stuff), paid as a Play
+ * cost (`COST_PAID` — discarded, not lost) and Good Stuff returned to the
+ * pool at Settle your Stuff for going unpaid (rulebook, Ascending, step 2).
+ * Only the first two, plus a returned Good Stuff, shrink the live deck
+ * (`policy.ts`, `liveDeckSize`) — paying a cost does not.
+ */
+export interface FloorLossRow {
+  readonly floor: number;
+  readonly character: Character;
+  readonly exhausted: number;
+  readonly scrapped: number;
+  readonly paidAsCost: number;
+  readonly stuffReturned: number;
 }
 
 export interface BalanceReport {
@@ -46,6 +65,7 @@ export interface BalanceReport {
   readonly endReasons: readonly EndReasonCount[];
   readonly characters: Readonly<Record<Character, CharacterAscendStats>>;
   readonly cards: readonly CardStat[];
+  readonly floorLosses: readonly FloorLossRow[];
   /**
    * How many Ascends the greedy policy's composed `ASCEND` command was
    * refused, falling back to the move generator's own (capped) list — see
@@ -72,6 +92,15 @@ interface CardTally {
   kept: number;
 }
 
+interface LossTally {
+  exhausted: number;
+  scrapped: number;
+  paidAsCost: number;
+  stuffReturned: number;
+}
+
+const emptyLossTally = (): LossTally => ({ exhausted: 0, scrapped: 0, paidAsCost: 0, stuffReturned: 0 });
+
 class Accumulator {
   runs = 0;
   wins = 0;
@@ -80,7 +109,9 @@ class Accumulator {
   private readonly ascendCounts: Record<Character, number> = { Red: 0, Gray: 0 };
   private readonly deckSums: Record<Character, number> = { Red: 0, Gray: 0 };
   private readonly exhaustSums: Record<Character, number> = { Red: 0, Gray: 0 };
+  private readonly liveSums: Record<Character, number> = { Red: 0, Gray: 0 };
   private readonly cardTallies = new Map<string, CardTally>();
+  private readonly lossTallies = new Map<string, LossTally>();
 
   private tally(name: string): CardTally {
     let t = this.cardTallies.get(name);
@@ -91,10 +122,27 @@ class Accumulator {
     return t;
   }
 
+  private lossTally(floor: number, character: Character): LossTally {
+    const key = `${String(floor)}:${character}`;
+    let t = this.lossTallies.get(key);
+    if (!t) {
+      t = emptyLossTally();
+      this.lossTallies.set(key, t);
+    }
+    return t;
+  }
+
   onStep(before: GameState, command: Command, after: GameState, events: readonly DomainEvent[]): void {
     for (const event of events) {
       if (event.type === "CARD_PLAYED") this.tally(event.card.name).played += 1;
       if (event.type === "REWARD_TAKEN") this.tally(event.card.name).taken += 1;
+      if (event.type === "CARD_EXHAUSTED") this.lossTally(before.floor, event.character).exhausted += 1;
+      if (event.type === "CARD_SCRAPPED" && event.character !== null) {
+        this.lossTally(before.floor, event.character).scrapped += 1;
+      }
+      if (event.type === "COST_PAID") {
+        this.lossTally(before.floor, event.character).paidAsCost += event.cards.length;
+      }
     }
     if (command.type === "ASCEND") {
       for (const character of CHARACTERS) {
@@ -102,18 +150,27 @@ class Accumulator {
         const p = playerOf(after, character);
         this.deckSums[character] += p.deck.length;
         this.exhaustSums[character] += p.exhaust.length;
+        this.liveSums[character] += p.deck.length + p.hand.length + p.discard.length;
         this.recordKeeps(before, character, command[character]);
       }
     }
   }
 
-  /** Good Stuff kept iff paid for; Bad Stuff kept iff not (rulebook, section 10, step 2). */
+  /**
+   * Good Stuff kept iff paid for; Bad Stuff kept iff not (rulebook, section
+   * 10, step 2). An unpaid Good Stuff card shuffles back into the pool
+   * (`engine.ts`, `settleStuff`), which is a loss from that character's live
+   * deck even though no `DomainEvent` says so directly.
+   */
   private recordKeeps(before: GameState, character: Character, choice: AscendChoice): void {
     for (const card of settleableStuff(before, character)) {
       const settlement = choice.settle.find((s) => s.cardId === card.id);
       const paid = (settlement?.payWith ?? null) !== null;
       const kept = card.kind === "good_stuff" ? paid : !paid;
       if (kept) this.tally(card.name).kept += 1;
+      if (card.kind === "good_stuff" && !paid) {
+        this.lossTally(before.floor, character).stuffReturned += 1;
+      }
     }
   }
 
@@ -131,6 +188,7 @@ class Accumulator {
       ascends,
       meanDeckSize: ascends > 0 ? this.deckSums[character] / ascends : 0,
       meanExhaustSize: ascends > 0 ? this.exhaustSums[character] / ascends : 0,
+      meanLiveSize: ascends > 0 ? this.liveSums[character] / ascends : 0,
     };
   }
 
@@ -144,6 +202,12 @@ class Accumulator {
     const cards = [...this.cardTallies.entries()]
       .sort(([a], [b]) => a.localeCompare(b))
       .map(([name, t]) => ({ name, ...t }));
+    const floorLosses = [...this.lossTallies.entries()]
+      .map(([key, t]) => {
+        const [floorStr, character] = key.split(":") as [string, Character];
+        return { floor: Number(floorStr), character, ...t };
+      })
+      .sort((a, b) => a.floor - b.floor || a.character.localeCompare(b.character));
     return {
       policy,
       from,
@@ -155,6 +219,7 @@ class Accumulator {
       endReasons,
       characters: { Red: this.characterStats("Red"), Gray: this.characterStats("Gray") },
       cards,
+      floorLosses,
       ascendFallbacks,
     };
   }

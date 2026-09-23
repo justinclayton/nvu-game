@@ -221,22 +221,29 @@ the budget ran out; the engine refused a command the generator offered.
 
 `sim --seeds N` plays N seeds under `app/src/sim/policy.ts`'s `greedy` policy (the default) or
 `random`, from `--from` (default 1), and prints a balance report: win rate, the floor each run
-reached, why each run ended, each character's mean deck and Exhaust pile size right after each
-Ascend, and every card's play, take and keep counts across the sweep. `--json` prints the same
-report as data, for comparing two versions of the card numbers.
+reached, why each run ended, each character's mean deck, live-card and Exhaust-pile size right
+after each Ascend, every card's play, take and keep counts across the sweep, and — per floor, per
+character — where cards went: Exhausted, Scrapped, paid as a Play cost, and Good Stuff returned to
+the pool unpaid. `--json` prints the same report as data, for comparing two versions of the card
+numbers.
 
 The greedy policy is fixed and simple: play whatever would meet a Clearing threshold the pool has
-not met yet, or otherwise the play worth the most Oomph and Scramble combined; pay for it with the
-cheapest cards in hand. At Ascend (issue #97): pay to keep the Good Stuff and shed the Bad Stuff
-most worth it, cheapest payer first, but only while the character's deck, hand and discard together
-stay at or above a floor (`MIN_LIVE_DECK` in `sim/policy.ts`) and the card is worth more than the
-payer it costs — a Good Stuff's worth is its printed stats plus a point for having text; a Bad
-Stuff's is 1 for the dead weight of holding it plus a point per kind of ongoing tax its `Holding:`
-line levies. It then takes whichever offered reward best fits the deck: the character's weaker
-stat, doubled, plus the reward's own total stats, ties broken toward the lower card id. Everywhere
-but Ascend it answers only from the move generator's own list
-(`sim/moves.ts`), never a command it invents. At Ascend it composes each character's whole choice
-independently — the same shape the CLI's per-question staging builds (`cli/ascend.ts`,
+not met yet; among plays that tie on that, prefer the one costing the least printed `Exhaust X`,
+then the most Oomph and Scramble combined; pay for it with the cheapest cards in hand. It also
+checks, before playing anything, whether anything left in hand could Clear the room at all this
+turn — if not, it stops (`END_PLAY`) instead of spending cards, and any Exhaust, on a room that is
+getting Fled regardless (issue #102). A card asking an optional choice it has no opinion on (e.g.
+Level Up's "Scrap a card?") is declined rather than answered with the cheapest option. At Ascend
+(issue #97): pay to keep the Good Stuff and shed the Bad Stuff most worth it, cheapest payer first,
+but only while the character's deck, hand and discard together stay at or above a floor
+(`MIN_LIVE_DECK` in `sim/policy.ts`) and the card is worth more than the payer it costs — a Good
+Stuff's worth is its printed stats plus a point for having text; a Bad Stuff's is 1 for the dead
+weight of holding it plus a point per kind of ongoing tax its `Holding:` line levies. It then takes
+whichever offered reward best fits the deck: the character's weaker stat, doubled, plus the
+reward's own total stats, docked for twice any printed `Exhaust X` the reward itself carries, ties
+broken toward the lower card id. Everywhere but Ascend it answers only from the move generator's
+own list (`sim/moves.ts`), never a command it invents. At Ascend it composes each character's whole
+choice independently — the same shape the CLI's per-question staging builds (`cli/ascend.ts`,
 `composeAscend`) — and validates the composed command against the engine, because the generator's
 own list crosses both characters' choices and caps out at 256 combined options; past that cap every
 command it offers forces one character's choice to "none", which forfeited about half of every
@@ -245,6 +252,13 @@ how often the composed command had to fall back to the generator's own list inst
 in `--json`; zero across the 500-seed sweep this shipped with). It never draws on its own randomness,
 so a seed always plays the same game. It is not a playtester and does not read the rulebook; the
 agent playtest is still the check for fidelity and rulebook gaps.
+
+Its Exhaust losses are still overwhelmingly forced, not chosen: across a 500-seed sweep, well under
+2% of Exhausted cards come from a card the policy played, the rest from a room's own Flee
+punishment (e.g. "Both of you Exhaust 1"), which the policy cannot avoid by playing differently —
+only by Clearing the room instead of Fleeing it, a harder problem than avoiding self-harm. Mean
+live cards per character through floor 5 run from about 12 (floor 1) down to about 9-10 (floor 5),
+short of the roughly 11-14 an agent playtest (issue #98, playtest 4) held across the same floors.
 
 "Why runs ended" and "the turn limit" in the issue map onto the engine's own outcomes, not an
 invented one: `Victory` (floor 10 Cleared), `Defeat (Down)` (rulebook, Going Down — the engine has

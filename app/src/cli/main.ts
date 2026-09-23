@@ -606,13 +606,23 @@ function renderReport(report: BalanceReport): string {
   for (const c of CHARACTERS) {
     const s = report.characters[c];
     lines.push(
-      `  ${c}: ${String(s.ascends)} Ascend(s), deck ${s.meanDeckSize.toFixed(1)}, exhaust ${s.meanExhaustSize.toFixed(1)}`,
+      `  ${c}: ${String(s.ascends)} Ascend(s), deck ${s.meanDeckSize.toFixed(1)}, live ${s.meanLiveSize.toFixed(1)}, exhaust ${s.meanExhaustSize.toFixed(1)}`,
     );
   }
   lines.push("");
   lines.push("Per card — played / taken / kept:");
   for (const card of report.cards) {
     lines.push(`  ${card.name}: ${String(card.played)} / ${String(card.taken)} / ${String(card.kept)}`);
+  }
+  lines.push("");
+  lines.push("Where cards went, by floor — Exhausted / Scrapped / paid as cost / Stuff returned:");
+  for (const c of CHARACTERS) {
+    lines.push(`  ${c}:`);
+    for (const row of report.floorLosses.filter((r) => r.character === c)) {
+      lines.push(
+        `    Floor ${String(row.floor)}: ${String(row.exhausted)} / ${String(row.scrapped)} / ${String(row.paidAsCost)} / ${String(row.stuffReturned)}`,
+      );
+    }
   }
   if (report.ascendFallbacks !== null) {
     lines.push("");

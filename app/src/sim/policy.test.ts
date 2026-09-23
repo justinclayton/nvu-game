@@ -69,14 +69,84 @@ describe("greedy", () => {
     });
   });
 
+  it("prefers a play that clears the room without Exhausting over one that also clears but costs an Exhaust", () => {
+    resetRig();
+    const chargeIn = card("Charge In"); // cost 2, oomph 4, no Exhaust
+    const recklessSwing = card("Reckless Swing"); // cost 1, oomph 4, Exhaust 1 — clears just as well
+    const payerA = card("Shove");
+    const payerB = card("Shove");
+    const state: GameState = rig({
+      phase: "Play",
+      activeRoom: roomWith({ value: 4 }),
+      Red: player({ hand: [chargeIn, recklessSwing, payerA, payerB] }),
+    });
+    const legal: readonly Command[] = [
+      { type: "PLAY_CARD", character: "Red", cardId: chargeIn.id, payWith: [payerA.id, payerB.id] },
+      { type: "PLAY_CARD", character: "Red", cardId: recklessSwing.id, payWith: [payerA.id] },
+      { type: "END_PLAY" },
+    ];
+    const [chosen] = greedyPolicy.choose(state, legal, policySeed(1));
+    expect(chosen).toEqual({
+      type: "PLAY_CARD",
+      character: "Red",
+      cardId: chargeIn.id,
+      payWith: [payerA.id, payerB.id],
+    });
+  });
+
+  it("stops playing instead of pouring cards into a room nothing in hand can clear this turn", () => {
+    resetRig();
+    const shove = card("Shove"); // 2 Oomph — the room asks for far more than the whole hand could add up to
+    const payer = card("Shove");
+    const state: GameState = rig({
+      phase: "Play",
+      activeRoom: roomWith({ value: 1000 }),
+      Red: player({ hand: [shove, payer] }),
+    });
+    const legal: readonly Command[] = [
+      { type: "PLAY_CARD", character: "Red", cardId: shove.id, payWith: [payer.id] },
+      { type: "END_PLAY" },
+    ];
+    const [chosen] = greedyPolicy.choose(state, legal, policySeed(1));
+    expect(chosen).toEqual({ type: "END_PLAY" });
+  });
+
+  it("declines an optional ChooseCards prompt (e.g. Level Up's Scrap ask) instead of always taking the minimum", () => {
+    resetRig();
+    const toScrap = card("Shove");
+    const other = card("Overdrive");
+    const state: GameState = rig({
+      phase: "Play",
+      pending: {
+        kind: "ChooseCards",
+        prompt: "Scrap a card from your hand?",
+        character: "Red",
+        options: [toScrap, other],
+        count: 1,
+        optional: true,
+        source: null,
+      },
+    });
+    const legal: readonly Command[] = [
+      { type: "CHOOSE_CARDS", cardIds: [] },
+      { type: "CHOOSE_CARDS", cardIds: [toScrap.id] },
+      { type: "CHOOSE_CARDS", cardIds: [other.id] },
+    ];
+    const [chosen] = greedyPolicy.choose(state, legal, policySeed(1));
+    expect(chosen).toEqual({ type: "CHOOSE_CARDS", cardIds: [] });
+  });
+
   it("pays for a card with the cheapest hand cards available", () => {
     resetRig();
     const shove = card("Shove"); // cost 1
     const cheapPayer = card("Overdrive"); // cost 0
     const costlyPayer = card("Charge In"); // cost 2
     const state: GameState = rig({
+      // Reachable this turn (the hand's cards could add up to 8 Oomph
+      // between them) but not by this one Shove (2) alone, so the choice
+      // between paying with cheapPayer or costlyPayer is what's on test.
       phase: "Play",
-      activeRoom: roomWith({ value: 1000 }), // unreachable — no play clears it
+      activeRoom: roomWith({ value: 5 }),
       Red: player({ hand: [shove, cheapPayer, costlyPayer] }),
     });
     const legal: readonly Command[] = [
@@ -127,7 +197,7 @@ describe("greedy", () => {
     const badStuff = card("Rust");
     const payerA = card("Shove");
     const payerB = card("Shove");
-    const filler = pile("Shove", 6); // enough live cards that both Scraps stay above the floor
+    const filler = pile("Shove", 10); // enough live cards that both Scraps stay above the floor
     const reward = card("Fast Follow");
     const state: GameState = rig({
       phase: "Ascend",

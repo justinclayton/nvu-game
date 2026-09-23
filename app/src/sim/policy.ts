@@ -12,7 +12,9 @@ import { behaviourOf } from "@domain/cards/behaviours";
 import { validate } from "@domain/engine";
 import {
   contributionOf,
+  exhaustXPreventedBy,
   metThresholds,
+  playableCards,
   settleableStuff,
   settlePayOptions,
   statPool,
@@ -30,7 +32,7 @@ import type {
   Stat,
   StuffSettlement,
 } from "@domain/types";
-import { playerOf } from "@domain/verbs";
+import { CHARACTERS, playerOf } from "@domain/verbs";
 import { pick, type Rng } from "./rng";
 
 export interface Policy {
@@ -73,6 +75,54 @@ function roomIsCleared(state: GameState): boolean {
   return metThresholds(state).some((t) => t.clears);
 }
 
+/**
+ * The permanent loss this card's own printed text would cost right now: a
+ * bare `Exhaust X` line (Overdrive, Reckless Swing, Reckless, Panic), unless
+ * this character holds something that stops it (Zen Mode). Payment cost is
+ * not part of this — paying only discards, it does not lose a card for good.
+ */
+function exhaustCost(state: GameState, character: Character, card: Card): number {
+  const x = behaviourOf(card.name)?.exhaustX ?? 0;
+  if (x === 0) return 0;
+  return exhaustXPreventedBy(state, character) ? 0 : x;
+}
+
+/**
+ * The most either character's hand could add to the pool this turn, playing
+ * every playable card for free — a generous upper bound that ignores payment
+ * (a card spent paying could otherwise have been played for its own stats).
+ * Used only to tell "unreachable" apart from "not reached yet".
+ */
+function maxAdditionalGain(state: GameState): StatTotals {
+  let oomph = 0;
+  let scramble = 0;
+  for (const character of CHARACTERS) {
+    for (const card of playableCards(state, character)) {
+      const gain = contributionOf(state, { owner: character, card });
+      oomph += gain.oomph;
+      scramble += gain.scramble;
+    }
+  }
+  return { oomph, scramble };
+}
+
+/**
+ * Could anything still in hand clear the room this turn? If not, the room
+ * will be Fled regardless of what else gets played — the rulebook shuffles
+ * it back into the Floor deck either way (Outcome, Flee) — so there is
+ * nothing left to buy with a further Exhaust or a further card at all.
+ */
+function roomIsClearableThisTurn(state: GameState): boolean {
+  const room = state.activeRoom;
+  if (!room) return false;
+  const now = statPool(state);
+  const potential = maxAdditionalGain(state);
+  const reachable: StatTotals = { oomph: now.oomph + potential.oomph, scramble: now.scramble + potential.scramble };
+  return room.thresholds.some(
+    (t) => t.clears && !thresholdIsMet(state, t) && statValue(reachable, t.stat) >= thresholdTarget(state, t),
+  );
+}
+
 function findInHand(state: GameState, character: Character, id: CardId): Card | undefined {
   return playerOf(state, character).hand.find((c) => c.id === id);
 }
@@ -93,10 +143,14 @@ function choosePlay(state: GameState, legal: readonly Command[]): Command {
   if (!endPlay) throw new Error("greedy: Play phase offered no END_PLAY");
   if (plays.length === 0) return endPlay;
   if (roomIsCleared(state)) return endPlay; // Already cleared — stop spending stamina.
+  // Nothing left in hand could clear it either — the room is Fled regardless
+  // of what else gets played, so stop pouring cards (and Exhaust) into it.
+  if (!roomIsClearableThisTurn(state)) return endPlay;
 
   let bestCharacter: Character | null = null;
   let bestCardId: CardId | null = null;
   let bestClears = false;
+  let bestHarm = Number.POSITIVE_INFINITY;
   let bestTotal = -1;
   const seen = new Set<string>();
   for (const play of plays) {
@@ -106,20 +160,32 @@ function choosePlay(state: GameState, legal: readonly Command[]): Command {
     const card = findInHand(state, play.character, play.cardId);
     if (!card) continue;
     const clears = clearsARoom(state, play.character, card);
+    const harm = exhaustCost(state, play.character, card);
     const gain = contributionOf(state, { owner: play.character, card });
     const total = gain.oomph + gain.scramble;
+    // Prefer a play that Clears; among plays that both Clear, prefer the one
+    // that costs the least permanent loss — this is what makes a cheaper,
+    // harmless play beat Reckless or Panic whenever either would clear the
+    // room just as well. Short of Clearing, maximize progress first, same as
+    // before, and only fall back to harm as a tie-break — a harmless card
+    // that does nothing is not a substitute for one that helps.
     const better =
       bestCardId === null ||
       (clears && !bestClears) ||
-      (clears === bestClears && total > bestTotal) ||
+      (clears === bestClears && clears && harm < bestHarm) ||
+      (clears === bestClears && clears && harm === bestHarm && total > bestTotal) ||
+      (clears === bestClears && !clears && total > bestTotal) ||
+      (clears === bestClears && !clears && total === bestTotal && harm < bestHarm) ||
       (clears === bestClears &&
         total === bestTotal &&
+        harm === bestHarm &&
         (play.character < (bestCharacter ?? play.character) ||
           (play.character === bestCharacter && play.cardId < bestCardId)));
     if (better) {
       bestCharacter = play.character;
       bestCardId = play.cardId;
       bestClears = clears;
+      bestHarm = harm;
       bestTotal = total;
     }
   }
@@ -141,12 +207,16 @@ function choosePlay(state: GameState, legal: readonly Command[]): Command {
  * Below this many live cards (deck + hand + discard — the pool a Scrap
  * actually shrinks; the Exhaust pile is already gone for the run and the
  * Scrapyard doesn't come back), the bot stops paying at Settle your Stuff
- * altogether. 8 is a full hand (`HAND_CAP`) plus 3 spare: enough to survive a
- * turn's plays and an `Exhaust 2` hit without forcing a reshuffle, with a
- * little headroom left for the floors still ahead. [agent] — a designer with
- * playtest data may want to move this.
+ * altogether. [agent] — raised from 8 to 12 on the loss-accounting data in
+ * issue #102: most of a run's Exhaust comes from Fleeing rooms, not from
+ * cards the bot chooses to play, so it is not something a play-time choice
+ * can head off. Scrapping at Ascend was the one loss this policy controls
+ * outright, and at 8 it kept spending it down to a size well under playtest
+ * 4's observed 11-14 live cards. 12 leaves that same "full hand plus a few
+ * spare" headroom (`HAND_CAP` + 7) while banking more of the deck against
+ * the Exhaust a Flee is going to cost it anyway.
  */
-const MIN_LIVE_DECK = 8;
+const MIN_LIVE_DECK = 12;
 
 function liveDeckSize(state: GameState, character: Character): number {
   const p = playerOf(state, character);
@@ -189,9 +259,17 @@ function weakerStat(state: GameState, character: Character): Stat {
   return oomph <= scramble ? "Oomph" : "Scramble";
 }
 
-/** Favor the character's weaker stat, then raw power as a tie-break. */
+/** The Exhaust this card would tax the deck with every time it gets played, taking it in the abstract. */
+const printedExhaustCost = (card: Card): number => behaviourOf(card.name)?.exhaustX ?? 0;
+
+/**
+ * Favor the character's weaker stat, then raw power as a tie-break, docked
+ * for a printed `Exhaust X` — Reckless's 5 Oomph is not worth taking over a
+ * clean 4 if it also taxes the deck 3 cards every time it gets played.
+ */
 function rewardScore(card: Card, weak: Stat): number {
-  return statValue({ oomph: card.oomph, scramble: card.scramble }, weak) * 2 + card.oomph + card.scramble;
+  const raw = statValue({ oomph: card.oomph, scramble: card.scramble }, weak) * 2 + card.oomph + card.scramble;
+  return raw - 2 * printedExhaustCost(card);
 }
 
 function chooseReward(state: GameState, character: Character): CardId | null {
@@ -341,7 +419,11 @@ function choosePending(state: GameState, legal: readonly Command[]): Command {
   }
 
   if (pending.kind === "ChooseCards") {
-    const wanted = Math.min(pending.count, pending.options.length);
+    // Optional means no greedy opinion favors taking it over not — decline,
+    // same as the comment above always meant to (e.g. Level Up's "Scrap a
+    // card?" is a bad trade the moment the Rewards pool it draws from is
+    // empty, and this prompt carries nothing that says which case it is).
+    const wanted = pending.optional ? 0 : Math.min(pending.count, pending.options.length);
     const desired =
       wanted === 0
         ? []

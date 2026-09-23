@@ -1,7 +1,7 @@
 /* One test per entry in the Stuff registry, beside the behaviour. */
 
 import { beforeEach, describe, expect, it } from "vitest";
-import { costOf, statPool, thresholdTarget } from "../queries";
+import { costOf, extraScrambleRequirement, statPool, thresholdIsMet, thresholdTarget } from "../queries";
 import {
   card,
   eventTypes,
@@ -578,6 +578,75 @@ describe("Panic — 'ALL rooms require an additional 2 Scramble, and Play: Exhau
     if (!room1) throw new Error("rig");
     expect(room1.value).toBe(2);
     expect(thresholdTarget(state, room1)).toBe(4);
+  });
+
+  it("adds a Scramble 2 requirement to an Oomph-only line", () => {
+    const state = playing({
+      activeRoom: room("Gross Thing That Looks Like A Cherry"),
+      Gray: player({ deck: pile("Duck Under", 4), hand: [card("Panic")] }),
+    });
+    const line = state.activeRoom?.thresholds[0];
+    if (!line) throw new Error("rig");
+    expect(line.stat).toBe("Oomph");
+    expect(extraScrambleRequirement(state, line)).toBe(2);
+  });
+
+  it("does not add a second Scramble floor to a line that is already Scramble", () => {
+    const state = playing({
+      activeRoom: room("Collapsed Stairwell"),
+      Gray: player({ deck: pile("Duck Under", 4), hand: [card("Panic")] }),
+    });
+    const line = state.activeRoom?.thresholds[0];
+    if (!line) throw new Error("rig");
+    expect(line.stat).toBe("Scramble");
+    expect(extraScrambleRequirement(state, line)).toBe(0);
+    expect(thresholdTarget(state, line)).toBe(4);
+  });
+
+  it("stacks: two Panics push the Scramble floor to 4", () => {
+    const state = playing({
+      activeRoom: room("Gross Thing That Looks Like A Cherry"),
+      Red: player({ hand: [card("Panic")] }),
+      Gray: player({ deck: pile("Duck Under", 4), hand: [card("Panic")] }),
+    });
+    const line = state.activeRoom?.thresholds[0];
+    if (!line) throw new Error("rig");
+    expect(extraScrambleRequirement(state, line)).toBe(4);
+  });
+
+  it("blocks an Oomph line from clearing on Oomph alone while Panic is held", () => {
+    const state = playing({
+      activeRoom: room("Gross Thing That Looks Like A Cherry"),
+      Gray: player({ hand: [card("Panic")] }),
+      playZone: [
+        { owner: "Red", card: card("Charge In") },
+        { owner: "Red", card: card("Shove") },
+      ],
+    });
+    const line = state.activeRoom?.thresholds[0];
+    if (!line) throw new Error("rig");
+    expect(statPool(state).oomph).toBeGreaterThanOrEqual(line.value);
+    expect(thresholdIsMet(state, line)).toBe(false);
+
+    const withScramble = {
+      ...state,
+      playZone: [...state.playZone, { owner: "Gray" as const, card: card("Duck Under") }],
+    };
+    expect(thresholdIsMet(withScramble, line)).toBe(true);
+  });
+
+  it("leaves an Oomph line unaffected with no Panic held", () => {
+    const state = playing({
+      activeRoom: room("Gross Thing That Looks Like A Cherry"),
+      playZone: [
+        { owner: "Red", card: card("Charge In") },
+        { owner: "Red", card: card("Shove") },
+      ],
+    });
+    const line = state.activeRoom?.thresholds[0];
+    if (!line) throw new Error("rig");
+    expect(extraScrambleRequirement(state, line)).toBe(0);
+    expect(thresholdIsMet(state, line)).toBe(true);
   });
 
   it("Exhausts 2 when it is played", () => {

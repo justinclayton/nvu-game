@@ -138,13 +138,24 @@ export function thresholdTarget(state: GameState, threshold: Threshold): number 
   return threshold.value + extra;
 }
 
+/**
+ * Panic doesn't just raise Scramble lines — it makes every line need Scramble.
+ * An Oomph line picks up its own Scramble floor; a Scramble line already
+ * carries the same delta on its own target, so it needs no second floor.
+ */
+export function extraScrambleRequirement(state: GameState, threshold: Threshold): number {
+  return threshold.stat === "Scramble" ? 0 : thresholdScrambleDelta(state);
+}
+
 const statOf = (totals: StatTotals, stat: Stat): number =>
   stat === "Oomph" ? totals.oomph : totals.scramble;
 
 /** Is this line's threshold met? Every Challenge reads the shared pool. */
 export function thresholdIsMet(state: GameState, threshold: Threshold): boolean {
   const pool = statPool(state);
-  return statOf(pool, threshold.stat) >= thresholdTarget(state, threshold);
+  const meetsMain = statOf(pool, threshold.stat) >= thresholdTarget(state, threshold);
+  const meetsExtra = pool.scramble >= extraScrambleRequirement(state, threshold);
+  return meetsMain && meetsExtra;
 }
 
 /** Every line of the active room the pool currently meets. */

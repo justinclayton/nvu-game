@@ -6,6 +6,7 @@ import { execute } from "./engine";
 import {
   card,
   eventTypes,
+  handCard,
   must,
   pile,
   play,
@@ -86,7 +87,7 @@ describe("Ascending, Settle your Stuff", () => {
     const state = atAscension();
     const pryBar = state.Red.discard.find((c) => c.name === "Pry Bar");
     const payer = state.Red.discard.find((c) => c.name === "Charge In");
-    if (!pryBar || !payer) throw new Error("rig");
+    if (!pryBar || !payer) throw new Error("Red is not holding both Pry Bar and Charge In in discard");
     const { state: next, events } = must(state, {
       type: "ASCEND",
       Red: { settle: [{ cardId: pryBar.id, payWith: payer.id }], takeRewardId: null },
@@ -168,7 +169,7 @@ describe("Ascending, Settle your Stuff", () => {
   it("rejects paying with a card that is not another owned, non-Stuff card", () => {
     const state = atAscension();
     const pryBar = state.Red.discard.find((c) => c.name === "Pry Bar");
-    if (!pryBar) throw new Error("rig");
+    if (!pryBar) throw new Error("Red is not holding Pry Bar in discard");
     const rejected = execute(state, {
       type: "ASCEND",
       Red: { settle: [{ cardId: pryBar.id, payWith: pryBar.id }], takeRewardId: null },
@@ -221,7 +222,7 @@ describe("Ascending, the reward", () => {
     const state = atAscension();
     const offered = state.offer?.Red ?? [];
     const taken = offered[0];
-    if (!taken) throw new Error("rig");
+    if (!taken) throw new Error("Red has no reward offered");
     const { state: next, events } = must(state, {
       type: "ASCEND",
       Red: { settle: [], takeRewardId: taken.id },
@@ -269,12 +270,12 @@ describe("Winning and losing", () => {
       }),
       Gray: player({ deck: pile("Duck Under", 4) }),
     });
-    const hand = state.Red.hand.map((c) => c.id);
-    const [chargeIn, payA, payB, pryBar] = hand;
-    if (!chargeIn || !payA || !payB || !pryBar) throw new Error("rig");
+    const chargeIn = handCard(state, "Red", "Charge In");
+    const pryBar = handCard(state, "Red", "Pry Bar");
+    const payWith = state.Red.hand.filter((c) => c.name === "Shove").map((c) => c.id);
     const { state: next, events } = play(state, [
-      { type: "PLAY_CARD", character: "Red", cardId: chargeIn, payWith: [payA, payB] },
-      { type: "PLAY_CARD", character: "Red", cardId: pryBar, payWith: [] },
+      { type: "PLAY_CARD", character: "Red", cardId: chargeIn.id, payWith },
+      { type: "PLAY_CARD", character: "Red", cardId: pryBar.id, payWith: [] },
       { type: "END_PLAY" },
     ]);
     expect(next.phase).toBe("GameOver");

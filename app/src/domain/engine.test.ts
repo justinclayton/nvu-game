@@ -8,6 +8,9 @@ import { shuffle } from "./rng";
 import {
   card,
   eventTypes,
+  free,
+  handCard,
+  ids,
   must,
   pile,
   play,
@@ -16,19 +19,9 @@ import {
   rig,
   room,
 } from "./__fixtures__/rig";
-import type { CardId, Command, GameState, Room } from "./types";
+import type { Room } from "./types";
 
 beforeEach(resetRig);
-
-const ids = (state: GameState, c: "Red" | "Gray"): readonly CardId[] =>
-  state[c].hand.map((x) => x.id);
-
-const playFree = (c: "Red" | "Gray", cardId: CardId): Command => ({
-  type: "PLAY_CARD",
-  character: c,
-  cardId,
-  payWith: [],
-});
 
 describe("Turn Start", () => {
   it("step 1, Flip the room: turns the top card of the floor deck face up before anything is spent", () => {
@@ -104,8 +97,7 @@ describe("Play", () => {
 
   it("'to play a card, discard cards from your hand equal to its Cost'", () => {
     const state = playState();
-    const [charge, shove] = state.Red.hand;
-    if (!charge || !shove) throw new Error("rig");
+    const charge = handCard(state, "Red", "Charge In");
     const rejected = execute(state, {
       type: "PLAY_CARD",
       character: "Red",
@@ -120,8 +112,7 @@ describe("Play", () => {
     const state = playState({
       Red: player({ deck: pile("Shove", 5), hand: [card("Shove"), card("Shove")] }),
     });
-    const [first] = state.Red.hand;
-    if (!first) throw new Error("rig");
+    const first = handCard(state, "Red", "Shove");
     const rejected = execute(state, {
       type: "PLAY_CARD",
       character: "Red",
@@ -137,9 +128,8 @@ describe("Play", () => {
       Red: player({ deck: pile("Shove", 5), hand: [card("Charge In")] }),
       Gray: player({ deck: pile("Duck Under", 5), hand: [card("Duck Under"), card("Duck Under")] }),
     });
-    const red = state.Red.hand[0];
-    const gray = state.Gray.hand[0];
-    if (!red || !gray) throw new Error("rig");
+    const red = handCard(state, "Red", "Charge In");
+    const gray = handCard(state, "Gray", "Duck Under");
     const rejected = execute(state, {
       type: "PLAY_CARD",
       character: "Red",
@@ -156,11 +146,14 @@ describe("Play", () => {
       Red: player({ deck: pile("Shove", 3), hand: [card("Shove"), card("Shove")] }),
       Gray: player({ deck: pile("Duck Under", 3), hand: [card("Duck Under"), card("Duck Under")] }),
     });
-    const redHand = ids(state, "Red");
-    const grayHand = ids(state, "Gray");
+    const [redPlay, redPay] = state.Red.hand.filter((c) => c.name === "Shove");
+    const [grayPlay, grayPay] = state.Gray.hand.filter((c) => c.name === "Duck Under");
+    if (!redPlay || !redPay || !grayPlay || !grayPay) {
+      throw new Error("Red and Gray each need two of their own card");
+    }
     const { state: next } = play(state, [
-      { type: "PLAY_CARD", character: "Red", cardId: redHand[0] as CardId, payWith: [redHand[1] as CardId] },
-      { type: "PLAY_CARD", character: "Gray", cardId: grayHand[0] as CardId, payWith: [grayHand[1] as CardId] },
+      { type: "PLAY_CARD", character: "Red", cardId: redPlay.id, payWith: [redPay.id] },
+      { type: "PLAY_CARD", character: "Gray", cardId: grayPlay.id, payWith: [grayPay.id] },
     ]);
     // Shove is Oomph 2, Duck Under is Scramble 2.
     expect(statPool(next)).toEqual({ oomph: 2, scramble: 2 });
@@ -175,12 +168,13 @@ describe("Play", () => {
       Red: player({ deck: pile("Shove", 3), hand: [card("Shove"), card("Shove")] }),
       Gray: player({ deck: pile("Duck Under", 3) }),
     });
-    const hand = ids(state, "Red");
+    const [toPlay, toPay] = state.Red.hand.filter((c) => c.name === "Shove");
+    if (!toPlay || !toPay) throw new Error("Red is not holding two Shoves");
     const { state: mid } = must(state, {
       type: "PLAY_CARD",
       character: "Red",
-      cardId: hand[0] as CardId,
-      payWith: [hand[1] as CardId],
+      cardId: toPlay.id,
+      payWith: [toPay.id],
     });
     // Sorting Room pays at Oomph 2 and the pool is 2, but nothing has happened.
     expect(mid.activeRoom).not.toBeNull();
@@ -207,9 +201,13 @@ describe("Cleanup", () => {
       Red: player({ deck: pile("Shove", 3), hand: [card("Shove"), card("Charge In")] }),
       Gray: player({ deck: pile("Duck Under", 3) }),
     });
-    const hand = ids(state, "Red");
     const { state: next } = play(state, [
-      { type: "PLAY_CARD", character: "Red", cardId: hand[0] as CardId, payWith: [hand[1] as CardId] },
+      {
+        type: "PLAY_CARD",
+        character: "Red",
+        cardId: handCard(state, "Red", "Shove").id,
+        payWith: [handCard(state, "Red", "Charge In").id],
+      },
       { type: "END_PLAY" },
     ]);
     expect(next.playZone).toEqual([]);
@@ -270,10 +268,12 @@ describe("Room kinds: Room and Stairwell", () => {
       }),
       Gray: player({ deck: pile("Duck Under", 5) }),
     });
-    const h = ids(state, "Red");
+    const chargeIn = handCard(state, "Red", "Charge In");
+    const pryBar = handCard(state, "Red", "Pry Bar");
+    const shoves = state.Red.hand.filter((c) => c.name === "Shove").map((c) => c.id);
     const { state: next, events } = play(state, [
-      { type: "PLAY_CARD", character: "Red", cardId: h[0] as CardId, payWith: [h[1] as CardId, h[2] as CardId] },
-      playFree("Red", h[3] as CardId),
+      { type: "PLAY_CARD", character: "Red", cardId: chargeIn.id, payWith: shoves },
+      free("Red", pryBar.id),
       { type: "END_PLAY" },
     ]);
     expect(eventTypes(events)).toContain("ROOM_CLEARED");
@@ -294,10 +294,12 @@ describe("Room kinds: Room and Stairwell", () => {
         hand: [card("Pick The Lock"), card("Coil Of Cable"), card("Duck Under"), card("Duck Under")],
       }),
     });
-    const g = ids(state, "Gray");
+    const pickTheLock = handCard(state, "Gray", "Pick The Lock");
+    const coil = handCard(state, "Gray", "Coil Of Cable");
+    const duckUnders = state.Gray.hand.filter((c) => c.name === "Duck Under").map((c) => c.id);
     const { state: next, events } = play(state, [
-      { type: "PLAY_CARD", character: "Gray", cardId: g[0] as CardId, payWith: [g[2] as CardId, g[3] as CardId] },
-      playFree("Gray", g[1] as CardId),
+      { type: "PLAY_CARD", character: "Gray", cardId: pickTheLock.id, payWith: duckUnders },
+      free("Gray", coil.id),
       { type: "END_PLAY" },
     ]);
     expect(events.filter((e) => e.type === "THRESHOLD_MET")).toHaveLength(1);
@@ -321,10 +323,11 @@ describe("Room kinds: Room and Stairwell", () => {
       }),
     });
     const grayPool = state.pools.Gray;
-    const g = ids(state, "Gray");
+    const [firstCoil, secondCoil] = state.Gray.hand.filter((c) => c.name === "Coil Of Cable");
+    if (!firstCoil || !secondCoil) throw new Error("Gray is not holding two Coil Of Cables");
     const { state: afterPlay } = play(state, [
-      playFree("Gray", g[0] as CardId),
-      playFree("Gray", g[1] as CardId),
+      free("Gray", firstCoil.id),
+      free("Gray", secondCoil.id),
       { type: "END_PLAY" },
     ]);
     expect(afterPlay.pending?.kind).toBe("ChooseCharacter");
@@ -356,11 +359,14 @@ describe("Room kinds: Room and Stairwell", () => {
       Red: player({ deck: pile("Shove", 5), hand: [card("Reckless"), card("Shove")] }),
       Gray: player({ deck: pile("Duck Under", 5), hand: [card("Coil Of Cable")] }),
     });
-    const r = ids(state, "Red");
-    const g = ids(state, "Gray");
     const { state: next, events } = play(state, [
-      { type: "PLAY_CARD", character: "Red", cardId: r[0] as CardId, payWith: [r[1] as CardId] },
-      playFree("Gray", g[0] as CardId),
+      {
+        type: "PLAY_CARD",
+        character: "Red",
+        cardId: handCard(state, "Red", "Reckless").id,
+        payWith: [handCard(state, "Red", "Shove").id],
+      },
+      free("Gray", handCard(state, "Gray", "Coil Of Cable").id),
       { type: "END_PLAY" },
     ]);
     expect(events.filter((e) => e.type === "THRESHOLD_MET")).toHaveLength(1);
@@ -378,11 +384,13 @@ describe("Room kinds: Room and Stairwell", () => {
       Red: player({ deck: pile("Shove", 5), hand: [card("Charge In"), card("Shove"), card("Shove")] }),
       Gray: player({ deck: pile("Duck Under", 5), hand: [card("Duck Under"), card("Duck Under")] }),
     });
-    const r = ids(state, "Red");
-    const g = ids(state, "Gray");
+    const chargeIn = handCard(state, "Red", "Charge In");
+    const redShoves = state.Red.hand.filter((c) => c.name === "Shove").map((c) => c.id);
+    const [grayPlay, grayPay] = state.Gray.hand.filter((c) => c.name === "Duck Under");
+    if (!grayPlay || !grayPay) throw new Error("Gray is not holding two Duck Unders");
     const { state: next } = play(state, [
-      { type: "PLAY_CARD", character: "Red", cardId: r[0] as CardId, payWith: [r[1] as CardId, r[2] as CardId] },
-      { type: "PLAY_CARD", character: "Gray", cardId: g[0] as CardId, payWith: [g[1] as CardId] },
+      { type: "PLAY_CARD", character: "Red", cardId: chargeIn.id, payWith: redShoves },
+      { type: "PLAY_CARD", character: "Gray", cardId: grayPlay.id, payWith: [grayPay.id] },
       { type: "END_PLAY" },
     ]);
     expect(next.Red.hand.filter((c) => c.kind === "good_stuff")).toHaveLength(2);
@@ -396,11 +404,14 @@ describe("Room kinds: Room and Stairwell", () => {
       Red: player({ deck: pile("Shove", 5), hand: [card("Shove"), card("Shove")] }),
       Gray: player({ deck: pile("Duck Under", 5), hand: [card("Duck Under"), card("Duck Under")] }),
     });
-    const r = ids(state, "Red");
-    const g = ids(state, "Gray");
+    const [redPlay, redPay] = state.Red.hand.filter((c) => c.name === "Shove");
+    const [grayPlay, grayPay] = state.Gray.hand.filter((c) => c.name === "Duck Under");
+    if (!redPlay || !redPay || !grayPlay || !grayPay) {
+      throw new Error("Red and Gray each need two of their own card");
+    }
     const { state: next, events } = play(state, [
-      { type: "PLAY_CARD", character: "Red", cardId: r[0] as CardId, payWith: [r[1] as CardId] },
-      { type: "PLAY_CARD", character: "Gray", cardId: g[0] as CardId, payWith: [g[1] as CardId] },
+      { type: "PLAY_CARD", character: "Red", cardId: redPlay.id, payWith: [redPay.id] },
+      { type: "PLAY_CARD", character: "Gray", cardId: grayPlay.id, payWith: [grayPay.id] },
       { type: "END_PLAY" },
     ]);
     expect(events.filter((e) => e.type === "THRESHOLD_MET")).toHaveLength(2);
@@ -422,8 +433,8 @@ describe("Room kinds: Room and Stairwell", () => {
     const { state: next } = play(state, [
       // Three free Pry Bars is Oomph 9, three free Coils is Scramble 9, so both
       // lines are met at once.
-      ...r.slice(0, 3).map((id) => playFree("Red", id as CardId)),
-      ...g.slice(0, 3).map((id) => playFree("Gray", id as CardId)),
+      ...r.slice(0, 3).map((id) => free("Red", id)),
+      ...g.slice(0, 3).map((id) => free("Gray", id)),
       { type: "END_PLAY" },
     ]);
     expect(next.cleared).toHaveLength(1);
@@ -455,11 +466,14 @@ describe("Room kinds: Room and Stairwell", () => {
       Red: player({ deck: pile("Shove", 5), hand: [card("Shove"), card("Shove")] }),
       Gray: player({ deck: pile("Duck Under", 5), hand: [card("Duck Under"), card("Duck Under")] }),
     });
-    const r = ids(state, "Red");
-    const g = ids(state, "Gray");
+    const [redPlay, redPay] = state.Red.hand.filter((c) => c.name === "Shove");
+    const [grayPlay, grayPay] = state.Gray.hand.filter((c) => c.name === "Duck Under");
+    if (!redPlay || !redPay || !grayPlay || !grayPay) {
+      throw new Error("Red and Gray each need two of their own card");
+    }
     const { state: next } = play(state, [
-      { type: "PLAY_CARD", character: "Red", cardId: r[0] as CardId, payWith: [r[1] as CardId] },
-      { type: "PLAY_CARD", character: "Gray", cardId: g[0] as CardId, payWith: [g[1] as CardId] },
+      { type: "PLAY_CARD", character: "Red", cardId: redPlay.id, payWith: [redPay.id] },
+      { type: "PLAY_CARD", character: "Gray", cardId: grayPlay.id, payWith: [grayPay.id] },
       { type: "END_PLAY" },
     ]);
     // Both lines paid. What each one drew is blind, and a Crowbar in hand pays
@@ -479,9 +493,8 @@ describe("Room kinds: Room and Stairwell", () => {
       Red: player({ deck: pile("Shove", 5), hand: [card("Coil Of Cable")] }),
       Gray: player({ deck: pile("Duck Under", 5) }),
     });
-    const r = ids(state, "Red");
     const { state: next } = play(state, [
-      playFree("Red", r[0] as CardId),
+      free("Red", handCard(state, "Red", "Coil Of Cable").id),
       { type: "END_PLAY" },
     ]);
     // Oomph never reached 2, so Red gets nothing.
@@ -501,9 +514,10 @@ describe("Room kinds: Room and Stairwell", () => {
       Gray: player({ deck: pile("Duck Under", 5) }),
     });
     const empty = { ...state, pools: { ...state.pools, goodStuff: [] } };
-    const r = ids(empty, "Red");
+    const [toPlay, toPay] = empty.Red.hand.filter((c) => c.name === "Shove");
+    if (!toPlay || !toPay) throw new Error("Red is not holding two Shoves");
     const { state: next, events } = play(empty, [
-      { type: "PLAY_CARD", character: "Red", cardId: r[0] as CardId, payWith: [r[1] as CardId] },
+      { type: "PLAY_CARD", character: "Red", cardId: toPlay.id, payWith: [toPay.id] },
       { type: "END_PLAY" },
     ]);
     expect(eventTypes(events)).not.toContain("STUFF_TAKEN");
@@ -528,10 +542,11 @@ describe("Room kinds: Room and Stairwell", () => {
       }),
     });
     const empty = { ...state, pools: { ...state.pools, badStuff: [] } };
-    const g = ids(empty, "Gray");
+    const [firstCoil, secondCoil] = empty.Gray.hand.filter((c) => c.name === "Coil Of Cable");
+    if (!firstCoil || !secondCoil) throw new Error("Gray is not holding two Coil Of Cables");
     const { state: next, events } = play(empty, [
-      playFree("Gray", g[0] as CardId),
-      playFree("Gray", g[1] as CardId),
+      free("Gray", firstCoil.id),
+      free("Gray", secondCoil.id),
       { type: "END_PLAY" },
     ]);
     expect(eventTypes(events)).not.toContain("STUFF_TAKEN");

@@ -4,6 +4,9 @@ import { beforeEach, describe, expect, it } from "vitest";
 import {
   card,
   eventTypes,
+  free,
+  goingDown,
+  handCard,
   must,
   pile,
   play,
@@ -12,14 +15,8 @@ import {
   rig,
   room,
 } from "./__fixtures__/rig";
-import type { CardId, Character, GameState } from "./types";
 
 beforeEach(resetRig);
-
-const ids = (state: GameState, c: Character): readonly CardId[] => state[c].hand.map((x) => x.id);
-
-const free = (c: Character, cardId: CardId) =>
-  ({ type: "PLAY_CARD", character: c, cardId, payWith: [] }) as const;
 
 describe("Keywords: Empty deck", () => {
   it("'first shuffle your discard pile to form a new deck' — on a draw", () => {
@@ -44,7 +41,7 @@ describe("Keywords: Empty deck", () => {
       Gray: player({ deck: pile("Duck Under", 4) }),
     });
     // Overdrive: "Exhaust 2."
-    const { state: next, events } = must(state, free("Red", ids(state, "Red")[0] as CardId));
+    const { state: next, events } = must(state, free("Red", handCard(state, "Red", "Overdrive").id));
     expect(next.Red.exhaust).toHaveLength(2);
     expect(next.Red.deck).toHaveLength(3);
     expect(next.Red.discard).toEqual([]);
@@ -72,7 +69,7 @@ describe("Keywords: Empty deck", () => {
       Gray: player({ deck: pile("Duck Under", 4) }),
     });
     // Overdrive: "Exhaust 2."
-    const { state: next, events } = must(state, free("Red", ids(state, "Red")[0] as CardId));
+    const { state: next, events } = must(state, free("Red", handCard(state, "Red", "Overdrive").id));
     expect(next.phase).toBe("GameOver");
     expect(next.Red.down).toBe(true);
     expect(eventTypes(events)).toContain("WENT_DOWN");
@@ -100,12 +97,7 @@ describe("Keywords: Empty deck", () => {
 
 describe("Going Down", () => {
   it("'you go Down and the game is lost' — one character is enough", () => {
-    const state = rig({
-      phase: "Play",
-      activeRoom: room("Collapsed Stairwell"),
-      Red: player({ deck: [], discard: [], hand: [card("Pry Bar")] }),
-      Gray: player({ deck: pile("Duck Under", 4) }),
-    });
+    const state = goingDown([card("Pry Bar")]);
     // Collapsed Stairwell's Flee line: one of you Exhausts 3.
     const { state: next, events } = play(state, [
       { type: "END_PLAY" },
@@ -118,12 +110,7 @@ describe("Going Down", () => {
   });
 
   it("'going Down empties your hand into your discard pile'", () => {
-    const state = rig({
-      phase: "Play",
-      activeRoom: room("Collapsed Stairwell"),
-      Red: player({ deck: [], discard: [], hand: [card("Pry Bar"), card("Shove")] }),
-      Gray: player({ deck: pile("Duck Under", 4) }),
-    });
+    const state = goingDown([card("Pry Bar"), card("Shove")]);
     const { state: next } = play(state, [
       { type: "END_PLAY" },
       { type: "CHOOSE_CHARACTER", character: "Red" },

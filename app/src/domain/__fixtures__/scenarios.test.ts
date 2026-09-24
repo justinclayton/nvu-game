@@ -30,7 +30,7 @@ const idsOf = (cards: readonly Card[]): readonly CardId[] => [...cards.map((c) =
 describe("dev fixtures", () => {
   it.each(FIXTURES.map((f) => f.name))("%s loads and satisfies the engine's invariants", (name) => {
     const fixture = FIXTURES.find((f) => f.name === name);
-    if (!fixture) throw new Error("rig");
+    if (!fixture) throw new Error(`no fixture named ${name}`);
 
     const state = fixture.build();
 

@@ -9,6 +9,7 @@ import { execute } from "../engine";
 import { emptyTurnRecord, mintCard, mintRoom } from "../setup";
 import type {
   Card,
+  CardId,
   Character,
   Command,
   DomainEvent,
@@ -127,3 +128,37 @@ export const eventTypes = (events: readonly DomainEvent[]): readonly string[] =>
   events.map((e) => e.type);
 
 export const names = (cards: readonly Card[]): readonly string[] => cards.map((c) => c.name);
+
+/** A hand's card ids, so a test can pay with or play whichever position it needs. */
+export const ids = (state: GameState, c: Character): readonly CardId[] =>
+  state[c].hand.map((x) => x.id);
+
+/** One named card out of a hand, so a test never counts hand positions. */
+export function handCard(state: GameState, c: Character, name: string): Card {
+  const found = state[c].hand.find((x) => x.name === name);
+  if (!found) throw new Error(`${c} is not holding ${name}`);
+  return found;
+}
+
+/** Play the given card for nothing. */
+export const free = (c: Character, cardId: CardId): Command =>
+  ({ type: "PLAY_CARD", character: c, cardId, payWith: [] }) as const;
+
+/** A rigged Play-phase state, Gross Thing That Looks Like A Cherry, both hands empty with full decks. */
+export const playing = (over: Partial<GameState> = {}): GameState =>
+  rig({
+    phase: "Play",
+    activeRoom: room("Gross Thing That Looks Like A Cherry"),
+    Red: player({ deck: pile("Shove", 6) }),
+    Gray: player({ deck: pile("Duck Under", 6) }),
+    ...over,
+  });
+
+/** Play phase at Collapsed Stairwell, both decks and discard piles empty: one Exhaust away from Going Down. */
+export const goingDown = (hand: readonly Card[] = []): GameState =>
+  rig({
+    phase: "Play",
+    activeRoom: room("Collapsed Stairwell"),
+    Red: player({ deck: [], discard: [], hand }),
+    Gray: player({ deck: pile("Duck Under", 4) }),
+  });

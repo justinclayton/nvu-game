@@ -10,6 +10,9 @@ import { statPool } from "./queries";
 import {
   card,
   eventTypes,
+  free,
+  goingDown,
+  handCard,
   must,
   pile,
   play,
@@ -18,15 +21,8 @@ import {
   rig,
   room,
 } from "./__fixtures__/rig";
-import type { CardId, Character, GameState } from "./types";
 
 beforeEach(resetRig);
-
-const hand = (state: GameState, c: Character): readonly CardId[] =>
-  state[c].hand.map((x) => x.id);
-
-const free = (c: Character, cardId: CardId) =>
-  ({ type: "PLAY_CARD", character: c, cardId, payWith: [] }) as const;
 
 describe("walkthrough 1 — the deck runs dry mid-draw and the discard pile becomes the new deck", () => {
   it("reshuffles once, then keeps drawing to 5", () => {
@@ -60,12 +56,7 @@ describe("walkthrough 1 — the deck runs dry mid-draw and the discard pile beco
 
 describe("walkthrough 2 — Down when the deck and discard are both empty ends the run on the spot", () => {
   it("stops a room's own punishment from finishing, and everything after it", () => {
-    const state = rig({
-      phase: "Play",
-      activeRoom: room("Collapsed Stairwell"),
-      Red: player({ deck: [], discard: [], hand: [card("Shove")] }),
-      Gray: player({ deck: pile("Duck Under", 4) }),
-    });
+    const state = goingDown([card("Shove")]);
     // Collapsed Stairwell's Flee line: "One of you Exhausts 3." Nobody played
     // anything, so no threshold is met and the room Flees.
     const { state: next, events } = play(state, [
@@ -173,12 +164,12 @@ describe("walkthrough 5 — Cleanup runs before Ascending", () => {
       }),
       Gray: player({ deck: pile("Duck Under", 5) }),
     });
-    const h = hand(state, "Red");
-    const [chargeIn, payA, payB, pryBar] = h;
-    if (!chargeIn || !payA || !payB || !pryBar) throw new Error("rig");
+    const chargeIn = handCard(state, "Red", "Charge In");
+    const pryBar = handCard(state, "Red", "Pry Bar");
+    const payWith = state.Red.hand.filter((c) => c.name === "Shove").map((c) => c.id);
     const { state: next, events } = play(state, [
-      { type: "PLAY_CARD", character: "Red", cardId: chargeIn, payWith: [payA, payB] },
-      { type: "PLAY_CARD", character: "Red", cardId: pryBar, payWith: [] },
+      { type: "PLAY_CARD", character: "Red", cardId: chargeIn.id, payWith },
+      { type: "PLAY_CARD", character: "Red", cardId: pryBar.id, payWith: [] },
       { type: "END_PLAY" },
     ]);
     const types = eventTypes(events);
@@ -206,8 +197,8 @@ describe("walkthrough 6 — a Room's Challenge reads the shared pool, not either
       Gray: player({ deck: pile("Duck Under", 5), hand: [card("Pry Bar")] }),
     });
     const played = play(state, [
-      free("Red", hand(state, "Red")[0] as CardId),
-      free("Gray", hand(state, "Gray")[0] as CardId),
+      free("Red", handCard(state, "Red", "Coil Of Cable").id),
+      free("Gray", handCard(state, "Gray", "Pry Bar").id),
     ]);
     expect(statPool(played.state)).toEqual({ oomph: 3, scramble: 3 });
 
@@ -263,18 +254,18 @@ describe("walkthrough 8 — ascending end to end: Settle your Stuff, then the re
       }),
       Gray: player({ deck: pile("Duck Under", 5) }),
     });
-    const h = hand(state, "Red");
-    const [chargeIn, payA, payB, pryBar] = h;
-    if (!chargeIn || !payA || !payB || !pryBar) throw new Error("rig");
+    const chargeIn = handCard(state, "Red", "Charge In");
+    const pryBar = handCard(state, "Red", "Pry Bar");
+    const payWith = state.Red.hand.filter((c) => c.name === "Shove").map((c) => c.id);
     const cleared = play(state, [
-      { type: "PLAY_CARD", character: "Red", cardId: chargeIn, payWith: [payA, payB] },
-      { type: "PLAY_CARD", character: "Red", cardId: pryBar, payWith: [] },
+      { type: "PLAY_CARD", character: "Red", cardId: chargeIn.id, payWith },
+      { type: "PLAY_CARD", character: "Red", cardId: pryBar.id, payWith: [] },
       { type: "END_PLAY" },
     ]);
     expect(cleared.state.phase).toBe("Ascend");
 
     const offer = cleared.state.offer?.Red[0];
-    if (!offer) throw new Error("rig");
+    if (!offer) throw new Error("Red has no reward offered");
     const { state: next } = must(cleared.state, {
       type: "ASCEND",
       Red: { settle: [], takeRewardId: offer.id },

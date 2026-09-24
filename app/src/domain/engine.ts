@@ -737,9 +737,13 @@ function drain(state: GameState, run: Run): GameState {
         continue;
       }
       // Asking "who" is pointless when every standing character's reward
-      // pool is already empty — either answer reveals nothing, so there is
-      // no real choice to make.
-      const moot = head.type === "RevealReward" && options.every((c) => s.pools[c].length === 0);
+      // pool is already empty, or when neither hand holds a Bad Stuff card
+      // to Scrap — either answer reveals or changes nothing, so there is no
+      // real choice to make.
+      const moot =
+        (head.type === "RevealReward" && options.every((c) => s.pools[c].length === 0)) ||
+        (head.type === "ScrapBadStuffFromHand" &&
+          options.every((c) => !playerOf(s, c).hand.some((card) => card.kind === "bad_stuff")));
       if (options.length > 1 && !moot) {
         return {
           ...s,

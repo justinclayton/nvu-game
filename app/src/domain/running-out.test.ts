@@ -4,6 +4,7 @@ import { beforeEach, describe, expect, it } from "vitest";
 import {
   card,
   eventTypes,
+  free,
   must,
   pile,
   play,
@@ -12,14 +13,8 @@ import {
   rig,
   room,
 } from "./__fixtures__/rig";
-import type { CardId, Character, GameState } from "./types";
 
 beforeEach(resetRig);
-
-const ids = (state: GameState, c: Character): readonly CardId[] => state[c].hand.map((x) => x.id);
-
-const free = (c: Character, cardId: CardId) =>
-  ({ type: "PLAY_CARD", character: c, cardId, payWith: [] }) as const;
 
 describe("Keywords: Empty deck", () => {
   it("'first shuffle your discard pile to form a new deck' — on a draw", () => {
@@ -44,7 +39,7 @@ describe("Keywords: Empty deck", () => {
       Gray: player({ deck: pile("Duck Under", 4) }),
     });
     // Overdrive: "Exhaust 2."
-    const { state: next, events } = must(state, free("Red", ids(state, "Red")[0] as CardId));
+    const { state: next, events } = must(state, free(state, "Red", "Overdrive"));
     expect(next.Red.exhaust).toHaveLength(2);
     expect(next.Red.deck).toHaveLength(3);
     expect(next.Red.discard).toEqual([]);
@@ -72,7 +67,7 @@ describe("Keywords: Empty deck", () => {
       Gray: player({ deck: pile("Duck Under", 4) }),
     });
     // Overdrive: "Exhaust 2."
-    const { state: next, events } = must(state, free("Red", ids(state, "Red")[0] as CardId));
+    const { state: next, events } = must(state, free(state, "Red", "Overdrive"));
     expect(next.phase).toBe("GameOver");
     expect(next.Red.down).toBe(true);
     expect(eventTypes(events)).toContain("WENT_DOWN");

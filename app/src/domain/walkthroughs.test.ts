@@ -10,6 +10,8 @@ import { statPool } from "./queries";
 import {
   card,
   eventTypes,
+  free,
+  handCard,
   must,
   pile,
   play,
@@ -18,15 +20,8 @@ import {
   rig,
   room,
 } from "./__fixtures__/rig";
-import type { CardId, Character, GameState } from "./types";
 
 beforeEach(resetRig);
-
-const hand = (state: GameState, c: Character): readonly CardId[] =>
-  state[c].hand.map((x) => x.id);
-
-const free = (c: Character, cardId: CardId) =>
-  ({ type: "PLAY_CARD", character: c, cardId, payWith: [] }) as const;
 
 describe("walkthrough 1 — the deck runs dry mid-draw and the discard pile becomes the new deck", () => {
   it("reshuffles once, then keeps drawing to 5", () => {
@@ -164,21 +159,25 @@ describe("walkthrough 4 — Settle your Stuff: four cards, four different fates,
 
 describe("walkthrough 5 — Cleanup runs before Ascending", () => {
   it("discards the play zone, then clears the floor and offers the reward", () => {
+    const shoveA = card("Shove");
+    const shoveB = card("Shove");
     const state = rig({
       phase: "Play",
       activeRoom: room("Gross Thing That Looks Like A Cherry"),
       Red: player({
         deck: pile("Shove", 5),
-        hand: [card("Charge In"), card("Shove"), card("Shove"), card("Pry Bar")],
+        hand: [card("Charge In"), shoveA, shoveB, card("Pry Bar")],
       }),
       Gray: player({ deck: pile("Duck Under", 5) }),
     });
-    const h = hand(state, "Red");
-    const [chargeIn, payA, payB, pryBar] = h;
-    if (!chargeIn || !payA || !payB || !pryBar) throw new Error("rig");
     const { state: next, events } = play(state, [
-      { type: "PLAY_CARD", character: "Red", cardId: chargeIn, payWith: [payA, payB] },
-      { type: "PLAY_CARD", character: "Red", cardId: pryBar, payWith: [] },
+      {
+        type: "PLAY_CARD",
+        character: "Red",
+        cardId: handCard(state, "Red", "Charge In").id,
+        payWith: [shoveA.id, shoveB.id],
+      },
+      free(state, "Red", "Pry Bar"),
       { type: "END_PLAY" },
     ]);
     const types = eventTypes(events);
@@ -206,8 +205,8 @@ describe("walkthrough 6 — a Room's Challenge reads the shared pool, not either
       Gray: player({ deck: pile("Duck Under", 5), hand: [card("Pry Bar")] }),
     });
     const played = play(state, [
-      free("Red", hand(state, "Red")[0] as CardId),
-      free("Gray", hand(state, "Gray")[0] as CardId),
+      free(state, "Red", "Coil Of Cable"),
+      free(state, "Gray", "Pry Bar"),
     ]);
     expect(statPool(played.state)).toEqual({ oomph: 3, scramble: 3 });
 
@@ -263,18 +262,20 @@ describe("walkthrough 8 — ascending end to end: Settle your Stuff, then the re
       }),
       Gray: player({ deck: pile("Duck Under", 5) }),
     });
-    const h = hand(state, "Red");
-    const [chargeIn, payA, payB, pryBar] = h;
-    if (!chargeIn || !payA || !payB || !pryBar) throw new Error("rig");
     const cleared = play(state, [
-      { type: "PLAY_CARD", character: "Red", cardId: chargeIn, payWith: [payA, payB] },
-      { type: "PLAY_CARD", character: "Red", cardId: pryBar, payWith: [] },
+      {
+        type: "PLAY_CARD",
+        character: "Red",
+        cardId: handCard(state, "Red", "Charge In").id,
+        payWith: state.Red.hand.filter((c) => c.name === "Shove").map((c) => c.id),
+      },
+      free(state, "Red", "Pry Bar"),
       { type: "END_PLAY" },
     ]);
     expect(cleared.state.phase).toBe("Ascend");
 
     const offer = cleared.state.offer?.Red[0];
-    if (!offer) throw new Error("rig");
+    if (!offer) throw new Error("expected a card offered to Red");
     const { state: next } = must(cleared.state, {
       type: "ASCEND",
       Red: { settle: [], takeRewardId: offer.id },

@@ -6,6 +6,8 @@ import { execute } from "./engine";
 import {
   card,
   eventTypes,
+  free,
+  handCard,
   must,
   pile,
   play,
@@ -86,7 +88,7 @@ describe("Ascending, Settle your Stuff", () => {
     const state = atAscension();
     const pryBar = state.Red.discard.find((c) => c.name === "Pry Bar");
     const payer = state.Red.discard.find((c) => c.name === "Charge In");
-    if (!pryBar || !payer) throw new Error("rig");
+    if (!pryBar || !payer) throw new Error("expected Pry Bar and Charge In in Red's discard pile");
     const { state: next, events } = must(state, {
       type: "ASCEND",
       Red: { settle: [{ cardId: pryBar.id, payWith: payer.id }], takeRewardId: null },
@@ -168,7 +170,7 @@ describe("Ascending, Settle your Stuff", () => {
   it("rejects paying with a card that is not another owned, non-Stuff card", () => {
     const state = atAscension();
     const pryBar = state.Red.discard.find((c) => c.name === "Pry Bar");
-    if (!pryBar) throw new Error("rig");
+    if (!pryBar) throw new Error("expected Pry Bar in Red's discard pile");
     const rejected = execute(state, {
       type: "ASCEND",
       Red: { settle: [{ cardId: pryBar.id, payWith: pryBar.id }], takeRewardId: null },
@@ -221,7 +223,7 @@ describe("Ascending, the reward", () => {
     const state = atAscension();
     const offered = state.offer?.Red ?? [];
     const taken = offered[0];
-    if (!taken) throw new Error("rig");
+    if (!taken) throw new Error("expected a card offered to Red");
     const { state: next, events } = must(state, {
       type: "ASCEND",
       Red: { settle: [], takeRewardId: taken.id },
@@ -259,22 +261,26 @@ describe("Ascending, build the next floor", () => {
 
 describe("Winning and losing", () => {
   it("'you win by clearing floor 10's Stairwell'", () => {
+    const shoveA = card("Shove");
+    const shoveB = card("Shove");
     const state = rig({
       phase: "Play",
       floor: 10,
       activeRoom: room("Gross Thing That Looks Like A Cherry"),
       Red: player({
         deck: pile("Shove", 4),
-        hand: [card("Charge In"), card("Shove"), card("Shove"), card("Pry Bar")],
+        hand: [card("Charge In"), shoveA, shoveB, card("Pry Bar")],
       }),
       Gray: player({ deck: pile("Duck Under", 4) }),
     });
-    const hand = state.Red.hand.map((c) => c.id);
-    const [chargeIn, payA, payB, pryBar] = hand;
-    if (!chargeIn || !payA || !payB || !pryBar) throw new Error("rig");
     const { state: next, events } = play(state, [
-      { type: "PLAY_CARD", character: "Red", cardId: chargeIn, payWith: [payA, payB] },
-      { type: "PLAY_CARD", character: "Red", cardId: pryBar, payWith: [] },
+      {
+        type: "PLAY_CARD",
+        character: "Red",
+        cardId: handCard(state, "Red", "Charge In").id,
+        payWith: [shoveA.id, shoveB.id],
+      },
+      free(state, "Red", "Pry Bar"),
       { type: "END_PLAY" },
     ]);
     expect(next.phase).toBe("GameOver");

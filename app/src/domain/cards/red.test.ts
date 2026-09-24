@@ -5,44 +5,30 @@ import { costOf, statPool } from "../queries";
 import {
   card,
   eventTypes,
+  free,
+  handCard,
   must,
   pile,
   play,
   player,
+  playing,
   resetRig,
   rig,
   room,
 } from "../__fixtures__/rig";
-import type { CardId, Character, GameState } from "../types";
 
 beforeEach(resetRig);
-
-const ids = (state: GameState, c: Character): readonly CardId[] =>
-  state[c].hand.map((x) => x.id);
-
-const free = (c: Character, cardId: CardId) =>
-  ({ type: "PLAY_CARD", character: c, cardId, payWith: [] }) as const;
-
-const playing = (over: Partial<GameState> = {}) =>
-  rig({
-    phase: "Play",
-    activeRoom: room("Gross Thing That Looks Like A Cherry"),
-    Red: player({ deck: pile("Shove", 6) }),
-    Gray: player({ deck: pile("Duck Under", 6) }),
-    ...over,
-  });
 
 describe("Reckless Swing — 'Exhaust 1'", () => {
   it("takes one off the top of your own deck, into the Exhaust pile", () => {
     const state = playing({
       Red: player({ deck: pile("Shove", 4), hand: [card("Reckless Swing"), card("Shove")] }),
     });
-    const hand = ids(state, "Red");
     const { state: next } = must(state, {
       type: "PLAY_CARD",
       character: "Red",
-      cardId: hand[0] as CardId,
-      payWith: [hand[1] as CardId],
+      cardId: handCard(state, "Red", "Reckless Swing").id,
+      payWith: [handCard(state, "Red", "Shove").id],
     });
     expect(next.Red.deck).toHaveLength(3);
     // Paid from hand, not Exhausted.
@@ -56,12 +42,11 @@ describe("Reckless — 'Exhaust 3'", () => {
     const state = playing({
       Red: player({ deck: pile("Shove", 5), hand: [card("Reckless"), card("Shove")] }),
     });
-    const hand = ids(state, "Red");
     const { state: next } = must(state, {
       type: "PLAY_CARD",
       character: "Red",
-      cardId: hand[0] as CardId,
-      payWith: [hand[1] as CardId],
+      cardId: handCard(state, "Red", "Reckless").id,
+      payWith: [handCard(state, "Red", "Shove").id],
     });
     expect(next.Red.deck).toHaveLength(2);
   });
@@ -70,9 +55,7 @@ describe("Reckless — 'Exhaust 3'", () => {
 describe("Fast Follow — 'If Gray played a card this turn, play this card for free'", () => {
   it("costs its printed 1 while Gray has played nothing", () => {
     const state = playing({ Red: player({ deck: pile("Shove", 4), hand: [card("Fast Follow")] }) });
-    const fastFollow = state.Red.hand[0];
-    if (!fastFollow) throw new Error("rig");
-    expect(costOf(state, "Red", fastFollow)).toBe(1);
+    expect(costOf(state, "Red", handCard(state, "Red", "Fast Follow"))).toBe(1);
   });
 
   it("costs nothing once Gray has played", () => {
@@ -80,10 +63,8 @@ describe("Fast Follow — 'If Gray played a card this turn, play this card for f
       Red: player({ deck: pile("Shove", 4), hand: [card("Fast Follow")] }),
       Gray: player({ deck: pile("Duck Under", 4), hand: [card("Coil Of Cable")] }),
     });
-    const played = play(state, [free("Gray", ids(state, "Gray")[0] as CardId)]);
-    const fastFollow = played.state.Red.hand[0];
-    if (!fastFollow) throw new Error("rig");
-    expect(costOf(played.state, "Red", fastFollow)).toBe(0);
+    const played = play(state, [free(state, "Gray", "Coil Of Cable")]);
+    expect(costOf(played.state, "Red", handCard(played.state, "Red", "Fast Follow"))).toBe(0);
   });
 
   it("is free even while Sluggish is held, once Gray has played", () => {
@@ -91,37 +72,34 @@ describe("Fast Follow — 'If Gray played a card this turn, play this card for f
       Red: player({ deck: pile("Shove", 4), hand: [card("Fast Follow"), card("Sluggish")] }),
       Gray: player({ deck: pile("Duck Under", 4), hand: [card("Coil Of Cable")] }),
     });
-    const played = play(state, [free("Gray", ids(state, "Gray")[0] as CardId)]);
-    const fastFollow = played.state.Red.hand.find((c) => c.name === "Fast Follow");
-    if (!fastFollow) throw new Error("rig");
-    expect(costOf(played.state, "Red", fastFollow)).toBe(0);
+    const played = play(state, [free(state, "Gray", "Coil Of Cable")]);
+    expect(costOf(played.state, "Red", handCard(played.state, "Red", "Fast Follow"))).toBe(0);
   });
 
   it("pays its printed cost plus Sluggish's +1 while Gray has played nothing", () => {
     const state = playing({
       Red: player({ deck: pile("Shove", 4), hand: [card("Fast Follow"), card("Sluggish")] }),
     });
-    const fastFollow = state.Red.hand.find((c) => c.name === "Fast Follow");
-    if (!fastFollow) throw new Error("rig");
-    expect(costOf(state, "Red", fastFollow)).toBe(2);
+    expect(costOf(state, "Red", handCard(state, "Red", "Fast Follow"))).toBe(2);
   });
 });
 
 describe("Second Wind — 'Shuffle a Red card from your Exhaust pile into your deck'", () => {
   it("offers Red's own Exhausted cards, and nothing else", () => {
+    const shoveA = card("Shove");
+    const shoveB = card("Shove");
     const state = playing({
       Red: player({
         deck: pile("Shove", 3),
-        hand: [card("Second Wind"), card("Shove"), card("Shove")],
+        hand: [card("Second Wind"), shoveA, shoveB],
         exhaust: [card("Charge In"), card("Pry Bar")],
       }),
     });
-    const hand = ids(state, "Red");
     const asked = must(state, {
       type: "PLAY_CARD",
       character: "Red",
-      cardId: hand[0] as CardId,
-      payWith: [hand[1] as CardId, hand[2] as CardId],
+      cardId: handCard(state, "Red", "Second Wind").id,
+      payWith: [shoveA.id, shoveB.id],
     });
     const pending = asked.state.pending;
     expect(pending?.kind).toBe("ChooseCards");
@@ -132,7 +110,7 @@ describe("Second Wind — 'Shuffle a Red card from your Exhaust pile into your d
     expect(offered).not.toContain("Pry Bar");
 
     const chosen = pending.options.find((c) => c.name === "Charge In");
-    if (!chosen) throw new Error("rig");
+    if (!chosen) throw new Error("expected Charge In among the offered options");
     const { state: next, events } = must(asked.state, {
       type: "CHOOSE_CARDS",
       cardIds: [chosen.id],
@@ -145,18 +123,19 @@ describe("Second Wind — 'Shuffle a Red card from your Exhaust pile into your d
 
 describe("Junk Launcher — 'Oomph +2 for each card you paid with this turn'", () => {
   it("counts the cards already spent, which are no longer anywhere else", () => {
+    const shoveA = card("Shove");
+    const shoveB = card("Shove");
     const state = playing({
       Red: player({
         deck: pile("Shove", 3),
-        hand: [card("Junk Launcher"), card("Shove"), card("Shove")],
+        hand: [card("Junk Launcher"), shoveA, shoveB],
       }),
     });
-    const hand = ids(state, "Red");
     const { state: next } = must(state, {
       type: "PLAY_CARD",
       character: "Red",
-      cardId: hand[0] as CardId,
-      payWith: [hand[1] as CardId, hand[2] as CardId],
+      cardId: handCard(state, "Red", "Junk Launcher").id,
+      payWith: [shoveA.id, shoveB.id],
     });
     // Printed Oomph 2, plus 2 for each of the two cards it cost.
     expect(statPool(next).oomph).toBe(6);
@@ -171,18 +150,17 @@ describe("Heavy Pockets — 'Shuffle 1 Stuff from your hand into your deck'", ()
         hand: [card("Heavy Pockets"), card("Shove"), card("Pry Bar")],
       }),
     });
-    const hand = ids(state, "Red");
     const asked = must(state, {
       type: "PLAY_CARD",
       character: "Red",
-      cardId: hand[0] as CardId,
-      payWith: [hand[1] as CardId],
+      cardId: handCard(state, "Red", "Heavy Pockets").id,
+      payWith: [handCard(state, "Red", "Shove").id],
     });
     const pending = asked.state.pending;
     if (pending?.kind !== "ChooseCards") throw new Error("expected a card choice");
     expect(pending.options.map((c) => c.name)).toEqual(["Pry Bar"]);
     const pryBar = pending.options[0];
-    if (!pryBar) throw new Error("rig");
+    if (!pryBar) throw new Error("expected Pry Bar among the offered options");
     const { state: next } = must(asked.state, { type: "CHOOSE_CARDS", cardIds: [pryBar.id] });
     expect(next.Red.deck).toHaveLength(4);
     expect(next.Red.hand).toEqual([]);
@@ -191,18 +169,19 @@ describe("Heavy Pockets — 'Shuffle 1 Stuff from your hand into your deck'", ()
 
 describe("Deadweight Grip — 'Cards you play have +1 Oomph. At Turn Start, draw 1 fewer card'", () => {
   it("adds a Oomph to everything its holder plays", () => {
+    const shoveA = card("Shove");
+    const shoveB = card("Shove");
     const state = playing({
       Red: player({
         deck: pile("Shove", 3),
-        hand: [card("Deadweight Grip"), card("Shove"), card("Shove")],
+        hand: [card("Deadweight Grip"), shoveA, shoveB],
       }),
     });
-    const hand = ids(state, "Red");
     const { state: next } = must(state, {
       type: "PLAY_CARD",
       character: "Red",
-      cardId: hand[1] as CardId,
-      payWith: [hand[2] as CardId],
+      cardId: shoveA.id,
+      payWith: [shoveB.id],
     });
     // Shove is Oomph 2, and the Grip is still in hand.
     expect(statPool(next).oomph).toBe(3);
@@ -224,31 +203,38 @@ describe("Deadweight Grip — 'Cards you play have +1 Oomph. At Turn Start, draw
 
 describe("Both Barrels — '+2 Oomph after Gray, and back to hand on a clear'", () => {
   it("is Oomph 4 alone and Oomph 6 once Gray has played", () => {
+    const shoveA = card("Shove");
+    const shoveB = card("Shove");
     const state = playing({
-      Red: player({ deck: pile("Shove", 3), hand: [card("Both Barrels"), card("Shove"), card("Shove")] }),
+      Red: player({ deck: pile("Shove", 3), hand: [card("Both Barrels"), shoveA, shoveB] }),
       Gray: player({ deck: pile("Duck Under", 3), hand: [card("Coil Of Cable")] }),
     });
-    const r = ids(state, "Red");
     const alone = must(state, {
       type: "PLAY_CARD",
       character: "Red",
-      cardId: r[0] as CardId,
-      payWith: [r[1] as CardId, r[2] as CardId],
+      cardId: handCard(state, "Red", "Both Barrels").id,
+      payWith: [shoveA.id, shoveB.id],
     });
     expect(statPool(alone.state).oomph).toBe(4);
 
-    const withGray = must(alone.state, free("Gray", ids(alone.state, "Gray")[0] as CardId));
+    const withGray = must(alone.state, free(alone.state, "Gray", "Coil Of Cable"));
     expect(statPool(withGray.state).oomph).toBe(6);
   });
 
   it("comes back to hand when the room is Cleared", () => {
+    const shoveA = card("Shove");
+    const shoveB = card("Shove");
     const state = playing({
       activeRoom: room("Sorting Room"),
-      Red: player({ deck: pile("Shove", 3), hand: [card("Both Barrels"), card("Shove"), card("Shove")] }),
+      Red: player({ deck: pile("Shove", 3), hand: [card("Both Barrels"), shoveA, shoveB] }),
     });
-    const r = ids(state, "Red");
     const { state: next } = play(state, [
-      { type: "PLAY_CARD", character: "Red", cardId: r[0] as CardId, payWith: [r[1] as CardId, r[2] as CardId] },
+      {
+        type: "PLAY_CARD",
+        character: "Red",
+        cardId: handCard(state, "Red", "Both Barrels").id,
+        payWith: [shoveA.id, shoveB.id],
+      },
       { type: "END_PLAY" },
     ]);
     expect(next.Red.hand.some((c) => c.name === "Both Barrels")).toBe(true);
@@ -256,13 +242,19 @@ describe("Both Barrels — '+2 Oomph after Gray, and back to hand on a clear'", 
   });
 
   it("stays discarded when the room is not Cleared", () => {
+    const shoveA = card("Shove");
+    const shoveB = card("Shove");
     const state = playing({
       activeRoom: room("Gross Thing That Looks Like A Cherry"),
-      Red: player({ deck: pile("Shove", 3), hand: [card("Both Barrels"), card("Shove"), card("Shove")] }),
+      Red: player({ deck: pile("Shove", 3), hand: [card("Both Barrels"), shoveA, shoveB] }),
     });
-    const r = ids(state, "Red");
     const { state: next } = play(state, [
-      { type: "PLAY_CARD", character: "Red", cardId: r[0] as CardId, payWith: [r[1] as CardId, r[2] as CardId] },
+      {
+        type: "PLAY_CARD",
+        character: "Red",
+        cardId: handCard(state, "Red", "Both Barrels").id,
+        payWith: [shoveA.id, shoveB.id],
+      },
       { type: "END_PLAY" },
     ]);
     expect(next.Red.discard.some((c) => c.name === "Both Barrels")).toBe(true);
@@ -277,14 +269,21 @@ describe("Flurry — 'Oomph equal to twice the number of other cards Red played'
         hand: [card("Flurry"), card("Pry Bar"), card("Coil Of Cable"), card("Shove")],
       }),
     });
-    const r = ids(state, "Red");
     const one = play(state, [
-      { type: "PLAY_CARD", character: "Red", cardId: r[0] as CardId, payWith: [r[3] as CardId] },
+      {
+        type: "PLAY_CARD",
+        character: "Red",
+        cardId: handCard(state, "Red", "Flurry").id,
+        payWith: [handCard(state, "Red", "Shove").id],
+      },
     ]);
     // Nothing else played: Flurry is Oomph 0.
     expect(statPool(one.state).oomph).toBe(0);
 
-    const two = play(one.state, [free("Red", r[1] as CardId), free("Red", r[2] as CardId)]);
+    const two = play(one.state, [
+      free(one.state, "Red", "Pry Bar"),
+      free(one.state, "Red", "Coil Of Cable"),
+    ]);
     // Two other cards, so Flurry is Oomph 4, plus the Pry Bar's 3.
     expect(statPool(two.state).oomph).toBe(7);
   });
@@ -322,9 +321,7 @@ describe("Zen Mode — \"Holding: you don't `Exhaust`\"", () => {
     const state = playing({
       Red: player({ deck: pile("Shove", 4), hand: [card("Zen Mode"), card("Overdrive")] }),
     });
-    const overdrive = state.Red.hand[1];
-    if (!overdrive) throw new Error("rig");
-    const { state: next, events } = must(state, free("Red", overdrive.id));
+    const { state: next, events } = must(state, free(state, "Red", "Overdrive"));
     expect(next.Red.deck).toHaveLength(4);
     expect(next.Red.discard).toEqual([]);
     expect(eventTypes(events)).toEqual(["CARD_PLAYED", "EXHAUST_PREVENTED"]);
@@ -333,20 +330,19 @@ describe("Zen Mode — \"Holding: you don't `Exhaust`\"", () => {
   });
 
   it("does not stop paying a cost", () => {
+    const shoveA = card("Shove");
+    const shoveB = card("Shove");
     const state = playing({
       Red: player({
         deck: pile("Shove", 4),
-        hand: [card("Zen Mode"), card("Charge In"), card("Shove"), card("Shove")],
+        hand: [card("Zen Mode"), card("Charge In"), shoveA, shoveB],
       }),
     });
-    const hand = state.Red.hand.map((c) => c.id);
-    const [, chargeIn, payA, payB] = hand;
-    if (!chargeIn || !payA || !payB) throw new Error("rig");
     const { state: next } = must(state, {
       type: "PLAY_CARD",
       character: "Red",
-      cardId: chargeIn,
-      payWith: [payA, payB],
+      cardId: handCard(state, "Red", "Charge In").id,
+      payWith: [shoveA.id, shoveB.id],
     });
     expect(next.Red.discard).toHaveLength(2);
   });

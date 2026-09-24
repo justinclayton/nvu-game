@@ -9,6 +9,7 @@ import { execute } from "../engine";
 import { emptyTurnRecord, mintCard, mintRoom } from "../setup";
 import type {
   Card,
+  CardId,
   Character,
   Command,
   DomainEvent,
@@ -127,3 +128,30 @@ export const eventTypes = (events: readonly DomainEvent[]): readonly string[] =>
   events.map((e) => e.type);
 
 export const names = (cards: readonly Card[]): readonly string[] => cards.map((c) => c.name);
+
+/** One named card out of a hand, so a test never counts hand positions. */
+export function handCard(state: GameState, c: Character, name: string): Card {
+  const found = state[c].hand.find((x) => x.name === name);
+  if (!found) throw new Error(`${c} is not holding ${name}`);
+  return found;
+}
+
+/** A hand's card ids, for tests that only care how many, not which. */
+export const ids = (state: GameState, c: Character): readonly CardId[] =>
+  state[c].hand.map((x) => x.id);
+
+/** Play a named card from the hand, paying nothing. */
+export function free(state: GameState, c: Character, name: string): Command {
+  return { type: "PLAY_CARD", character: c, cardId: handCard(state, c, name).id, payWith: [] };
+}
+
+/** A state rigged onto the Play phase, in the room the card tests share. */
+export function playing(over: Partial<GameState> = {}): GameState {
+  return rig({
+    phase: "Play",
+    activeRoom: room("Gross Thing That Looks Like A Cherry"),
+    Red: player({ deck: pile("Shove", 6) }),
+    Gray: player({ deck: pile("Duck Under", 6) }),
+    ...over,
+  });
+}

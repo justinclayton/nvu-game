@@ -9,6 +9,7 @@ import type { CardBehaviour } from "./cards/behaviours";
 import {
   card,
   eventTypes,
+  free,
   must,
   names,
   pile,
@@ -50,12 +51,6 @@ beforeEach(() => {
   probe.heard.length = 0;
 });
 
-const playFree = (state: GameState, name: string): Command => {
-  const found = state.Red.hand.find((x) => x.name === name);
-  if (!found) throw new Error(`Red is not holding ${name}`);
-  return { type: "PLAY_CARD", character: "Red", cardId: found.id, payWith: [] };
-};
-
 /** Play the named card, paying with the first copies of the other cards named. */
 const playPaying = (
   state: GameState,
@@ -89,24 +84,20 @@ const drawsAndLosses = (events: readonly DomainEvent[]): readonly string[] =>
 
 describe("a reaction resolves where its event happens", () => {
   it("Crowbar in the play zone: the bonus piece lands before Cleanup begins", () => {
+    const shove = card("Shove");
+    const payment = card("Shove");
     const state = rig({
       phase: "Play",
       activeRoom: room("Sorting Room"),
       Red: player({
         deck: pile("Shove", 4),
-        hand: [card("Crowbar"), card("Shove"), card("Shove")],
+        hand: [card("Crowbar"), shove, payment],
       }),
       Gray: player({ deck: pile("Duck Under", 4) }),
     });
-    const [crowbar, shove, payment] = state.Red.hand.map((x) => x.id) as CardId[];
     const { events } = play(state, [
-      { type: "PLAY_CARD", character: "Red", cardId: crowbar as CardId, payWith: [] },
-      {
-        type: "PLAY_CARD",
-        character: "Red",
-        cardId: shove as CardId,
-        payWith: [payment as CardId],
-      },
+      free(state, "Red", "Crowbar"),
+      { type: "PLAY_CARD", character: "Red", cardId: shove.id, payWith: [payment.id] },
       { type: "END_PLAY" },
     ]);
     const types = eventTypes(events);
@@ -125,7 +116,7 @@ describe("a reaction resolves where its event happens", () => {
       }),
       Gray: player({ deck: pile("Duck Under", 3) }),
     });
-    const { state: next, events } = must(state, playFree(state, "Coil Of Cable"));
+    const { state: next, events } = must(state, free(state, "Red", "Coil Of Cable"));
     const types = eventTypes(events);
     expect(drawsAndLosses(events)).toEqual(["Gray: draw", "Red: exhaust"]);
     expect(types.indexOf("CARD_PLAYED")).toBeLessThan(types.indexOf("CARD_DRAWN"));
@@ -145,7 +136,7 @@ describe("a reaction's consequences resolve before the next listener hears the e
       }),
       Gray: player({ deck: pile("Duck Under", 3) }),
     });
-    const { state: next, events } = must(state, playFree(state, "Coil Of Cable"));
+    const { state: next, events } = must(state, free(state, "Red", "Coil Of Cable"));
     // The first Exhaust takes Red's last card; the second finds nothing left.
     expect(drawsAndLosses(events)).toEqual([
       "Gray: draw",
@@ -164,7 +155,7 @@ describe("a reaction's consequences resolve before the next listener hears the e
       Red: player({ hand: [card("My Head Is Quantum Spinning"), card("Coil Of Cable")] }),
       Gray: player({ deck: pile("Duck Under", 3) }),
     });
-    const { state: next, events } = must(state, playFree(state, "Coil Of Cable"));
+    const { state: next, events } = must(state, free(state, "Red", "Coil Of Cable"));
     expect(drawsAndLosses(events)).toEqual(["Gray: draw", "Red: down"]);
     expect(next.Gray.hand).toHaveLength(1);
     expect(next.phase).toBe("GameOver");
@@ -239,9 +230,10 @@ describe("playing a card is heard after the card's own effect", () => {
       const asking = must(state, playPaying(state, "Gray", "Here, Catch", ["Duck Under"])).state;
       const saved = JSON.parse(JSON.stringify(asking)) as GameState;
       const coil = asking.Gray.hand.find((x) => x.name === "Coil Of Cable");
+      if (!coil) throw new Error("expected Coil Of Cable still in Gray's hand");
       const { state: next, events } = must(saved, {
         type: "CHOOSE_CARDS",
-        cardIds: [coil?.id as CardId],
+        cardIds: [coil.id],
       });
       const types = eventTypes(events);
       expect(types.indexOf("CARD_TO_HAND")).toBeLessThan(types.indexOf("CARD_DRAWN"));
@@ -314,7 +306,8 @@ describe("playing a card is heard after the card's own effect", () => {
     });
     const asking = must(state, playPaying(state, "Gray", "Here, Catch", ["Duck Under"])).state;
     const pryBar = asking.Gray.hand.find((x) => x.name === probe.name);
-    const { state: next } = must(asking, { type: "CHOOSE_CARDS", cardIds: [pryBar?.id as CardId] });
+    if (!pryBar) throw new Error(`expected ${probe.name} still in Gray's hand`);
+    const { state: next } = must(asking, { type: "CHOOSE_CARDS", cardIds: [pryBar.id] });
     expect(names(next.Red.hand)).toEqual([probe.name]);
     expect(playedHeard()).toEqual([]);
   });

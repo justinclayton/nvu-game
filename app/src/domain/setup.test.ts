@@ -45,7 +45,7 @@ describe("Setting up a floor", () => {
     }
   });
 
-  // Bands 2 and 3, and floor 10's fixed Stairwell, are follow-ups (#122, #123, #125).
+  // Bands 2 and 3, and floor 10's fixed Stairwell, aren't in design/cards.yaml yet.
   it("builds an empty deck for a floor outside band 1", () => {
     const [initial] = createInitialState(1, content);
     const fullSupply = returnRoomsToSupply(initial);
@@ -98,7 +98,7 @@ describe("Setting up a floor", () => {
 
 // Rulebook, Ascending step 4: "Return every room still in the floor deck, Fled
 // rooms included, to its band's pool. Rooms you cleared, the Stairwell
-// included, stay on the Rooms pile." (#66)
+// included, stay on the Rooms pile."
 describe("Ending a floor (Ascending, Build the next floor)", () => {
   it("returns an unseen or Fled room (still in the floor deck) to the pool", () => {
     const [initial] = createInitialState(1, content);

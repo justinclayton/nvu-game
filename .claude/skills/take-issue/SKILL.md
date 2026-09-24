@@ -6,7 +6,7 @@ disable-model-invocation: false
 
 # Take issue
 
-One issue, this checkout, one PR. Conventions (claiming, branch name, PR body, media) and environment setup/verification are in `docs/agents/issue-tracker.md`.
+One issue, this checkout, one PR. Conventions (claiming, branch name, PR body, media) and environment setup/verification are in `docs/agents/issue-tracker.md`. `CLAUDE.md` is the reading map — which files to open for a given change; `app/README.md` describes the layers and the build.
 
 Arguments: `$ARGUMENTS` is an issue number. With none, take the lowest-numbered open `ready-for-agent` issue with no open blocker.
 

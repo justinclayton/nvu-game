@@ -1,7 +1,7 @@
 /* One test per entry in Red's registry, beside the behaviour. */
 
 import { beforeEach, describe, expect, it } from "vitest";
-import { costOf, statPool } from "../queries";
+import { contributionOf, costOf, statPool } from "../queries";
 import {
   card,
   eventTypes,
@@ -143,7 +143,7 @@ describe("Second Wind — 'Shuffle a Red card from your Exhaust pile into your d
   });
 });
 
-describe("Junk Launcher — 'Oomph +2 for each card you paid with this turn'", () => {
+describe("Junk Launcher — 'Oomph +2 for each card spent to play it this turn'", () => {
   it("counts the cards already spent, which are no longer anywhere else", () => {
     const state = playing({
       Red: player({
@@ -160,6 +160,41 @@ describe("Junk Launcher — 'Oomph +2 for each card you paid with this turn'", (
     });
     // Printed Oomph 2, plus 2 for each of the two cards it cost.
     expect(statPool(next).oomph).toBe(6);
+  });
+
+  it("ignores a card paid for a different play later the same turn", () => {
+    const state = playing({
+      Red: player({
+        deck: pile("Shove", 5),
+        hand: [
+          card("Junk Launcher"),
+          card("Shove"),
+          card("Shove"),
+          card("Shove"),
+          card("Shove"),
+        ],
+      }),
+    });
+    const hand = ids(state, "Red");
+    const { state: afterLauncher } = must(state, {
+      type: "PLAY_CARD",
+      character: "Red",
+      cardId: hand[0] as CardId,
+      payWith: [hand[1] as CardId, hand[2] as CardId],
+    });
+    // Printed Oomph 2, plus 2 for each of the two cards it cost: 6.
+    expect(statPool(afterLauncher).oomph).toBe(6);
+
+    const { state: afterSecond } = must(afterLauncher, {
+      type: "PLAY_CARD",
+      character: "Red",
+      cardId: hand[3] as CardId,
+      payWith: [hand[4] as CardId],
+    });
+    // Junk Launcher's own Oomph must not rise for a payment spent on a
+    // different card played later the same turn.
+    const launcherAfter = afterSecond.playZone.find((p) => p.card.name === "Junk Launcher");
+    expect(launcherAfter && contributionOf(afterSecond, launcherAfter).oomph).toBe(6);
   });
 });
 

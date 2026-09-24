@@ -681,10 +681,6 @@
         "type": "END_PLAY"
       },
       {
-        "type": "CHOOSE_CHARACTER",
-        "character": "Red"
-      },
-      {
         "type": "FLIP_ROOM"
       },
       {

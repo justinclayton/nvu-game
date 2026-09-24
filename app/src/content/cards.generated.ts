@@ -30,7 +30,7 @@ export const CARD_CONTENT = {
     {"name":"Bull Rush","set":"proposed","kind":"player","owner":"Red","rarity":"Fine","starter":false,"count":2,"cost":1,"oomph":2,"scramble":1,"conditionalStat":false,"text":"","flavor":"Charge ahead while keeping your footing on loose debris."},
     {"name":"Cross Punch","set":"proposed","kind":"player","owner":"Red","rarity":"Fine","starter":false,"count":2,"cost":2,"oomph":4,"scramble":2,"conditionalStat":false,"text":"Exhaust 1.","flavor":"A heavy two-part combination attack."},
     {"name":"Second Wind","set":"proposed","kind":"player","owner":"Red","rarity":"Cool","starter":false,"count":2,"cost":2,"oomph":4,"scramble":0,"conditionalStat":false,"text":"Shuffle a Red card from your Exhaust pile into your deck.","flavor":"Catch your breath and shake off the fatigue."},
-    {"name":"Junk Launcher","set":"proposed","kind":"player","owner":"Red","rarity":"Cool","starter":false,"count":2,"cost":2,"oomph":0,"scramble":0,"conditionalStat":true,"text":"Oomph equal to total costs of all cards you played this turn.","flavor":"Hurl whatever scrap isn't nailed down."},
+    {"name":"Junk Launcher","set":"proposed","kind":"player","owner":"Red","rarity":"Cool","starter":false,"count":2,"cost":2,"oomph":0,"scramble":0,"conditionalStat":true,"text":"Oomph equal to the total printed cost of all cards in the play zone.","flavor":"Hurl whatever scrap isn't nailed down."},
     {"name":"Heavy Pockets","set":"proposed","kind":"player","owner":"Red","rarity":"Cool","starter":false,"count":2,"cost":1,"oomph":2,"scramble":1,"conditionalStat":false,"text":"Shuffle 1 Stuff from your hand into your deck.","flavor":"Stash the heavy salvage where it won't weigh down your swing."},
     {"name":"Tag Team","set":"proposed","kind":"player","owner":"Red","rarity":"Cool","starter":false,"count":2,"cost":1,"oomph":2,"scramble":2,"conditionalStat":false,"text":"If Gray played a card this turn, draw 1 card.","flavor":"Seamless hand-off between partners."},
     {"name":"Catch Your Breath","set":"proposed","kind":"player","owner":"Gray","rarity":"Fine","starter":false,"count":2,"cost":1,"oomph":0,"scramble":2,"conditionalStat":false,"text":"Look at top 2 cards of any deck. Put them back in either order.","flavor":"Pause for a second to read the room."},
@@ -83,4 +83,4 @@ export const CARD_CONTENT = {
 } as const satisfies CardContent;
 
 /** The first 12 hex of sha256 over the JSON of CARD_CONTENT above — identifies this card list. */
-export const CARD_LIST_ID = "7758bd369cb1";
+export const CARD_LIST_ID = "74bf74e78a62";

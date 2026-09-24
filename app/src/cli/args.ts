@@ -104,7 +104,7 @@ case-insensitively; quote a name with a space in it.
 play    the run file is the only state; every call loads it, applies one move, writes it back
         (--run defaults to runs/<seed>.json for "new"; later calls default to the run
         "new" last started, recorded in runs/current)
-card    print a card's face from the content — no run needed
+card    print a card's or Room's face from the content — no run needed
 replay  fold a run file back through the engine and print its transcript
 fuzz    play N seeds of uniformly random legal play under a command budget; prints failures only
 sim     play N seeds with a policy and print a balance report (win rate, floors, per-card stats)

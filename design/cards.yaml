@@ -204,7 +204,7 @@ cards:
     rarity: Cool
     cost: 2
     conditional_stat: true
-    text: Oomph equal to total costs of all cards you played this turn.
+    text: Oomph equal to the total printed cost of all cards in the play zone.
     flavor: Hurl whatever scrap isn't nailed down.
 
   - name: Heavy Pockets

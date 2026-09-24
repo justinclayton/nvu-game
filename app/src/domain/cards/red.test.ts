@@ -173,7 +173,7 @@ describe("Second Wind — 'Shuffle a Red card from your Exhaust pile into your d
   });
 });
 
-describe("Junk Launcher — 'Oomph equal to total costs of all cards you played this turn'", () => {
+describe("Junk Launcher — 'Oomph equal to the total printed cost of all cards in the play zone'", () => {
   it("is just its own cost when nothing else has been played", () => {
     const state = playing({
       Red: player({
@@ -221,6 +221,62 @@ describe("Junk Launcher — 'Oomph equal to total costs of all cards you played 
     // Junk Launcher (cost 2) plus the Shove played later the same turn (cost 1): 3.
     const launcherAfter = afterSecond.playZone.find((p) => p.card.name === "Junk Launcher");
     expect(launcherAfter && contributionOf(afterSecond, launcherAfter).oomph).toBe(3);
+  });
+
+  it("counts a card Gray plays after Red has played Junk Launcher", () => {
+    const state = playing({
+      Red: player({
+        deck: pile("Shove", 3),
+        hand: [card("Junk Launcher"), card("Shove"), card("Shove")],
+      }),
+      Gray: player({
+        deck: pile("Duck Under", 4),
+        hand: [card("Duck Under"), card("Coil Of Cable")],
+      }),
+    });
+    const shoves = state.Red.hand.filter((c) => c.name === "Shove").map((c) => c.id);
+    const { state: afterLauncher } = must(state, {
+      type: "PLAY_CARD",
+      character: "Red",
+      cardId: handCard(state, "Red", "Junk Launcher").id,
+      payWith: shoves,
+    });
+    // Junk Launcher is the only card in the play zone so far, costing 2.
+    expect(statPool(afterLauncher).oomph).toBe(2);
+
+    const { state: afterGray } = must(afterLauncher, {
+      type: "PLAY_CARD",
+      character: "Gray",
+      cardId: handCard(afterLauncher, "Gray", "Duck Under").id,
+      payWith: [handCard(afterLauncher, "Gray", "Coil Of Cable").id],
+    });
+    // Duck Under costs 1, and Gray owns it: Junk Launcher's Oomph goes up by 1.
+    const launcherAfter = afterGray.playZone.find((p) => p.card.name === "Junk Launcher");
+    expect(launcherAfter && contributionOf(afterGray, launcherAfter).oomph).toBe(3);
+  });
+
+  it("counts a card played for free at its printed cost", () => {
+    const state = playing({
+      Red: player({
+        deck: pile("Shove", 3),
+        hand: [card("Junk Launcher"), card("Shove"), card("Shove"), card("Fast Follow")],
+      }),
+      Gray: player({ deck: pile("Duck Under", 4), hand: [card("Coil Of Cable")] }),
+    });
+    // Gray plays first so Fast Follow's freeIf is satisfied.
+    const afterGray = play(state, [free("Gray", handCard(state, "Gray", "Coil Of Cable").id)]);
+    const shoves = afterGray.state.Red.hand.filter((c) => c.name === "Shove").map((c) => c.id);
+    const afterLauncher = play(afterGray.state, [
+      { type: "PLAY_CARD", character: "Red", cardId: handCard(afterGray.state, "Red", "Junk Launcher").id, payWith: shoves },
+    ]);
+    // Fast Follow is free (its cost is reduced to 0), but its printed cost is 1.
+    expect(costOf(afterLauncher.state, "Red", handCard(afterLauncher.state, "Red", "Fast Follow"))).toBe(0);
+    const afterFastFollow = play(afterLauncher.state, [
+      free("Red", handCard(afterLauncher.state, "Red", "Fast Follow").id),
+    ]);
+    // Coil Of Cable (0) + Junk Launcher (2) + Fast Follow's printed cost (1), even though it was free: 3.
+    const launcherAfter = afterFastFollow.state.playZone.find((p) => p.card.name === "Junk Launcher");
+    expect(launcherAfter && contributionOf(afterFastFollow.state, launcherAfter).oomph).toBe(3);
   });
 });
 

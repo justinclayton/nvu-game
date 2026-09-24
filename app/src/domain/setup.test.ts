@@ -19,7 +19,7 @@ describe("Setting up a floor", () => {
   });
 
   // Band 1's pool covers every floor 1-3 calls for (10, 9, 8), with every
-  // room cleared (issue #176) — the worst case, since a cleared room never
+  // room cleared — the worst case, since a cleared room never
   // returns to the pool.
   it("builds a full floor deck for every floor in band 1 (floors 1-3)", () => {
     const [initial] = createInitialState(1, content);

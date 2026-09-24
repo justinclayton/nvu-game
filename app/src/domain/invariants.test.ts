@@ -176,8 +176,8 @@ describe("seeded-run invariants", () => {
     expect(start).toEqual(again);
   });
 
-  // Pools are sized so a real run never comes up short (setup.test.ts,
-  // issue #176) — every seed here reaches a genuine Victory or Defeat well
+  // Pools are sized so a real run never comes up short (setup.test.ts)
+  // — every seed here reaches a genuine Victory or Defeat well
   // before MAX_COMMANDS, never Aborted.
   it("reaches a finished run from every seed", () => {
     for (const seed of SEEDS) {

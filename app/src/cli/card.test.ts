@@ -1,9 +1,4 @@
-/* `bin/nvu card NAME` prints a card's face with no run needed, and, as of this
- * test, a Room's the same way — name, band, each challenge's thresholds and
- * outcome, and the Flee text (design/cli-sim/spec.md, "card NAME prints a
- * card's face from the content"). Run through the real launcher so args.ts,
- * main.ts and render.ts are all exercised together, the way a playtester
- * calls it. */
+/* `bin/nvu card NAME`, run through the real launcher. */
 import { execFileSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";

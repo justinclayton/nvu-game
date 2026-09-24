@@ -11,7 +11,7 @@ import { dirname, join } from "node:path";
 import { stdout } from "node:process";
 
 import { runData, type RunFile } from "@application/exportRun";
-import { logLines } from "@application/narrate";
+import { logLines, tailEvents } from "@application/narrate";
 import { createSession, type Note, type SavedRun, type Session } from "@application/session";
 import { CARD_CONTENT } from "@content/index";
 import { resolveCardName } from "@content/names";
@@ -347,7 +347,7 @@ function showPlay(run: string | null, action: Extract<PlayAction, { kind: "show"
     return 0;
   }
   if (action.events !== null) {
-    const lines = logLines(events, notes).slice(-action.events);
+    const lines = tailEvents(logLines(events, notes), action.events);
     for (const line of lines) out(line.kind === "note" ? `NOTE — ${line.text}` : line.text);
   }
   if (action.table) out(renderTable(state, staged));

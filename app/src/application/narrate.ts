@@ -56,6 +56,8 @@ export function describeEvent(event: DomainEvent): string {
       return `${event.character} is Down — ${event.cause}. The run is lost.`;
     case "REWARD_REVEALED":
       return `${event.character}'s reward pool shows ${event.card.name}.`;
+    case "REWARD_POOL_EMPTY":
+      return `${event.character}'s reward pool is empty — nothing to reveal.`;
     case "REWARD_TAKEN":
       return `${event.character} takes ${event.card.name}.`;
     case "REWARD_DECLINED":
@@ -102,3 +104,21 @@ export function logLines(
 /** The class suffix a line carries, so the screen can colour it. */
 export const lineKindOf = (line: LogLine): string =>
   line.kind === "note" ? "note" : line.event.type.toLowerCase();
+
+/**
+ * The last N *event* lines, plus any note anchored among them — what
+ * `show --events N` prints. A note does not spend one of the N slots: a long
+ * one, printed in full, would otherwise fill the window on its own with
+ * nothing else in it. `n <= 0` prints nothing.
+ */
+export function tailEvents(lines: readonly LogLine[], n: number): readonly LogLine[] {
+  if (n <= 0) return [];
+  let seen = 0;
+  for (let i = lines.length - 1; i >= 0; i--) {
+    if (lines[i]?.kind === "event") {
+      seen += 1;
+      if (seen === n) return lines.slice(i);
+    }
+  }
+  return lines;
+}

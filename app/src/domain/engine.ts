@@ -713,7 +713,11 @@ function drain(state: GameState, run: Run): GameState {
         s = withEffects(s, rest);
         continue;
       }
-      if (options.length > 1) {
+      // Asking "who" is pointless when every standing character's reward
+      // pool is already empty — either answer reveals nothing, so there is
+      // no real choice to make.
+      const moot = head.type === "RevealReward" && options.every((c) => s.pools[c].length === 0);
+      if (options.length > 1 && !moot) {
         return { ...s, pending: { kind: "ChooseCharacter", prompt: promptFor(head), options, source: null } };
       }
       s = withEffects(s, [retarget(head, only), ...rest]);
@@ -725,7 +729,10 @@ function drain(state: GameState, run: Run): GameState {
       // it or skip it.
       const card = s.pools[head.who][0];
       s = withEffects(s, rest);
-      if (!card) continue;
+      if (!card) {
+        run.events.push({ type: "REWARD_POOL_EMPTY", character: head.who });
+        continue;
+      }
       run.events.push({ type: "REWARD_REVEALED", character: head.who, card });
       s = settle(s, run);
       if (s.phase === "GameOver") return s;

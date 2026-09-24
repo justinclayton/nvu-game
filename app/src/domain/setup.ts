@@ -158,7 +158,7 @@ export function returnRoomsToSupply(state: GameState): GameState {
 /* ---------------------------------------------------------- the whole run */
 
 export const emptyTurnRecord = (): TurnRecord => ({
-  paid: { Red: 0, Gray: 0 },
+  paidFor: {},
   freePlays: 0,
   goodStuffTaken: { Red: 0, Gray: 0 },
   fired: [],

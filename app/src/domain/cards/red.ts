@@ -67,13 +67,14 @@ export const RED: Registry = {
     },
   },
 
-  /* "This has Oomph +2 for each card you paid with this turn."
+  /* "This card gains Oomph +2 for each card spent to play it this turn."
    *
    * Cards paid with have already gone to the discard pile, so the turn record is
-   * what counts them. */
+   * what counts them — keyed by this card's own id, not its owner, so a later
+   * payment for a different card doesn't also inflate this one. */
   "Junk Launcher": {
-    stats(state, owner, card) {
-      return { oomph: card.oomph + 2 * state.thisTurn.paid[owner], scramble: card.scramble };
+    stats(state, _owner, card) {
+      return { oomph: card.oomph + 2 * (state.thisTurn.paidFor[card.id] ?? 0), scramble: card.scramble };
     },
   },
 

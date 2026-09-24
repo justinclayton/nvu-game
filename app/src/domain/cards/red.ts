@@ -1,7 +1,7 @@
 /* Red's cards. Keyed by the name design/cards.yaml makes unique. */
 
 import type { DomainEvent } from "../types";
-import { costPlayedBy, playedBy } from "../queries";
+import { playedBy } from "../queries";
 import { drawOne, playerOf, shuffleIntoDeck, takeFrom } from "../verbs";
 import { ask, done, nothing, source, type Registry } from "./behaviour";
 
@@ -59,10 +59,11 @@ export const RED: Registry = {
     },
   },
 
-  /* "Oomph equal to total costs of all cards you played this turn." */
+  /* "Oomph equal to the total printed cost of all cards in the play zone." */
   "Junk Launcher": {
-    stats(state, owner, card) {
-      return { oomph: costPlayedBy(state, owner), scramble: card.scramble };
+    stats(state, _owner, card) {
+      const total = state.playZone.reduce((sum, p) => sum + p.card.cost, 0);
+      return { oomph: total, scramble: card.scramble };
     },
   },
 

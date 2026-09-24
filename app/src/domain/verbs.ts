@@ -315,7 +315,7 @@ export function takeGoodStuff(
     const [card, rest, seed] = drawBlind(next.pools.goodStuff, next.seed);
     // Unkept Good Stuff returns to this pool at Ascend, but it can still run
     // dry mid-floor. Say so — a reward the log announced but the pool could
-    // not pay must not go silent (issue #37).
+    // not pay must not go silent.
     if (!card) {
       events.push({ type: "STUFF_POOL_EMPTY", character: c, pool: "good_stuff" });
       return next;

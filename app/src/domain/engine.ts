@@ -53,6 +53,7 @@ import {
   shuffleIntoDeck,
   spendFreePlay,
   standing,
+  takeFrom,
   takeGoodStuff,
   topDeck,
   withPlayer,
@@ -221,10 +222,12 @@ function locate(state: GameState, c: Character, cardId: CardId): readonly [Pile,
 
 function removeFrom(state: GameState, c: Character, pile: Pile, cardId: CardId): GameState {
   const p = playerOf(state, c);
-  const without = (list: readonly Card[]) => list.filter((x) => x.id !== cardId);
-  if (pile === "deck") return withPlayer(state, c, { ...p, deck: without(p.deck) });
-  if (pile === "hand") return withPlayer(state, c, { ...p, hand: without(p.hand) });
-  return withPlayer(state, c, { ...p, discard: without(p.discard) });
+  if (pile === "deck") {
+    return withPlayer(state, c, { ...p, deck: p.deck.filter((x) => x.id !== cardId) });
+  }
+  const list = pile === "hand" ? p.hand : p.discard;
+  const card = list.find((x) => x.id === cardId);
+  return card ? takeFrom(state, c, pile, [card]) : state;
 }
 
 /** Every Stuff card this character's deck, hand or discard pile holds right now. */

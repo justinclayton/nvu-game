@@ -225,17 +225,6 @@ export function takeFromHand(state: GameState, c: Character, cards: readonly Car
   return withPlayer(state, c, { ...p, hand: p.hand.filter((x) => !ids.has(x.id)) });
 }
 
-/** Cards lifted back out of a discard pile, for a card that says it can. */
-export function takeFromDiscard(
-  state: GameState,
-  c: Character,
-  cards: readonly Card[],
-): GameState {
-  const ids = new Set(cards.map((x) => x.id));
-  const p = playerOf(state, c);
-  return withPlayer(state, c, { ...p, discard: p.discard.filter((x) => !ids.has(x.id)) });
-}
-
 /**
  * Cards lifted back out of the Exhaust pile, for a card that says it can.
  * Rulebook, Setup: the Exhaust pile is otherwise permanent — nothing else

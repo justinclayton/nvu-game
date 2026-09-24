@@ -750,6 +750,38 @@ describe("Room kinds: Room and Stairwell", () => {
       expect(eventTypes(events)).not.toContain("CARD_SCRAPPED");
       expect(next.Gray.hand.some((c) => c.name === "Rust")).toBe(true);
     });
+
+    it("resolves as declined with no prompt when neither hand holds a Bad Stuff card", () => {
+      const state = rig({
+        phase: "Play",
+        activeRoom: room("Automated Defense Turret"),
+        Red: player({
+          deck: pile("Shove", 4),
+          hand: [card("Charge In"), card("Charge In"), card("Pry Bar"), ...pile("Shove", 4)],
+        }),
+        Gray: player({ deck: pile("Duck Under", 5) }),
+      });
+      const r = ids(state, "Red");
+      const { state: next, events } = play(state, [
+        {
+          type: "PLAY_CARD",
+          character: "Red",
+          cardId: r[0] as CardId,
+          payWith: [r[3] as CardId, r[4] as CardId],
+        },
+        {
+          type: "PLAY_CARD",
+          character: "Red",
+          cardId: r[1] as CardId,
+          payWith: [r[5] as CardId, r[6] as CardId],
+        },
+        playFree("Red", r[2] as CardId),
+        { type: "END_PLAY" },
+      ]);
+      expect(events.filter((e) => e.type === "THRESHOLD_MET")).toHaveLength(1);
+      expect(eventTypes(events)).toContain("ROOM_CLEARED");
+      expect(next.pending).toBeNull();
+    });
   });
 });
 

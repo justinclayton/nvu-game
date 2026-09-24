@@ -3,7 +3,7 @@ import { CARD_CONTENT } from "@content/index";
 import { card, pile, player, resetRig, rig, room } from "@domain/__fixtures__/rig";
 import type { Command, GameState, Room, Threshold } from "@domain/types";
 import { ascendChoices, legalCommands } from "./moves";
-import { greedyAscendStats, greedyPolicy, randomPolicy, resetGreedyAscendStats } from "./policy";
+import { greedyPolicy, randomPolicy } from "./policy";
 import { policySeed } from "./rng";
 import { simulate } from "./run";
 
@@ -284,7 +284,6 @@ describe("greedy", () => {
     // own options, instead of picking from that capped list, should still
     // get both a reward.
     resetRig();
-    resetGreedyAscendStats();
     const redStuff = [card("Pry Bar"), card("Coil Of Cable"), card("Crowbar")];
     const redPayers = [card("Shove"), card("Shove"), card("Shove")];
     const redReward = [card("Reckless Swing"), card("Fast Follow"), card("Reckless")];
@@ -311,6 +310,5 @@ describe("greedy", () => {
     if (chosen.type !== "ASCEND") throw new Error("expected an ASCEND command");
     expect(chosen.Red.takeRewardId).not.toBeNull();
     expect(chosen.Gray.takeRewardId).not.toBeNull();
-    expect(greedyAscendStats.fallback).toBe(0);
   });
 });

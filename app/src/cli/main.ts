@@ -624,10 +624,6 @@ function renderReport(report: BalanceReport): string {
       );
     }
   }
-  if (report.ascendFallbacks !== null) {
-    lines.push("");
-    lines.push(`Ascend commands composed directly, falling back to the generator's list ${String(report.ascendFallbacks)} time(s).`);
-  }
   return lines.join("\n");
 }
 

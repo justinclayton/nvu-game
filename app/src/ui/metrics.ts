@@ -44,6 +44,3 @@ export const STACK_STEP_MAX = 14;
 
 /** How much larger a card offered as a reward is drawn while it floats above the mat. */
 export const FLOAT_SCALE = 1.22;
-
-/** The zoomed copy shown while a card is under the pointer. */
-export const INSPECT_W = 230;

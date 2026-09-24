@@ -97,7 +97,10 @@ export const STUFF: Registry = {
    *
    * Rulebook, Keywords: Empty deck: an empty deck with a non-empty discard still
    * draws — it reshuffles first — so only a character with both empty, or already
-   * Down, is not a legal choice. */
+   * Down, is not a legal choice.
+   *
+   * Skips the character choice when only one side is eligible to draw — the
+   * same "no real choice" shape as Stich-Em-Ups' heal target above. */
   "Grav Harness": {
     onPlay(state, ctx) {
       const options = CHARACTERS.filter((c) => {
@@ -105,6 +108,12 @@ export const STUFF: Registry = {
         return !p.down && (p.deck.length > 0 || p.discard.length > 0);
       });
       if (options.length === 0) return nothing(state);
+      if (options.length === 1) {
+        const only = options[0];
+        if (!only) return nothing(state);
+        const events: DomainEvent[] = [];
+        return done(drawOne(state, only, events), events);
+      }
       return ask(state, {
         kind: "ChooseCharacter",
         prompt: "Who draws a card?",

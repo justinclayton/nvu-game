@@ -348,6 +348,7 @@ export type DomainEvent =
   | { readonly type: "FLED_RESHUFFLED"; readonly room: Room }
   | { readonly type: "WENT_DOWN"; readonly character: Character; readonly cause: string }
   | { readonly type: "REWARD_REVEALED"; readonly character: Character; readonly card: Card }
+  | { readonly type: "REWARD_POOL_EMPTY"; readonly character: Character }
   | { readonly type: "REWARD_TAKEN"; readonly character: Character; readonly card: Card }
   | { readonly type: "REWARD_DECLINED"; readonly character: Character }
   | { readonly type: "CLEANUP_BEGAN" }

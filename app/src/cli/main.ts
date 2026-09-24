@@ -42,9 +42,15 @@ import {
   type ReplayRequest,
   type SimRequest,
 } from "./args";
-import { cardLine, moveHint, printedFaceLine, renderTable } from "./render";
+import { cardLine, moveHint, printedFaceLine, printedRoomLines, renderTable } from "./render";
 
 const content = CARD_CONTENT;
+
+/** A card or a Room, named the same way (`bin/nvu card NAME`) — matched against both at once, so an ambiguous name across the two is refused like any other. */
+const PRINTABLES = [
+  ...content.cards.map((face) => ({ kind: "card" as const, name: face.name, face })),
+  ...content.rooms.map((face) => ({ kind: "room" as const, name: face.name, face })),
+];
 
 const out = (text: string): void => {
   stdout.write(text.endsWith("\n") ? text : text + "\n");
@@ -471,12 +477,16 @@ function play(request: PlayRequest): number {
 /* ------------------------------------------------------------------ card */
 
 function cardFace(request: CardRequest): number {
-  const named = resolveCardName(request.name, content.cards);
+  const named = resolveCardName(request.name, PRINTABLES);
   if (!named.ok) {
     out(`Refused: ${named.reason}`);
     return 1;
   }
-  out(printedFaceLine(named.card));
+  if (named.card.kind === "room") {
+    for (const line of printedRoomLines(named.card.face)) out(line);
+  } else {
+    out(printedFaceLine(named.card.face));
+  }
   return 0;
 }
 

@@ -11,7 +11,7 @@ import {
   thresholdLines,
 } from "@domain/queries";
 import type { Card, Character, GameState, Room } from "@domain/types";
-import type { CardFace } from "@domain/printed";
+import type { CardFace, RoomFace, StatRequirement } from "@domain/printed";
 import { CHARACTERS, playerOf } from "@domain/verbs";
 import { currentQuestion, describeStagedAnswer, type StagedAnswer } from "./ascend";
 
@@ -43,6 +43,27 @@ export function printedFaceLine(card: CardFace): string {
   const bits = [`cost ${String(card.cost)}`, statsOf(card), kindOf(card)].filter((s) => s !== "");
   const text = card.text.trim() === "" ? "" : ` — ${card.text.trim()}`;
   return `${card.name} [${bits.join("; ")}]${text}`;
+}
+
+const requirementText = (requires: StatRequirement): string => {
+  const parts: string[] = [];
+  if (requires.oomph > 0) parts.push(`Oomph ${String(requires.oomph)}`);
+  if (requires.scramble > 0) parts.push(`Scramble ${String(requires.scramble)}`);
+  return parts.join(" and ");
+};
+
+/** A Room's printed face, with no run to check thresholds against — `bin/nvu card NAME`. */
+export function printedRoomLines(room: RoomFace): string[] {
+  const band = room.band === null ? "no band" : `band ${String(room.band)}`;
+  const lines = [`${room.name} [${room.kind}; ${band}]`];
+  if (room.text.trim() !== "") lines.push(`  ${room.text.trim()}`);
+  for (const challenge of room.challenges) {
+    for (const threshold of challenge.thresholds) {
+      lines.push(`  ${requirementText(threshold.requires)}: ${threshold.outcome}`);
+    }
+  }
+  lines.push(`  Flee: ${room.flee.text}`);
+  return lines;
 }
 
 function roomLines(state: GameState, room: Room): string[] {

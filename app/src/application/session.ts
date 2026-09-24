@@ -170,10 +170,12 @@ export function loadSession(
   notes: readonly Note[] = [],
 ): Session {
   const session = createSession(saved.seed, content);
-  for (const command of saved.commands) {
+  for (const [index, command] of saved.commands.entries()) {
     const result = session.getState().dispatch(command);
     if (!result.ok) {
-      throw new Error(`Could not load the saved run: ${result.reason.message}`);
+      throw new Error(
+        `Command ${String(index)} (${command.type}) is no longer legal: ${result.reason.message}`,
+      );
     }
   }
   session.setState({ notes });

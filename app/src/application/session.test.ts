@@ -138,7 +138,7 @@ describe("save and replay", () => {
 
   it("says so when a save and the rules have diverged", () => {
     expect(() => loadSession({ seed: SEED, commands: [{ type: "END_PLAY" }] }, content)).toThrow(
-      /Could not load the saved run/,
+      /Command 0 \(END_PLAY\) is no longer legal/,
     );
   });
 });

@@ -12,7 +12,7 @@ import { stdout } from "node:process";
 
 import { runData, type RunFile } from "@application/exportRun";
 import { logLines, tailEvents } from "@application/narrate";
-import { createSession, type Note, type SavedRun, type Session } from "@application/session";
+import { createSession, loadSession, type Note, type SavedRun, type Session } from "@application/session";
 import { CARD_CONTENT } from "@content/index";
 import { resolveCardName } from "@content/names";
 import { costOf, payOptions, playableCards } from "@domain/queries";
@@ -79,23 +79,13 @@ function writeRunFile(path: string, session: Session): void {
   writeFileSync(path, runData(session.getState(), new Date()).text);
 }
 
-/**
- * Replay a saved run into a live session, the same fold `application/session`
- * does, but naming the index of a command the rules no longer accept — that
- * is how a rules change that broke a saved run shows itself.
- */
-function loadRunIndexed(saved: SavedRun, notes: readonly Note[] = []): Session {
-  const session = createSession(saved.seed, content);
-  for (const [index, command] of saved.commands.entries()) {
-    const result = session.getState().dispatch(command);
-    if (!result.ok) {
-      throw new UsageError(
-        `Command ${String(index)} (${command.type}) is no longer legal: ${result.reason.message}`,
-      );
-    }
+/** `loadSession`, with any load failure recast as the CLI's usage-error idiom. */
+function loadRun(saved: SavedRun, notes: readonly Note[]): Session {
+  try {
+    return loadSession(saved, content, notes);
+  } catch (error) {
+    throw new UsageError(error instanceof Error ? error.message : String(error));
   }
-  session.setState({ notes });
-  return session;
 }
 
 /* -------------------------------------------------------- the run pointer */
@@ -118,6 +108,23 @@ function runPathFor(action: string, run: string | null, seed: number | null): st
 function rememberRun(path: string): void {
   mkdirSync(dirname(path), { recursive: true });
   writeFileSync(CURRENT, `${path}\n`);
+}
+
+/**
+ * Resolve, remember and load the run a command acts on: the preamble every
+ * continuing `play` move shares (`show`, `pile`, and every move but `new`).
+ */
+function openRun(
+  action: string,
+  run: string | null,
+  seed: number | null = null,
+): { path: string; session: Session } {
+  const path = runPathFor(action, run, seed);
+  rememberRun(path);
+  if (!existsSync(path)) throw new UsageError(`${path} does not exist. Start it with play new.`);
+  const file = readRunFile(path);
+  if (!file.run) throw new UsageError(`${path} was not played from a seed and cannot continue.`);
+  return { path, session: loadRun(file.run, file.notes) };
 }
 
 const ascendSidecarPath = (runPath: string): string => `${runPath}.ascend.json`;
@@ -145,6 +152,24 @@ function matchCharacter(raw: string): Character {
 
 /* ------------------------------------------------------- building commands */
 
+/**
+ * Resolve each name against `candidates` in turn, narrowing to what is left
+ * unconsumed after every match — the shape a payer list, a `choose` answer
+ * and an `order` answer all share.
+ */
+function resolveEach(names: readonly string[], candidates: readonly Card[]): Card[] {
+  const consumed = new Set<CardId>();
+  const resolved: Card[] = [];
+  for (const name of names) {
+    const pool = candidates.filter((c) => !consumed.has(c.id));
+    const named = resolveCardName(name, pool);
+    if (!named.ok) throw new MoveRefused(named.reason);
+    consumed.add(named.card.id);
+    resolved.push(named.card);
+  }
+  return resolved;
+}
+
 function buildPlayCard(
   state: GameState,
   action: Extract<PlayAction, { kind: "card" }>,
@@ -157,15 +182,7 @@ function buildPlayCard(
   if (!named.ok) throw new MoveRefused(named.reason);
   const card = named.card;
 
-  const consumed = new Set<CardId>();
-  const payWith: CardId[] = [];
-  for (const payerName of action.pay) {
-    const candidates = payOptions(state, character, card.id).filter((c) => !consumed.has(c.id));
-    const payer = resolveCardName(payerName, candidates);
-    if (!payer.ok) throw new MoveRefused(payer.reason);
-    consumed.add(payer.card.id);
-    payWith.push(payer.card.id);
-  }
+  const payWith = resolveEach(action.pay, payOptions(state, character, card.id)).map((c) => c.id);
   const cost = costOf(state, character, card);
   if (payWith.length !== cost) {
     throw new MoveRefused(`${card.name} costs ${String(cost)}; ${String(payWith.length)} named.`);
@@ -190,15 +207,7 @@ function buildChoose(state: GameState, action: Extract<PlayAction, { kind: "choo
   }
 
   if (pending.kind === "ChooseCards") {
-    const consumed = new Set<CardId>();
-    const cardIds: CardId[] = [];
-    for (const name of action.names) {
-      const candidates = pending.options.filter((c) => !consumed.has(c.id));
-      const named = resolveCardName(name, candidates);
-      if (!named.ok) throw new MoveRefused(named.reason);
-      consumed.add(named.card.id);
-      cardIds.push(named.card.id);
-    }
+    const cardIds = resolveEach(action.names, pending.options).map((c) => c.id);
     return { type: "CHOOSE_CARDS", cardIds };
   }
 
@@ -210,15 +219,7 @@ function buildOrder(state: GameState, action: Extract<PlayAction, { kind: "order
   if (!pending || pending.kind !== "OrderCards") {
     throw new MoveRefused(pending ? `Waiting on: ${pending.prompt}` : "Nothing is waiting to be answered.");
   }
-  const consumed = new Set<CardId>();
-  const cardIds: CardId[] = [];
-  for (const name of action.names) {
-    const candidates = pending.cards.filter((c) => !consumed.has(c.id));
-    const named = resolveCardName(name, candidates);
-    if (!named.ok) throw new MoveRefused(named.reason);
-    consumed.add(named.card.id);
-    cardIds.push(named.card.id);
-  }
+  const cardIds = resolveEach(action.names, pending.cards).map((c) => c.id);
   return { type: "ORDER_CARDS", cardIds };
 }
 
@@ -330,12 +331,7 @@ function dispatchOrThrow(session: Session, command: Command): void {
 /* ----------------------------------------------------------------- play */
 
 function showPlay(run: string | null, action: Extract<PlayAction, { kind: "show" }>): number {
-  const path = runPathFor("show", run, null);
-  rememberRun(path);
-  if (!existsSync(path)) throw new UsageError(`${path} does not exist. Start it with play new.`);
-  const file = readRunFile(path);
-  if (!file.run) throw new UsageError(`${path} was not played from a seed and cannot continue.`);
-  const session = loadRunIndexed(file.run, file.notes);
+  const { path, session } = openRun("show", run);
   const { state, events, notes } = session.getState();
   const staged = readAscendSidecar(ascendSidecarPath(path));
 
@@ -356,12 +352,7 @@ function showPlay(run: string | null, action: Extract<PlayAction, { kind: "show"
 }
 
 function showPile(run: string | null, action: Extract<PlayAction, { kind: "pile" }>): number {
-  const path = runPathFor("pile", run, null);
-  rememberRun(path);
-  if (!existsSync(path)) throw new UsageError(`${path} does not exist. Start it with play new.`);
-  const file = readRunFile(path);
-  if (!file.run) throw new UsageError(`${path} was not played from a seed and cannot continue.`);
-  const session = loadRunIndexed(file.run, file.notes);
+  const { session } = openRun("pile", run);
   const state = session.getState().state;
   const character = matchCharacter(action.character);
   const p = playerOf(state, character);
@@ -391,22 +382,16 @@ function play(request: PlayRequest): number {
   if (action.kind === "show") return showPlay(request.run, action);
   if (action.kind === "pile") return showPile(request.run, action);
 
-  const path =
-    action.kind === "new"
-      ? runPathFor("new", request.run, action.seed)
-      : runPathFor(action.kind, request.run, null);
-  rememberRun(path);
-
+  let path: string;
   let session: Session;
   let before: number;
   if (action.kind === "new") {
+    path = runPathFor("new", request.run, action.seed);
+    rememberRun(path);
     session = createSession(action.seed, content);
     before = 0;
   } else {
-    if (!existsSync(path)) throw new UsageError(`${path} does not exist. Start it with play new.`);
-    const file = readRunFile(path);
-    if (!file.run) throw new UsageError(`${path} was not played from a seed and cannot continue.`);
-    session = loadRunIndexed(file.run, file.notes);
+    ({ path, session } = openRun(action.kind, request.run));
     before = logLines(session.getState().events, session.getState().notes).length;
   }
 
@@ -524,7 +509,7 @@ function cardFace(request: CardRequest): number {
 function replayRun(request: ReplayRequest): number {
   const file = readRunFile(request.file);
   if (!file.run) throw new UsageError(`${request.file} was not played from a seed and cannot replay.`);
-  const session = loadRunIndexed(file.run, file.notes ?? []);
+  const session = loadRun(file.run, file.notes ?? []);
   const s = session.getState();
 
   const recorded = `floor ${String(file.floor)}, turn ${String(file.turn)}, ${file.outcome ?? `in progress (${file.phase})`}`;

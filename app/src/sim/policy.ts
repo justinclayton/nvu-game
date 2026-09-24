@@ -2,9 +2,9 @@
  *
  * Random play is what fuzz uses to shake the engine, and an agent playtester
  * stands in for anything smarter about how a person plays. The greedy policy
- * (issue #93) is neither: it is fixed, simple, and deterministic, built to
- * produce balance volume across many seeds for `nvu sim`, not to play well.
- * design/cli-sim/spec.md's "there is no bot" ruling predates this issue; the
+ * is neither: it is fixed, simple, and deterministic, built to produce
+ * balance volume across many seeds for `nvu sim`, not to play well.
+ * design/cli-sim/spec.md's "there is no bot" ruling no longer holds; the
  * spec is updated alongside this file.
  */
 
@@ -208,14 +208,12 @@ function choosePlay(state: GameState, legal: readonly Command[]): Command {
  * Below this many live cards (deck + hand + discard — the pool a Scrap
  * actually shrinks; the Exhaust pile is already gone for the run and the
  * Scrapyard doesn't come back), the bot stops paying at Settle your Stuff
- * altogether. [agent] — raised from 8 to 12 on the loss-accounting data in
- * issue #102: most of a run's Exhaust comes from Fleeing rooms, not from
+ * altogether. Most of a run's Exhaust comes from Fleeing rooms, not from
  * cards the bot chooses to play, so it is not something a play-time choice
- * can head off. Scrapping at Ascend was the one loss this policy controls
- * outright, and at 8 it kept spending it down to a size well under playtest
- * 4's observed 11-14 live cards. 12 leaves that same "full hand plus a few
- * spare" headroom (`HAND_CAP` + 7) while banking more of the deck against
- * the Exhaust a Flee is going to cost it anyway.
+ * can head off. Scrapping at Ascend is the one loss this policy controls
+ * outright: 12 leaves a "full hand plus a few spare" headroom (`HAND_CAP` + 7)
+ * while banking more of the deck against the Exhaust a Flee is going to cost
+ * it anyway — well under playtest 4's observed 11-14 live cards.
  */
 const MIN_LIVE_DECK = 12;
 
@@ -387,7 +385,7 @@ function choosePending(state: GameState, legal: readonly Command[]): Command {
 }
 
 /**
- * A fixed, deterministic bot (issue #93): play what clears the room, pay
+ * A fixed, deterministic bot: play what clears the room, pay
  * with the cheapest cards, take the reward, keep Good Stuff you can pay for
  * and shed Bad Stuff you can. It never draws on `rng` — ties are broken by
  * card id — so the same seed always plays the same game. Everywhere but

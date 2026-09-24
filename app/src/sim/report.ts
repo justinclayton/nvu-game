@@ -1,4 +1,4 @@
-/* A balance report over many seeds (issue #93): win rate, floor reached, why
+/* A balance report over many seeds: win rate, floor reached, why
  * runs end, deck/Exhaust size per character after each Ascend, and per-card
  * play/take/keep counts. Everything here reads events and states `simulate`
  * already produces, through `RunOptions.onStep`, so one pass per seed is

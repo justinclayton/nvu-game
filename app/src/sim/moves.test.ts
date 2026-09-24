@@ -143,28 +143,25 @@ describe("legalCommands", () => {
 });
 
 describe("ascendChoices", () => {
-  it("crosses every reward with every way of settling one Stuff card, and with settling none", () => {
+  it("lists each offered reward, or none, and crosses both characters' choices in full", () => {
     resetRig();
-    const pryBar = card("Pry Bar");
     const state = rig({
       phase: "Ascend",
       roomSupply: [room("Security Turnstile")],
-      Red: player({ deck: pile("Shove", 2), discard: [pryBar, ...pile("Charge In", 2)] }),
+      Red: player({ deck: pile("Shove", 2), discard: pile("Charge In", 2) }),
       Gray: player({ deck: pile("Duck Under", 2) }),
     });
     const offered = { Red: state.pools.Red.slice(0, 3), Gray: state.pools.Gray.slice(0, 3) };
     const ready = { ...state, offer: offered };
 
-    // Red: (settle nothing + 4 payers for the one Stuff card — a payer may
-    // come from the deck too, not only the discard pile) × (decline + 3
-    // rewards) = 20. Gray: 1 × 4.
+    // Each side: decline + 3 rewards = 4. Crossed: 16.
     const red = ascendChoices(ready, "Red");
     const gray = ascendChoices(ready, "Gray");
-    expect(red).toHaveLength(20);
+    expect(red).toHaveLength(4);
     expect(gray).toHaveLength(4);
     for (const choice of red) {
       expect(validate(ready, { type: "ASCEND", Red: choice, Gray: gray[0]! })).toBeNull();
     }
-    expect(legalCommands(ready)).toHaveLength(80);
+    expect(legalCommands(ready)).toHaveLength(16);
   });
 });

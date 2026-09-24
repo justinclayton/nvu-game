@@ -1,13 +1,12 @@
 /* A balance report over many seeds: win rate, floor reached, why
  * runs end, deck/Exhaust size per character after each Ascend, and per-card
- * play/take/keep counts. Everything here reads events and states `simulate`
+ * play/take counts. Everything here reads events and states `simulate`
  * already produces, through `RunOptions.onStep`, so one pass per seed is
  * enough — nothing is replayed twice.
  */
 
-import { settleableStuff } from "@domain/queries";
 import type { CardContent } from "@domain/printed";
-import type { AscendChoice, Character, Command, DomainEvent, GameState } from "@domain/types";
+import type { Character, Command, DomainEvent, GameState } from "@domain/types";
 import { CHARACTERS, playerOf } from "@domain/verbs";
 import type { Policy } from "./policy";
 import { seedsFrom, simulate, type RunResult, type StopReason } from "./run";
@@ -26,7 +25,7 @@ export interface CharacterAscendStats {
   readonly ascends: number;
   readonly meanDeckSize: number;
   readonly meanExhaustSize: number;
-  /** deck + hand + discard right after the Ascend — the same total `policy.ts`'s `liveDeckSize` reads. */
+  /** deck + hand + discard right after the Ascend. */
   readonly meanLiveSize: number;
 }
 
@@ -34,16 +33,13 @@ export interface CardStat {
   readonly name: string;
   readonly played: number;
   readonly taken: number;
-  readonly kept: number;
 }
 
 /**
  * Where one character's cards went on one floor: Exhausted (`CARD_EXHAUSTED`),
- * Scrapped (`CARD_SCRAPPED`, e.g. paying to settle Stuff), paid as a Play
- * cost (`COST_PAID` — discarded, not lost) and Good Stuff returned to the
- * pool at Settle your Stuff for going unpaid (rulebook, Ascending, step 2).
- * Only the first two, plus a returned Good Stuff, shrink the live deck
- * (`policy.ts`, `liveDeckSize`) — paying a cost does not.
+ * Scrapped (`CARD_SCRAPPED`), and paid as a Play cost (`COST_PAID` —
+ * discarded, not lost). Only the first two shrink the live deck (deck + hand
+ * + discard) — paying a cost does not.
  */
 export interface FloorLossRow {
   readonly floor: number;
@@ -51,7 +47,6 @@ export interface FloorLossRow {
   readonly exhausted: number;
   readonly scrapped: number;
   readonly paidAsCost: number;
-  readonly stuffReturned: number;
 }
 
 export interface BalanceReport {
@@ -83,17 +78,15 @@ function endReasonOf(run: RunResult): string {
 interface CardTally {
   played: number;
   taken: number;
-  kept: number;
 }
 
 interface LossTally {
   exhausted: number;
   scrapped: number;
   paidAsCost: number;
-  stuffReturned: number;
 }
 
-const emptyLossTally = (): LossTally => ({ exhausted: 0, scrapped: 0, paidAsCost: 0, stuffReturned: 0 });
+const emptyLossTally = (): LossTally => ({ exhausted: 0, scrapped: 0, paidAsCost: 0 });
 
 class Accumulator {
   runs = 0;
@@ -110,7 +103,7 @@ class Accumulator {
   private tally(name: string): CardTally {
     let t = this.cardTallies.get(name);
     if (!t) {
-      t = { played: 0, taken: 0, kept: 0 };
+      t = { played: 0, taken: 0 };
       this.cardTallies.set(name, t);
     }
     return t;
@@ -148,25 +141,6 @@ class Accumulator {
         this.deckSums[character] += p.deck.length;
         this.exhaustSums[character] += p.exhaust.length;
         this.liveSums[character] += p.deck.length + p.hand.length + p.discard.length;
-        this.recordKeeps(before, character, command[character]);
-      }
-    }
-  }
-
-  /**
-   * Good Stuff kept iff paid for; Bad Stuff kept iff not (rulebook, section
-   * 10, step 2). An unpaid Good Stuff card shuffles back into the pool
-   * (`engine.ts`, `settleStuff`), which is a loss from that character's live
-   * deck even though no `DomainEvent` says so directly.
-   */
-  private recordKeeps(before: GameState, character: Character, choice: AscendChoice): void {
-    for (const card of settleableStuff(before, character)) {
-      const settlement = choice.settle.find((s) => s.cardId === card.id);
-      const paid = (settlement?.payWith ?? null) !== null;
-      const kept = card.kind === "good_stuff" ? paid : !paid;
-      if (kept) this.tally(card.name).kept += 1;
-      if (card.kind === "good_stuff" && !paid) {
-        this.lossTally(before.floor, character).stuffReturned += 1;
       }
     }
   }

@@ -1,8 +1,8 @@
-/* Rulebook, Ascending — shuffle the hand into the deck, Settle your Stuff, the
- * reward, building the next floor. */
+/* Rulebook, Ascending — shuffle the hand into the deck, the reward, building
+ * the next floor. Stuff a character holds stays in their deck until it is
+ * Scrapped or Exhausted; nothing returns it to a pool. */
 
 import { beforeEach, describe, expect, it } from "vitest";
-import { execute } from "./engine";
 import {
   card,
   eventTypes,
@@ -18,7 +18,7 @@ import type { AscendChoice, GameState } from "./types";
 
 beforeEach(resetRig);
 
-const NOTHING: AscendChoice = { settle: [], takeRewardId: null };
+const NOTHING: AscendChoice = { takeRewardId: null };
 
 /** A state parked on the Ascend phase, with the piles a test wants. */
 function atAscension(over: Partial<GameState> = {}): GameState {
@@ -30,7 +30,7 @@ function atAscension(over: Partial<GameState> = {}): GameState {
       ...Array.from({ length: 8 }, () => room("Security Turnstile")),
     ],
     cleared: [room("The Sentry Drone")],
-    Red: player({ deck: pile("Shove", 2), discard: [...pile("Charge In", 3), card("Pry Bar")] }),
+    Red: player({ deck: pile("Shove", 2), discard: pile("Charge In", 3) }),
     Gray: player({ deck: pile("Duck Under", 2), discard: pile("Pick The Lock", 3) }),
     ...over,
   });
@@ -51,154 +51,45 @@ describe("Ascending, shuffle your hand into your deck", () => {
     expect(next.Red.deck.some((c) => c.id === held.id)).toBe(true);
     expect(eventTypes(events)).toContain("CARDS_SHUFFLED_IN");
   });
-
-  it("runs before Settle your Stuff, so a Stuff card starting in hand is settled as deck Stuff", () => {
-    const inHand = card("Pry Bar");
-    const state = atAscension({
-      Red: player({ deck: pile("Shove", 2), hand: [inHand], discard: [] }),
-    });
-    const before = state.pools.goodStuff.length;
-    const { state: next } = must(state, { type: "ASCEND", Red: NOTHING, Gray: NOTHING });
-    // The default for Good Stuff: it went to its pool, exactly as it would
-    // from the deck — the hand it started in no longer matters by then.
-    expect(next.Red.hand).toEqual([]);
-    expect(next.Red.deck.some((c) => c.id === inHand.id)).toBe(false);
-    expect(next.pools.goodStuff).toHaveLength(before + 1);
-  });
 });
 
-describe("Ascending, Settle your Stuff", () => {
-  it("'shuffle it into the Good Stuff pool' — the default for a Good Stuff card", () => {
-    const state = atAscension();
+describe("Ascending, Stuff stays until Scrapped or Exhausted", () => {
+  it("a Good Stuff card gained in hand stays in the deck, not the Good Stuff pool", () => {
+    const gained = card("Pry Bar");
+    const state = atAscension({
+      Red: player({ deck: pile("Shove", 2), hand: [gained], discard: [] }),
+    });
     const before = state.pools.goodStuff.length;
     const { state: next, events } = must(state, { type: "ASCEND", Red: NOTHING, Gray: NOTHING });
-    expect(next.Red.discard.some((c) => c.name === "Pry Bar")).toBe(false);
-    expect(next.Red.deck.some((c) => c.name === "Pry Bar")).toBe(false);
-    expect(next.pools.goodStuff).toHaveLength(before + 1);
-    expect(next.scrapyard).toEqual([]);
+    expect(next.Red.hand).toEqual([]);
+    expect(next.Red.deck.some((c) => c.id === gained.id)).toBe(true);
+    expect(next.pools.goodStuff).toHaveLength(before);
     expect(eventTypes(events)).not.toContain("CARD_SCRAPPED");
   });
 
-  it("'keep it by Scrapping one non-Stuff card' — a Good Stuff card kept stays where it was found", () => {
-    const state = atAscension();
-    const pryBar = state.Red.discard.find((c) => c.name === "Pry Bar");
-    const payer = state.Red.discard.find((c) => c.name === "Charge In");
-    if (!pryBar || !payer)
-      throw new Error("Red is not holding both Pry Bar and Charge In in discard");
-    const { state: next, events } = must(state, {
-      type: "ASCEND",
-      Red: { settle: [{ cardId: pryBar.id, payWith: payer.id }], takeRewardId: null },
-      Gray: NOTHING,
-    });
-    expect(next.Red.discard.some((c) => c.id === pryBar.id)).toBe(true);
-    expect(next.scrapyard.map((c) => c.id)).toEqual([payer.id]);
-    expect(eventTypes(events)).toContain("CARD_SCRAPPED");
-  });
-
-  it("'keep it' — the default for a Bad Stuff card", () => {
+  it("Bad Stuff found in the deck also stays, not shed to its pool", () => {
     const badStuff = card("Sluggish");
     const state = atAscension({
-      Red: player({ deck: pile("Shove", 2), discard: [badStuff, ...pile("Charge In", 2)] }),
-    });
-    const { state: next } = must(state, { type: "ASCEND", Red: NOTHING, Gray: NOTHING });
-    expect(next.Red.discard.some((c) => c.id === badStuff.id)).toBe(true);
-    expect(next.pools.badStuff.some((c) => c.id === badStuff.id)).toBe(false);
-  });
-
-  it("'shuffle it into the Bad Stuff pool and Scrap one non-Stuff card' — shedding Bad Stuff", () => {
-    const badStuff = card("Sluggish");
-    const payer = card("Charge In");
-    const state = atAscension({
-      Red: player({ deck: pile("Shove", 2), discard: [badStuff, payer] }),
+      Red: player({ deck: [badStuff, ...pile("Shove", 2)], discard: pile("Charge In", 2) }),
     });
     const before = state.pools.badStuff.length;
-    const { state: next, events } = must(state, {
-      type: "ASCEND",
-      Red: { settle: [{ cardId: badStuff.id, payWith: payer.id }], takeRewardId: null },
-      Gray: NOTHING,
-    });
-    expect(next.Red.discard).toEqual([]);
-    expect(next.pools.badStuff).toHaveLength(before + 1);
-    expect(next.scrapyard.map((c) => c.id)).toEqual([payer.id]);
-    expect(eventTypes(events)).toContain("CARD_SCRAPPED");
-  });
-
-  it("searches the deck as well as the discard pile", () => {
-    const inDeck = card("Pry Bar");
-    const inDiscard = card("Sluggish");
-    const state = atAscension({
-      Red: player({ deck: [inDeck, ...pile("Shove", 2)], discard: [inDiscard] }),
-    });
     const { state: next } = must(state, { type: "ASCEND", Red: NOTHING, Gray: NOTHING });
-    // The Good Stuff in the deck went to its pool by default...
-    expect(next.Red.deck.some((c) => c.id === inDeck.id)).toBe(false);
-    // ...and the Bad Stuff in the discard pile stayed, by its own default, right where it was.
+    expect(next.Red.deck.some((c) => c.id === badStuff.id)).toBe(true);
+    expect(next.pools.badStuff).toHaveLength(before);
+  });
+
+  it("Stuff sitting in the discard pile stays there too", () => {
+    const inDiscard = card("Coil Of Cable");
+    const state = atAscension({
+      Red: player({ deck: pile("Shove", 2), discard: [inDiscard, ...pile("Charge In", 2)] }),
+    });
+    const before = state.pools.goodStuff.length;
+    const { state: next } = must(state, { type: "ASCEND", Red: NOTHING, Gray: NOTHING });
     expect(next.Red.discard.some((c) => c.id === inDiscard.id)).toBe(true);
+    expect(next.pools.goodStuff).toHaveLength(before);
   });
 
-  it("a payer that started in hand still pays, once the hand has joined the deck", () => {
-    const pryBar = card("Pry Bar");
-    const payer = card("Shove");
-    const state = atAscension({
-      Red: player({ deck: pile("Shove", 1), hand: [payer], discard: [pryBar] }),
-    });
-    const { state: next } = must(state, {
-      type: "ASCEND",
-      Red: { settle: [{ cardId: pryBar.id, payWith: payer.id }], takeRewardId: null },
-      Gray: NOTHING,
-    });
-    expect(next.Red.hand).toEqual([]);
-    expect(next.Red.discard.some((c) => c.id === pryBar.id)).toBe(true);
-    expect(next.scrapyard.map((c) => c.id)).toEqual([payer.id]);
-  });
-
-  it("rejects settling a card that is not Stuff the character holds", () => {
-    const state = atAscension();
-    const rejected = execute(state, {
-      type: "ASCEND",
-      Red: { settle: [{ cardId: state.Red.deck[0]!.id, payWith: null }], takeRewardId: null },
-      Gray: NOTHING,
-    });
-    expect(rejected.ok).toBe(false);
-    if (!rejected.ok) expect(rejected.reason.code).toBe("NotAnOption");
-  });
-
-  it("rejects paying with a card that is not another owned, non-Stuff card", () => {
-    const state = atAscension();
-    const pryBar = state.Red.discard.find((c) => c.name === "Pry Bar");
-    if (!pryBar) throw new Error("Red is not holding Pry Bar in discard");
-    const rejected = execute(state, {
-      type: "ASCEND",
-      Red: { settle: [{ cardId: pryBar.id, payWith: pryBar.id }], takeRewardId: null },
-      Gray: NOTHING,
-    });
-    expect(rejected.ok).toBe(false);
-    if (!rejected.ok) expect(rejected.reason.code).toBe("NotAnOption");
-  });
-
-  it("rejects spending the same payer twice", () => {
-    const goodStuff = card("Pry Bar");
-    const badStuff = card("Sluggish");
-    const payer = card("Charge In");
-    const state = atAscension({
-      Red: player({ deck: pile("Shove", 2), discard: [goodStuff, badStuff, payer] }),
-    });
-    const rejected = execute(state, {
-      type: "ASCEND",
-      Red: {
-        settle: [
-          { cardId: goodStuff.id, payWith: payer.id },
-          { cardId: badStuff.id, payWith: payer.id },
-        ],
-        takeRewardId: null,
-      },
-      Gray: NOTHING,
-    });
-    expect(rejected.ok).toBe(false);
-    if (!rejected.ok) expect(rejected.reason.code).toBe("NotAnOption");
-  });
-
-  it("'no heal' — the discard pile is untouched apart from the Stuff settled out of it", () => {
+  it("'no heal' — the discard pile is untouched", () => {
     const state = atAscension({
       Red: player({ deck: pile("Shove", 2), discard: pile("Charge In", 4) }),
     });
@@ -222,7 +113,7 @@ describe("Ascending, the reward", () => {
     if (!taken) throw new Error("Red has no reward offered");
     const { state: next, events } = must(state, {
       type: "ASCEND",
-      Red: { settle: [], takeRewardId: taken.id },
+      Red: { takeRewardId: taken.id },
       Gray: NOTHING,
     });
     expect(next.Red.deck.some((c) => c.id === taken.id)).toBe(true);

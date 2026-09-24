@@ -7,14 +7,13 @@ import {
   payOptions,
   playableCards,
   scrapForStatsCards,
-  settleableStuff,
   statPool,
   thresholdLines,
 } from "@domain/queries";
 import type { Card, Character, GameState, Room } from "@domain/types";
 import type { CardFace } from "@domain/printed";
 import { CHARACTERS, playerOf } from "@domain/verbs";
-import { currentQuestion, describeStagedAnswer, payerCandidates, type StagedAnswer } from "./ascend";
+import { currentQuestion, describeStagedAnswer, type StagedAnswer } from "./ascend";
 
 const statsOf = (card: Card | CardFace): string => {
   const parts: string[] = [];
@@ -76,22 +75,10 @@ function playerLines(state: GameState, c: Character): string[] {
 
 function ascendStatusLines(state: GameState, staged: readonly StagedAnswer[]): string[] {
   const lines: string[] = ["Ascending."];
-  const q = currentQuestion(state, staged);
-  if (q) {
-    lines.push(
-      `Asking: ${q.character} — ${q.kind === "reward" ? "the reward, last" : `${q.card?.name ?? ""} (${kindOf(q.card as Card)})`}`,
-    );
-  } else {
-    lines.push("Every question is staged; composing ASCEND.");
-  }
-  for (const c of CHARACTERS) {
-    const stuff = settleableStuff(state, c);
-    lines.push(
-      `  ${c} settleable Stuff: ${stuff.length > 0 ? stuff.map((x) => `${x.name} (${kindOf(x)})`).join(", ") : "none"}`,
-    );
-    const payers = payerCandidates(state, c, staged);
-    lines.push(`  ${c} payer candidates: ${payers.length > 0 ? payers.map((x) => x.name).join(", ") : "none"}`);
-  }
+  const asking = currentQuestion(state, staged);
+  lines.push(
+    asking ? `Asking: ${asking} — the reward` : "Every question is staged; composing ASCEND.",
+  );
   lines.push("Offered:");
   for (const c of CHARACTERS) {
     const offer = state.offer?.[c] ?? [];
@@ -185,23 +172,14 @@ export function moveHint(state: GameState, staged: readonly StagedAnswer[] = [])
     }
 
     case "Ascend": {
-      const q = currentQuestion(state, staged);
-      if (!q) {
+      const asking = currentQuestion(state, staged);
+      if (!asking) {
         lines.push("Every question is staged; composing ASCEND.");
         break;
       }
-      if (q.kind === "reward") {
-        const offered = state.offer?.[q.character] ?? [];
-        const names = offered.map((c) => c.name).join(", ") || "nothing";
-        lines.push(`${q.character}: the reward. take <Name> — one of: ${names} — or take none`);
-      } else if (q.card) {
-        const payers = payerCandidates(state, q.character, staged).map((c) => c.name).join(", ") || "none";
-        lines.push(
-          q.card.kind === "good_stuff"
-            ? `${q.character}: ${q.card.name} (Good Stuff). keep ${q.card.name} paying <Payer: ${payers}> | return ${q.card.name}`
-            : `${q.character}: ${q.card.name} (Bad Stuff). keep ${q.card.name} | shed ${q.card.name} paying <Payer: ${payers}>`,
-        );
-      }
+      const offered = state.offer?.[asking] ?? [];
+      const names = offered.map((c) => c.name).join(", ") || "nothing";
+      lines.push(`${asking}: the reward. take <Name> — one of: ${names} — or take none`);
       lines.push("undo — step back one staged question");
       break;
     }

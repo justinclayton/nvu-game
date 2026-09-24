@@ -1018,24 +1018,6 @@ body {
   text-transform: uppercase;
   color: var(--print);
 }
-.ascend__stuff {
-  display: flex;
-  align-items: flex-start;
-  flex-wrap: wrap;
-  gap: 10px;
-  padding: 6px 0;
-  border-bottom: 1px dotted var(--print-faint);
-}
-.ascend__default {
-  font-size: 12px;
-  color: var(--print);
-  white-space: nowrap;
-  align-self: center;
-}
-.ascend__stuff .zone {
-  flex-basis: 100%;
-  padding-left: 4px;
-}
 
 .over {
   margin-top: 20px;

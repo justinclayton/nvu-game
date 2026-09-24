@@ -15,7 +15,7 @@ import { CHARACTERS } from "./verbs";
 const SEEDS = [1, 2, 3, 7, 11, 42, 99, 12345];
 const MAX_COMMANDS = 4000;
 
-const DECLINE: AscendChoice = { settle: [], takeRewardId: null };
+const DECLINE: AscendChoice = { takeRewardId: null };
 
 function nextCommand(state: GameState): Command | null {
   const pending = state.pending;

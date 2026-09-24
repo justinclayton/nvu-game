@@ -10,12 +10,13 @@ import { existsSync, mkdirSync, readFileSync, unlinkSync, writeFileSync } from "
 import { dirname, join } from "node:path";
 import { stdout } from "node:process";
 
-import { runData, type RunFile } from "@application/exportRun";
+import { mismatchedField, runData, type RunFile } from "@application/exportRun";
 import { logLines, tailEvents } from "@application/narrate";
 import { createSession, loadSession, type Note, type SavedRun, type Session } from "@application/session";
 import { CARD_CONTENT, CARD_LIST_ID } from "@content/index";
 import { resolveCardName } from "@content/names";
 import { costOf, payOptions, playableCards } from "@domain/queries";
+import { RULES_VERSION } from "@domain/setup";
 import type { Card, CardId, Character, Command, GameState, Stat } from "@domain/types";
 import { CHARACTERS, playerOf } from "@domain/verbs";
 import { POLICIES, randomPolicy } from "@sim/policy";
@@ -27,9 +28,7 @@ import {
   currentQuestion,
   describeStagedAnswer,
   parseAnswers,
-  payerCandidates,
   serializeAnswers,
-  type AscendQuestion,
   type StagedAnswer,
 } from "./ascend";
 import {
@@ -245,80 +244,19 @@ function buildOrder(state: GameState, action: Extract<PlayAction, { kind: "order
   return { type: "ORDER_CARDS", cardIds };
 }
 
-function resolvePayer(
-  state: GameState,
-  character: Character,
-  payName: string,
-  staged: readonly StagedAnswer[],
-): Card {
-  const candidates = payerCandidates(state, character, staged);
-  const named = resolveCardName(payName, candidates);
-  if (!named.ok) throw new MoveRefused(named.reason);
-  return named.card;
-}
-
 /**
  * One Ascend question's answer, staged (not yet dispatched). Refuses naming
- * the wrong card, or a verb that does not fit the card being asked about
- * (design/cli-sim/spec.md, "Ascending, one question at a time").
+ * a card that was not offered (design/cli-sim/spec.md, "Ascending, one
+ * question at a time").
  */
-type AscendAction = Extract<PlayAction, { kind: "keep" | "return" | "shed" | "takeAscend" }>;
+type AscendAction = Extract<PlayAction, { kind: "takeAscend" }>;
 
-function buildAscendAnswer(
-  state: GameState,
-  question: AscendQuestion,
-  action: AscendAction,
-  staged: readonly StagedAnswer[],
-): StagedAnswer {
-  if (question.kind === "reward") {
-    if (action.kind !== "takeAscend") {
-      throw new MoveRefused(
-        `${question.character} is being asked about the reward. Use: take <Name>, or take none.`,
-      );
-    }
-    if (action.name === null) {
-      return { kind: "reward", character: question.character, takeRewardId: null };
-    }
-    const offered = state.offer?.[question.character] ?? [];
-    const named = resolveCardName(action.name, offered);
-    if (!named.ok) throw new MoveRefused(named.reason);
-    return { kind: "reward", character: question.character, takeRewardId: named.card.id };
-  }
-
-  const card = question.card;
-  if (!card) throw new MoveRefused("No Stuff card is being asked about.");
-  if (action.kind === "takeAscend") {
-    throw new MoveRefused(`${question.character} is being asked about ${card.name}, not the reward yet.`);
-  }
-  const named = resolveCardName(action.name, [card]);
-  if (!named.ok) {
-    throw new MoveRefused(`${question.character} is being asked about ${card.name}, not "${action.name}".`);
-  }
-  const isGoodStuff = card.kind === "good_stuff";
-
-  if (action.kind === "return") {
-    if (!isGoodStuff) {
-      throw new MoveRefused(`${card.name} is Bad Stuff — return only answers Good Stuff. Use keep or shed.`);
-    }
-    return { kind: "settle", character: question.character, cardId: card.id, payWith: null };
-  }
-  if (action.kind === "keep") {
-    if (isGoodStuff) {
-      if (action.pay === null) {
-        throw new MoveRefused(`${card.name} is Good Stuff — keep it by paying: keep ${card.name} paying <Payer>.`);
-      }
-      const payer = resolvePayer(state, question.character, action.pay, staged);
-      return { kind: "settle", character: question.character, cardId: card.id, payWith: payer.id };
-    }
-    if (action.pay !== null) throw new MoveRefused(`${card.name} is Bad Stuff — keeping it is free.`);
-    return { kind: "settle", character: question.character, cardId: card.id, payWith: null };
-  }
-  // action.kind === "shed"
-  if (isGoodStuff) {
-    throw new MoveRefused(`${card.name} is Good Stuff — shed only answers Bad Stuff. Use keep or return.`);
-  }
-  const payer = resolvePayer(state, question.character, action.pay, staged);
-  return { kind: "settle", character: question.character, cardId: card.id, payWith: payer.id };
+function buildAscendAnswer(state: GameState, character: Character, action: AscendAction): StagedAnswer {
+  if (action.name === null) return { character, takeRewardId: null };
+  const offered = state.offer?.[character] ?? [];
+  const named = resolveCardName(action.name, offered);
+  if (!named.ok) throw new MoveRefused(named.reason);
+  return { character, takeRewardId: named.card.id };
 }
 
 /** A one-line account of a dispatched action that produced no narrated event. */
@@ -470,9 +408,6 @@ function play(request: PlayRequest): number {
       case "skip":
         dispatchOrThrow(session, { type: "TAKE_REWARD", take: false });
         break;
-      case "keep":
-      case "return":
-      case "shed":
       case "takeAscend": {
         const state = session.getState().state;
         if (state.phase !== "Ascend") {
@@ -480,7 +415,7 @@ function play(request: PlayRequest): number {
         }
         const question = currentQuestion(state, staged);
         if (!question) throw new MoveRefused("Every Ascend question is already staged.");
-        const answer = buildAscendAnswer(state, question, action, staged);
+        const answer = buildAscendAnswer(state, question, action);
         staged = [...staged, answer];
         manualNote = describeStagedAnswer(state, answer);
         if (ascendComplete(state, staged)) {
@@ -536,10 +471,12 @@ function cardFace(request: CardRequest): number {
 function replayRun(request: ReplayRequest): number {
   const file = readRunFile(request.file);
   if (!file.run) throw new UsageError(`${request.file} was not played from a seed and cannot replay.`);
-  if (file.cards !== CARD_LIST_ID) {
-    out(
-      `${request.file} was recorded on a different card list (${file.cards ?? "none recorded"}); this build is ${CARD_LIST_ID}. Not replaying.`,
-    );
+  const mismatch = mismatchedField(file);
+  if (mismatch !== null) {
+    const label = mismatch === "cards" ? "card list" : "rules";
+    const recorded = (mismatch === "cards" ? file.cards : file.rules) ?? "none recorded";
+    const current = mismatch === "cards" ? CARD_LIST_ID : RULES_VERSION;
+    out(`${request.file} was recorded on a different ${label} (${recorded}); this build is ${current}. Not replaying.`);
     return 2;
   }
   const session = loadRun(file.run, file.notes ?? []);
@@ -628,17 +565,17 @@ function renderReport(report: BalanceReport): string {
     );
   }
   lines.push("");
-  lines.push("Per card — played / taken / kept:");
+  lines.push("Per card — played / taken:");
   for (const card of report.cards) {
-    lines.push(`  ${card.name}: ${String(card.played)} / ${String(card.taken)} / ${String(card.kept)}`);
+    lines.push(`  ${card.name}: ${String(card.played)} / ${String(card.taken)}`);
   }
   lines.push("");
-  lines.push("Where cards went, by floor — Exhausted / Scrapped / paid as cost / Stuff returned:");
+  lines.push("Where cards went, by floor — Exhausted / Scrapped / paid as cost:");
   for (const c of CHARACTERS) {
     lines.push(`  ${c}:`);
     for (const row of report.floorLosses.filter((r) => r.character === c)) {
       lines.push(
-        `    Floor ${String(row.floor)}: ${String(row.exhausted)} / ${String(row.scrapped)} / ${String(row.paidAsCost)} / ${String(row.stuffReturned)}`,
+        `    Floor ${String(row.floor)}: ${String(row.exhausted)} / ${String(row.scrapped)} / ${String(row.paidAsCost)}`,
       );
     }
   }

@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import { CARD_CONTENT, CARD_LIST_ID } from "@content/index";
 import { costOf, payOptions, playableCards } from "@domain/queries";
+import { RULES_VERSION } from "@domain/setup";
 import type { AscendChoice, Character, Command, GameState } from "@domain/types";
 import { EXPORTS, runData, runTranscript, runTurns, turnRows, type RunFile } from "./exportRun";
 import { createSession, loadSession, type Session } from "./session";
@@ -82,7 +83,6 @@ function affordablePlay(state: GameState, character: Character) {
 }
 
 const ascendChoice = (state: GameState, character: Character): AscendChoice => ({
-  settle: [],
   takeRewardId: state.offer?.[character][0]?.id ?? null,
 });
 
@@ -174,6 +174,7 @@ describe("the run itself (.json)", () => {
     expect(file.notes).toEqual(session.getState().notes);
     expect(file.log).toHaveLength(session.getState().events.length);
     expect(file.cards).toBe(CARD_LIST_ID);
+    expect(file.rules).toBe(RULES_VERSION);
   });
 
   it("replays to the same event log, with the notes back where they were typed", () => {

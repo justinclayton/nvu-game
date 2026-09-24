@@ -110,30 +110,6 @@ describe("parseRequest", () => {
     });
   });
 
-  it("reads the Ascend Stuff answers", () => {
-    expect(parseRequest(["play", "keep", "Crowbar", "paying", "Shove"])).toEqual({
-      command: "play",
-      action: { kind: "keep", name: "Crowbar", pay: "Shove" },
-      run: null,
-    });
-    expect(parseRequest(["play", "keep", "Torn Seal"])).toEqual({
-      command: "play",
-      action: { kind: "keep", name: "Torn Seal", pay: null },
-      run: null,
-    });
-    expect(parseRequest(["play", "return", "Pry Bar"])).toEqual({
-      command: "play",
-      action: { kind: "return", name: "Pry Bar" },
-      run: null,
-    });
-    expect(parseRequest(["play", "shed", "Rust", "paying", "Charge In"])).toEqual({
-      command: "play",
-      action: { kind: "shed", name: "Rust", pay: "Charge In" },
-      run: null,
-    });
-    expect(() => parseRequest(["play", "shed", "Rust"])).toThrow(UsageError);
-  });
-
   it("reads undo and show with no positionals", () => {
     expect(parseRequest(["play", "undo", "--run", "r.json"])).toEqual({
       command: "play",

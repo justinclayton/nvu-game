@@ -224,71 +224,11 @@ function validateAnswer(pending: Pending, command: Command): Rejection | null {
 
 /* --------------------------------------------------------- Rulebook, Ascending */
 
-/**
- * Where one of a character's own cards currently sits — never the Exhaust
- * pile. `hand` only ever matters before Ascending's step 1 (Shuffle your
- * hand into your deck) runs: `validateAscendChoice` checks the state as
- * submitted, where the hand can still hold cards, but `settleStuff` (step 2)
- * always sees an empty one.
- */
-type Pile = "deck" | "hand" | "discard";
-
-/** Find a card of this character's, wherever among deck, hand or discard it sits. */
-function locate(state: GameState, c: Character, cardId: CardId): readonly [Pile, Card] | null {
-  const p = playerOf(state, c);
-  const inDeck = p.deck.find((x) => x.id === cardId);
-  if (inDeck) return ["deck", inDeck];
-  const inHand = p.hand.find((x) => x.id === cardId);
-  if (inHand) return ["hand", inHand];
-  const inDiscard = p.discard.find((x) => x.id === cardId);
-  if (inDiscard) return ["discard", inDiscard];
-  return null;
-}
-
-function removeFrom(state: GameState, c: Character, pile: Pile, cardId: CardId): GameState {
-  const p = playerOf(state, c);
-  if (pile === "deck") {
-    return withPlayer(state, c, { ...p, deck: p.deck.filter((x) => x.id !== cardId) });
-  }
-  const list = pile === "hand" ? p.hand : p.discard;
-  const card = list.find((x) => x.id === cardId);
-  return card ? takeFrom(state, c, pile, [card]) : state;
-}
-
-/** Every Stuff card this character's deck, hand or discard pile holds right now. */
-function stuffOnHand(state: GameState, c: Character): readonly (readonly [Pile, Card])[] {
-  const p = playerOf(state, c);
-  const of = (pile: Pile, list: readonly Card[]) =>
-    list.filter((x) => x.kind !== "player").map((x): readonly [Pile, Card] => [pile, x]);
-  return [...of("deck", p.deck), ...of("hand", p.hand), ...of("discard", p.discard)];
-}
-
 function validateAscendChoice(
   state: GameState,
   c: Character,
   choice: AscendChoice,
 ): Rejection | null {
-  const stuff = new Map(stuffOnHand(state, c).map(([, card]) => [card.id, card] as const));
-  const settledCards = new Set<CardId>();
-  const spentPayers = new Set<CardId>();
-  for (const entry of choice.settle) {
-    if (settledCards.has(entry.cardId)) {
-      return reject("NotAnOption", `${c} settled the same Stuff card twice.`);
-    }
-    settledCards.add(entry.cardId);
-    if (!stuff.has(entry.cardId)) {
-      return reject("NotAnOption", `That is not Stuff in ${c}'s deck, hand or discard pile.`);
-    }
-    if (entry.payWith === null) continue;
-    if (spentPayers.has(entry.payWith)) {
-      return reject("NotAnOption", `${c} spent the same card paying to settle Stuff twice.`);
-    }
-    spentPayers.add(entry.payWith);
-    const payer = locate(state, c, entry.payWith);
-    if (!payer || payer[1].kind !== "player") {
-      return reject("NotAnOption", `That is not another card of ${c}'s to Scrap.`);
-    }
-  }
   if (choice.takeRewardId !== null) {
     const offered = state.offer?.[c] ?? [];
     if (!offered.some((x) => x.id === choice.takeRewardId)) {
@@ -1114,56 +1054,10 @@ function shuffleHandIntoDeck(state: GameState, c: Character, run: Run): GameStat
   return withPlayer(s, c, { ...playerOf(s, c), hand: [] });
 }
 
-/**
- * Rulebook, Ascending, step 2: Settle your Stuff. Search deck and discard for
- * Stuff — the hand is empty by now, already shuffled into the deck in step 1.
- * A Good Stuff card shuffles into the Good Stuff pool unless kept by
- * Scrapping one other owned, non-Stuff card from deck or discard; a Bad
- * Stuff card stays unless shed the same way. A kept card is left exactly
- * where it was found. No heal: the discard pile is untouched apart from
- * Stuff settled out of it. No hand discard either — step 1 shuffles the
- * hand into the deck, it does not spend it.
- *
- * `stuffOnHand` and `locate` still search all three piles: harmless here,
- * since step 1 already emptied the hand, and it lets the same helpers back
- * `validateAscendChoice`, which runs before step 1 and so must still accept
- * a Stuff card or a payer sitting in hand — it will be deck by the time this
- * runs.
- */
-function settleStuff(state: GameState, c: Character, choice: AscendChoice, run: Run): GameState {
-  let s = state;
-  for (const [pile, stuffCard] of stuffOnHand(state, c)) {
-    const entry = choice.settle.find((e) => e.cardId === stuffCard.id);
-    const payWith = entry?.payWith ?? null;
-
-    if (payWith !== null) {
-      const payer = locate(s, c, payWith);
-      if (!payer) continue; // Already validated; defensive only.
-      const [payerPile, payerCard] = payer;
-      s = removeFrom(s, c, payerPile, payerCard.id);
-      s = scrap(s, c, payerCard, run.events);
-      if (stuffCard.kind === "bad_stuff") {
-        // Paying sheds Bad Stuff: off to its pool.
-        s = removeFrom(s, c, pile, stuffCard.id);
-        s = { ...s, pools: { ...s.pools, badStuff: [...s.pools.badStuff, stuffCard] } };
-      }
-      // Paying for Good Stuff keeps it where it was found: nothing else moves.
-    } else if (stuffCard.kind === "good_stuff") {
-      // The default for Good Stuff: shuffle it into the Good Stuff pool.
-      s = removeFrom(s, c, pile, stuffCard.id);
-      s = { ...s, pools: { ...s.pools, goodStuff: [...s.pools.goodStuff, stuffCard] } };
-    }
-    // The default for Bad Stuff is to keep it: nothing moves.
-  }
-  // "...then shuffle your deck."
-  return shuffleIntoDeck(s, c, [], run.events);
-}
-
 function ascendOne(state: GameState, c: Character, choice: AscendChoice, run: Run): GameState {
   let s = shuffleHandIntoDeck(state, c, run);
-  s = settleStuff(s, c, choice, run);
 
-  // Rulebook, Ascending, step 3: Choose a reward. Three cards from their own pool;
+  // Rulebook, Ascending, step 2: Choose a reward. Three cards from their own pool;
   // take one, shuffled into the deck, or decline. A declined card goes to the
   // bottom of its pool.
   const offered = state.offer?.[c] ?? [];

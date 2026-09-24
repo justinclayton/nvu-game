@@ -1,25 +1,24 @@
 // @vitest-environment jsdom
-import { fireEvent, render, screen, within } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import { useState } from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { card, pile, player, resetRig, rig, room } from "@domain/__fixtures__/rig";
+import { pile, player, resetRig, rig, room } from "@domain/__fixtures__/rig";
 import type { AscendChoice, Character, Command, GameState } from "@domain/types";
 import { AscendPanel, NO_CHOICES, type AscendChoices } from "./AscendPanel";
 import { Mat } from "./Mat";
 import { FULL } from "./metrics";
 
-/* The ascension panel settles every Stuff card found in a deck, hand or
- * discard pile; the reward is chosen from the three cards floating above the
- * mat. Both read one choice, which the table owns, so the test stands in for
- * the table. */
+/* The reward is chosen from the three cards floating above the mat, one
+ * choice per character, sent together as one command. The table owns the
+ * choice, so the test stands in for the table. */
 
 function atAscension(): GameState {
   const base = rig({
     phase: "Ascend",
     floor: 1,
     cleared: [room("The Sentry Drone")],
-    Red: player({ deck: pile("Shove", 2), discard: [...pile("Charge In", 2), card("Pry Bar")] }),
+    Red: player({ deck: pile("Shove", 2), discard: pile("Charge In", 2) }),
     Gray: player({ deck: pile("Duck Under", 2), discard: pile("Pick The Lock", 2) }),
   });
   return {
@@ -60,13 +59,6 @@ function Harness({
 
 beforeEach(resetRig);
 
-/** The panel, as opposed to the mat: the same card names appear on both. */
-function panel() {
-  const el = document.querySelector(".ascend");
-  if (!(el instanceof HTMLElement)) throw new Error("no ascend panel");
-  return within(el);
-}
-
 describe("the ascension panel", () => {
   it("floats three cards above each character's side of the mat", () => {
     const state = atAscension();
@@ -86,21 +78,6 @@ describe("the ascension panel", () => {
     expect(screen.getByRole("button", { name: "Ascend to floor 2" })).toBeDefined();
   });
 
-  it("lists every Stuff card found in the deck, hand and discard pile", () => {
-    const state = atAscension();
-    render(<Harness state={state} dispatch={vi.fn()} />);
-    expect(panel().getAllByText("Pry Bar").length).toBeGreaterThan(0);
-    expect(panel().getByText(/Good Stuff pool by default/)).toBeDefined();
-  });
-
-  it("keeps a Good Stuff card once a payer is picked, and reports it", () => {
-    const state = atAscension();
-    render(<Harness state={state} dispatch={vi.fn()} />);
-    expect(panel().getByText(/Good Stuff pool by default/)).toBeDefined();
-    fireEvent.click(panel().getAllByText("Charge In")[0] as HTMLElement);
-    expect(panel().getByText(/kept in place by Scrapping/)).toBeDefined();
-  });
-
   it("takes a floating card on click, and declines it on a second click", () => {
     const state = atAscension();
     render(<Harness state={state} dispatch={vi.fn()} />);
@@ -116,24 +93,20 @@ describe("the ascension panel", () => {
     expect(floating.classList.contains("is-selected")).toBe(false);
   });
 
-  it("sends the whole choice as one command", () => {
+  it("sends both characters' reward choices as one command", () => {
     const state = atAscension();
     const dispatch = vi.fn();
     render(<Harness state={state} dispatch={dispatch} />);
-    const pryBar = state.Red.discard.find((c) => c.name === "Pry Bar");
-    const payer = state.Red.discard.find((c) => c.name === "Charge In");
     const reward = state.offer?.Red[0];
-    if (!pryBar || !payer || !reward) throw new Error("rig");
+    if (!reward) throw new Error("rig");
 
-    fireEvent.click(panel().getAllByText("Charge In")[0] as HTMLElement);
     fireEvent.click(document.querySelector('[data-zone="red-offer"]') as HTMLElement);
     fireEvent.click(screen.getByRole("button", { name: "Ascend to floor 2" }));
 
     const sent = dispatch.mock.calls[0]?.[0] as Command | undefined;
     expect(sent?.type).toBe("ASCEND");
     if (sent?.type !== "ASCEND") throw new Error("expected an ascend");
-    expect(sent.Red.settle).toEqual([{ cardId: pryBar.id, payWith: payer.id }]);
     expect(sent.Red.takeRewardId).toBe(reward.id);
-    expect(sent.Gray.settle).toEqual([]);
+    expect(sent.Gray.takeRewardId).toBeNull();
   });
 });

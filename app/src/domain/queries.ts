@@ -326,22 +326,8 @@ export function scrapForStatsCards(state: GameState, c: Character): readonly Car
   return p.hand.filter((card) => card.kind === "good_stuff");
 }
 
-/* ------------------------------------------------------------- Rulebook, Ascending */
-
-/**
- * Every Stuff card in this character's deck, hand or discard pile — what
- * Settle your Stuff works through, once Ascending's first step has shuffled
- * the hand into the deck. A Stuff card sitting in hand right now is included
- * here, since that shuffle is what it goes through on its way to being
- * settled.
- */
-export function settleableStuff(state: GameState, c: Character): readonly Card[] {
-  const p = playerOf(state, c);
-  return [...p.deck, ...p.hand, ...p.discard].filter((x) => x.kind !== "player");
-}
-
-/** Every other owned, non-Stuff card that could pay to settle a Stuff card. */
-export function settlePayOptions(state: GameState, c: Character): readonly Card[] {
+/** Every non-Stuff card this character owns, across deck, hand and discard pile. */
+export function ownedPlayerCards(state: GameState, c: Character): readonly Card[] {
   const p = playerOf(state, c);
   return [...p.deck, ...p.hand, ...p.discard].filter((x) => x.kind === "player");
 }

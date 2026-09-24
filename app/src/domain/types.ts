@@ -255,20 +255,8 @@ export interface GameState {
 
 /* ------------------------------------------------------------- commands */
 
-/**
- * Settle one Stuff card found in a character's deck, hand or discard pile
- * (rulebook, Ascending). Omitting a card from `AscendChoice.settle` takes the
- * default: a Good Stuff card goes to its pool, a Bad Stuff card is kept.
- */
-export interface StuffSettlement {
-  readonly cardId: CardId;
-  /** Pay by Scrapping this other owned, non-Stuff card: keeps Good Stuff, or sheds Bad Stuff. */
-  readonly payWith: CardId | null;
-}
-
-/** Settling Stuff and the reward, both decided at the moment of ascending (rulebook, Ascending). */
+/** The reward chosen at the moment of ascending (rulebook, Ascending). */
 export interface AscendChoice {
-  readonly settle: readonly StuffSettlement[];
   /** One of the three offered, or null to decline. */
   readonly takeRewardId: CardId | null;
 }

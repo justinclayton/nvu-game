@@ -20,9 +20,6 @@ export type PlayAction =
   | { readonly kind: "order"; readonly names: readonly string[] }
   | { readonly kind: "take" }
   | { readonly kind: "skip" }
-  | { readonly kind: "keep"; readonly name: string; readonly pay: string | null }
-  | { readonly kind: "return"; readonly name: string }
-  | { readonly kind: "shed"; readonly name: string; readonly pay: string }
   | { readonly kind: "takeAscend"; readonly name: string | null }
   | { readonly kind: "undo" }
   | { readonly kind: "note"; readonly text: string }
@@ -88,10 +85,6 @@ export const USAGE = `North vs Up — the CLI. The same rules engine as the web 
   bin/nvu play choose Rope Flare | play choose none     CHOOSE_CARDS
   bin/nvu play order Rope Flare Shove                  ORDER_CARDS, top first
   bin/nvu play take | play skip                        TAKE_REWARD
-  bin/nvu play keep Crowbar paying Shove               Ascend: keep Good Stuff
-  bin/nvu play return Pry Bar                          Ascend: return Good Stuff
-  bin/nvu play keep Torn Seal                          Ascend: keep Bad Stuff (free)
-  bin/nvu play shed Rust paying Charge In              Ascend: shed Bad Stuff
   bin/nvu play take Zen Mode | play take none          Ascend: the reward
   bin/nvu play undo           [--run FILE]
   bin/nvu play note "text"    [--run FILE]
@@ -202,26 +195,9 @@ function parseMove(action: string, actionRest: readonly string[]): PlayAction {
       return { kind: "takeAscend", name: name.toLowerCase() === "none" ? null : name };
     }
 
-    case "keep": {
-      const { before, pay } = splitOnPay(actionRest);
-      const name = oneName(before, "play keep");
-      if (pay !== null && pay.length !== 1) throw new UsageError("play keep ... paying wants one payer.");
-      return { kind: "keep", name, pay: pay ? (pay[0] ?? null) : null };
-    }
-    case "return":
-      return { kind: "return", name: oneName(actionRest, "play return") };
-    case "shed": {
-      const { before, pay } = splitOnPay(actionRest);
-      const name = oneName(before, "play shed");
-      if (pay === null || pay.length !== 1 || pay[0] === undefined) {
-        throw new UsageError("play shed wants: shed <Card> paying <Payer>.");
-      }
-      return { kind: "shed", name, pay: pay[0] };
-    }
-
     default:
       throw new UsageError(
-        `Unknown "play ${action}". Choose flip, end, card, scrap, choose, order, take, skip, keep, return, shed, undo, note, show or pile.`,
+        `Unknown "play ${action}". Choose flip, end, card, scrap, choose, order, take, skip, undo, note, show or pile.`,
       );
   }
 }

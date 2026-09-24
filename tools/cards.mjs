@@ -22,6 +22,7 @@ import { readFileSync, writeFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
 import { createContext, runInContext } from "node:vm";
+import { createHash } from "node:crypto";
 import { checkCardComments } from "./check-card-comments.mjs";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
@@ -321,7 +322,7 @@ const CLAUSES = [
   ],
   [
     /^(both of you|one of you|red|gray) (?:gets?|takes?) (?:(\d+) )?bad stuff$/i,
-    (m) => ({ effect: { type: "DealBadStuff", who: who(m[1]) } }),
+    (m) => ({ effect: { type: "DealBadStuff", who: who(m[1]), count: Number(m[2] ?? 1) } }),
   ],
   [
     /^(both of you|one of you|red|gray) (?:gets?|takes?) (?:(\d+) )?good stuff$/i,
@@ -330,6 +331,10 @@ const CLAUSES = [
   [
     /^(both of you|one of you|red|gray) reveals? (?:a |the )?(?:card )?reward$/i,
     (m) => ({ effect: { type: "RevealReward", who: who(m[1]) } }),
+  ],
+  [
+    /^(both of you|one of you|red|gray) may scrap a bad stuff card from (?:your|their) hand$/i,
+    (m) => ({ effect: { type: "ScrapBadStuffFromHand", who: who(m[1]), optional: true } }),
   ],
 ];
 
@@ -355,15 +360,27 @@ function readProse(prose, where) {
   return out;
 }
 
-function threshold(raw, where) {
-  if (!raw || typeof raw.value !== "number" || (raw.stat !== "Oomph" && raw.stat !== "Scramble")) {
-    throw new Error(`${where}: a threshold needs a Oomph or Scramble stat and a value`);
+/** A threshold's `stat`/`value` pair, or its `stats: { Oomph, Scramble }` pair, read
+ * into one shape: how much of each stat the line asks of the pool (0 for neither). */
+function requirementsOf(raw, where) {
+  if (raw && raw.stats && typeof raw.stats === "object") {
+    const { Oomph, Scramble } = raw.stats;
+    if (typeof Oomph !== "number" && typeof Scramble !== "number") {
+      throw new Error(`${where}: stats needs an Oomph or Scramble number`);
+    }
+    return { oomph: Oomph ?? 0, scramble: Scramble ?? 0 };
   }
+  if (raw && typeof raw.value === "number" && raw.stat === "Oomph") return { oomph: raw.value, scramble: 0 };
+  if (raw && typeof raw.value === "number" && raw.stat === "Scramble") return { oomph: 0, scramble: raw.value };
+  throw new Error(`${where}: a threshold needs a Oomph or Scramble stat and a value, or a stats: { Oomph, Scramble } pair`);
+}
+
+function threshold(raw, where) {
+  const requires = requirementsOf(raw, where);
   const outcome = String(raw.outcome ?? "");
   const read = readProse(outcome, `${where} threshold "${outcome}"`);
   return {
-    stat: raw.stat,
-    value: raw.value,
+    requires,
     outcome,
     // Each Turn, Outcome: any met threshold Clears the room, full stop — a line's own
     // prose need not say "Clear" (most Stuff lines never do). The one exception a line
@@ -395,6 +412,7 @@ function cardFace(c) {
     scramble: c.scramble ?? 0,
     conditionalStat: c.conditional_stat === true,
     text: c.text ?? "",
+    flavor: c.flavor ?? "",
   };
 }
 
@@ -407,8 +425,11 @@ function challenge(raw, where) {
 function roomFace(c) {
   const challenges = (c.challenges ?? []).map((ch) => challenge(ch, c.name));
   if (challenges.length === 0) throw new Error(`${c.name}: a room prints at least one challenge`);
-  if (c.band !== 1 && c.band !== 2 && c.band !== 3) {
-    throw new Error(`${c.name}: a room needs a band of 1, 2 or 3`);
+  if (c.band !== 1 && c.band !== 2 && c.band !== 3 && c.band !== null) {
+    throw new Error(`${c.name}: a room needs a band of 1, 2, 3, or null for the fixed Floor 10 Stairwell`);
+  }
+  if (c.band === null && c.kind !== "stairwell") {
+    throw new Error(`${c.name}: only a Stairwell may print band: null`);
   }
   return {
     name: c.name,
@@ -416,6 +437,7 @@ function roomFace(c) {
     kind: c.kind,
     band: c.band,
     flavor: c.flavor ?? "",
+    text: c.text ?? "",
     count: c.count ?? 1,
     challenges,
     flee: fleeLine(c),
@@ -431,10 +453,22 @@ export function structure(doc) {
     else if (ROOM_KINDS.has(c.kind)) rooms.push(roomFace(c));
     else throw new Error(`${c.name}: unknown kind ${JSON.stringify(c.kind)}`);
   }
+  const fixedStairwells = rooms.filter((r) => r.band === null);
+  if (fixedStairwells.length !== 1) {
+    throw new Error(
+      `expected exactly one Floor 10 Stairwell (band: null), found ${fixedStairwells.length}`,
+    );
+  }
   return { meta: { updated: String(doc.meta.updated ?? "") }, cards, rooms };
 }
 
 /* ------------------------------------------------------- the typed TS module */
+
+/** The first 12 hex of sha256 over the JSON of the structured content — a stable
+ * id for exactly this card list, independent of source formatting. */
+function cardListId(content) {
+  return createHash("sha256").update(JSON.stringify(content)).digest("hex").slice(0, 12);
+}
 
 export function generateTs(doc) {
   const content = structure(doc);
@@ -464,6 +498,9 @@ ${cardsBody}
 ${roomsBody}
   ],
 } as const satisfies CardContent;
+
+/** The first 12 hex of sha256 over the JSON of CARD_CONTENT above — identifies this card list. */
+export const CARD_LIST_ID = ${JSON.stringify(cardListId(content))};
 `;
 }
 

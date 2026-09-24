@@ -7,6 +7,7 @@
  * nothing about notes.
  */
 
+import { printedThresholdLines } from "@domain/queries";
 import type { DomainEvent } from "@domain/types";
 import type { Note } from "./session";
 
@@ -26,6 +27,8 @@ export function describeEvent(event: DomainEvent): string {
       return `${event.character} discards ${event.card.name} from their ${event.from === "playZone" ? "play zone" : event.from}.`;
     case "CARD_SCRAPPED":
       return `${event.card.name} is Scrapped.`;
+    case "CARD_SCRAPPED_FOR_STATS":
+      return `${event.character} Scraps ${event.card.name} for +${String(event.amount)} ${event.stat}.`;
     case "CARD_EXHAUSTED":
       return `${event.character} Exhausts ${event.card.name}.`;
     case "EXHAUST_PREVENTED":
@@ -39,9 +42,13 @@ export function describeEvent(event: DomainEvent): string {
     case "CARD_MOVED":
       return `${event.card.name} goes to ${event.character}'s ${event.to}.`;
     case "CARDS_PEEKED":
-      return `A look at ${event.character}'s deck: ${event.cards.map((c) => c.name).join(", ")}.`;
-    case "THRESHOLD_MET":
-      return `${event.threshold.stat} ${String(event.threshold.value)} met — ${event.threshold.outcome}`;
+      return `A look at the ${event.pile}: ${event.cards.map((c) => c.name).join(", ")}.`;
+    case "THRESHOLD_MET": {
+      const need = printedThresholdLines(event.threshold)
+        .map((l) => `${l.stat} ${String(l.effective)}`)
+        .join(" and ");
+      return `${need} met — ${event.threshold.outcome}`;
+    }
     case "STUFF_TAKEN":
       return `${event.character} gets ${event.card.name}.`;
     case "STUFF_POOL_EMPTY":
@@ -70,6 +77,8 @@ export function describeEvent(event: DomainEvent): string {
       return `Floor ${String(event.floor)} is clear.`;
     case "GAME_OVER":
       return event.outcome === "Victory" ? "You reach the rooftop. You win." : "You lose.";
+    case "RUN_ABORTED":
+      return `The run is void: ${event.reason}`;
   }
 }
 

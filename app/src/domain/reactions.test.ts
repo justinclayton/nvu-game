@@ -87,24 +87,26 @@ describe("a reaction resolves where its event happens", () => {
   it("Crowbar in the play zone: the bonus piece lands before Cleanup begins", () => {
     const state = rig({
       phase: "Play",
-      activeRoom: room("Sorting Room"),
+      activeRoom: room("Security Turnstile"),
       Red: player({
         deck: pile("Shove", 4),
-        hand: [card("Crowbar"), card("Shove"), card("Shove")],
+        hand: [card("Crowbar"), card("Shove"), card("Shove"), card("Pry Bar")],
       }),
       Gray: player({ deck: pile("Duck Under", 4) }),
     });
-    const crowbar = handCard(state, "Red", "Crowbar");
-    const [shove, payment] = state.Red.hand.filter((c) => c.name === "Shove");
+    const crowbar = handCard(state, "Red", "Crowbar").id;
+    const [shove, payment] = state.Red.hand.filter((c) => c.name === "Shove").map((c) => c.id);
     if (!shove || !payment) throw new Error("Red is not holding two Shoves");
+    const pryBar = handCard(state, "Red", "Pry Bar").id;
     const { events } = play(state, [
-      { type: "PLAY_CARD", character: "Red", cardId: crowbar.id, payWith: [] },
+      { type: "PLAY_CARD", character: "Red", cardId: crowbar, payWith: [] },
       {
         type: "PLAY_CARD",
         character: "Red",
-        cardId: shove.id,
-        payWith: [payment.id],
+        cardId: shove,
+        payWith: [payment],
       },
+      { type: "PLAY_CARD", character: "Red", cardId: pryBar, payWith: [] },
       { type: "END_PLAY" },
     ]);
     const types = eventTypes(events);
@@ -115,7 +117,7 @@ describe("a reaction resolves where its event happens", () => {
   it("Covering Fire and My Head Is Quantum Spinning: Gray draws, then Red Exhausts", () => {
     const state = rig({
       phase: "Play",
-      activeRoom: room("Sorting Room"),
+      activeRoom: room("Security Turnstile"),
       playZone: [coveringFire()],
       Red: player({
         deck: pile("Shove", 3),
@@ -123,7 +125,10 @@ describe("a reaction resolves where its event happens", () => {
       }),
       Gray: player({ deck: pile("Duck Under", 3) }),
     });
-    const { state: next, events } = must(state, free("Red", handCard(state, "Red", "Coil Of Cable").id));
+    const { state: next, events } = must(
+      state,
+      free("Red", handCard(state, "Red", "Coil Of Cable").id),
+    );
     const types = eventTypes(events);
     expect(drawsAndLosses(events)).toEqual(["Gray: draw", "Red: exhaust"]);
     expect(types.indexOf("CARD_PLAYED")).toBeLessThan(types.indexOf("CARD_DRAWN"));
@@ -135,7 +140,7 @@ describe("a reaction's consequences resolve before the next listener hears the e
   it("two Covering Fires: the first draw's Exhaust lands before the second draw", () => {
     const state = rig({
       phase: "Play",
-      activeRoom: room("Sorting Room"),
+      activeRoom: room("Security Turnstile"),
       playZone: [coveringFire(), coveringFire()],
       Red: player({
         deck: [card("Shove")],
@@ -143,7 +148,10 @@ describe("a reaction's consequences resolve before the next listener hears the e
       }),
       Gray: player({ deck: pile("Duck Under", 3) }),
     });
-    const { state: next, events } = must(state, free("Red", handCard(state, "Red", "Coil Of Cable").id));
+    const { state: next, events } = must(
+      state,
+      free("Red", handCard(state, "Red", "Coil Of Cable").id),
+    );
     // The first Exhaust takes Red's last card; the second finds nothing left.
     expect(drawsAndLosses(events)).toEqual([
       "Gray: draw",
@@ -157,12 +165,15 @@ describe("a reaction's consequences resolve before the next listener hears the e
   it("with Red's deck and discard empty, Red goes Down after the first draw and the second never happens", () => {
     const state = rig({
       phase: "Play",
-      activeRoom: room("Sorting Room"),
+      activeRoom: room("Security Turnstile"),
       playZone: [coveringFire(), coveringFire()],
       Red: player({ hand: [card("My Head Is Quantum Spinning"), card("Coil Of Cable")] }),
       Gray: player({ deck: pile("Duck Under", 3) }),
     });
-    const { state: next, events } = must(state, free("Red", handCard(state, "Red", "Coil Of Cable").id));
+    const { state: next, events } = must(
+      state,
+      free("Red", handCard(state, "Red", "Coil Of Cable").id),
+    );
     expect(drawsAndLosses(events)).toEqual(["Gray: draw", "Red: down"]);
     expect(next.Gray.hand).toHaveLength(1);
     expect(next.phase).toBe("GameOver");
@@ -173,7 +184,7 @@ describe("Turn Start: 'Resolve effects triggered by these draws after both playe
   it("a held card hears every draw only once both hands hold 5", () => {
     const state = rig({
       phase: "Turn Start",
-      floorDeck: [room("Sorting Room")],
+      floorDeck: [room("Security Turnstile")],
       Red: player({ deck: pile("Shove", 6), hand: [card(probe.name)] }),
       Gray: player({ deck: pile("Duck Under", 6) }),
     });
@@ -188,7 +199,7 @@ describe("playing a card is heard after the card's own effect", () => {
   it("Covering Fire, Red plays Reckless: Red Exhausts 3, then Gray draws", () => {
     const state = rig({
       phase: "Play",
-      activeRoom: room("Sorting Room"),
+      activeRoom: room("Security Turnstile"),
       playZone: [coveringFire()],
       Red: player({ deck: pile("Shove", 5), hand: [card("Reckless"), card("Shove")] }),
       Gray: player({ deck: pile("Duck Under", 3) }),
@@ -202,89 +213,12 @@ describe("playing a card is heard after the card's own effect", () => {
     ]);
   });
 
-  describe("I Know Kung Fu, Gray plays Here, Catch", () => {
-    const heldHereCatch = () =>
-      rig({
-        phase: "Play",
-        activeRoom: room("Sorting Room"),
-        Red: player({ deck: pile("Shove", 3) }),
-        Gray: player({
-          deck: [card("Crowbar"), ...pile("Duck Under", 2)],
-          hand: [
-            card("I Know Kung Fu"),
-            card("Here, Catch"),
-            card("Coil Of Cable"),
-            card("Duck Under"),
-          ],
-        }),
-      });
-
-    it("the question offers only the Stuff held before the draw", () => {
-      const state = heldHereCatch();
-      const { state: asking, events } = must(
-        state,
-        playPaying(state, "Gray", "Here, Catch", ["Duck Under"]),
-      );
-      expect(drawsAndLosses(events)).toEqual([]);
-      expect(asking.pending?.kind).toBe("ChooseCards");
-      expect(asking.pending?.kind === "ChooseCards" && names(asking.pending.options)).toEqual([
-        "Coil Of Cable",
-      ]);
-    });
-
-    it("Gray draws once the question is answered, and the pause survives a save", () => {
-      const state = heldHereCatch();
-      const asking = must(state, playPaying(state, "Gray", "Here, Catch", ["Duck Under"])).state;
-      const saved = JSON.parse(JSON.stringify(asking)) as GameState;
-      const coil = handCard(asking, "Gray", "Coil Of Cable");
-      const { state: next, events } = must(saved, {
-        type: "CHOOSE_CARDS",
-        cardIds: [coil.id],
-      });
-      const types = eventTypes(events);
-      expect(types.indexOf("CARD_TO_HAND")).toBeLessThan(types.indexOf("CARD_DRAWN"));
-      expect(drawsAndLosses(events)).toEqual(["Gray: draw"]);
-      expect(names(next.Red.hand)).toEqual(["Coil Of Cable"]);
-      expect(names(next.Gray.hand)).toEqual(["I Know Kung Fu", "Crowbar"]);
-      expect(next.unfinishedPlay).toBeNull();
-    });
-  });
-
-  it("I Know Kung Fu and My Head Is Quantum Spinning, Gray plays Grav Harness and draws from it: its draw and Exhaust come first", () => {
-    const state = rig({
-      phase: "Play",
-      activeRoom: room("Sorting Room"),
-      Red: player({ deck: pile("Shove", 4), hand: [card("My Head Is Quantum Spinning")] }),
-      Gray: player({
-        deck: pile("Duck Under", 3),
-        hand: [card("I Know Kung Fu"), card("Grav Harness"), ...pile("Duck Under", 2)],
-      }),
-    });
-    const played = must(
-      state,
-      playPaying(state, "Gray", "Grav Harness", ["Duck Under", "Duck Under"]),
-    );
-    expect(drawsAndLosses(played.events)).toEqual([]);
-    const { state: next, events } = must(played.state, {
-      type: "CHOOSE_CHARACTER",
-      character: "Gray",
-    });
-    expect(drawsAndLosses(events)).toEqual([
-      "Gray: draw",
-      "Red: exhaust",
-      "Gray: draw",
-      "Red: exhaust",
-    ]);
-    expect(next.Gray.hand).toHaveLength(3);
-    expect(next.Red.deck).toHaveLength(2);
-  });
-
   const playedHeard = () => probe.heard.filter((h) => h.event.type === "CARD_PLAYED");
 
   it("a held card hears the play after the effect's question is answered", () => {
     const state = rig({
       phase: "Play",
-      activeRoom: room("Sorting Room"),
+      activeRoom: room("Security Turnstile"),
       Red: player({ deck: pile("Shove", 3), hand: [card(probe.name)] }),
       Gray: player({
         deck: pile("Duck Under", 3),
@@ -303,7 +237,7 @@ describe("playing a card is heard after the card's own effect", () => {
   it("a card the effect moves out of its zone does not hear the play", () => {
     const state = rig({
       phase: "Play",
-      activeRoom: room("Sorting Room"),
+      activeRoom: room("Security Turnstile"),
       Red: player({ deck: pile("Shove", 3) }),
       Gray: player({
         deck: pile("Duck Under", 3),
@@ -320,7 +254,7 @@ describe("playing a card is heard after the card's own effect", () => {
   it("a card the effect brings into hand does not hear the play", () => {
     const state = rig({
       phase: "Play",
-      activeRoom: room("Sorting Room"),
+      activeRoom: room("Security Turnstile"),
       Red: player({ deck: pile("Shove", 3) }),
       Gray: player({
         deck: [card(probe.name)],

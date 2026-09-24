@@ -26,8 +26,8 @@ export interface Fixture {
   events?(): readonly DomainEvent[];
 }
 
-const SORTING_ROOM = "Sorting Room";
-const CLEARED_ROOM = "Gross Thing That Looks Like A Cherry";
+const SORTING_ROOM = "Security Turnstile";
+const CLEARED_ROOM = "The Sentry Drone";
 
 /** Play phase, just flipped: both hands already drawn to 5 (Turn Start runs both steps at once). */
 function playing(): GameState {
@@ -60,47 +60,45 @@ function choosingCharacter(): GameState {
   return asked;
 }
 
-/** A pending `ChooseCards`: Level Up asks whether to Scrap. */
+/** A pending `ChooseCards`: Automated Defense Turret's Scrap offer asks whether to. */
 function choosingCards(): GameState {
   const state = rig({
     phase: "Play",
-    activeRoom: room(CLEARED_ROOM),
-    Red: player({ deck: pile("Shove", 6) }),
-    Gray: player({
-      deck: pile("Duck Under", 3),
-      hand: [card("Level Up"), card("Duck Under"), card("Duck Under"), card("Coil Of Cable")],
+    activeRoom: room("Automated Defense Turret"),
+    Red: player({
+      deck: pile("Shove", 4),
+      hand: [card("Charge In"), card("Charge In"), card("Pry Bar"), ...pile("Shove", 4)],
     }),
+    Gray: player({ deck: pile("Duck Under", 4), hand: [card("Rust")] }),
   });
-  const hand = state.Gray.hand;
-  const levelUp = hand[0];
-  const payA = hand[1];
-  const payB = hand[2];
-  if (!levelUp || !payA || !payB) throw new Error("rig");
-  const { state: asked } = must(state, {
-    type: "PLAY_CARD",
-    character: "Gray",
-    cardId: levelUp.id,
-    payWith: [payA.id, payB.id],
-  });
+  const r = state.Red.hand;
+  const { state: afterPlay } = play(state, [
+    { type: "PLAY_CARD", character: "Red", cardId: r[0]!.id, payWith: [r[3]!.id, r[4]!.id] },
+    { type: "PLAY_CARD", character: "Red", cardId: r[1]!.id, payWith: [r[5]!.id, r[6]!.id] },
+    { type: "PLAY_CARD", character: "Red", cardId: r[2]!.id, payWith: [] },
+    { type: "END_PLAY" },
+  ]);
+  const { state: asked } = must(afterPlay, { type: "CHOOSE_CHARACTER", character: "Gray" });
   return asked;
 }
 
-/** A pending `ChooseCharacter` raised at Outcome: Collapsed Stairwell's higher line reveals a reward. */
+/** A pending `ChooseCharacter` raised at Outcome: The Sentry Drone's Scramble line asks who gets Good Stuff. */
 function outcomeChoice(): GameState {
   const state = rig({
     phase: "Play",
-    activeRoom: room("Collapsed Stairwell"),
+    activeRoom: room("The Sentry Drone"),
     Red: player({ deck: pile("Shove", 5) }),
     Gray: player({
       deck: pile("Duck Under", 5),
-      hand: [card("Coil Of Cable"), card("Coil Of Cable")],
+      hand: pile("Coil Of Cable", 3),
     }),
   });
-  const [first, second] = state.Gray.hand;
-  if (!first || !second) throw new Error("rig");
+  const [first, second, third] = state.Gray.hand;
+  if (!first || !second || !third) throw new Error("rig");
   const { state: asked } = play(state, [
     { type: "PLAY_CARD", character: "Gray", cardId: first.id, payWith: [] },
     { type: "PLAY_CARD", character: "Gray", cardId: second.id, payWith: [] },
+    { type: "PLAY_CARD", character: "Gray", cardId: third.id, payWith: [] },
     { type: "END_PLAY" },
   ]);
   return asked;
@@ -160,11 +158,11 @@ function longestText(): GameState {
     activeRoom: room(SORTING_ROOM),
     Red: player({
       deck: pile("Shove", 4),
-      hand: [card("Deadweight Grip"), card("Both Barrels"), card("Panic")],
+      hand: [card("Junk Launcher"), card("A Pair Of Stitch-Em-Ups"), card("Panic")],
     }),
     Gray: player({
       deck: pile("Duck Under", 4),
-      hand: [card("Level Up"), card("My Head Is Quantum Spinning")],
+      hand: [card("My Head Is Quantum Spinning"), card("Corrosive Acid")],
     }),
   });
 }
@@ -175,11 +173,11 @@ function ascending(): GameState {
     phase: "Ascend",
     floor: 1,
     roomSupply: [
-      room("Coney, The Thing In The Stairwell"),
-      room("Collapsed Stairwell"),
-      room("Collapsed Stairwell"),
-      room("Ruptured Coolant Line"),
-      ...Array.from({ length: 8 }, () => room("Sorting Room")),
+      room("The Sentry Drone"),
+      room("Flooded Ventilation Shaft"),
+      room("Flooded Ventilation Shaft"),
+      room("Overgrown Hydroponics Bay"),
+      ...Array.from({ length: 8 }, () => room("Security Turnstile")),
     ],
     cleared: [room(CLEARED_ROOM)],
     Red: player({ deck: pile("Shove", 2), discard: [...pile("Charge In", 3), card("Pry Bar")] }),
@@ -200,14 +198,18 @@ function emptyGoodStuffPool(): Ran {
   const state = rig({
     phase: "Play",
     activeRoom: room(SORTING_ROOM),
-    Red: player({ deck: pile("Shove", 5), hand: [card("Shove"), card("Shove")] }),
+    Red: player({
+      deck: pile("Shove", 5),
+      hand: [card("Charge In"), card("Shove"), card("Shove"), card("Pry Bar")],
+    }),
     Gray: player({ deck: pile("Duck Under", 5) }),
   });
   const dry = { ...state, pools: { ...state.pools, goodStuff: [] } };
-  const [toPlay, toPayWith] = dry.Red.hand;
-  if (!toPlay || !toPayWith) throw new Error("rig");
+  const [chargeIn, payA, payB, pryBar] = dry.Red.hand;
+  if (!chargeIn || !payA || !payB || !pryBar) throw new Error("rig");
   return play(dry, [
-    { type: "PLAY_CARD", character: "Red", cardId: toPlay.id, payWith: [toPayWith.id] },
+    { type: "PLAY_CARD", character: "Red", cardId: chargeIn.id, payWith: [payA.id, payB.id] },
+    { type: "PLAY_CARD", character: "Red", cardId: pryBar.id, payWith: [] },
     { type: "END_PLAY" },
   ]);
 }
@@ -247,7 +249,7 @@ export const FIXTURES: readonly Fixture[] = [
   },
   {
     name: "choose-cards",
-    description: "Level Up pending a ChooseCards answer.",
+    description: "Automated Defense Turret's Scrap offer pending a ChooseCards answer.",
     build: stable(choosingCards),
   },
   {

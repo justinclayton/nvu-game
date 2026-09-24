@@ -120,7 +120,15 @@ var ROOM_KIND_LABEL = { room: "Room", stairwell: "Stairwell" };
 var BAND_FLOORS = { 1: "Floors 1–3", 2: "Floors 4–6", 3: "Floors 7–9" };
 
 function roomTypeLine(c) {
+  if (c.band === null) return ROOM_KIND_LABEL[c.kind] + " · Floor 10";
   return ROOM_KIND_LABEL[c.kind] + " · " + (BAND_FLOORS[c.band] || "?");
+}
+
+/* A threshold prints one stat (`stat`/`value`) or both at once
+   (`stats: { Oomph, Scramble }`, design/cards.yaml). */
+function thresholdLabel(t) {
+  if (t.stats) return "Oomph " + t.stats.Oomph + " and Scramble " + t.stats.Scramble;
+  return esc(t.stat) + " " + t.value;
 }
 
 function statLine(c) {
@@ -163,7 +171,7 @@ function playerCardHTML(c) {
 function roomCardHTML(c) {
   var challenges = (c.challenges || []).map(function (ch) {
     var lines = (ch.thresholds || []).map(function (t) {
-      return '<div class="th"><b>' + esc(t.stat) + " " + t.value + ":</b> " + esc(t.outcome) + "</div>";
+      return '<div class="th"><b>' + thresholdLabel(t) + ":</b> " + esc(t.outcome) + "</div>";
     }).join("");
     return '<div class="challenge">' + lines + "</div>";
   }).join("");
@@ -171,7 +179,7 @@ function roomCardHTML(c) {
   var foot = c.flee
     ? '<div class="flee"><b>Flee:</b> ' + esc(c.flee) + "</div>"
     : '<div class="flee"><b>Flee:</b> Leave empty handed.</div>';
-  return '<div class="card room band-' + c.band + '"><div class="type-bar"></div>' +
+  return '<div class="card room band-' + (c.band === null ? "10" : c.band) + '"><div class="type-bar"></div>' +
     '<div class="top"><div><div class="name">' + esc(c.name) + "</div>" +
     '<div class="typeline">' + esc(roomTypeLine(c)) + "</div></div></div>" +
     '<div class="art"></div>' +

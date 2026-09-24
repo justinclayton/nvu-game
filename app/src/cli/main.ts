@@ -10,13 +10,14 @@ import { existsSync, mkdirSync, readFileSync, unlinkSync, writeFileSync } from "
 import { dirname, join } from "node:path";
 import { stdout } from "node:process";
 
-import { runData, type RunFile } from "@application/exportRun";
+import { mismatchedField, runData, type RunFile } from "@application/exportRun";
 import { logLines, tailEvents } from "@application/narrate";
 import { createSession, loadSession, type Note, type SavedRun, type Session } from "@application/session";
-import { CARD_CONTENT } from "@content/index";
+import { CARD_CONTENT, CARD_LIST_ID } from "@content/index";
 import { resolveCardName } from "@content/names";
 import { costOf, payOptions, playableCards } from "@domain/queries";
-import type { Card, CardId, Character, Command, GameState } from "@domain/types";
+import { RULES_VERSION } from "@domain/setup";
+import type { Card, CardId, Character, Command, GameState, RoomId, Stat } from "@domain/types";
 import { CHARACTERS, playerOf } from "@domain/verbs";
 import { POLICIES, randomPolicy } from "@sim/policy";
 import { buildReport, type BalanceReport } from "@sim/report";
@@ -27,9 +28,7 @@ import {
   currentQuestion,
   describeStagedAnswer,
   parseAnswers,
-  payerCandidates,
   serializeAnswers,
-  type AscendQuestion,
   type StagedAnswer,
 } from "./ascend";
 import {
@@ -150,6 +149,14 @@ function matchCharacter(raw: string): Character {
   return found;
 }
 
+const STATS: readonly Stat[] = ["Oomph", "Scramble"];
+
+function matchStat(raw: string): Stat {
+  const found = STATS.find((s) => s.toLowerCase() === raw.toLowerCase());
+  if (!found) throw new MoveRefused(`"${raw}" is not a stat — choose Oomph or Scramble.`);
+  return found;
+}
+
 /* ------------------------------------------------------- building commands */
 
 /**
@@ -157,9 +164,12 @@ function matchCharacter(raw: string): Character {
  * unconsumed after every match — the shape a payer list, a `choose` answer
  * and an `order` answer all share.
  */
-function resolveEach(names: readonly string[], candidates: readonly Card[]): Card[] {
-  const consumed = new Set<CardId>();
-  const resolved: Card[] = [];
+function resolveEach<T extends { readonly id: CardId | RoomId; readonly name: string }>(
+  names: readonly string[],
+  candidates: readonly T[],
+): T[] {
+  const consumed = new Set<CardId | RoomId>();
+  const resolved: T[] = [];
   for (const name of names) {
     const pool = candidates.filter((c) => !consumed.has(c.id));
     const named = resolveCardName(name, pool);
@@ -190,6 +200,20 @@ function buildPlayCard(
   return { type: "PLAY_CARD", character, cardId: card.id, payWith };
 }
 
+function buildScrapForStats(
+  state: GameState,
+  action: Extract<PlayAction, { kind: "scrap" }>,
+): Command {
+  if (state.phase !== "Play") {
+    throw new MoveRefused(`Cannot Scrap for stats during the ${state.phase} phase.`);
+  }
+  const character = matchCharacter(action.character);
+  const named = resolveCardName(action.name, playerOf(state, character).hand);
+  if (!named.ok) throw new MoveRefused(named.reason);
+  const stat = matchStat(action.stat);
+  return { type: "SCRAP_FOR_STATS", character, cardId: named.card.id, stat };
+}
+
 function buildChoose(state: GameState, action: Extract<PlayAction, { kind: "choose" }>): Command {
   const pending = state.pending;
   if (!pending) throw new MoveRefused("Nothing is waiting to be answered.");
@@ -204,6 +228,17 @@ function buildChoose(state: GameState, action: Extract<PlayAction, { kind: "choo
       throw new MoveRefused(`"${only}" is not one of: ${pending.options.join(", ")}.`);
     }
     return { type: "CHOOSE_CHARACTER", character };
+  }
+
+  if (pending.kind === "ChoosePile") {
+    const typed = action.names.join(" ").toLowerCase();
+    const exact = pending.options.filter((p) => p.toLowerCase() === typed);
+    const matches = exact.length > 0 ? exact : pending.options.filter((p) => p.toLowerCase().startsWith(typed));
+    const [only, ...extra] = matches;
+    if (!only || extra.length > 0) {
+      throw new MoveRefused(`Choose one of: ${pending.options.join(", ")}.`);
+    }
+    return { type: "CHOOSE_PILE", pile: only };
   }
 
   if (pending.kind === "ChooseCards") {
@@ -223,80 +258,19 @@ function buildOrder(state: GameState, action: Extract<PlayAction, { kind: "order
   return { type: "ORDER_CARDS", cardIds };
 }
 
-function resolvePayer(
-  state: GameState,
-  character: Character,
-  payName: string,
-  staged: readonly StagedAnswer[],
-): Card {
-  const candidates = payerCandidates(state, character, staged);
-  const named = resolveCardName(payName, candidates);
-  if (!named.ok) throw new MoveRefused(named.reason);
-  return named.card;
-}
-
 /**
  * One Ascend question's answer, staged (not yet dispatched). Refuses naming
- * the wrong card, or a verb that does not fit the card being asked about
- * (design/cli-sim/spec.md, "Ascending, one question at a time").
+ * a card that was not offered (design/cli-sim/spec.md, "Ascending, one
+ * question at a time").
  */
-type AscendAction = Extract<PlayAction, { kind: "keep" | "return" | "shed" | "takeAscend" }>;
+type AscendAction = Extract<PlayAction, { kind: "takeAscend" }>;
 
-function buildAscendAnswer(
-  state: GameState,
-  question: AscendQuestion,
-  action: AscendAction,
-  staged: readonly StagedAnswer[],
-): StagedAnswer {
-  if (question.kind === "reward") {
-    if (action.kind !== "takeAscend") {
-      throw new MoveRefused(
-        `${question.character} is being asked about the reward. Use: take <Name>, or take none.`,
-      );
-    }
-    if (action.name === null) {
-      return { kind: "reward", character: question.character, takeRewardId: null };
-    }
-    const offered = state.offer?.[question.character] ?? [];
-    const named = resolveCardName(action.name, offered);
-    if (!named.ok) throw new MoveRefused(named.reason);
-    return { kind: "reward", character: question.character, takeRewardId: named.card.id };
-  }
-
-  const card = question.card;
-  if (!card) throw new MoveRefused("No Stuff card is being asked about.");
-  if (action.kind === "takeAscend") {
-    throw new MoveRefused(`${question.character} is being asked about ${card.name}, not the reward yet.`);
-  }
-  const named = resolveCardName(action.name, [card]);
-  if (!named.ok) {
-    throw new MoveRefused(`${question.character} is being asked about ${card.name}, not "${action.name}".`);
-  }
-  const isGoodStuff = card.kind === "good_stuff";
-
-  if (action.kind === "return") {
-    if (!isGoodStuff) {
-      throw new MoveRefused(`${card.name} is Bad Stuff — return only answers Good Stuff. Use keep or shed.`);
-    }
-    return { kind: "settle", character: question.character, cardId: card.id, payWith: null };
-  }
-  if (action.kind === "keep") {
-    if (isGoodStuff) {
-      if (action.pay === null) {
-        throw new MoveRefused(`${card.name} is Good Stuff — keep it by paying: keep ${card.name} paying <Payer>.`);
-      }
-      const payer = resolvePayer(state, question.character, action.pay, staged);
-      return { kind: "settle", character: question.character, cardId: card.id, payWith: payer.id };
-    }
-    if (action.pay !== null) throw new MoveRefused(`${card.name} is Bad Stuff — keeping it is free.`);
-    return { kind: "settle", character: question.character, cardId: card.id, payWith: null };
-  }
-  // action.kind === "shed"
-  if (isGoodStuff) {
-    throw new MoveRefused(`${card.name} is Good Stuff — shed only answers Bad Stuff. Use keep or return.`);
-  }
-  const payer = resolvePayer(state, question.character, action.pay, staged);
-  return { kind: "settle", character: question.character, cardId: card.id, payWith: payer.id };
+function buildAscendAnswer(state: GameState, character: Character, action: AscendAction): StagedAnswer {
+  if (action.name === null) return { character, takeRewardId: null };
+  const offered = state.offer?.[character] ?? [];
+  const named = resolveCardName(action.name, offered);
+  if (!named.ok) throw new MoveRefused(named.reason);
+  return { character, takeRewardId: named.card.id };
 }
 
 /** A one-line account of a dispatched action that produced no narrated event. */
@@ -310,6 +284,8 @@ function describeAction(action: PlayAction): string {
       return action.pay.length > 0
         ? `Played ${action.name}, paying ${action.pay.join(", ")}.`
         : `Played ${action.name}.`;
+    case "scrap":
+      return `Scrapped ${action.name} for +3 ${action.stat}.`;
     case "choose":
       return action.names.length === 0 ? "Chose none." : `Chose ${action.names.join(", ")}.`;
     case "order":
@@ -431,6 +407,9 @@ function play(request: PlayRequest): number {
       case "card":
         dispatchOrThrow(session, buildPlayCard(session.getState().state, action));
         break;
+      case "scrap":
+        dispatchOrThrow(session, buildScrapForStats(session.getState().state, action));
+        break;
       case "choose":
         dispatchOrThrow(session, buildChoose(session.getState().state, action));
         break;
@@ -443,9 +422,6 @@ function play(request: PlayRequest): number {
       case "skip":
         dispatchOrThrow(session, { type: "TAKE_REWARD", take: false });
         break;
-      case "keep":
-      case "return":
-      case "shed":
       case "takeAscend": {
         const state = session.getState().state;
         if (state.phase !== "Ascend") {
@@ -453,7 +429,7 @@ function play(request: PlayRequest): number {
         }
         const question = currentQuestion(state, staged);
         if (!question) throw new MoveRefused("Every Ascend question is already staged.");
-        const answer = buildAscendAnswer(state, question, action, staged);
+        const answer = buildAscendAnswer(state, question, action);
         staged = [...staged, answer];
         manualNote = describeStagedAnswer(state, answer);
         if (ascendComplete(state, staged)) {
@@ -509,6 +485,14 @@ function cardFace(request: CardRequest): number {
 function replayRun(request: ReplayRequest): number {
   const file = readRunFile(request.file);
   if (!file.run) throw new UsageError(`${request.file} was not played from a seed and cannot replay.`);
+  const mismatch = mismatchedField(file);
+  if (mismatch !== null) {
+    const label = mismatch === "cards" ? "card list" : "rules";
+    const recorded = (mismatch === "cards" ? file.cards : file.rules) ?? "none recorded";
+    const current = mismatch === "cards" ? CARD_LIST_ID : RULES_VERSION;
+    out(`${request.file} was recorded on a different ${label} (${recorded}); this build is ${current}. Not replaying.`);
+    return 2;
+  }
   const session = loadRun(file.run, file.notes ?? []);
   const s = session.getState();
 
@@ -595,17 +579,17 @@ function renderReport(report: BalanceReport): string {
     );
   }
   lines.push("");
-  lines.push("Per card — played / taken / kept:");
+  lines.push("Per card — played / taken:");
   for (const card of report.cards) {
-    lines.push(`  ${card.name}: ${String(card.played)} / ${String(card.taken)} / ${String(card.kept)}`);
+    lines.push(`  ${card.name}: ${String(card.played)} / ${String(card.taken)}`);
   }
   lines.push("");
-  lines.push("Where cards went, by floor — Exhausted / Scrapped / paid as cost / Stuff returned:");
+  lines.push("Where cards went, by floor — Exhausted / Scrapped / paid as cost:");
   for (const c of CHARACTERS) {
     lines.push(`  ${c}:`);
     for (const row of report.floorLosses.filter((r) => r.character === c)) {
       lines.push(
-        `    Floor ${String(row.floor)}: ${String(row.exhausted)} / ${String(row.scrapped)} / ${String(row.paidAsCost)} / ${String(row.stuffReturned)}`,
+        `    Floor ${String(row.floor)}: ${String(row.exhausted)} / ${String(row.scrapped)} / ${String(row.paidAsCost)}`,
       );
     }
   }

@@ -96,11 +96,13 @@ The moves, one per engine command: `[agent, accepted]`
 | `play flip` | `FLIP_ROOM`; Turn Start is one step, see below |
 | `play end` | `END_PLAY` |
 | `play card Red CI pay Rope Flare` | `PLAY_CARD`, paying with the named cards; `pay` and its list are omitted for a cost of 0 |
+| `play scrap Red "Pry Bar" for Oomph` | `SCRAP_FOR_STATS`, legal only where the active room's own printed text allows it (e.g. Bio-Hazard Containment Vault) `[agent]` |
 | `play choose Red` | `CHOOSE_CHARACTER` |
+| `play choose Floor deck` | `CHOOSE_PILE` |
 | `play choose Rope Flare`, `play choose none` | `CHOOSE_CARDS` |
 | `play order Rope Flare Shove` | `ORDER_CARDS`, top first |
 | `play take`, `play skip` | `TAKE_REWARD` |
-| `play keep Crowbar paying Shove`, `play return Pry Bar`, `play keep Torn Seal`, `play shed Rust paying Charge In`, `play take Zen Mode`, `play take none` | one Ascend question's answer, composed into `ASCEND`, see below |
+| `play take Zen Mode`, `play take none` | one character's Ascend answer, composed into `ASCEND`, see below |
 
 There is no Draw phase and no draw move. `[agent]` Rulebook 0.2 folded Draw up to five into Turn
 Start as an automatic second step with no decision in it (rulebook, Each Turn): `play flip` resolves
@@ -120,38 +122,20 @@ same card, any copy is taken. A content test in `app/src/content` reports every 
 those are Reckless Swing and Riot Shield, Reckless and Rust, Shove and Sluggish.
 
 **Ascending, one question at a time.** `[you]` The engine takes one `ASCEND` command holding both
-characters' choices, `Red` and `Gray`, each an `AscendChoice`: a `settle` list of `{cardId,
-payWith}` and a `takeRewardId` (`app/src/domain/types.ts`). The CLI does not ask for a character's
-whole Ascend in one line. It asks one question at a time, and every call prints the next one, e.g.
-`Red: Pry Bar (Good Stuff). Keep or return?`. Every Stuff card found is asked about in turn; there
-are no silent defaults. `[you]`
+characters' choices, `Red` and `Gray`, each an `AscendChoice`: just a `takeRewardId`
+(`app/src/domain/types.ts`). The CLI does not ask for a character's whole Ascend in one line; it
+asks about the reward one character at a time, and every call prints the next one. `[agent]`
 
-The hand shuffles into the deck automatically before Settle your Stuff; there is no move for it.
-`[agent]` Rulebook 0.2, section 10, then asks about each Stuff card found across the character's
-deck and discard, then the reward, last. `Red` is asked first, then `Gray`; either order is
-equally valid and this one was picked for being simpler to implement and to read in a transcript.
+`Red` is asked first, then `Gray`; either order is equally valid and this one was picked for being
+simpler to implement and to read in a transcript. The answer is `play take Zen Mode`, one of the
+three offered, or `play take none`. An answer must name the card being asked about; naming any
+other card is refused with the engine-style reason, naming the card that was actually asked about.
 `[agent]`
 
-Answers reuse the Play phase's `paying` wording: `[you]`
-
-| Question | Answer |
-| --- | --- |
-| A Good Stuff card: keep or return? | `play keep Crowbar paying Shove` (keep it by Scrapping one non-Stuff card), or `play return Pry Bar` (back to the Good Stuff pool, free) |
-| A Bad Stuff card: keep or shed? | `play keep Torn Seal` (stays, free), or `play shed Rust paying Charge In` (to the Bad Stuff pool by Scrapping one non-Stuff card) |
-| The reward, last | `play take Zen Mode`, or `play take none` |
-
-An answer must name the card being asked about; naming any other card is refused with the engine-
-style reason, naming the card that was actually asked about. `take` ends that character's Ascend.
-
 The answers are staged in a sidecar file next to the run file, one question at a time, and composed
-into the single `ASCEND` command once both characters have answered `take`; the sidecar is then
-removed. `undo` during staging steps back one question and clears its staged answer. `show` during
-Ascend prints the character and card currently being asked about, each character's Stuff found in
-deck and discard, the payer candidates, the offered cards as full faces, and what is staged so far.
-The flat cross product of both characters' choices is gone. `[agent, accepted]`
-
-Stuff rent (what a kept or shed Stuff card costs to Scrap) is pinned by the designer; when it
-changes, only the `keep`/`shed`/`return` verbs' cost changes, not this form. `[agent]`
+into the single `ASCEND` command once both characters have answered; the sidecar is then removed.
+`undo` during staging steps back one question and clears its staged answer. `show` during Ascend
+prints the offered cards as full faces and what is staged so far. `[agent, accepted]`
 
 ### What each call prints `[you]`
 
@@ -191,18 +175,13 @@ one per step.
 The contract, held by `moves.test.ts`: every command returned passes `validate`, and for a sample
 of seeded states every command `validate` accepts is one it returned.
 
-Three places cap the list where the full set is large, and all three are recorded here as debt the
-solver must pay before it can claim completeness. None touches `play`, which enumerates nothing:
+One place caps the list where the full set is large, recorded here as debt the solver must pay
+before it can claim completeness. It does not touch `play`, which enumerates nothing:
 
 - An `OrderCards` answer over more than four cards offers only the order shown and its reverse.
-- The cross product of the two characters' ascension choices is not crossed past 256 entries.
-- An ascension's Settle your Stuff answer tries one Stuff card at a time, each way of paying for
-  it alone; settling several Stuff cards in the same `ASCEND` is not crossed.
 
-Playtest 4 (`design/playtests/04-first-run-on-rules-0.2.md`) hit the 256-entry cross-product cap
-with only two Stuff cards to settle, and it silently dropped a legal combination rather than just
-making the list unwieldy; the marathon deck sizes 0.2 produces make this worse than under 0.1. The
-per-question `play` form above is unaffected, but `fuzz` and the solver still owe this fix. `[agent]`
+An `ASCEND` is the cross product of the two characters' reward choices, four by four at most, and
+is crossed in full. `[agent]`
 
 The web game's ADR ruled a generator out for the UI, which has a better source in `pending` and
 targeted queries. That ruling stands; this generator lives in `sim`, not `domain`.
@@ -234,24 +213,15 @@ checks, before playing anything, whether anything left in hand could Clear the r
 turn — if not, it stops (`END_PLAY`) instead of spending cards, and any Exhaust, on a room that is
 getting Fled regardless (issue #102). A card asking an optional choice it has no opinion on (e.g.
 Level Up's "Scrap a card?") is declined rather than answered with the cheapest option. At Ascend
-(issue #97): pay to keep the Good Stuff and shed the Bad Stuff most worth it, cheapest payer first,
-but only while the character's deck, hand and discard together stay at or above a floor
-(`MIN_LIVE_DECK` in `sim/policy.ts`) and the card is worth more than the payer it costs — a Good
-Stuff's worth is its printed stats plus a point for having text; a Bad Stuff's is 1 for the dead
-weight of holding it plus a point per kind of ongoing tax its `Holding:` line levies. It then takes
-whichever offered reward best fits the deck: the character's weaker stat, doubled, plus the
-reward's own total stats, docked for twice any printed `Exhaust X` the reward itself carries, ties
-broken toward the lower card id. Everywhere but Ascend it answers only from the move generator's
-own list (`sim/moves.ts`), never a command it invents. At Ascend it composes each character's whole
-choice independently — the same shape the CLI's per-question staging builds (`cli/ascend.ts`,
-`composeAscend`) — and validates the composed command against the engine, because the generator's
-own list crosses both characters' choices and caps out at 256 combined options; past that cap every
-command it offers forces one character's choice to "none", which forfeited about half of every
-Ascend's rewards and Stuff settlements when the policy could only pick from that list. A composed
-command the engine refuses is a bug in the policy, same as any other `greedy:` throw — it never has
-been refused across any sweep run against it. It never draws on its own randomness, so a seed always
-plays the same game. It is not a playtester and does not read the rulebook; the agent playtest is
-still the check for fidelity and rulebook gaps.
+(issue #97) it takes whichever offered reward best fits the deck: the character's weaker stat,
+doubled, plus the reward's own total stats, docked for twice any printed `Exhaust X` the reward
+itself carries, ties broken toward the lower card id. Everywhere but Ascend it answers only from
+the move generator's own list (`sim/moves.ts`), never a command it invents. At Ascend it composes
+each character's choice directly, the same shape the CLI's staging builds (`cli/ascend.ts`,
+`composeAscend`), and validates the composed command against the engine; a composed command the
+engine refuses is a bug in the policy, same as any other `greedy:` throw. It never draws on its own
+randomness, so a seed always plays the same game. It is not a playtester and does not read the rulebook; the
+agent playtest is still the check for fidelity and rulebook gaps.
 
 Its Exhaust losses are still overwhelmingly forced, not chosen: across a 500-seed sweep, well under
 2% of Exhausted cards come from a card the policy played, the rest from a room's own Flee
@@ -287,8 +257,7 @@ Tests: `moves.test.ts` (the contract), `run.test.ts` (every seed ends or hits th
 throws, and the log replays to the same state), `cli/args.test.ts`, a test of card-name resolution
 (full name, initials, prefix, ambiguity refused, copies interchangeable), and the initials-collision
 report in `app/src/content`. `policy.test.ts` holds the greedy policy's key choices — the play that
-clears, the cheapest payment, keeping paid-for Good Stuff, shedding paid-for Bad Stuff, taking the
-reward — and `report.test.ts` holds the balance report's aggregation, both deterministic on a fixed
+clears, the cheapest payment, taking the reward — and `report.test.ts` holds the balance report's aggregation, both deterministic on a fixed
 seed set.
 
 ## The playtest note `[you]`

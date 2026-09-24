@@ -17,8 +17,22 @@ import type {
   PlayerState,
   Room,
 } from "../types";
+import type { CardContent } from "../printed";
 
 export const CONTENT = CARD_CONTENT;
+
+/**
+ * Band 1's printed Room supply is short of what floor 1-3 call for (setup.ts,
+ * `buildFloor`) — the card list is not yet complete. A test that plays a
+ * whole run needs a band 1 with enough cards to actually build a floor, so it
+ * pads one band-1 Room's copy count rather than going through `design/`.
+ */
+export const FULL_CONTENT: CardContent = {
+  ...CONTENT,
+  rooms: CONTENT.rooms.map((r) =>
+    r.name === "Security Turnstile" ? { ...r, count: r.count + 4 } : r,
+  ),
+};
 
 let counter = 0;
 export const resetRig = (): void => {
@@ -144,21 +158,21 @@ export function handCard(state: GameState, c: Character, name: string): Card {
 export const free = (c: Character, cardId: CardId): Command =>
   ({ type: "PLAY_CARD", character: c, cardId, payWith: [] }) as const;
 
-/** A rigged Play-phase state, Gross Thing That Looks Like A Cherry, both hands empty with full decks. */
+/** A rigged Play-phase state, The Sentry Drone, both hands empty with full decks. */
 export const playing = (over: Partial<GameState> = {}): GameState =>
   rig({
     phase: "Play",
-    activeRoom: room("Gross Thing That Looks Like A Cherry"),
+    activeRoom: room("The Sentry Drone"),
     Red: player({ deck: pile("Shove", 6) }),
     Gray: player({ deck: pile("Duck Under", 6) }),
     ...over,
   });
 
-/** Play phase at Collapsed Stairwell, both decks and discard piles empty: one Exhaust away from Going Down. */
+/** Play phase at Smoldering Armory (Flee: Red Exhausts 5), both decks and discard piles empty: one Exhaust away from Going Down. */
 export const goingDown = (hand: readonly Card[] = []): GameState =>
   rig({
     phase: "Play",
-    activeRoom: room("Collapsed Stairwell"),
+    activeRoom: room("Smoldering Armory"),
     Red: player({ deck: [], discard: [], hand }),
     Gray: player({ deck: pile("Duck Under", 4) }),
   });

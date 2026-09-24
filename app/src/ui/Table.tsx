@@ -34,8 +34,8 @@ export function Table({ onNewRun }: { readonly onNewRun: () => void }) {
    * back to the card layer. */
   const [debug, setDebug] = useState(false);
   const [openPile, setOpenPile] = useState<ZoneId | null>(null);
-  /* Rulebook, Ascending: what each character is keeping, Scrapping and taking, decided together
-   * and sent as one command. The cards on offer float above the mat, so the
+  /* Rulebook, Ascending: what each character is taking, decided together and
+   * sent as one command. The cards on offer float above the mat, so the
    * choice lives here where both the mat and the panel can read it. */
   const [ascend, setAscend] = useState<AscendChoices>(NO_CHOICES);
   const choose = useCallback((c: Character, patch: Partial<AscendChoice>) => {

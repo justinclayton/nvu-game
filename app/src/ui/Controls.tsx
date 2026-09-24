@@ -7,9 +7,25 @@
 
 import { useEffect, useState } from "react";
 
-import type { CardId, Command, GameState } from "@domain/types";
+import { scrapForStatsCards } from "@domain/queries";
+import type { CardId, Command, GameState, Stat } from "@domain/types";
 import { isLegal, whyNot } from "./legal";
-import { CardView } from "./CardView";
+import { CardView, RoomCardView } from "./CardView";
+
+const STATS: readonly Stat[] = ["Oomph", "Scramble"];
+
+/** Bio-Hazard Containment Vault, while active: one button per Good Stuff card and stat. */
+function scrapButtons(state: GameState): readonly { label: string; command: Command }[] {
+  if (state.phase !== "Play") return [];
+  return (["Red", "Gray"] as const).flatMap((c) =>
+    scrapForStatsCards(state, c).flatMap((card) =>
+      STATS.map((stat) => ({
+        label: `${c} Scraps ${card.name} for +3 ${stat}`,
+        command: { type: "SCRAP_FOR_STATS", character: c, cardId: card.id, stat } as Command,
+      })),
+    ),
+  );
+}
 
 interface Props {
   readonly state: GameState;
@@ -25,7 +41,10 @@ export function Controls({ state, dispatch, hint }: Props) {
     state.phase === "Turn Start"
       ? [{ label: "Flip the next room", command: { type: "FLIP_ROOM" } }]
       : state.phase === "Play"
-        ? [{ label: "Both of us have stopped — check the room", command: { type: "END_PLAY" } }]
+        ? [
+            ...scrapButtons(state),
+            { label: "Both of us have stopped — check the room", command: { type: "END_PLAY" } },
+          ]
         : [];
 
   return (
@@ -48,7 +67,7 @@ export function Controls({ state, dispatch, hint }: Props) {
         <span className="controls__hint">{hint}</span>
       ) : buttons.length > 0 ? (
         <span className="controls__why">
-          {whyNot(state, buttons[0]?.command ?? { type: "END_PLAY" })}
+          {whyNot(state, buttons[buttons.length - 1]?.command ?? { type: "END_PLAY" })}
         </span>
       ) : null}
     </div>
@@ -74,6 +93,25 @@ function PendingChoice({ state, dispatch }: Props) {
               }}
             >
               {c}
+            </button>
+          ))}
+        </div>
+      );
+
+    case "ChoosePile":
+      return (
+        <div className="controls controls--pending">
+          <p className="controls__prompt">{pending.prompt}</p>
+          {pending.options.map((p) => (
+            <button
+              key={p}
+              type="button"
+              className="button button--primary"
+              onClick={() => {
+                dispatch({ type: "CHOOSE_PILE", pile: p });
+              }}
+            >
+              {p}
             </button>
           ))}
         </div>
@@ -110,9 +148,13 @@ function PendingChoice({ state, dispatch }: Props) {
         <div className="controls controls--pending">
           <p className="controls__prompt">{pending.prompt}</p>
           <div className="zone">
-            {pending.cards.map((card) => (
-              <CardView key={card.id} card={card} />
-            ))}
+            {pending.cards.map((card) =>
+              "challenges" in card ? (
+                <RoomCardView key={card.id} room={card} />
+              ) : (
+                <CardView key={card.id} card={card} />
+              ),
+            )}
           </div>
           <button
             type="button"
@@ -121,7 +163,7 @@ function PendingChoice({ state, dispatch }: Props) {
               dispatch({ type: "ORDER_CARDS", cardIds: pending.cards.map((c) => c.id) });
             }}
           >
-            Put them back in this order
+            Put {pending.pile} back in this order
           </button>
         </div>
       );

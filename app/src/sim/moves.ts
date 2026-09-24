@@ -6,15 +6,15 @@
  * the same queries the UI uses, and stays out of the domain.
  *
  * The contract, which moves.test.ts holds this file to: every command returned
- * passes `validate`. The reverse holds too, with two exceptions noted below
+ * passes `validate`. The reverse holds too, with one exception noted below
  * where the full set is too large to enumerate: an `OrderCards` answer over
- * more than four cards, and the cross product of two characters' ascension
- * choices. Turn Start's two steps, Flip the room and Draw up to five, run
- * together inside `FLIP_ROOM` with no decision between them (rulebook, Each
- * Turn, Turn Start), so there is no separate case for either here.
+ * more than four cards. Turn Start's two steps, Flip the room and Draw up to
+ * five, run together inside `FLIP_ROOM` with no decision between them
+ * (rulebook, Each Turn, Turn Start), so there is no separate case for either
+ * here.
  */
 
-import { costOf, payOptions, playableCards } from "@domain/queries";
+import { costOf, payOptions, playableCards, scrapForStatsCards } from "@domain/queries";
 import type {
   AscendChoice,
   Card,
@@ -23,9 +23,10 @@ import type {
   Command,
   GameState,
   Pending,
-  StuffSettlement,
+  Room,
+  RoomId,
 } from "@domain/types";
-import { CHARACTERS, playerOf } from "@domain/verbs";
+import { CHARACTERS } from "@domain/verbs";
 
 /** Every way to pick `k` of `items`, in a stable order. */
 export function combinations<T>(items: readonly T[], k: number): readonly (readonly T[])[] {
@@ -61,9 +62,6 @@ export function permutations<T>(items: readonly T[]): readonly (readonly T[])[] 
 /** Past this many cards an `OrderCards` answer offers only the order shown and its reverse. */
 const ORDER_ALL_UP_TO = 4;
 
-/** Past this many combined ascension choices the two characters' lists are not crossed. */
-const ASCEND_CROSS_UP_TO = 256;
-
 const ids = (cards: readonly Card[]): CardId[] => cards.map((c) => c.id);
 
 /* ------------------------------------------------------------- answering */
@@ -72,6 +70,8 @@ function answers(pending: Pending): readonly Command[] {
   switch (pending.kind) {
     case "ChooseCharacter":
       return pending.options.map((character) => ({ type: "CHOOSE_CHARACTER", character }));
+    case "ChoosePile":
+      return pending.options.map((pile) => ({ type: "CHOOSE_PILE", pile }));
     case "ChooseCards": {
       const wanted = Math.min(pending.count, pending.options.length);
       const picks = combinations(pending.options, wanted).map((cards): Command => ({
@@ -82,11 +82,13 @@ function answers(pending: Pending): readonly Command[] {
       return picks;
     }
     case "OrderCards": {
+      const pileIds = (items: readonly (Card | Room)[]): (CardId | RoomId)[] =>
+        items.map((c) => c.id);
       const orders =
         pending.cards.length <= ORDER_ALL_UP_TO
           ? permutations(pending.cards)
           : [pending.cards, [...pending.cards].reverse()];
-      return orders.map((cards) => ({ type: "ORDER_CARDS", cardIds: ids(cards) }));
+      return orders.map((cards) => ({ type: "ORDER_CARDS", cardIds: pileIds(cards) }));
     }
     case "TakeReward":
       return [
@@ -109,57 +111,29 @@ export function playsOf(state: GameState, c: Character, card: Card): readonly Co
   }));
 }
 
+/** Every legal `SCRAP_FOR_STATS`, one per eligible Good Stuff card and stat (Bio-Hazard Containment Vault). */
+export function scrapsOf(state: GameState, c: Character): readonly Command[] {
+  const stats = ["Oomph", "Scramble"] as const;
+  return scrapForStatsCards(state, c).flatMap((card) =>
+    stats.map((stat): Command => ({ type: "SCRAP_FOR_STATS", character: c, cardId: card.id, stat })),
+  );
+}
+
 /* ---------------------------------------------------------------- Ascend */
 
-/**
- * Everything one character may decide at ascension: each reward or none,
- * crossed with every way of settling a single Stuff card (deck, hand or
- * discard pile) by paying for it with a single payer. Settling more than one
- * Stuff card simultaneously is not crossed — recorded as debt alongside
- * `OrderCards` and the ascend cross product below (design/cli-sim/spec.md).
- * A policy that wants to settle several at once builds its own
- * `AscendChoice.settle`.
- */
+/** Everything one character may decide at ascension: each offered reward, or none. */
 export function ascendChoices(state: GameState, c: Character): readonly AscendChoice[] {
   const offered = state.offer?.[c] ?? [];
   const rewards: (CardId | null)[] = [null, ...ids(offered)];
-
-  const p = playerOf(state, c);
-  const owned = [...p.deck, ...p.hand, ...p.discard];
-  const stuff = owned.filter((x) => x.kind !== "player");
-  const payers = owned.filter((x) => x.kind === "player");
-
-  const settlements: readonly (readonly StuffSettlement[])[] = [
-    [],
-    ...stuff.flatMap((s): (readonly StuffSettlement[])[] =>
-      payers.map((payer): readonly StuffSettlement[] => [{ cardId: s.id, payWith: payer.id }]),
-    ),
-  ];
-
-  const out: AscendChoice[] = [];
-  for (const settle of settlements) {
-    for (const takeRewardId of rewards) out.push({ settle, takeRewardId });
-  }
-  return out;
+  return rewards.map((takeRewardId) => ({ takeRewardId }));
 }
 
+/** The cross product of both characters' reward choices — at most 4×4, so nothing here is capped. */
 function ascends(state: GameState): readonly Command[] {
   const red = ascendChoices(state, "Red");
   const gray = ascendChoices(state, "Gray");
-  const redNone = red[0];
-  const grayNone = gray[0];
-  if (!redNone || !grayNone) return [];
-
   const out: Command[] = [];
-  if (red.length * gray.length <= ASCEND_CROSS_UP_TO) {
-    for (const r of red) for (const g of gray) out.push({ type: "ASCEND", Red: r, Gray: g });
-    return out;
-  }
-  // Too many to cross: each of one character's choices against the other's
-  // "nothing", both ways round. A policy choosing per character reads
-  // `ascendChoices` directly instead.
-  for (const r of red) out.push({ type: "ASCEND", Red: r, Gray: grayNone });
-  for (const g of gray) if (g !== grayNone) out.push({ type: "ASCEND", Red: redNone, Gray: g });
+  for (const r of red) for (const g of gray) out.push({ type: "ASCEND", Red: r, Gray: g });
   return out;
 }
 
@@ -177,6 +151,7 @@ export function legalCommands(state: GameState): readonly Command[] {
       const out: Command[] = [];
       for (const c of CHARACTERS) {
         for (const card of playableCards(state, c)) out.push(...playsOf(state, c, card));
+        out.push(...scrapsOf(state, c));
       }
       out.push({ type: "END_PLAY" });
       return out;

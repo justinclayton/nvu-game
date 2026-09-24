@@ -9,15 +9,16 @@
 
 import type { CardId, RoomId } from "./ids";
 import type {
-  Band,
   CardKind,
   CardSet,
   Challenge,
   Character,
   FleeLine,
   Rarity,
+  RoomBand,
   RoomEffect,
   RoomKind,
+  Stat,
   Threshold,
 } from "./printed";
 
@@ -53,8 +54,8 @@ export interface Room {
   readonly id: RoomId;
   readonly name: string;
   readonly kind: RoomKind;
-  /** Which floors' pool the card is drawn from (rulebook Setup, "Floor deck"). */
-  readonly band: Band;
+  /** Which floors' pool the card is drawn from; `null` for the one fixed Floor 10 Stairwell. */
+  readonly band: RoomBand;
   readonly flavor: string;
   readonly challenges: readonly Challenge[];
   readonly flee: FleeLine;
@@ -118,6 +119,15 @@ export interface TurnRecord {
    * marker.
    */
   readonly fired: readonly string[];
+  /**
+   * Distract & Pivot: one-shot "-1 cost" charges banked for a character's own
+   * next play, spent one per play regardless of what it saves.
+   */
+  readonly playDiscount: Readonly<Record<Character, number>>;
+  /** System Feedback: banked off the shared pool this turn; a stat never reads below zero. */
+  readonly poolPenalty: { readonly oomph: number; readonly scramble: number };
+  /** Bio-Hazard Containment Vault: banked onto the shared pool this turn by Scrapping Good Stuff. */
+  readonly poolBonus: { readonly oomph: number; readonly scramble: number };
 }
 
 /* ------------------------------------------------------------ the phases */
@@ -133,9 +143,21 @@ export interface TurnRecord {
  */
 export type Phase = "Turn Start" | "Play" | "Outcome" | "Cleanup" | "Ascend" | "GameOver";
 
-export type Outcome = "Victory" | "Defeat";
+export type Outcome = "Victory" | "Defeat" | "Aborted";
 
 /* ------------------------------------------------------ pending choices */
+
+/** Every face-down pile on the table (rulebook, Keywords: any deck). */
+export const PILES = [
+  "Red deck",
+  "Gray deck",
+  "Floor deck",
+  "Red reward pool",
+  "Gray reward pool",
+  "Good Stuff pool",
+  "Bad Stuff pool",
+] as const;
+export type Pile = (typeof PILES)[number];
 
 /** Which card asked the question, when a card did rather than a room. */
 export interface PendingSource {
@@ -157,6 +179,12 @@ export type Pending =
       readonly source: PendingSource | null;
     }
   | {
+      readonly kind: "ChoosePile";
+      readonly prompt: string;
+      readonly options: readonly Pile[];
+      readonly source: PendingSource | null;
+    }
+  | {
       readonly kind: "ChooseCards";
       readonly prompt: string;
       readonly character: Character;
@@ -169,8 +197,8 @@ export type Pending =
   | {
       readonly kind: "OrderCards";
       readonly prompt: string;
-      readonly character: Character;
-      readonly cards: readonly Card[];
+      readonly pile: Pile;
+      readonly cards: readonly (Card | Room)[];
       readonly source: PendingSource | null;
     }
   | {
@@ -240,20 +268,8 @@ export interface GameState {
 
 /* ------------------------------------------------------------- commands */
 
-/**
- * Settle one Stuff card found in a character's deck, hand or discard pile
- * (rulebook, Ascending). Omitting a card from `AscendChoice.settle` takes the
- * default: a Good Stuff card goes to its pool, a Bad Stuff card is kept.
- */
-export interface StuffSettlement {
-  readonly cardId: CardId;
-  /** Pay by Scrapping this other owned, non-Stuff card: keeps Good Stuff, or sheds Bad Stuff. */
-  readonly payWith: CardId | null;
-}
-
-/** Settling Stuff and the reward, both decided at the moment of ascending (rulebook, Ascending). */
+/** The reward chosen at the moment of ascending (rulebook, Ascending). */
 export interface AscendChoice {
-  readonly settle: readonly StuffSettlement[];
   /** One of the three offered, or null to decline. */
   readonly takeRewardId: CardId | null;
 }
@@ -267,9 +283,17 @@ export type Command =
       readonly payWith: readonly CardId[];
     }
   | { readonly type: "END_PLAY" }
+  | {
+      /** Bio-Hazard Containment Vault, while active: Scrap a Good Stuff card from hand for +3 to one stat. */
+      readonly type: "SCRAP_FOR_STATS";
+      readonly character: Character;
+      readonly cardId: CardId;
+      readonly stat: Stat;
+    }
   | { readonly type: "CHOOSE_CHARACTER"; readonly character: Character }
+  | { readonly type: "CHOOSE_PILE"; readonly pile: Pile }
   | { readonly type: "CHOOSE_CARDS"; readonly cardIds: readonly CardId[] }
-  | { readonly type: "ORDER_CARDS"; readonly cardIds: readonly CardId[] }
+  | { readonly type: "ORDER_CARDS"; readonly cardIds: readonly (CardId | RoomId)[] }
   | { readonly type: "TAKE_REWARD"; readonly take: boolean }
   | { readonly type: "ASCEND"; readonly Red: AscendChoice; readonly Gray: AscendChoice };
 
@@ -302,6 +326,14 @@ export type DomainEvent =
     }
   | { readonly type: "CARD_SCRAPPED"; readonly character: Character | null; readonly card: Card }
   | {
+      /** Bio-Hazard Containment Vault: one Scrap, one stat, one line — see `narrate.ts`. */
+      readonly type: "CARD_SCRAPPED_FOR_STATS";
+      readonly character: Character;
+      readonly card: Card;
+      readonly stat: Stat;
+      readonly amount: number;
+    }
+  | {
       readonly type: "CARD_EXHAUSTED";
       readonly character: Character;
       readonly card: Card;
@@ -330,7 +362,12 @@ export type DomainEvent =
       readonly card: Card;
       readonly to: "deck" | "hand";
     }
-  | { readonly type: "CARDS_PEEKED"; readonly character: Character; readonly cards: readonly Card[] }
+  | {
+      readonly type: "CARDS_PEEKED";
+      readonly character: Character;
+      readonly pile: Pile;
+      readonly cards: readonly (Card | Room)[];
+    }
   | { readonly type: "THRESHOLD_MET"; readonly room: Room; readonly threshold: Threshold }
   | { readonly type: "STUFF_TAKEN"; readonly character: Character; readonly card: Card }
   | {
@@ -349,7 +386,8 @@ export type DomainEvent =
   | { readonly type: "CLEANUP_BEGAN" }
   | { readonly type: "TURN_ENDED"; readonly turn: number }
   | { readonly type: "FLOOR_CLEARED"; readonly floor: number }
-  | { readonly type: "GAME_OVER"; readonly outcome: Outcome };
+  | { readonly type: "GAME_OVER"; readonly outcome: Outcome }
+  | { readonly type: "RUN_ABORTED"; readonly reason: string };
 
 export type DomainEventType = DomainEvent["type"];
 
@@ -366,7 +404,9 @@ export type RejectionCode =
   | "CannotPayWithThat"
   | "NotAnOption"
   | "NotOffered"
-  | "FloorDeckEmpty";
+  | "FloorDeckEmpty"
+  | "RoomDoesNotAllow"
+  | "NotGoodStuff";
 
 /** An illegal command is a value, not a throw. */
 export interface Rejection {

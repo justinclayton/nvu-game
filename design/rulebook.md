@@ -1,6 +1,6 @@
 # *North vs Up*: Rulebook
 
-Rules version: 0.2.3
+Rules version: 0.2.4
 
 ---
 
@@ -162,6 +162,7 @@ A `Stuff` card shows the same parts as a player card, with these differences:
 - `Exhaust X cards from your deck`: Move the top **X** cards of your deck to your Exhaust pile. If your deck is empty, see `Empty deck`.
 - `Exhaust X`: the same as `Exhaust X cards from your deck`.
 - `Peek X`: Look at the top **X** cards of any deck, then put them back in the same order.
+- `any deck`: any face-down pile on the table: a character deck, a reward pool, the Floor deck, or a Stuff pool.
 - `Scrap`: Move the card to the Scrapyard. It is removed from play for the rest of the game.
 - `Empty deck`: If you must draw or Exhaust a card and your deck is empty, first shuffle your discard pile to form a new deck. If your discard pile is also empty, you go `Down` (section 9).
 

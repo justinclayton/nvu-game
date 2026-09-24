@@ -2,7 +2,7 @@
 
 The project's domain terms and nothing else: what each thing is, the rulebook section that governs
 it, and the ticket or ruling that settled it. The rules themselves live in
-[`rulebook.md`](rulebook.md) (rules version 0.2.3), which wins
+[`rulebook.md`](rulebook.md) (rules version 0.2.4), which wins
 wherever this file disagrees with it. Code uses these terms spelled this way.
 
 ---
@@ -121,7 +121,7 @@ The turn phase that opens each turn: Flip the room, then Draw up to five. Both s
 
 **Draw**
 
-The second step of Turn Start: each player draws from their deck until holding 5, all at once — no decision to make. A draw that reaches an empty deck triggers Empty deck.
+The second step of Turn Start: each player draws from their deck until holding 5, all at once — no decision to make. A draw that reaches an empty deck triggers Empty deck. A draw with nothing left in deck or discard puts the character Down (issue #146). `[you, 2026-09-23]`
 
 **Empty deck**
 
@@ -150,6 +150,10 @@ A player's face-up pile of cards Exhausted off their deck. Permanent: unlike the
 **Peek**
 
 The keyword `Peek X`: look at the top X cards of any deck, then put them back in the same order. `[agent, 2026-09-23]`
+
+**Any deck**
+
+On a card, any face-down pile on the table: a character deck, a reward pool, the Floor deck, or a Stuff pool (issue #147). `[you, 2026-09-23]`
 
 **Scrap**
 

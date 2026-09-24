@@ -154,7 +154,8 @@ After a move, in this order:
 `show` prints 2 and 3. `show --events N` prints the last N narrated lines, `--table` and `--moves`
 print only that part. `note` confirms itself in one line and prints nothing else. A refused move
 prints the engine's reason and the moves hint, never the help text. `pile` prints the named pile as
-card faces. `card NAME` prints a card's face from the content, with no run needed.
+card faces. `card NAME` prints a card's or a Room's face from the content, with no run needed — a
+Room prints its thresholds and Flee text as printed, not against any run's state.
 
 Playtest 3 recorded what the table got right, and it stays: the tick beside a met threshold, a
 modified number shown next to the printed one, the name of the card that stopped an effect, the

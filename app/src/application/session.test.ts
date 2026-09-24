@@ -7,7 +7,6 @@ import {
   createSession,
   createSessionFrom,
   loadSession,
-  replay,
   saveOf,
   type SavedRun,
   type Session,
@@ -119,7 +118,8 @@ describe("save and replay", () => {
   it("replays to exactly the same state", () => {
     const session = newSession();
     for (const command of throughATurn()) session.getState().dispatch(command);
-    expect(replay(mustSave(session), content)).toEqual(session.getState().state);
+    const loaded = loadSession(mustSave(session), content);
+    expect(loaded.getState().state).toEqual(session.getState().state);
   });
 
   it("loads a saved run into a live session", () => {
@@ -137,8 +137,8 @@ describe("save and replay", () => {
   });
 
   it("says so when a save and the rules have diverged", () => {
-    expect(() => replay({ seed: SEED, commands: [{ type: "END_PLAY" }] }, content)).toThrow(
-      /Replay stopped at command 0/,
+    expect(() => loadSession({ seed: SEED, commands: [{ type: "END_PLAY" }] }, content)).toThrow(
+      /Command 0 \(END_PLAY\) is no longer legal/,
     );
   });
 });
@@ -167,7 +167,7 @@ describe("notes", () => {
     session.getState().note("a thought");
     expect(session.getState().commands).toEqual(before.commands);
     expect(session.getState().events).toEqual(before.events);
-    expect(replay(mustSave(session), content)).toEqual(before.state);
+    expect(loadSession(mustSave(session), content).getState().state).toEqual(before.state);
   });
 
   it("keeps a note about the thing being undone, at the new end of the log", () => {

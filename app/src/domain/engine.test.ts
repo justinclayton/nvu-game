@@ -350,6 +350,30 @@ describe("Room kinds: Room and Stairwell", () => {
     expect(afterTake.pools.Gray).toHaveLength(grayPool.length - 1);
   });
 
+  it("skips 'who reveals a reward' when both reward pools are already empty, and says so", () => {
+    // Same threshold as above, but both reward pools are spent: whichever
+    // character is picked reveals nothing, so there is no real choice.
+    const state = rig({
+      phase: "Play",
+      activeRoom: room("Collapsed Stairwell"),
+      Red: player({ deck: pile("Shove", 5) }),
+      Gray: player({
+        deck: pile("Duck Under", 5),
+        hand: [card("Coil Of Cable"), card("Coil Of Cable")],
+      }),
+      pools: { Red: [], Gray: [], goodStuff: [], badStuff: [] },
+    });
+    const g = ids(state, "Gray");
+    const { state: next, events } = play(state, [
+      playFree("Gray", g[0] as CardId),
+      playFree("Gray", g[1] as CardId),
+      { type: "END_PLAY" },
+    ]);
+    expect(next.pending).toBeNull();
+    expect(events).toContainEqual({ type: "REWARD_POOL_EMPTY", character: "Red" });
+    expect(events.some((e) => e.type === "REWARD_REVEALED")).toBe(false);
+  });
+
   it("'only resolve the outcome from the lowest-printed met threshold' — different stats in one challenge", () => {
     // Tool Cage's one challenge mixes stats: Scramble 3 and Oomph 5. Meeting
     // both at once resolves only the lowest-printed line, Oomph 5.

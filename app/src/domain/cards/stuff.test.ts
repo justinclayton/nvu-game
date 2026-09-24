@@ -306,6 +306,53 @@ describe("Grav Harness — 'One of you draws 1 card, even if their hand is full'
     expect(eventTypes(events)).toEqual(["CARD_DRAWN"]);
     expect(next.Gray.hand).toHaveLength(1);
   });
+
+  it("still offers a character whose deck is empty but whose discard is not", () => {
+    const state = playing({
+      Red: player({ deck: pile("Shove", 4), hand: [card("Grav Harness"), ...pile("Shove", 5)] }),
+      Gray: player({ deck: [], discard: pile("Duck Under", 3) }),
+    });
+    const grav = state.Red.hand[0];
+    if (!grav) throw new Error("rig");
+    const asked = must(state, {
+      type: "PLAY_CARD",
+      character: "Red",
+      cardId: grav.id,
+      payWith: state.Red.hand.slice(1, 3).map((c) => c.id),
+    });
+    if (asked.state.pending?.kind !== "ChooseCharacter") throw new Error("rig");
+    // Rulebook, Keywords: Empty deck — an empty deck with cards still in the
+    // discard pile reshuffles rather than being unable to draw.
+    expect(asked.state.pending.options).toContain("Gray");
+
+    const { state: next, events } = must(asked.state, {
+      type: "CHOOSE_CHARACTER",
+      character: "Gray",
+    });
+    expect(eventTypes(events)).toEqual(["DISCARD_RESHUFFLED", "CARD_DRAWN"]);
+    expect(next.Gray.deck).toHaveLength(2);
+    expect(next.Gray.discard).toHaveLength(0);
+  });
+
+  it("skips the question when only one side is eligible, and draws for them directly", () => {
+    const state = playing({
+      Red: player({ deck: pile("Shove", 4), hand: [card("Grav Harness"), ...pile("Shove", 5)] }),
+      Gray: player({ down: true }),
+    });
+    const grav = state.Red.hand[0];
+    if (!grav) throw new Error("rig");
+    const { state: next, events } = play(state, [
+      {
+        type: "PLAY_CARD",
+        character: "Red",
+        cardId: grav.id,
+        payWith: state.Red.hand.slice(1, 3).map((c) => c.id),
+      },
+    ]);
+    expect(next.pending).toBeNull();
+    expect(eventTypes(events)).toContain("CARD_DRAWN");
+    expect(next.Red.deck).toHaveLength(3);
+  });
 });
 
 describe("Riot Shield — 'If the room is Cleared, return this to your hand at the end of the turn'", () => {

@@ -247,11 +247,11 @@ choice independently — the same shape the CLI's per-question staging builds (`
 `composeAscend`) — and validates the composed command against the engine, because the generator's
 own list crosses both characters' choices and caps out at 256 combined options; past that cap every
 command it offers forces one character's choice to "none", which forfeited about half of every
-Ascend's rewards and Stuff settlements when the policy could only pick from that list. `sim` reports
-how often the composed command had to fall back to the generator's own list instead (`ascendFallbacks`
-in `--json`; zero across the 500-seed sweep this shipped with). It never draws on its own randomness,
-so a seed always plays the same game. It is not a playtester and does not read the rulebook; the
-agent playtest is still the check for fidelity and rulebook gaps.
+Ascend's rewards and Stuff settlements when the policy could only pick from that list. A composed
+command the engine refuses is a bug in the policy, same as any other `greedy:` throw — it never has
+been refused across any sweep run against it. It never draws on its own randomness, so a seed always
+plays the same game. It is not a playtester and does not read the rulebook; the agent playtest is
+still the check for fidelity and rulebook gaps.
 
 Its Exhaust losses are still overwhelmingly forced, not chosen: across a 500-seed sweep, well under
 2% of Exhausted cards come from a card the policy played, the rest from a room's own Flee

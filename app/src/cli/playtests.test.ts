@@ -4,16 +4,16 @@
  *
  * `PRE_0_2` is every run recorded before design/rulebook.md: they
  * played DRAW and END_DRAW commands and the 0.1 shape of ASCEND, neither of
- * which the engine accepts any more, so they cannot replay against it. #83
- * (not yet landed) is where a run's own rules version becomes the thing this
- * check reads, so this list can retire itself; until then it is named by
- * hand. The files stay in the repo as the record they are — this only stops
- * the automated replay check from reading them. */
+ * which the engine accepts any more, so they cannot replay against it. A
+ * planned change makes a run's own rules version the thing this check reads,
+ * so this list can retire itself; until then it is named by hand. The files
+ * stay in the repo as the record they are — this only stops the automated
+ * replay check from reading them. */
 import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import { CARD_CONTENT } from "@content/index";
-import { replay } from "@application/session";
+import { loadSession } from "@application/session";
 import type { RunFile } from "@application/exportRun";
 
 const PRE_0_2 = new Set(["03-first-agent-cli-run.json"]);
@@ -52,7 +52,7 @@ describe("saved playtest runs", () => {
       }
       const run = parsed as RunFile;
       if (!run.run) throw new Error(`${file} was not played from a seed and cannot replay.`);
-      const state = replay(run.run, CARD_CONTENT);
+      const state = loadSession(run.run, CARD_CONTENT).getState().state;
       expect(state.floor).toBe(run.floor);
       expect(state.turn).toBe(run.turn);
       expect(state.outcome).toBe(run.outcome);

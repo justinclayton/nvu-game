@@ -46,8 +46,9 @@ history. The issue's Done-when is your completion criterion; every line of it
 is satisfied before you open the PR.
 
 Conventions: docs/agents/issue-tracker.md (claiming, branch, PR, media).
-CLAUDE.md and README.md describe the domain, the build, and anything a
-person will see; read them before designing anything user-facing.
+CLAUDE.md is the reading map — which files to open for a given change, and
+which to leave closed; app/README.md describes the layers and the build.
+Read both before designing anything user-facing.
 
 Environment setup, shared-resource rules (device pools, seed data, etc.), and
 how to verify a change are in docs/agents/issue-tracker.md → "Running issues

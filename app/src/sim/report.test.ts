@@ -3,7 +3,7 @@
 
 import { describe, expect, it } from "vitest";
 import { CARD_CONTENT } from "@content/index";
-import { greedyPolicy, randomPolicy } from "./policy";
+import { greedyPolicy } from "./policy";
 import { buildReport } from "./report";
 import { simulate } from "./run";
 
@@ -73,14 +73,5 @@ describe("buildReport", () => {
 
     expect(reportExhausted).toBe(exhaustedTotal);
     expect(reportPaidAsCost).toBe(paidAsCostTotal);
-  });
-
-  it("tracks the greedy policy's Ascend composition fallbacks, and leaves it null for a policy with none", () => {
-    const greedy = buildReport(greedyPolicy, CARD_CONTENT, FROM, SEEDS);
-    expect(greedy.ascendFallbacks).not.toBeNull();
-    expect(greedy.ascendFallbacks ?? -1).toBeGreaterThanOrEqual(0);
-
-    const random = buildReport(randomPolicy, CARD_CONTENT, FROM, SEEDS);
-    expect(random.ascendFallbacks).toBeNull();
   });
 });

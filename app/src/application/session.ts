@@ -159,26 +159,6 @@ export const saveOf = (session: SessionState): SavedRun | null =>
   session.seed === null ? null : { seed: session.seed, commands: session.commands };
 
 /**
- * Replay a saved run: a fold of `execute` over the command log. A command the
- * rules now refuse means the save and the rules have diverged, which is worth
- * saying out loud rather than silently truncating the run.
- */
-export function replay(saved: SavedRun, content: CardContent): GameState {
-  const [state] = createInitialState(saved.seed, content);
-  let current = state;
-  for (const [index, command] of saved.commands.entries()) {
-    const result = execute(current, command);
-    if (!result.ok) {
-      throw new Error(
-        `Replay stopped at command ${String(index)} (${command.type}): ${result.reason.message}`,
-      );
-    }
-    current = result.state;
-  }
-  return current;
-}
-
-/**
  * Load a saved run into a live session by replaying its commands into it. The
  * notes are handed back separately, because they are not part of what the
  * engine replays — each one goes back to the position in the log it was typed
@@ -190,10 +170,12 @@ export function loadSession(
   notes: readonly Note[] = [],
 ): Session {
   const session = createSession(saved.seed, content);
-  for (const command of saved.commands) {
+  for (const [index, command] of saved.commands.entries()) {
     const result = session.getState().dispatch(command);
     if (!result.ok) {
-      throw new Error(`Could not load the saved run: ${result.reason.message}`);
+      throw new Error(
+        `Command ${String(index)} (${command.type}) is no longer legal: ${result.reason.message}`,
+      );
     }
   }
   session.setState({ notes });

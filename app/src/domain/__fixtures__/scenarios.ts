@@ -194,7 +194,7 @@ function ascending(): GameState {
 /**
  * Play phase: Sorting Room's Oomph 2 line owes Red a Good Stuff, but the pool
  * is dry. The reward line still prints, followed by the pool-empty line
- * (issue #37) rather than paying out in silence.
+ * rather than paying out in silence.
  */
 function emptyGoodStuffPool(): Ran {
   const state = rig({

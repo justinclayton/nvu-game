@@ -1,4 +1,4 @@
-/* A balance report over many seeds (issue #93): win rate, floor reached, why
+/* A balance report over many seeds: win rate, floor reached, why
  * runs end, deck/Exhaust size per character after each Ascend, and per-card
  * play/take/keep counts. Everything here reads events and states `simulate`
  * already produces, through `RunOptions.onStep`, so one pass per seed is
@@ -9,7 +9,7 @@ import { settleableStuff } from "@domain/queries";
 import type { CardContent } from "@domain/printed";
 import type { AscendChoice, Character, Command, DomainEvent, GameState } from "@domain/types";
 import { CHARACTERS, playerOf } from "@domain/verbs";
-import { greedyAscendStats, greedyPolicy, resetGreedyAscendStats, type Policy } from "./policy";
+import type { Policy } from "./policy";
 import { seedsFrom, simulate, type RunResult, type StopReason } from "./run";
 
 export interface FloorCount {
@@ -66,12 +66,6 @@ export interface BalanceReport {
   readonly characters: Readonly<Record<Character, CharacterAscendStats>>;
   readonly cards: readonly CardStat[];
   readonly floorLosses: readonly FloorLossRow[];
-  /**
-   * How many Ascends the greedy policy's composed `ASCEND` command was
-   * refused, falling back to the move generator's own (capped) list — see
-   * `policy.ts`, `composeChoice`. Null for a policy with no such stat.
-   */
-  readonly ascendFallbacks: number | null;
 }
 
 /** Why a run ended, in the engine's own terms where it has one. */
@@ -192,7 +186,7 @@ class Accumulator {
     };
   }
 
-  finish(policy: string, from: number, seeds: number, ascendFallbacks: number | null): BalanceReport {
+  finish(policy: string, from: number, seeds: number): BalanceReport {
     const floors = [...this.floorCounts.entries()]
       .sort(([a], [b]) => a - b)
       .map(([floor, runs]) => ({ floor, runs }));
@@ -220,15 +214,11 @@ class Accumulator {
       characters: { Red: this.characterStats("Red"), Gray: this.characterStats("Gray") },
       cards,
       floorLosses,
-      ascendFallbacks,
     };
   }
 }
 
 export function buildReport(policy: Policy, content: CardContent, from: number, seeds: number): BalanceReport {
-  const tracksAscendFallbacks = policy === greedyPolicy;
-  if (tracksAscendFallbacks) resetGreedyAscendStats();
-
   const acc = new Accumulator();
   for (const seed of seedsFrom(from, seeds)) {
     const run = simulate(seed, policy, content, {
@@ -236,5 +226,5 @@ export function buildReport(policy: Policy, content: CardContent, from: number, 
     });
     acc.recordRun(run);
   }
-  return acc.finish(policy.name, from, seeds, tracksAscendFallbacks ? greedyAscendStats.fallback : null);
+  return acc.finish(policy.name, from, seeds);
 }

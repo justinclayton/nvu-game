@@ -1,6 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { CARD_CONTENT } from "@content/index";
-import { card, pile, player, rig, room } from "@domain/__fixtures__/rig";
+import { FULL_CONTENT as CARD_CONTENT, card, pile, player, rig, room } from "@domain/__fixtures__/rig";
 import type { Command } from "@domain/types";
 import {
   canUndo,

@@ -17,8 +17,22 @@ import type {
   PlayerState,
   Room,
 } from "../types";
+import type { CardContent } from "../printed";
 
 export const CONTENT = CARD_CONTENT;
+
+/**
+ * Band 1's printed Room supply is short of what floor 1-3 call for (setup.ts,
+ * `buildFloor`) — the card list is not yet complete. A test that plays a
+ * whole run needs a band 1 with enough cards to actually build a floor, so it
+ * pads one band-1 Room's copy count rather than going through `design/`.
+ */
+export const FULL_CONTENT: CardContent = {
+  ...CONTENT,
+  rooms: CONTENT.rooms.map((r) =>
+    r.name === "Security Turnstile" ? { ...r, count: r.count + 4 } : r,
+  ),
+};
 
 let counter = 0;
 export const resetRig = (): void => {

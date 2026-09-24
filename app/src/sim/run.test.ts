@@ -2,6 +2,7 @@
 
 import { describe, expect, it } from "vitest";
 import { CARD_CONTENT } from "@content/index";
+import { FULL_CONTENT } from "@domain/__fixtures__/rig";
 import { loadSession } from "@application/session";
 import { randomPolicy } from "./policy";
 import { seedsFrom, simulate } from "./run";
@@ -33,8 +34,11 @@ describe("simulate", () => {
     }
   });
 
+  // Band 1's pool is short of what floor 1 calls for (setup.test.ts), so a
+  // run on the real card list aborts before its first command — these two
+  // need an actual command in flight, so they play on a padded band 1.
   it("stops at the command budget and says so", () => {
-    const run = simulate(1, randomPolicy, CARD_CONTENT, { maxCommands: 5 });
+    const run = simulate(1, randomPolicy, FULL_CONTENT, { maxCommands: 5 });
     expect(run.stopped).toBe("Budget");
     expect(run.outcome).toBe("Unfinished");
     expect(run.commandCount).toBe(5);
@@ -45,7 +49,7 @@ describe("simulate", () => {
       name: "stubborn",
       choose: () => [{ type: "END_PLAY" } as const, 0] as const,
     };
-    const run = simulate(1, stubborn, CARD_CONTENT);
+    const run = simulate(1, stubborn, FULL_CONTENT);
     expect(run.stopped).toBe("Rejected");
     expect(run.rejection).toContain("END_PLAY");
     expect(run.commandCount).toBe(0);

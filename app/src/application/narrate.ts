@@ -77,6 +77,8 @@ export function describeEvent(event: DomainEvent): string {
       return `Floor ${String(event.floor)} is clear.`;
     case "GAME_OVER":
       return event.outcome === "Victory" ? "You reach the rooftop. You win." : "You lose.";
+    case "RUN_ABORTED":
+      return `The run is void: ${event.reason}`;
   }
 }
 

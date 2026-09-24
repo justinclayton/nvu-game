@@ -304,6 +304,33 @@ describe("Room kinds: Room and Stairwell", () => {
     expect(next.phase).toBe("Ascend");
   });
 
+  it("aborts the run instead of Ascending when a reward pool holds fewer than 3", () => {
+    // Same Stairwell clear as above, but Red's own reward pool is down to 2 —
+    // too short for Ascending's "each of you is offered three cards" (rulebook).
+    const state = rig({
+      phase: "Play",
+      activeRoom: room("The Sentry Drone"),
+      Red: player({
+        deck: pile("Shove", 5),
+        hand: [card("Charge In"), card("Shove"), card("Shove"), card("Pry Bar"), card("Pry Bar")],
+      }),
+      Gray: player({ deck: pile("Duck Under", 5) }),
+      pools: { Red: pile("Grav Harness", 2), Gray: pile("Grav Harness", 3), goodStuff: [], badStuff: [] },
+    });
+    const h = ids(state, "Red");
+    const { state: next, events } = play(state, [
+      { type: "PLAY_CARD", character: "Red", cardId: h[0] as CardId, payWith: [h[1] as CardId, h[2] as CardId] },
+      playFree("Red", h[3] as CardId),
+      playFree("Red", h[4] as CardId),
+      { type: "END_PLAY" },
+    ]);
+    expect(next.phase).toBe("GameOver");
+    expect(next.outcome).toBe("Aborted");
+    const aborted = events.find((e) => e.type === "RUN_ABORTED");
+    if (aborted?.type !== "RUN_ABORTED") throw new Error("expected a RUN_ABORTED event");
+    expect(aborted.reason).toBe("Red's reward pool holds 2 cards; Ascending reveals 3.");
+  });
+
   it("'if more than one threshold within a challenge is met, only the lowest-printed one resolves'", () => {
     // A hand-built room: one challenge, two thresholds. Two free Coil Of
     // Cables (Scramble 3 each) meet both the Scramble 2 line (Exhaust 1 each)

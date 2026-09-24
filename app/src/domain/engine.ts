@@ -884,6 +884,15 @@ function finishCleanup(state: GameState, run: Run): GameState {
       return { ...s, phase: "GameOver", outcome: "Victory", playZone: [] };
     }
     // Rulebook, Ascending: each character is offered three cards from their own pool.
+    // Pools are sized so this always holds; if either falls short, the run is
+    // void rather than offering fewer cards than the rule promises.
+    for (const c of CHARACTERS) {
+      if (s.pools[c].length < 3) {
+        const reason = `${c}'s reward pool holds ${String(s.pools[c].length)} cards; Ascending reveals 3.`;
+        run.events.push({ type: "RUN_ABORTED", reason });
+        return { ...s, phase: "GameOver", outcome: "Aborted", playZone: [] };
+      }
+    }
     return {
       ...s,
       phase: "Ascend",

@@ -20,7 +20,7 @@ import type {
   Room,
   Stat,
 } from "./types";
-import { drawBlind, shuffle } from "./rng";
+import { shuffle } from "./rng";
 
 export const CHARACTERS: readonly Character[] = ["Red", "Gray"];
 
@@ -403,7 +403,7 @@ export function takeGoodStuff(
   let next = state;
   for (let i = 0; i < count; i++) {
     if (playerOf(next, c).down) return next;
-    const [card, rest, seed] = drawBlind(next.pools.goodStuff, next.seed);
+    const [card, rest, seed] = drawFromPool(next.pools.goodStuff, next.seed);
     // Unkept Good Stuff returns to this pool at Ascend, but it can still run
     // dry mid-floor. Say so — a reward the log announced but the pool could
     // not pay must not go silent.
@@ -438,7 +438,7 @@ export function dealBadStuff(
   let next = state;
   for (let i = 0; i < count; i++) {
     if (playerOf(next, c).down) return next; // takes no punishments (rulebook, Going Down)
-    const [card, rest, seed] = drawBlind(next.pools.badStuff, next.seed);
+    const [card, rest, seed] = drawFromPool(next.pools.badStuff, next.seed);
     if (!card) {
       events.push({ type: "STUFF_POOL_EMPTY", character: c, pool: "bad_stuff" });
       return next;
@@ -459,3 +459,17 @@ export const markFired = (state: GameState, key: string): GameState => ({
   ...state,
   thisTurn: { ...state.thisTurn, fired: [...state.thisTurn.fired, key] },
 });
+
+/**
+ * A Stuff pool is an ordered pile, shuffled once at setup. Gaining from it
+ * takes the top card with no reshuffle, so a reorder (Hack the Doors, Catch
+ * Your Breath) decides what comes next.
+ */
+function drawFromPool(
+  pool: readonly Card[],
+  seed: number,
+): readonly [Card | null, readonly Card[], number] {
+  if (pool.length === 0) return [null, pool, seed];
+  return [pool[0] as Card, pool.slice(1), seed];
+}
+

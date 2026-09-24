@@ -148,7 +148,7 @@ export interface TurnRecord {
  */
 export type Phase = "Turn Start" | "Play" | "Outcome" | "Cleanup" | "Ascend" | "GameOver";
 
-export type Outcome = "Victory" | "Defeat";
+export type Outcome = "Victory" | "Defeat" | "Aborted";
 
 /* ------------------------------------------------------ pending choices */
 
@@ -391,7 +391,8 @@ export type DomainEvent =
   | { readonly type: "CLEANUP_BEGAN" }
   | { readonly type: "TURN_ENDED"; readonly turn: number }
   | { readonly type: "FLOOR_CLEARED"; readonly floor: number }
-  | { readonly type: "GAME_OVER"; readonly outcome: Outcome };
+  | { readonly type: "GAME_OVER"; readonly outcome: Outcome }
+  | { readonly type: "RUN_ABORTED"; readonly reason: string };
 
 export type DomainEventType = DomainEvent["type"];
 

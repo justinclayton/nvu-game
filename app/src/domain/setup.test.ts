@@ -1,13 +1,8 @@
 import { describe, expect, it } from "vitest";
-import { room } from "./__fixtures__/rig";
+import { FULL_CONTENT, room } from "./__fixtures__/rig";
 import { CARD_CONTENT } from "../content";
-import {
-  buildFloor,
-  createInitialState,
-  returnRoomsToSupply,
-  roomsOnFloor,
-  TOP_FLOOR,
-} from "./setup";
+import { buildFloor, createInitialState, returnRoomsToSupply, roomsOnFloor, TOP_FLOOR } from "./setup";
+import type { DomainEvent } from "./types";
 
 const content = CARD_CONTENT;
 
@@ -24,15 +19,17 @@ describe("Setting up a floor", () => {
   });
 
   // Band 1's pool (Security Turnstile x3, Flooded Ventilation Shaft x2, The
-  // Sentry Drone x1) is 6 cards — short of the 10 floor 1 calls for. The
-  // rulebook says nothing about a band running short, so the floor is built
-  // with every room the band has instead.
-  it("builds floor 1 from every room band 1 has, since its pool is short of 10", () => {
-    const [state] = createInitialState(1, content);
-    const kinds = state.floorDeck.map((r) => r.kind);
-    expect(kinds.filter((k) => k === "stairwell")).toHaveLength(1);
-    expect(kinds.filter((k) => k === "room")).toHaveLength(5);
-    expect(state.floorDeck).toHaveLength(6);
+  // Sentry Drone x1) is 6 cards — short of the 10 floor 1 calls for. Pools are
+  // sized so this never happens; when it does, the run is void instead of
+  // building a short floor.
+  it("aborts at floor 1, since band 1's pool is short of 10", () => {
+    const [state, events] = createInitialState(1, content);
+    expect(state.phase).toBe("GameOver");
+    expect(state.outcome).toBe("Aborted");
+    expect(state.floorDeck).toEqual([]);
+    const aborted = events.find((e) => e.type === "RUN_ABORTED");
+    if (aborted?.type !== "RUN_ABORTED") throw new Error("expected a RUN_ABORTED event");
+    expect(aborted.reason).toBe("Floor 1 needs 10 cards; band 1 holds 6.");
   });
 
   // Rulebook Setup, "Floor deck": "The first floor consists of 10 cards. As
@@ -46,15 +43,17 @@ describe("Setting up a floor", () => {
   });
 
   // Band 1's pool (6 cards) is short of every floor 1-3 calls for (10, 9, 8),
-  // so all three floors come out the same size: everything band 1 has.
-  it("builds every band-1 floor (1-3) with band 1's whole pool, never throwing", () => {
-    const [initial] = createInitialState(1, content);
+  // so building any of them aborts the run instead.
+  it("aborts every band-1 floor (1-3), band 1's pool being short of all of them", () => {
+    const [initial] = createInitialState(1, FULL_CONTENT);
     const fullSupply = returnRoomsToSupply(initial);
+    const shortBand1 = { ...fullSupply, roomSupply: fullSupply.roomSupply.filter((r) => r.band !== 1) };
     for (const floor of [1, 2, 3]) {
-      const state = buildFloor({ ...fullSupply, floor }, []);
-      expect(state.floorDeck).toHaveLength(6);
-      expect(state.floorDeck.filter((r) => r.kind === "stairwell")).toHaveLength(1);
-      expect(state.floorDeck.every((r) => r.band === 1)).toBe(true);
+      const events: DomainEvent[] = [];
+      const state = buildFloor({ ...shortBand1, floor, seed: initial.seed }, events);
+      expect(state.phase).toBe("GameOver");
+      expect(state.outcome).toBe("Aborted");
+      expect(events.some((e) => e.type === "RUN_ABORTED")).toBe(true);
     }
   });
 
@@ -110,7 +109,7 @@ describe("Setting up a floor", () => {
   });
 
   it("takes the Stairwell and Rooms from the floor's own band", () => {
-    const [state] = createInitialState(1, content);
+    const [state] = createInitialState(1, FULL_CONTENT);
     const stairwell = state.floorDeck.find((r) => r.kind === "stairwell");
     expect(stairwell?.band).toBe(1);
     expect(state.floorDeck.every((r) => r.band === 1)).toBe(true);

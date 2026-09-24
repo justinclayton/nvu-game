@@ -99,15 +99,16 @@ function takeRooms(
  * random until the floor is full (rulebook Setup, "Floor deck"). The floor
  * gets no harder as you climb — it gets emptier.
  *
- * A band's pool can hold fewer physical cards than a floor calls for — the
- * rulebook says nothing about this — so the floor is simply built with every
- * card the band still has, Stairwell included, and never throws.
+ * Pools are sized so a band always has enough for its floors. If a band ever
+ * comes up short of one Stairwell plus enough Rooms, the run is void: the
+ * floor is not built, and the game ends Aborted instead.
  */
 export function buildFloor(state: GameState, events: DomainEvent[]): GameState {
   let seed = state.seed;
   let supply = state.roomSupply;
   const rooms: Room[] = [];
   const band = bandOf(state.floor);
+  const need = roomsOnFloor(state.floor);
 
   const [stairwells, afterStairwell, s1] = takeRooms(
     supply,
@@ -122,12 +123,18 @@ export function buildFloor(state: GameState, events: DomainEvent[]): GameState {
   const [rest, afterRest, s2] = takeRooms(
     supply,
     (r) => r.kind === "room" && r.band === band,
-    roomsOnFloor(state.floor) - STAIRWELLS_PER_FLOOR,
+    need - STAIRWELLS_PER_FLOOR,
     seed,
   );
   rooms.push(...rest);
   supply = afterRest;
   seed = s2;
+
+  if (rooms.length < need) {
+    const reason = `Floor ${String(state.floor)} needs ${String(need)} cards; band ${String(band)} holds ${String(rooms.length)}.`;
+    events.push({ type: "RUN_ABORTED", reason });
+    return { ...state, phase: "GameOver", outcome: "Aborted" };
+  }
 
   const [floorDeck, s4] = shuffle(rooms, seed);
   events.push({ type: "FLOOR_BUILT", floor: state.floor, rooms: floorDeck.length });
@@ -200,9 +207,11 @@ export function createInitialState(
   const [grayDeck, s2] = shuffle(deckFor("Gray"), s1);
   const [redPool, s3] = shuffle(poolFor("Red"), s2);
   const [grayPool, s4] = shuffle(poolFor("Gray"), s3);
+  const [goodStuff, s5] = shuffle(stuffOf("good_stuff"), s4);
+  const [badStuff, s6] = shuffle(stuffOf("bad_stuff"), s5);
 
   const base: GameState = {
-    seed: s4,
+    seed: s6,
     floor: 1,
     turn: 0,
     phase: "Turn Start",
@@ -217,8 +226,8 @@ export function createInitialState(
     pools: {
       Red: redPool,
       Gray: grayPool,
-      goodStuff: stuffOf("good_stuff"),
-      badStuff: stuffOf("bad_stuff"),
+      goodStuff,
+      badStuff,
     },
     offer: null,
     pending: null,

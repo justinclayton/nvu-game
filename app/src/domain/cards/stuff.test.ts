@@ -17,7 +17,7 @@ import {
   rig,
   room,
 } from "../__fixtures__/rig";
-
+import { takeGoodStuff } from "../verbs";
 import type { CardId } from "../types";
 
 beforeEach(resetRig);
@@ -1036,5 +1036,21 @@ describe("System Feedback — 'Holding: Whenever you play a card with Cost 0, lo
       payWith: [r[2] as CardId, r[3] as CardId],
     });
     expect(statPool(next.state)).toEqual({ oomph: 4, scramble: 0 });
+  });
+});
+
+describe("Stuff pools are ordered piles", () => {
+  it("gains off the top with no reshuffle, so a reorder decides what comes next", () => {
+    const state = rig({
+      Red: player({ deck: pile("Shove", 4) }),
+      pools: { Red: [], Gray: [], goodStuff: pile("Stim Pack", 3), badStuff: [] },
+    });
+    const reordered = [...state.pools.goodStuff].reverse();
+    const seed = state.seed;
+    const next = takeGoodStuff({ ...state, pools: { ...state.pools, goodStuff: reordered } }, "Red", 1, []);
+    expect(next.Red.hand.map((c) => c.id)).toEqual([reordered[0]?.id]);
+    expect(next.pools.goodStuff.map((c) => c.id)).toEqual(reordered.slice(1).map((c) => c.id));
+    // No shuffle happened, so the seed is untouched.
+    expect(next.seed).toBe(seed);
   });
 });

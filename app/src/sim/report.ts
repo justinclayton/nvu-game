@@ -65,7 +65,11 @@ export interface BalanceReport {
 
 /** Why a run ended, in the engine's own terms where it has one. */
 function endReasonOf(run: RunResult): string {
-  if (run.stopped === "GameOver") return run.outcome === "Victory" ? "Victory" : "Defeat (Down)";
+  if (run.stopped === "GameOver") {
+    if (run.outcome === "Victory") return "Victory";
+    if (run.outcome === "Aborted") return "Aborted (not enough cards)";
+    return "Defeat (Down)";
+  }
   const other: Record<Exclude<StopReason, "GameOver">, string> = {
     Budget: "Unfinished: command budget",
     NoLegalMove: "Unfinished: no legal move offered",

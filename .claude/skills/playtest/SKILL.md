@@ -58,7 +58,10 @@ looks like a bug. Note it when it happens, so it lands in the log at the right l
 were trying to do and why, not only what you saw. Only use `undo` to back out a mistyped move, never
 to take back a legal move you regret; say why in a note either way.
 
-Play until the run ends in victory or defeat, or until turn 25. Keep a scratch list, outside the
+Play until the run ends in victory or defeat, or until turn 25. If the run ends `Aborted`, at
+`new` or at an Ascend, the card list is short of Rooms or reward cards; stop there, report the
+printed shortfall, and write no note: a run on a short pool is void data, and the pools are sized
+so it never happens. Keep a scratch list, outside the
 run, of every friction point with the CLI itself: output you could not read, a move you could not
 express, something you wished it printed, an error you hit.
 

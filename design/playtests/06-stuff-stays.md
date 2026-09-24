@@ -12,6 +12,13 @@ pile on the table. The card list is the proposed list as adopted in playtest 5, 
 counts the designer asked for (Fine Good Stuff ×3, Cool ×2, Woah ×1, every Bad Stuff ×2). The
 engine work for both rulings was done by separate agents before this run.
 
+**Void as shape data.** The designer ruled after this run that a floor built short of the
+rulebook's count ends the run instead, and floor 1 here was six cards against ten. Every finding
+below about band drain, one-card floors, forced Flees and Stamina is an artefact of that. The
+engine findings stand: the Stuff pools (notes 9, 10, since fixed in the same stack), Junk Launcher
+(note 13), Holding at Turn Start (note 8). The run file is not kept, because the engine now aborts
+it at `new`; the transcript is the appendix.
+
 Notes are the agent's, verbatim, tagged `[agent]`, in the order they were written into the run.
 Nothing here is a ruling. Suspected bugs were checked against `design/rulebook.md` and
 `design/cards.yaml` only; the engine was not read.

@@ -16,7 +16,7 @@ import {
   other,
   playerOf,
   returnToHand,
-  takeFromExhaust,
+  takeFrom,
   takeGoodStuff,
 } from "../verbs";
 import { ask, done, nothing, source, type BehaviourContext, type Registry } from "./behaviour";
@@ -88,7 +88,7 @@ export const STUFF: Registry = {
       if (answer.kind !== "cards") return nothing(state);
       const target = answer.tag.split(":")[1] === "Red" ? "Red" : "Gray";
       const events: DomainEvent[] = [];
-      const lifted = takeFromExhaust(state, target, answer.cards);
+      const lifted = takeFrom(state, target, "exhaust", answer.cards);
       return done(moveToBottomOfDeck(lifted, target, answer.cards, events), events);
     },
   },

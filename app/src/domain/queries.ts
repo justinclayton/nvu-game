@@ -79,6 +79,16 @@ export function exhaustXPreventedBy(state: GameState, c: Character): Card | null
 export const drawTargetFor = (state: GameState, c: Character): number =>
   Math.max(0, HAND_CAP - heldModifiers(state, c).drawTargetDelta);
 
+/* ------------------------------------------------------------- the play zone */
+
+/** How many cards a character has played this turn. */
+export const playedBy = (state: GameState, c: Character): number =>
+  state.playZone.filter((p) => p.owner === c).length;
+
+/** How many cards a character has played this turn, this card excluded. */
+export const othersPlayed = (state: GameState, c: Character, self: Card): number =>
+  state.playZone.filter((p) => p.owner === c && p.card.id !== self.id).length;
+
 /* ------------------------------------------------------------- the stat pool */
 
 /**

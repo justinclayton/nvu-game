@@ -15,7 +15,9 @@ import type {
   DiscardedFrom,
   DomainEvent,
   GameState,
+  Pile,
   PlayerState,
+  Room,
   Stat,
 } from "./types";
 import { drawBlind, shuffle } from "./rng";
@@ -28,6 +30,46 @@ export const playerOf = (state: GameState, c: Character): PlayerState => state[c
 
 export const withPlayer = (state: GameState, c: Character, p: PlayerState): GameState =>
   c === "Red" ? { ...state, Red: p } : { ...state, Gray: p };
+
+/** The face-down cards of any pile on the table (rulebook, Keywords: any deck). */
+export function pileCards(state: GameState, pile: Pile): readonly (Card | Room)[] {
+  switch (pile) {
+    case "Red deck":
+      return state.Red.deck;
+    case "Gray deck":
+      return state.Gray.deck;
+    case "Floor deck":
+      return state.floorDeck;
+    case "Red reward pool":
+      return state.pools.Red;
+    case "Gray reward pool":
+      return state.pools.Gray;
+    case "Good Stuff pool":
+      return state.pools.goodStuff;
+    case "Bad Stuff pool":
+      return state.pools.badStuff;
+  }
+}
+
+/** Replace a pile on the table wholesale — for putting looked-at cards back. */
+export function withPile(state: GameState, pile: Pile, cards: readonly (Card | Room)[]): GameState {
+  switch (pile) {
+    case "Red deck":
+      return withPlayer(state, "Red", { ...state.Red, deck: cards as readonly Card[] });
+    case "Gray deck":
+      return withPlayer(state, "Gray", { ...state.Gray, deck: cards as readonly Card[] });
+    case "Floor deck":
+      return { ...state, floorDeck: cards as readonly Room[] };
+    case "Red reward pool":
+      return { ...state, pools: { ...state.pools, Red: cards as readonly Card[] } };
+    case "Gray reward pool":
+      return { ...state, pools: { ...state.pools, Gray: cards as readonly Card[] } };
+    case "Good Stuff pool":
+      return { ...state, pools: { ...state.pools, goodStuff: cards as readonly Card[] } };
+    case "Bad Stuff pool":
+      return { ...state, pools: { ...state.pools, badStuff: cards as readonly Card[] } };
+  }
+}
 
 /** Everyone not Down. A Down character is skipped by everything (rulebook, Going Down). */
 export const standing = (state: GameState): readonly Character[] =>

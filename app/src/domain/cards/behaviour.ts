@@ -11,6 +11,8 @@ import type {
   GameState,
   Pending,
   PendingSource,
+  Pile,
+  Room,
   StepResult,
 } from "../types";
 
@@ -25,8 +27,9 @@ export interface BehaviourContext {
 /** The answer to a question a card asked through `state.pending`. */
 export type ChoiceAnswer =
   | { readonly kind: "character"; readonly tag: string; readonly character: Character }
+  | { readonly kind: "pile"; readonly tag: string; readonly pile: Pile }
   | { readonly kind: "cards"; readonly tag: string; readonly cards: readonly Card[] }
-  | { readonly kind: "order"; readonly tag: string; readonly cards: readonly Card[] };
+  | { readonly kind: "order"; readonly tag: string; readonly cards: readonly (Card | Room)[] };
 
 /**
  * What a `Holding:` line changes for as long as the card sits in hand.

@@ -10,7 +10,7 @@ import { useEffect, useState } from "react";
 import { scrapForStatsCards } from "@domain/queries";
 import type { CardId, Command, GameState, Stat } from "@domain/types";
 import { isLegal, whyNot } from "./legal";
-import { CardView } from "./CardView";
+import { CardView, RoomCardView } from "./CardView";
 
 const STATS: readonly Stat[] = ["Oomph", "Scramble"];
 
@@ -98,6 +98,25 @@ function PendingChoice({ state, dispatch }: Props) {
         </div>
       );
 
+    case "ChoosePile":
+      return (
+        <div className="controls controls--pending">
+          <p className="controls__prompt">{pending.prompt}</p>
+          {pending.options.map((p) => (
+            <button
+              key={p}
+              type="button"
+              className="button button--primary"
+              onClick={() => {
+                dispatch({ type: "CHOOSE_PILE", pile: p });
+              }}
+            >
+              {p}
+            </button>
+          ))}
+        </div>
+      );
+
     case "TakeReward":
       return (
         <div className="controls controls--pending">
@@ -129,9 +148,13 @@ function PendingChoice({ state, dispatch }: Props) {
         <div className="controls controls--pending">
           <p className="controls__prompt">{pending.prompt}</p>
           <div className="zone">
-            {pending.cards.map((card) => (
-              <CardView key={card.id} card={card} />
-            ))}
+            {pending.cards.map((card) =>
+              "challenges" in card ? (
+                <RoomCardView key={card.id} room={card} />
+              ) : (
+                <CardView key={card.id} card={card} />
+              ),
+            )}
           </div>
           <button
             type="button"
@@ -140,7 +163,7 @@ function PendingChoice({ state, dispatch }: Props) {
               dispatch({ type: "ORDER_CARDS", cardIds: pending.cards.map((c) => c.id) });
             }}
           >
-            Put them back in this order
+            Put {pending.pile} back in this order
           </button>
         </div>
       );

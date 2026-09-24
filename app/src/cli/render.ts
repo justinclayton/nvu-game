@@ -126,6 +126,9 @@ export function moveHint(state: GameState, staged: readonly StagedAnswer[] = [])
       case "ChooseCharacter":
         lines.push(`choose <Name> — one of: ${pending.options.join(", ")}`);
         break;
+      case "ChoosePile":
+        lines.push(`choose <Pile> — one of: ${pending.options.join(", ")}`);
+        break;
       case "ChooseCards": {
         const names = pending.options.map((c) => c.name).join(", ") || "nothing";
         const want = Math.min(pending.count, pending.options.length);

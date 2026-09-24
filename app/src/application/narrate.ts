@@ -42,9 +42,7 @@ export function describeEvent(event: DomainEvent): string {
     case "CARD_MOVED":
       return `${event.card.name} goes to ${event.character}'s ${event.to}.`;
     case "CARDS_PEEKED":
-      return `A look at ${event.character}'s deck: ${event.cards.map((c) => c.name).join(", ")}.`;
-    case "ROOMS_PEEKED":
-      return `A look at the Floor deck: ${event.rooms.map((r) => r.name).join(", ")}.`;
+      return `A look at the ${event.pile}: ${event.cards.map((c) => c.name).join(", ")}.`;
     case "THRESHOLD_MET": {
       const need = printedThresholdLines(event.threshold)
         .map((l) => `${l.stat} ${String(l.effective)}`)

@@ -160,7 +160,9 @@ export const STUFF: Registry = {
   "High-Frequency Scanner": {
     onPlay(state, ctx) {
       const top = state.floorDeck.slice(0, 3);
-      return done(state, [{ type: "ROOMS_PEEKED", character: ctx.character, rooms: top }]);
+      return done(state, [
+        { type: "CARDS_PEEKED", character: ctx.character, pile: "Floor deck", cards: top },
+      ]);
     },
   },
 

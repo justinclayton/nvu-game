@@ -29,6 +29,7 @@ import type {
   Character,
   Command,
   GameState,
+  RoomId,
   Stat,
   Threshold,
 } from "@domain/types";
@@ -264,7 +265,7 @@ function chooseAscend(state: GameState): Command {
   return composed;
 }
 
-function cardsDeepEqual(a: readonly CardId[], b: readonly CardId[]): boolean {
+function cardsDeepEqual(a: readonly (CardId | RoomId)[], b: readonly (CardId | RoomId)[]): boolean {
   return a.length === b.length && a.every((id, i) => id === b[i]);
 }
 
@@ -281,6 +282,12 @@ function choosePending(state: GameState, legal: readonly Command[]): Command {
   if (pending.kind === "ChooseCharacter") {
     const wanted = pending.options[0];
     const found = legal.find((c) => c.type === "CHOOSE_CHARACTER" && c.character === wanted);
+    if (found) return found;
+  }
+
+  if (pending.kind === "ChoosePile") {
+    const wanted = pending.options.includes("Floor deck") ? "Floor deck" : pending.options[0];
+    const found = legal.find((c) => c.type === "CHOOSE_PILE" && c.pile === wanted);
     if (found) return found;
   }
 

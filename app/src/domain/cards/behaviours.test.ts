@@ -111,9 +111,9 @@ describe("Peek Around Corner — 'Look at the top card of any deck'", () => {
       cardId: peek.id,
       payWith: [payer.id],
     });
-    expect(asked.state.pending?.kind).toBe("ChooseCharacter");
+    expect(asked.state.pending?.kind).toBe("ChoosePile");
 
-    const answered = must(asked.state, { type: "CHOOSE_CHARACTER", character: "Red" });
+    const answered = must(asked.state, { type: "CHOOSE_PILE", pile: "Red deck" });
     expect(answered.state.pending).toBeNull();
     expect(eventTypes(answered.events)).toEqual(["CARDS_PEEKED"]);
     const peeked = answered.events[0];

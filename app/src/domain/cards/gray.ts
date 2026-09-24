@@ -1,15 +1,16 @@
 /* Gray's cards. Keyed by the name design/cards.yaml makes unique. */
 
 import { playedBy } from "../queries";
-import type { Character, DomainEvent, Pending } from "../types";
+import { PILES, type Character, type DomainEvent, type Pending, type Pile } from "../types";
 import {
-  CHARACTERS,
   drawOne,
   grantPlayDiscount,
   moveToHand,
+  pileCards,
   playerOf,
   shuffleIntoDeck,
   takeFrom,
+  withPile,
 } from "../verbs";
 import {
   ask,
@@ -21,7 +22,7 @@ import {
   type Registry,
 } from "./behaviour";
 
-/** Two questions: whose deck, then what order. Depth 1 has no order to choose. */
+/** Two questions: which pile, then what order. Depth 1 has no order to choose. */
 function peek(depth: number): CardBehaviour {
   const orderPrompt =
     depth === 1
@@ -29,37 +30,35 @@ function peek(depth: number): CardBehaviour {
       : `Put those ${String(depth)} back on top, in the order you choose.`;
   return {
     onPlay(state, ctx) {
-      const options = CHARACTERS.filter((c) => playerOf(state, c).deck.length > 0);
+      const options = PILES.filter((p) => pileCards(state, p).length > 0);
       if (options.length === 0) return nothing(state);
       return ask(state, {
-        kind: "ChooseCharacter",
-        prompt: `Look at the top ${String(depth)} of whose deck?`,
+        kind: "ChoosePile",
+        prompt: `Look at the top ${String(depth)} of any deck.`,
         options,
         source: source(ctx, "peek"),
       });
     },
     onChoice(answer, state, ctx) {
-      if (answer.kind === "character") {
-        const top = playerOf(state, answer.character).deck.slice(0, depth);
+      if (answer.kind === "pile") {
+        const top = pileCards(state, answer.pile).slice(0, depth);
         const events: DomainEvent[] = [
-          { type: "CARDS_PEEKED", character: answer.character, cards: top },
+          { type: "CARDS_PEEKED", character: ctx.character, pile: answer.pile, cards: top },
         ];
         if (top.length < 2) return done(state, events);
         const pending: Pending = {
           kind: "OrderCards",
-          prompt: `${answer.character}'s deck. ${orderPrompt}`,
-          character: answer.character,
+          prompt: `${answer.pile}. ${orderPrompt}`,
+          pile: answer.pile,
           cards: top,
-          source: source(ctx, `order:${answer.character}`),
+          source: source(ctx, `order:${answer.pile}`),
         };
         return ask(state, pending, events);
       }
       if (answer.kind !== "order") return nothing(state);
-      const whose = answer.tag.split(":")[1] === "Red" ? "Red" : "Gray";
-      const p = playerOf(state, whose);
-      const rest = p.deck.slice(answer.cards.length);
-      const reordered = { ...p, deck: [...answer.cards, ...rest] };
-      return done(whose === "Red" ? { ...state, Red: reordered } : { ...state, Gray: reordered });
+      const pile = answer.tag.split(":")[1] as Pile;
+      const rest = pileCards(state, pile).slice(answer.cards.length);
+      return done(withPile(state, pile, [...answer.cards, ...rest]));
     },
   };
 }

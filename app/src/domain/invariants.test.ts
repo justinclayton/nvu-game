@@ -25,6 +25,10 @@ function nextCommand(state: GameState): Command | null {
         const first = pending.options[0];
         return first ? { type: "CHOOSE_CHARACTER", character: first } : null;
       }
+      case "ChoosePile": {
+        const first = pending.options[0];
+        return first ? { type: "CHOOSE_PILE", pile: first } : null;
+      }
       case "ChooseCards":
         return {
           type: "CHOOSE_CARDS",

@@ -15,7 +15,17 @@
  */
 
 import { costOf, payOptions, playableCards, scrapForStatsCards } from "@domain/queries";
-import type { AscendChoice, Card, CardId, Character, Command, GameState, Pending } from "@domain/types";
+import type {
+  AscendChoice,
+  Card,
+  CardId,
+  Character,
+  Command,
+  GameState,
+  Pending,
+  Room,
+  RoomId,
+} from "@domain/types";
 import { CHARACTERS } from "@domain/verbs";
 
 /** Every way to pick `k` of `items`, in a stable order. */
@@ -60,6 +70,8 @@ function answers(pending: Pending): readonly Command[] {
   switch (pending.kind) {
     case "ChooseCharacter":
       return pending.options.map((character) => ({ type: "CHOOSE_CHARACTER", character }));
+    case "ChoosePile":
+      return pending.options.map((pile) => ({ type: "CHOOSE_PILE", pile }));
     case "ChooseCards": {
       const wanted = Math.min(pending.count, pending.options.length);
       const picks = combinations(pending.options, wanted).map((cards): Command => ({
@@ -70,11 +82,13 @@ function answers(pending: Pending): readonly Command[] {
       return picks;
     }
     case "OrderCards": {
+      const pileIds = (items: readonly (Card | Room)[]): (CardId | RoomId)[] =>
+        items.map((c) => c.id);
       const orders =
         pending.cards.length <= ORDER_ALL_UP_TO
           ? permutations(pending.cards)
           : [pending.cards, [...pending.cards].reverse()];
-      return orders.map((cards) => ({ type: "ORDER_CARDS", cardIds: ids(cards) }));
+      return orders.map((cards) => ({ type: "ORDER_CARDS", cardIds: pileIds(cards) }));
     }
     case "TakeReward":
       return [

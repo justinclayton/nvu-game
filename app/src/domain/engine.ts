@@ -31,11 +31,13 @@ import type {
   DomainEvent,
   GameState,
   Pending,
+  Pile,
   Rejection,
   RejectionCode,
   Result,
   Room,
   RoomEffect,
+  RoomId,
   Stat,
   Threshold,
   TurnRecord,
@@ -96,6 +98,7 @@ export function validate(state: GameState, command: Command): Rejection | null {
 
   switch (command.type) {
     case "CHOOSE_CHARACTER":
+    case "CHOOSE_PILE":
     case "CHOOSE_CARDS":
     case "ORDER_CARDS":
     case "TAKE_REWARD":
@@ -190,6 +193,12 @@ function validateAnswer(pending: Pending, command: Command): Rejection | null {
         ? null
         : reject("NotAnOption", `${command.character} is not one of the options.`);
 
+    case "CHOOSE_PILE":
+      if (pending.kind !== "ChoosePile") return waiting;
+      return pending.options.includes(command.pile)
+        ? null
+        : reject("NotAnOption", `${command.pile} is not one of the options.`);
+
     case "CHOOSE_CARDS": {
       if (pending.kind !== "ChooseCards") return waiting;
       const chosen = new Set(command.cardIds);
@@ -274,6 +283,8 @@ function apply(state: GameState, command: Command, run: Run): GameState {
       return scrapForStats(state, command.character, command.cardId, command.stat, run);
     case "CHOOSE_CHARACTER":
       return answerCharacter(state, command.character, run);
+    case "CHOOSE_PILE":
+      return answerPile(state, command.pile, run);
     case "CHOOSE_CARDS":
       return answerCards(state, command.cardIds, "cards", run);
     case "ORDER_CARDS":
@@ -965,6 +976,15 @@ function answerCharacter(state: GameState, character: Character, run: Run): Game
   );
 }
 
+function answerPile(state: GameState, pile: Pile, run: Run): GameState {
+  const pending = state.pending;
+  if (pending?.kind !== "ChoosePile") {
+    throw new CorruptStateError("Answered a pile choice that was not being asked.");
+  }
+  if (!pending.source) throw new CorruptStateError("No card is waiting on a pile answer.");
+  return runChoice(state, { kind: "pile", tag: pending.source.tag, pile }, run);
+}
+
 /** The one thing a room-asked (not card-asked) `ChooseCards` answers today. */
 function answerRoomCards(
   state: GameState,
@@ -988,24 +1008,28 @@ function answerRoomCards(
 
 function answerCards(
   state: GameState,
-  cardIds: readonly Card["id"][],
+  ids: readonly (CardId | RoomId)[],
   kind: "cards" | "order",
   run: Run,
 ): GameState {
   const pending = state.pending;
   if (!pending) throw new CorruptStateError("No card is waiting on that answer.");
-  if (!pending.source) return answerRoomCards(state, pending, cardIds, run);
-  const shown =
-    pending.kind === "ChooseCards"
-      ? pending.options
-      : pending.kind === "OrderCards"
-        ? pending.cards
-        : [];
-  const cards = cardIds.flatMap((id) => {
-    const found = shown.find((x) => x.id === id);
+  if (kind === "cards") {
+    if (!pending.source) return answerRoomCards(state, pending, ids as readonly CardId[], run);
+    if (pending.kind !== "ChooseCards") throw new CorruptStateError("No card choice is waiting on that answer.");
+    const cards = ids.flatMap((id) => {
+      const found = pending.options.find((x) => x.id === id);
+      return found ? [found] : [];
+    });
+    return runChoice(state, { kind: "cards", tag: pending.source.tag, cards }, run);
+  }
+  if (!pending.source) throw new CorruptStateError("No card is waiting on that order.");
+  if (pending.kind !== "OrderCards") throw new CorruptStateError("No order is waiting on that answer.");
+  const cards = ids.flatMap((id) => {
+    const found = pending.cards.find((x) => x.id === id);
     return found ? [found] : [];
   });
-  return runChoice(state, { kind, tag: pending.source.tag, cards }, run);
+  return runChoice(state, { kind: "order", tag: pending.source.tag, cards }, run);
 }
 
 function answerReward(state: GameState, take: boolean, run: Run): GameState {

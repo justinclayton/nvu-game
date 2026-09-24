@@ -82,6 +82,7 @@ export const USAGE = `North vs Up — the CLI. The same rules engine as the web 
   bin/nvu play card Red Charge In [pay Rope Flare]     PLAY_CARD
   bin/nvu play scrap Red "Pry Bar" for Oomph           SCRAP_FOR_STATS (only where a room's own text allows it)
   bin/nvu play choose Red                              CHOOSE_CHARACTER
+  bin/nvu play choose Floor deck                       CHOOSE_PILE
   bin/nvu play choose Rope Flare | play choose none     CHOOSE_CARDS
   bin/nvu play order Rope Flare Shove                  ORDER_CARDS, top first
   bin/nvu play take | play skip                        TAKE_REWARD

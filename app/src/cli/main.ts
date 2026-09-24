@@ -17,7 +17,7 @@ import { CARD_CONTENT, CARD_LIST_ID } from "@content/index";
 import { resolveCardName } from "@content/names";
 import { costOf, payOptions, playableCards } from "@domain/queries";
 import { RULES_VERSION } from "@domain/setup";
-import type { Card, CardId, Character, Command, GameState, Stat } from "@domain/types";
+import type { Card, CardId, Character, Command, GameState, RoomId, Stat } from "@domain/types";
 import { CHARACTERS, playerOf } from "@domain/verbs";
 import { POLICIES, randomPolicy } from "@sim/policy";
 import { buildReport, type BalanceReport } from "@sim/report";
@@ -164,9 +164,12 @@ function matchStat(raw: string): Stat {
  * unconsumed after every match — the shape a payer list, a `choose` answer
  * and an `order` answer all share.
  */
-function resolveEach(names: readonly string[], candidates: readonly Card[]): Card[] {
-  const consumed = new Set<CardId>();
-  const resolved: Card[] = [];
+function resolveEach<T extends { readonly id: CardId | RoomId; readonly name: string }>(
+  names: readonly string[],
+  candidates: readonly T[],
+): T[] {
+  const consumed = new Set<CardId | RoomId>();
+  const resolved: T[] = [];
   for (const name of names) {
     const pool = candidates.filter((c) => !consumed.has(c.id));
     const named = resolveCardName(name, pool);
@@ -225,6 +228,17 @@ function buildChoose(state: GameState, action: Extract<PlayAction, { kind: "choo
       throw new MoveRefused(`"${only}" is not one of: ${pending.options.join(", ")}.`);
     }
     return { type: "CHOOSE_CHARACTER", character };
+  }
+
+  if (pending.kind === "ChoosePile") {
+    const typed = action.names.join(" ").toLowerCase();
+    const exact = pending.options.filter((p) => p.toLowerCase() === typed);
+    const matches = exact.length > 0 ? exact : pending.options.filter((p) => p.toLowerCase().startsWith(typed));
+    const [only, ...extra] = matches;
+    if (!only || extra.length > 0) {
+      throw new MoveRefused(`Choose one of: ${pending.options.join(", ")}.`);
+    }
+    return { type: "CHOOSE_PILE", pile: only };
   }
 
   if (pending.kind === "ChooseCards") {

@@ -532,9 +532,10 @@ describe("High-Frequency Scanner — 'Play: Look at the top 3 cards of the Floor
       cardId: r[0] as CardId,
       payWith: [r[1] as CardId],
     });
-    const peeked = events.find((e) => e.type === "ROOMS_PEEKED");
-    if (peeked?.type !== "ROOMS_PEEKED") throw new Error("expected a peek");
-    expect(peeked.rooms.map((r) => r.id)).toEqual([first.id, second.id]);
+    const peeked = events.find((e) => e.type === "CARDS_PEEKED");
+    if (peeked?.type !== "CARDS_PEEKED") throw new Error("expected a peek");
+    expect(peeked.pile).toBe("Floor deck");
+    expect(peeked.cards.map((r) => r.id)).toEqual([first.id, second.id]);
     // Nothing about the deck changes: it is a look, not a draw or a reorder.
     expect(next.floorDeck).toEqual(state.floorDeck);
   });
@@ -552,9 +553,9 @@ describe("High-Frequency Scanner — 'Play: Look at the top 3 cards of the Floor
       cardId: r[0] as CardId,
       payWith: [r[1] as CardId],
     });
-    const peeked = events.find((e) => e.type === "ROOMS_PEEKED");
-    if (peeked?.type !== "ROOMS_PEEKED") throw new Error("expected a peek");
-    expect(peeked.rooms).toHaveLength(1);
+    const peeked = events.find((e) => e.type === "CARDS_PEEKED");
+    if (peeked?.type !== "CARDS_PEEKED") throw new Error("expected a peek");
+    expect(peeked.cards).toHaveLength(1);
   });
 });
 

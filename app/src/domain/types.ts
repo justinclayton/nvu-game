@@ -152,6 +152,18 @@ export type Outcome = "Victory" | "Defeat";
 
 /* ------------------------------------------------------ pending choices */
 
+/** Every face-down pile on the table (rulebook, Keywords: any deck). */
+export const PILES = [
+  "Red deck",
+  "Gray deck",
+  "Floor deck",
+  "Red reward pool",
+  "Gray reward pool",
+  "Good Stuff pool",
+  "Bad Stuff pool",
+] as const;
+export type Pile = (typeof PILES)[number];
+
 /** Which card asked the question, when a card did rather than a room. */
 export interface PendingSource {
   readonly card: Card;
@@ -172,6 +184,12 @@ export type Pending =
       readonly source: PendingSource | null;
     }
   | {
+      readonly kind: "ChoosePile";
+      readonly prompt: string;
+      readonly options: readonly Pile[];
+      readonly source: PendingSource | null;
+    }
+  | {
       readonly kind: "ChooseCards";
       readonly prompt: string;
       readonly character: Character;
@@ -184,8 +202,8 @@ export type Pending =
   | {
       readonly kind: "OrderCards";
       readonly prompt: string;
-      readonly character: Character;
-      readonly cards: readonly Card[];
+      readonly pile: Pile;
+      readonly cards: readonly (Card | Room)[];
       readonly source: PendingSource | null;
     }
   | {
@@ -278,8 +296,9 @@ export type Command =
       readonly stat: Stat;
     }
   | { readonly type: "CHOOSE_CHARACTER"; readonly character: Character }
+  | { readonly type: "CHOOSE_PILE"; readonly pile: Pile }
   | { readonly type: "CHOOSE_CARDS"; readonly cardIds: readonly CardId[] }
-  | { readonly type: "ORDER_CARDS"; readonly cardIds: readonly CardId[] }
+  | { readonly type: "ORDER_CARDS"; readonly cardIds: readonly (CardId | RoomId)[] }
   | { readonly type: "TAKE_REWARD"; readonly take: boolean }
   | { readonly type: "ASCEND"; readonly Red: AscendChoice; readonly Gray: AscendChoice };
 
@@ -348,8 +367,12 @@ export type DomainEvent =
       readonly card: Card;
       readonly to: "deck" | "hand";
     }
-  | { readonly type: "CARDS_PEEKED"; readonly character: Character; readonly cards: readonly Card[] }
-  | { readonly type: "ROOMS_PEEKED"; readonly character: Character; readonly rooms: readonly Room[] }
+  | {
+      readonly type: "CARDS_PEEKED";
+      readonly character: Character;
+      readonly pile: Pile;
+      readonly cards: readonly (Card | Room)[];
+    }
   | { readonly type: "THRESHOLD_MET"; readonly room: Room; readonly threshold: Threshold }
   | { readonly type: "STUFF_TAKEN"; readonly character: Character; readonly card: Card }
   | {

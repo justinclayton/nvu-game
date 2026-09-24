@@ -11,6 +11,7 @@
 import { behaviourOf } from "@domain/cards/behaviours";
 import { validate } from "@domain/engine";
 import {
+  allThresholds,
   contributionOf,
   exhaustXPreventedBy,
   metThresholds,
@@ -65,7 +66,7 @@ function clearsARoom(state: GameState, character: Character, card: Card): boolea
   const before = statPool(state);
   const gain = contributionOf(state, { owner: character, card });
   const after: StatTotals = { oomph: before.oomph + gain.oomph, scramble: before.scramble + gain.scramble };
-  return room.thresholds.some(
+  return allThresholds(room).some(
     (t) => t.clears && !thresholdIsMet(state, t) && statValue(after, t.stat) >= thresholdTarget(state, t),
   );
 }
@@ -118,7 +119,7 @@ function roomIsClearableThisTurn(state: GameState): boolean {
   const now = statPool(state);
   const potential = maxAdditionalGain(state);
   const reachable: StatTotals = { oomph: now.oomph + potential.oomph, scramble: now.scramble + potential.scramble };
-  return room.thresholds.some(
+  return allThresholds(room).some(
     (t) => t.clears && !thresholdIsMet(state, t) && statValue(reachable, t.stat) >= thresholdTarget(state, t),
   );
 }

@@ -7,7 +7,10 @@ import { EXPORTS, runData, runTranscript, runTurns, turnRows, type RunFile } fro
 import { createSession, loadSession, type Session } from "./session";
 
 const content = CARD_CONTENT;
-const SEED = 20260917;
+// A seed the naive "always take what's affordable" driver below plays to a
+// Defeat well inside band 1 (#122/#123/#125: floor 4 and up has no content
+// yet, so a run that ascends that far finds an empty floor deck).
+const SEED = 20260918;
 const WHEN = new Date("2026-09-17T09:30:00.000Z");
 
 /**

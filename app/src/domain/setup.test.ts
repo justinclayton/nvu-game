@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { room } from "./__fixtures__/rig";
 import { CARD_CONTENT } from "../content";
 import { buildFloor, createInitialState, returnRoomsToSupply, roomsOnFloor, TOP_FLOOR } from "./setup";
 
@@ -16,11 +17,11 @@ describe("Setting up a floor", () => {
     expect(state.Gray.deck).toHaveLength(12);
   });
 
-  it("builds floor 1 from 1 Enemy room and 9 Hazard/Stuff rooms", () => {
+  it("builds floor 1 from 1 Stairwell and 9 Rooms", () => {
     const [state] = createInitialState(1, content);
     const kinds = state.floorDeck.map((r) => r.kind);
-    expect(kinds.filter((k) => k === "enemy")).toHaveLength(1);
-    expect(kinds.filter((k) => k === "hazard" || k === "stuff")).toHaveLength(9);
+    expect(kinds.filter((k) => k === "stairwell")).toHaveLength(1);
+    expect(kinds.filter((k) => k === "room")).toHaveLength(9);
     expect(state.floorDeck).toHaveLength(10);
   });
 
@@ -28,30 +29,47 @@ describe("Setting up a floor", () => {
   // you move up, each subsequent floor will have one fewer card than the
   // previous one."
   it("floor size is 11 - floor, per rulebook Setup > Floor deck", () => {
-    const [initial] = createInitialState(1, content);
-    const fullSupply = returnRoomsToSupply(initial);
     for (let floor = 1; floor <= TOP_FLOOR; floor += 1) {
-      const state = buildFloor({ ...fullSupply, floor }, []);
-      expect(state.floorDeck).toHaveLength(roomsOnFloor(floor));
       expect(roomsOnFloor(floor)).toBe(11 - floor);
     }
     expect(roomsOnFloor(TOP_FLOOR)).toBe(1);
   });
 
-  it("the Hazard count on a floor varies with the seed", () => {
-    const hazardCounts = new Set(
-      Array.from({ length: 20 }, (_, i) => {
-        const [state] = createInitialState(i, content);
-        return state.floorDeck.filter((r) => r.kind === "hazard").length;
-      }),
-    );
-    expect(hazardCounts.size).toBeGreaterThan(1);
+  it("builds a full floor deck for every floor in band 1 (floors 1-3)", () => {
+    const [initial] = createInitialState(1, content);
+    const fullSupply = returnRoomsToSupply(initial);
+    for (let floor = 1; floor <= 3; floor += 1) {
+      const state = buildFloor({ ...fullSupply, floor }, []);
+      expect(state.floorDeck).toHaveLength(roomsOnFloor(floor));
+      expect(state.floorDeck.every((r) => r.band === 1)).toBe(true);
+    }
   });
 
-  it("takes the Enemy room that guards the floor being built", () => {
+  // Bands 2 and 3, and floor 10's fixed Stairwell, are follow-ups (#122, #123, #125).
+  it("builds an empty deck for a floor outside band 1", () => {
+    const [initial] = createInitialState(1, content);
+    const fullSupply = returnRoomsToSupply(initial);
+    for (const floor of [4, 7, 10]) {
+      const state = buildFloor({ ...fullSupply, floor }, []);
+      expect(state.floorDeck).toHaveLength(0);
+    }
+  });
+
+  it("floor 1's room composition varies with the seed", () => {
+    const compositions = new Set(
+      Array.from({ length: 20 }, (_, i) => {
+        const [state] = createInitialState(i, content);
+        return state.floorDeck.map((r) => r.name).sort().join(",");
+      }),
+    );
+    expect(compositions.size).toBeGreaterThan(1);
+  });
+
+  it("takes the Stairwell and Rooms from the floor's own band", () => {
     const [state] = createInitialState(1, content);
-    const enemy = state.floorDeck.find((r) => r.kind === "enemy");
-    expect(enemy?.floor).toBe(1);
+    const stairwell = state.floorDeck.find((r) => r.kind === "stairwell");
+    expect(stairwell?.band).toBe(1);
+    expect(state.floorDeck.every((r) => r.band === 1)).toBe(true);
   });
 
   it("gives every physical copy its own id", () => {
@@ -75,5 +93,42 @@ describe("Setting up a floor", () => {
     expect(a).toEqual(b);
     const [c] = createInitialState(100, content);
     expect(c.Red.deck.map((x) => x.id)).not.toEqual(a.Red.deck.map((x) => x.id));
+  });
+});
+
+// Rulebook, Ascending step 4: "Return every room still in the floor deck, Fled
+// rooms included, to its band's pool. Rooms you cleared, the Stairwell
+// included, stay on the Rooms pile." (#66)
+describe("Ending a floor (Ascending, Build the next floor)", () => {
+  it("returns an unseen or Fled room (still in the floor deck) to the pool", () => {
+    const [initial] = createInitialState(1, content);
+    const stillInDeck = room("Sorting Room");
+    const state = { ...initial, floorDeck: [stillInDeck], cleared: [], roomSupply: [] };
+
+    const after = returnRoomsToSupply(state);
+
+    expect(after.roomSupply).toContainEqual(stillInDeck);
+  });
+
+  it("keeps a cleared room out of the pool, on the cleared pile, across an Ascend", () => {
+    const [initial] = createInitialState(1, content);
+    const clearedRoom = room("Coney, The Thing In The Stairwell");
+    const state = { ...initial, floorDeck: [], cleared: [clearedRoom], roomSupply: [] };
+
+    const after = returnRoomsToSupply(state);
+
+    expect(after.roomSupply).not.toContainEqual(clearedRoom);
+    expect(after.cleared).toEqual([clearedRoom]);
+  });
+
+  it("does not reset the cleared pile when building the next floor", () => {
+    const [initial] = createInitialState(1, content);
+    const clearedRoom = room("Collapsed Stairwell");
+    const fullSupply = returnRoomsToSupply({ ...initial, cleared: [] });
+    const state = { ...fullSupply, floor: 2, cleared: [clearedRoom] };
+
+    const next = buildFloor(state, []);
+
+    expect(next.cleared).toEqual([clearedRoom]);
   });
 });

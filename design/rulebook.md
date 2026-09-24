@@ -1,6 +1,6 @@
 # *North vs Up*: Rulebook
 
-Rules version: 0.2.0
+Rules version: 0.2.1
 
 ---
 
@@ -40,9 +40,13 @@ Each player grabs the **starter cards** for their character. This will form your
 
 ### Floor deck
 
-Assemble the floor deck for Floor 1. The first floor consists of **10** cards. As you move up, each subsequent floor will have one fewer card than the previous one (until the final battle at the top of the pyramid tower!).
+Floors 1–3, 4–6, and 7–9 each share one `Room` pool and one `Stairwell` pool, called a `band`. Floor 10 has no band: it uses one fixed `Stairwell` instead.
 
-To create the floor deck, first add the `Enemy Room` marked with the number of floor you're building, then select randomly from the available Floor cards until you have the right number. Shuffle these cards together and place them in the middle of the table, face down.
+Assemble the floor deck for the floor you're building:
+
+1. **Draw the Stairwell:** Take one `Stairwell` at random from the floor's band, or the fixed Floor 10 card.
+2. **Draw the Rooms:** Take `Room` cards at random from the same band until the deck holds this floor's count: **10** on Floor 1, one fewer each floor after.
+3. **Shuffle** the drawn cards together and place them in the middle of the table, face down.
 
 ### Placeholder for diagram of an example table layout at start of game
 
@@ -77,7 +81,7 @@ In the middle of the table:
 
 Players take turns playing a card.
 
-- **Play**: Move a card from your hand into your play zone and pay for it: look at its `Cost`, then move that number of cards from your hand to your discard pile. Unless otherwise specified, you can only pay for a card with other cards from your own hand. If a card's cost is 0 or less, play the card for free.
+- **Play**: Move a card from your hand into your play zone and pay for it: look at its `Cost`, then move that number of cards from your hand to your discard pile. Unless otherwise specified, you can only pay for a card with other cards from your own hand. If a card's cost is 0 or less, play the card for free. Resolve effects triggered by playing or paying for a card after that card's own text.
 - **Add up stats**: Stats on played cards add together across both sides of the play zone into one team pool.
 
 > *Example: `Red` plays a card with `Oomph 2`. `Gray` plays two cards, which read `Oomph 1`, and `Scramble 2`. Together, they have `Oomph 3` and `Scramble 2`.*
@@ -86,13 +90,13 @@ The phase ends when both players pass.
 
 ### 3. Outcome
 
-Players add their combined stats they accumulated this turn and check to see if they Cleared one or more challenges, or if they must Flee.
+Players add their combined stats they accumulated this turn and check to see if they met one or more challenges, or if they must Flee.
 
-**Clear**: If any challenge's threshold has been met or exceeded, the players `Clear` the room. Resolve each cleared challenge's outcome according to the text on the card. If more than one challenge has been cleared, their outcomes may be resolved in any order.
+**Clear**: A challenge is met when the players' stats meet or exceed any of its thresholds. If one or more challenges are met, the players `Clear` the room. For each met challenge, resolve the outcome of **one** threshold: the lowest-printed threshold met in that challenge. If more than one challenge is met, their outcomes may be resolved in any order.
 
-> If any challenge's outcome says to `Ascend`, the entire Floor is cleared. Perform the Cleanup phase as normal, then perform the steps in section 10: *Ascending*.
+> If a resolved outcome says to `Ascend`, the entire Floor is cleared. Perform the Cleanup phase as normal, then perform the steps in section 10: *Ascending*.
 
-**Flee**: If *no challenges* have been cleared, the players must Flee the room. Resolve the `Flee:` outcome according to the text on the card, then **shuffle the room card back into the Floor deck**.
+**Flee**: If *no challenges* have been met, the players must Flee the room. Resolve the `Flee:` outcome according to the text on the card, then **shuffle the room card back into the Floor deck**.
 
 ### 4. Cleanup (end of turn)
 
@@ -113,15 +117,18 @@ A number never goes below zero. If an effect would take a card's stat, cost, or 
 
 ### Room Cards
 
-A room card presents one or more **challenges** to the players. Each turn players will work together to play cards from their hand until they either meet or exceed one or more of the challenges, or, if they are unwilling or unable to complete any challenges, they `Flee`.
+A room card presents one or more **challenges** to the players. A challenge lists one or more **thresholds**, and each threshold has an outcome. Each turn players will work together to play cards from their hand until they either meet or exceed one or more of the challenges, or, if they are unwilling or unable to complete any challenges, they `Flee`.
+
+There are two kinds: `Room` and `Stairwell`. Only a `Stairwell`'s challenges print `Ascend`.
 
 #### Placeholder for diagram
 
 
 - **Name.**
-- **Type:** `Enemy`, `Hazard`, or `Stuff`. Note: `Enemy` rooms will also have a number indicating which floor they belong to (`Enemy 1`, etc.)
-- **Challenges:** one or more lines with `threshold: outcome`.
-- **`Flee`**: what happens when no challenges are completed.
+- **Type line:** `Room` or `Stairwell`, and the band of floors it belongs to (`Room · Floors 4–6`).
+- **Flavor line.**
+- **Challenges:** one or more, each listing one or more `threshold: outcome` lines.
+- **`Flee`**: what happens when no challenges are met.
 
 ### Character cards
 
@@ -166,7 +173,7 @@ If you must draw or Exhaust a card and your deck and discard pile are both empty
 
 ## 10. Ascending
 
-When you have Cleared the Enemy room, you escape the current floor and `Ascend` to the next. On floor 10, skip this section: you have won (section 11).
+When a resolved outcome says `Ascend`, you escape the current floor and move to the next. On floor 10, skip this section: you have won (section 11).
 
 After Cleanup, each player does the following:
 
@@ -176,13 +183,13 @@ After Cleanup, each player does the following:
    - For each `Bad Stuff` card, keep it, or shuffle it into the Bad Stuff pool and Scrap **one** non-Stuff card from your deck or discard pile.
    Return each kept card to where you found it, then shuffle your deck.
 3. **Choose a reward:** Reveal the top **3** cards of your reward pool. You may shuffle **one** into your deck. Put the cards you did not take on the bottom of your reward pool.
-4. **Build the next floor:** Setup, *Floor deck*.
+4. **Build the next floor:** Return every room still in the floor deck, Fled rooms included, to its band's pool. Rooms you cleared, the Stairwell included, stay on the Rooms pile. Then assemble the new floor as in Setup, *Floor deck*.
 
 ---
 
 ## 11. Winning and losing
 
-**You win** by clearing the Enemy room on floor 10.
+**You win** by clearing floor 10's Stairwell.
 
 **You lose** when either character goes `Down`.
 

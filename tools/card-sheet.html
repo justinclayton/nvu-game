@@ -14,6 +14,9 @@
     --good-stuff: #3f8f4a;  /* green */
     --bad-stuff: #5a3a6e;   /* dark plum */
     --floor: #111;
+    --band-1: #2d6a4f;  /* forest green: floors 1-3 */
+    --band-2: #1d4e89;  /* deep blue: floors 4-6 */
+    --band-3: #7c2d12;  /* rust: floors 7-9 */
   }
   * { box-sizing: border-box; }
   body {
@@ -73,9 +76,14 @@
 
   /* room cards */
   .card.room .type-bar { background: var(--floor); }
+  .card.room.band-1 .type-bar { background: var(--band-1); }
+  .card.room.band-2 .type-bar { background: var(--band-2); }
+  .card.room.band-3 .type-bar { background: var(--band-3); }
+  .flavor { font-size: 8pt; font-style: italic; color: #555; margin: -1mm 0 1mm; }
   .thresholds { font-size: 9pt; line-height: 1.4; }
   .thresholds .th { margin-bottom: 1.5mm; }
   .thresholds .th b { font-weight: 700; }
+  .challenge + .challenge { margin-top: 1.5mm; padding-top: 1.5mm; border-top: 0.2mm dotted #ccc; }
   .flee {
     margin-top: auto; padding-top: 2mm; border-top: 0.3mm solid #999;
     font-size: 8.5pt; line-height: 1.3;
@@ -103,11 +111,17 @@ function esc(s) {
 
 var TYPE_LINE = {
   good_stuff: "Good Stuff",
-  bad_stuff: "Bad Stuff",
-  enemy_room: "Enemy Room",
-  hazard_room: "Hazard Room",
-  stuff_room: "Stuff Room"
+  bad_stuff: "Bad Stuff"
 };
+
+var ROOM_KIND_LABEL = { room: "Room", stairwell: "Stairwell" };
+
+/* Floors 1-3, 4-6, 7-9 (rulebook Setup, "Floor deck"). */
+var BAND_FLOORS = { 1: "Floors 1–3", 2: "Floors 4–6", 3: "Floors 7–9" };
+
+function roomTypeLine(c) {
+  return ROOM_KIND_LABEL[c.kind] + " · " + (BAND_FLOORS[c.band] || "?");
+}
 
 function statLine(c) {
   var parts = [];
@@ -147,21 +161,26 @@ function playerCardHTML(c) {
 }
 
 function roomCardHTML(c) {
-  var lines = (c.thresholds || []).map(function (t) {
-    return '<div class="th"><b>' + esc(t.stat) + " " + t.value + ":</b> " + esc(t.outcome) + "</div>";
+  var challenges = (c.challenges || []).map(function (ch) {
+    var lines = (ch.thresholds || []).map(function (t) {
+      return '<div class="th"><b>' + esc(t.stat) + " " + t.value + ":</b> " + esc(t.outcome) + "</div>";
+    }).join("");
+    return '<div class="challenge">' + lines + "</div>";
   }).join("");
+  var flavor = c.flavor ? '<div class="flavor">' + esc(c.flavor) + "</div>" : "";
   var foot = c.flee
     ? '<div class="flee"><b>Flee:</b> ' + esc(c.flee) + "</div>"
     : '<div class="flee"><b>Flee:</b> Leave empty handed.</div>';
-  return '<div class="card room"><div class="type-bar"></div>' +
+  return '<div class="card room band-' + c.band + '"><div class="type-bar"></div>' +
     '<div class="top"><div><div class="name">' + esc(c.name) + "</div>" +
-    '<div class="typeline">' + esc(TYPE_LINE[c.kind]) + "</div></div></div>" +
+    '<div class="typeline">' + esc(roomTypeLine(c)) + "</div></div></div>" +
     '<div class="art"></div>' +
-    '<div class="thresholds">' + lines + "</div>" + foot + "</div>";
+    flavor +
+    '<div class="thresholds">' + challenges + "</div>" + foot + "</div>";
 }
 
 function cardHTML(c) {
-  return c.kind.indexOf("room") !== -1 ? roomCardHTML(c) : playerCardHTML(c);
+  return c.kind === "room" || c.kind === "stairwell" ? roomCardHTML(c) : playerCardHTML(c);
 }
 
 /* The sheet's groupings, in cutting order — the cards print as one unbroken
@@ -174,9 +193,6 @@ function player(owner, starter) {
 function kind(k) {
   return function (c) { return c.kind === k; };
 }
-function rooms(c) {
-  return c.kind === "enemy_room" || c.kind === "hazard_room";
-}
 function rewards(c) {
   return c.kind === "player" && !c.starter;
 }
@@ -188,8 +204,8 @@ var SECTIONS = [
   { pick: function (c) { return rewards(c) && c.owner === "Gray"; } },
   { pick: kind("good_stuff") },
   { pick: kind("bad_stuff") },
-  { pick: rooms },
-  { pick: kind("stuff_room") }
+  { pick: kind("stairwell") },
+  { pick: kind("room") }
 ];
 
 /* Physical playtesting needs duplicates: a card with `count` prints that many copies. */

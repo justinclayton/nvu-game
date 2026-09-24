@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { CARD_CONTENT } from "@content/index";
 import { card, pile, player, resetRig, rig, room } from "@domain/__fixtures__/rig";
-import type { Command, GameState, Room } from "@domain/types";
+import type { Command, GameState, Room, Threshold } from "@domain/types";
 import { ascendChoices, legalCommands } from "./moves";
 import { greedyAscendStats, greedyPolicy, randomPolicy, resetGreedyAscendStats } from "./policy";
 import { policySeed } from "./rng";
@@ -16,21 +16,25 @@ describe("random", () => {
   });
 });
 
-/** A one-threshold room, only its shape overridden. */
-function roomWith(threshold: Partial<Room["thresholds"][number]>): Room {
+/** A one-challenge, one-threshold room, only its shape overridden. */
+function roomWith(threshold: Partial<Threshold>): Room {
   const base = room("Gross Thing That Looks Like A Cherry");
   return {
     ...base,
-    thresholds: [
+    challenges: [
       {
-        stat: "Oomph",
-        value: 4,
-        outcome: "Clear it.",
-        clears: true,
-        fleeFree: false,
-        ascends: false,
-        effects: [],
-        ...threshold,
+        thresholds: [
+          {
+            stat: "Oomph",
+            value: 4,
+            outcome: "Clear it.",
+            clears: true,
+            fleeFree: false,
+            ascends: false,
+            effects: [],
+            ...threshold,
+          },
+        ],
       },
     ],
   };

@@ -31,9 +31,8 @@
   --fine: #0fa3a8;
   --cool: #8f6fc4;
   --woah: #daa520;
-  --enemy: #8d1f18;
-  --hazard: #c98a12;
-  --stuffroom: #2f7f86;
+  --stairwell: #8d1f18;
+  --room: #c98a12;
 
   --cw: 88px;
   --ch: 123px;
@@ -326,14 +325,11 @@ body {
   font: 700 18px/1.1 var(--display);
   letter-spacing: 0.01em;
 }
-.brief--enemy .brief__name {
+.brief--stairwell .brief__name {
   color: var(--red-light);
 }
-.brief--hazard .brief__name {
+.brief--room .brief__name {
   color: #f0c96a;
-}
-.brief--stuff .brief__name {
-  color: #8fd7dc;
 }
 .brief__pool {
   margin-left: auto;
@@ -588,14 +584,11 @@ body {
 .tone--bad {
   --tone: var(--bad);
 }
-.tone--enemy {
-  --tone: var(--enemy);
+.tone--stairwell {
+  --tone: var(--stairwell);
 }
-.tone--hazard {
-  --tone: var(--hazard);
-}
-.tone--stuff {
-  --tone: var(--stuffroom);
+.tone--room {
+  --tone: var(--room);
 }
 .rarity--fine .face {
   border-color: var(--fine);
@@ -675,14 +668,11 @@ body {
 .tone--bad .face__art {
   --art: radial-gradient(circle at 40% 60%, #b892d1, #5a3a6e 60%, #34203f);
 }
-.tone--enemy .face__art {
+.tone--stairwell .face__art {
   --art: radial-gradient(ellipse at 50% 60%, #d84a3e, #6a1a14 55%, #1c0907);
 }
-.tone--hazard .face__art {
+.tone--room .face__art {
   --art: repeating-linear-gradient(-45deg, #d9a21b 0 0.8em, #2a2622 0.8em 1.6em);
-}
-.tone--stuff .face__art {
-  --art: radial-gradient(circle at 50% 45%, #5fb9bf, #2f7f86 60%, #174a4f);
 }
 
 .face__stats {

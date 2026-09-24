@@ -93,12 +93,16 @@ export const STUFF: Registry = {
     },
   },
 
-  /* "One of you draws 1 card." */
+  /* "One of you draws 1 card."
+   *
+   * Rulebook, Keywords: Empty deck: an empty deck with a non-empty discard still
+   * draws — it reshuffles first — so only a character with both empty, or already
+   * Down, is not a legal choice. */
   "Grav Harness": {
     onPlay(state, ctx) {
       const options = CHARACTERS.filter((c) => {
         const p = playerOf(state, c);
-        return !p.down && p.deck.length > 0;
+        return !p.down && (p.deck.length > 0 || p.discard.length > 0);
       });
       if (options.length === 0) return nothing(state);
       return ask(state, {
@@ -182,7 +186,7 @@ export const STUFF: Registry = {
     },
   },
 
-  /* "Holding: Every challenge also requires 2 `Scramble` to clear. A `Scramble` challenge requires 2 more instead.
+  /* "Holding: Every threshold also requires 2 `Scramble` to be met. A `Scramble` threshold requires 2 more instead.
    *  Play: Exhaust 2." */
   Panic: {
     whileHeld: { thresholdScrambleDelta: 2 },

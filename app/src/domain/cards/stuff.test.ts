@@ -322,6 +322,33 @@ describe("Grav Harness — 'One of you draws 1 card, even if their hand is full'
     expect(eventTypes(events)).toEqual(["CARD_DRAWN"]);
     expect(next.Gray.hand).toHaveLength(1);
   });
+
+  it("still offers a character whose deck is empty but whose discard is not", () => {
+    const state = playing({
+      Red: player({ deck: pile("Shove", 4), hand: [card("Grav Harness"), ...pile("Shove", 5)] }),
+      Gray: player({ deck: [], discard: pile("Duck Under", 3) }),
+    });
+    const grav = state.Red.hand[0];
+    if (!grav) throw new Error("rig");
+    const asked = must(state, {
+      type: "PLAY_CARD",
+      character: "Red",
+      cardId: grav.id,
+      payWith: state.Red.hand.slice(1, 3).map((c) => c.id),
+    });
+    if (asked.state.pending?.kind !== "ChooseCharacter") throw new Error("rig");
+    // Rulebook, Keywords: Empty deck — an empty deck with cards still in the
+    // discard pile reshuffles rather than being unable to draw.
+    expect(asked.state.pending.options).toContain("Gray");
+
+    const { state: next, events } = must(asked.state, {
+      type: "CHOOSE_CHARACTER",
+      character: "Gray",
+    });
+    expect(eventTypes(events)).toEqual(["DISCARD_RESHUFFLED", "CARD_DRAWN"]);
+    expect(next.Gray.deck).toHaveLength(2);
+    expect(next.Gray.discard).toHaveLength(0);
+  });
 });
 
 describe("Riot Shield — 'If the room is Cleared, return this to your hand at the end of the turn'", () => {
@@ -587,7 +614,7 @@ describe("Panic — 'ALL rooms require an additional 2 Scramble, and Play: Exhau
       activeRoom: room("Collapsed Stairwell"),
       Gray: player({ deck: pile("Duck Under", 4), hand: [card("Panic")] }),
     });
-    const room1 = state.activeRoom?.thresholds[0];
+    const room1 = state.activeRoom?.challenges[0]?.thresholds[0];
     if (!room1) throw new Error("rig");
     expect(room1.value).toBe(2);
     expect(thresholdTarget(state, room1)).toBe(4);
@@ -598,7 +625,7 @@ describe("Panic — 'ALL rooms require an additional 2 Scramble, and Play: Exhau
       activeRoom: room("Gross Thing That Looks Like A Cherry"),
       Gray: player({ deck: pile("Duck Under", 4), hand: [card("Panic")] }),
     });
-    const line = state.activeRoom?.thresholds[0];
+    const line = state.activeRoom?.challenges[0]?.thresholds[0];
     if (!line) throw new Error("rig");
     expect(line.stat).toBe("Oomph");
     expect(extraScrambleRequirement(state, line)).toBe(2);
@@ -609,7 +636,7 @@ describe("Panic — 'ALL rooms require an additional 2 Scramble, and Play: Exhau
       activeRoom: room("Collapsed Stairwell"),
       Gray: player({ deck: pile("Duck Under", 4), hand: [card("Panic")] }),
     });
-    const line = state.activeRoom?.thresholds[0];
+    const line = state.activeRoom?.challenges[0]?.thresholds[0];
     if (!line) throw new Error("rig");
     expect(line.stat).toBe("Scramble");
     expect(extraScrambleRequirement(state, line)).toBe(0);
@@ -622,7 +649,7 @@ describe("Panic — 'ALL rooms require an additional 2 Scramble, and Play: Exhau
       Red: player({ hand: [card("Panic")] }),
       Gray: player({ deck: pile("Duck Under", 4), hand: [card("Panic")] }),
     });
-    const line = state.activeRoom?.thresholds[0];
+    const line = state.activeRoom?.challenges[0]?.thresholds[0];
     if (!line) throw new Error("rig");
     expect(extraScrambleRequirement(state, line)).toBe(4);
   });
@@ -636,7 +663,7 @@ describe("Panic — 'ALL rooms require an additional 2 Scramble, and Play: Exhau
         { owner: "Red", card: card("Shove") },
       ],
     });
-    const line = state.activeRoom?.thresholds[0];
+    const line = state.activeRoom?.challenges[0]?.thresholds[0];
     if (!line) throw new Error("rig");
     expect(statPool(state).oomph).toBeGreaterThanOrEqual(line.value);
     expect(thresholdIsMet(state, line)).toBe(false);
@@ -656,7 +683,7 @@ describe("Panic — 'ALL rooms require an additional 2 Scramble, and Play: Exhau
         { owner: "Red", card: card("Shove") },
       ],
     });
-    const line = state.activeRoom?.thresholds[0];
+    const line = state.activeRoom?.challenges[0]?.thresholds[0];
     if (!line) throw new Error("rig");
     expect(extraScrambleRequirement(state, line)).toBe(0);
     expect(thresholdIsMet(state, line)).toBe(true);

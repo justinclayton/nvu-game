@@ -3,7 +3,7 @@
  * beside it prints them large, with what the pool has against each one.
  * Whether a line is met is the domain's answer. */
 
-import { statPool, thresholdIsMet, thresholdTarget } from "@domain/queries";
+import { allThresholds, statPool, thresholdIsMet, thresholdTarget } from "@domain/queries";
 import type { GameState } from "@domain/types";
 
 const PHASE_BLURB: Record<GameState["phase"], string> = {
@@ -11,14 +11,13 @@ const PHASE_BLURB: Record<GameState["phase"], string> = {
   Play: "Play into your own side. Nothing resolves until you both stop.",
   Outcome: "Checking the room against what you played.",
   Cleanup: "Discarding the play zone and settling what's left of the turn.",
-  Ascend: "The Enemy is dead. Pack up the floor.",
+  Ascend: "The Stairwell is clear. Pack up the floor.",
   GameOver: "The run is over.",
 };
 
 const KIND_LABEL: Record<NonNullable<GameState["activeRoom"]>["kind"], string> = {
-  enemy: "Enemy",
-  hazard: "Hazard",
-  stuff: "Stuff",
+  room: "Room",
+  stairwell: "Stairwell",
 };
 
 export function RoomBrief({ state }: { readonly state: GameState }) {
@@ -40,7 +39,7 @@ export function RoomBrief({ state }: { readonly state: GameState }) {
             </span>
           </div>
           <ul className="brief__lines">
-            {room.thresholds.map((t, i) => {
+            {allThresholds(room).map((t, i) => {
               const met = thresholdIsMet(state, t);
               const target = thresholdTarget(state, t);
               const have = t.stat === "Oomph" ? pool.oomph : pool.scramble;

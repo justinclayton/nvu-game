@@ -25,27 +25,34 @@ describe("content", () => {
 
   it("carries structure, never prose, for what a room does", () => {
     for (const room of CARD_CONTENT.rooms) {
-      expect(room.thresholds.length).toBeGreaterThan(0);
-      // Each Turn, Outcome: a Flee never clears the room — only a met threshold does.
+      expect(room.challenges.length).toBeGreaterThan(0);
+      // Each Turn, Outcome: a Flee never clears the room — only a met challenge does.
       expect(room.flee.clears).toBe(false);
-      for (const t of room.thresholds) {
-        expect(t.clears || t.fleeFree).toBe(true);
+      for (const c of room.challenges) {
+        expect(c.thresholds.length).toBeGreaterThan(0);
+        for (const t of c.thresholds) {
+          expect(t.clears || t.fleeFree).toBe(true);
+        }
       }
     }
   });
 
   it("gives every room's threshold the same shape, whatever the room's printed kind", () => {
-    // A room's type line (Enemy/Hazard/Stuff) is flavor: every Challenge is checked
-    // the same way, so no threshold carries a kind-specific reading of the pool.
+    // A Room and a Stairwell check a Challenge the same way, so no threshold
+    // carries a kind-specific reading of the pool.
     for (const room of CARD_CONTENT.rooms) {
-      for (const t of room.thresholds) expect(t).not.toHaveProperty("measuredOn");
+      for (const c of room.challenges) {
+        for (const t of c.thresholds) expect(t).not.toHaveProperty("measuredOn");
+      }
     }
   });
 
   it("only an `Ascend` outcome sets `ascends`", () => {
     for (const room of CARD_CONTENT.rooms) {
-      for (const t of room.thresholds) {
-        expect(t.ascends).toBe(/ascend/i.test(t.outcome));
+      for (const c of room.challenges) {
+        for (const t of c.thresholds) {
+          expect(t.ascends).toBe(/ascend/i.test(t.outcome));
+        }
       }
     }
   });

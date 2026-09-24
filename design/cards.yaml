@@ -11,17 +11,22 @@
 #
 # Fields
 #   set     official | proposed
-#   kind    player | good_stuff | bad_stuff | enemy_room | hazard_room | stuff_room
+#   kind    player | good_stuff | bad_stuff | room | stairwell
 #   owner   Red | Gray           player cards only
 #   rarity  Fine | Cool | Woah
 #   cost    integer              null means not yet set
-#   oomph / scramble  integer    
+#   oomph / scramble  integer
 #   conditional_stat  true       stat lives in the text instead of a field
 #   starter true                 part of a starting deck rather than a reward pool
 #   text    string               the literal printed rules text
+#   band    1 | 2 | 3            room and stairwell only: which floors' pool the card is drawn from
+#   challenges                   room and stairwell only: one or more, each a list of
+#                                `thresholds` (stat, value, outcome) in printed order
+#   flee    string               room and stairwell only: the printed Flee line
+#   flavor  string               room and stairwell only: the printed flavor line, empty for now
 
 meta:
-  updated: 2026-09-16
+  updated: 2026-09-23
 
 cards:
 
@@ -391,7 +396,7 @@ cards:
     kind: bad_stuff
     cost: 1
     text: >-
-      Holding: Every challenge also requires 2 `Scramble` to clear. A `Scramble` challenge requires 2 more instead.
+      Holding: Every threshold also requires 2 `Scramble` to be met. A `Scramble` threshold requires 2 more instead.
       Play: Exhaust 2.
 
   - name: My Head Is Quantum Spinning
@@ -404,113 +409,131 @@ cards:
 
   - name: Gross Thing That Looks Like A Cherry
     set: proposed
-    kind: enemy_room
-    floor: 1
-    thresholds:
-      - stat: Oomph
-        value: 5
-        outcome: Ascend
+    kind: stairwell
+    band: 1
+    challenges:
+      - thresholds:
+          - stat: Oomph
+            value: 5
+            outcome: Ascend
     flee: Both of you Exhaust 1.
 
   - name: Coney, The Thing In The Stairwell
     set: proposed
-    kind: enemy_room
-    floor: 2
-    thresholds:
-      - stat: Oomph
-        value: 9
-        outcome: Ascend
+    kind: stairwell
+    band: 1
+    challenges:
+      - thresholds:
+          - stat: Oomph
+            value: 9
+            outcome: Ascend
     flee: Both of you Exhaust 1.
 
   - name: Villy, Coney's Work Husband
     set: proposed
-    kind: enemy_room
-    floor: 3
-    thresholds:
-      - stat: Oomph
-        value: 9
-        outcome: Ascend
-      - stat: Scramble
-        value: 9
-        outcome: Flee this room for free.
+    kind: stairwell
+    band: 1
+    challenges:
+      - thresholds:
+          - stat: Oomph
+            value: 9
+            outcome: Ascend
+      - thresholds:
+          - stat: Scramble
+            value: 9
+            outcome: Flee this room for free.
     flee: Both of you Exhaust 2.
 
   - name: Collapsed Stairwell
     count: 3
     set: proposed
-    kind: hazard_room
-    thresholds:
-    - stat: Scramble
-      value: 2
-      outcome: Clear, but both of you Exhaust 1.
-    - stat: Scramble
-      value: 5
-      outcome: Clear, and one of you reveals a reward.
+    kind: room
+    band: 1
+    challenges:
+      - thresholds:
+          - stat: Scramble
+            value: 2
+            outcome: Clear, but both of you Exhaust 1.
+          - stat: Scramble
+            value: 5
+            outcome: Clear, and one of you reveals a reward.
     flee: One of you Exhausts 3.
 
   - name: Ruptured Coolant Line
     count: 3
     set: proposed
-    kind: hazard_room
-    thresholds:
-    - stat: Scramble
-      value: 4
-      outcome: Clear, but both of you get Bad Stuff.
-    - stat: Scramble
-      value: 7
-      outcome: Clear, and one of you reveals a reward.
+    kind: room
+    band: 1
+    challenges:
+      - thresholds:
+          - stat: Scramble
+            value: 4
+            outcome: Clear, but both of you get Bad Stuff.
+          - stat: Scramble
+            value: 7
+            outcome: Clear, and one of you reveals a reward.
     flee: Both of you Exhaust 1, and one of you gets Bad Stuff.
 
   - name: Sorting Room
     count: 3
     set: proposed
-    kind: stuff_room
-    thresholds:
-      - stat: Oomph
-        value: 2
-        outcome: Red gets Good Stuff.
-      - stat: Scramble
-        value: 2
-        outcome: Gray gets Good Stuff.
+    kind: room
+    band: 1
+    challenges:
+      - thresholds:
+          - stat: Oomph
+            value: 2
+            outcome: Red gets Good Stuff.
+      - thresholds:
+          - stat: Scramble
+            value: 2
+            outcome: Gray gets Good Stuff.
 
   - name: Ration Locker
     count: 2
     set: proposed
-    kind: stuff_room
-    thresholds:
-      - stat: Oomph
-        value: 2
-        outcome: Red gets Good Stuff.
-      - stat: Scramble
-        value: 2
-        outcome: Gray gets Good Stuff.
-      - stat: Oomph
-        value: 4
-        outcome: Red gets 2 instead.
-      - stat: Scramble
-        value: 4
-        outcome: Gray gets 2 instead.
+    kind: room
+    band: 1
+    challenges:
+      - thresholds:
+          - stat: Oomph
+            value: 2
+            outcome: Red gets Good Stuff.
+          - stat: Oomph
+            value: 4
+            outcome: Red gets 2 Good Stuff.
+      - thresholds:
+          - stat: Scramble
+            value: 2
+            outcome: Gray gets Good Stuff.
+          - stat: Scramble
+            value: 4
+            outcome: Gray gets 2 Good Stuff.
 
   - name: Tool Cage
     count: 2
     set: proposed
-    kind: stuff_room
-    thresholds:
-      - stat: Scramble
-        value: 3
-        outcome: Both of you get Good Stuff.
-      - stat: Oomph
-        value: 5
-        outcome: Red gets 2 instead.
+    kind: room
+    band: 1
+    challenges:
+      - thresholds:
+          - stat: Scramble
+            value: 3
+            outcome: Both of you get Good Stuff.
+          - stat: Oomph
+            value: 5
+            outcome: Red gets 2 Good Stuff, and Gray gets Good Stuff.
 
   - name: Spill Of Cargo
     count: 2
     set: proposed
-    kind: stuff_room
-    thresholds:
-      - stat: Scramble
-        value: 3
-        outcome: Both of you get Good Stuff.
-      - stat: Scramble
-        value: 5
-        outcome: Gray gets 2 instead.
+    kind: room
+    band: 1
+    challenges:
+      - thresholds:
+          - stat: Scramble
+            value: 3
+            outcome: Both of you get Good Stuff.
+          - stat: Scramble
+            value: 5
+            outcome: Gray gets 2 Good Stuff, and Red gets Good Stuff.

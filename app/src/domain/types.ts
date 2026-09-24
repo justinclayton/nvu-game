@@ -2,15 +2,17 @@
  *
  * Every name here is a term from design/GLOSSARY.md, spelled the same way: discard pile,
  * Exhaust pile, Fled, Cleared, Scrapyard, Down, stat pool, play zone. Section
- * numbers in the comments point at design/rulebook.md, rules version 0.2.0.
+ * numbers in the comments point at design/rulebook.md, rules version 0.2.1.
  *
  * Everything is readonly. The engine never mutates; it returns a new state.
  */
 
 import type { CardId, RoomId } from "./ids";
 import type {
+  Band,
   CardKind,
   CardSet,
+  Challenge,
   Character,
   FleeLine,
   Rarity,
@@ -19,7 +21,7 @@ import type {
   Threshold,
 } from "./printed";
 
-export type { Character, Rarity, RoomEffect, Stat, Threshold, FleeLine } from "./printed";
+export type { Challenge, Character, Rarity, RoomEffect, Stat, Threshold, FleeLine } from "./printed";
 export type { CardId, RoomId } from "./ids";
 
 /** The registry key for a card's behaviour. `cards.yaml` makes the name unique. */
@@ -51,9 +53,10 @@ export interface Room {
   readonly id: RoomId;
   readonly name: string;
   readonly kind: RoomKind;
-  /** Enemy rooms name the floor they guard (rulebook, Card anatomy: Room Cards). */
-  readonly floor: number | null;
-  readonly thresholds: readonly Threshold[];
+  /** Which floors' pool the card is drawn from (rulebook Setup, "Floor deck"). */
+  readonly band: Band;
+  readonly flavor: string;
+  readonly challenges: readonly Challenge[];
   readonly flee: FleeLine;
 }
 
@@ -197,6 +200,16 @@ export interface Resolution {
   readonly ascends: boolean;
 }
 
+/**
+ * A played card whose effect is waiting on `pending`. Once the effect
+ * finishes, the cards in `listeners` that are still where they were hear
+ * `events`: paying for the card and playing it.
+ */
+export interface UnfinishedPlay {
+  readonly events: readonly DomainEvent[];
+  readonly listeners: readonly CardId[];
+}
+
 /* --------------------------------------------------------- the aggregate */
 
 export interface GameState {
@@ -224,6 +237,7 @@ export interface GameState {
   readonly offer: RewardOffer | null;
 
   readonly pending: Pending | null;
+  readonly unfinishedPlay: UnfinishedPlay | null;
   readonly resolution: Resolution | null;
   readonly thisTurn: TurnRecord;
   readonly outcome: Outcome | null;

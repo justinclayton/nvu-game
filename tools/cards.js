@@ -11,7 +11,7 @@
  * and no server.
  */
 var NVU_CARDS = {
-  meta: {"updated":"2026-09-16"},
+  meta: {"updated":"2026-09-23"},
   cards: [
     {"name":"Shove","set":"official","kind":"player","owner":"Red","starter":true,"cost":1,"oomph":2,"count":5},
     {"name":"Charge In","set":"official","kind":"player","owner":"Red","starter":true,"cost":2,"oomph":4,"count":5},
@@ -53,17 +53,17 @@ var NVU_CARDS = {
     {"name":"Sluggish","set":"proposed","kind":"bad_stuff","cost":1,"text":"Holding: cards cost +1 to play."},
     {"name":"Rust","set":"proposed","kind":"bad_stuff","cost":2,"text":"Holding: Stuff you play has -1 Oomph."},
     {"name":"Spore Cloud","set":"proposed","kind":"bad_stuff","cost":2,"text":"Holding: At Cleanup, discard cards other than this one until you hold 3."},
-    {"name":"Panic","set":"proposed","kind":"bad_stuff","cost":1,"text":"Holding: Every challenge also requires 2 `Scramble` to clear. A `Scramble` challenge requires 2 more instead. Play: Exhaust 2."},
+    {"name":"Panic","set":"proposed","kind":"bad_stuff","cost":1,"text":"Holding: Every threshold also requires 2 `Scramble` to be met. A `Scramble` threshold requires 2 more instead. Play: Exhaust 2."},
     {"name":"My Head Is Quantum Spinning","set":"proposed","kind":"bad_stuff","cost":1,"text":"Holding: Whenever your partner draws a card during Play, Exhaust 1."},
-    {"name":"Gross Thing That Looks Like A Cherry","set":"proposed","kind":"enemy_room","thresholds":[{"stat":"Oomph","value":5,"outcome":"Ascend"}],"flee":"Both of you Exhaust 1.","floor":1},
-    {"name":"Coney, The Thing In The Stairwell","set":"proposed","kind":"enemy_room","thresholds":[{"stat":"Oomph","value":9,"outcome":"Ascend"}],"flee":"Both of you Exhaust 1.","floor":2},
-    {"name":"Villy, Coney's Work Husband","set":"proposed","kind":"enemy_room","thresholds":[{"stat":"Oomph","value":9,"outcome":"Ascend"},{"stat":"Scramble","value":9,"outcome":"Flee this room for free."}],"flee":"Both of you Exhaust 2.","floor":3},
-    {"name":"Collapsed Stairwell","set":"proposed","kind":"hazard_room","thresholds":[{"stat":"Scramble","value":2,"outcome":"Clear, but both of you Exhaust 1."},{"stat":"Scramble","value":5,"outcome":"Clear, and one of you reveals a reward."}],"flee":"One of you Exhausts 3.","count":3},
-    {"name":"Ruptured Coolant Line","set":"proposed","kind":"hazard_room","thresholds":[{"stat":"Scramble","value":4,"outcome":"Clear, but both of you get Bad Stuff."},{"stat":"Scramble","value":7,"outcome":"Clear, and one of you reveals a reward."}],"flee":"Both of you Exhaust 1, and one of you gets Bad Stuff.","count":3},
-    {"name":"Sorting Room","set":"proposed","kind":"stuff_room","thresholds":[{"stat":"Oomph","value":2,"outcome":"Red gets Good Stuff."},{"stat":"Scramble","value":2,"outcome":"Gray gets Good Stuff."}],"count":3},
-    {"name":"Ration Locker","set":"proposed","kind":"stuff_room","thresholds":[{"stat":"Oomph","value":2,"outcome":"Red gets Good Stuff."},{"stat":"Scramble","value":2,"outcome":"Gray gets Good Stuff."},{"stat":"Oomph","value":4,"outcome":"Red gets 2 instead."},{"stat":"Scramble","value":4,"outcome":"Gray gets 2 instead."}],"count":2},
-    {"name":"Tool Cage","set":"proposed","kind":"stuff_room","thresholds":[{"stat":"Scramble","value":3,"outcome":"Both of you get Good Stuff."},{"stat":"Oomph","value":5,"outcome":"Red gets 2 instead."}],"count":2},
-    {"name":"Spill Of Cargo","set":"proposed","kind":"stuff_room","thresholds":[{"stat":"Scramble","value":3,"outcome":"Both of you get Good Stuff."},{"stat":"Scramble","value":5,"outcome":"Gray gets 2 instead."}],"count":2}
+    {"name":"Gross Thing That Looks Like A Cherry","set":"proposed","kind":"stairwell","band":1,"challenges":[{"thresholds":[{"stat":"Oomph","value":5,"outcome":"Ascend"}]}],"flee":"Both of you Exhaust 1."},
+    {"name":"Coney, The Thing In The Stairwell","set":"proposed","kind":"stairwell","band":1,"challenges":[{"thresholds":[{"stat":"Oomph","value":9,"outcome":"Ascend"}]}],"flee":"Both of you Exhaust 1."},
+    {"name":"Villy, Coney's Work Husband","set":"proposed","kind":"stairwell","band":1,"challenges":[{"thresholds":[{"stat":"Oomph","value":9,"outcome":"Ascend"}]},{"thresholds":[{"stat":"Scramble","value":9,"outcome":"Flee this room for free."}]}],"flee":"Both of you Exhaust 2."},
+    {"name":"Collapsed Stairwell","set":"proposed","kind":"room","band":1,"challenges":[{"thresholds":[{"stat":"Scramble","value":2,"outcome":"Clear, but both of you Exhaust 1."},{"stat":"Scramble","value":5,"outcome":"Clear, and one of you reveals a reward."}]}],"flee":"One of you Exhausts 3.","count":3},
+    {"name":"Ruptured Coolant Line","set":"proposed","kind":"room","band":1,"challenges":[{"thresholds":[{"stat":"Scramble","value":4,"outcome":"Clear, but both of you get Bad Stuff."},{"stat":"Scramble","value":7,"outcome":"Clear, and one of you reveals a reward."}]}],"flee":"Both of you Exhaust 1, and one of you gets Bad Stuff.","count":3},
+    {"name":"Sorting Room","set":"proposed","kind":"room","band":1,"challenges":[{"thresholds":[{"stat":"Oomph","value":2,"outcome":"Red gets Good Stuff."}]},{"thresholds":[{"stat":"Scramble","value":2,"outcome":"Gray gets Good Stuff."}]}],"count":3},
+    {"name":"Ration Locker","set":"proposed","kind":"room","band":1,"challenges":[{"thresholds":[{"stat":"Oomph","value":2,"outcome":"Red gets Good Stuff."},{"stat":"Oomph","value":4,"outcome":"Red gets 2 Good Stuff."}]},{"thresholds":[{"stat":"Scramble","value":2,"outcome":"Gray gets Good Stuff."},{"stat":"Scramble","value":4,"outcome":"Gray gets 2 Good Stuff."}]}],"count":2},
+    {"name":"Tool Cage","set":"proposed","kind":"room","band":1,"challenges":[{"thresholds":[{"stat":"Scramble","value":3,"outcome":"Both of you get Good Stuff."},{"stat":"Oomph","value":5,"outcome":"Red gets 2 Good Stuff, and Gray gets Good Stuff."}]}],"count":2},
+    {"name":"Spill Of Cargo","set":"proposed","kind":"room","band":1,"challenges":[{"thresholds":[{"stat":"Scramble","value":3,"outcome":"Both of you get Good Stuff."},{"stat":"Scramble","value":5,"outcome":"Gray gets 2 Good Stuff, and Red gets Good Stuff."}]}],"count":2}
   ]
 };
 

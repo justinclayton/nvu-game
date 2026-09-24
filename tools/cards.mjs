@@ -32,9 +32,10 @@ const SETS = new Set(["official", "proposed"]);
 
 /* ------------------------------------------------------------------ parser
    Handles exactly the subset design/cards.yaml uses: a top-level map, one list
-   of maps under `cards:`, scalars, `>-` folded blocks, and flow or block maps
-   in a nested list.  Anything outside that subset is an error, not a silent
-   skip. */
+   of maps under `cards:`, scalars, `>-` folded blocks, and lists of block maps
+   nested to whatever depth a card needs (a room's `challenges:`, each holding
+   its own `thresholds:`).  Anything outside that subset is an error, not a
+   silent skip. */
 
 function parseScalar(raw) {
   const s = raw.trim();
@@ -94,99 +95,138 @@ function stripComment(line) {
   return line;
 }
 
+/* The line-level helpers below all work off the raw (not comment-stripped)
+   line, since a folded block's own indent check needs the untouched line and
+   nothing else here cares about the distinction. */
+
+const isBlank = (rawLine) => stripComment(rawLine).trim() === "";
+const indentOf = (rawLine) => rawLine.length - rawLine.trimStart().length;
+const KEY_LINE = /^([A-Za-z_]+):\s*(.*)$/;
+
+/** A folded block scalar (`>-`, `>`, `|`, `|-`): every line indented past
+ * `ownerIndent`, blank lines included, joined into one whitespace-normalised
+ * string. Returns the text and the index of the line that ended it. */
+function parseFold(rawLines, i, ownerIndent) {
+  const parts = [];
+  while (i < rawLines.length) {
+    const rawLine = rawLines[i];
+    if (rawLine.trim() === "") { parts.push(""); i++; continue; }
+    if (indentOf(rawLine) > ownerIndent) { parts.push(rawLine.trim()); i++; continue; }
+    break;
+  }
+  return [parts.join(" ").replace(/\s+/g, " ").trim(), i];
+}
+
+/** A value that reads as `key:` with nothing after it: the nested list it
+ * introduces, indented on the lines that follow. `challenges:` and a
+ * challenge's own `thresholds:` both take this shape. */
+function parseNestedList(rawLines, i, ownerIndent, key) {
+  let j = i;
+  while (j < rawLines.length && isBlank(rawLines[j])) j++;
+  if (j >= rawLines.length || indentOf(rawLines[j]) <= ownerIndent || !stripComment(rawLines[j]).trim().startsWith("- ")) {
+    throw new Error(`line ${i + 1}: expected a nested list after "${key}:"`);
+  }
+  return parseListEntries(rawLines, j, indentOf(rawLines[j]));
+}
+
+/** One value on the right of `key:`, whatever shape it takes. */
+function parseValue(rawLines, i, entryIndent, key, rawValue) {
+  if (rawValue === ">-" || rawValue === ">" || rawValue === "|" || rawValue === "|-") {
+    return parseFold(rawLines, i, entryIndent);
+  }
+  if (rawValue === "") return parseNestedList(rawLines, i, entryIndent, key);
+  return [parseScalar(rawValue), i];
+}
+
+/** Every `key: value` line at exactly `entryIndent`, filled into `obj`, until
+ * the indent drops (the map's own end). */
+function parseMapEntries(rawLines, i, entryIndent, obj) {
+  while (i < rawLines.length) {
+    if (isBlank(rawLines[i])) { i++; continue; }
+    if (indentOf(rawLines[i]) !== entryIndent) break;
+    const t = stripComment(rawLines[i]).trim();
+    const m = t.match(KEY_LINE);
+    if (!m) throw new Error(`line ${i + 1}: unparsed line: ${t}`);
+    const [value, next] = parseValue(rawLines, i + 1, entryIndent, m[1], m[2]);
+    obj[m[1]] = value;
+    i = next;
+  }
+  return i;
+}
+
+/** A sequence of `- ...` items at exactly `itemIndent`: each is a block map
+ * (its first key inline after the dash, more keys indented to match) or,
+ * failing that, a bare scalar. */
+function parseListEntries(rawLines, i, itemIndent) {
+  const arr = [];
+  while (i < rawLines.length) {
+    if (isBlank(rawLines[i])) { i++; continue; }
+    if (indentOf(rawLines[i]) !== itemIndent) break;
+    const t = stripComment(rawLines[i]).trim();
+    if (!t.startsWith("- ")) break;
+    const rest = t.slice(2);
+    const m = rest.match(KEY_LINE);
+    if (!m) { arr.push(parseScalar(rest)); i++; continue; }
+    const entryIndent = itemIndent + 2;
+    const item = {};
+    const [value, next] = parseValue(rawLines, i + 1, entryIndent, m[1], m[2]);
+    item[m[1]] = value;
+    i = parseMapEntries(rawLines, next, entryIndent, item);
+    arr.push(item);
+  }
+  return [arr, i];
+}
+
+/** One card: a `- key: value` line at indent 2, plus whatever `key: value`
+ * lines follow it at indent 4 — including nested lists such as `challenges`. */
+function parseCardBlock(rawLines, i) {
+  const dashIndent = indentOf(rawLines[i]);
+  const t = stripComment(rawLines[i]).trim();
+  const m = t.slice(2).match(KEY_LINE);
+  if (!m) throw new Error(`line ${i + 1}: a card must start with a key: ${t}`);
+  const entryIndent = dashIndent + 2;
+  const card = {};
+  const [value, next] = parseValue(rawLines, i + 1, entryIndent, m[1], m[2]);
+  card[m[1]] = value;
+  return [card, parseMapEntries(rawLines, next, entryIndent, card)];
+}
+
 export function parseCardsYaml(text) {
-  const lines = text.split("\n");
+  const rawLines = text.split("\n");
   const doc = { meta: {}, cards: [] };
-  let card = null, section = null;
-  let nested = null; // {item, indent}: a block map open inside a nested list
-  let fold = null; // {target, key, indent, parts}
+  let section = null;
+  let i = 0;
 
-  const flushFold = () => {
-    if (!fold) return;
-    fold.target[fold.key] = fold.parts.join(" ").replace(/\s+/g, " ").trim();
-    fold = null;
-  };
+  while (i < rawLines.length) {
+    if (isBlank(rawLines[i]) || stripComment(rawLines[i]).trim() === "---") { i++; continue; }
+    const indent = indentOf(rawLines[i]);
+    const t = stripComment(rawLines[i]).trim();
 
-  for (let n = 0; n < lines.length; n++) {
-    const rawLine = lines[n];
-    const indent = rawLine.length - rawLine.trimStart().length;
-
-    if (fold) {
-      if (rawLine.trim() === "") { fold.parts.push(""); continue; }
-      if (indent > fold.indent) { fold.parts.push(rawLine.trim()); continue; }
-      flushFold();
-    }
-
-    const line = stripComment(rawLine);
-    const t = line.trim();
-    if (t === "" || t === "---") continue;
-
-    // top-level keys
     if (indent === 0) {
-      const m = t.match(/^([A-Za-z_]+):\s*(.*)$/);
-      if (!m) throw new Error(`line ${n + 1}: unexpected top-level content: ${t}`);
+      const m = t.match(KEY_LINE);
+      if (!m) throw new Error(`line ${i + 1}: unexpected top-level content: ${t}`);
       section = m[1];
-      if (section === "cards") { card = null; continue; }
-      if (section === "meta") continue;
-      throw new Error(`line ${n + 1}: unknown top-level key: ${section}`);
+      i++;
+      if (section === "cards" || section === "meta") continue;
+      throw new Error(`line ${i}: unknown top-level key: ${section}`);
     }
 
     if (section === "meta") {
-      const m = t.match(/^([A-Za-z_]+):\s*(.*)$/);
-      if (!m) throw new Error(`line ${n + 1}: bad meta entry: ${t}`);
+      const m = t.match(KEY_LINE);
+      if (!m) throw new Error(`line ${i + 1}: bad meta entry: ${t}`);
       doc.meta[m[1]] = parseScalar(m[2]);
+      i++;
       continue;
     }
 
-    if (section !== "cards") throw new Error(`line ${n + 1}: content outside a known section`);
-
-    // a new card
-    if (t.startsWith("- ")) {
-      const rest = t.slice(2);
-      if (indent === 2) {
-        nested = null;
-        card = {};
-        doc.cards.push(card);
-        const m = rest.match(/^([A-Za-z_]+):\s*(.*)$/);
-        if (!m) throw new Error(`line ${n + 1}: a card must start with a key: ${t}`);
-        card[m[1]] = parseScalar(m[2]);
-        continue;
-      }
-      // an item of a nested list (thresholds)
-      const key = card && card.__list;
-      if (!key) throw new Error(`line ${n + 1}: nested list item with no list key`);
-      const bm = rest.match(/^([A-Za-z_]+):\s*(.*)$/);
-      if (bm) {
-        // `- stat: Oomph` opens a block map; its later keys sit indented past the dash
-        const item = { [bm[1]]: parseScalar(bm[2]) };
-        card[key].push(item);
-        nested = { item, indent };
-      } else {
-        card[key].push(parseScalar(rest));
-        nested = null;
-      }
-      continue;
+    if (section !== "cards") throw new Error(`line ${i + 1}: content outside a known section`);
+    if (indent !== 2 || !t.startsWith("- ")) {
+      throw new Error(`line ${i + 1}: expected a new card here: ${t}`);
     }
-
-    const m = t.match(/^([A-Za-z_]+):\s*(.*)$/);
-    if (!m) throw new Error(`line ${n + 1}: unparsed line: ${t}`);
-    const [, key, value] = m;
-    if (!card) throw new Error(`line ${n + 1}: key outside a card: ${t}`);
-
-    if (nested) {
-      if (indent > nested.indent) { nested.item[key] = parseScalar(value); continue; }
-      nested = null;
-    }
-
-    if (value === ">-" || value === ">" || value === "|" || value === "|-") {
-      fold = { target: card, key, indent, parts: [] };
-      continue;
-    }
-    if (value === "") { card.__list = key; card[key] = []; continue; }
-    card[key] = parseScalar(value);
+    const [card, next] = parseCardBlock(rawLines, i);
+    doc.cards.push(card);
+    i = next;
   }
-  flushFold();
-  for (const c of doc.cards) delete c.__list;
   return doc;
 }
 
@@ -195,7 +235,7 @@ export function parseCardsYaml(text) {
 const FIELD_ORDER = [
   "name", "set", "kind", "owner", "starter", "rarity",
   "rarity_status", "cost", "oomph", "scramble", "conditional_stat",
-  "thresholds", "flee", "text", "note", "flagged",
+  "band", "flavor", "challenges", "flee", "text", "note", "flagged",
 ];
 
 function ordered(card) {
@@ -247,12 +287,12 @@ if (typeof module !== "undefined") module.exports = NVU_CARDS;
    turned into structure here.  Anything this does not recognise is an error,
    not a silently dropped rule.
 
-   Rulebook, Card anatomy: Room Cards: every room works the same way, whatever its printed
-   type line (`Enemy`, `Hazard`, or `Stuff`) says — that line is flavor, read only for display
-   and for floor-deck composition (setup.ts), never for how a threshold or a Flee line resolves. */
+   Rulebook, Card anatomy: Room Cards: a threshold or a Flee line resolves the same way whether
+   it is printed on a Room or a Stairwell. Kind only decides which pool a card is drawn from and,
+   for a Stairwell, that it is the one card in the floor that can print `Ascend` (setup.ts). */
 
 const CARD_KINDS = new Set(["player", "good_stuff", "bad_stuff"]);
-const ROOM_KIND = { enemy_room: "enemy", hazard_room: "hazard", stuff_room: "stuff" };
+const ROOM_KINDS = new Set(["room", "stairwell"]);
 
 /** The text shown when a room with no printed Flee line of its own is fled
  * without meeting a threshold. It has no effect and, like any other Flee,
@@ -286,10 +326,6 @@ const CLAUSES = [
   [
     /^(both of you|one of you|red|gray) (?:gets?|takes?) (?:(\d+) )?good stuff$/i,
     (m) => ({ effect: { type: "TakeGoodStuff", who: who(m[1]), count: Number(m[2] ?? 1) } }),
-  ],
-  [
-    /^(both of you|one of you|red|gray) (?:gets?|takes?) (\d+) instead$/i,
-    (m) => ({ effect: { type: "TakeGoodStuff", who: who(m[1]), count: Number(m[2]) } }),
   ],
   [
     /^(both of you|one of you|red|gray) reveals? (?:a |the )?(?:card )?reward$/i,
@@ -362,17 +398,26 @@ function cardFace(c) {
   };
 }
 
+function challenge(raw, where) {
+  const thresholds = (raw?.thresholds ?? []).map((t) => threshold(t, where));
+  if (thresholds.length === 0) throw new Error(`${where}: a challenge needs at least one threshold`);
+  return { thresholds };
+}
+
 function roomFace(c) {
-  const kind = ROOM_KIND[c.kind];
-  const thresholds = (c.thresholds ?? []).map((t) => threshold(t, c.name));
-  if (thresholds.length === 0) throw new Error(`${c.name}: a room prints at least one threshold`);
+  const challenges = (c.challenges ?? []).map((ch) => challenge(ch, c.name));
+  if (challenges.length === 0) throw new Error(`${c.name}: a room prints at least one challenge`);
+  if (c.band !== 1 && c.band !== 2 && c.band !== 3) {
+    throw new Error(`${c.name}: a room needs a band of 1, 2 or 3`);
+  }
   return {
     name: c.name,
     set: c.set,
-    kind,
-    floor: typeof c.floor === "number" ? c.floor : null,
+    kind: c.kind,
+    band: c.band,
+    flavor: c.flavor ?? "",
     count: c.count ?? 1,
-    thresholds,
+    challenges,
     flee: fleeLine(c),
   };
 }
@@ -383,7 +428,7 @@ export function structure(doc) {
   const rooms = [];
   for (const c of doc.cards) {
     if (CARD_KINDS.has(c.kind)) cards.push(cardFace(c));
-    else if (c.kind in ROOM_KIND) rooms.push(roomFace(c));
+    else if (ROOM_KINDS.has(c.kind)) rooms.push(roomFace(c));
     else throw new Error(`${c.name}: unknown kind ${JSON.stringify(c.kind)}`);
   }
   return { meta: { updated: String(doc.meta.updated ?? "") }, cards, rooms };

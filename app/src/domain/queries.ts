@@ -13,6 +13,7 @@ import type {
   DomainEvent,
   GameState,
   PlayedCard,
+  Room,
   Stat,
   Threshold,
 } from "./types";
@@ -155,11 +156,16 @@ export function thresholdIsMet(state: GameState, threshold: Threshold): boolean 
   return meetsMain && meetsExtra;
 }
 
-/** Every line of the active room the pool currently meets. */
+/** Every Threshold printed on a room, across every Challenge, in printed order. */
+export function allThresholds(room: Room): readonly Threshold[] {
+  return room.challenges.flatMap((c) => c.thresholds);
+}
+
+/** Every line of the active room the pool currently meets, for display — not what resolves. */
 export function metThresholds(state: GameState): readonly Threshold[] {
   const room = state.activeRoom;
   if (!room) return [];
-  return room.thresholds.filter((t) => thresholdIsMet(state, t));
+  return allThresholds(room).filter((t) => thresholdIsMet(state, t));
 }
 
 /* ---------------------------------------------------------------- the costs */

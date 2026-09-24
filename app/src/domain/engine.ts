@@ -6,7 +6,7 @@
  * in the state, so a run replays exactly from its seed and its command log.
  *
  * Section numbers point at design/rulebook.md, rules version
- * 0.2.0, which is the authority.
+ * 0.2.1, which is the authority.
  */
 
 import { behaviourOf, type BehaviourContext, type ChoiceAnswer } from "./cards/behaviours";
@@ -24,6 +24,7 @@ import type {
   AscendChoice,
   Card,
   CardId,
+  Challenge,
   Character,
   Command,
   DomainEvent,
@@ -36,6 +37,7 @@ import type {
   RoomEffect,
   Threshold,
   TurnRecord,
+  UnfinishedPlay,
 } from "./types";
 import { CorruptStateError } from "./types";
 import {
@@ -341,25 +343,26 @@ function settle(state: GameState, run: Run): GameState {
   run.settled = to;
   // Every arrival in this batch is already in `state`, so a card drawn last
   // must not hear the draws before it.
-  for (let i = from; i < to; i++) {
-    const event = run.events[i];
-    if (event) trackEntry(run, event, i);
-  }
+  trackEntries(run, from, to);
   let s = state;
   for (let i = from; i < to; i++) {
     if (s.phase === "GameOver") return s;
-    s = hear(s, run, i);
+    const event = run.events[i];
+    if (event) s = hear(s, run, event, (id) => heldSince(run, id, i));
   }
   return s;
 }
 
-function hear(state: GameState, run: Run, index: number): GameState {
-  const event = run.events[index];
-  if (!event) return state;
+function hear(
+  state: GameState,
+  run: Run,
+  event: DomainEvent,
+  hears: (id: CardId) => boolean,
+): GameState {
   let s = state;
   for (const ctx of listeners(s)) {
     if (s.phase === "GameOver") return s;
-    if (!heldSince(run, ctx.card.id, index) || !stillThere(s, ctx)) continue;
+    if (!hears(ctx.card.id) || !stillThere(s, ctx)) continue;
     const onEvent = behaviourOf(ctx.card.name)?.onEvent;
     if (!onEvent) continue;
     const step = onEvent(event, s, ctx);
@@ -380,9 +383,16 @@ function stillThere(state: GameState, ctx: BehaviourContext): boolean {
 }
 
 /** A card arriving in hand or the play zone — the moment a `Holding:` effect starts hearing events. */
-function trackEntry(run: Run, event: DomainEvent, index: number): void {
-  if (event.type === "CARD_DRAWN" || event.type === "CARD_TO_HAND" || event.type === "CARD_PLAYED") {
-    run.enteredAt.set(event.card.id, index);
+function trackEntries(run: Run, from: number, to: number): void {
+  for (let i = from; i < to; i++) {
+    const event = run.events[i];
+    if (
+      event?.type === "CARD_DRAWN" ||
+      event?.type === "CARD_TO_HAND" ||
+      event?.type === "CARD_PLAYED"
+    ) {
+      run.enteredAt.set(event.card.id, i);
+    }
   }
 }
 
@@ -500,60 +510,72 @@ function playCard(
   }
 
   // Each Turn, Play: you pay in *other* cards from your own hand. Red never pays for Gray.
+  const from = run.events.length;
   s = discardFromHand(s, c, payment, run.events);
   if (payment.length > 0) {
     run.events.push({ type: "COST_PAID", character: c, cards: payment });
     s = { ...s, thisTurn: addPaid(s.thisTurn, cardId, payment.length) };
   }
-  s = settle(s, run);
-  if (s.phase === "GameOver") return s;
 
   const after = playerOf(s, c);
   s = withPlayer(s, c, { ...after, hand: after.hand.filter((x) => x.id !== cardId) });
   s = { ...s, playZone: [...s.playZone, { owner: c, card }] };
   run.events.push({ type: "CARD_PLAYED", character: c, card });
-  s = settle(s, run);
-  if (s.phase === "GameOver") return s;
+  const to = run.events.length;
+  trackEntries(run, from, to);
+  run.settled = to;
 
-  // Each Turn: nothing resolves while you play — the *room* is checked once, at
-  // the end of the phase. A card's own printed effect still happens as it is played.
   const behaviour = behaviourOf(card.name);
   if (behaviour?.exhaustX !== undefined) {
     s = settle(printedExhaust(s, c, behaviour.exhaustX, card.name, run), run);
   }
-  if (s.phase === "GameOver") return s;
   const onPlay = behaviour?.onPlay;
-  if (onPlay) {
+  if (onPlay && s.phase !== "GameOver") {
     const step = onPlay(s, { card, character: c, zone: "playZone" });
     run.events.push(...step.events);
     s = settle(step.state, run);
+  }
+  return finishPlay(s, run, {
+    events: run.events.slice(from, to),
+    listeners: presentSince(s, run, from),
+  });
+}
+
+/** Every card that can hear events and has been where it is since before the event at `index`. */
+function presentSince(state: GameState, run: Run, index: number): readonly CardId[] {
+  return listeners(state)
+    .filter((ctx) => heldSince(run, ctx.card.id, index))
+    .map((ctx) => ctx.card.id);
+}
+
+/**
+ * Paying for a card and playing it are heard once its own effect is done. An
+ * effect waiting on a question keeps them in the state until it is answered.
+ */
+function finishPlay(state: GameState, run: Run, play: UnfinishedPlay): GameState {
+  if (state.phase === "GameOver") return state;
+  if (state.pending) return { ...state, unfinishedPlay: play };
+  const since = run.events.length;
+  const hears = (id: CardId) => play.listeners.includes(id) && heldSince(run, id, since);
+  let s = state;
+  for (const event of play.events) {
+    if (s.phase === "GameOver") return s;
+    s = hear(s, run, event, hears);
   }
   return s;
 }
 
 /* ------------------------------------------------------------ Outcome */
 
-const goodStuffFor = (t: Threshold, c: Character): number =>
-  t.effects
-    .filter((e) => e.type === "TakeGoodStuff" && (e.who === c || e.who === "both"))
-    .reduce((most, e) => Math.max(most, e.type === "TakeGoodStuff" ? e.count : 0), 0);
-
 /**
- * Every challenge met resolves (see below), but a richer tier's "instead"
- * replaces a poorer one's Good Stuff rather than adding to it: each character
- * takes the largest amount any met line awards them, not the sum. Any other
- * kind of effect from a met line is simply collected.
+ * A challenge is met when any of its thresholds is met (rulebook, Outcome).
+ * When more than one is, only the lowest-printed met one resolves — the last
+ * threshold in printed order that the pool still meets.
  */
-function resolveMetEffects(met: readonly Threshold[]): readonly RoomEffect[] {
-  const out: RoomEffect[] = [];
-  for (const c of CHARACTERS) {
-    const count = met.reduce((most, t) => Math.max(most, goodStuffFor(t, c)), 0);
-    if (count > 0) out.push({ type: "TakeGoodStuff", who: c, count });
-  }
-  for (const t of met) {
-    for (const e of t.effects) if (e.type !== "TakeGoodStuff") out.push(e);
-  }
-  return out;
+function resolvedThresholdOf(state: GameState, challenge: Challenge): Threshold | null {
+  let resolved: Threshold | null = null;
+  for (const t of challenge.thresholds) if (thresholdIsMet(state, t)) resolved = t;
+  return resolved;
 }
 
 interface RoomOutcome {
@@ -565,26 +587,28 @@ interface RoomOutcome {
 
 /**
  * Each Turn, Outcome: the room is checked once, when both characters have stopped playing,
- * the same way whatever the room's printed type. If any challenge's threshold
- * is met the room is Cleared, and the card text of *every* challenge met
- * resolves — a Hazard's higher tier also reveals a reward, on top of the
- * lower tier rather than instead of it.
+ * the same way whatever the room's printed type. Every met challenge resolves, but only
+ * through its one chosen threshold — a Hazard's higher tier replaces its lower tier's
+ * outcome, on that challenge, rather than adding to it. A different challenge on the same
+ * card is untouched by that and resolves on its own.
  */
 function roomOutcome(state: GameState, room: Room): RoomOutcome {
-  const met = room.thresholds.filter((t) => thresholdIsMet(state, t));
+  const met = room.challenges
+    .map((c) => resolvedThresholdOf(state, c))
+    .filter((t): t is Threshold => t !== null);
 
   if (met.length === 0) {
-    // Each Turn, Outcome: if no threshold is met, the characters Flee. Resolve the Flee line.
+    // Each Turn, Outcome: if no challenge is met, the characters Flee. Resolve the Flee line.
     // A room with no Flee line of its own Flees empty-handed, and does not Clear.
     return { met, cleared: room.flee.clears, ascends: false, effects: room.flee.effects };
   }
   // A line that says "Flee this room for free" cannot un-Clear a room another
-  // met line Cleared: Outcome's first sentence is that any met threshold Clears it.
+  // met challenge Cleared: Outcome's first sentence is that any met challenge Clears it.
   return {
     met,
     cleared: met.some((t) => t.clears),
     ascends: met.some((t) => t.ascends),
-    effects: resolveMetEffects(met),
+    effects: met.flatMap((t) => t.effects),
   };
 }
 
@@ -789,8 +813,7 @@ function finishCleanup(state: GameState, run: Run): GameState {
   run.events.push({ type: "TURN_ENDED", turn: s.turn });
 
   // Each Turn, Outcome: an outcome that says Ascend runs Cleanup as normal first, then ends
-  // the floor, whichever room printed it — the room's kind ("Enemy" and all)
-  // is a printed label, not what triggers this.
+  // the floor — a met threshold triggers this, whichever room printed it.
   if (ascends) {
     run.events.push({ type: "FLOOR_CLEARED", floor: s.floor });
     if (s.floor >= TOP_FLOOR) {
@@ -849,14 +872,19 @@ function runChoice(state: GameState, answer: ChoiceAnswer, run: Run): GameState 
   const pending = state.pending;
   if (!pending) throw new CorruptStateError("Answered a choice that was not being asked.");
   const ctx = contextFor(state, pending);
-  const cleared: GameState = { ...state, pending: null };
+  const play = state.unfinishedPlay;
+  const cleared: GameState = { ...state, pending: null, unfinishedPlay: null };
   if (!ctx) return drain(cleared, run);
 
   const onChoice = behaviourOf(ctx.card.name)?.onChoice;
   if (!onChoice) throw new CorruptStateError(`${ctx.card.name} asked a question it cannot answer.`);
   const step = onChoice(answer, cleared, ctx);
   run.events.push(...step.events);
-  const s = settle(step.state, run);
+  let s = settle(step.state, run);
+  if (play) {
+    const stayed = new Set(presentSince(s, run, 0));
+    s = finishPlay(s, run, { ...play, listeners: play.listeners.filter((id) => stayed.has(id)) });
+  }
   return s.pending || s.phase === "GameOver" ? s : drain(s, run);
 }
 
@@ -936,7 +964,7 @@ function ascend(state: GameState, red: AscendChoice, gray: AscendChoice, run: Ru
   s = ascendOne(s, "Red", red, run);
   s = ascendOne(s, "Gray", gray, run);
 
-  // Setup: build the next floor's deck, with one fewer Stuff room than last time.
+  // Setup: build the next floor's deck, one card smaller than this one's.
   s = returnRoomsToSupply(s);
   s = buildFloor({ ...s, floor: s.floor + 1, offer: null }, run.events);
   return { ...s, phase: "Turn Start", playZone: [], thisTurn: emptyTurnRecord() };

@@ -7,27 +7,39 @@
  */
 
 import { cardId, roomId } from "./ids";
-import type { CardContent, CardFace, Character, RoomFace } from "./printed";
+import type { Band, CardContent, CardFace, Character, RoomFace } from "./printed";
 import { shuffle } from "./rng";
 import type { Card, DomainEvent, GameState, PlayerState, Room, TurnRecord } from "./types";
 
 /** The rulebook this engine implements (design/rulebook.md). See #83. */
-export const RULES_VERSION = "0.2.0";
+export const RULES_VERSION = "0.2.1";
 
-/** The tenth floor is the roof: clearing its Enemy room wins the run (rulebook, Winning and losing). */
+/** The tenth floor is the roof: clearing it wins the run (rulebook, Winning and losing). */
 export const TOP_FLOOR = 10;
 
 /** Draw up to this many, each turn (Each Turn, Turn Start: Draw up to five). A card may tighten it. */
 export const HAND_CAP = 5;
 
-/** Every floor holds exactly one Enemy room (rulebook Setup, "Floor deck"). */
-export const ENEMY_ROOMS_PER_FLOOR = 1;
+/** Every floor holds exactly one Stairwell (rulebook Setup, "Floor deck"). */
+export const STAIRWELLS_PER_FLOOR = 1;
 
 /**
  * The floor deck is 10 cards on floor 1 and one fewer each floor above it
  * (rulebook Setup, "Floor deck"): 11 - floor.
  */
 export const roomsOnFloor = (floor: number): number => TOP_FLOOR + 1 - floor;
+
+/**
+ * Rooms and Stairwells pool by band: floors 1–3, 4–6, 7–9 (rulebook Setup,
+ * "Floor deck"). Floor 10 draws from no band — it prints one fixed Stairwell
+ * instead, not yet in design/cards.yaml (#125).
+ */
+export function bandOf(floor: number): Band | null {
+  if (floor <= 3) return 1;
+  if (floor <= 6) return 2;
+  if (floor <= 9) return 3;
+  return null;
+}
 
 /* ------------------------------------------------------ minting the cards */
 
@@ -53,8 +65,9 @@ export function mintRoom(face: RoomFace, copy: number): Room {
     id: roomId(`${face.name}#${copy}`),
     name: face.name,
     kind: face.kind,
-    floor: face.floor,
-    thresholds: face.thresholds,
+    band: face.band,
+    flavor: face.flavor,
+    challenges: face.challenges,
     flee: face.flee,
   };
 }
@@ -82,33 +95,34 @@ function takeRooms(
 }
 
 /**
- * The Enemy room that guards the floor, plus Hazard and Stuff rooms drawn at
- * random together until the floor is full (rulebook Setup, "Floor deck").
- * The floor gets no harder as you climb — it gets emptier.
+ * One Stairwell from the floor's band, plus Rooms from the same band drawn at
+ * random until the floor is full (rulebook Setup, "Floor deck"). The floor
+ * gets no harder as you climb — it gets emptier.
  *
- * Enemy rooms name the floor they guard. Nothing is printed above floor 3, so a
- * higher floor falls back to any Enemy room.
+ * Bands 2 and 3, and floor 10's fixed Stairwell, are not yet in
+ * design/cards.yaml (#122, #123, #125), so a floor outside band 1 builds an
+ * empty deck.
  */
 export function buildFloor(state: GameState, events: DomainEvent[]): GameState {
   let seed = state.seed;
   let supply = state.roomSupply;
   const rooms: Room[] = [];
+  const band = bandOf(state.floor);
 
-  const guardsThisFloor = supply.some((r) => r.kind === "enemy" && r.floor === state.floor);
-  const [enemies, afterEnemy, s1] = takeRooms(
+  const [stairwells, afterStairwell, s1] = takeRooms(
     supply,
-    (r) => r.kind === "enemy" && (!guardsThisFloor || r.floor === state.floor),
-    ENEMY_ROOMS_PER_FLOOR,
+    (r) => r.kind === "stairwell" && r.band === band,
+    STAIRWELLS_PER_FLOOR,
     seed,
   );
-  rooms.push(...enemies);
-  supply = afterEnemy;
+  rooms.push(...stairwells);
+  supply = afterStairwell;
   seed = s1;
 
   const [rest, afterRest, s2] = takeRooms(
     supply,
-    (r) => r.kind === "hazard" || r.kind === "stuff",
-    roomsOnFloor(state.floor) - ENEMY_ROOMS_PER_FLOOR,
+    (r) => r.kind === "room" && r.band === band,
+    roomsOnFloor(state.floor) - STAIRWELLS_PER_FLOOR,
     seed,
   );
   rooms.push(...rest);
@@ -123,22 +137,20 @@ export function buildFloor(state: GameState, events: DomainEvent[]): GameState {
     floorDeck,
     roomSupply: supply,
     activeRoom: null,
-    cleared: [],
   };
 }
 
-/** Every room the floor used goes back in the box, ready for the next floor. */
+/**
+ * Unseen and Fled rooms go back to their band's pool, ready for the next
+ * floor. Cleared rooms, the Stairwell included, stay on the Rooms pile for
+ * the rest of the run (rulebook, Ascending).
+ */
 export function returnRoomsToSupply(state: GameState): GameState {
-  const used = [
-    ...state.floorDeck,
-    ...state.cleared,
-    ...(state.activeRoom ? [state.activeRoom] : []),
-  ];
+  const used = [...state.floorDeck, ...(state.activeRoom ? [state.activeRoom] : [])];
   return {
     ...state,
     roomSupply: [...state.roomSupply, ...used],
     floorDeck: [],
-    cleared: [],
     activeRoom: null,
   };
 }
@@ -209,6 +221,7 @@ export function createInitialState(
     },
     offer: null,
     pending: null,
+    unfinishedPlay: null,
     resolution: null,
     thisTurn: emptyTurnRecord(),
     outcome: null,

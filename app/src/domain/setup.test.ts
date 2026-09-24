@@ -18,18 +18,18 @@ describe("Setting up a floor", () => {
     expect(state.Gray.deck).toHaveLength(12);
   });
 
-  // Band 1's pool (Security Turnstile x3, Flooded Ventilation Shaft x2, The
-  // Sentry Drone x1) is 6 cards — short of the 10 floor 1 calls for. Pools are
-  // sized so this never happens; when it does, the run is void instead of
-  // building a short floor.
-  it("aborts at floor 1, since band 1's pool is short of 10", () => {
-    const [state, events] = createInitialState(1, content);
-    expect(state.phase).toBe("GameOver");
-    expect(state.outcome).toBe("Aborted");
-    expect(state.floorDeck).toEqual([]);
-    const aborted = events.find((e) => e.type === "RUN_ABORTED");
-    if (aborted?.type !== "RUN_ABORTED") throw new Error("expected a RUN_ABORTED event");
-    expect(aborted.reason).toBe("Floor 1 needs 10 cards; band 1 holds 6.");
+  // Band 1's pool covers every floor 1-3 calls for (10, 9, 8), with every
+  // room cleared (issue #176) — the worst case, since a cleared room never
+  // returns to the pool.
+  it("builds a full floor deck for every floor in band 1 (floors 1-3)", () => {
+    const [initial] = createInitialState(1, content);
+    const fullSupply = returnRoomsToSupply(initial);
+    for (const floor of [1, 2, 3]) {
+      const state = buildFloor({ ...fullSupply, floor }, []);
+      expect(state.floorDeck).toHaveLength(roomsOnFloor(floor));
+      expect(state.floorDeck.filter((r) => r.kind === "stairwell")).toHaveLength(1);
+      expect(state.floorDeck.every((r) => r.band === 1)).toBe(true);
+    }
   });
 
   // Rulebook Setup, "Floor deck": "The first floor consists of 10 cards. As
@@ -42,8 +42,8 @@ describe("Setting up a floor", () => {
     expect(roomsOnFloor(TOP_FLOOR)).toBe(1);
   });
 
-  // Band 1's pool (6 cards) is short of every floor 1-3 calls for (10, 9, 8),
-  // so building any of them aborts the run instead.
+  // With band 1 emptied out, every floor 1-3 calls for cards the pool no
+  // longer holds, so building any of them aborts the run instead.
   it("aborts every band-1 floor (1-3), band 1's pool being short of all of them", () => {
     const [initial] = createInitialState(1, FULL_CONTENT);
     const fullSupply = returnRoomsToSupply(initial);
@@ -57,7 +57,7 @@ describe("Setting up a floor", () => {
     }
   });
 
-  // Band 2's pool (8 cards) covers every floor 4-6 calls for (7, 6, 5).
+  // Band 2's pool (18 cards) covers every floor 4-6 calls for (7, 6, 5).
   it("builds a full floor deck for every floor in band 2 (floors 4-6)", () => {
     const [initial] = createInitialState(1, content);
     const fullSupply = returnRoomsToSupply(initial);
@@ -69,7 +69,7 @@ describe("Setting up a floor", () => {
     }
   });
 
-  // Band 3's pool (7 cards) covers every floor 7-9 calls for (4, 3, 2).
+  // Band 3's pool (9 cards) covers every floor 7-9 calls for (4, 3, 2).
   it("builds a full floor deck for every floor in band 3 (floors 7-9)", () => {
     const [initial] = createInitialState(1, content);
     const fullSupply = returnRoomsToSupply(initial);
@@ -91,8 +91,8 @@ describe("Setting up a floor", () => {
     expect(state.floorDeck[0]?.band).toBeNull();
   });
 
-  // Band 2's pool (8) has one more card than floor 4 needs (7), so which room
-  // sits out varies with the seed — band 1's pool has no slack left to vary.
+  // Band 2's pool (18) has more cards than floor 4 needs (7), so which rooms
+  // sit out varies with the seed.
   it("floor 4's room composition varies with the seed", () => {
     const [initial] = createInitialState(1, content);
     const fullSupply = returnRoomsToSupply(initial);

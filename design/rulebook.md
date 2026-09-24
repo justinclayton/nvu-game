@@ -1,6 +1,6 @@
 # *North vs Up*: Rulebook
 
-Rules version: 0.2.2
+Rules version: 0.2.3
 
 ---
 
@@ -144,7 +144,7 @@ A Character card shows:
 
 ### Stuff cards
 
-`Stuff` is `Good Stuff` or `Bad Stuff`. Unless a card says otherwise, Stuff you gain goes into your hand. If the Bad Stuff pool is empty when you would gain Bad Stuff, you gain nothing.
+`Stuff` is `Good Stuff` or `Bad Stuff`. Unless a card says otherwise, Stuff you gain goes into your hand. If its pool is empty when you would gain Stuff, you gain nothing.
 
 Play and pay with Stuff cards as with Character cards. Either player may gain and use any Stuff card.
 
@@ -179,12 +179,8 @@ When a resolved outcome says `Ascend`, you escape the current floor and move to 
 After Cleanup, each player does the following:
 
 1. **Shuffle your hand into your deck.**
-2. **Settle your Stuff:** Search your deck and discard pile for `Stuff` cards.
-   - For each `Good Stuff` card, shuffle it into the Good Stuff pool, or keep it by Scrapping **one** non-Stuff card from your deck or discard pile.
-   - For each `Bad Stuff` card, keep it, or shuffle it into the Bad Stuff pool and Scrap **one** non-Stuff card from your deck or discard pile.
-   Return each kept card to where you found it, then shuffle your deck.
-3. **Choose a reward:** Reveal the top **3** cards of your reward pool. You may shuffle **one** into your deck. Put the cards you did not take on the bottom of your reward pool.
-4. **Build the next floor:** Return every room still in the floor deck, Fled rooms included, to its band's pool. Rooms you cleared, the Stairwell included, stay on the Rooms pile. Then assemble the new floor as in Setup, *Floor deck*.
+2. **Choose a reward:** Reveal the top **3** cards of your reward pool. You may shuffle **one** into your deck. Put the cards you did not take on the bottom of your reward pool.
+3. **Build the next floor:** Return every room still in the floor deck, Fled rooms included, to its band's pool. Rooms you cleared, the Stairwell included, stay on the Rooms pile. Then assemble the new floor as in Setup, *Floor deck*.
 
 ---
 

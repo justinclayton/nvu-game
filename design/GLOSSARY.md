@@ -2,7 +2,7 @@
 
 The project's domain terms and nothing else: what each thing is, the rulebook section that governs
 it, and the ticket or ruling that settled it. The rules themselves live in
-[`rulebook.md`](rulebook.md) (rules version 0.2.2), which wins
+[`rulebook.md`](rulebook.md) (rules version 0.2.3), which wins
 wherever this file disagrees with it. Code uses these terms spelled this way.
 
 ---
@@ -91,10 +91,6 @@ The result when no Challenge is met this turn. The players resolve the Room's Fl
 
 The outcome, printed on some Thresholds, that clears the entire floor rather than just the Room. Triggering it runs Cleanup as normal first, then moves into the Ascending steps.
 
-**Settle your Stuff**
-
-Ascending's second step, once the hand has been shuffled into the deck. Every Stuff card in a player's deck and discard pile is found: a Good Stuff card shuffles into the Good Stuff pool unless kept by Scrapping one other owned, non-Stuff card from the deck or discard pile; a Bad Stuff card stays unless shed into the Bad Stuff pool the same way. A kept card is returned to wherever it was found.
-
 **Card reward**
 
 A card offered to a player from their reward pool. Comes from a Room's Threshold outcome (one card, take or skip) or from Ascending (top 3 cards revealed, take up to one into your deck).
@@ -141,7 +137,7 @@ To move a card to its owner's discard pile, from wherever it was: paying a Cost,
 
 **Discard pile**
 
-A player's face-up pile of spent or lost cards. Played cards move here at Cleanup. It recycles: an empty deck reshuffles it to form a new deck (Empty deck). A card in it can also be shuffled back into the deck directly (Ascending, Settle your Stuff) or Scrapped.
+A player's face-up pile of spent or lost cards. Played cards move here at Cleanup. It recycles: an empty deck reshuffles it to form a new deck (Empty deck). A card in it can also be Scrapped.
 
 **Exhaust**
 

@@ -130,6 +130,7 @@ cards:
   ### Red
 
   - name: Reckless Swing
+    count: 3
     set: proposed
     kind: player
     owner: Red
@@ -140,6 +141,7 @@ cards:
     flavor: Put everything into a wide arc, damn the recoil.
 
   - name: Fast Follow
+    count: 3
     set: proposed
     kind: player
     owner: Red
@@ -150,6 +152,7 @@ cards:
     flavor: Stepping right into the opening Gray created.
 
   - name: Reckless
+    count: 2
     set: proposed
     kind: player
     owner: Red
@@ -160,6 +163,7 @@ cards:
     flavor: Pure raw force that leaves you completely breathless.
 
   - name: Bull Rush
+    count: 2
     set: proposed
     kind: player
     owner: Red
@@ -170,6 +174,7 @@ cards:
     flavor: Charge ahead while keeping your footing on loose debris.
 
   - name: Cross Punch
+    count: 2
     set: proposed
     kind: player
     owner: Red
@@ -181,6 +186,7 @@ cards:
     flavor: A heavy two-part combination attack.
 
   - name: Second Wind
+    count: 2
     set: proposed
     kind: player
     owner: Red
@@ -191,6 +197,7 @@ cards:
     flavor: Catch your breath and shake off the fatigue.
 
   - name: Junk Launcher
+    count: 2
     set: proposed
     kind: player
     owner: Red
@@ -201,6 +208,7 @@ cards:
     flavor: Hurl whatever scrap isn't nailed down.
 
   - name: Heavy Pockets
+    count: 2
     set: proposed
     kind: player
     owner: Red
@@ -212,6 +220,7 @@ cards:
     flavor: Stash the heavy salvage where it won't weigh down your swing.
 
   - name: Tag Team
+    count: 2
     set: proposed
     kind: player
     owner: Red
@@ -225,6 +234,7 @@ cards:
   ### Gray
 
   - name: Catch Your Breath
+    count: 2
     set: proposed
     kind: player
     owner: Gray
@@ -235,6 +245,7 @@ cards:
     flavor: Pause for a second to read the room.
 
   - name: Here, Catch
+    count: 2
     set: proposed
     kind: player
     owner: Gray
@@ -245,6 +256,7 @@ cards:
     flavor: Toss a heavy tool over before it bogs you down.
 
   - name: Hit 'n Run
+    count: 2
     set: proposed
     kind: player
     owner: Gray
@@ -256,6 +268,7 @@ cards:
     flavor: Strike fast and disappear into the shadows.
 
   - name: I'll Take That
+    count: 2
     set: proposed
     kind: player
     owner: Gray
@@ -266,6 +279,7 @@ cards:
     flavor: Relieve Red of that cumbersome pack.
 
   - name: Quick Vault
+    count: 2
     set: proposed
     kind: player
     owner: Gray
@@ -276,6 +290,7 @@ cards:
     flavor: Spring off Red's shoulder to clear the gap.
 
   - name: In Step
+    count: 2
     set: proposed
     kind: player
     owner: Gray
@@ -286,6 +301,7 @@ cards:
     flavor: Sync your movements perfectly with Red's brute rhythm.
 
   - name: One Man's Junk
+    count: 2
     set: proposed
     kind: player
     owner: Gray
@@ -297,6 +313,7 @@ cards:
     flavor: Turn hazardous junk into a makeshift advantage.
 
   - name: Hack the Doors
+    count: 2
     set: proposed
     kind: player
     owner: Gray
@@ -307,6 +324,7 @@ cards:
     flavor: Bypass the security subroutines to peek ahead.
 
   - name: Covering Fire
+    count: 2
     set: proposed
     kind: player
     owner: Gray
@@ -317,6 +335,7 @@ cards:
     flavor: Keep their eyes on you so Red can maneuver freely.
 
   - name: Distract & Pivot
+    count: 2
     set: proposed
     kind: player
     owner: Gray
@@ -542,7 +561,7 @@ cards:
   ## Band 1 (floors 1–3)
 
   - name: Security Turnstile
-    count: 3
+    count: 14
     set: proposed
     kind: room
     band: 1
@@ -559,7 +578,7 @@ cards:
     flee: Both of you Exhaust 1.
 
   - name: Flooded Ventilation Shaft
-    count: 2
+    count: 10
     set: proposed
     kind: room
     band: 1
@@ -594,7 +613,7 @@ cards:
   ## Band 2 (floors 4–6)
 
   - name: Automated Defense Turret
-    count: 3
+    count: 7
     set: proposed
     kind: room
     band: 2
@@ -611,7 +630,7 @@ cards:
     flee: Both of you Exhaust 2, and both of you get Bad Stuff.
 
   - name: Pressurized Maintenance Hub
-    count: 2
+    count: 4
     set: proposed
     kind: room
     band: 2
@@ -628,7 +647,7 @@ cards:
     flee: Both of you Exhaust 2.
 
   - name: Overgrown Hydroponics Bay
-    count: 2
+    count: 4
     set: proposed
     kind: room
     band: 2

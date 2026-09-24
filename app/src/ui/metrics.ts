@@ -25,8 +25,8 @@ export const FULL: Metrics = { cardW: 88, cardH: 123, slotPad: 8, rowGap: 12 };
 export const COMPACT: Metrics = { cardW: 62, cardH: 87, slotPad: 6, rowGap: 8 };
 
 /** A screen with room to spare draws bigger cards instead of more empty felt
- * around the same ones (issue #47). A flat 1.25× of `FULL`, so every number
- * is still a clean whole one. */
+ * around the same ones. A flat 1.25× of `FULL`, so every number is still a
+ * clean whole one. */
 export const WIDE: Metrics = { cardW: 110, cardH: 154, slotPad: 10, rowGap: 15 };
 
 /** The viewport width below which the compact table is used. Matches table.css. */
@@ -44,6 +44,3 @@ export const STACK_STEP_MAX = 14;
 
 /** How much larger a card offered as a reward is drawn while it floats above the mat. */
 export const FLOAT_SCALE = 1.22;
-
-/** The zoomed copy shown while a card is under the pointer. */
-export const INSPECT_W = 230;

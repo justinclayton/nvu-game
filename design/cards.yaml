@@ -556,6 +556,7 @@ cards:
     flee: Gray Exhausts 2.
 
   - name: The Sentry Drone
+    count: 3
     set: proposed
     kind: stairwell
     band: 1
@@ -625,6 +626,7 @@ cards:
     flee: Both of you Exhaust 2, and Gray gets Bad Stuff.
 
   - name: Gears & Glitch
+    count: 3
     set: proposed
     kind: stairwell
     band: 2
@@ -694,6 +696,7 @@ cards:
     flee: Red Exhausts 5.
 
   - name: The Iron Sentinel
+    count: 3
     set: proposed
     kind: stairwell
     band: 3

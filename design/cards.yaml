@@ -484,7 +484,7 @@ cards:
     count: 2
     set: proposed
     kind: bad_stuff
-    cost: 2
+    cost: 3
     text: null
     flavor: Broken rubber gasket. Useless dead weight clogging your pack.
 
@@ -492,7 +492,7 @@ cards:
     count: 2
     set: proposed
     kind: bad_stuff
-    cost: 1
+    cost: 2
     text: "Holding: Cards you play cost +1 card to play."
     flavor: Limb fatigue slows down every movement.
 
@@ -500,7 +500,7 @@ cards:
     count: 2
     set: proposed
     kind: bad_stuff
-    cost: 2
+    cost: 3
     text: "Holding: Stuff cards you play have -1 Oomph and -1 Scramble."
     flavor: Corrosion degrades the quality of your scavenged gear.
 
@@ -508,7 +508,7 @@ cards:
     count: 2
     set: proposed
     kind: bad_stuff
-    cost: 2
+    cost: 3
     text: "Holding: At Turn Start, draw 1 fewer card."
     flavor: Murky goop blinds your vision and slows drawing.
 
@@ -516,7 +516,7 @@ cards:
     count: 2
     set: proposed
     kind: bad_stuff
-    cost: 2
+    cost: 3
     text: "Holding: At Cleanup, discard cards other than this one until you hold 3."
     flavor: Choking spores force you to drop excess gear.
 
@@ -524,7 +524,7 @@ cards:
     count: 2
     set: proposed
     kind: bad_stuff
-    cost: 1
+    cost: 2
     text: "Holding: Whenever your partner draws a card during Play, Exhaust 1."
     flavor: Disorientation drains stamina whenever team communication spikes.
 
@@ -532,7 +532,7 @@ cards:
     count: 2
     set: proposed
     kind: bad_stuff
-    cost: 1
+    cost: 2
     text: >-
       Holding: Every room threshold requires +2 Scramble to be met.
       Play: Exhaust 2.
@@ -542,7 +542,7 @@ cards:
     count: 2
     set: proposed
     kind: bad_stuff
-    cost: 2
+    cost: 3
     text: >-
       Holding: At Turn Start, Exhaust 1.
       Play: Scrap 1 Good Stuff card from your hand.
@@ -552,7 +552,7 @@ cards:
     count: 2
     set: proposed
     kind: bad_stuff
-    cost: 1
+    cost: 2
     text: "Holding: Whenever you play a card with Cost 0, lose 1 Oomph and 1 Scramble from the Stat pool this turn."
     flavor: Electrical backlash dampens cheap card plays.
 

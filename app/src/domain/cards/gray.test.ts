@@ -240,6 +240,7 @@ describe("One Man's Junk — 'If any Bad Stuff is played this turn, gain Oomph +
           card("Torn Seal"),
           card("Duck Under"),
           card("Duck Under"),
+          card("Duck Under"),
         ],
       }),
     });

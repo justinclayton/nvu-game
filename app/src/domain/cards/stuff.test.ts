@@ -845,14 +845,15 @@ describe("Panic — 'Holding: every room threshold requires +2 Scramble to be me
     const state = playing({
       Red: player({
         deck: pile("Shove", 4),
-        hand: [card("Panic"), card("Shove")],
+        hand: [card("Panic"), card("Shove"), card("Shove")],
       }),
     });
+    const payWith = state.Red.hand.filter((c) => c.name === "Shove").map((c) => c.id);
     const { state: next } = must(state, {
       type: "PLAY_CARD",
       character: "Red",
       cardId: handCard(state, "Red", "Panic").id,
-      payWith: [handCard(state, "Red", "Shove").id],
+      payWith,
     });
     expect(next.Red.deck).toHaveLength(2);
   });
@@ -957,7 +958,7 @@ describe("Corrosive Acid — 'Holding: At Turn Start, Exhaust 1. Play: Scrap 1 G
     const state = playing({
       Red: player({
         deck: pile("Shove", 4),
-        hand: [card("Corrosive Acid"), card("Pry Bar"), card("Shove"), card("Shove")],
+        hand: [card("Corrosive Acid"), card("Pry Bar"), card("Shove"), card("Shove"), card("Shove")],
       }),
     });
     const r = ids(state, "Red");
@@ -965,7 +966,7 @@ describe("Corrosive Acid — 'Holding: At Turn Start, Exhaust 1. Play: Scrap 1 G
       type: "PLAY_CARD",
       character: "Red",
       cardId: r[0] as CardId,
-      payWith: [r[2] as CardId, r[3] as CardId],
+      payWith: [r[2] as CardId, r[3] as CardId, r[4] as CardId],
     });
     const pending = asked.state.pending;
     if (pending?.kind !== "ChooseCards") throw new Error("expected a card choice");
@@ -980,14 +981,17 @@ describe("Corrosive Acid — 'Holding: At Turn Start, Exhaust 1. Play: Scrap 1 G
 
   it("does nothing when played with no Good Stuff in hand", () => {
     const state = playing({
-      Red: player({ deck: pile("Shove", 4), hand: [card("Corrosive Acid"), card("Shove"), card("Shove")] }),
+      Red: player({
+        deck: pile("Shove", 4),
+        hand: [card("Corrosive Acid"), card("Shove"), card("Shove"), card("Shove")],
+      }),
     });
     const r = ids(state, "Red");
     const { state: next } = must(state, {
       type: "PLAY_CARD",
       character: "Red",
       cardId: r[0] as CardId,
-      payWith: [r[1] as CardId, r[2] as CardId],
+      payWith: [r[1] as CardId, r[2] as CardId, r[3] as CardId],
     });
     expect(next.pending).toBeNull();
   });

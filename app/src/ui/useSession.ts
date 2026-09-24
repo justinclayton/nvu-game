@@ -20,9 +20,3 @@ export function useSession(): Session {
 export function useSessionState<T>(selector: (state: SessionState) => T): T {
   return useStore(useSession(), selector);
 }
-
-/** Dispatch without subscribing to anything. */
-export function useDispatch(): SessionState["dispatch"] {
-  const session = useSession();
-  return session.getState().dispatch;
-}

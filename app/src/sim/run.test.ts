@@ -2,7 +2,7 @@
 
 import { describe, expect, it } from "vitest";
 import { CARD_CONTENT } from "@content/index";
-import { replay } from "@application/session";
+import { loadSession } from "@application/session";
 import { randomPolicy } from "./policy";
 import { seedsFrom, simulate } from "./run";
 
@@ -28,7 +28,7 @@ describe("simulate", () => {
   it("replays through the session layer to the same final state", () => {
     for (const seed of SEEDS.slice(0, 4)) {
       const run = simulate(seed, randomPolicy, CARD_CONTENT);
-      const replayed = replay({ seed, commands: run.commands }, CARD_CONTENT);
+      const replayed = loadSession({ seed, commands: run.commands }, CARD_CONTENT).getState().state;
       expect(replayed).toEqual(run.final);
     }
   });

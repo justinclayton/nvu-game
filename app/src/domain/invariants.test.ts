@@ -79,9 +79,9 @@ function runFrom(seed: number): Ran {
     const result = execute(state, command);
     if (!result.ok) {
       // Bands 2 and 3, and floor 10's fixed Stairwell, aren't in
-      // design/cards.yaml yet (#122, #123, #125): a run that Ascends past
-      // floor 3 finds an empty floor deck and stops there. Anything short
-      // of that, or any other rejection, is a real bug.
+      // design/cards.yaml yet: a run that Ascends past floor 3 finds an
+      // empty floor deck and stops there. Anything short of that, or any
+      // other rejection, is a real bug.
       if (command.type === "FLIP_ROOM" && state.floor >= 4) break;
       throw new Error(`the actor produced an illegal ${command.type}: ${result.reason.message}`);
     }
@@ -186,8 +186,8 @@ describe("seeded-run invariants", () => {
         expect(state.outcome).not.toBeNull();
         continue;
       }
-      // See runFrom: bands 2/3 and floor 10 aren't stocked yet (#122, #123,
-      // #125), so a run that ascends past floor 3 stops there instead.
+      // See runFrom: bands 2/3 and floor 10 aren't stocked yet, so a run
+      // that ascends past floor 3 stops there instead.
       expect(state.floor).toBeGreaterThanOrEqual(4);
     }
   });

@@ -41,7 +41,7 @@ describe("logLines", () => {
 describe("tailEvents", () => {
   it("counts only event lines toward N, not notes among them", () => {
     // A long note sits among the last 2 events; it must not spend one of
-    // their 2 slots, or a long note would fill the window on its own (#152).
+    // their 2 slots, or a long note would fill the window on its own.
     const lines = logLines(events, [{ at: 2, text: "a very long note\nspanning lines" }]);
     expect(tailEvents(lines, 2).map((l) => l.text)).toEqual([
       "Cleanup.",

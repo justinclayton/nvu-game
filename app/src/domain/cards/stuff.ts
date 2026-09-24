@@ -16,7 +16,7 @@ import {
   other,
   playerOf,
   returnToHand,
-  takeFromExhaust,
+  takeFrom,
   takeGoodStuff,
 } from "../verbs";
 import { ask, done, nothing, source, type BehaviourContext, type Registry } from "./behaviour";
@@ -88,12 +88,16 @@ export const STUFF: Registry = {
       if (answer.kind !== "cards") return nothing(state);
       const target = answer.tag.split(":")[1] === "Red" ? "Red" : "Gray";
       const events: DomainEvent[] = [];
-      const lifted = takeFromExhaust(state, target, answer.cards);
+      const lifted = takeFrom(state, target, "exhaust", answer.cards);
       return done(moveToBottomOfDeck(lifted, target, answer.cards, events), events);
     },
   },
 
   /* "One of you draws 1 card."
+   *
+   * Rulebook, Keywords: Empty deck: an empty deck with a non-empty discard still
+   * draws — it reshuffles first — so only a character with both empty, or already
+   * Down, is not a legal choice.
    *
    * Skips the character choice when only one side is eligible to draw — the
    * same "no real choice" shape as Stich-Em-Ups' heal target above. */
@@ -101,7 +105,7 @@ export const STUFF: Registry = {
     onPlay(state, ctx) {
       const options = CHARACTERS.filter((c) => {
         const p = playerOf(state, c);
-        return !p.down && p.deck.length > 0;
+        return !p.down && (p.deck.length > 0 || p.discard.length > 0);
       });
       if (options.length === 0) return nothing(state);
       if (options.length === 1) {

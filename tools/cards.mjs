@@ -436,25 +436,10 @@ export function structure(doc) {
 
 /* ------------------------------------------------------- the typed TS module */
 
-function ts(value, indent) {
-  const pad = "  ".repeat(indent);
-  if (value === null) return "null";
-  if (Array.isArray(value)) {
-    if (value.length === 0) return "[]";
-    const items = value.map((v) => `${pad}  ${ts(v, indent + 1)}`);
-    return `[\n${items.join(",\n")},\n${pad}]`;
-  }
-  if (typeof value === "object") {
-    const keys = Object.keys(value);
-    if (keys.length === 0) return "{}";
-    const body = keys.map((k) => `${pad}  ${k}: ${ts(value[k], indent + 1)}`);
-    return `{\n${body.join(",\n")},\n${pad}}`;
-  }
-  return JSON.stringify(value);
-}
-
 export function generateTs(doc) {
   const content = structure(doc);
+  const cardsBody = content.cards.map((c) => "    " + JSON.stringify(c)).join(",\n");
+  const roomsBody = content.rooms.map((r) => "    " + JSON.stringify(r)).join(",\n");
   return `/* GENERATED FILE — DO NOT EDIT.
  *
  * Source: design/cards.yaml       Regenerate: node tools/cards.mjs build
@@ -470,7 +455,15 @@ export function generateTs(doc) {
 
 import type { CardContent } from "../domain/printed";
 
-export const CARD_CONTENT = ${ts(content, 0)} as const satisfies CardContent;
+export const CARD_CONTENT = {
+  meta: ${JSON.stringify(content.meta)},
+  cards: [
+${cardsBody}
+  ],
+  rooms: [
+${roomsBody}
+  ],
+} as const satisfies CardContent;
 `;
 }
 

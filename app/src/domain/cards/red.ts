@@ -1,21 +1,9 @@
 /* Red's cards. Keyed by the name design/cards.yaml makes unique. */
 
-import type { Card, Character, DomainEvent, GameState } from "../types";
-import {
-  playerOf,
-  returnToHand,
-  shuffleIntoDeck,
-  takeFromExhaust,
-  takeFromHand,
-} from "../verbs";
+import type { DomainEvent } from "../types";
+import { othersPlayed, playedBy } from "../queries";
+import { playerOf, returnToHand, shuffleIntoDeck, takeFrom } from "../verbs";
 import { ask, done, nothing, source, type Registry } from "./behaviour";
-
-/** How many cards a character has in the play zone, this card excluded. */
-const othersPlayed = (state: GameState, c: Character, self: Card): number =>
-  state.playZone.filter((p) => p.owner === c && p.card.id !== self.id).length;
-
-const playedBy = (state: GameState, c: Character): number =>
-  state.playZone.filter((p) => p.owner === c).length;
 
 export const RED: Registry = {
   /* "Exhaust 2." */
@@ -62,18 +50,19 @@ export const RED: Registry = {
     onChoice(answer, state, ctx) {
       if (answer.kind !== "cards") return nothing(state);
       const events: DomainEvent[] = [];
-      const lifted = takeFromExhaust(state, ctx.character, answer.cards);
+      const lifted = takeFrom(state, ctx.character, "exhaust", answer.cards);
       return done(shuffleIntoDeck(lifted, ctx.character, answer.cards, events), events);
     },
   },
 
-  /* "This has Oomph +2 for each card you paid with this turn."
+  /* "This card gains Oomph +2 for each card spent to play it this turn."
    *
    * Cards paid with have already gone to the discard pile, so the turn record is
-   * what counts them. */
+   * what counts them — keyed by this card's own id, not its owner, so a later
+   * payment for a different card doesn't also inflate this one. */
   "Junk Launcher": {
-    stats(state, owner, card) {
-      return { oomph: card.oomph + 2 * state.thisTurn.paid[owner], scramble: card.scramble };
+    stats(state, _owner, card) {
+      return { oomph: card.oomph + 2 * (state.thisTurn.paidFor[card.id] ?? 0), scramble: card.scramble };
     },
   },
 
@@ -95,7 +84,7 @@ export const RED: Registry = {
     onChoice(answer, state, ctx) {
       if (answer.kind !== "cards") return nothing(state);
       const events: DomainEvent[] = [];
-      const lifted = takeFromHand(state, ctx.character, answer.cards);
+      const lifted = takeFrom(state, ctx.character, "hand", answer.cards);
       return done(shuffleIntoDeck(lifted, ctx.character, answer.cards, events), events);
     },
   },

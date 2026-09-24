@@ -1,6 +1,7 @@
 /* Gray's cards. Keyed by the name design/cards.yaml makes unique. */
 
-import type { Card, Character, DomainEvent, GameState, Pending } from "../types";
+import type { Character, DomainEvent, Pending } from "../types";
+import { othersPlayed, playedBy } from "../queries";
 import {
   CHARACTERS,
   drawOne,
@@ -8,8 +9,7 @@ import {
   playerOf,
   scrap,
   shuffleIntoDeck,
-  takeFromExhaust,
-  takeFromHand,
+  takeFrom,
 } from "../verbs";
 import {
   ask,
@@ -20,12 +20,6 @@ import {
   type CardBehaviour,
   type Registry,
 } from "./behaviour";
-
-const playedBy = (state: GameState, c: Character): number =>
-  state.playZone.filter((p) => p.owner === c).length;
-
-const othersPlayed = (state: GameState, c: Character, self: Card): number =>
-  state.playZone.filter((p) => p.owner === c && p.card.id !== self.id).length;
 
 /** Two questions: whose deck, then what order. Depth 1 has no order to choose. */
 function peek(depth: number): CardBehaviour {
@@ -91,7 +85,7 @@ function shuffleStuffFromHand(whose: (ctx: BehaviourContext) => Character): Card
       if (answer.kind !== "cards") return nothing(state);
       const target = whose(ctx);
       const events: DomainEvent[] = [];
-      const lifted = takeFromHand(state, target, answer.cards);
+      const lifted = takeFrom(state, target, "hand", answer.cards);
       return done(shuffleIntoDeck(lifted, target, answer.cards, events), events);
     },
   };
@@ -145,7 +139,7 @@ export const GRAY: Registry = {
     onChoice(answer, state, ctx) {
       if (answer.kind !== "cards" || state.Red.down) return nothing(state);
       const events: DomainEvent[] = [];
-      let s = takeFromHand(state, ctx.character, answer.cards);
+      let s = takeFrom(state, ctx.character, "hand", answer.cards);
       for (const card of answer.cards) s = moveToHand(s, "Red", card, events);
       return done(s, events);
     },
@@ -169,7 +163,7 @@ export const GRAY: Registry = {
     onChoice(answer, state, ctx) {
       if (answer.kind !== "cards") return nothing(state);
       const events: DomainEvent[] = [];
-      const lifted = takeFromExhaust(state, ctx.character, answer.cards);
+      const lifted = takeFrom(state, ctx.character, "exhaust", answer.cards);
       return done(shuffleIntoDeck(lifted, ctx.character, answer.cards, events), events);
     },
   },
@@ -217,7 +211,7 @@ export const GRAY: Registry = {
     onChoice(answer, state, ctx) {
       if (answer.kind !== "cards" || answer.cards.length === 0) return nothing(state);
       const events: DomainEvent[] = [];
-      let s = takeFromHand(state, ctx.character, answer.cards);
+      let s = takeFrom(state, ctx.character, "hand", answer.cards);
       for (const card of answer.cards) s = scrap(s, ctx.character, card, events);
       const top = s.pools[ctx.character][0];
       if (!top) return done(s, events);

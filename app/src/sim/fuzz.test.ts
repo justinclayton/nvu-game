@@ -14,8 +14,8 @@ describe("fuzz sweep", () => {
       const detail = `seed ${String(seed)}: ${run.rejection ?? run.stopped}, floor ${String(run.floor)}`;
       if (run.stopped === "NoLegalMove") {
         // Bands 2 and 3, and floor 10's fixed Stairwell, aren't in design/cards.yaml
-        // yet (#122, #123, #125): a run that Ascends past floor 3 finds an empty
-        // floor deck and stalls there. Anything short of that is a real bug.
+        // yet: a run that Ascends past floor 3 finds an empty floor deck and
+        // stalls there. Anything short of that is a real bug.
         expect(run.floor, detail).toBeGreaterThanOrEqual(4);
         continue;
       }

@@ -53,6 +53,7 @@ import {
   shuffleIntoDeck,
   spendFreePlay,
   standing,
+  takeFrom,
   takeGoodStuff,
   topDeck,
   withPlayer,
@@ -221,10 +222,12 @@ function locate(state: GameState, c: Character, cardId: CardId): readonly [Pile,
 
 function removeFrom(state: GameState, c: Character, pile: Pile, cardId: CardId): GameState {
   const p = playerOf(state, c);
-  const without = (list: readonly Card[]) => list.filter((x) => x.id !== cardId);
-  if (pile === "deck") return withPlayer(state, c, { ...p, deck: without(p.deck) });
-  if (pile === "hand") return withPlayer(state, c, { ...p, hand: without(p.hand) });
-  return withPlayer(state, c, { ...p, discard: without(p.discard) });
+  if (pile === "deck") {
+    return withPlayer(state, c, { ...p, deck: p.deck.filter((x) => x.id !== cardId) });
+  }
+  const list = pile === "hand" ? p.hand : p.discard;
+  const card = list.find((x) => x.id === cardId);
+  return card ? takeFrom(state, c, pile, [card]) : state;
 }
 
 /** Every Stuff card this character's deck, hand or discard pile holds right now. */
@@ -482,10 +485,10 @@ function drawToCap(state: GameState, c: Character, run: Run): GameState {
 
 /* ------------------------------------------------------------ Play */
 
-const addPaid = (record: TurnRecord, c: Character, n: number): TurnRecord =>
-  c === "Red"
-    ? { ...record, paid: { ...record.paid, Red: record.paid.Red + n } }
-    : { ...record, paid: { ...record.paid, Gray: record.paid.Gray + n } };
+const addPaid = (record: TurnRecord, cardId: Card["id"], n: number): TurnRecord => ({
+  ...record,
+  paidFor: { ...record.paidFor, [cardId]: (record.paidFor[cardId] ?? 0) + n },
+});
 
 function playCard(
   state: GameState,
@@ -514,7 +517,7 @@ function playCard(
   s = discardFromHand(s, c, payment, run.events);
   if (payment.length > 0) {
     run.events.push({ type: "COST_PAID", character: c, cards: payment });
-    s = { ...s, thisTurn: addPaid(s.thisTurn, c, payment.length) };
+    s = { ...s, thisTurn: addPaid(s.thisTurn, cardId, payment.length) };
   }
 
   const after = playerOf(s, c);

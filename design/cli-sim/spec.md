@@ -101,7 +101,7 @@ The moves, one per engine command: `[agent, accepted]`
 | `play choose Rope Flare`, `play choose none` | `CHOOSE_CARDS` |
 | `play order Rope Flare Shove` | `ORDER_CARDS`, top first |
 | `play take`, `play skip` | `TAKE_REWARD` |
-| `play keep Crowbar paying Shove`, `play return Pry Bar`, `play keep Torn Seal`, `play shed Rust paying Charge In`, `play take Zen Mode`, `play take none` | one Ascend question's answer, composed into `ASCEND`, see below |
+| `play take Zen Mode`, `play take none` | one character's Ascend answer, composed into `ASCEND`, see below |
 
 There is no Draw phase and no draw move. `[agent]` Rulebook 0.2 folded Draw up to five into Turn
 Start as an automatic second step with no decision in it (rulebook, Each Turn): `play flip` resolves
@@ -174,18 +174,13 @@ one per step.
 The contract, held by `moves.test.ts`: every command returned passes `validate`, and for a sample
 of seeded states every command `validate` accepts is one it returned.
 
-Three places cap the list where the full set is large, and all three are recorded here as debt the
-solver must pay before it can claim completeness. None touches `play`, which enumerates nothing:
+One place caps the list where the full set is large, recorded here as debt the solver must pay
+before it can claim completeness. It does not touch `play`, which enumerates nothing:
 
 - An `OrderCards` answer over more than four cards offers only the order shown and its reverse.
-- The cross product of the two characters' ascension choices is not crossed past 256 entries.
-- An ascension's Settle your Stuff answer tries one Stuff card at a time, each way of paying for
-  it alone; settling several Stuff cards in the same `ASCEND` is not crossed.
 
-Playtest 4 (`design/playtests/04-first-run-on-rules-0.2.md`) hit the 256-entry cross-product cap
-with only two Stuff cards to settle, and it silently dropped a legal combination rather than just
-making the list unwieldy; the marathon deck sizes 0.2 produces make this worse than under 0.1. The
-per-question `play` form above is unaffected, but `fuzz` and the solver still owe this fix. `[agent]`
+An `ASCEND` is the cross product of the two characters' reward choices, four by four at most, and
+is crossed in full. `[agent]`
 
 The web game's ADR ruled a generator out for the UI, which has a better source in `pending` and
 targeted queries. That ruling stands; this generator lives in `sim`, not `domain`.
@@ -221,13 +216,10 @@ Level Up's "Scrap a card?") is declined rather than answered with the cheapest o
 doubled, plus the reward's own total stats, docked for twice any printed `Exhaust X` the reward
 itself carries, ties broken toward the lower card id. Everywhere but Ascend it answers only from
 the move generator's own list (`sim/moves.ts`), never a command it invents. At Ascend it composes
-each character's whole choice independently — the same shape the CLI's per-question staging builds
-(`cli/ascend.ts`, `composeAscend`) — and validates the composed command against the engine, because
-the generator's own list crosses both characters' choices and caps out at 256 combined options;
-past that cap every command it offers forces one character's choice to "none", which forfeited
-about half of every Ascend's rewards and Stuff settlements when the policy could only pick from
-that list. A composed command the engine refuses is a bug in the policy, same as any other
-`greedy:` throw. It never draws on its own randomness, so a seed always plays the same game. It is not a playtester and does not read the rulebook; the
+each character's choice directly, the same shape the CLI's staging builds (`cli/ascend.ts`,
+`composeAscend`), and validates the composed command against the engine; a composed command the
+engine refuses is a bug in the policy, same as any other `greedy:` throw. It never draws on its own
+randomness, so a seed always plays the same game. It is not a playtester and does not read the rulebook; the
 agent playtest is still the check for fidelity and rulebook gaps.
 
 Its Exhaust losses are still overwhelmingly forced, not chosen: across a 500-seed sweep, well under
@@ -264,8 +256,7 @@ Tests: `moves.test.ts` (the contract), `run.test.ts` (every seed ends or hits th
 throws, and the log replays to the same state), `cli/args.test.ts`, a test of card-name resolution
 (full name, initials, prefix, ambiguity refused, copies interchangeable), and the initials-collision
 report in `app/src/content`. `policy.test.ts` holds the greedy policy's key choices — the play that
-clears, the cheapest payment, keeping paid-for Good Stuff, shedding paid-for Bad Stuff, taking the
-reward — and `report.test.ts` holds the balance report's aggregation, both deterministic on a fixed
+clears, the cheapest payment, taking the reward — and `report.test.ts` holds the balance report's aggregation, both deterministic on a fixed
 seed set.
 
 ## The playtest note `[you]`

@@ -1,7 +1,7 @@
 /* Red's cards. Keyed by the name design/cards.yaml makes unique. */
 
 import type { DomainEvent } from "../types";
-import { othersPlayed, playedBy } from "../queries";
+import { costPlayedBy, othersPlayed, playedBy } from "../queries";
 import { playerOf, returnToHand, shuffleIntoDeck, takeFrom } from "../verbs";
 import { ask, done, nothing, source, type Registry } from "./behaviour";
 
@@ -55,14 +55,10 @@ export const RED: Registry = {
     },
   },
 
-  /* "This card gains Oomph +2 for each card spent to play it this turn."
-   *
-   * Cards paid with have already gone to the discard pile, so the turn record is
-   * what counts them — keyed by this card's own id, not its owner, so a later
-   * payment for a different card doesn't also inflate this one. */
+  /* "Oomph equal to total costs of all cards you played this turn." */
   "Junk Launcher": {
-    stats(state, _owner, card) {
-      return { oomph: card.oomph + 2 * (state.thisTurn.paidFor[card.id] ?? 0), scramble: card.scramble };
+    stats(state, owner, card) {
+      return { oomph: costPlayedBy(state, owner), scramble: card.scramble };
     },
   },
 

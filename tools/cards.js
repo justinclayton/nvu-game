@@ -23,7 +23,7 @@ var NVU_CARDS = {
     {"name":"Fast Follow","set":"proposed","kind":"player","owner":"Red","rarity":"Fine","cost":1,"oomph":3,"text":"If Gray played a card this turn, play this card for free."},
     {"name":"Reckless","set":"proposed","kind":"player","owner":"Red","rarity":"Fine","cost":1,"oomph":5,"text":"Exhaust 3."},
     {"name":"Second Wind","set":"proposed","kind":"player","owner":"Red","rarity":"Cool","cost":2,"oomph":4,"text":"Shuffle a Red card from your Exhaust pile into your deck."},
-    {"name":"Junk Launcher","set":"proposed","kind":"player","owner":"Red","rarity":"Cool","cost":2,"oomph":2,"text":"This card gains Oomph +2 for each card spent to play it this turn."},
+    {"name":"Junk Launcher","set":"proposed","kind":"player","owner":"Red","rarity":"Cool","cost":2,"conditional_stat":true,"text":"Oomph equal to total costs of all cards you played this turn."},
     {"name":"Heavy Pockets","set":"proposed","kind":"player","owner":"Red","rarity":"Cool","cost":1,"oomph":2,"text":"Shuffle 1 Stuff from your hand into your deck."},
     {"name":"Deadweight Grip","set":"proposed","kind":"player","owner":"Red","rarity":"Woah","cost":1,"scramble":2,"text":"Holding: Cards you play have +1 Oomph. At Turn Start, draw 1 fewer card."},
     {"name":"Both Barrels","set":"proposed","kind":"player","owner":"Red","rarity":"Woah","cost":2,"oomph":4,"text":"If Gray has already played at least one card this turn, +2 Oomph. If the room is Cleared, return this to your hand at the end of the turn."},

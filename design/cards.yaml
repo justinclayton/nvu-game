@@ -140,8 +140,8 @@ cards:
     owner: Red
     rarity: Cool
     cost: 2
-    oomph: 2
-    text: This card gains Oomph +2 for each card spent to play it this turn.
+    conditional_stat: true
+    text: Oomph equal to total costs of all cards you played this turn.
 
   - name: Heavy Pockets
     set: proposed

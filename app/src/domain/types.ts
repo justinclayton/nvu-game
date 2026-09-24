@@ -98,13 +98,8 @@ export interface PlayerState {
 
 /**
  * What the turn in progress has done that no pile records. Reset at Flip.
- *
- * Cards paid with have already gone to the discard pile, so a card that reads
- * "for each card spent to play it this turn" has nothing else to count.
  */
 export interface TurnRecord {
-  /** Keyed by the id of the card that was paid for, e.g. Junk Launcher's own count. */
-  readonly paidFor: Readonly<Record<CardId, number>>;
   /**
    * Overcharged Battery: this many of the next cards played cost nothing,
    * whichever character plays them. The discount belongs to the team, and the

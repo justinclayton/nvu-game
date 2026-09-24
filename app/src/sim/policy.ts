@@ -240,11 +240,6 @@ function stuffValue(card: Card): number {
   return card.kind === "good_stuff" ? goodStuffValue(card) : badStuffSeverity(card);
 }
 
-function findOwned(state: GameState, character: Character, id: CardId): Card | undefined {
-  const p = playerOf(state, character);
-  return [...p.deck, ...p.hand, ...p.discard].find((c) => c.id === id);
-}
-
 const byValueDesc = (a: Card, b: Card): number => stuffValue(b) - stuffValue(a) || a.id.localeCompare(b.id);
 
 /** Which stat this character's non-Stuff cards lean on least, going by what's still in deck, hand and discard. */
@@ -289,30 +284,6 @@ function chooseReward(state: GameState, character: Character): CardId | null {
 }
 
 /**
- * "Only pay at Settle your Stuff when the deck can afford it and the Stuff is
- * worth more than what it costs", scored the same way `composeChoice` below
- * decides it, for one already-generated settlement.
- */
-function scoreChoice(state: GameState, character: Character, choice: AscendChoice): number {
-  let score = 0;
-  if (choice.takeRewardId !== null) {
-    const offered = state.offer?.[character] ?? [];
-    const reward = offered.find((c) => c.id === choice.takeRewardId);
-    if (reward) score += 100 + rewardScore(reward, weakerStat(state, character));
-  }
-  const stuff = settleableStuff(state, character);
-  const budget = liveDeckSize(state, character);
-  for (const settlement of choice.settle) {
-    const card = stuff.find((s) => s.id === settlement.cardId);
-    const payer = settlement.payWith !== null ? findOwned(state, character, settlement.payWith) : undefined;
-    if (!card || !payer) continue;
-    const value = stuffValue(card);
-    if (value > payer.cost && budget - 1 >= MIN_LIVE_DECK) score += value * 10;
-  }
-  return score;
-}
-
-/**
  * One character's whole Ascend, decided independently of the other's: pay to
  * keep the Good Stuff most worth keeping, then pay to shed the Bad Stuff most
  * worth shedding, with whatever payers are left — but only while the deck can
@@ -354,47 +325,15 @@ function composeChoice(state: GameState, character: Character): AscendChoice {
   return { settle, takeRewardId: chooseReward(state, character) };
 }
 
-/**
- * Instrumentation only, read by `report.ts`: how often the composed command
- * above validated versus how often it had to fall back to the move
- * generator's own (capped) list. Doesn't affect what the policy chooses.
- */
-export const greedyAscendStats = { composed: 0, fallback: 0 };
-
-export function resetGreedyAscendStats(): void {
-  greedyAscendStats.composed = 0;
-  greedyAscendStats.fallback = 0;
-}
-
-/** The best of whatever the move generator did offer, for the rare case the composed command is refused. */
-function bestGeneratedAscend(state: GameState, legal: readonly Command[]): Command {
-  const ascends = legal.filter((c): c is Extract<Command, { type: "ASCEND" }> => c.type === "ASCEND");
-  const first = ascends[0];
-  if (!first) throw new Error("greedy: Ascend phase offered no ASCEND command");
-  let best = first;
-  let bestScore = scoreChoice(state, "Red", first.Red) + scoreChoice(state, "Gray", first.Gray);
-  for (const c of ascends.slice(1)) {
-    const score = scoreChoice(state, "Red", c.Red) + scoreChoice(state, "Gray", c.Gray);
-    if (score > bestScore) {
-      best = c;
-      bestScore = score;
-    }
-  }
-  return best;
-}
-
-function chooseAscend(state: GameState, legal: readonly Command[]): Command {
+function chooseAscend(state: GameState): Command {
   const composed: Command = {
     type: "ASCEND",
     Red: composeChoice(state, "Red"),
     Gray: composeChoice(state, "Gray"),
   };
-  if (validate(state, composed) === null) {
-    greedyAscendStats.composed += 1;
-    return composed;
-  }
-  greedyAscendStats.fallback += 1;
-  return bestGeneratedAscend(state, legal);
+  const rejection = validate(state, composed);
+  if (rejection !== null) throw new Error(`greedy: composed Ascend command rejected: ${rejection.message}`);
+  return composed;
 }
 
 function cardsDeepEqual(a: readonly CardId[], b: readonly CardId[]): boolean {
@@ -468,7 +407,7 @@ export const greedyPolicy: Policy = {
       case "Play":
         return [choosePlay(state, legal), rng];
       case "Ascend":
-        return [chooseAscend(state, legal), rng];
+        return [chooseAscend(state), rng];
       case "Outcome":
       case "Cleanup":
         throw new Error(`greedy: asked to choose during automatic ${state.phase} with nothing pending`);

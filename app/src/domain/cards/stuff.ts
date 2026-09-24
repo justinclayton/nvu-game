@@ -93,12 +93,16 @@ export const STUFF: Registry = {
     },
   },
 
-  /* "One of you draws 1 card." */
+  /* "One of you draws 1 card."
+   *
+   * Rulebook, Keywords: Empty deck: an empty deck with a non-empty discard still
+   * draws — it reshuffles first — so only a character with both empty, or already
+   * Down, is not a legal choice. */
   "Grav Harness": {
     onPlay(state, ctx) {
       const options = CHARACTERS.filter((c) => {
         const p = playerOf(state, c);
-        return !p.down && p.deck.length > 0;
+        return !p.down && (p.deck.length > 0 || p.discard.length > 0);
       });
       if (options.length === 0) return nothing(state);
       return ask(state, {

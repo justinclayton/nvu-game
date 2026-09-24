@@ -363,10 +363,11 @@ describe("Room kinds: Room and Stairwell", () => {
       }),
       pools: { Red: [], Gray: [], goodStuff: [], badStuff: [] },
     });
-    const g = ids(state, "Gray");
+    const [firstCoil, secondCoil] = state.Gray.hand.filter((c) => c.name === "Coil Of Cable");
+    if (!firstCoil || !secondCoil) throw new Error("Gray is not holding two Coil Of Cables");
     const { state: next, events } = play(state, [
-      playFree("Gray", g[0] as CardId),
-      playFree("Gray", g[1] as CardId),
+      free("Gray", firstCoil.id),
+      free("Gray", secondCoil.id),
       { type: "END_PLAY" },
     ]);
     expect(next.pending).toBeNull();

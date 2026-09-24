@@ -154,12 +154,14 @@ describe("Junk Launcher — 'Oomph +2 for each card spent to play it this turn'"
         ],
       }),
     });
-    const hand = ids(state, "Red");
+    const shoves = state.Red.hand.filter((c) => c.name === "Shove");
+    const [payerA, payerB, second, payerC] = shoves;
+    if (!payerA || !payerB || !second || !payerC) throw new Error("Red is not holding four Shoves");
     const { state: afterLauncher } = must(state, {
       type: "PLAY_CARD",
       character: "Red",
-      cardId: hand[0] as CardId,
-      payWith: [hand[1] as CardId, hand[2] as CardId],
+      cardId: handCard(state, "Red", "Junk Launcher").id,
+      payWith: [payerA.id, payerB.id],
     });
     // Printed Oomph 2, plus 2 for each of the two cards it cost: 6.
     expect(statPool(afterLauncher).oomph).toBe(6);
@@ -167,8 +169,8 @@ describe("Junk Launcher — 'Oomph +2 for each card spent to play it this turn'"
     const { state: afterSecond } = must(afterLauncher, {
       type: "PLAY_CARD",
       character: "Red",
-      cardId: hand[3] as CardId,
-      payWith: [hand[4] as CardId],
+      cardId: second.id,
+      payWith: [payerC.id],
     });
     // Junk Launcher's own Oomph must not rise for a payment spent on a
     // different card played later the same turn.

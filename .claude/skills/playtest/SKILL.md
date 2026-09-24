@@ -58,10 +58,14 @@ looks like a bug. Note it when it happens, so it lands in the log at the right l
 were trying to do and why, not only what you saw. Only use `undo` to back out a mistyped move, never
 to take back a legal move you regret; say why in a note either way.
 
-Play until the run ends in victory or defeat, or until turn 25. If the run ends `Aborted`, at
+Play until the run ends in Victory, Defeat, or Aborted. If the run ends `Aborted`, at
 `new` or at an Ascend, the card list is short of Rooms or reward cards; stop there, report the
 printed shortfall, and write no note: a run on a short pool is void data, and the pools are sized
-so it never happens. Keep a scratch list, outside the
+so it never happens. If play somehow reaches turn 60 without ending, stop there and report it as a
+friction point instead of a note: a run should never take that long (playtest 7 reached floor 6 in
+25 turns, and `bin/nvu sim --seeds 20 --policy greedy` finishes every one of its runs, win or lose,
+by turn 19), so getting this far means something is stuck rather than the run being merely slow.
+Keep a scratch list, outside the
 run, of every friction point with the CLI itself: output you could not read, a move you could not
 express, something you wished it printed, an error you hit.
 

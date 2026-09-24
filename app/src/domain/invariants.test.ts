@@ -78,11 +78,6 @@ function runFrom(seed: number): Ran {
     if (!command) break;
     const result = execute(state, command);
     if (!result.ok) {
-      // The rulebook says nothing about a band's Room pool running short —
-      // once a band's own Stairwell is spent, that band can never Ascend
-      // again, so a long enough run empties its floor deck and stops there.
-      // Anything short of that, or any other rejection, is a real bug.
-      if (command.type === "FLIP_ROOM" && result.reason.code === "FloorDeckEmpty") break;
       throw new Error(`the actor produced an illegal ${command.type}: ${result.reason.message}`);
     }
     state = result.state;
@@ -182,15 +177,8 @@ describe("seeded-run invariants", () => {
       const { state, commands } = runFrom(seed);
       expect(commands.length).toBeGreaterThan(0);
       expect(commands.length).toBeLessThan(MAX_COMMANDS);
-      if (state.phase === "GameOver") {
-        expect(state.outcome).not.toBeNull();
-        continue;
-      }
-      // See runFrom: a band's own pool can run dry once its Stairwell is
-      // spent, so a non-Victory run may stop on any floor. The only thing
-      // left to check is that it really did stop for that reason.
-      expect(state.phase).toBe("Turn Start");
-      expect(state.floorDeck).toHaveLength(0);
+      expect(state.phase).toBe("GameOver");
+      expect(state.outcome).not.toBeNull();
     }
   });
 });

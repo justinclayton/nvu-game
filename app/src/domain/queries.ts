@@ -106,7 +106,7 @@ export function contributionOf(state: GameState, played: PlayedCard): StatTotals
   const stuffDelta = card.kind === "good_stuff" ? m.stuffPowerDelta : 0;
   return {
     oomph: Math.max(0, base.oomph + m.playedPowerDelta + stuffDelta),
-    scramble: Math.max(0, base.scramble),
+    scramble: Math.max(0, base.scramble + stuffDelta),
   };
 }
 
@@ -126,7 +126,13 @@ export function statPool(state: GameState, side?: Character): StatTotals {
     oomph += c.oomph;
     scramble += c.scramble;
   }
-  return { oomph, scramble };
+  // System Feedback banks a loss against the shared pool, not either side's
+  // own display-only contribution.
+  if (side) return { oomph, scramble };
+  return {
+    oomph: Math.max(0, oomph - state.thisTurn.poolPenalty.oomph),
+    scramble: Math.max(0, scramble - state.thisTurn.poolPenalty.scramble),
+  };
 }
 
 /** A card that says "ALL rooms require an additional N Scramble" is read from either hand. */
@@ -263,7 +269,9 @@ export function costOverrideFor(state: GameState, c: Character, card: Card): Cos
 export function printedCostOf(state: GameState, c: Character, card: Card): number {
   const behaviour = behaviourOf(card.name);
   const base = behaviour?.cost ? behaviour.cost(state, c, card) : card.cost;
-  return Math.max(0, base + heldModifiers(state, c).costDelta);
+  // Distract & Pivot: a banked charge takes 1 off this character's very next play.
+  const discount = state.thisTurn.playDiscount[c] > 0 ? 1 : 0;
+  return Math.max(0, base + heldModifiers(state, c).costDelta - discount);
 }
 
 /**
@@ -334,6 +342,7 @@ const REVEALING: ReadonlySet<DomainEvent["type"]> = new Set([
   "CARD_EXHAUSTED",
   "STUFF_TAKEN",
   "CARDS_PEEKED",
+  "ROOMS_PEEKED",
   "REWARD_REVEALED",
   "REWARD_TAKEN",
 ]);

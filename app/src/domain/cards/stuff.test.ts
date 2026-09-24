@@ -7,6 +7,7 @@ import {
   eventTypes,
   free,
   handCard,
+  ids,
   must,
   pile,
   play,
@@ -16,6 +17,8 @@ import {
   rig,
   room,
 } from "../__fixtures__/rig";
+
+import type { CardId } from "../types";
 
 beforeEach(resetRig);
 
@@ -501,6 +504,118 @@ describe("Overcharged Battery — 'The next card played this turn is played for 
   });
 });
 
+describe("Stim Pack — 'Play: Draw 1 card'", () => {
+  it("draws the player who played it a card", () => {
+    const state = playing({
+      Red: player({ deck: pile("Shove", 3), hand: [card("Stim Pack")] }),
+    });
+    const r = ids(state, "Red");
+    const { state: next, events } = must(state, free("Red", r[0] as CardId));
+    expect(eventTypes(events)).toContain("CARD_DRAWN");
+    expect(next.Red.hand).toHaveLength(1);
+    expect(next.Red.deck).toHaveLength(2);
+  });
+});
+
+describe("High-Frequency Scanner — 'Play: Look at the top 3 cards of the Floor deck'", () => {
+  it("reveals the top of the Floor deck and puts it back untouched", () => {
+    const first = room("Security Turnstile");
+    const second = room("Flooded Ventilation Shaft");
+    const state = playing({
+      floorDeck: [first, second],
+      Red: player({ deck: pile("Shove", 3), hand: [card("High-Frequency Scanner"), card("Shove")] }),
+    });
+    const r = ids(state, "Red");
+    const { state: next, events } = must(state, {
+      type: "PLAY_CARD",
+      character: "Red",
+      cardId: r[0] as CardId,
+      payWith: [r[1] as CardId],
+    });
+    const peeked = events.find((e) => e.type === "ROOMS_PEEKED");
+    if (peeked?.type !== "ROOMS_PEEKED") throw new Error("expected a peek");
+    expect(peeked.rooms.map((r) => r.id)).toEqual([first.id, second.id]);
+    // Nothing about the deck changes: it is a look, not a draw or a reorder.
+    expect(next.floorDeck).toEqual(state.floorDeck);
+  });
+
+  it("shows fewer than 3 when the Floor deck holds fewer", () => {
+    const only = room("Security Turnstile");
+    const state = playing({
+      floorDeck: [only],
+      Red: player({ deck: pile("Shove", 3), hand: [card("High-Frequency Scanner"), card("Shove")] }),
+    });
+    const r = ids(state, "Red");
+    const { events } = must(state, {
+      type: "PLAY_CARD",
+      character: "Red",
+      cardId: r[0] as CardId,
+      payWith: [r[1] as CardId],
+    });
+    const peeked = events.find((e) => e.type === "ROOMS_PEEKED");
+    if (peeked?.type !== "ROOMS_PEEKED") throw new Error("expected a peek");
+    expect(peeked.rooms).toHaveLength(1);
+  });
+});
+
+describe("Automated Salvage Kit — 'Play: Scrap 1 Bad Stuff card from your hand or discard pile'", () => {
+  it("offers Bad Stuff from hand and from the discard pile together", () => {
+    const state = playing({
+      Red: player({
+        deck: pile("Shove", 3),
+        hand: [card("Automated Salvage Kit"), card("Rust"), card("Shove")],
+        discard: [card("Sluggish")],
+      }),
+    });
+    const r = ids(state, "Red");
+    const asked = must(state, {
+      type: "PLAY_CARD",
+      character: "Red",
+      cardId: r[0] as CardId,
+      payWith: [r[2] as CardId],
+    });
+    const pending = asked.state.pending;
+    if (pending?.kind !== "ChooseCards") throw new Error("expected a card choice");
+    expect(pending.options.map((c) => c.name).sort()).toEqual(["Rust", "Sluggish"]);
+
+    const rust = pending.options.find((c) => c.name === "Rust");
+    if (!rust) throw new Error("rig");
+    const { state: next, events } = must(asked.state, { type: "CHOOSE_CARDS", cardIds: [rust.id] });
+    expect(eventTypes(events)).toContain("CARD_SCRAPPED");
+    expect(next.Red.hand.some((c) => c.name === "Rust")).toBe(false);
+    expect(next.scrapyard.some((c) => c.name === "Rust")).toBe(true);
+    // The discard pile's Sluggish is untouched.
+    expect(next.Red.discard.some((c) => c.name === "Sluggish")).toBe(true);
+  });
+
+  it("does nothing when there is no Bad Stuff to Scrap", () => {
+    const state = playing({
+      Red: player({ deck: pile("Shove", 3), hand: [card("Automated Salvage Kit"), card("Shove")] }),
+    });
+    const r = ids(state, "Red");
+    const { state: next } = must(state, {
+      type: "PLAY_CARD",
+      character: "Red",
+      cardId: r[0] as CardId,
+      payWith: [r[1] as CardId],
+    });
+    expect(next.pending).toBeNull();
+    expect(next.scrapyard).toEqual([]);
+  });
+});
+
+describe("Emergency Power Core — 'Exhaust 2'", () => {
+  it("takes two off the top of your own deck, into the Exhaust pile", () => {
+    const state = playing({
+      Red: player({ deck: pile("Shove", 4), hand: [card("Emergency Power Core")] }),
+    });
+    const r = ids(state, "Red");
+    const { state: next } = must(state, free("Red", r[0] as CardId));
+    expect(next.Red.deck).toHaveLength(2);
+    expect(next.Red.exhaust).toHaveLength(2);
+  });
+});
+
 describe("Faceful Of Slime — 'Holding: At Turn Start, draw 1 fewer card'", () => {
   it("trims the automatic draw's target from 5 to 4", () => {
     const state = rig({
@@ -531,17 +646,18 @@ describe("Faceful Of Slime — 'Holding: At Turn Start, draw 1 fewer card'", () 
   });
 });
 
-describe("Rust — 'Holding: Stuff you play has -1 Oomph'", () => {
-  it("takes a Oomph off Stuff, and leaves other cards alone", () => {
+describe("Rust — 'Holding: Stuff cards you play have -1 Oomph and -1 Scramble'", () => {
+  it("takes 1 off both of a Stuff card's stats, and leaves other cards alone", () => {
     const state = playing({
       Red: player({
         deck: pile("Shove", 3),
-        hand: [card("Rust"), card("Pry Bar"), card("Shove"), card("Shove")],
+        hand: [card("Rust"), card("Coil Of Cable"), card("Shove"), card("Shove")],
       }),
     });
-    const withStuff = must(state, free("Red", handCard(state, "Red", "Pry Bar").id));
-    // The Pry Bar is Oomph 3, less 1 while the Rust is held.
-    expect(statPool(withStuff.state).oomph).toBe(2);
+    const r = ids(state, "Red");
+    const withStuff = must(state, free("Red", r[1] as CardId));
+    // Coil Of Cable is Scramble 3, less 1 while the Rust is held.
+    expect(statPool(withStuff.state)).toEqual({ oomph: 0, scramble: 2 });
 
     const [toPlay, toPay] = withStuff.state.Red.hand.filter((c) => c.name === "Shove");
     if (!toPlay || !toPay) throw new Error("Red is not holding two Shoves");
@@ -552,19 +668,24 @@ describe("Rust — 'Holding: Stuff you play has -1 Oomph'", () => {
       payWith: [toPay.id],
     });
     // Shove is Oomph 2 and is not Stuff.
-    expect(statPool(withCard.state).oomph).toBe(4);
+    expect(statPool(withCard.state)).toEqual({ oomph: 2, scramble: 2 });
   });
 
-  it("floors a Stuff card's Oomph at zero rather than going negative", () => {
+  it("floors a Stuff card's stats at zero rather than going negative", () => {
     const state = playing({
       Red: player({
         deck: pile("Shove", 3),
-        hand: [card("Rust"), card("Coil Of Cable")],
+        hand: [card("Rust"), card("Pry Bar"), card("Coil Of Cable")],
       }),
     });
-    // Coil Of Cable is Oomph 0, so Rust's -1 would drain the pool if not floored.
-    const withCard = must(state, free("Red", handCard(state, "Red", "Coil Of Cable").id));
-    expect(statPool(withCard.state).oomph).toBe(0);
+    const r = ids(state, "Red");
+    // Pry Bar (Oomph 3, Scramble 0) and Coil Of Cable (Oomph 0, Scramble 3)
+    // each have one stat Rust's -1 would drive negative if not floored.
+    const withPryBar = must(state, free("Red", r[1] as CardId));
+    expect(statPool(withPryBar.state)).toEqual({ oomph: 2, scramble: 0 });
+
+    const withBoth = must(withPryBar.state, free("Red", r[2] as CardId));
+    expect(statPool(withBoth.state)).toEqual({ oomph: 2, scramble: 2 });
   });
 });
 
@@ -813,5 +934,106 @@ describe("My Head Is Quantum Spinning — 'Holding: whenever your partner draws 
     });
     expect(next.Red.deck).toHaveLength(3);
     expect(eventTypes(events)).not.toContain("CARD_EXHAUSTED");
+  });
+});
+
+describe("Corrosive Acid — 'Holding: At Turn Start, Exhaust 1. Play: Scrap 1 Good Stuff card from your hand.'", () => {
+  it("Exhausts 1 at Turn Start, once the draw is done", () => {
+    const state = rig({
+      phase: "Turn Start",
+      floorDeck: [room("Security Turnstile")],
+      Red: player({ deck: pile("Shove", 6), hand: [card("Corrosive Acid")] }),
+      Gray: player({ deck: pile("Duck Under", 6) }),
+    });
+    const { state: next, events } = must(state, { type: "FLIP_ROOM" });
+    expect(next.Red.hand).toHaveLength(5);
+    expect(next.Red.deck).toHaveLength(1);
+    expect(next.Red.exhaust).toHaveLength(1);
+    expect(eventTypes(events)).toContain("CARD_EXHAUSTED");
+  });
+
+  it("Scraps a chosen Good Stuff card from hand when played", () => {
+    const state = playing({
+      Red: player({
+        deck: pile("Shove", 4),
+        hand: [card("Corrosive Acid"), card("Pry Bar"), card("Shove"), card("Shove")],
+      }),
+    });
+    const r = ids(state, "Red");
+    const asked = must(state, {
+      type: "PLAY_CARD",
+      character: "Red",
+      cardId: r[0] as CardId,
+      payWith: [r[2] as CardId, r[3] as CardId],
+    });
+    const pending = asked.state.pending;
+    if (pending?.kind !== "ChooseCards") throw new Error("expected a card choice");
+    expect(pending.options.map((c) => c.name)).toEqual(["Pry Bar"]);
+    const pryBar = pending.options[0];
+    if (!pryBar) throw new Error("rig");
+    const { state: next, events } = must(asked.state, { type: "CHOOSE_CARDS", cardIds: [pryBar.id] });
+    expect(eventTypes(events)).toContain("CARD_SCRAPPED");
+    expect(next.Red.hand.some((c) => c.name === "Pry Bar")).toBe(false);
+    expect(next.scrapyard.some((c) => c.name === "Pry Bar")).toBe(true);
+  });
+
+  it("does nothing when played with no Good Stuff in hand", () => {
+    const state = playing({
+      Red: player({ deck: pile("Shove", 4), hand: [card("Corrosive Acid"), card("Shove"), card("Shove")] }),
+    });
+    const r = ids(state, "Red");
+    const { state: next } = must(state, {
+      type: "PLAY_CARD",
+      character: "Red",
+      cardId: r[0] as CardId,
+      payWith: [r[1] as CardId, r[2] as CardId],
+    });
+    expect(next.pending).toBeNull();
+  });
+});
+
+describe("System Feedback — 'Holding: Whenever you play a card with Cost 0, lose 1 Oomph and 1 Scramble from the Stat pool this turn.'", () => {
+  it("loses 1 Oomph and 1 Scramble, cumulatively, for each Cost-0 card the holder plays", () => {
+    const state = playing({
+      Red: player({
+        deck: pile("Shove", 4),
+        hand: [card("System Feedback"), card("Pry Bar"), card("Coil Of Cable")],
+      }),
+    });
+    const r = ids(state, "Red");
+    // Pry Bar and Coil Of Cable are both Cost 0.
+    const one = must(state, free("Red", r[1] as CardId));
+    expect(statPool(one.state)).toEqual({ oomph: 2, scramble: 0 });
+
+    const two = must(one.state, free("Red", r[2] as CardId));
+    expect(statPool(two.state)).toEqual({ oomph: 1, scramble: 1 });
+  });
+
+  it("floors the shared pool at zero rather than going negative", () => {
+    const state = playing({
+      Red: player({ deck: pile("Shove", 4), hand: [card("System Feedback"), card("Coil Of Cable")] }),
+    });
+    const r = ids(state, "Red");
+    const next = must(state, free("Red", r[1] as CardId));
+    // Coil Of Cable's own Scramble 3, less System Feedback's 1, is still
+    // positive; Oomph has nothing to lose and stays at zero.
+    expect(statPool(next.state)).toEqual({ oomph: 0, scramble: 2 });
+  });
+
+  it("does not fire for a card that costs more than 0", () => {
+    const state = playing({
+      Red: player({
+        deck: pile("Shove", 4),
+        hand: [card("System Feedback"), card("Charge In"), card("Shove"), card("Shove")],
+      }),
+    });
+    const r = ids(state, "Red");
+    const next = must(state, {
+      type: "PLAY_CARD",
+      character: "Red",
+      cardId: r[1] as CardId,
+      payWith: [r[2] as CardId, r[3] as CardId],
+    });
+    expect(statPool(next.state)).toEqual({ oomph: 4, scramble: 0 });
   });
 });

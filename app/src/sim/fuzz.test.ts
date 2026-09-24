@@ -12,13 +12,6 @@ describe("fuzz sweep", () => {
     for (const seed of seedsFrom(1, 50)) {
       const run = simulate(seed, randomPolicy, CARD_CONTENT);
       const detail = `seed ${String(seed)}: ${run.rejection ?? run.stopped}, floor ${String(run.floor)}`;
-      if (run.stopped === "NoLegalMove") {
-        // The rulebook says nothing about a band's Room pool running short:
-        // once a band's own Stairwell is spent, that band can never Ascend
-        // again, so a long enough run empties its floor deck and stalls
-        // there — on any floor. Anything else stopping the run is a bug.
-        continue;
-      }
       expect(run.stopped, detail).toBe("GameOver");
     }
   });

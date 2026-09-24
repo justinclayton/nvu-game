@@ -2,7 +2,15 @@
 
 import { playedBy } from "../queries";
 import type { Character, DomainEvent, Pending } from "../types";
-import { CHARACTERS, drawOne, moveToHand, playerOf, shuffleIntoDeck, takeFrom } from "../verbs";
+import {
+  CHARACTERS,
+  drawOne,
+  grantPlayDiscount,
+  moveToHand,
+  playerOf,
+  shuffleIntoDeck,
+  takeFrom,
+} from "../verbs";
 import {
   ask,
   done,
@@ -96,7 +104,7 @@ export const GRAY: Registry = {
   /* "Scramble equal to 2 times the number of cards Red has played this turn." */
   "In Step": {
     stats(state, _owner, card) {
-      return { oomph: 2 * playedBy(state, "Red"), scramble: card.scramble };
+      return { oomph: card.oomph, scramble: 2 * playedBy(state, "Red") };
     },
   },
 
@@ -105,9 +113,11 @@ export const GRAY: Registry = {
    * Bad Stuff itself contributes no stats; this card is what makes playing
    * a piece of it worth anything. */
   "One Man's Junk": {
-    stats(state) {
+    stats(state, _owner, card) {
       const played = state.playZone.some((p) => p.card.kind === "bad_stuff");
-      return played ? { oomph: 2, scramble: 2 } : { oomph: 0, scramble: 0 };
+      return played
+        ? { oomph: card.oomph + 1, scramble: card.scramble + 1 }
+        : { oomph: card.oomph, scramble: card.scramble };
     },
   },
 
@@ -172,6 +182,13 @@ export const GRAY: Registry = {
       if (event.type !== "CARD_PLAYED" || event.character !== "Red") return nothing(state);
       const events: DomainEvent[] = [];
       return done(drawOne(state, ctx.character, events), events);
+    },
+  },
+
+  /* "The next card Red plays this turn costs 1 fewer card to play." */
+  "Distract & Pivot": {
+    onPlay(state) {
+      return done(grantPlayDiscount(state, "Red"));
     },
   },
 };

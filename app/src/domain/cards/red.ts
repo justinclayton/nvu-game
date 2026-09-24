@@ -2,7 +2,7 @@
 
 import type { DomainEvent } from "../types";
 import { playedBy } from "../queries";
-import { playerOf, shuffleIntoDeck, takeFrom } from "../verbs";
+import { drawOne, playerOf, shuffleIntoDeck, takeFrom } from "../verbs";
 import { ask, done, nothing, source, type Registry } from "./behaviour";
 
 export const RED: Registry = {
@@ -15,10 +15,22 @@ export const RED: Registry = {
   /* "Exhaust 3." */
   Reckless: { exhaustX: 3 },
 
+  /* "Exhaust 1." */
+  "Cross Punch": { exhaustX: 1 },
+
   /* "If Gray played a card this turn, play this card for free." */
   "Fast Follow": {
     freeIf(state) {
       return playedBy(state, "Gray") > 0;
+    },
+  },
+
+  /* "If Gray played a card this turn, draw 1 card." */
+  "Tag Team": {
+    onPlay(state, ctx) {
+      if (playedBy(state, "Gray") === 0) return nothing(state);
+      const events: DomainEvent[] = [];
+      return done(drawOne(state, ctx.character, events), events);
     },
   },
 

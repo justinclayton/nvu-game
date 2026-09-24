@@ -5,6 +5,7 @@
 import type { Character, DomainEvent, GameState, Pending } from "../types";
 import { exhaustXPreventedBy } from "../queries";
 import {
+  applyPoolPenalty,
   CHARACTERS,
   discardFromHand,
   drawOne,
@@ -16,6 +17,7 @@ import {
   other,
   playerOf,
   returnToHand,
+  scrap,
   takeFrom,
   takeGoodStuff,
 } from "../verbs";
@@ -146,6 +148,56 @@ export const STUFF: Registry = {
     },
   },
 
+  /* "Play: Draw 1 card." */
+  "Stim Pack": {
+    onPlay(state, ctx) {
+      const events: DomainEvent[] = [];
+      return done(drawOne(state, ctx.character, events), events);
+    },
+  },
+
+  /* "Play: Look at the top 3 cards of the Floor deck." */
+  "High-Frequency Scanner": {
+    onPlay(state, ctx) {
+      const top = state.floorDeck.slice(0, 3);
+      return done(state, [{ type: "ROOMS_PEEKED", character: ctx.character, rooms: top }]);
+    },
+  },
+
+  /* "Play: Scrap 1 Bad Stuff card from your hand or discard pile." */
+  "Automated Salvage Kit": {
+    onPlay(state, ctx) {
+      const p = playerOf(state, ctx.character);
+      const options = [...p.hand, ...p.discard].filter((c) => c.kind === "bad_stuff");
+      if (options.length === 0) return nothing(state);
+      return ask(state, {
+        kind: "ChooseCards",
+        prompt: "Scrap which Bad Stuff card from your hand or discard pile?",
+        character: ctx.character,
+        options,
+        count: 1,
+        optional: false,
+        source: source(ctx, "automated-salvage-kit"),
+      });
+    },
+    onChoice(answer, state, ctx) {
+      if (answer.kind !== "cards") return nothing(state);
+      const events: DomainEvent[] = [];
+      let s = state;
+      for (const chosen of answer.cards) {
+        const inHand = playerOf(s, ctx.character).hand.some((c) => c.id === chosen.id);
+        s = inHand
+          ? takeFrom(s, ctx.character, "hand", [chosen])
+          : takeFrom(s, ctx.character, "discard", [chosen]);
+        s = scrap(s, ctx.character, chosen, events);
+      }
+      return done(s, events);
+    },
+  },
+
+  /* "Exhaust 2." */
+  "Emergency Power Core": { exhaustX: 2 },
+
   /* ------------------------------------------------------------- Bad Stuff */
 
   /* "Holding: At Turn Start, draw 1 fewer card." */
@@ -218,6 +270,50 @@ export const STUFF: Registry = {
         return done(state, events);
       }
       return done(exhaustFromDeck(state, ctx.character, 1, ctx.card.name, events), events);
+    },
+  },
+
+  /* "Holding: At Turn Start, Exhaust 1. Play: Scrap 1 Good Stuff card from your hand." */
+  "Corrosive Acid": {
+    onTurnStart(state, ctx) {
+      const events: DomainEvent[] = [];
+      const stoppedBy = exhaustXPreventedBy(state, ctx.character);
+      if (stoppedBy) {
+        events.push({ type: "EXHAUST_PREVENTED", character: ctx.character, amount: 1, by: stoppedBy });
+        return done(state, events);
+      }
+      return done(exhaustFromDeck(state, ctx.character, 1, ctx.card.name, events), events);
+    },
+    onPlay(state, ctx) {
+      const options = playerOf(state, ctx.character).hand.filter((c) => c.kind === "good_stuff");
+      if (options.length === 0) return nothing(state);
+      return ask(state, {
+        kind: "ChooseCards",
+        prompt: "Scrap which Good Stuff card from your hand?",
+        character: ctx.character,
+        options,
+        count: 1,
+        optional: false,
+        source: source(ctx, "corrosive-acid"),
+      });
+    },
+    onChoice(answer, state, ctx) {
+      if (answer.kind !== "cards") return nothing(state);
+      const events: DomainEvent[] = [];
+      const lifted = takeFrom(state, ctx.character, "hand", answer.cards);
+      let s = lifted;
+      for (const chosen of answer.cards) s = scrap(s, ctx.character, chosen, events);
+      return done(s, events);
+    },
+  },
+
+  /* "Holding: Whenever you play a card with Cost 0, lose 1 Oomph and 1 Scramble from the Stat pool this turn." */
+  "System Feedback": {
+    onEvent(event, state, ctx) {
+      if (ctx.zone !== "hand") return nothing(state);
+      if (event.type !== "CARD_PLAYED" || event.character !== ctx.character) return nothing(state);
+      if (event.card.cost !== 0) return nothing(state);
+      return done(applyPoolPenalty(state, 1, 1));
     },
   },
 };

@@ -3,6 +3,7 @@
 
 import { beforeEach, describe, expect, it } from "vitest";
 import { execute } from "./engine";
+import { roomId } from "./ids";
 import { statPool, thresholdIsMet } from "./queries";
 import { shuffle } from "./rng";
 import {
@@ -19,11 +20,29 @@ import {
   rig,
   room,
 } from "./__fixtures__/rig";
-import type { CardId, Command, Room } from "./types";
+import type { CardId, Challenge, Command, Room, Threshold } from "./types";
 
 beforeEach(resetRig);
 
 const playFree = free;
+
+/**
+ * A room built by hand rather than looked up from design/cards.yaml, for a
+ * rule that must hold regardless of which rooms the printed list carries.
+ */
+let fixtureRoomCount = 0;
+function fixtureRoom(challenges: readonly Challenge[]): Room {
+  fixtureRoomCount += 1;
+  return {
+    id: roomId(`fixture-room#${String(fixtureRoomCount)}`),
+    name: "Fixture Room",
+    kind: "room",
+    band: 1,
+    flavor: "",
+    challenges,
+    flee: { text: "Leave empty-handed.", clears: false, effects: [] },
+  };
+}
 
 describe("Turn Start", () => {
   it("step 1, Flip the room: turns the top card of the floor deck face up before anything is spent", () => {
@@ -285,6 +304,98 @@ describe("Room kinds: Room and Stairwell", () => {
     expect(next.phase).toBe("Ascend");
   });
 
+  it("'if more than one threshold within a challenge is met, only the lowest-printed one resolves'", () => {
+    // A hand-built room: one challenge, two thresholds. Two free Coil Of
+    // Cables (Scramble 3 each) meet both the Scramble 2 line (Exhaust 1 each)
+    // and the Scramble 5 line (reveal a reward) at once. Only the
+    // lowest-printed of the two — Scramble 5 — resolves.
+    const thresholds: Threshold[] = [
+      {
+        requires: { oomph: 0, scramble: 2 },
+        outcome: "Both of you Exhaust 1.",
+        clears: false,
+        fleeFree: false,
+        ascends: false,
+        effects: [{ type: "ExhaustFromDeck", who: "both", amount: 1 }],
+      },
+      {
+        requires: { oomph: 0, scramble: 5 },
+        outcome: "One of you reveals a card reward.",
+        clears: true,
+        fleeFree: false,
+        ascends: false,
+        effects: [{ type: "RevealReward", who: "one" }],
+      },
+    ];
+    const state = rig({
+      phase: "Play",
+      activeRoom: fixtureRoom([{ thresholds }]),
+      Red: player({ deck: pile("Shove", 5) }),
+      Gray: player({
+        deck: pile("Duck Under", 5),
+        hand: [card("Coil Of Cable"), card("Coil Of Cable")],
+      }),
+    });
+    const g = ids(state, "Gray");
+    const { state: next, events } = play(state, [
+      playFree("Gray", g[0] as CardId),
+      playFree("Gray", g[1] as CardId),
+      { type: "END_PLAY" },
+    ]);
+    expect(events.filter((e) => e.type === "THRESHOLD_MET")).toHaveLength(1);
+    expect(next.cleared).toHaveLength(1);
+    // No Exhaust: the Scramble 2 line's outcome does not resolve alongside it.
+    expect(next.Red.exhaust).toHaveLength(0);
+    expect(next.Gray.exhaust).toHaveLength(0);
+    expect(next.pending?.kind).toBe("ChooseCharacter");
+  });
+
+  it("a met line that Clears beats one that says to Flee for free", () => {
+    // A hand-built room: two challenges. One's threshold Ascends; the
+    // other's says "Flee this room for free." Each Turn, Outcome: any met
+    // challenge Clears the room, so a fleeFree line elsewhere cannot un-Clear it.
+    const ascendChallenge: Challenge = {
+      thresholds: [
+        {
+          requires: { oomph: 9, scramble: 0 },
+          outcome: "Ascend.",
+          clears: true,
+          fleeFree: false,
+          ascends: true,
+          effects: [],
+        },
+      ],
+    };
+    const fleeFreeChallenge: Challenge = {
+      thresholds: [
+        {
+          requires: { oomph: 0, scramble: 9 },
+          outcome: "Flee this room for free.",
+          clears: false,
+          fleeFree: true,
+          ascends: false,
+          effects: [],
+        },
+      ],
+    };
+    const state = rig({
+      phase: "Play",
+      activeRoom: fixtureRoom([ascendChallenge, fleeFreeChallenge]),
+      Red: player({ deck: pile("Shove", 5), hand: pile("Pry Bar", 3) }),
+      Gray: player({ deck: pile("Duck Under", 5), hand: pile("Coil Of Cable", 3) }),
+    });
+    const r = ids(state, "Red");
+    const g = ids(state, "Gray");
+    const { state: next } = play(state, [
+      // Three free Pry Bars is Oomph 9, three free Coils is Scramble 9, so both
+      // challenges are met at once.
+      ...r.map((id) => playFree("Red", id as CardId)),
+      ...g.map((id) => playFree("Gray", id as CardId)),
+      { type: "END_PLAY" },
+    ]);
+    expect(next.cleared).toHaveLength(1);
+  });
+
   it("'one of you reveals a card reward' asks who, then offers it — taken or skipped", () => {
     // Bio-Hazard Containment Vault's Oomph-15 challenge is its own "one of
     // you reveals a card reward": two Charge Ins (Oomph 4 each) plus three
@@ -452,32 +563,22 @@ describe("Room kinds: Room and Stairwell", () => {
   });
 
   it("a Room's Challenge reads the shared pool, not just the named character's own cards", () => {
-    // Sorting Room: Oomph 2 pays Red, Scramble 2 pays Gray. Each line names who
-    // is paid, not whose side of the play zone counts.
+    // Security Turnstile's Oomph 5 line pays Red — met by Charge In's own 4
+    // plus a Pry Bar Gray played, proving the pool is shared rather than read
+    // from Red's own cards alone.
     const state = rig({
       phase: "Play",
       activeRoom: room("Security Turnstile"),
-      Red: player({
-        deck: pile("Shove", 5),
-        hand: [card("Charge In"), card("Shove"), card("Shove")],
-      }),
-      Gray: player({ deck: pile("Duck Under", 5), hand: [card("In Step"), card("Duck Under")] }),
+      Red: player({ deck: pile("Shove", 5), hand: [card("Charge In"), card("Shove"), card("Shove")] }),
+      Gray: player({ deck: pile("Duck Under", 5), hand: [card("Pry Bar")] }),
     });
     const r = ids(state, "Red");
     const g = ids(state, "Gray");
     const { state: next } = play(state, [
-      {
-        type: "PLAY_CARD",
-        character: "Red",
-        cardId: r[0] as CardId,
-        payWith: [r[1] as CardId, r[2] as CardId],
-      },
-      { type: "PLAY_CARD", character: "Gray", cardId: g[0] as CardId, payWith: [g[1] as CardId] },
+      { type: "PLAY_CARD", character: "Red", cardId: r[0] as CardId, payWith: [r[1] as CardId, r[2] as CardId] },
+      playFree("Gray", g[0] as CardId),
       { type: "END_PLAY" },
     ]);
-    // Security Turnstile's Oomph 5 line pays Red — met by Charge In's own 4
-    // plus Gray's In Step (Oomph = 2x Red's plays this turn), proving the
-    // pool is shared rather than read from Red's own cards alone.
     expect(next.Red.hand.some((c) => c.kind === "good_stuff")).toBe(true);
   });
 

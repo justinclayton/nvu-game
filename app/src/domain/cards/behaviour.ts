@@ -77,6 +77,12 @@ export interface CardBehaviour {
    * held card before the play zone is swept, and may `ask` a question.
    */
   onCleanup?(state: GameState, ctx: BehaviourContext): StepResult;
+  /**
+   * A `Holding:` line that acts once at Turn Start, after the draw
+   * (Corrosive Acid). Called on the held card once both hands have drawn,
+   * before Play begins.
+   */
+  onTurnStart?(state: GameState, ctx: BehaviourContext): StepResult;
 }
 
 export type Registry = Readonly<Record<string, CardBehaviour>>;

@@ -123,6 +123,13 @@ export interface TurnRecord {
    * marker.
    */
   readonly fired: readonly string[];
+  /**
+   * Distract & Pivot: one-shot "-1 cost" charges banked for a character's own
+   * next play, spent one per play regardless of what it saves.
+   */
+  readonly playDiscount: Readonly<Record<Character, number>>;
+  /** System Feedback: banked off the shared pool this turn; a stat never reads below zero. */
+  readonly poolPenalty: { readonly oomph: number; readonly scramble: number };
 }
 
 /* ------------------------------------------------------------ the phases */
@@ -336,6 +343,7 @@ export type DomainEvent =
       readonly to: "deck" | "hand";
     }
   | { readonly type: "CARDS_PEEKED"; readonly character: Character; readonly cards: readonly Card[] }
+  | { readonly type: "ROOMS_PEEKED"; readonly character: Character; readonly rooms: readonly Room[] }
   | { readonly type: "THRESHOLD_MET"; readonly room: Room; readonly threshold: Threshold }
   | { readonly type: "STUFF_TAKEN"; readonly character: Character; readonly card: Card }
   | {

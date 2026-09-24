@@ -280,6 +280,42 @@ export const spendFreePlay = (state: GameState): GameState => ({
   thisTurn: { ...state.thisTurn, freePlays: Math.max(0, state.thisTurn.freePlays - 1) },
 });
 
+/** Distract & Pivot: bank a one-shot "-1 cost" charge for this character's own next play. */
+export const grantPlayDiscount = (state: GameState, c: Character): GameState => ({
+  ...state,
+  thisTurn: {
+    ...state.thisTurn,
+    playDiscount: { ...state.thisTurn.playDiscount, [c]: state.thisTurn.playDiscount[c] + 1 },
+  },
+});
+
+/** Spend one charge, as the next card that character plays is played. */
+export const spendPlayDiscount = (state: GameState, c: Character): GameState => ({
+  ...state,
+  thisTurn: {
+    ...state.thisTurn,
+    playDiscount: { ...state.thisTurn.playDiscount, [c]: Math.max(0, state.thisTurn.playDiscount[c] - 1) },
+  },
+});
+
+/** Drop every play discount nobody used. It is for a card played this turn. */
+export const clearPlayDiscount = (state: GameState): GameState =>
+  state.thisTurn.playDiscount.Red === 0 && state.thisTurn.playDiscount.Gray === 0
+    ? state
+    : { ...state, thisTurn: { ...state.thisTurn, playDiscount: { Red: 0, Gray: 0 } } };
+
+/** System Feedback: bank a one-shot loss against this turn's shared stat pool. */
+export const applyPoolPenalty = (state: GameState, oomph: number, scramble: number): GameState => ({
+  ...state,
+  thisTurn: {
+    ...state.thisTurn,
+    poolPenalty: {
+      oomph: state.thisTurn.poolPenalty.oomph + oomph,
+      scramble: state.thisTurn.poolPenalty.scramble + scramble,
+    },
+  },
+});
+
 /** Put a card on top of a deck. Nothing shuffles during a floor, so it is next. */
 export function topDeck(state: GameState, c: Character, card: Card): GameState {
   const p = playerOf(state, c);

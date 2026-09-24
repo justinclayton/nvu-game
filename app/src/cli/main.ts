@@ -553,10 +553,7 @@ function fuzz(request: FuzzRequest): number {
   const failures: string[] = [];
   for (const seed of seedsFrom(request.from, request.seeds)) {
     const run = simulate(seed, randomPolicy, content);
-    // A band's own pool can run dry once its Stairwell is spent (design says
-    // nothing about this), so a random run stalling with no legal move left
-    // is expected, not a failure — only a stop no seed should ever produce is.
-    if (run.stopped === "GameOver" || run.stopped === "NoLegalMove") continue;
+    if (run.stopped === "GameOver") continue;
 
     const path = join(FUZZ_DIR, `${String(seed)}.json`);
     const session = createSession(seed, content);

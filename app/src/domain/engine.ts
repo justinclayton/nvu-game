@@ -43,6 +43,7 @@ import { CorruptStateError } from "./types";
 import {
   CHARACTERS,
   clearFreePlays,
+  clearPlayDiscount,
   dealBadStuff,
   drawOne,
   discard,
@@ -52,6 +53,7 @@ import {
   scrap,
   shuffleIntoDeck,
   spendFreePlay,
+  spendPlayDiscount,
   standing,
   takeFrom,
   takeGoodStuff,
@@ -454,7 +456,25 @@ function flipRoom(state: GameState, run: Run): GameState {
   };
   const faced = settle(flipped, run);
   if (faced.phase === "GameOver") return faced;
-  return settle(drawPhase(faced, run), run);
+  const drawn = settle(drawPhase(faced, run), run);
+  if (drawn.phase === "GameOver") return drawn;
+  return turnStartHands(drawn, run);
+}
+
+/** A held card's own Turn Start line (Corrosive Acid), once the draw is done. */
+function turnStartHands(state: GameState, run: Run): GameState {
+  let s = state;
+  for (const c of CHARACTERS) {
+    for (const card of playerOf(s, c).hand) {
+      const onTurnStart = behaviourOf(card.name)?.onTurnStart;
+      if (!onTurnStart) continue;
+      const step = onTurnStart(s, { card, character: c, zone: "hand" });
+      run.events.push(...step.events);
+      s = settle(step.state, run);
+      if (s.phase === "GameOver") return s;
+    }
+  }
+  return s;
 }
 
 /**
@@ -510,6 +530,10 @@ function playCard(
   // and nothing else — a card that already cost nothing never burns it.
   if (costOverrideSpentBy(s, c, card)) {
     s = spendFreePlay(s);
+  }
+  // Distract & Pivot: the very next card this character plays spends the charge.
+  if (s.thisTurn.playDiscount[c] > 0) {
+    s = spendPlayDiscount(s, c);
   }
 
   // Each Turn, Play: you pay in *other* cards from your own hand. Red never pays for Gray.
@@ -806,6 +830,7 @@ function finishTurn(state: GameState, run: Run): GameState {
     // The Play phase is over, so a free play nobody used is gone: it discounts a
     // card played this turn or nothing at all.
     s = clearFreePlays(s);
+    s = clearPlayDiscount(s);
 
     run.events.push({ type: "CLEANUP_BEGAN" });
     s = settle(s, run);

@@ -7,6 +7,7 @@ import {
   eventTypes,
   free,
   handCard,
+  ids,
   must,
   pile,
   play,
@@ -14,6 +15,8 @@ import {
   playing,
   resetRig,
 } from "../__fixtures__/rig";
+
+import type { CardId } from "../types";
 
 beforeEach(resetRig);
 
@@ -47,6 +50,57 @@ describe("Reckless — 'Exhaust 3'", () => {
       payWith: [handCard(state, "Red", "Shove").id],
     });
     expect(next.Red.deck).toHaveLength(2);
+  });
+});
+
+describe("Cross Punch — 'Exhaust 1'", () => {
+  it("takes one off the top of your own deck, into the Exhaust pile", () => {
+    const state = playing({
+      Red: player({ deck: pile("Shove", 4), hand: [card("Cross Punch"), card("Shove"), card("Shove")] }),
+    });
+    const hand = ids(state, "Red");
+    const { state: next } = must(state, {
+      type: "PLAY_CARD",
+      character: "Red",
+      cardId: hand[0] as CardId,
+      payWith: [hand[1] as CardId, hand[2] as CardId],
+    });
+    expect(next.Red.deck).toHaveLength(3);
+    expect(next.Red.exhaust).toHaveLength(1);
+  });
+});
+
+describe("Tag Team — 'If Gray played a card this turn, draw 1 card'", () => {
+  it("draws nothing while Gray has played nothing", () => {
+    const state = playing({
+      Red: player({ deck: pile("Shove", 4), hand: [card("Tag Team"), card("Shove")] }),
+    });
+    const hand = ids(state, "Red");
+    const { state: next, events } = must(state, {
+      type: "PLAY_CARD",
+      character: "Red",
+      cardId: hand[0] as CardId,
+      payWith: [hand[1] as CardId],
+    });
+    expect(eventTypes(events)).not.toContain("CARD_DRAWN");
+    expect(next.Red.deck).toHaveLength(4);
+  });
+
+  it("draws a card once Gray has played", () => {
+    const state = playing({
+      Red: player({ deck: pile("Shove", 4), hand: [card("Tag Team"), card("Shove")] }),
+      Gray: player({ deck: pile("Duck Under", 4), hand: [card("Coil Of Cable")] }),
+    });
+    const played = play(state, [free("Gray", ids(state, "Gray")[0] as CardId)]);
+    const hand = ids(played.state, "Red");
+    const { state: next, events } = must(played.state, {
+      type: "PLAY_CARD",
+      character: "Red",
+      cardId: hand[0] as CardId,
+      payWith: [hand[1] as CardId],
+    });
+    expect(eventTypes(events)).toContain("CARD_DRAWN");
+    expect(next.Red.deck).toHaveLength(3);
   });
 });
 

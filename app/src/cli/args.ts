@@ -210,53 +210,41 @@ function parseMove(action: string, actionRest: readonly string[]): PlayAction {
   }
 }
 
+/** Every `play` move's flags, superimposed — a move uses the ones that name it. */
+const PLAY_OPTIONS = {
+  run: { type: "string" },
+  seed: { type: "string" },
+  events: { type: "string" },
+  table: { type: "boolean" },
+  moves: { type: "boolean" },
+} as const;
+
 function parsePlay(rest: readonly string[]): PlayRequest {
-  const [action, ...actionRest] = rest;
+  const { values, positionals } = parseArgs({
+    args: [...rest],
+    options: PLAY_OPTIONS,
+    allowPositionals: true,
+    strict: true,
+  });
+  const [action, ...actionRest] = positionals;
   if (action === undefined) throw new UsageError("play wants a move — see bin/nvu help.");
+  const run = values.run ?? null;
 
   switch (action) {
-    case "new": {
-      const { values } = parseArgs({
-        args: [...actionRest],
-        options: { seed: { type: "string" }, run: { type: "string" } },
-        strict: true,
-      });
+    case "new":
       return {
         command: "play",
         action: { kind: "new", seed: requiredInteger("seed", values.seed) },
-        run: values.run ?? null,
+        run,
       };
-    }
-    case "undo": {
-      const { values } = parseArgs({
-        args: [...actionRest],
-        options: { run: { type: "string" } },
-        strict: true,
-      });
-      return { command: "play", action: { kind: "undo" }, run: values.run ?? null };
-    }
+    case "undo":
+      return { command: "play", action: { kind: "undo" }, run };
     case "note": {
-      const { values, positionals } = parseArgs({
-        args: [...actionRest],
-        options: { run: { type: "string" } },
-        allowPositionals: true,
-        strict: true,
-      });
-      const text = positionals[0];
+      const text = actionRest[0];
       if (text === undefined) throw new UsageError("note wants the text to write into the log.");
-      return { command: "play", action: { kind: "note", text }, run: values.run ?? null };
+      return { command: "play", action: { kind: "note", text }, run };
     }
-    case "show": {
-      const { values } = parseArgs({
-        args: [...actionRest],
-        options: {
-          run: { type: "string" },
-          events: { type: "string" },
-          table: { type: "boolean" },
-          moves: { type: "boolean" },
-        },
-        strict: true,
-      });
+    case "show":
       return {
         command: "play",
         action: {
@@ -265,35 +253,17 @@ function parsePlay(rest: readonly string[]): PlayRequest {
           table: values.table ?? false,
           moves: values.moves ?? false,
         },
-        run: values.run ?? null,
+        run,
       };
-    }
     case "pile": {
-      const { values, positionals } = parseArgs({
-        args: [...actionRest],
-        options: { run: { type: "string" } },
-        allowPositionals: true,
-        strict: true,
-      });
-      const [character, pile] = positionals;
+      const [character, pile] = actionRest;
       if (character === undefined || pile === undefined) {
         throw new UsageError("play pile wants a character (Red or Gray) and a pile (hand, discard or play).");
       }
-      return { command: "play", action: { kind: "pile", character, pile }, run: values.run ?? null };
+      return { command: "play", action: { kind: "pile", character, pile }, run };
     }
-    default: {
-      // Every remaining move takes no flags of its own, only --run, so we
-      // strip that first and hand the rest to the named-move grammar.
-      const { values, positionals } = parseArgs({
-        args: [action, ...actionRest],
-        options: { run: { type: "string" } },
-        allowPositionals: true,
-        strict: true,
-      });
-      const [moveAction, ...moveRest] = positionals;
-      if (moveAction === undefined) throw new UsageError("play wants a move — see bin/nvu help.");
-      return { command: "play", action: parseMove(moveAction, moveRest), run: values.run ?? null };
-    }
+    default:
+      return { command: "play", action: parseMove(action, actionRest), run };
   }
 }
 

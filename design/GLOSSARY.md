@@ -2,7 +2,7 @@
 
 The project's domain terms and nothing else: what each thing is, the rulebook section that governs
 it, and the ticket or ruling that settled it. The rules themselves live in
-[`rulebook.md`](rulebook.md) (rules version 0.2.0), which wins
+[`rulebook.md`](rulebook.md) (rules version 0.2.2), which wins
 wherever this file disagrees with it. Code uses these terms spelled this way.
 
 ---
@@ -37,7 +37,7 @@ A group of one or more Thresholds on a Room card. A challenge is met when the St
 
 **Threshold**
 
-A `threshold: outcome` line within a Challenge. Players compare their Stat pool against it during the Outcome phase. A line naming one character says who an outcome pays or targets, never whose side of the play zone counts — every Threshold, on every Room, reads the same shared Stat pool. `[you, 2026-09-17, 2026-09-23]`
+A `threshold: outcome` line within a Challenge. Players compare their Stat pool against it during the Outcome phase. A line naming one character says who an outcome pays or targets, never whose side of the play zone counts — every Threshold, on every Room, reads the same shared Stat pool. `[you, 2026-09-17, 2026-09-23]` A Threshold prints one stat or both; one printing both is met only when the Stat pool meets both numbers (issue #66). `[agent → you, 2026-09-23]`
 
 **Flee line**
 
@@ -150,6 +150,10 @@ The keyword `Exhaust X`, also written `Exhaust X cards from your deck`: move the
 **Exhaust pile**
 
 A player's face-up pile of cards Exhausted off their deck. Permanent: unlike the discard pile, nothing here ever returns.
+
+**Peek**
+
+The keyword `Peek X`: look at the top X cards of any deck, then put them back in the same order. `[agent, 2026-09-23]`
 
 **Scrap**
 

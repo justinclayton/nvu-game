@@ -21,7 +21,7 @@ import {
 } from "../verbs";
 import { ask, done, nothing, source, type BehaviourContext, type Registry } from "./behaviour";
 
-/** The `ChooseCards` question for a Stich-Em-Ups heal, once the target is known. */
+/** The `ChooseCards` question for a Stitch-Em-Ups heal, once the target is known. */
 function healCardsAsk(state: GameState, ctx: BehaviourContext, target: Character): Pending {
   return {
     kind: "ChooseCards",
@@ -37,7 +37,7 @@ function healCardsAsk(state: GameState, ctx: BehaviourContext, target: Character
 export const STUFF: Registry = {
   /* ------------------------------------------------------------ Good Stuff */
 
-  /* "Play: if you get any Good Stuff this turn, get an additional one."
+  /* "Play: If you get any Good Stuff this turn, get 1 additional Good Stuff."
    *
    * Two hooks share one `fired` marker per copy so the bonus pays out exactly
    * once, whether the Good Stuff arrives before or after Crowbar is played. */
@@ -65,7 +65,7 @@ export const STUFF: Registry = {
    * Skips the character choice when only one side has an Exhaust pile to draw
    * from, and moves fewer than 2 if that pile is that short (validation's own
    * `Math.min(count, options.length)` already covers it). */
-  "A Pair Of Stich-Em-Ups": {
+  "A Pair Of Stitch-Em-Ups": {
     onPlay(state, ctx) {
       const eligible = CHARACTERS.filter((c) => playerOf(state, c).exhaust.length > 0);
       if (eligible.length === 0) return nothing(state);
@@ -100,7 +100,7 @@ export const STUFF: Registry = {
    * Down, is not a legal choice.
    *
    * Skips the character choice when only one side is eligible to draw — the
-   * same "no real choice" shape as Stich-Em-Ups' heal target above. */
+   * same "no real choice" shape as Stitch-Em-Ups' heal target above. */
   "Grav Harness": {
     onPlay(state, ctx) {
       const options = CHARACTERS.filter((c) => {
@@ -128,7 +128,7 @@ export const STUFF: Registry = {
     },
   },
 
-  /* "If the room is Cleared, return this to your hand at the end of the turn." */
+  /* "If the room is Cleared, return this card to your hand at the end of the turn." */
   "Riot Shield": {
     onCleanup(state, ctx) {
       if (state.resolution?.roomEnded !== "Cleared") return nothing(state);
@@ -153,14 +153,14 @@ export const STUFF: Registry = {
     whileHeld: { drawTargetDelta: 1 },
   },
 
-  /* "Holding: cards cost +1 to play."
+  /* "Holding: Cards you play cost +1 card to play."
    *
    * Bites its holder only: Red never pays for Gray (rulebook §7, Play). */
   Sluggish: {
     whileHeld: { costDelta: 1 },
   },
 
-  /* "Holding: Stuff you play has -1 Oomph." */
+  /* "Holding: Stuff cards you play have -1 Oomph and -1 Scramble." */
   Rust: {
     whileHeld: { stuffPowerDelta: -1 },
   },
@@ -195,8 +195,7 @@ export const STUFF: Registry = {
     },
   },
 
-  /* "Holding: Every threshold also requires 2 `Scramble` to be met. A `Scramble` threshold requires 2 more instead.
-   *  Play: Exhaust 2." */
+  /* "Holding: Every room threshold requires +2 Scramble to be met. Play: Exhaust 2." */
   Panic: {
     whileHeld: { thresholdScrambleDelta: 2 },
     exhaustX: 2,

@@ -21,7 +21,7 @@ describe("Overdrive — 'Exhaust 2'", () => {
   it("puts the top 2 cards of your own deck into your Exhaust pile", () => {
     const state = rig({
       phase: "Play",
-      activeRoom: room("Sorting Room"),
+      activeRoom: room("Security Turnstile"),
       Red: player({ deck: pile("Shove", 4), hand: [card("Overdrive")] }),
       Gray: player({ deck: pile("Duck Under", 4) }),
     });
@@ -44,7 +44,7 @@ describe("Overdrive — 'Exhaust 2'", () => {
   it("sends you Down if the deck runs out under it", () => {
     const state = rig({
       phase: "Play",
-      activeRoom: room("Sorting Room"),
+      activeRoom: room("Security Turnstile"),
       Red: player({ deck: [card("Shove")], hand: [card("Overdrive")] }),
       Gray: player({ deck: pile("Duck Under", 4) }),
     });
@@ -63,7 +63,7 @@ describe("Sluggish — 'Holding: cards cost +1 to play'", () => {
   it("makes its holder's cards dearer, and nobody else's", () => {
     const state = rig({
       phase: "Play",
-      activeRoom: room("Sorting Room"),
+      activeRoom: room("Security Turnstile"),
       Red: player({ deck: pile("Shove", 4), hand: [card("Sluggish"), card("Shove")] }),
       Gray: player({ deck: pile("Duck Under", 4), hand: [card("Duck Under")] }),
     });
@@ -76,7 +76,7 @@ describe("Sluggish — 'Holding: cards cost +1 to play'", () => {
   it("stops mattering once it leaves the hand", () => {
     const state = rig({
       phase: "Play",
-      activeRoom: room("Sorting Room"),
+      activeRoom: room("Security Turnstile"),
       Red: player({
         deck: pile("Shove", 4),
         hand: [card("Sluggish"), card("Shove"), card("Shove"), card("Shove")],
@@ -99,7 +99,7 @@ describe("Peek Around Corner — 'Look at the top card of any deck'", () => {
   it("asks whose deck, then shows the top card and puts it back", () => {
     const state = rig({
       phase: "Play",
-      activeRoom: room("Sorting Room"),
+      activeRoom: room("Security Turnstile"),
       Red: player({ deck: pile("Shove", 3), hand: [] }),
       Gray: player({ deck: pile("Duck Under", 3), hand: [card("Peek Around Corner"), card("Duck Under")] }),
     });

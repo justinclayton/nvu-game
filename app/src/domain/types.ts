@@ -9,13 +9,13 @@
 
 import type { CardId, RoomId } from "./ids";
 import type {
-  Band,
   CardKind,
   CardSet,
   Challenge,
   Character,
   FleeLine,
   Rarity,
+  RoomBand,
   RoomEffect,
   RoomKind,
   Threshold,
@@ -53,8 +53,8 @@ export interface Room {
   readonly id: RoomId;
   readonly name: string;
   readonly kind: RoomKind;
-  /** Which floors' pool the card is drawn from (rulebook Setup, "Floor deck"). */
-  readonly band: Band;
+  /** Which floors' pool the card is drawn from; `null` for the one fixed Floor 10 Stairwell. */
+  readonly band: RoomBand;
   readonly flavor: string;
   readonly challenges: readonly Challenge[];
   readonly flee: FleeLine;

@@ -6,7 +6,6 @@ import { execute } from "./engine";
 import {
   card,
   eventTypes,
-  handCard,
   must,
   pile,
   play,
@@ -27,13 +26,10 @@ function atAscension(over: Partial<GameState> = {}): GameState {
     phase: "Ascend",
     floor: 1,
     roomSupply: [
-      room("Coney, The Thing In The Stairwell"),
-      room("Collapsed Stairwell"),
-      room("Collapsed Stairwell"),
-      room("Ruptured Coolant Line"),
-      ...Array.from({ length: 8 }, () => room("Sorting Room")),
+      room("The Sentry Drone"),
+      ...Array.from({ length: 8 }, () => room("Security Turnstile")),
     ],
-    cleared: [room("Gross Thing That Looks Like A Cherry")],
+    cleared: [room("The Sentry Drone")],
     Red: player({ deck: pile("Shove", 2), discard: [...pile("Charge In", 3), card("Pry Bar")] }),
     Gray: player({ deck: pile("Duck Under", 2), discard: pile("Pick The Lock", 3) }),
     ...over,
@@ -87,7 +83,8 @@ describe("Ascending, Settle your Stuff", () => {
     const state = atAscension();
     const pryBar = state.Red.discard.find((c) => c.name === "Pry Bar");
     const payer = state.Red.discard.find((c) => c.name === "Charge In");
-    if (!pryBar || !payer) throw new Error("Red is not holding both Pry Bar and Charge In in discard");
+    if (!pryBar || !payer)
+      throw new Error("Red is not holding both Pry Bar and Charge In in discard");
     const { state: next, events } = must(state, {
       type: "ASCEND",
       Red: { settle: [{ cardId: pryBar.id, payWith: payer.id }], takeRewardId: null },
@@ -263,19 +260,20 @@ describe("Winning and losing", () => {
     const state = rig({
       phase: "Play",
       floor: 10,
-      activeRoom: room("Gross Thing That Looks Like A Cherry"),
+      activeRoom: room("The Sentry Drone"),
       Red: player({
         deck: pile("Shove", 4),
-        hand: [card("Charge In"), card("Shove"), card("Shove"), card("Pry Bar")],
+        hand: [card("Charge In"), card("Shove"), card("Shove"), card("Pry Bar"), card("Pry Bar")],
       }),
       Gray: player({ deck: pile("Duck Under", 4) }),
     });
-    const chargeIn = handCard(state, "Red", "Charge In");
-    const pryBar = handCard(state, "Red", "Pry Bar");
-    const payWith = state.Red.hand.filter((c) => c.name === "Shove").map((c) => c.id);
+    const hand = state.Red.hand.map((c) => c.id);
+    const [chargeIn, payA, payB, pryBar, pryBar2] = hand;
+    if (!chargeIn || !payA || !payB || !pryBar || !pryBar2) throw new Error("rig");
     const { state: next, events } = play(state, [
-      { type: "PLAY_CARD", character: "Red", cardId: chargeIn.id, payWith },
-      { type: "PLAY_CARD", character: "Red", cardId: pryBar.id, payWith: [] },
+      { type: "PLAY_CARD", character: "Red", cardId: chargeIn, payWith: [payA, payB] },
+      { type: "PLAY_CARD", character: "Red", cardId: pryBar, payWith: [] },
+      { type: "PLAY_CARD", character: "Red", cardId: pryBar2, payWith: [] },
       { type: "END_PLAY" },
     ]);
     expect(next.phase).toBe("GameOver");

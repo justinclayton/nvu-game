@@ -140,30 +140,62 @@ function thresholdScrambleDelta(state: GameState): number {
   return delta;
 }
 
-/** What a printed threshold actually asks for right now. */
-export function thresholdTarget(state: GameState, threshold: Threshold): number {
-  const extra = threshold.stat === "Scramble" ? thresholdScrambleDelta(state) : 0;
-  return threshold.value + extra;
+/**
+ * What a printed threshold actually asks of the pool right now: Panic (and
+ * anything like it) only ever raises the Scramble side, whether a line
+ * already carried one or not (design/cards.yaml, Panic).
+ */
+export function thresholdRequirement(state: GameState, threshold: Threshold): StatTotals {
+  return {
+    oomph: threshold.requires.oomph,
+    scramble: threshold.requires.scramble + thresholdScrambleDelta(state),
+  };
 }
 
 /**
- * Panic doesn't just raise Scramble lines — it makes every line need Scramble.
- * An Oomph line picks up its own Scramble floor; a Scramble line already
- * carries the same delta on its own target, so it needs no second floor.
+ * Is this line's threshold met? A threshold that prints both stats is met
+ * only when the pool meets or exceeds both (design/rulebook.md).
  */
-export function extraScrambleRequirement(state: GameState, threshold: Threshold): number {
-  return threshold.stat === "Scramble" ? 0 : thresholdScrambleDelta(state);
-}
-
-const statOf = (totals: StatTotals, stat: Stat): number =>
-  stat === "Oomph" ? totals.oomph : totals.scramble;
-
-/** Is this line's threshold met? Every Challenge reads the shared pool. */
 export function thresholdIsMet(state: GameState, threshold: Threshold): boolean {
   const pool = statPool(state);
-  const meetsMain = statOf(pool, threshold.stat) >= thresholdTarget(state, threshold);
-  const meetsExtra = pool.scramble >= extraScrambleRequirement(state, threshold);
-  return meetsMain && meetsExtra;
+  const req = thresholdRequirement(state, threshold);
+  return pool.oomph >= req.oomph && pool.scramble >= req.scramble;
+}
+
+/** One stat line a threshold should show right now, whether printed or added by something held. */
+export interface ThresholdLine {
+  readonly stat: Stat;
+  readonly effective: number;
+  readonly printed: number;
+}
+
+/** The printed stat lines of a threshold, with no state to weigh a held modifier against. */
+export function printedThresholdLines(threshold: Threshold): readonly ThresholdLine[] {
+  const lines: ThresholdLine[] = [];
+  if (threshold.requires.oomph > 0) {
+    lines.push({ stat: "Oomph", effective: threshold.requires.oomph, printed: threshold.requires.oomph });
+  }
+  if (threshold.requires.scramble > 0) {
+    lines.push({ stat: "Scramble", effective: threshold.requires.scramble, printed: threshold.requires.scramble });
+  }
+  return lines;
+}
+
+/**
+ * The stat lines a threshold should display right now — every stat it prints,
+ * plus Scramble if something held adds it where none was printed (Panic
+ * against an Oomph-only line).
+ */
+export function thresholdLines(state: GameState, threshold: Threshold): readonly ThresholdLine[] {
+  const req = thresholdRequirement(state, threshold);
+  const lines: ThresholdLine[] = [];
+  if (threshold.requires.oomph > 0 || req.oomph > 0) {
+    lines.push({ stat: "Oomph", effective: req.oomph, printed: threshold.requires.oomph });
+  }
+  if (threshold.requires.scramble > 0 || req.scramble > 0) {
+    lines.push({ stat: "Scramble", effective: req.scramble, printed: threshold.requires.scramble });
+  }
+  return lines;
 }
 
 /** Every Threshold printed on a room, across every Challenge, in printed order. */

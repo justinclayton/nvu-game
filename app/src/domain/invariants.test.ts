@@ -78,11 +78,11 @@ function runFrom(seed: number): Ran {
     if (!command) break;
     const result = execute(state, command);
     if (!result.ok) {
-      // Bands 2 and 3, and floor 10's fixed Stairwell, aren't in
-      // design/cards.yaml yet: a run that Ascends past floor 3 finds an
-      // empty floor deck and stops there. Anything short of that, or any
-      // other rejection, is a real bug.
-      if (command.type === "FLIP_ROOM" && state.floor >= 4) break;
+      // The rulebook says nothing about a band's Room pool running short —
+      // once a band's own Stairwell is spent, that band can never Ascend
+      // again, so a long enough run empties its floor deck and stops there.
+      // Anything short of that, or any other rejection, is a real bug.
+      if (command.type === "FLIP_ROOM" && result.reason.code === "FloorDeckEmpty") break;
       throw new Error(`the actor produced an illegal ${command.type}: ${result.reason.message}`);
     }
     state = result.state;
@@ -186,9 +186,11 @@ describe("seeded-run invariants", () => {
         expect(state.outcome).not.toBeNull();
         continue;
       }
-      // See runFrom: bands 2/3 and floor 10 aren't stocked yet, so a run
-      // that ascends past floor 3 stops there instead.
-      expect(state.floor).toBeGreaterThanOrEqual(4);
+      // See runFrom: a band's own pool can run dry once its Stairwell is
+      // spent, so a non-Victory run may stop on any floor. The only thing
+      // left to check is that it really did stop for that reason.
+      expect(state.phase).toBe("Turn Start");
+      expect(state.floorDeck).toHaveLength(0);
     }
   });
 });

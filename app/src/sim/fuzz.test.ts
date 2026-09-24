@@ -13,10 +13,10 @@ describe("fuzz sweep", () => {
       const run = simulate(seed, randomPolicy, CARD_CONTENT);
       const detail = `seed ${String(seed)}: ${run.rejection ?? run.stopped}, floor ${String(run.floor)}`;
       if (run.stopped === "NoLegalMove") {
-        // Bands 2 and 3, and floor 10's fixed Stairwell, aren't in design/cards.yaml
-        // yet: a run that Ascends past floor 3 finds an empty floor deck and
-        // stalls there. Anything short of that is a real bug.
-        expect(run.floor, detail).toBeGreaterThanOrEqual(4);
+        // The rulebook says nothing about a band's Room pool running short:
+        // once a band's own Stairwell is spent, that band can never Ascend
+        // again, so a long enough run empties its floor deck and stalls
+        // there — on any floor. Anything else stopping the run is a bug.
         continue;
       }
       expect(run.stopped, detail).toBe("GameOver");

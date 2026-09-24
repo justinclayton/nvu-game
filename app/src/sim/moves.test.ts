@@ -118,7 +118,7 @@ describe("legalCommands", () => {
     const empty = rig({ phase: "Turn Start" });
     expect(legalCommands(empty)).toEqual([]);
 
-    const queued = rig({ phase: "Turn Start", floorDeck: [room("Sorting Room")] });
+    const queued = rig({ phase: "Turn Start", floorDeck: [room("Security Turnstile")] });
     expect(legalCommands(queued)).toEqual([{ type: "FLIP_ROOM" }]);
   });
 
@@ -148,7 +148,7 @@ describe("ascendChoices", () => {
     const pryBar = card("Pry Bar");
     const state = rig({
       phase: "Ascend",
-      roomSupply: [room("Sorting Room")],
+      roomSupply: [room("Security Turnstile")],
       Red: player({ deck: pile("Shove", 2), discard: [pryBar, ...pile("Charge In", 2)] }),
       Gray: player({ deck: pile("Duck Under", 2) }),
     });

@@ -9,14 +9,7 @@
  * the new state. Nothing mutates the state handed to it.
  */
 
-import type {
-  Card,
-  Character,
-  DomainEvent,
-  DiscardedFrom,
-  GameState,
-  PlayerState,
-} from "./types";
+import type { Card, Character, DomainEvent, DiscardedFrom, GameState, PlayerState } from "./types";
 import { drawBlind, shuffle } from "./rng";
 
 export const CHARACTERS: readonly Character[] = ["Red", "Gray"];
@@ -327,7 +320,10 @@ export function takeGoodStuff(
       ...next,
       thisTurn: {
         ...next.thisTurn,
-        goodStuffTaken: { ...next.thisTurn.goodStuffTaken, [c]: next.thisTurn.goodStuffTaken[c] + 1 },
+        goodStuffTaken: {
+          ...next.thisTurn.goodStuffTaken,
+          [c]: next.thisTurn.goodStuffTaken[c] + 1,
+        },
       },
     };
   }
@@ -338,25 +334,30 @@ export function takeGoodStuff(
 export function dealBadStuff(
   state: GameState,
   c: Character,
+  count: number,
   events: DomainEvent[],
 ): GameState {
-  if (playerOf(state, c).down) return state; // takes no punishments (rulebook, Going Down)
-  const [card, rest, seed] = drawBlind(state.pools.badStuff, state.seed);
-  if (!card) {
-    events.push({ type: "STUFF_POOL_EMPTY", character: c, pool: "bad_stuff" });
-    return state;
+  let next = state;
+  for (let i = 0; i < count; i++) {
+    if (playerOf(next, c).down) return next; // takes no punishments (rulebook, Going Down)
+    const [card, rest, seed] = drawBlind(next.pools.badStuff, next.seed);
+    if (!card) {
+      events.push({ type: "STUFF_POOL_EMPTY", character: c, pool: "bad_stuff" });
+      return next;
+    }
+    next = { ...next, seed, pools: { ...next.pools, badStuff: rest } };
+    events.push({ type: "STUFF_TAKEN", character: c, card });
+    next = moveToHand(next, c, card, events);
   }
-  const next = { ...state, seed, pools: { ...state.pools, badStuff: rest } };
-  events.push({ type: "STUFF_TAKEN", character: c, card });
-  return moveToHand(next, c, card, events);
+  return next;
 }
 
 /** Has this once-per-turn trigger already gone off? */
-export const hasFired = (state: GameState, key: string): boolean => state.thisTurn.fired.includes(key);
+export const hasFired = (state: GameState, key: string): boolean =>
+  state.thisTurn.fired.includes(key);
 
 /** Mark a once-per-turn trigger as spent, so an effect that could feed itself fires once. */
 export const markFired = (state: GameState, key: string): GameState => ({
   ...state,
   thisTurn: { ...state.thisTurn, fired: [...state.thisTurn.fired, key] },
 });
-

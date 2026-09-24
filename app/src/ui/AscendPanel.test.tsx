@@ -18,7 +18,7 @@ function atAscension(): GameState {
   const base = rig({
     phase: "Ascend",
     floor: 1,
-    cleared: [room("Gross Thing That Looks Like A Cherry")],
+    cleared: [room("The Sentry Drone")],
     Red: player({ deck: pile("Shove", 2), discard: [...pile("Charge In", 2), card("Pry Bar")] }),
     Gray: player({ deck: pile("Duck Under", 2), discard: pile("Pick The Lock", 2) }),
   });

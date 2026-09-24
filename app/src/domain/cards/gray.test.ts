@@ -50,7 +50,10 @@ describe("Catch Your Breath — 'Look at the top 2 of any deck, put them back in
 describe("Hack the Doors — 'Look at the top 3 of any deck'", () => {
   it("shows three", () => {
     const state = playing({
-      Gray: player({ deck: pile("Duck Under", 4), hand: [card("Hack the Doors"), card("Duck Under")] }),
+      Gray: player({
+        deck: pile("Duck Under", 4),
+        hand: [card("Hack the Doors"), card("Duck Under")],
+      }),
     });
     const asked = must(state, {
       type: "PLAY_CARD",
@@ -238,125 +241,5 @@ describe("Covering Fire — 'Every time Red plays a card this turn, draw 1 card'
 
     const twice = must(once.state, free("Red", handCard(once.state, "Red", "Coil Of Cable").id));
     expect(twice.state.Gray.hand).toHaveLength(2);
-  });
-});
-
-describe("Every Little Bit Helps — 'twice the number of other cards Gray played'", () => {
-  it("counts Gray's other played cards", () => {
-    const state = playing({
-      Gray: player({
-        deck: pile("Duck Under", 3),
-        hand: [card("Every Little Bit Helps"), card("Duck Under"), card("Coil Of Cable")],
-      }),
-    });
-    const one = must(state, {
-      type: "PLAY_CARD",
-      character: "Gray",
-      cardId: handCard(state, "Gray", "Every Little Bit Helps").id,
-      payWith: [handCard(state, "Gray", "Duck Under").id],
-    });
-    expect(statPool(one.state).scramble).toBe(0);
-    const two = must(one.state, free("Gray", handCard(one.state, "Gray", "Coil Of Cable").id));
-    // The Coil is Scramble 3, and it is one other card, so this is Scramble 2.
-    expect(statPool(two.state).scramble).toBe(5);
-  });
-});
-
-describe("Level Up — 'Scrap a card from your hand for the top of the Gray Rewards deck'", () => {
-  it("Scraps the chosen card and puts the reward straight into hand", () => {
-    const state = playing({
-      Gray: player({
-        deck: pile("Duck Under", 3),
-        hand: [card("Level Up"), card("Duck Under"), card("Duck Under"), card("Coil Of Cable")],
-      }),
-    });
-    const top = state.pools.Gray[0];
-    if (!top) throw new Error("Gray's reward pool is empty");
-    const payWith = state.Gray.hand.filter((c) => c.name === "Duck Under").map((c) => c.id);
-    const asked = must(state, {
-      type: "PLAY_CARD",
-      character: "Gray",
-      cardId: handCard(state, "Gray", "Level Up").id,
-      payWith,
-    });
-    const pending = asked.state.pending;
-    if (pending?.kind !== "ChooseCards") throw new Error("expected a card choice");
-    expect(pending.optional).toBe(true);
-
-    const coil = pending.options.find((c) => c.name === "Coil Of Cable");
-    if (!coil) throw new Error("Coil Of Cable not offered");
-    const { state: next, events } = must(asked.state, {
-      type: "CHOOSE_CARDS",
-      cardIds: [coil.id],
-    });
-    expect(next.scrapyard.map((c) => c.id)).toEqual([coil.id]);
-    expect(next.Gray.hand.map((c) => c.id)).toEqual([top.id]);
-    expect(next.pools.Gray[0]?.id).not.toBe(top.id);
-    expect(eventTypes(events)).toContain("CARD_SCRAPPED");
-  });
-
-  it("does nothing if you decline to Scrap", () => {
-    const state = playing({
-      Gray: player({
-        deck: pile("Duck Under", 3),
-        hand: [card("Level Up"), card("Duck Under"), card("Duck Under"), card("Duck Under")],
-      }),
-    });
-    const payWith = state.Gray.hand.filter((c) => c.name === "Duck Under").slice(0, 2).map((c) => c.id);
-    const asked = must(state, {
-      type: "PLAY_CARD",
-      character: "Gray",
-      cardId: handCard(state, "Gray", "Level Up").id,
-      payWith,
-    });
-    const { state: next } = must(asked.state, { type: "CHOOSE_CARDS", cardIds: [] });
-    expect(next.scrapyard).toEqual([]);
-    // The spare card is still in hand, and no reward was drawn.
-    expect(next.Gray.hand.map((c) => c.name)).toEqual(["Duck Under"]);
-    expect(next.pools.Gray).toEqual(state.pools.Gray);
-  });
-});
-
-describe("I Know Kung Fu — 'Holding: when you play a card with Scramble, draw 1'", () => {
-  it("draws while it is held, and not once it is played", () => {
-    const state = playing({
-      Red: player({ deck: pile("Shove", 4), hand: [card("Coil Of Cable")] }),
-      Gray: player({
-        deck: pile("Duck Under", 6),
-        hand: [
-          card("I Know Kung Fu"),
-          card("Coil Of Cable"),
-          card("Coil Of Cable"),
-          card("Pry Bar"),
-          card("Pry Bar"),
-          card("Pry Bar"),
-        ],
-      }),
-    });
-    const kungFu = handCard(state, "Gray", "I Know Kung Fu");
-    const coils = state.Gray.hand.filter((c) => c.name === "Coil Of Cable");
-    const pryBars = state.Gray.hand.filter((c) => c.name === "Pry Bar");
-    const [firstCoil, secondCoil] = coils;
-    if (!firstCoil || !secondCoil) throw new Error("Gray is not holding two Coil Of Cables");
-
-    // Red playing Scramble does nothing: the card says "when *you* play".
-    const byRed = must(state, free("Red", handCard(state, "Red", "Coil Of Cable").id));
-    expect(byRed.state.Gray.deck).toHaveLength(6);
-
-    // Gray playing Scramble while holding it draws.
-    const byGray = must(byRed.state, free("Gray", firstCoil.id));
-    expect(byGray.state.Gray.deck).toHaveLength(5);
-
-    // Playing it moves it to the play zone, where a `Holding:` line is no
-    // longer running.
-    const played = must(byGray.state, {
-      type: "PLAY_CARD",
-      character: "Gray",
-      cardId: kungFu.id,
-      payWith: pryBars.map((c) => c.id),
-    });
-    const deckAfter = played.state.Gray.deck.length;
-    const silent = must(played.state, free("Gray", secondCoil.id));
-    expect(silent.state.Gray.deck).toHaveLength(deckAfter);
   });
 });

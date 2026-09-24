@@ -11,8 +11,8 @@ import type { Band, CardContent, CardFace, Character, RoomFace } from "./printed
 import { shuffle } from "./rng";
 import type { Card, DomainEvent, GameState, PlayerState, Room, TurnRecord } from "./types";
 
-/** The rulebook this engine implements (design/rulebook.md). */
-export const RULES_VERSION = "0.2.1";
+/** The rulebook this engine implements (design/rulebook.md). See #83. */
+export const RULES_VERSION = "0.2.2";
 
 /** The tenth floor is the roof: clearing it wins the run (rulebook, Winning and losing). */
 export const TOP_FLOOR = 10;
@@ -32,7 +32,7 @@ export const roomsOnFloor = (floor: number): number => TOP_FLOOR + 1 - floor;
 /**
  * Rooms and Stairwells pool by band: floors 1–3, 4–6, 7–9 (rulebook Setup,
  * "Floor deck"). Floor 10 draws from no band — it prints one fixed Stairwell
- * instead, not yet in design/cards.yaml.
+ * instead (design/cards.yaml, The Monolith Core; issue #66).
  */
 export function bandOf(floor: number): Band | null {
   if (floor <= 3) return 1;
@@ -99,8 +99,9 @@ function takeRooms(
  * random until the floor is full (rulebook Setup, "Floor deck"). The floor
  * gets no harder as you climb — it gets emptier.
  *
- * Bands 2 and 3, and floor 10's fixed Stairwell, are not yet in
- * design/cards.yaml, so a floor outside band 1 builds an empty deck.
+ * A band's pool can hold fewer physical cards than a floor calls for — the
+ * rulebook says nothing about this — so the floor is simply built with every
+ * card the band still has, Stairwell included, and never throws.
  */
 export function buildFloor(state: GameState, events: DomainEvent[]): GameState {
   let seed = state.seed;
@@ -184,10 +185,8 @@ export function createInitialState(
   content: CardContent,
 ): readonly [GameState, DomainEvent[]] {
   const players = content.cards.filter((c) => c.kind === "player");
-  const starterFaces = (owner: Character) =>
-    players.filter((c) => c.owner === owner && c.starter);
-  const rewardFaces = (owner: Character) =>
-    players.filter((c) => c.owner === owner && !c.starter);
+  const starterFaces = (owner: Character) => players.filter((c) => c.owner === owner && c.starter);
+  const rewardFaces = (owner: Character) => players.filter((c) => c.owner === owner && !c.starter);
 
   const deckFor = (owner: Character) => starterFaces(owner).flatMap(copiesOf);
   const poolFor = (owner: Character) => rewardFaces(owner).flatMap(copiesOf);

@@ -7,12 +7,12 @@
 
 import { beforeEach, describe, expect, it } from "vitest";
 import { statPool } from "./queries";
+import type { CardId, GameState } from "./types";
 import {
   card,
   eventTypes,
   free,
   goingDown,
-  handCard,
   must,
   pile,
   play,
@@ -24,11 +24,14 @@ import {
 
 beforeEach(resetRig);
 
+const hand = (state: GameState, c: "Red" | "Gray"): readonly CardId[] =>
+  state[c].hand.map((x) => x.id);
+
 describe("walkthrough 1 — the deck runs dry mid-draw and the discard pile becomes the new deck", () => {
   it("reshuffles once, then keeps drawing to 5", () => {
     const state = rig({
       phase: "Turn Start",
-      floorDeck: [room("Sorting Room")],
+      floorDeck: [room("Security Turnstile")],
       Red: player({ deck: pile("Shove", 2), discard: pile("Charge In", 3) }),
       Gray: player({ deck: pile("Duck Under", 5) }),
     });
@@ -57,12 +60,9 @@ describe("walkthrough 1 — the deck runs dry mid-draw and the discard pile beco
 describe("walkthrough 2 — Down when the deck and discard are both empty ends the run on the spot", () => {
   it("stops a room's own punishment from finishing, and everything after it", () => {
     const state = goingDown([card("Shove")]);
-    // Collapsed Stairwell's Flee line: "One of you Exhausts 3." Nobody played
+    // Smoldering Armory's Flee line: "Red Exhausts 5." Nobody played
     // anything, so no threshold is met and the room Flees.
-    const { state: next, events } = play(state, [
-      { type: "END_PLAY" },
-      { type: "CHOOSE_CHARACTER", character: "Red" },
-    ]);
+    const { state: next, events } = play(state, [{ type: "END_PLAY" }]);
     expect(next.phase).toBe("GameOver");
     expect(next.outcome).toBe("Defeat");
     // Going Down still empties the hand into the discard pile.
@@ -83,7 +83,7 @@ describe("walkthrough 3 — Exhaust is permanent; only the discard pile recycles
     const exhausted = pile("Charge In", 2);
     const state = rig({
       phase: "Turn Start",
-      floorDeck: [room("Sorting Room")],
+      floorDeck: [room("Security Turnstile")],
       Red: player({ deck: [], discard: pile("Shove", 5), exhaust: exhausted }),
       Gray: player({ deck: pile("Duck Under", 5) }),
     });
@@ -108,13 +108,13 @@ describe("walkthrough 4 — Settle your Stuff: four cards, four different fates,
       phase: "Ascend",
       floor: 1,
       roomSupply: [
-        room("Coney, The Thing In The Stairwell"),
-        room("Collapsed Stairwell"),
-        room("Collapsed Stairwell"),
-        room("Ruptured Coolant Line"),
-        ...Array.from({ length: 8 }, () => room("Sorting Room")),
+        room("The Sentry Drone"),
+        room("Flooded Ventilation Shaft"),
+        room("Flooded Ventilation Shaft"),
+        room("Overgrown Hydroponics Bay"),
+        ...Array.from({ length: 8 }, () => room("Security Turnstile")),
       ],
-      cleared: [room("Gross Thing That Looks Like A Cherry")],
+      cleared: [room("The Sentry Drone")],
       Red: player({
         deck: [defaultGood, ...pile("Shove", 2)],
         hand: [defaultBad],
@@ -157,28 +157,29 @@ describe("walkthrough 5 — Cleanup runs before Ascending", () => {
   it("discards the play zone, then clears the floor and offers the reward", () => {
     const state = rig({
       phase: "Play",
-      activeRoom: room("Gross Thing That Looks Like A Cherry"),
+      activeRoom: room("The Sentry Drone"),
       Red: player({
         deck: pile("Shove", 5),
-        hand: [card("Charge In"), card("Shove"), card("Shove"), card("Pry Bar")],
+        hand: [card("Charge In"), card("Shove"), card("Shove"), card("Pry Bar"), card("Pry Bar")],
       }),
       Gray: player({ deck: pile("Duck Under", 5) }),
     });
-    const chargeIn = handCard(state, "Red", "Charge In");
-    const pryBar = handCard(state, "Red", "Pry Bar");
-    const payWith = state.Red.hand.filter((c) => c.name === "Shove").map((c) => c.id);
+    const h = hand(state, "Red");
+    const [chargeIn, payA, payB, pryBar, pryBar2] = h;
+    if (!chargeIn || !payA || !payB || !pryBar || !pryBar2) throw new Error("rig");
     const { state: next, events } = play(state, [
-      { type: "PLAY_CARD", character: "Red", cardId: chargeIn.id, payWith },
-      { type: "PLAY_CARD", character: "Red", cardId: pryBar.id, payWith: [] },
+      { type: "PLAY_CARD", character: "Red", cardId: chargeIn, payWith: [payA, payB] },
+      { type: "PLAY_CARD", character: "Red", cardId: pryBar, payWith: [] },
+      { type: "PLAY_CARD", character: "Red", cardId: pryBar2, payWith: [] },
       { type: "END_PLAY" },
     ]);
     const types = eventTypes(events);
     expect(types.indexOf("CLEANUP_BEGAN")).toBeLessThan(types.indexOf("FLOOR_CLEARED"));
-    // The play zone's two cards were discarded during that cleanup.
+    // The play zone's three cards were discarded during that cleanup.
     const playZoneDiscards = events.filter(
       (e) => e.type === "CARD_DISCARDED" && e.from === "playZone",
     );
-    expect(playZoneDiscards).toHaveLength(2);
+    expect(playZoneDiscards).toHaveLength(3);
     expect(next.playZone).toEqual([]);
     expect(next.phase).toBe("Ascend");
     expect(next.offer?.Red).toHaveLength(3);
@@ -187,28 +188,43 @@ describe("walkthrough 5 — Cleanup runs before Ascending", () => {
 
 describe("walkthrough 6 — a Room's Challenge reads the shared pool, not either character's side", () => {
   it("pays both lines even with the stats swapped between characters", () => {
-    // Sorting Room asks for Oomph (pays Red) and Scramble (pays Gray). Red
-    // brings Scramble and Gray brings Oomph — the shared pool has both, so
-    // both lines are met and both characters are paid.
+    // Pressurized Maintenance Hub asks for Oomph (pays Red) and Scramble
+    // (pays Gray) in two independent challenges. Red brings Scramble and
+    // Gray brings Oomph — the shared pool has both, so both lines are met
+    // and both characters are paid, regardless of whose cards supplied it.
     const state = rig({
       phase: "Play",
-      activeRoom: room("Sorting Room"),
-      Red: player({ deck: pile("Shove", 5), hand: [card("Coil Of Cable")] }),
-      Gray: player({ deck: pile("Duck Under", 5), hand: [card("Pry Bar")] }),
+      activeRoom: room("Pressurized Maintenance Hub"),
+      Red: player({ deck: pile("Shove", 5), hand: pile("Coil Of Cable", 3) }),
+      Gray: player({ deck: pile("Duck Under", 5), hand: pile("Pry Bar", 3) }),
     });
+    const r = hand(state, "Red");
+    const g = hand(state, "Gray");
     const played = play(state, [
-      free("Red", handCard(state, "Red", "Coil Of Cable").id),
-      free("Gray", handCard(state, "Gray", "Pry Bar").id),
+      ...r.map((id): ReturnType<typeof free> => free("Red", id as CardId)),
+      ...g.map((id): ReturnType<typeof free> => free("Gray", id as CardId)),
     ]);
-    expect(statPool(played.state)).toEqual({ oomph: 3, scramble: 3 });
+    expect(statPool(played.state)).toEqual({ oomph: 9, scramble: 9 });
 
-    const { state: next, events } = play(played.state, [{ type: "END_PLAY" }]);
-    expect(eventTypes(events)).toContain("STUFF_TAKEN");
+    const { state: cleared, events } = play(played.state, [{ type: "END_PLAY" }]);
+    expect(eventTypes(events).filter((t) => t === "THRESHOLD_MET")).toHaveLength(2);
     expect(eventTypes(events)).toContain("ROOM_CLEARED");
     expect(eventTypes(events)).not.toContain("ROOM_FLED");
-    expect(next.cleared).toHaveLength(1);
-    expect(next.Red.hand.every((c) => c.kind === "good_stuff")).toBe(true);
-    expect(next.Gray.hand.every((c) => c.kind === "good_stuff")).toBe(true);
+    expect(cleared.cleared).toHaveLength(1);
+    // Oomph pays Red even though Gray's cards supplied it; Scramble pays Gray
+    // even though Red's cards supplied it.
+    expect(cleared.pending?.kind).toBe("TakeReward");
+    expect(
+      cleared.pending && "character" in cleared.pending ? cleared.pending.character : null,
+    ).toBe("Red");
+    const { state: afterRed } = must(cleared, { type: "TAKE_REWARD", take: true });
+    expect(afterRed.pending?.kind).toBe("TakeReward");
+    expect(
+      afterRed.pending && "character" in afterRed.pending ? afterRed.pending.character : null,
+    ).toBe("Gray");
+    const { state: next } = must(afterRed, { type: "TAKE_REWARD", take: true });
+    expect(next.Red.deck[0]?.owner).toBe("Red");
+    expect(next.Gray.deck[0]?.owner).toBe("Gray");
   });
 });
 
@@ -216,7 +232,7 @@ describe("walkthrough 7 — one Down ends the run immediately, mid multi-effect 
   it("stops a Flee line's own later effect from ever running", () => {
     const state = rig({
       phase: "Play",
-      activeRoom: room("Ruptured Coolant Line"),
+      activeRoom: room("Overgrown Hydroponics Bay"),
       Red: player({ deck: [], discard: [], hand: [] }),
       Gray: player({ deck: pile("Duck Under", 4), hand: [] }),
     });
@@ -239,27 +255,28 @@ describe("walkthrough 8 — ascending end to end: Settle your Stuff, then the re
     const state = rig({
       phase: "Play",
       floor: 1,
-      activeRoom: room("Gross Thing That Looks Like A Cherry"),
+      activeRoom: room("The Sentry Drone"),
       roomSupply: [
-        room("Coney, The Thing In The Stairwell"),
-        room("Collapsed Stairwell"),
-        room("Collapsed Stairwell"),
-        room("Ruptured Coolant Line"),
-        ...Array.from({ length: 8 }, () => room("Sorting Room")),
+        room("The Sentry Drone"),
+        room("Flooded Ventilation Shaft"),
+        room("Flooded Ventilation Shaft"),
+        room("Overgrown Hydroponics Bay"),
+        ...Array.from({ length: 8 }, () => room("Security Turnstile")),
       ],
       Red: player({
         deck: pile("Shove", 5),
-        hand: [card("Charge In"), card("Shove"), card("Shove"), card("Pry Bar")],
+        hand: [card("Charge In"), card("Shove"), card("Shove"), card("Pry Bar"), card("Pry Bar")],
         discard: pile("Charge In", 3),
       }),
       Gray: player({ deck: pile("Duck Under", 5) }),
     });
-    const chargeIn = handCard(state, "Red", "Charge In");
-    const pryBar = handCard(state, "Red", "Pry Bar");
-    const payWith = state.Red.hand.filter((c) => c.name === "Shove").map((c) => c.id);
+    const h = hand(state, "Red");
+    const [chargeIn, payA, payB, pryBar, pryBar2] = h;
+    if (!chargeIn || !payA || !payB || !pryBar || !pryBar2) throw new Error("rig");
     const cleared = play(state, [
-      { type: "PLAY_CARD", character: "Red", cardId: chargeIn.id, payWith },
-      { type: "PLAY_CARD", character: "Red", cardId: pryBar.id, payWith: [] },
+      { type: "PLAY_CARD", character: "Red", cardId: chargeIn, payWith: [payA, payB] },
+      { type: "PLAY_CARD", character: "Red", cardId: pryBar, payWith: [] },
+      { type: "PLAY_CARD", character: "Red", cardId: pryBar2, payWith: [] },
       { type: "END_PLAY" },
     ]);
     expect(cleared.state.phase).toBe("Ascend");

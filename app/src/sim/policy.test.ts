@@ -18,15 +18,14 @@ describe("random", () => {
 
 /** A one-challenge, one-threshold room, only its shape overridden. */
 function roomWith(threshold: Partial<Threshold>): Room {
-  const base = room("Gross Thing That Looks Like A Cherry");
+  const base = room("The Sentry Drone");
   return {
     ...base,
     challenges: [
       {
         thresholds: [
           {
-            stat: "Oomph",
-            value: 4,
+            requires: { oomph: 4, scramble: 0 },
             outcome: "Clear it.",
             clears: true,
             fleeFree: false,
@@ -81,7 +80,7 @@ describe("greedy", () => {
     const payerB = card("Shove");
     const state: GameState = rig({
       phase: "Play",
-      activeRoom: roomWith({ value: 4 }),
+      activeRoom: roomWith({ requires: { oomph: 4, scramble: 0 } }),
       Red: player({ hand: [chargeIn, recklessSwing, payerA, payerB] }),
     });
     const legal: readonly Command[] = [
@@ -104,7 +103,7 @@ describe("greedy", () => {
     const payer = card("Shove");
     const state: GameState = rig({
       phase: "Play",
-      activeRoom: roomWith({ value: 1000 }),
+      activeRoom: roomWith({ requires: { oomph: 1000, scramble: 0 } }),
       Red: player({ hand: [shove, payer] }),
     });
     const legal: readonly Command[] = [
@@ -150,7 +149,7 @@ describe("greedy", () => {
       // between them) but not by this one Shove (2) alone, so the choice
       // between paying with cheapPayer or costlyPayer is what's on test.
       phase: "Play",
-      activeRoom: roomWith({ value: 5 }),
+      activeRoom: roomWith({ requires: { oomph: 5, scramble: 0 } }),
       Red: player({ hand: [shove, cheapPayer, costlyPayer] }),
     });
     const legal: readonly Command[] = [
@@ -263,7 +262,7 @@ describe("greedy", () => {
     resetRig();
     const deck = pile("Shove", 6); // all Oomph — Red is weak on Scramble
     const oomphReward = card("Fast Follow"); // Oomph 3
-    const scrambleReward = card("Deadweight Grip"); // Scramble 2
+    const scrambleReward = card("Tag Team"); // Oomph 2, Scramble 2
     const state: GameState = rig({
       phase: "Ascend",
       Red: player({ deck }),
@@ -287,7 +286,7 @@ describe("greedy", () => {
     const redStuff = [card("Pry Bar"), card("Coil Of Cable"), card("Crowbar")];
     const redPayers = [card("Shove"), card("Shove"), card("Shove")];
     const redReward = [card("Reckless Swing"), card("Fast Follow"), card("Reckless")];
-    const grayStuff = [card("A Pair Of Stich-Em-Ups"), card("Cutting Torch"), card("Grav Harness")];
+    const grayStuff = [card("A Pair Of Stitch-Em-Ups"), card("Cutting Torch"), card("Grav Harness")];
     const grayPayers = [card("Duck Under"), card("Duck Under"), card("Duck Under")];
     const grayReward = [card("Catch Your Breath"), card("In Step"), card("One Man's Junk")];
 

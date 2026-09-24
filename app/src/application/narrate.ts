@@ -7,6 +7,7 @@
  * nothing about notes.
  */
 
+import { printedThresholdLines } from "@domain/queries";
 import type { DomainEvent } from "@domain/types";
 import type { Note } from "./session";
 
@@ -40,8 +41,12 @@ export function describeEvent(event: DomainEvent): string {
       return `${event.card.name} goes to ${event.character}'s ${event.to}.`;
     case "CARDS_PEEKED":
       return `A look at ${event.character}'s deck: ${event.cards.map((c) => c.name).join(", ")}.`;
-    case "THRESHOLD_MET":
-      return `${event.threshold.stat} ${String(event.threshold.value)} met — ${event.threshold.outcome}`;
+    case "THRESHOLD_MET": {
+      const need = printedThresholdLines(event.threshold)
+        .map((l) => `${l.stat} ${String(l.effective)}`)
+        .join(" and ");
+      return `${need} met — ${event.threshold.outcome}`;
+    }
     case "STUFF_TAKEN":
       return `${event.character} gets ${event.card.name}.`;
     case "STUFF_POOL_EMPTY":

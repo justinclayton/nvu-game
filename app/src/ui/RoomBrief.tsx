@@ -3,7 +3,7 @@
  * beside it prints them large, with what the pool has against each one.
  * Whether a line is met is the domain's answer. */
 
-import { allThresholds, statPool, thresholdIsMet, thresholdTarget } from "@domain/queries";
+import { allThresholds, statPool, thresholdIsMet, thresholdLines } from "@domain/queries";
 import type { GameState } from "@domain/types";
 
 const PHASE_BLURB: Record<GameState["phase"], string> = {
@@ -41,17 +41,14 @@ export function RoomBrief({ state }: { readonly state: GameState }) {
           <ul className="brief__lines">
             {allThresholds(room).map((t, i) => {
               const met = thresholdIsMet(state, t);
-              const target = thresholdTarget(state, t);
-              const have = t.stat === "Oomph" ? pool.oomph : pool.scramble;
+              const lines = thresholdLines(state, t);
+              const need = lines.map((l) => `${l.stat} ${l.effective}`).join(" and ");
+              const have = lines.map((l) => (l.stat === "Oomph" ? pool.oomph : pool.scramble)).join(" / ");
               return (
                 <li key={i} className={met ? "bline is-met" : "bline"}>
-                  <span className="bline__need">
-                    {t.stat} {target}
-                  </span>
+                  <span className="bline__need">{need}</span>
                   <span className="bline__outcome">{t.outcome}</span>
-                  <span className="bline__have">
-                    {have}/{target}
-                  </span>
+                  <span className="bline__have">{have}</span>
                 </li>
               );
             })}

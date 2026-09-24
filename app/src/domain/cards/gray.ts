@@ -1,16 +1,8 @@
 /* Gray's cards. Keyed by the name design/cards.yaml makes unique. */
 
+import { playedBy } from "../queries";
 import type { Character, DomainEvent, Pending } from "../types";
-import { othersPlayed, playedBy } from "../queries";
-import {
-  CHARACTERS,
-  drawOne,
-  moveToHand,
-  playerOf,
-  scrap,
-  shuffleIntoDeck,
-  takeFrom,
-} from "../verbs";
+import { CHARACTERS, drawOne, moveToHand, playerOf, shuffleIntoDeck, takeFrom } from "../verbs";
 import {
   ask,
   done,
@@ -92,23 +84,23 @@ function shuffleStuffFromHand(whose: (ctx: BehaviourContext) => Character): Card
 }
 
 export const GRAY: Registry = {
-  /* "Look at the top card of any deck, then put it back on top. (Peek 1?)" */
+  /* "Peek 1." */
   "Peek Around Corner": peek(1),
 
-  /* "Look at the top 2 cards of any deck. Put them back in either order." */
+  /* "Look at top 2 cards of any deck. Put them back in either order." */
   "Catch Your Breath": peek(2),
 
-  /* "Look at the top 3 cards of any deck, then put them back in any order." */
+  /* "Look at top 3 cards of any deck, put back in any order." */
   "Hack the Doors": peek(3),
 
-  /* "Oomph equal to twice the number of cards Red has played this turn." */
+  /* "Scramble equal to 2 times the number of cards Red has played this turn." */
   "In Step": {
     stats(state, _owner, card) {
       return { oomph: 2 * playedBy(state, "Red"), scramble: card.scramble };
     },
   },
 
-  /* "If any Bad Stuff is played this turn, Oomph 2 and Scramble 2."
+  /* "If any Bad Stuff is played this turn, gain Oomph +1 and Scramble +1."
    *
    * Bad Stuff itself contributes no stats; this card is what makes playing
    * a piece of it worth anything. */
@@ -178,61 +170,6 @@ export const GRAY: Registry = {
     onEvent(event, state, ctx) {
       if (ctx.zone !== "playZone") return nothing(state);
       if (event.type !== "CARD_PLAYED" || event.character !== "Red") return nothing(state);
-      const events: DomainEvent[] = [];
-      return done(drawOne(state, ctx.character, events), events);
-    },
-  },
-
-  /* "Scramble equal to twice the number of other cards Gray played this turn." */
-  "Every Little Bit Helps": {
-    stats(state, owner, card) {
-      return { oomph: card.oomph, scramble: 2 * othersPlayed(state, owner, card) };
-    },
-  },
-
-  /* "Scrap a card from your hand. If you do, draw the top card from the Gray
-   * Rewards deck directly into your hand."
-   *
-   * The Gray Rewards deck is Gray's reward pool (rulebook §5, Setup); its top card goes to hand, not deck. */
-  "Level Up": {
-    onPlay(state, ctx) {
-      const options = playerOf(state, ctx.character).hand;
-      if (options.length === 0) return nothing(state);
-      return ask(state, {
-        kind: "ChooseCards",
-        prompt: "Scrap a card from your hand?",
-        character: ctx.character,
-        options,
-        count: 1,
-        optional: true,
-        source: source(ctx, "level-up"),
-      });
-    },
-    onChoice(answer, state, ctx) {
-      if (answer.kind !== "cards" || answer.cards.length === 0) return nothing(state);
-      const events: DomainEvent[] = [];
-      let s = takeFrom(state, ctx.character, "hand", answer.cards);
-      for (const card of answer.cards) s = scrap(s, ctx.character, card, events);
-      const top = s.pools[ctx.character][0];
-      if (!top) return done(s, events);
-      s = {
-        ...s,
-        pools:
-          ctx.character === "Red"
-            ? { ...s.pools, Red: s.pools.Red.slice(1) }
-            : { ...s.pools, Gray: s.pools.Gray.slice(1) },
-      };
-      events.push({ type: "REWARD_TAKEN", character: ctx.character, card: top });
-      return done(moveToHand(s, ctx.character, top, events), events);
-    },
-  },
-
-  /* "Holding: when you play a card with Scramble, draw 1 card." */
-  "I Know Kung Fu": {
-    onEvent(event, state, ctx) {
-      if (ctx.zone !== "hand") return nothing(state);
-      if (event.type !== "CARD_PLAYED" || event.character !== ctx.character) return nothing(state);
-      if (event.card.scramble <= 0) return nothing(state);
       const events: DomainEvent[] = [];
       return done(drawOne(state, ctx.character, events), events);
     },

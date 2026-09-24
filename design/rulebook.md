@@ -1,6 +1,6 @@
 # *North vs Up*: Rulebook
 
-Rules version: 0.2.1
+Rules version: 0.2.2
 
 ---
 
@@ -92,7 +92,7 @@ The phase ends when both players pass.
 
 Players add their combined stats they accumulated this turn and check to see if they met one or more challenges, or if they must Flee.
 
-**Clear**: A challenge is met when the players' stats meet or exceed any of its thresholds. If one or more challenges are met, the players `Clear` the room. For each met challenge, resolve the outcome of **one** threshold: the lowest-printed threshold met in that challenge. If more than one challenge is met, their outcomes may be resolved in any order.
+**Clear**: A challenge is met when the players' stats meet or exceed any of its thresholds. A threshold that prints both stats is met only when the players' stats meet or exceed both. If one or more challenges are met, the players `Clear` the room. For each met challenge, resolve the outcome of **one** threshold: the lowest-printed threshold met in that challenge. If more than one challenge is met, their outcomes may be resolved in any order.
 
 > If a resolved outcome says to `Ascend`, the entire Floor is cleared. Perform the Cleanup phase as normal, then perform the steps in section 10: *Ascending*.
 
@@ -127,7 +127,7 @@ There are two kinds: `Room` and `Stairwell`. Only a `Stairwell`'s challenges pri
 - **Name.**
 - **Type line:** `Room` or `Stairwell`, and the band of floors it belongs to (`Room · Floors 4–6`).
 - **Flavor line.**
-- **Challenges:** one or more, each listing one or more `threshold: outcome` lines.
+- **Challenges:** one or more, each listing one or more `threshold: outcome` lines. A threshold prints one stat, or both (`Oomph 7 and Scramble 7`).
 - **`Flee`**: what happens when no challenges are met.
 
 ### Character cards
@@ -161,6 +161,7 @@ A `Stuff` card shows the same parts as a player card, with these differences:
 - `Discard X cards from your hand`: Choose **X** cards from your hand and move them to your discard pile.
 - `Exhaust X cards from your deck`: Move the top **X** cards of your deck to your Exhaust pile. If your deck is empty, see `Empty deck`.
 - `Exhaust X`: the same as `Exhaust X cards from your deck`.
+- `Peek X`: Look at the top **X** cards of any deck, then put them back in the same order.
 - `Scrap`: Move the card to the Scrapyard. It is removed from play for the rest of the game.
 - `Empty deck`: If you must draw or Exhaust a card and your deck is empty, first shuffle your discard pile to form a new deck. If your discard pile is also empty, you go `Down` (section 9).
 

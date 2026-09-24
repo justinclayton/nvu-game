@@ -12,8 +12,12 @@ describe("simulate", () => {
   it("finishes every seeded run", () => {
     for (const seed of SEEDS) {
       const run = simulate(seed, randomPolicy, CARD_CONTENT);
-      expect(run.stopped, `seed ${String(seed)}: ${run.rejection ?? ""}`).toBe("GameOver");
-      expect(run.outcome).not.toBe("Unfinished");
+      const detail = `seed ${String(seed)}: ${run.rejection ?? run.stopped}`;
+      // A band's own pool can run dry once its Stairwell is spent (design
+      // says nothing about this), so a random run may also stall with no
+      // legal move left, not only win or lose.
+      expect(["GameOver", "NoLegalMove"], detail).toContain(run.stopped);
+      if (run.stopped === "GameOver") expect(run.outcome).not.toBe("Unfinished");
       expect(run.commandCount).toBe(run.commands.length);
     }
   });

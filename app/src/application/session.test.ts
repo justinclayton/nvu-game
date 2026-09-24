@@ -176,7 +176,7 @@ describe("notes", () => {
     const session = createSessionFrom(
       rig({
         phase: "Play",
-        activeRoom: room("Sorting Room"),
+        activeRoom: room("Security Turnstile"),
         Red: player({ deck: pile("Shove", 4), hand: [card("Pry Bar")] }),
         Gray: player({ deck: pile("Duck Under", 4) }),
       }),

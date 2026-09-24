@@ -653,11 +653,13 @@ function retarget(effect: RoomEffect, who: Character): RoomEffect {
     case "ExhaustFromDeck":
       return { type: "ExhaustFromDeck", who, amount: effect.amount };
     case "DealBadStuff":
-      return { type: "DealBadStuff", who };
+      return { type: "DealBadStuff", who, count: effect.count };
     case "TakeGoodStuff":
       return { type: "TakeGoodStuff", who, count: effect.count };
     case "RevealReward":
       return { type: "RevealReward", who };
+    case "ScrapBadStuffFromHand":
+      return { type: "ScrapBadStuffFromHand", who, optional: effect.optional };
   }
 }
 
@@ -671,6 +673,8 @@ const promptFor = (effect: RoomEffect): string => {
       return "Who takes the Good Stuff?";
     case "RevealReward":
       return "Whose reward pool is revealed?";
+    case "ScrapBadStuffFromHand":
+      return "Who may Scrap a Bad Stuff card from their hand?";
   }
 };
 
@@ -679,11 +683,13 @@ function applyEffect(state: GameState, effect: RoomEffect, who: Character, run: 
     case "ExhaustFromDeck":
       return printedExhaust(state, who, effect.amount, "a room's printed punishment", run);
     case "DealBadStuff":
-      return dealBadStuff(state, who, run.events);
+      return dealBadStuff(state, who, effect.count, run.events);
     case "TakeGoodStuff":
       return takeGoodStuff(state, who, effect.count, run.events);
     case "RevealReward":
       throw new CorruptStateError("A reward reveal is a pending choice, not an effect.");
+    case "ScrapBadStuffFromHand":
+      throw new CorruptStateError("A Scrap offer is a pending choice, not an effect.");
   }
 }
 
@@ -721,7 +727,10 @@ function drain(state: GameState, run: Run): GameState {
       // no real choice to make.
       const moot = head.type === "RevealReward" && options.every((c) => s.pools[c].length === 0);
       if (options.length > 1 && !moot) {
-        return { ...s, pending: { kind: "ChooseCharacter", prompt: promptFor(head), options, source: null } };
+        return {
+          ...s,
+          pending: { kind: "ChooseCharacter", prompt: promptFor(head), options, source: null },
+        };
       }
       s = withEffects(s, [retarget(head, only), ...rest]);
       continue;
@@ -746,6 +755,28 @@ function drain(state: GameState, run: Run): GameState {
           prompt: `Take ${card.name}, or skip it?`,
           character: head.who,
           card,
+          source: null,
+        },
+      };
+    }
+
+    if (head.type === "ScrapBadStuffFromHand") {
+      // The chosen character may Scrap one Bad Stuff card from their own
+      // hand — a room-asked question, so it answers through `choose <Name>`
+      // or `choose none` the same way any other optional ChooseCards does.
+      const character = head.who;
+      const options = playerOf(s, character).hand.filter((c) => c.kind === "bad_stuff");
+      s = withEffects(s, rest);
+      if (options.length === 0) continue;
+      return {
+        ...s,
+        pending: {
+          kind: "ChooseCards",
+          prompt: `${character} may Scrap a Bad Stuff card from hand?`,
+          character,
+          options,
+          count: 1,
+          optional: true,
           source: null,
         },
       };
@@ -914,10 +945,34 @@ function answerCharacter(state: GameState, character: Character, run: Run): Game
     {
       ...state,
       pending: null,
-      resolution: { ...resolution, effects: [retarget(head, character), ...resolution.effects.slice(1)] },
+      resolution: {
+        ...resolution,
+        effects: [retarget(head, character), ...resolution.effects.slice(1)],
+      },
     },
     run,
   );
+}
+
+/** The one thing a room-asked (not card-asked) `ChooseCards` answers today. */
+function answerRoomCards(
+  state: GameState,
+  pending: Pending,
+  cardIds: readonly Card["id"][],
+  run: Run,
+): GameState {
+  if (pending.kind !== "ChooseCards")
+    throw new CorruptStateError("No card is waiting on that answer.");
+  const chosen = cardIds.flatMap((id) => {
+    const found = pending.options.find((x) => x.id === id);
+    return found ? [found] : [];
+  });
+  let s: GameState = { ...state, pending: null };
+  if (chosen.length > 0) {
+    s = takeFrom(s, pending.character, "hand", chosen);
+    for (const c of chosen) s = scrap(s, pending.character, c, run.events);
+  }
+  return drain(s, run);
 }
 
 function answerCards(
@@ -927,7 +982,8 @@ function answerCards(
   run: Run,
 ): GameState {
   const pending = state.pending;
-  if (!pending?.source) throw new CorruptStateError("No card is waiting on that answer.");
+  if (!pending) throw new CorruptStateError("No card is waiting on that answer.");
+  if (!pending.source) return answerRoomCards(state, pending, cardIds, run);
   const shown =
     pending.kind === "ChooseCards"
       ? pending.options

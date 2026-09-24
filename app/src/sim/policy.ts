@@ -20,7 +20,7 @@ import {
   settlePayOptions,
   statPool,
   thresholdIsMet,
-  thresholdTarget,
+  thresholdRequirement,
   type StatTotals,
 } from "@domain/queries";
 import type {
@@ -32,6 +32,7 @@ import type {
   GameState,
   Stat,
   StuffSettlement,
+  Threshold,
 } from "@domain/types";
 import { CHARACTERS, playerOf } from "@domain/verbs";
 import { pick, type Rng } from "./rng";
@@ -55,6 +56,12 @@ export const randomPolicy: Policy = {
 const statValue = (totals: StatTotals, stat: Stat): number =>
   stat === "Oomph" ? totals.oomph : totals.scramble;
 
+/** Would `totals` meet this threshold's requirement, dual stats and all? */
+const meetsRequirement = (state: GameState, totals: StatTotals, t: Threshold): boolean => {
+  const req = thresholdRequirement(state, t);
+  return totals.oomph >= req.oomph && totals.scramble >= req.scramble;
+};
+
 /**
  * Would adding `card`'s contribution meet a Clearing threshold the pool has
  * not already met? A "flee this room for free" threshold (`clears: false`)
@@ -66,9 +73,7 @@ function clearsARoom(state: GameState, character: Character, card: Card): boolea
   const before = statPool(state);
   const gain = contributionOf(state, { owner: character, card });
   const after: StatTotals = { oomph: before.oomph + gain.oomph, scramble: before.scramble + gain.scramble };
-  return allThresholds(room).some(
-    (t) => t.clears && !thresholdIsMet(state, t) && statValue(after, t.stat) >= thresholdTarget(state, t),
-  );
+  return allThresholds(room).some((t) => t.clears && !thresholdIsMet(state, t) && meetsRequirement(state, after, t));
 }
 
 /** Has the room already been Cleared by something the pool now meets? */
@@ -120,7 +125,7 @@ function roomIsClearableThisTurn(state: GameState): boolean {
   const potential = maxAdditionalGain(state);
   const reachable: StatTotals = { oomph: now.oomph + potential.oomph, scramble: now.scramble + potential.scramble };
   return allThresholds(room).some(
-    (t) => t.clears && !thresholdIsMet(state, t) && statValue(reachable, t.stat) >= thresholdTarget(state, t),
+    (t) => t.clears && !thresholdIsMet(state, t) && meetsRequirement(state, reachable, t),
   );
 }
 

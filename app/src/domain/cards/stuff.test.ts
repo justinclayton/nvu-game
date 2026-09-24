@@ -1,7 +1,7 @@
 /* One test per entry in the Stuff registry, beside the behaviour. */
 
 import { beforeEach, describe, expect, it } from "vitest";
-import { costOf, extraScrambleRequirement, statPool, thresholdIsMet, thresholdTarget } from "../queries";
+import { costOf, statPool, thresholdIsMet, thresholdRequirement } from "../queries";
 import {
   card,
   eventTypes,
@@ -24,7 +24,9 @@ describe("Crowbar — 'Play: if you get any Good Stuff this turn, get an additio
     const state = playing({
       Red: player({ deck: pile("Shove", 4), hand: [card("Crowbar")] }),
     });
-    const { state: next, events } = play(state, [free("Red", handCard(state, "Red", "Crowbar").id)]);
+    const { state: next, events } = play(state, [
+      free("Red", handCard(state, "Red", "Crowbar").id),
+    ]);
     expect(eventTypes(events)).not.toContain("STUFF_TAKEN");
     expect(next.Red.hand).toEqual([]);
   });
@@ -35,8 +37,13 @@ describe("Crowbar — 'Play: if you get any Good Stuff this turn, get an additio
     const rigged = playing({
       Red: player({ deck: pile("Shove", 4), hand: [card("Crowbar")] }),
     });
-    const state = { ...rigged, thisTurn: { ...rigged.thisTurn, goodStuffTaken: { Red: 1, Gray: 0 } } };
-    const { state: next, events } = play(state, [free("Red", handCard(state, "Red", "Crowbar").id)]);
+    const state = {
+      ...rigged,
+      thisTurn: { ...rigged.thisTurn, goodStuffTaken: { Red: 1, Gray: 0 } },
+    };
+    const { state: next, events } = play(state, [
+      free("Red", handCard(state, "Red", "Crowbar").id),
+    ]);
     expect(eventTypes(events)).toContain("STUFF_TAKEN");
     expect(next.Red.hand.filter((c) => c.kind === "good_stuff")).toHaveLength(1);
   });
@@ -47,10 +54,10 @@ describe("Crowbar — 'Play: if you get any Good Stuff this turn, get an additio
     // the room's own payout once Outcome hands it over — rigged through a
     // real Sorting Room clear, not by setting turn-record fields by hand.
     const state = playing({
-      activeRoom: room("Sorting Room"),
+      activeRoom: room("Security Turnstile"),
       Red: player({
         deck: pile("Shove", 4),
-        hand: [card("Crowbar"), card("Shove"), card("Shove")],
+        hand: [card("Crowbar"), card("Shove"), card("Shove"), card("Pry Bar")],
       }),
     });
     const crowbar = handCard(state, "Red", "Crowbar");
@@ -59,11 +66,12 @@ describe("Crowbar — 'Play: if you get any Good Stuff this turn, get an additio
     const { state: next, events } = play(state, [
       free("Red", crowbar.id), // Crowbar, cost 0, nothing to look back at yet
       { type: "PLAY_CARD", character: "Red", cardId: toPlay.id, payWith: [toPay.id] }, // Shove, Oomph 2
+      free("Red", handCard(state, "Red", "Pry Bar").id), // Pry Bar, Oomph 3
       { type: "END_PLAY" },
     ]);
-    // Sorting Room's Oomph-2 line meets on Crowbar's own Oomph 1 plus Shove's
-    // 2, and pays Red one piece at Outcome; the played Crowbar catches that
-    // payout as it lands and pays a second.
+    // Security Turnstile's Oomph-5 line meets on Crowbar's own Oomph 1 plus
+    // Shove's 2 plus Pry Bar's 3, and pays Red one piece at Outcome; the
+    // played Crowbar catches that payout as it lands and pays a second.
     expect(eventTypes(events).filter((t) => t === "STUFF_TAKEN")).toHaveLength(2);
     expect(next.Red.hand.filter((c) => c.kind === "good_stuff")).toHaveLength(2);
   });
@@ -72,19 +80,23 @@ describe("Crowbar — 'Play: if you get any Good Stuff this turn, get an additio
     // Once-per-copy: whichever
     // hook pays first uses up this copy's only bonus for the turn.
     const rigged = playing({
-      activeRoom: room("Sorting Room"),
+      activeRoom: room("Security Turnstile"),
       Red: player({
         deck: pile("Shove", 4),
-        hand: [card("Crowbar"), card("Shove"), card("Shove")],
+        hand: [card("Crowbar"), card("Shove"), card("Shove"), card("Pry Bar")],
       }),
     });
-    const state = { ...rigged, thisTurn: { ...rigged.thisTurn, goodStuffTaken: { Red: 1, Gray: 0 } } };
+    const state = {
+      ...rigged,
+      thisTurn: { ...rigged.thisTurn, goodStuffTaken: { Red: 1, Gray: 0 } },
+    };
     const crowbar = handCard(state, "Red", "Crowbar");
     const [toPlay, toPay] = state.Red.hand.filter((c) => c.name === "Shove");
     if (!toPlay || !toPay) throw new Error("Red is not holding two Shoves");
     const { state: next } = play(state, [
       free("Red", crowbar.id), // Crowbar: fires now, at play, off the look-back
       { type: "PLAY_CARD", character: "Red", cardId: toPlay.id, payWith: [toPay.id] }, // Shove, Oomph 2
+      free("Red", handCard(state, "Red", "Pry Bar").id), // Pry Bar, Oomph 3
       { type: "END_PLAY" }, // pays Red another piece at Outcome — Crowbar stays quiet
     ]);
     // One from the look-back bonus, one from the room's own Outcome payout —
@@ -94,10 +106,10 @@ describe("Crowbar — 'Play: if you get any Good Stuff this turn, get an additio
 
   it("two Crowbars played by the same controller pay two extra pieces", () => {
     const state = playing({
-      activeRoom: room("Sorting Room"),
+      activeRoom: room("Security Turnstile"),
       Red: player({
         deck: pile("Shove", 4),
-        hand: [card("Crowbar"), card("Crowbar"), card("Shove"), card("Shove")],
+        hand: [card("Crowbar"), card("Crowbar"), card("Shove"), card("Shove"), card("Pry Bar")],
       }),
     });
     const [firstCrowbar, secondCrowbar] = state.Red.hand.filter((c) => c.name === "Crowbar");
@@ -109,6 +121,7 @@ describe("Crowbar — 'Play: if you get any Good Stuff this turn, get an additio
       free("Red", firstCrowbar.id),
       free("Red", secondCrowbar.id),
       { type: "PLAY_CARD", character: "Red", cardId: toPlay.id, payWith: [toPay.id] }, // Shove, Oomph 2
+      free("Red", handCard(state, "Red", "Pry Bar").id), // Pry Bar, Oomph 3
       { type: "END_PLAY" },
     ]);
     // The room's own piece, plus one bonus per Crowbar.
@@ -120,15 +133,15 @@ describe("Crowbar — 'Play: if you get any Good Stuff this turn, get an additio
     // Crowbar's own bonus draw then goes through `takeGoodStuff` and finds it
     // empty, the same as any other draw would.
     const rigged = playing({
-      activeRoom: room("Sorting Room"),
+      activeRoom: room("Security Turnstile"),
       Red: player({
         deck: pile("Shove", 4),
-        hand: [card("Crowbar"), card("Shove"), card("Shove")],
+        hand: [card("Crowbar"), card("Shove"), card("Shove"), card("Pry Bar")],
       }),
     });
     const state = {
       ...rigged,
-      pools: { ...rigged.pools, goodStuff: [card("A Pair Of Stich-Em-Ups")] },
+      pools: { ...rigged.pools, goodStuff: [card("A Pair Of Stitch-Em-Ups")] },
     };
     const crowbar = handCard(state, "Red", "Crowbar");
     const [toPlay, toPay] = state.Red.hand.filter((c) => c.name === "Shove");
@@ -136,6 +149,7 @@ describe("Crowbar — 'Play: if you get any Good Stuff this turn, get an additio
     const { state: next, events } = play(state, [
       free("Red", crowbar.id),
       { type: "PLAY_CARD", character: "Red", cardId: toPlay.id, payWith: [toPay.id] },
+      free("Red", handCard(state, "Red", "Pry Bar").id), // Pry Bar, Oomph 3
       { type: "END_PLAY" },
     ]);
     expect(eventTypes(events).filter((t) => t === "STUFF_TAKEN")).toHaveLength(1);
@@ -143,20 +157,20 @@ describe("Crowbar — 'Play: if you get any Good Stuff this turn, get an additio
     expect(next.Red.hand.filter((c) => c.kind === "good_stuff")).toHaveLength(1);
   });
 
-  it("does not fire on its own arrival: a room handing Red both Crowbar and another piece pays no third", () => {
-    const state = playing({
-      activeRoom: room("Ration Locker"),
+  it("does not fire on its own arrival: a room handing Red Crowbar itself pays no bonus", () => {
+    // Security Turnstile's Oomph 5 line draws face down from the Good Stuff
+    // pool; rig that draw to be Crowbar itself. Crowbar arriving unplayed is
+    // not Crowbar being played, so its own bonus never fires.
+    const rigged = playing({
+      activeRoom: room("Security Turnstile"),
       Red: player({
         deck: pile("Shove", 4),
-        hand: [card("Charge In"), card("Shove"), card("Shove")],
+        hand: [card("Charge In"), card("Shove"), card("Shove"), card("Pry Bar")],
       }),
     });
+    const state = { ...rigged, pools: { ...rigged.pools, goodStuff: [card("Crowbar")] } };
     const chargeIn = handCard(state, "Red", "Charge In");
     const payWith = state.Red.hand.filter((c) => c.name === "Shove").map((c) => c.id);
-    // Charge In is Oomph 4, meeting Ration Locker's Oomph 4 line, which pays Red 2 Good Stuff.
-    // Whether or not Crowbar itself is one of the two, arriving unplayed in a
-    // hand is not Crowbar being played — the pool never grows a third piece
-    // from that arrival, only playing Crowbar afterward could.
     const { state: next } = play(state, [
       {
         type: "PLAY_CARD",
@@ -164,30 +178,33 @@ describe("Crowbar — 'Play: if you get any Good Stuff this turn, get an additio
         cardId: chargeIn.id,
         payWith,
       },
+      free("Red", handCard(state, "Red", "Pry Bar").id),
       { type: "END_PLAY" },
     ]);
     const stuff = next.Red.hand.filter((c) => c.kind === "good_stuff");
-    expect(stuff).toHaveLength(2);
+    expect(stuff).toHaveLength(1);
+    expect(stuff[0]?.name).toBe("Crowbar");
   });
 });
 
-describe("A Pair Of Stich-Em-Ups — 'Choose a character, move 2 cards from their Exhaust pile'", () => {
+describe("A Pair Of Stitch-Em-Ups — 'Choose a character, move 2 cards from their Exhaust pile'", () => {
   it("heals the caster with no choice offered when only they have an Exhaust pile", () => {
     const state = playing({
       Red: player({
         deck: pile("Shove", 2),
-        hand: [card("A Pair Of Stich-Em-Ups"), card("Shove")],
+        hand: [card("A Pair Of Stitch-Em-Ups"), card("Shove")],
         exhaust: pile("Charge In", 3),
       }),
     });
     const asked = must(state, {
       type: "PLAY_CARD",
       character: "Red",
-      cardId: handCard(state, "Red", "A Pair Of Stich-Em-Ups").id,
+      cardId: handCard(state, "Red", "A Pair Of Stitch-Em-Ups").id,
       payWith: [handCard(state, "Red", "Shove").id],
     });
     const pending = asked.state.pending;
-    if (pending?.kind !== "ChooseCards") throw new Error("expected a card choice, no character prompt");
+    if (pending?.kind !== "ChooseCards")
+      throw new Error("expected a card choice, no character prompt");
     expect(pending.character).toBe("Red");
     expect(pending.count).toBe(2);
 
@@ -203,7 +220,7 @@ describe("A Pair Of Stich-Em-Ups — 'Choose a character, move 2 cards from thei
     const state = playing({
       Red: player({
         deck: pile("Shove", 2),
-        hand: [card("A Pair Of Stich-Em-Ups"), card("Shove")],
+        hand: [card("A Pair Of Stitch-Em-Ups"), card("Shove")],
         exhaust: pile("Charge In", 3),
       }),
       Gray: player({
@@ -214,7 +231,7 @@ describe("A Pair Of Stich-Em-Ups — 'Choose a character, move 2 cards from thei
     const asked = must(state, {
       type: "PLAY_CARD",
       character: "Red",
-      cardId: handCard(state, "Red", "A Pair Of Stich-Em-Ups").id,
+      cardId: handCard(state, "Red", "A Pair Of Stitch-Em-Ups").id,
       payWith: [handCard(state, "Red", "Shove").id],
     });
     expect(asked.state.pending?.kind).toBe("ChooseCharacter");
@@ -240,14 +257,14 @@ describe("A Pair Of Stich-Em-Ups — 'Choose a character, move 2 cards from thei
     const state = playing({
       Red: player({
         deck: pile("Shove", 2),
-        hand: [card("A Pair Of Stich-Em-Ups"), card("Shove")],
+        hand: [card("A Pair Of Stitch-Em-Ups"), card("Shove")],
         exhaust: pile("Charge In", 1),
       }),
     });
     const asked = must(state, {
       type: "PLAY_CARD",
       character: "Red",
-      cardId: handCard(state, "Red", "A Pair Of Stich-Em-Ups").id,
+      cardId: handCard(state, "Red", "A Pair Of Stitch-Em-Ups").id,
       payWith: [handCard(state, "Red", "Shove").id],
     });
     const pending = asked.state.pending;
@@ -361,7 +378,7 @@ describe("Riot Shield — 'If the room is Cleared, return this to your hand at t
     // every Challenge reads the shared pool, so it does not matter that Red
     // is the one playing it while the line pays Gray.
     const state = playing({
-      activeRoom: room("Sorting Room"),
+      activeRoom: room("Security Turnstile"),
       Red: player({
         deck: pile("Shove", 1),
         hand: [card("Riot Shield"), card("Shove")],
@@ -383,7 +400,7 @@ describe("Riot Shield — 'If the room is Cleared, return this to your hand at t
 
   it("is discarded with the play zone when the room is Fled", () => {
     const state = playing({
-      activeRoom: room("Gross Thing That Looks Like A Cherry"),
+      activeRoom: room("The Sentry Drone"),
       Red: player({ deck: pile("Shove", 3), hand: [card("Riot Shield"), card("Shove")] }),
     });
     const { state: next } = play(state, [
@@ -482,14 +499,13 @@ describe("Overcharged Battery — 'The next card played this turn is played for 
     ]);
     expect(next.thisTurn.freePlays).toBe(0);
   });
-
 });
 
 describe("Faceful Of Slime — 'Holding: At Turn Start, draw 1 fewer card'", () => {
   it("trims the automatic draw's target from 5 to 4", () => {
     const state = rig({
       phase: "Turn Start",
-      floorDeck: [room("Sorting Room")],
+      floorDeck: [room("Security Turnstile")],
       Red: player({ deck: pile("Shove", 6), hand: [card("Faceful Of Slime")] }),
       Gray: player({ deck: pile("Duck Under", 6) }),
     });
@@ -498,18 +514,18 @@ describe("Faceful Of Slime — 'Holding: At Turn Start, draw 1 fewer card'", () 
     expect(next.Red.hand).toHaveLength(4);
   });
 
-  it("stacks with another 'draw 1 fewer' source (Deadweight Grip)", () => {
+  it("stacks with another copy of the same source", () => {
     const state = rig({
       phase: "Turn Start",
-      floorDeck: [room("Sorting Room")],
+      floorDeck: [room("Security Turnstile")],
       Red: player({
         deck: pile("Shove", 6),
-        hand: [card("Faceful Of Slime"), card("Deadweight Grip")],
+        hand: pile("Faceful Of Slime", 2),
       }),
       Gray: player({ deck: pile("Duck Under", 6) }),
     });
     const { state: next } = must(state, { type: "FLIP_ROOM" });
-    // Two sources: target 5 - 1 - 1 = 3, one draw short of the two already held.
+    // Two held copies: target 5 - 1 - 1 = 3, one draw short of the two already held.
     expect(next.Red.drewThisTurn).toBe(1);
     expect(next.Red.hand).toHaveLength(3);
   });
@@ -555,7 +571,7 @@ describe("Rust — 'Holding: Stuff you play has -1 Oomph'", () => {
 describe("Spore Cloud — 'Holding: At Cleanup, discard cards other than this one until you hold 3'", () => {
   it("does nothing to a hand already at or under 3", () => {
     const state = playing({
-      activeRoom: room("Gross Thing That Looks Like A Cherry"),
+      activeRoom: room("Security Turnstile"),
       Red: player({ deck: pile("Shove", 3), hand: [card("Spore Cloud"), card("Shove")] }),
       Gray: player({ deck: pile("Duck Under", 3) }),
     });
@@ -566,7 +582,7 @@ describe("Spore Cloud — 'Holding: At Cleanup, discard cards other than this on
 
   it("asks its holder to discard down to 3 at Cleanup, Spore Cloud itself not offered", () => {
     const state = playing({
-      activeRoom: room("Gross Thing That Looks Like A Cherry"),
+      activeRoom: room("Security Turnstile"),
       Red: player({
         deck: pile("Shove", 3),
         hand: [card("Spore Cloud"), card("Shove"), card("Shove"), card("Shove")],
@@ -597,7 +613,7 @@ describe("Spore Cloud — 'Holding: At Cleanup, discard cards other than this on
 
   it("stays uneraseable even holding two copies", () => {
     const state = playing({
-      activeRoom: room("Gross Thing That Looks Like A Cherry"),
+      activeRoom: room("Security Turnstile"),
       Red: player({
         deck: pile("Shove", 3),
         hand: [card("Spore Cloud"), card("Spore Cloud"), card("Shove"), card("Shove")],
@@ -620,64 +636,66 @@ describe("Spore Cloud — 'Holding: At Cleanup, discard cards other than this on
   });
 });
 
-describe("Panic — 'ALL rooms require an additional 2 Scramble, and Play: Exhaust 2'", () => {
+describe("Panic — 'Holding: every room threshold requires +2 Scramble to be met'", () => {
   it("raises every Scramble threshold while it is held, in either hand", () => {
     const state = playing({
-      activeRoom: room("Collapsed Stairwell"),
+      activeRoom: room("The Sentry Drone"),
       Gray: player({ deck: pile("Duck Under", 4), hand: [card("Panic")] }),
     });
-    const room1 = state.activeRoom?.challenges[0]?.thresholds[0];
-    if (!room1) throw new Error("room has no first threshold");
-    expect(room1.value).toBe(2);
-    expect(thresholdTarget(state, room1)).toBe(4);
+    // Challenge 1: Scramble 8.
+    const line = state.activeRoom?.challenges[1]?.thresholds[0];
+    if (!line) throw new Error("rig");
+    expect(line.requires).toEqual({ oomph: 0, scramble: 8 });
+    expect(thresholdRequirement(state, line)).toEqual({ oomph: 0, scramble: 10 });
   });
 
   it("adds a Scramble 2 requirement to an Oomph-only line", () => {
     const state = playing({
-      activeRoom: room("Gross Thing That Looks Like A Cherry"),
+      activeRoom: room("The Sentry Drone"),
       Gray: player({ deck: pile("Duck Under", 4), hand: [card("Panic")] }),
     });
+    // Challenge 0: Oomph 8, no printed Scramble.
     const line = state.activeRoom?.challenges[0]?.thresholds[0];
-    if (!line) throw new Error("room has no first threshold");
-    expect(line.stat).toBe("Oomph");
-    expect(extraScrambleRequirement(state, line)).toBe(2);
+    if (!line) throw new Error("rig");
+    expect(line.requires).toEqual({ oomph: 8, scramble: 0 });
+    expect(thresholdRequirement(state, line)).toEqual({ oomph: 8, scramble: 2 });
   });
 
-  it("does not add a second Scramble floor to a line that is already Scramble", () => {
+  it("adds to a dual threshold's own printed Scramble, not a second floor", () => {
     const state = playing({
-      activeRoom: room("Collapsed Stairwell"),
+      activeRoom: room("Flooded Ventilation Shaft"),
       Gray: player({ deck: pile("Duck Under", 4), hand: [card("Panic")] }),
     });
-    const line = state.activeRoom?.challenges[0]?.thresholds[0];
-    if (!line) throw new Error("room has no first threshold");
-    expect(line.stat).toBe("Scramble");
-    expect(extraScrambleRequirement(state, line)).toBe(0);
-    expect(thresholdTarget(state, line)).toBe(4);
+    // Challenge 1: Oomph 3 and Scramble 3 together.
+    const line = state.activeRoom?.challenges[1]?.thresholds[0];
+    if (!line) throw new Error("rig");
+    expect(line.requires).toEqual({ oomph: 3, scramble: 3 });
+    expect(thresholdRequirement(state, line)).toEqual({ oomph: 3, scramble: 5 });
   });
 
   it("stacks: two Panics push the Scramble floor to 4", () => {
     const state = playing({
-      activeRoom: room("Gross Thing That Looks Like A Cherry"),
+      activeRoom: room("The Sentry Drone"),
       Red: player({ hand: [card("Panic")] }),
       Gray: player({ deck: pile("Duck Under", 4), hand: [card("Panic")] }),
     });
     const line = state.activeRoom?.challenges[0]?.thresholds[0];
-    if (!line) throw new Error("room has no first threshold");
-    expect(extraScrambleRequirement(state, line)).toBe(4);
+    if (!line) throw new Error("rig");
+    expect(thresholdRequirement(state, line)).toEqual({ oomph: 8, scramble: 4 });
   });
 
   it("blocks an Oomph line from clearing on Oomph alone while Panic is held", () => {
     const state = playing({
-      activeRoom: room("Gross Thing That Looks Like A Cherry"),
+      activeRoom: room("The Sentry Drone"),
       Gray: player({ hand: [card("Panic")] }),
       playZone: [
         { owner: "Red", card: card("Charge In") },
-        { owner: "Red", card: card("Shove") },
+        { owner: "Red", card: card("Charge In") },
       ],
     });
     const line = state.activeRoom?.challenges[0]?.thresholds[0];
-    if (!line) throw new Error("room has no first threshold");
-    expect(statPool(state).oomph).toBeGreaterThanOrEqual(line.value);
+    if (!line) throw new Error("rig");
+    expect(statPool(state).oomph).toBeGreaterThanOrEqual(line.requires.oomph);
     expect(thresholdIsMet(state, line)).toBe(false);
 
     const withScramble = {
@@ -689,15 +707,15 @@ describe("Panic — 'ALL rooms require an additional 2 Scramble, and Play: Exhau
 
   it("leaves an Oomph line unaffected with no Panic held", () => {
     const state = playing({
-      activeRoom: room("Gross Thing That Looks Like A Cherry"),
+      activeRoom: room("The Sentry Drone"),
       playZone: [
         { owner: "Red", card: card("Charge In") },
-        { owner: "Red", card: card("Shove") },
+        { owner: "Red", card: card("Charge In") },
       ],
     });
     const line = state.activeRoom?.challenges[0]?.thresholds[0];
-    if (!line) throw new Error("room has no first threshold");
-    expect(extraScrambleRequirement(state, line)).toBe(0);
+    if (!line) throw new Error("rig");
+    expect(thresholdRequirement(state, line)).toEqual({ oomph: 8, scramble: 0 });
     expect(thresholdIsMet(state, line)).toBe(true);
   });
 
@@ -722,7 +740,7 @@ describe("My Head Is Quantum Spinning — 'Holding: whenever your partner draws 
   it("does not fire for Turn Start's own automatic draws", () => {
     const state = rig({
       phase: "Turn Start",
-      floorDeck: [room("Sorting Room")],
+      floorDeck: [room("Security Turnstile")],
       Red: player({
         deck: pile("Shove", 6),
         hand: [card("My Head Is Quantum Spinning"), ...pile("Shove", 3)],
@@ -740,54 +758,8 @@ describe("My Head Is Quantum Spinning — 'Holding: whenever your partner draws 
     const state = playing({
       Red: player({
         deck: pile("Shove", 4),
-        hand: [card("My Head Is Quantum Spinning"), card("Grav Harness"), card("Shove"), card("Shove")],
-      }),
-      Gray: player({ deck: pile("Duck Under", 3) }),
-    });
-    const grav = handCard(state, "Red", "Grav Harness");
-    const shoves = state.Red.hand.filter((c) => c.name === "Shove").map((c) => c.id);
-    const asked = must(state, {
-      type: "PLAY_CARD",
-      character: "Red",
-      cardId: grav.id,
-      payWith: shoves,
-    });
-    const pending = asked.state.pending;
-    if (pending?.kind !== "ChooseCharacter") throw new Error("expected a character choice");
-    const { state: next, events } = must(asked.state, { type: "CHOOSE_CHARACTER", character: "Gray" });
-    expect(next.Gray.hand).toHaveLength(1);
-    expect(next.Red.deck).toHaveLength(3);
-    expect(eventTypes(events)).toContain("CARD_EXHAUSTED");
-  });
-
-  it("does not fire for its own holder's draw", () => {
-    const state = playing({
-      Red: player({
-        deck: pile("Shove", 4),
-        hand: [card("My Head Is Quantum Spinning"), card("Grav Harness"), card("Shove"), card("Shove")],
-      }),
-      Gray: player({ deck: pile("Duck Under", 3) }),
-    });
-    const grav = handCard(state, "Red", "Grav Harness");
-    const shoves = state.Red.hand.filter((c) => c.name === "Shove").map((c) => c.id);
-    const asked = must(state, {
-      type: "PLAY_CARD",
-      character: "Red",
-      cardId: grav.id,
-      payWith: shoves,
-    });
-    const { state: next, events } = must(asked.state, { type: "CHOOSE_CHARACTER", character: "Red" });
-    expect(next.Red.deck).toHaveLength(3);
-    expect(eventTypes(events)).not.toContain("CARD_EXHAUSTED");
-  });
-
-  it("is stopped by its holder's own Zen Mode", () => {
-    const state = playing({
-      Red: player({
-        deck: pile("Shove", 4),
         hand: [
           card("My Head Is Quantum Spinning"),
-          card("Zen Mode"),
           card("Grav Harness"),
           card("Shove"),
           card("Shove"),
@@ -803,8 +775,43 @@ describe("My Head Is Quantum Spinning — 'Holding: whenever your partner draws 
       cardId: grav.id,
       payWith: shoves,
     });
-    const { state: next, events } = must(asked.state, { type: "CHOOSE_CHARACTER", character: "Gray" });
-    expect(next.Red.deck).toHaveLength(4);
-    expect(eventTypes(events)).toContain("EXHAUST_PREVENTED");
+    const pending = asked.state.pending;
+    if (pending?.kind !== "ChooseCharacter") throw new Error("expected a character choice");
+    const { state: next, events } = must(asked.state, {
+      type: "CHOOSE_CHARACTER",
+      character: "Gray",
+    });
+    expect(next.Gray.hand).toHaveLength(1);
+    expect(next.Red.deck).toHaveLength(3);
+    expect(eventTypes(events)).toContain("CARD_EXHAUSTED");
+  });
+
+  it("does not fire for its own holder's draw", () => {
+    const state = playing({
+      Red: player({
+        deck: pile("Shove", 4),
+        hand: [
+          card("My Head Is Quantum Spinning"),
+          card("Grav Harness"),
+          card("Shove"),
+          card("Shove"),
+        ],
+      }),
+      Gray: player({ deck: pile("Duck Under", 3) }),
+    });
+    const grav = handCard(state, "Red", "Grav Harness");
+    const shoves = state.Red.hand.filter((c) => c.name === "Shove").map((c) => c.id);
+    const asked = must(state, {
+      type: "PLAY_CARD",
+      character: "Red",
+      cardId: grav.id,
+      payWith: shoves,
+    });
+    const { state: next, events } = must(asked.state, {
+      type: "CHOOSE_CHARACTER",
+      character: "Red",
+    });
+    expect(next.Red.deck).toHaveLength(3);
+    expect(eventTypes(events)).not.toContain("CARD_EXHAUSTED");
   });
 });

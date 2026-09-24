@@ -25,6 +25,9 @@ export type RoomKind = "room" | "stairwell";
 /** Rooms and Stairwells pool by band: floors 1–3, 4–6, 7–9 (rulebook Setup, "Floor deck"). */
 export type Band = 1 | 2 | 3;
 
+/** A room's band, or `null` for the one fixed Floor 10 Stairwell (design/cards.yaml, "Rooms"). */
+export type RoomBand = Band | null;
+
 /** Whether a card is ratified or still a proposal. Only official cards gate the build. */
 export type CardSet = "official" | "proposed";
 
@@ -39,9 +42,23 @@ export type EffectTarget = Character | "one" | "both";
 
 export type RoomEffect =
   | { readonly type: "ExhaustFromDeck"; readonly who: EffectTarget; readonly amount: number }
-  | { readonly type: "DealBadStuff"; readonly who: EffectTarget }
+  | { readonly type: "DealBadStuff"; readonly who: EffectTarget; readonly count: number }
   | { readonly type: "TakeGoodStuff"; readonly who: EffectTarget; readonly count: number }
-  | { readonly type: "RevealReward"; readonly who: EffectTarget };
+  | { readonly type: "RevealReward"; readonly who: EffectTarget }
+  /** "One of you may Scrap a Bad Stuff card from your hand" — always declinable. */
+  | { readonly type: "ScrapBadStuffFromHand"; readonly who: EffectTarget; readonly optional: boolean };
+
+/**
+ * What a threshold asks of the shared pool: an Oomph amount, a Scramble
+ * amount, or both (design/cards.yaml, a threshold's `stat`/`value` or
+ * `stats: { Oomph, Scramble }`). 0 means that stat is not part of this line.
+ * A threshold that prints both stats is met only when the pool meets or
+ * exceeds both (design/rulebook.md).
+ */
+export interface StatRequirement {
+  readonly oomph: number;
+  readonly scramble: number;
+}
 
 /**
  * One `threshold: outcome` line (rulebook, Card anatomy: Room Cards). Every
@@ -50,8 +67,7 @@ export type RoomEffect =
  * pool it is drawn from, not how its thresholds resolve.
  */
 export interface Threshold {
-  readonly stat: Stat;
-  readonly value: number;
+  readonly requires: StatRequirement;
   /** The printed prose, kept for display. No rule reads it. */
   readonly outcome: string;
   /** Meeting this line Clears the room (rulebook, Outcome) unless it's `fleeFree`. */
@@ -102,6 +118,8 @@ export interface CardFace {
   /** The stat lives in the text instead of a field, so a behaviour computes it. */
   readonly conditionalStat: boolean;
   readonly text: string;
+  /** The printed flavor line. Empty until a card is given one. */
+  readonly flavor: string;
 }
 
 /** A room card, exactly as printed (rulebook, Card anatomy: Room Cards). */
@@ -109,10 +127,12 @@ export interface RoomFace {
   readonly name: string;
   readonly set: CardSet;
   readonly kind: RoomKind;
-  /** Which floors' pool the card is drawn from (rulebook Setup, "Floor deck"). */
-  readonly band: Band;
+  /** Which floors' pool the card is drawn from; `null` for the one fixed Floor 10 Stairwell. */
+  readonly band: RoomBand;
   /** The printed flavor line. Empty until a card is given one. */
   readonly flavor: string;
+  /** A room's own printed rule, beyond its thresholds and Flee line (e.g. Bio-Hazard Containment Vault). */
+  readonly text: string;
   readonly count: number;
   readonly challenges: readonly Challenge[];
   readonly flee: FleeLine;

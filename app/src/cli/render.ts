@@ -3,13 +3,12 @@
 import {
   allThresholds,
   costOf,
-  extraScrambleRequirement,
   metThresholds,
   payOptions,
   playableCards,
   settleableStuff,
   statPool,
-  thresholdTarget,
+  thresholdLines,
 } from "@domain/queries";
 import type { Card, Character, GameState, Room } from "@domain/types";
 import type { CardFace } from "@domain/printed";
@@ -50,12 +49,14 @@ function roomLines(state: GameState, room: Room): string[] {
   const met = new Set(metThresholds(state));
   const lines = [`Room: ${room.name} (${room.kind})`];
   for (const t of allThresholds(room)) {
-    const target = thresholdTarget(state, t);
     const mark = met.has(t) ? "✔" : " ";
-    const raised = target !== t.value ? ` (printed ${String(t.value)})` : "";
-    const extra = extraScrambleRequirement(state, t);
-    const extraNote = extra > 0 ? ` and Scramble ${String(extra)}` : "";
-    lines.push(`  ${mark} ${t.stat} ${String(target)}${raised}${extraNote}: ${t.outcome}`);
+    const need = thresholdLines(state, t)
+      .map((l) => {
+        const raised = l.effective !== l.printed ? ` (printed ${String(l.printed)})` : "";
+        return `${l.stat} ${String(l.effective)}${raised}`;
+      })
+      .join(" and ");
+    lines.push(`  ${mark} ${need}: ${t.outcome}`);
   }
   lines.push(`    Flee: ${room.flee.text}`);
   return lines;

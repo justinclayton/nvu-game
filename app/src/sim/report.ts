@@ -1,6 +1,6 @@
 /* A balance report over many seeds: win rate, floor reached, why
  * runs end, deck/Exhaust size per character after each Ascend, and per-card
- * play/take counts. Everything here reads events and states `simulate`
+ * play/take/paid counts. Everything here reads events and states `simulate`
  * already produces, through `RunOptions.onStep`, so one pass per seed is
  * enough — nothing is replayed twice.
  */
@@ -32,7 +32,10 @@ export interface CharacterAscendStats {
 export interface CardStat {
   readonly name: string;
   readonly played: number;
+  /** Taken from a reward pool at Ascend, or dealt as Stuff — either way, into a character's cards. */
   readonly taken: number;
+  /** Discarded as another card's Play cost — the only way Bad Stuff with no reason to play it ever leaves a hand. */
+  readonly paid: number;
 }
 
 /**
@@ -82,6 +85,7 @@ function endReasonOf(run: RunResult): string {
 interface CardTally {
   played: number;
   taken: number;
+  paid: number;
 }
 
 interface LossTally {
@@ -107,7 +111,7 @@ class Accumulator {
   private tally(name: string): CardTally {
     let t = this.cardTallies.get(name);
     if (!t) {
-      t = { played: 0, taken: 0 };
+      t = { played: 0, taken: 0, paid: 0 };
       this.cardTallies.set(name, t);
     }
     return t;
@@ -126,7 +130,8 @@ class Accumulator {
   onStep(before: GameState, command: Command, after: GameState, events: readonly DomainEvent[]): void {
     for (const event of events) {
       if (event.type === "CARD_PLAYED") this.tally(event.card.name).played += 1;
-      if (event.type === "REWARD_TAKEN") this.tally(event.card.name).taken += 1;
+      if (event.type === "REWARD_TAKEN" || event.type === "STUFF_TAKEN") this.tally(event.card.name).taken += 1;
+      if (event.type === "COST_PAID") for (const card of event.cards) this.tally(card.name).paid += 1;
       if (event.type === "CARD_EXHAUSTED") this.lossTally(before.floor, event.character).exhausted += 1;
       if (event.type === "CARD_SCRAPPED" && event.character !== null) {
         this.lossTally(before.floor, event.character).scrapped += 1;

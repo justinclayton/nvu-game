@@ -202,18 +202,26 @@ the budget ran out; the engine refused a command the generator offered.
 `sim --seeds N` plays N seeds under `app/src/sim/policy.ts`'s `greedy` policy (the default) or
 `random`, from `--from` (default 1), and prints a balance report: win rate, the floor each run
 reached, why each run ended, each character's mean deck, live-card and Exhaust-pile size right
-after each Ascend, every card's play, take and keep counts across the sweep, and — per floor, per
-character — where cards went: Exhausted, Scrapped, paid as a Play cost, and Good Stuff returned to
-the pool unpaid. `--json` prints the same report as data, for comparing two versions of the card
-numbers.
+after each Ascend, every card's play, take (a reward taken or Stuff dealt) and paid-as-cost counts
+across the sweep, and — per floor, per character — where cards went: Exhausted, Scrapped, paid as
+a Play cost, and Good Stuff returned to the pool unpaid. `--json` prints the same report as data,
+for comparing two versions of the card numbers. Bad Stuff has no reason to be played, so its
+paid-as-cost count is how a change to a Bad Stuff card shows up.
 
-The greedy policy is fixed and simple: play whatever would meet a Clearing threshold the pool has
-not met yet; among plays that tie on that, prefer the one costing the least printed `Exhaust X`,
-then the most Oomph and Scramble combined; pay for it with the cheapest cards in hand. It also
-checks, before playing anything, whether anything left in hand could Clear the room at all this
-turn — if not, it stops (`END_PLAY`) instead of spending cards, and any Exhaust, on a room that is
-getting Fled regardless (issue #102). A card asking an optional choice it has no opinion on (e.g.
-Level Up's "Scrap a card?") is declined rather than answered with the cheapest option. At Ascend
+The greedy policy is fixed and simple. It picks one Clearing line of the room and plays toward
+that line only: for each unmet line it plans the turn the way a person at the table would — play
+the card that closes the most of what the line still lacks (a card's Scramble is no help toward an
+Oomph line), pay for it with the cards worth least, repeat, both hands together — and drops any
+line the hands cannot reach. Among the reachable lines it takes an Ascend above all, then the line
+whose printed outcome (Stuff gained counts up, Exhaust and Bad Stuff dealt count down) less the
+plan's own printed `Exhaust X` is worth most, then the fewest cards spent, then printed order. If
+the best reachable line is still worth less than the room's Flee line, it stops (`END_PLAY`) and
+Flees rather than spend an Exhaust to Clear; an unreachable room is Fled without a card played
+(issue #102). Once the room is Cleared it keeps going only for a further line that hands out
+something. Payment goes to Bad Stuff first (paying is the cheapest way to be rid of a `Holding:`
+line), then to the cards adding least toward the chosen line, so a free Oomph card is never
+discarded to pay for a lesser one (issue #190). A card asking an optional choice it has no opinion
+on (e.g. Level Up's "Scrap a card?") is declined rather than answered with the cheapest option. At Ascend
 (issue #97) it takes whichever offered reward best fits the deck: the character's weaker stat,
 doubled, plus the reward's own total stats, docked for twice any printed `Exhaust X` the reward
 itself carries, ties broken toward the lower card id. Everywhere but Ascend it answers only from

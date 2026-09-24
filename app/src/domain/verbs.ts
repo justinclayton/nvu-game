@@ -17,7 +17,7 @@ import type {
   GameState,
   PlayerState,
 } from "./types";
-import { shuffle } from "./rng";
+import { drawBlind, shuffle } from "./rng";
 
 export const CHARACTERS: readonly Character[] = ["Red", "Gray"];
 
@@ -218,26 +218,25 @@ export function shuffleIntoDeck(
   return withPlayer({ ...state, seed }, c, { ...p, deck });
 }
 
-/** Cards a character no longer holds. No event: the verb that receives them says so. */
-export function takeFromHand(state: GameState, c: Character, cards: readonly Card[]): GameState {
-  const ids = new Set(cards.map((x) => x.id));
-  const p = playerOf(state, c);
-  return withPlayer(state, c, { ...p, hand: p.hand.filter((x) => !ids.has(x.id)) });
-}
-
 /**
- * Cards lifted back out of the Exhaust pile, for a card that says it can.
+ * Cards a character no longer holds, lifted out of one named pile. No event:
+ * the verb that receives them says so.
+ *
  * Rulebook, Setup: the Exhaust pile is otherwise permanent — nothing else
- * takes a card back out of it.
+ * takes a card back out of it except a card that says it can.
  */
-export function takeFromExhaust(
+export function takeFrom(
   state: GameState,
   c: Character,
+  pile: "hand" | "discard" | "exhaust",
   cards: readonly Card[],
 ): GameState {
   const ids = new Set(cards.map((x) => x.id));
   const p = playerOf(state, c);
-  return withPlayer(state, c, { ...p, exhaust: p.exhaust.filter((x) => !ids.has(x.id)) });
+  const without = (list: readonly Card[]) => list.filter((x) => !ids.has(x.id));
+  if (pile === "hand") return withPlayer(state, c, { ...p, hand: without(p.hand) });
+  if (pile === "discard") return withPlayer(state, c, { ...p, discard: without(p.discard) });
+  return withPlayer(state, c, { ...p, exhaust: without(p.exhaust) });
 }
 
 /** Under the deck, so it is the last thing you will see rather than the next. */
@@ -313,10 +312,10 @@ export function takeGoodStuff(
   let next = state;
   for (let i = 0; i < count; i++) {
     if (playerOf(next, c).down) return next;
-    const [card, rest, seed] = drawFromPool(next.pools.goodStuff, next.seed);
+    const [card, rest, seed] = drawBlind(next.pools.goodStuff, next.seed);
     // Unkept Good Stuff returns to this pool at Ascend, but it can still run
     // dry mid-floor. Say so — a reward the log announced but the pool could
-    // not pay must not go silent (issue #37).
+    // not pay must not go silent.
     if (!card) {
       events.push({ type: "STUFF_POOL_EMPTY", character: c, pool: "good_stuff" });
       return next;
@@ -342,7 +341,7 @@ export function dealBadStuff(
   events: DomainEvent[],
 ): GameState {
   if (playerOf(state, c).down) return state; // takes no punishments (rulebook, Going Down)
-  const [card, rest, seed] = drawFromPool(state.pools.badStuff, state.seed);
+  const [card, rest, seed] = drawBlind(state.pools.badStuff, state.seed);
   if (!card) {
     events.push({ type: "STUFF_POOL_EMPTY", character: c, pool: "bad_stuff" });
     return state;
@@ -360,13 +359,4 @@ export const markFired = (state: GameState, key: string): GameState => ({
   ...state,
   thisTurn: { ...state.thisTurn, fired: [...state.thisTurn.fired, key] },
 });
-
-function drawFromPool(
-  pool: readonly Card[],
-  seed: number,
-): readonly [Card | null, readonly Card[], number] {
-  if (pool.length === 0) return [null, pool, seed];
-  const [shuffled, next] = shuffle(pool, seed);
-  return [shuffled[0] as Card, shuffled.slice(1), next];
-}
 

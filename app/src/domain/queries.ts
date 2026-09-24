@@ -90,6 +90,10 @@ export const playedBy = (state: GameState, c: Character): number =>
 export const othersPlayed = (state: GameState, c: Character, self: Card): number =>
   state.playZone.filter((p) => p.owner === c && p.card.id !== self.id).length;
 
+/** The total printed Cost of every card a character has played this turn. */
+export const costPlayedBy = (state: GameState, c: Character): number =>
+  state.playZone.filter((p) => p.owner === c).reduce((sum, p) => sum + p.card.cost, 0);
+
 /* ------------------------------------------------------------- the stat pool */
 
 /**

@@ -173,8 +173,8 @@ describe("Second Wind — 'Shuffle a Red card from your Exhaust pile into your d
   });
 });
 
-describe("Junk Launcher — 'Oomph +2 for each card spent to play it this turn'", () => {
-  it("counts the cards already spent, which are no longer anywhere else", () => {
+describe("Junk Launcher — 'Oomph equal to total costs of all cards you played this turn'", () => {
+  it("is just its own cost when nothing else has been played", () => {
     const state = playing({
       Red: player({
         deck: pile("Shove", 3),
@@ -189,11 +189,11 @@ describe("Junk Launcher — 'Oomph +2 for each card spent to play it this turn'"
       cardId: launcher.id,
       payWith: shoves,
     });
-    // Printed Oomph 2, plus 2 for each of the two cards it cost.
-    expect(statPool(next).oomph).toBe(6);
+    // Junk Launcher costs 2, the payment cards it's discarded do not count.
+    expect(statPool(next).oomph).toBe(2);
   });
 
-  it("ignores a card paid for a different play later the same turn", () => {
+  it("counts a second card played and paid for later the same turn", () => {
     const state = playing({
       Red: player({
         deck: pile("Shove", 5),
@@ -209,8 +209,8 @@ describe("Junk Launcher — 'Oomph +2 for each card spent to play it this turn'"
       cardId: handCard(state, "Red", "Junk Launcher").id,
       payWith: [payerA.id, payerB.id],
     });
-    // Printed Oomph 2, plus 2 for each of the two cards it cost: 6.
-    expect(statPool(afterLauncher).oomph).toBe(6);
+    // Junk Launcher is the only card played so far, costing 2.
+    expect(statPool(afterLauncher).oomph).toBe(2);
 
     const { state: afterSecond } = must(afterLauncher, {
       type: "PLAY_CARD",
@@ -218,10 +218,9 @@ describe("Junk Launcher — 'Oomph +2 for each card spent to play it this turn'"
       cardId: second.id,
       payWith: [payerC.id],
     });
-    // Junk Launcher's own Oomph must not rise for a payment spent on a
-    // different card played later the same turn.
+    // Junk Launcher (cost 2) plus the Shove played later the same turn (cost 1): 3.
     const launcherAfter = afterSecond.playZone.find((p) => p.card.name === "Junk Launcher");
-    expect(launcherAfter && contributionOf(afterSecond, launcherAfter).oomph).toBe(6);
+    expect(launcherAfter && contributionOf(afterSecond, launcherAfter).oomph).toBe(3);
   });
 });
 

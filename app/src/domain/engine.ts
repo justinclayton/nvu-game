@@ -40,7 +40,6 @@ import type {
   RoomId,
   Stat,
   Threshold,
-  TurnRecord,
   UnfinishedPlay,
 } from "./types";
 import { CorruptStateError } from "./types";
@@ -481,11 +480,6 @@ function drawToCap(state: GameState, c: Character, run: Run): GameState {
 
 /* ------------------------------------------------------------ Play */
 
-const addPaid = (record: TurnRecord, cardId: Card["id"], n: number): TurnRecord => ({
-  ...record,
-  paidFor: { ...record.paidFor, [cardId]: (record.paidFor[cardId] ?? 0) + n },
-});
-
 function playCard(
   state: GameState,
   c: Character,
@@ -517,7 +511,6 @@ function playCard(
   s = discardFromHand(s, c, payment, run.events);
   if (payment.length > 0) {
     run.events.push({ type: "COST_PAID", character: c, cards: payment });
-    s = { ...s, thisTurn: addPaid(s.thisTurn, cardId, payment.length) };
   }
 
   const after = playerOf(s, c);

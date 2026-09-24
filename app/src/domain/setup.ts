@@ -11,8 +11,8 @@ import type { Band, CardContent, CardFace, Character, RoomFace } from "./printed
 import { shuffle } from "./rng";
 import type { Card, DomainEvent, GameState, PlayerState, Room, TurnRecord } from "./types";
 
-/** The rulebook this engine implements (design/rulebook.md). */
-export const RULES_VERSION = "0.2.1";
+/** The rulebook this engine implements (design/rulebook.md). See #83. */
+export const RULES_VERSION = "0.2.4";
 
 /** The tenth floor is the roof: clearing it wins the run (rulebook, Winning and losing). */
 export const TOP_FLOOR = 10;
@@ -32,7 +32,7 @@ export const roomsOnFloor = (floor: number): number => TOP_FLOOR + 1 - floor;
 /**
  * Rooms and Stairwells pool by band: floors 1–3, 4–6, 7–9 (rulebook Setup,
  * "Floor deck"). Floor 10 draws from no band — it prints one fixed Stairwell
- * instead, not yet in design/cards.yaml.
+ * instead (design/cards.yaml, The Monolith Core; issue #66).
  */
 export function bandOf(floor: number): Band | null {
   if (floor <= 3) return 1;
@@ -99,14 +99,16 @@ function takeRooms(
  * random until the floor is full (rulebook Setup, "Floor deck"). The floor
  * gets no harder as you climb — it gets emptier.
  *
- * Bands 2 and 3, and floor 10's fixed Stairwell, are not yet in
- * design/cards.yaml, so a floor outside band 1 builds an empty deck.
+ * Pools are sized so a band always has enough for its floors. If a band ever
+ * comes up short of one Stairwell plus enough Rooms, the run is void: the
+ * floor is not built, and the game ends Aborted instead.
  */
 export function buildFloor(state: GameState, events: DomainEvent[]): GameState {
   let seed = state.seed;
   let supply = state.roomSupply;
   const rooms: Room[] = [];
   const band = bandOf(state.floor);
+  const need = roomsOnFloor(state.floor);
 
   const [stairwells, afterStairwell, s1] = takeRooms(
     supply,
@@ -121,12 +123,18 @@ export function buildFloor(state: GameState, events: DomainEvent[]): GameState {
   const [rest, afterRest, s2] = takeRooms(
     supply,
     (r) => r.kind === "room" && r.band === band,
-    roomsOnFloor(state.floor) - STAIRWELLS_PER_FLOOR,
+    need - STAIRWELLS_PER_FLOOR,
     seed,
   );
   rooms.push(...rest);
   supply = afterRest;
   seed = s2;
+
+  if (rooms.length < need) {
+    const reason = `Floor ${String(state.floor)} needs ${String(need)} cards; band ${String(band)} holds ${String(rooms.length)}.`;
+    events.push({ type: "RUN_ABORTED", reason });
+    return { ...state, phase: "GameOver", outcome: "Aborted" };
+  }
 
   const [floorDeck, s4] = shuffle(rooms, seed);
   events.push({ type: "FLOOR_BUILT", floor: state.floor, rooms: floorDeck.length });
@@ -161,6 +169,9 @@ export const emptyTurnRecord = (): TurnRecord => ({
   freePlays: 0,
   goodStuffTaken: { Red: 0, Gray: 0 },
   fired: [],
+  playDiscount: { Red: 0, Gray: 0 },
+  poolPenalty: { oomph: 0, scramble: 0 },
+  poolBonus: { oomph: 0, scramble: 0 },
 });
 
 const freshPlayer = (deck: readonly Card[]): PlayerState => ({
@@ -184,10 +195,8 @@ export function createInitialState(
   content: CardContent,
 ): readonly [GameState, DomainEvent[]] {
   const players = content.cards.filter((c) => c.kind === "player");
-  const starterFaces = (owner: Character) =>
-    players.filter((c) => c.owner === owner && c.starter);
-  const rewardFaces = (owner: Character) =>
-    players.filter((c) => c.owner === owner && !c.starter);
+  const starterFaces = (owner: Character) => players.filter((c) => c.owner === owner && c.starter);
+  const rewardFaces = (owner: Character) => players.filter((c) => c.owner === owner && !c.starter);
 
   const deckFor = (owner: Character) => starterFaces(owner).flatMap(copiesOf);
   const poolFor = (owner: Character) => rewardFaces(owner).flatMap(copiesOf);
@@ -198,9 +207,11 @@ export function createInitialState(
   const [grayDeck, s2] = shuffle(deckFor("Gray"), s1);
   const [redPool, s3] = shuffle(poolFor("Red"), s2);
   const [grayPool, s4] = shuffle(poolFor("Gray"), s3);
+  const [goodStuff, s5] = shuffle(stuffOf("good_stuff"), s4);
+  const [badStuff, s6] = shuffle(stuffOf("bad_stuff"), s5);
 
   const base: GameState = {
-    seed: s4,
+    seed: s6,
     floor: 1,
     turn: 0,
     phase: "Turn Start",
@@ -215,8 +226,8 @@ export function createInitialState(
     pools: {
       Red: redPool,
       Gray: grayPool,
-      goodStuff: stuffOf("good_stuff"),
-      badStuff: stuffOf("bad_stuff"),
+      goodStuff,
+      badStuff,
     },
     offer: null,
     pending: null,

@@ -10,6 +10,7 @@
  */
 
 import { behaviourOf, type BehaviourContext, type ChoiceAnswer } from "./cards/behaviours";
+import { roomAllowsScrapForStats } from "./cards/rooms";
 import {
   costOf,
   costOverrideSpentBy,
@@ -30,19 +31,24 @@ import type {
   DomainEvent,
   GameState,
   Pending,
+  Pile,
   Rejection,
   RejectionCode,
   Result,
   Room,
   RoomEffect,
+  RoomId,
+  Stat,
   Threshold,
   TurnRecord,
   UnfinishedPlay,
 } from "./types";
 import { CorruptStateError } from "./types";
 import {
+  applyPoolBonus,
   CHARACTERS,
   clearFreePlays,
+  clearPlayDiscount,
   dealBadStuff,
   drawOne,
   discard,
@@ -52,6 +58,7 @@ import {
   scrap,
   shuffleIntoDeck,
   spendFreePlay,
+  spendPlayDiscount,
   standing,
   takeFrom,
   takeGoodStuff,
@@ -91,6 +98,7 @@ export function validate(state: GameState, command: Command): Rejection | null {
 
   switch (command.type) {
     case "CHOOSE_CHARACTER":
+    case "CHOOSE_PILE":
     case "CHOOSE_CARDS":
     case "ORDER_CARDS":
     case "TAKE_REWARD":
@@ -138,6 +146,26 @@ export function validate(state: GameState, command: Command): Rejection | null {
       return null;
     }
 
+    case "SCRAP_FOR_STATS": {
+      if (state.phase !== "Play") return wrongPhase(state, "Scrap for stats");
+      const room = state.activeRoom;
+      if (!room || !roomAllowsScrapForStats(room)) {
+        return reject(
+          "RoomDoesNotAllow",
+          `${room ? room.name : "This room"} prints no rule to Scrap for stats.`,
+        );
+      }
+      const c = command.character;
+      const p = playerOf(state, c);
+      if (p.down) return reject("CharacterIsDown", `${c} is Down.`);
+      const card = p.hand.find((x) => x.id === command.cardId);
+      if (!card) return reject("NotInHand", `That card is not in ${c}'s hand.`);
+      if (card.kind !== "good_stuff") {
+        return reject("NotGoodStuff", `${card.name} is not Good Stuff.`);
+      }
+      return null;
+    }
+
     case "ASCEND": {
       if (state.phase !== "Ascend") return wrongPhase(state, "ascend");
       for (const c of CHARACTERS) {
@@ -164,6 +192,12 @@ function validateAnswer(pending: Pending, command: Command): Rejection | null {
       return pending.options.includes(command.character)
         ? null
         : reject("NotAnOption", `${command.character} is not one of the options.`);
+
+    case "CHOOSE_PILE":
+      if (pending.kind !== "ChoosePile") return waiting;
+      return pending.options.includes(command.pile)
+        ? null
+        : reject("NotAnOption", `${command.pile} is not one of the options.`);
 
     case "CHOOSE_CARDS": {
       if (pending.kind !== "ChooseCards") return waiting;
@@ -199,71 +233,11 @@ function validateAnswer(pending: Pending, command: Command): Rejection | null {
 
 /* --------------------------------------------------------- Rulebook, Ascending */
 
-/**
- * Where one of a character's own cards currently sits — never the Exhaust
- * pile. `hand` only ever matters before Ascending's step 1 (Shuffle your
- * hand into your deck) runs: `validateAscendChoice` checks the state as
- * submitted, where the hand can still hold cards, but `settleStuff` (step 2)
- * always sees an empty one.
- */
-type Pile = "deck" | "hand" | "discard";
-
-/** Find a card of this character's, wherever among deck, hand or discard it sits. */
-function locate(state: GameState, c: Character, cardId: CardId): readonly [Pile, Card] | null {
-  const p = playerOf(state, c);
-  const inDeck = p.deck.find((x) => x.id === cardId);
-  if (inDeck) return ["deck", inDeck];
-  const inHand = p.hand.find((x) => x.id === cardId);
-  if (inHand) return ["hand", inHand];
-  const inDiscard = p.discard.find((x) => x.id === cardId);
-  if (inDiscard) return ["discard", inDiscard];
-  return null;
-}
-
-function removeFrom(state: GameState, c: Character, pile: Pile, cardId: CardId): GameState {
-  const p = playerOf(state, c);
-  if (pile === "deck") {
-    return withPlayer(state, c, { ...p, deck: p.deck.filter((x) => x.id !== cardId) });
-  }
-  const list = pile === "hand" ? p.hand : p.discard;
-  const card = list.find((x) => x.id === cardId);
-  return card ? takeFrom(state, c, pile, [card]) : state;
-}
-
-/** Every Stuff card this character's deck, hand or discard pile holds right now. */
-function stuffOnHand(state: GameState, c: Character): readonly (readonly [Pile, Card])[] {
-  const p = playerOf(state, c);
-  const of = (pile: Pile, list: readonly Card[]) =>
-    list.filter((x) => x.kind !== "player").map((x): readonly [Pile, Card] => [pile, x]);
-  return [...of("deck", p.deck), ...of("hand", p.hand), ...of("discard", p.discard)];
-}
-
 function validateAscendChoice(
   state: GameState,
   c: Character,
   choice: AscendChoice,
 ): Rejection | null {
-  const stuff = new Map(stuffOnHand(state, c).map(([, card]) => [card.id, card] as const));
-  const settledCards = new Set<CardId>();
-  const spentPayers = new Set<CardId>();
-  for (const entry of choice.settle) {
-    if (settledCards.has(entry.cardId)) {
-      return reject("NotAnOption", `${c} settled the same Stuff card twice.`);
-    }
-    settledCards.add(entry.cardId);
-    if (!stuff.has(entry.cardId)) {
-      return reject("NotAnOption", `That is not Stuff in ${c}'s deck, hand or discard pile.`);
-    }
-    if (entry.payWith === null) continue;
-    if (spentPayers.has(entry.payWith)) {
-      return reject("NotAnOption", `${c} spent the same card paying to settle Stuff twice.`);
-    }
-    spentPayers.add(entry.payWith);
-    const payer = locate(state, c, entry.payWith);
-    if (!payer || payer[1].kind !== "player") {
-      return reject("NotAnOption", `That is not another card of ${c}'s to Scrap.`);
-    }
-  }
   if (choice.takeRewardId !== null) {
     const offered = state.offer?.[c] ?? [];
     if (!offered.some((x) => x.id === choice.takeRewardId)) {
@@ -305,8 +279,12 @@ function apply(state: GameState, command: Command, run: Run): GameState {
       return playCard(state, command.character, command.cardId, command.payWith, run);
     case "END_PLAY":
       return endPlay(state, run);
+    case "SCRAP_FOR_STATS":
+      return scrapForStats(state, command.character, command.cardId, command.stat, run);
     case "CHOOSE_CHARACTER":
       return answerCharacter(state, command.character, run);
+    case "CHOOSE_PILE":
+      return answerPile(state, command.pile, run);
     case "CHOOSE_CARDS":
       return answerCards(state, command.cardIds, "cards", run);
     case "ORDER_CARDS":
@@ -454,7 +432,25 @@ function flipRoom(state: GameState, run: Run): GameState {
   };
   const faced = settle(flipped, run);
   if (faced.phase === "GameOver") return faced;
-  return settle(drawPhase(faced, run), run);
+  const drawn = settle(drawPhase(faced, run), run);
+  if (drawn.phase === "GameOver") return drawn;
+  return turnStartHands(drawn, run);
+}
+
+/** A held card's own Turn Start line (Corrosive Acid), once the draw is done. */
+function turnStartHands(state: GameState, run: Run): GameState {
+  let s = state;
+  for (const c of CHARACTERS) {
+    for (const card of playerOf(s, c).hand) {
+      const onTurnStart = behaviourOf(card.name)?.onTurnStart;
+      if (!onTurnStart) continue;
+      const step = onTurnStart(s, { card, character: c, zone: "hand" });
+      run.events.push(...step.events);
+      s = settle(step.state, run);
+      if (s.phase === "GameOver") return s;
+    }
+  }
+  return s;
 }
 
 /**
@@ -511,6 +507,10 @@ function playCard(
   if (costOverrideSpentBy(s, c, card)) {
     s = spendFreePlay(s);
   }
+  // Distract & Pivot: the very next card this character plays spends the charge.
+  if (s.thisTurn.playDiscount[c] > 0) {
+    s = spendPlayDiscount(s, c);
+  }
 
   // Each Turn, Play: you pay in *other* cards from your own hand. Red never pays for Gray.
   const from = run.events.length;
@@ -542,6 +542,27 @@ function playCard(
     events: run.events.slice(from, to),
     listeners: presentSince(s, run, from),
   });
+}
+
+/**
+ * Bio-Hazard Containment Vault: Scrap a Good Stuff card from hand for +3 to
+ * one stat in this turn's pool. Not a play — no `CARD_PLAYED` event, so
+ * nothing that keys off a play (Fast Follow, Tag Team) hears it.
+ */
+function scrapForStats(
+  state: GameState,
+  c: Character,
+  cardId: Card["id"],
+  stat: Stat,
+  run: Run,
+): GameState {
+  const card = playerOf(state, c).hand.find((x) => x.id === cardId);
+  if (!card) throw new CorruptStateError("Scrapped a card that is not in hand.");
+  let s = takeFrom(state, c, "hand", [card]);
+  s = { ...s, scrapyard: [...s.scrapyard, card] };
+  s = applyPoolBonus(s, stat, 3);
+  run.events.push({ type: "CARD_SCRAPPED_FOR_STATS", character: c, card, stat, amount: 3 });
+  return s;
 }
 
 /** Every card that can hear events and has been where it is since before the event at `index`. */
@@ -653,11 +674,13 @@ function retarget(effect: RoomEffect, who: Character): RoomEffect {
     case "ExhaustFromDeck":
       return { type: "ExhaustFromDeck", who, amount: effect.amount };
     case "DealBadStuff":
-      return { type: "DealBadStuff", who };
+      return { type: "DealBadStuff", who, count: effect.count };
     case "TakeGoodStuff":
       return { type: "TakeGoodStuff", who, count: effect.count };
     case "RevealReward":
       return { type: "RevealReward", who };
+    case "ScrapBadStuffFromHand":
+      return { type: "ScrapBadStuffFromHand", who, optional: effect.optional };
   }
 }
 
@@ -671,6 +694,8 @@ const promptFor = (effect: RoomEffect): string => {
       return "Who takes the Good Stuff?";
     case "RevealReward":
       return "Whose reward pool is revealed?";
+    case "ScrapBadStuffFromHand":
+      return "Who may Scrap a Bad Stuff card from their hand?";
   }
 };
 
@@ -679,11 +704,13 @@ function applyEffect(state: GameState, effect: RoomEffect, who: Character, run: 
     case "ExhaustFromDeck":
       return printedExhaust(state, who, effect.amount, "a room's printed punishment", run);
     case "DealBadStuff":
-      return dealBadStuff(state, who, run.events);
+      return dealBadStuff(state, who, effect.count, run.events);
     case "TakeGoodStuff":
       return takeGoodStuff(state, who, effect.count, run.events);
     case "RevealReward":
       throw new CorruptStateError("A reward reveal is a pending choice, not an effect.");
+    case "ScrapBadStuffFromHand":
+      throw new CorruptStateError("A Scrap offer is a pending choice, not an effect.");
   }
 }
 
@@ -721,7 +748,10 @@ function drain(state: GameState, run: Run): GameState {
       // no real choice to make.
       const moot = head.type === "RevealReward" && options.every((c) => s.pools[c].length === 0);
       if (options.length > 1 && !moot) {
-        return { ...s, pending: { kind: "ChooseCharacter", prompt: promptFor(head), options, source: null } };
+        return {
+          ...s,
+          pending: { kind: "ChooseCharacter", prompt: promptFor(head), options, source: null },
+        };
       }
       s = withEffects(s, [retarget(head, only), ...rest]);
       continue;
@@ -751,6 +781,28 @@ function drain(state: GameState, run: Run): GameState {
       };
     }
 
+    if (head.type === "ScrapBadStuffFromHand") {
+      // The chosen character may Scrap one Bad Stuff card from their own
+      // hand — a room-asked question, so it answers through `choose <Name>`
+      // or `choose none` the same way any other optional ChooseCards does.
+      const character = head.who;
+      const options = playerOf(s, character).hand.filter((c) => c.kind === "bad_stuff");
+      s = withEffects(s, rest);
+      if (options.length === 0) continue;
+      return {
+        ...s,
+        pending: {
+          kind: "ChooseCards",
+          prompt: `${character} may Scrap a Bad Stuff card from hand?`,
+          character,
+          options,
+          count: 1,
+          optional: true,
+          source: null,
+        },
+      };
+    }
+
     s = settle(applyEffect(s, head, head.who, run), run);
     if (s.phase === "GameOver") return s;
     s = withEffects(s, rest);
@@ -775,6 +827,7 @@ function finishTurn(state: GameState, run: Run): GameState {
     // The Play phase is over, so a free play nobody used is gone: it discounts a
     // card played this turn or nothing at all.
     s = clearFreePlays(s);
+    s = clearPlayDiscount(s);
 
     run.events.push({ type: "CLEANUP_BEGAN" });
     s = settle(s, run);
@@ -831,6 +884,15 @@ function finishCleanup(state: GameState, run: Run): GameState {
       return { ...s, phase: "GameOver", outcome: "Victory", playZone: [] };
     }
     // Rulebook, Ascending: each character is offered three cards from their own pool.
+    // Pools are sized so this always holds; if either falls short, the run is
+    // void rather than offering fewer cards than the rule promises.
+    for (const c of CHARACTERS) {
+      if (s.pools[c].length < 3) {
+        const reason = `${c}'s reward pool holds ${String(s.pools[c].length)} cards; Ascending reveals 3.`;
+        run.events.push({ type: "RUN_ABORTED", reason });
+        return { ...s, phase: "GameOver", outcome: "Aborted", playZone: [] };
+      }
+    }
     return {
       ...s,
       phase: "Ascend",
@@ -914,31 +976,69 @@ function answerCharacter(state: GameState, character: Character, run: Run): Game
     {
       ...state,
       pending: null,
-      resolution: { ...resolution, effects: [retarget(head, character), ...resolution.effects.slice(1)] },
+      resolution: {
+        ...resolution,
+        effects: [retarget(head, character), ...resolution.effects.slice(1)],
+      },
     },
     run,
   );
 }
 
+function answerPile(state: GameState, pile: Pile, run: Run): GameState {
+  const pending = state.pending;
+  if (pending?.kind !== "ChoosePile") {
+    throw new CorruptStateError("Answered a pile choice that was not being asked.");
+  }
+  if (!pending.source) throw new CorruptStateError("No card is waiting on a pile answer.");
+  return runChoice(state, { kind: "pile", tag: pending.source.tag, pile }, run);
+}
+
+/** The one thing a room-asked (not card-asked) `ChooseCards` answers today. */
+function answerRoomCards(
+  state: GameState,
+  pending: Pending,
+  cardIds: readonly Card["id"][],
+  run: Run,
+): GameState {
+  if (pending.kind !== "ChooseCards")
+    throw new CorruptStateError("No card is waiting on that answer.");
+  const chosen = cardIds.flatMap((id) => {
+    const found = pending.options.find((x) => x.id === id);
+    return found ? [found] : [];
+  });
+  let s: GameState = { ...state, pending: null };
+  if (chosen.length > 0) {
+    s = takeFrom(s, pending.character, "hand", chosen);
+    for (const c of chosen) s = scrap(s, pending.character, c, run.events);
+  }
+  return drain(s, run);
+}
+
 function answerCards(
   state: GameState,
-  cardIds: readonly Card["id"][],
+  ids: readonly (CardId | RoomId)[],
   kind: "cards" | "order",
   run: Run,
 ): GameState {
   const pending = state.pending;
-  if (!pending?.source) throw new CorruptStateError("No card is waiting on that answer.");
-  const shown =
-    pending.kind === "ChooseCards"
-      ? pending.options
-      : pending.kind === "OrderCards"
-        ? pending.cards
-        : [];
-  const cards = cardIds.flatMap((id) => {
-    const found = shown.find((x) => x.id === id);
+  if (!pending) throw new CorruptStateError("No card is waiting on that answer.");
+  if (kind === "cards") {
+    if (!pending.source) return answerRoomCards(state, pending, ids as readonly CardId[], run);
+    if (pending.kind !== "ChooseCards") throw new CorruptStateError("No card choice is waiting on that answer.");
+    const cards = ids.flatMap((id) => {
+      const found = pending.options.find((x) => x.id === id);
+      return found ? [found] : [];
+    });
+    return runChoice(state, { kind: "cards", tag: pending.source.tag, cards }, run);
+  }
+  if (!pending.source) throw new CorruptStateError("No card is waiting on that order.");
+  if (pending.kind !== "OrderCards") throw new CorruptStateError("No order is waiting on that answer.");
+  const cards = ids.flatMap((id) => {
+    const found = pending.cards.find((x) => x.id === id);
     return found ? [found] : [];
   });
-  return runChoice(state, { kind, tag: pending.source.tag, cards }, run);
+  return runChoice(state, { kind: "order", tag: pending.source.tag, cards }, run);
 }
 
 function answerReward(state: GameState, take: boolean, run: Run): GameState {
@@ -987,56 +1087,10 @@ function shuffleHandIntoDeck(state: GameState, c: Character, run: Run): GameStat
   return withPlayer(s, c, { ...playerOf(s, c), hand: [] });
 }
 
-/**
- * Rulebook, Ascending, step 2: Settle your Stuff. Search deck and discard for
- * Stuff — the hand is empty by now, already shuffled into the deck in step 1.
- * A Good Stuff card shuffles into the Good Stuff pool unless kept by
- * Scrapping one other owned, non-Stuff card from deck or discard; a Bad
- * Stuff card stays unless shed the same way. A kept card is left exactly
- * where it was found. No heal: the discard pile is untouched apart from
- * Stuff settled out of it. No hand discard either — step 1 shuffles the
- * hand into the deck, it does not spend it.
- *
- * `stuffOnHand` and `locate` still search all three piles: harmless here,
- * since step 1 already emptied the hand, and it lets the same helpers back
- * `validateAscendChoice`, which runs before step 1 and so must still accept
- * a Stuff card or a payer sitting in hand — it will be deck by the time this
- * runs.
- */
-function settleStuff(state: GameState, c: Character, choice: AscendChoice, run: Run): GameState {
-  let s = state;
-  for (const [pile, stuffCard] of stuffOnHand(state, c)) {
-    const entry = choice.settle.find((e) => e.cardId === stuffCard.id);
-    const payWith = entry?.payWith ?? null;
-
-    if (payWith !== null) {
-      const payer = locate(s, c, payWith);
-      if (!payer) continue; // Already validated; defensive only.
-      const [payerPile, payerCard] = payer;
-      s = removeFrom(s, c, payerPile, payerCard.id);
-      s = scrap(s, c, payerCard, run.events);
-      if (stuffCard.kind === "bad_stuff") {
-        // Paying sheds Bad Stuff: off to its pool.
-        s = removeFrom(s, c, pile, stuffCard.id);
-        s = { ...s, pools: { ...s.pools, badStuff: [...s.pools.badStuff, stuffCard] } };
-      }
-      // Paying for Good Stuff keeps it where it was found: nothing else moves.
-    } else if (stuffCard.kind === "good_stuff") {
-      // The default for Good Stuff: shuffle it into the Good Stuff pool.
-      s = removeFrom(s, c, pile, stuffCard.id);
-      s = { ...s, pools: { ...s.pools, goodStuff: [...s.pools.goodStuff, stuffCard] } };
-    }
-    // The default for Bad Stuff is to keep it: nothing moves.
-  }
-  // "...then shuffle your deck."
-  return shuffleIntoDeck(s, c, [], run.events);
-}
-
 function ascendOne(state: GameState, c: Character, choice: AscendChoice, run: Run): GameState {
   let s = shuffleHandIntoDeck(state, c, run);
-  s = settleStuff(s, c, choice, run);
 
-  // Rulebook, Ascending, step 3: Choose a reward. Three cards from their own pool;
+  // Rulebook, Ascending, step 2: Choose a reward. Three cards from their own pool;
   // take one, shuffled into the deck, or decline. A declined card goes to the
   // bottom of its pool.
   const offered = state.offer?.[c] ?? [];

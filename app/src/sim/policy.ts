@@ -15,12 +15,11 @@ import {
   contributionOf,
   exhaustXPreventedBy,
   metThresholds,
+  ownedPlayerCards,
   playableCards,
-  settleableStuff,
-  settlePayOptions,
   statPool,
   thresholdIsMet,
-  thresholdTarget,
+  thresholdRequirement,
   type StatTotals,
 } from "@domain/queries";
 import type {
@@ -30,8 +29,9 @@ import type {
   Character,
   Command,
   GameState,
+  RoomId,
   Stat,
-  StuffSettlement,
+  Threshold,
 } from "@domain/types";
 import { CHARACTERS, playerOf } from "@domain/verbs";
 import { pick, type Rng } from "./rng";
@@ -55,6 +55,12 @@ export const randomPolicy: Policy = {
 const statValue = (totals: StatTotals, stat: Stat): number =>
   stat === "Oomph" ? totals.oomph : totals.scramble;
 
+/** Would `totals` meet this threshold's requirement, dual stats and all? */
+const meetsRequirement = (state: GameState, totals: StatTotals, t: Threshold): boolean => {
+  const req = thresholdRequirement(state, t);
+  return totals.oomph >= req.oomph && totals.scramble >= req.scramble;
+};
+
 /**
  * Would adding `card`'s contribution meet a Clearing threshold the pool has
  * not already met? A "flee this room for free" threshold (`clears: false`)
@@ -66,9 +72,7 @@ function clearsARoom(state: GameState, character: Character, card: Card): boolea
   const before = statPool(state);
   const gain = contributionOf(state, { owner: character, card });
   const after: StatTotals = { oomph: before.oomph + gain.oomph, scramble: before.scramble + gain.scramble };
-  return allThresholds(room).some(
-    (t) => t.clears && !thresholdIsMet(state, t) && statValue(after, t.stat) >= thresholdTarget(state, t),
-  );
+  return allThresholds(room).some((t) => t.clears && !thresholdIsMet(state, t) && meetsRequirement(state, after, t));
 }
 
 /** Has the room already been Cleared by something the pool now meets? */
@@ -120,7 +124,7 @@ function roomIsClearableThisTurn(state: GameState): boolean {
   const potential = maxAdditionalGain(state);
   const reachable: StatTotals = { oomph: now.oomph + potential.oomph, scramble: now.scramble + potential.scramble };
   return allThresholds(room).some(
-    (t) => t.clears && !thresholdIsMet(state, t) && statValue(reachable, t.stat) >= thresholdTarget(state, t),
+    (t) => t.clears && !thresholdIsMet(state, t) && meetsRequirement(state, reachable, t),
   );
 }
 
@@ -204,49 +208,11 @@ function choosePlay(state: GameState, legal: readonly Command[]): Command {
   return best;
 }
 
-/**
- * Below this many live cards (deck + hand + discard — the pool a Scrap
- * actually shrinks; the Exhaust pile is already gone for the run and the
- * Scrapyard doesn't come back), the bot stops paying at Settle your Stuff
- * altogether. Most of a run's Exhaust comes from Fleeing rooms, not from
- * cards the bot chooses to play, so it is not something a play-time choice
- * can head off. Scrapping at Ascend is the one loss this policy controls
- * outright: 12 leaves a "full hand plus a few spare" headroom (`HAND_CAP` + 7)
- * while banking more of the deck against the Exhaust a Flee is going to cost
- * it anyway — well under playtest 4's observed 11-14 live cards.
- */
-const MIN_LIVE_DECK = 12;
-
-function liveDeckSize(state: GameState, character: Character): number {
-  const p = playerOf(state, character);
-  return p.deck.length + p.hand.length + p.discard.length;
-}
-
-/** What a Good Stuff card is worth: its stats, plus a point for doing something besides. */
-function goodStuffValue(card: Card): number {
-  return card.oomph + card.scramble + (card.text ? 1 : 0);
-}
-
-/** A Bad Stuff card is dead weight even with no `Holding:` line; add a point per kind of tax it levies. */
-function badStuffSeverity(card: Card): number {
-  const held = behaviourOf(card.name)?.whileHeld;
-  if (!held) return 1;
-  const taxes = [held.costDelta, held.drawTargetDelta, held.stuffPowerDelta, held.thresholdScrambleDelta];
-  return 1 + taxes.filter((delta) => (delta ?? 0) !== 0).length;
-}
-
-/** What keeping (Good Stuff) or shedding (Bad Stuff) this card is worth. */
-function stuffValue(card: Card): number {
-  return card.kind === "good_stuff" ? goodStuffValue(card) : badStuffSeverity(card);
-}
-
-const byValueDesc = (a: Card, b: Card): number => stuffValue(b) - stuffValue(a) || a.id.localeCompare(b.id);
-
 /** Which stat this character's non-Stuff cards lean on least, going by what's still in deck, hand and discard. */
 function weakerStat(state: GameState, character: Character): Stat {
   let oomph = 0;
   let scramble = 0;
-  for (const card of settlePayOptions(state, character)) {
+  for (const card of ownedPlayerCards(state, character)) {
     oomph += card.oomph;
     scramble += card.scramble;
   }
@@ -283,46 +249,9 @@ function chooseReward(state: GameState, character: Character): CardId | null {
   return best.id;
 }
 
-/**
- * One character's whole Ascend, decided independently of the other's: pay to
- * keep the Good Stuff most worth keeping, then pay to shed the Bad Stuff most
- * worth shedding, with whatever payers are left — but only while the deck can
- * afford it and the card is worth more than its cheapest payer — then take
- * the reward that best fits the deck. This is the same shape the CLI composes
- * from its per-question staging (`cli/ascend.ts`, `composeAscend`) — a full
- * `settle` list, not the move generator's single-item one — so it isn't
- * limited by the generator's Ascend cross-product cap (design/cli-sim/spec.md,
- * "The move generator").
- */
+/** One character's whole Ascend, decided independently of the other's: take the reward that best fits the deck. */
 function composeChoice(state: GameState, character: Character): AscendChoice {
-  const payers = [...settlePayOptions(state, character)].sort(
-    (a, b) => a.cost - b.cost || a.id.localeCompare(b.id),
-  );
-  let payerIndex = 0;
-  let liveBudget = liveDeckSize(state, character);
-
-  const takePayer = (value: number): CardId | null => {
-    const payer = payers[payerIndex];
-    if (!payer) return null;
-    if (value <= payer.cost) return null;
-    if (liveBudget - 1 < MIN_LIVE_DECK) return null;
-    payerIndex += 1;
-    liveBudget -= 1;
-    return payer.id;
-  };
-
-  const stuff = settleableStuff(state, character);
-  const settle: StuffSettlement[] = [];
-  for (const card of stuff.filter((c) => c.kind === "good_stuff").sort(byValueDesc)) {
-    const payWith = takePayer(stuffValue(card));
-    if (payWith !== null) settle.push({ cardId: card.id, payWith });
-  }
-  for (const card of stuff.filter((c) => c.kind === "bad_stuff").sort(byValueDesc)) {
-    const payWith = takePayer(stuffValue(card));
-    if (payWith !== null) settle.push({ cardId: card.id, payWith });
-  }
-
-  return { settle, takeRewardId: chooseReward(state, character) };
+  return { takeRewardId: chooseReward(state, character) };
 }
 
 function chooseAscend(state: GameState): Command {
@@ -336,7 +265,7 @@ function chooseAscend(state: GameState): Command {
   return composed;
 }
 
-function cardsDeepEqual(a: readonly CardId[], b: readonly CardId[]): boolean {
+function cardsDeepEqual(a: readonly (CardId | RoomId)[], b: readonly (CardId | RoomId)[]): boolean {
   return a.length === b.length && a.every((id, i) => id === b[i]);
 }
 
@@ -353,6 +282,12 @@ function choosePending(state: GameState, legal: readonly Command[]): Command {
   if (pending.kind === "ChooseCharacter") {
     const wanted = pending.options[0];
     const found = legal.find((c) => c.type === "CHOOSE_CHARACTER" && c.character === wanted);
+    if (found) return found;
+  }
+
+  if (pending.kind === "ChoosePile") {
+    const wanted = pending.options.includes("Floor deck") ? "Floor deck" : pending.options[0];
+    const found = legal.find((c) => c.type === "CHOOSE_PILE" && c.pile === wanted);
     if (found) return found;
   }
 
@@ -386,12 +321,11 @@ function choosePending(state: GameState, legal: readonly Command[]): Command {
 
 /**
  * A fixed, deterministic bot: play what clears the room, pay
- * with the cheapest cards, take the reward, keep Good Stuff you can pay for
- * and shed Bad Stuff you can. It never draws on `rng` — ties are broken by
- * card id — so the same seed always plays the same game. Everywhere but
- * Ascend it only answers from the move generator's own legal list; at
- * Ascend it composes its own `ASCEND` command (see `composeChoice`) and
- * validates it against the engine, because the generator's own list caps
+ * with the cheapest cards, and take the reward. It never draws on `rng` —
+ * ties are broken by card id — so the same seed always plays the same game.
+ * Everywhere but Ascend it only answers from the move generator's own legal
+ * list; at Ascend it composes its own `ASCEND` command (see `composeChoice`)
+ * and validates it against the engine, because the generator's own list caps
  * out well before two independent characters' choices fit in it.
  */
 export const greedyPolicy: Policy = {

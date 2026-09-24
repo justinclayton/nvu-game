@@ -38,7 +38,7 @@ export type StopReason =
   /** The generator or the engine raised instead of answering. */
   | "Threw";
 
-export type RunOutcome = "Victory" | "Defeat" | "Unfinished";
+export type RunOutcome = "Victory" | "Defeat" | "Aborted" | "Unfinished";
 
 export interface RunResult {
   readonly seed: number;

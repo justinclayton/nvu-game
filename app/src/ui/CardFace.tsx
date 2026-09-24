@@ -10,7 +10,7 @@
  * a field of the type's colour, which is what tells a hand apart at a glance.
  */
 
-import { allThresholds, costOf, thresholdIsMet, thresholdTarget } from "@domain/queries";
+import { allThresholds, costOf, printedThresholdLines, thresholdIsMet, thresholdLines } from "@domain/queries";
 import type { Card, Character, GameState, Room } from "@domain/types";
 
 const TYPE_LINE: Record<Card["kind"], string> = {
@@ -140,12 +140,11 @@ export function RoomFace({ room, state }: RoomFaceProps) {
       <ul className="lines">
         {allThresholds(room).map((t, i) => {
           const met = state ? thresholdIsMet(state, t) : false;
-          const target = state ? thresholdTarget(state, t) : t.value;
+          const lines = state ? thresholdLines(state, t) : printedThresholdLines(t);
+          const need = lines.map((l) => `${l.stat} ${l.effective}`).join(" and ");
           return (
             <li key={i} className={met ? "line is-met" : "line"}>
-              <b>
-                {t.stat} {target}
-              </b>
+              <b>{need}</b>
               <span>{t.outcome}</span>
             </li>
           );

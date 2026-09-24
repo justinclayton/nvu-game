@@ -3,7 +3,7 @@ import { act, fireEvent, render, screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it } from "vitest";
 
 import { createSession, type Session } from "@application/session";
-import { CARD_CONTENT } from "@content/index";
+import { FULL_CONTENT as CARD_CONTENT } from "@domain/__fixtures__/rig";
 import { App } from "./App";
 
 /* A handful of smoke tests. The rules are tested in domain; what is checked

@@ -1,15 +1,16 @@
 /* Gray's cards. Keyed by the name design/cards.yaml makes unique. */
 
-import type { Character, DomainEvent, Pending } from "../types";
-import { othersPlayed, playedBy } from "../queries";
+import { playedBy } from "../queries";
+import { PILES, type Character, type DomainEvent, type Pending, type Pile } from "../types";
 import {
-  CHARACTERS,
   drawOne,
+  grantPlayDiscount,
   moveToHand,
+  pileCards,
   playerOf,
-  scrap,
   shuffleIntoDeck,
   takeFrom,
+  withPile,
 } from "../verbs";
 import {
   ask,
@@ -21,7 +22,7 @@ import {
   type Registry,
 } from "./behaviour";
 
-/** Two questions: whose deck, then what order. Depth 1 has no order to choose. */
+/** Two questions: which pile, then what order. Depth 1 has no order to choose. */
 function peek(depth: number): CardBehaviour {
   const orderPrompt =
     depth === 1
@@ -29,37 +30,35 @@ function peek(depth: number): CardBehaviour {
       : `Put those ${String(depth)} back on top, in the order you choose.`;
   return {
     onPlay(state, ctx) {
-      const options = CHARACTERS.filter((c) => playerOf(state, c).deck.length > 0);
+      const options = PILES.filter((p) => pileCards(state, p).length > 0);
       if (options.length === 0) return nothing(state);
       return ask(state, {
-        kind: "ChooseCharacter",
-        prompt: `Look at the top ${String(depth)} of whose deck?`,
+        kind: "ChoosePile",
+        prompt: `Look at the top ${String(depth)} of any deck.`,
         options,
         source: source(ctx, "peek"),
       });
     },
     onChoice(answer, state, ctx) {
-      if (answer.kind === "character") {
-        const top = playerOf(state, answer.character).deck.slice(0, depth);
+      if (answer.kind === "pile") {
+        const top = pileCards(state, answer.pile).slice(0, depth);
         const events: DomainEvent[] = [
-          { type: "CARDS_PEEKED", character: answer.character, cards: top },
+          { type: "CARDS_PEEKED", character: ctx.character, pile: answer.pile, cards: top },
         ];
         if (top.length < 2) return done(state, events);
         const pending: Pending = {
           kind: "OrderCards",
-          prompt: `${answer.character}'s deck. ${orderPrompt}`,
-          character: answer.character,
+          prompt: `${answer.pile}. ${orderPrompt}`,
+          pile: answer.pile,
           cards: top,
-          source: source(ctx, `order:${answer.character}`),
+          source: source(ctx, `order:${answer.pile}`),
         };
         return ask(state, pending, events);
       }
       if (answer.kind !== "order") return nothing(state);
-      const whose = answer.tag.split(":")[1] === "Red" ? "Red" : "Gray";
-      const p = playerOf(state, whose);
-      const rest = p.deck.slice(answer.cards.length);
-      const reordered = { ...p, deck: [...answer.cards, ...rest] };
-      return done(whose === "Red" ? { ...state, Red: reordered } : { ...state, Gray: reordered });
+      const pile = answer.tag.split(":")[1] as Pile;
+      const rest = pileCards(state, pile).slice(answer.cards.length);
+      return done(withPile(state, pile, [...answer.cards, ...rest]));
     },
   };
 }
@@ -92,30 +91,32 @@ function shuffleStuffFromHand(whose: (ctx: BehaviourContext) => Character): Card
 }
 
 export const GRAY: Registry = {
-  /* "Look at the top card of any deck, then put it back on top. (Peek 1?)" */
+  /* "Peek 1." */
   "Peek Around Corner": peek(1),
 
-  /* "Look at the top 2 cards of any deck. Put them back in either order." */
+  /* "Look at top 2 cards of any deck. Put them back in either order." */
   "Catch Your Breath": peek(2),
 
-  /* "Look at the top 3 cards of any deck, then put them back in any order." */
+  /* "Look at top 3 cards of any deck, put back in any order." */
   "Hack the Doors": peek(3),
 
-  /* "Oomph equal to twice the number of cards Red has played this turn." */
+  /* "Scramble equal to 2 times the number of cards Red has played this turn." */
   "In Step": {
     stats(state, _owner, card) {
-      return { oomph: 2 * playedBy(state, "Red"), scramble: card.scramble };
+      return { oomph: card.oomph, scramble: 2 * playedBy(state, "Red") };
     },
   },
 
-  /* "If any Bad Stuff is played this turn, Oomph 2 and Scramble 2."
+  /* "If any Bad Stuff is played this turn, gain Oomph +1 and Scramble +1."
    *
    * Bad Stuff itself contributes no stats; this card is what makes playing
    * a piece of it worth anything. */
   "One Man's Junk": {
-    stats(state) {
+    stats(state, _owner, card) {
       const played = state.playZone.some((p) => p.card.kind === "bad_stuff");
-      return played ? { oomph: 2, scramble: 2 } : { oomph: 0, scramble: 0 };
+      return played
+        ? { oomph: card.oomph + 1, scramble: card.scramble + 1 }
+        : { oomph: card.oomph, scramble: card.scramble };
     },
   },
 
@@ -183,58 +184,10 @@ export const GRAY: Registry = {
     },
   },
 
-  /* "Scramble equal to twice the number of other cards Gray played this turn." */
-  "Every Little Bit Helps": {
-    stats(state, owner, card) {
-      return { oomph: card.oomph, scramble: 2 * othersPlayed(state, owner, card) };
-    },
-  },
-
-  /* "Scrap a card from your hand. If you do, draw the top card from the Gray
-   * Rewards deck directly into your hand."
-   *
-   * The Gray Rewards deck is Gray's reward pool (rulebook §5, Setup); its top card goes to hand, not deck. */
-  "Level Up": {
-    onPlay(state, ctx) {
-      const options = playerOf(state, ctx.character).hand;
-      if (options.length === 0) return nothing(state);
-      return ask(state, {
-        kind: "ChooseCards",
-        prompt: "Scrap a card from your hand?",
-        character: ctx.character,
-        options,
-        count: 1,
-        optional: true,
-        source: source(ctx, "level-up"),
-      });
-    },
-    onChoice(answer, state, ctx) {
-      if (answer.kind !== "cards" || answer.cards.length === 0) return nothing(state);
-      const events: DomainEvent[] = [];
-      let s = takeFrom(state, ctx.character, "hand", answer.cards);
-      for (const card of answer.cards) s = scrap(s, ctx.character, card, events);
-      const top = s.pools[ctx.character][0];
-      if (!top) return done(s, events);
-      s = {
-        ...s,
-        pools:
-          ctx.character === "Red"
-            ? { ...s.pools, Red: s.pools.Red.slice(1) }
-            : { ...s.pools, Gray: s.pools.Gray.slice(1) },
-      };
-      events.push({ type: "REWARD_TAKEN", character: ctx.character, card: top });
-      return done(moveToHand(s, ctx.character, top, events), events);
-    },
-  },
-
-  /* "Holding: when you play a card with Scramble, draw 1 card." */
-  "I Know Kung Fu": {
-    onEvent(event, state, ctx) {
-      if (ctx.zone !== "hand") return nothing(state);
-      if (event.type !== "CARD_PLAYED" || event.character !== ctx.character) return nothing(state);
-      if (event.card.scramble <= 0) return nothing(state);
-      const events: DomainEvent[] = [];
-      return done(drawOne(state, ctx.character, events), events);
+  /* "The next card Red plays this turn costs 1 fewer card to play." */
+  "Distract & Pivot": {
+    onPlay(state) {
+      return done(grantPlayDiscount(state, "Red"));
     },
   },
 };

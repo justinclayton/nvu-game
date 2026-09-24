@@ -5,6 +5,7 @@
  */
 
 import { behaviourOf, type HeldModifiers } from "./cards/behaviours";
+import { roomAllowsScrapForStats } from "./cards/rooms";
 import { HAND_CAP } from "./setup";
 import type {
   Card,
@@ -106,7 +107,7 @@ export function contributionOf(state: GameState, played: PlayedCard): StatTotals
   const stuffDelta = card.kind === "good_stuff" ? m.stuffPowerDelta : 0;
   return {
     oomph: Math.max(0, base.oomph + m.playedPowerDelta + stuffDelta),
-    scramble: Math.max(0, base.scramble),
+    scramble: Math.max(0, base.scramble + stuffDelta),
   };
 }
 
@@ -126,7 +127,16 @@ export function statPool(state: GameState, side?: Character): StatTotals {
     oomph += c.oomph;
     scramble += c.scramble;
   }
-  return { oomph, scramble };
+  // System Feedback banks a loss and Bio-Hazard Containment Vault a gain
+  // against the shared pool, not either side's own display-only contribution.
+  if (side) return { oomph, scramble };
+  return {
+    oomph: Math.max(0, oomph - state.thisTurn.poolPenalty.oomph + state.thisTurn.poolBonus.oomph),
+    scramble: Math.max(
+      0,
+      scramble - state.thisTurn.poolPenalty.scramble + state.thisTurn.poolBonus.scramble,
+    ),
+  };
 }
 
 /** A card that says "ALL rooms require an additional N Scramble" is read from either hand. */
@@ -140,30 +150,62 @@ function thresholdScrambleDelta(state: GameState): number {
   return delta;
 }
 
-/** What a printed threshold actually asks for right now. */
-export function thresholdTarget(state: GameState, threshold: Threshold): number {
-  const extra = threshold.stat === "Scramble" ? thresholdScrambleDelta(state) : 0;
-  return threshold.value + extra;
+/**
+ * What a printed threshold actually asks of the pool right now: Panic (and
+ * anything like it) only ever raises the Scramble side, whether a line
+ * already carried one or not (design/cards.yaml, Panic).
+ */
+export function thresholdRequirement(state: GameState, threshold: Threshold): StatTotals {
+  return {
+    oomph: threshold.requires.oomph,
+    scramble: threshold.requires.scramble + thresholdScrambleDelta(state),
+  };
 }
 
 /**
- * Panic doesn't just raise Scramble lines — it makes every line need Scramble.
- * An Oomph line picks up its own Scramble floor; a Scramble line already
- * carries the same delta on its own target, so it needs no second floor.
+ * Is this line's threshold met? A threshold that prints both stats is met
+ * only when the pool meets or exceeds both (design/rulebook.md).
  */
-export function extraScrambleRequirement(state: GameState, threshold: Threshold): number {
-  return threshold.stat === "Scramble" ? 0 : thresholdScrambleDelta(state);
-}
-
-const statOf = (totals: StatTotals, stat: Stat): number =>
-  stat === "Oomph" ? totals.oomph : totals.scramble;
-
-/** Is this line's threshold met? Every Challenge reads the shared pool. */
 export function thresholdIsMet(state: GameState, threshold: Threshold): boolean {
   const pool = statPool(state);
-  const meetsMain = statOf(pool, threshold.stat) >= thresholdTarget(state, threshold);
-  const meetsExtra = pool.scramble >= extraScrambleRequirement(state, threshold);
-  return meetsMain && meetsExtra;
+  const req = thresholdRequirement(state, threshold);
+  return pool.oomph >= req.oomph && pool.scramble >= req.scramble;
+}
+
+/** One stat line a threshold should show right now, whether printed or added by something held. */
+export interface ThresholdLine {
+  readonly stat: Stat;
+  readonly effective: number;
+  readonly printed: number;
+}
+
+/** The printed stat lines of a threshold, with no state to weigh a held modifier against. */
+export function printedThresholdLines(threshold: Threshold): readonly ThresholdLine[] {
+  const lines: ThresholdLine[] = [];
+  if (threshold.requires.oomph > 0) {
+    lines.push({ stat: "Oomph", effective: threshold.requires.oomph, printed: threshold.requires.oomph });
+  }
+  if (threshold.requires.scramble > 0) {
+    lines.push({ stat: "Scramble", effective: threshold.requires.scramble, printed: threshold.requires.scramble });
+  }
+  return lines;
+}
+
+/**
+ * The stat lines a threshold should display right now — every stat it prints,
+ * plus Scramble if something held adds it where none was printed (Panic
+ * against an Oomph-only line).
+ */
+export function thresholdLines(state: GameState, threshold: Threshold): readonly ThresholdLine[] {
+  const req = thresholdRequirement(state, threshold);
+  const lines: ThresholdLine[] = [];
+  if (threshold.requires.oomph > 0 || req.oomph > 0) {
+    lines.push({ stat: "Oomph", effective: req.oomph, printed: threshold.requires.oomph });
+  }
+  if (threshold.requires.scramble > 0 || req.scramble > 0) {
+    lines.push({ stat: "Scramble", effective: req.scramble, printed: threshold.requires.scramble });
+  }
+  return lines;
 }
 
 /** Every Threshold printed on a room, across every Challenge, in printed order. */
@@ -231,7 +273,9 @@ export function costOverrideFor(state: GameState, c: Character, card: Card): Cos
 export function printedCostOf(state: GameState, c: Character, card: Card): number {
   const behaviour = behaviourOf(card.name);
   const base = behaviour?.cost ? behaviour.cost(state, c, card) : card.cost;
-  return Math.max(0, base + heldModifiers(state, c).costDelta);
+  // Distract & Pivot: a banked charge takes 1 off this character's very next play.
+  const discount = state.thisTurn.playDiscount[c] > 0 ? 1 : 0;
+  return Math.max(0, base + heldModifiers(state, c).costDelta - discount);
 }
 
 /**
@@ -273,22 +317,17 @@ export function playableCards(state: GameState, c: Character): readonly Card[] {
   return p.hand.filter((card) => payOptions(state, c, card.id).length >= costOf(state, c, card));
 }
 
-/* ------------------------------------------------------------- Rulebook, Ascending */
-
-/**
- * Every Stuff card in this character's deck, hand or discard pile — what
- * Settle your Stuff works through, once Ascending's first step has shuffled
- * the hand into the deck. A Stuff card sitting in hand right now is included
- * here, since that shuffle is what it goes through on its way to being
- * settled.
- */
-export function settleableStuff(state: GameState, c: Character): readonly Card[] {
+/** This character's Good Stuff cards eligible for `SCRAP_FOR_STATS` right now — only while the active room's own text allows it (e.g. Bio-Hazard Containment Vault). */
+export function scrapForStatsCards(state: GameState, c: Character): readonly Card[] {
+  if (state.phase !== "Play" || state.pending !== null) return [];
+  if (!state.activeRoom || !roomAllowsScrapForStats(state.activeRoom)) return [];
   const p = playerOf(state, c);
-  return [...p.deck, ...p.hand, ...p.discard].filter((x) => x.kind !== "player");
+  if (p.down) return [];
+  return p.hand.filter((card) => card.kind === "good_stuff");
 }
 
-/** Every other owned, non-Stuff card that could pay to settle a Stuff card. */
-export function settlePayOptions(state: GameState, c: Character): readonly Card[] {
+/** Every non-Stuff card this character owns, across deck, hand and discard pile. */
+export function ownedPlayerCards(state: GameState, c: Character): readonly Card[] {
   const p = playerOf(state, c);
   return [...p.deck, ...p.hand, ...p.discard].filter((x) => x.kind === "player");
 }

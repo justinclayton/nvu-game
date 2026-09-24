@@ -1,16 +1,25 @@
 import { describe, expect, it } from "vitest";
 
-import { CARD_CONTENT } from "@content/index";
+import { CARD_CONTENT, CARD_LIST_ID } from "@content/index";
+import { FULL_CONTENT } from "@domain/__fixtures__/rig";
 import { costOf, payOptions, playableCards } from "@domain/queries";
+import type { CardContent } from "@domain/printed";
+import { RULES_VERSION } from "@domain/setup";
 import type { AscendChoice, Character, Command, GameState } from "@domain/types";
 import { EXPORTS, runData, runTranscript, runTurns, turnRows, type RunFile } from "./exportRun";
 import { createSession, loadSession, type Session } from "./session";
 
 const content = CARD_CONTENT;
 // A seed the naive "always take what's affordable" driver below plays to a
-// Defeat well inside band 1 (floor 4 and up has no content yet, so a run
-// that ascends that far finds an empty floor deck).
+// Defeat well inside band 1 (#122/#123/#125: floor 4 and up has no content
+// yet, so a run that ascends that far finds an empty floor deck). Band 1's
+// pool is also short of floor 1's own count (setup.test.ts), so this run
+// now ends Aborted at floor 1 before a single command runs.
 const SEED = 20260918;
+// Same driver, a padded band 1, and a seed proven (by simulate/randomPolicy) to
+// clear several turns before a Defeat — used only where a test needs more than
+// the one Aborted row the real card list gives every other run in this file.
+const FULL_SEED = 9;
 const WHEN = new Date("2026-09-17T09:30:00.000Z");
 
 /**
@@ -35,6 +44,8 @@ function nextCommand(state: GameState): Command {
     switch (pending.kind) {
       case "ChooseCharacter":
         return { type: "CHOOSE_CHARACTER", character: pending.options[0] ?? "Red" };
+      case "ChoosePile":
+        return { type: "CHOOSE_PILE", pile: pending.options[0] ?? "Red deck" };
       case "ChooseCards":
         return {
           type: "CHOOSE_CARDS",
@@ -82,13 +93,12 @@ function affordablePlay(state: GameState, character: Character) {
 }
 
 const ascendChoice = (state: GameState, character: Character): AscendChoice => ({
-  settle: [],
   takeRewardId: state.offer?.[character][0]?.id ?? null,
 });
 
 /** A run with notes typed into it at three different points. */
-function playedAndNoted(): Session {
-  const session = createSession(SEED, content);
+function playedAndNoted(seed = SEED, withContent: CardContent = content): Session {
+  const session = createSession(seed, withContent);
   session.getState().note("first thought, before anything happened");
   session.getState().dispatch({ type: "FLIP_ROOM" });
   session.getState().note("that room again");
@@ -127,7 +137,10 @@ describe("the transcript (.txt)", () => {
 
 describe("one row per turn (.csv)", () => {
   it("counts what the events say, and files each note under the turn it was typed in", () => {
-    const session = playedAndNoted();
+    // Band 1's pool is short of floor 1's own count (setup.test.ts), so this
+    // one plays out on a padded band 1 — it is the only test here that needs
+    // more than the one Aborted row to exercise turnRows across many turns.
+    const session = playedAndNoted(FULL_SEED, FULL_CONTENT);
     const rows = turnRows(
       session.getState().events,
       session.getState().notes,
@@ -173,6 +186,8 @@ describe("the run itself (.json)", () => {
     expect(file.run?.commands).toEqual(session.getState().commands);
     expect(file.notes).toEqual(session.getState().notes);
     expect(file.log).toHaveLength(session.getState().events.length);
+    expect(file.cards).toBe(CARD_LIST_ID);
+    expect(file.rules).toBe(RULES_VERSION);
   });
 
   it("replays to the same event log, with the notes back where they were typed", () => {

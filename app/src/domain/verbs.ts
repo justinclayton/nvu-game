@@ -12,12 +12,15 @@
 import type {
   Card,
   Character,
-  DomainEvent,
   DiscardedFrom,
+  DomainEvent,
   GameState,
+  Pile,
   PlayerState,
+  Room,
+  Stat,
 } from "./types";
-import { drawBlind, shuffle } from "./rng";
+import { shuffle } from "./rng";
 
 export const CHARACTERS: readonly Character[] = ["Red", "Gray"];
 
@@ -27,6 +30,46 @@ export const playerOf = (state: GameState, c: Character): PlayerState => state[c
 
 export const withPlayer = (state: GameState, c: Character, p: PlayerState): GameState =>
   c === "Red" ? { ...state, Red: p } : { ...state, Gray: p };
+
+/** The face-down cards of any pile on the table (rulebook, Keywords: any deck). */
+export function pileCards(state: GameState, pile: Pile): readonly (Card | Room)[] {
+  switch (pile) {
+    case "Red deck":
+      return state.Red.deck;
+    case "Gray deck":
+      return state.Gray.deck;
+    case "Floor deck":
+      return state.floorDeck;
+    case "Red reward pool":
+      return state.pools.Red;
+    case "Gray reward pool":
+      return state.pools.Gray;
+    case "Good Stuff pool":
+      return state.pools.goodStuff;
+    case "Bad Stuff pool":
+      return state.pools.badStuff;
+  }
+}
+
+/** Replace a pile on the table wholesale — for putting looked-at cards back. */
+export function withPile(state: GameState, pile: Pile, cards: readonly (Card | Room)[]): GameState {
+  switch (pile) {
+    case "Red deck":
+      return withPlayer(state, "Red", { ...state.Red, deck: cards as readonly Card[] });
+    case "Gray deck":
+      return withPlayer(state, "Gray", { ...state.Gray, deck: cards as readonly Card[] });
+    case "Floor deck":
+      return { ...state, floorDeck: cards as readonly Room[] };
+    case "Red reward pool":
+      return { ...state, pools: { ...state.pools, Red: cards as readonly Card[] } };
+    case "Gray reward pool":
+      return { ...state, pools: { ...state.pools, Gray: cards as readonly Card[] } };
+    case "Good Stuff pool":
+      return { ...state, pools: { ...state.pools, goodStuff: cards as readonly Card[] } };
+    case "Bad Stuff pool":
+      return { ...state, pools: { ...state.pools, badStuff: cards as readonly Card[] } };
+  }
+}
 
 /** Everyone not Down. A Down character is skipped by everything (rulebook, Going Down). */
 export const standing = (state: GameState): readonly Character[] =>
@@ -287,6 +330,54 @@ export const spendFreePlay = (state: GameState): GameState => ({
   thisTurn: { ...state.thisTurn, freePlays: Math.max(0, state.thisTurn.freePlays - 1) },
 });
 
+/** Distract & Pivot: bank a one-shot "-1 cost" charge for this character's own next play. */
+export const grantPlayDiscount = (state: GameState, c: Character): GameState => ({
+  ...state,
+  thisTurn: {
+    ...state.thisTurn,
+    playDiscount: { ...state.thisTurn.playDiscount, [c]: state.thisTurn.playDiscount[c] + 1 },
+  },
+});
+
+/** Spend one charge, as the next card that character plays is played. */
+export const spendPlayDiscount = (state: GameState, c: Character): GameState => ({
+  ...state,
+  thisTurn: {
+    ...state.thisTurn,
+    playDiscount: { ...state.thisTurn.playDiscount, [c]: Math.max(0, state.thisTurn.playDiscount[c] - 1) },
+  },
+});
+
+/** Drop every play discount nobody used. It is for a card played this turn. */
+export const clearPlayDiscount = (state: GameState): GameState =>
+  state.thisTurn.playDiscount.Red === 0 && state.thisTurn.playDiscount.Gray === 0
+    ? state
+    : { ...state, thisTurn: { ...state.thisTurn, playDiscount: { Red: 0, Gray: 0 } } };
+
+/** System Feedback: bank a one-shot loss against this turn's shared stat pool. */
+export const applyPoolPenalty = (state: GameState, oomph: number, scramble: number): GameState => ({
+  ...state,
+  thisTurn: {
+    ...state.thisTurn,
+    poolPenalty: {
+      oomph: state.thisTurn.poolPenalty.oomph + oomph,
+      scramble: state.thisTurn.poolPenalty.scramble + scramble,
+    },
+  },
+});
+
+/** Bio-Hazard Containment Vault: bank a stat gain against this turn's shared pool. */
+export const applyPoolBonus = (state: GameState, stat: Stat, amount: number): GameState => ({
+  ...state,
+  thisTurn: {
+    ...state.thisTurn,
+    poolBonus: {
+      oomph: state.thisTurn.poolBonus.oomph + (stat === "Oomph" ? amount : 0),
+      scramble: state.thisTurn.poolBonus.scramble + (stat === "Scramble" ? amount : 0),
+    },
+  },
+});
+
 /** Put a card on top of a deck. Nothing shuffles during a floor, so it is next. */
 export function topDeck(state: GameState, c: Character, card: Card): GameState {
   const p = playerOf(state, c);
@@ -312,7 +403,7 @@ export function takeGoodStuff(
   let next = state;
   for (let i = 0; i < count; i++) {
     if (playerOf(next, c).down) return next;
-    const [card, rest, seed] = drawBlind(next.pools.goodStuff, next.seed);
+    const [card, rest, seed] = drawFromPool(next.pools.goodStuff, next.seed);
     // Unkept Good Stuff returns to this pool at Ascend, but it can still run
     // dry mid-floor. Say so — a reward the log announced but the pool could
     // not pay must not go silent.
@@ -327,7 +418,10 @@ export function takeGoodStuff(
       ...next,
       thisTurn: {
         ...next.thisTurn,
-        goodStuffTaken: { ...next.thisTurn.goodStuffTaken, [c]: next.thisTurn.goodStuffTaken[c] + 1 },
+        goodStuffTaken: {
+          ...next.thisTurn.goodStuffTaken,
+          [c]: next.thisTurn.goodStuffTaken[c] + 1,
+        },
       },
     };
   }
@@ -338,25 +432,44 @@ export function takeGoodStuff(
 export function dealBadStuff(
   state: GameState,
   c: Character,
+  count: number,
   events: DomainEvent[],
 ): GameState {
-  if (playerOf(state, c).down) return state; // takes no punishments (rulebook, Going Down)
-  const [card, rest, seed] = drawBlind(state.pools.badStuff, state.seed);
-  if (!card) {
-    events.push({ type: "STUFF_POOL_EMPTY", character: c, pool: "bad_stuff" });
-    return state;
+  let next = state;
+  for (let i = 0; i < count; i++) {
+    if (playerOf(next, c).down) return next; // takes no punishments (rulebook, Going Down)
+    const [card, rest, seed] = drawFromPool(next.pools.badStuff, next.seed);
+    if (!card) {
+      events.push({ type: "STUFF_POOL_EMPTY", character: c, pool: "bad_stuff" });
+      return next;
+    }
+    next = { ...next, seed, pools: { ...next.pools, badStuff: rest } };
+    events.push({ type: "STUFF_TAKEN", character: c, card });
+    next = moveToHand(next, c, card, events);
   }
-  const next = { ...state, seed, pools: { ...state.pools, badStuff: rest } };
-  events.push({ type: "STUFF_TAKEN", character: c, card });
-  return moveToHand(next, c, card, events);
+  return next;
 }
 
 /** Has this once-per-turn trigger already gone off? */
-export const hasFired = (state: GameState, key: string): boolean => state.thisTurn.fired.includes(key);
+export const hasFired = (state: GameState, key: string): boolean =>
+  state.thisTurn.fired.includes(key);
 
 /** Mark a once-per-turn trigger as spent, so an effect that could feed itself fires once. */
 export const markFired = (state: GameState, key: string): GameState => ({
   ...state,
   thisTurn: { ...state.thisTurn, fired: [...state.thisTurn.fired, key] },
 });
+
+/**
+ * A Stuff pool is an ordered pile, shuffled once at setup. Gaining from it
+ * takes the top card with no reshuffle, so a reorder (Hack the Doors, Catch
+ * Your Breath) decides what comes next.
+ */
+function drawFromPool(
+  pool: readonly Card[],
+  seed: number,
+): readonly [Card | null, readonly Card[], number] {
+  if (pool.length === 0) return [null, pool, seed];
+  return [pool[0] as Card, pool.slice(1), seed];
+}
 

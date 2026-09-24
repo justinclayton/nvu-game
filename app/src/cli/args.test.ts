@@ -45,6 +45,17 @@ describe("parseRequest", () => {
     });
   });
 
+  it("reads a scrap-for-stats play, requiring 'for' and a stat", () => {
+    expect(parseRequest(["play", "scrap", "Red", "Pry Bar", "for", "Oomph"])).toEqual({
+      command: "play",
+      action: { kind: "scrap", character: "Red", name: "Pry Bar", stat: "Oomph" },
+      run: null,
+    });
+    expect(() => parseRequest(["play", "scrap", "Red", "Pry Bar"])).toThrow(UsageError);
+    expect(() => parseRequest(["play", "scrap", "Red"])).toThrow(UsageError);
+    expect(() => parseRequest(["play", "scrap"])).toThrow(UsageError);
+  });
+
   it("reads choose, with a character, cards, or none", () => {
     expect(parseRequest(["play", "choose", "Red"])).toEqual({
       command: "play",
@@ -97,30 +108,6 @@ describe("parseRequest", () => {
       action: { kind: "takeAscend", name: null },
       run: null,
     });
-  });
-
-  it("reads the Ascend Stuff answers", () => {
-    expect(parseRequest(["play", "keep", "Crowbar", "paying", "Shove"])).toEqual({
-      command: "play",
-      action: { kind: "keep", name: "Crowbar", pay: "Shove" },
-      run: null,
-    });
-    expect(parseRequest(["play", "keep", "Torn Seal"])).toEqual({
-      command: "play",
-      action: { kind: "keep", name: "Torn Seal", pay: null },
-      run: null,
-    });
-    expect(parseRequest(["play", "return", "Pry Bar"])).toEqual({
-      command: "play",
-      action: { kind: "return", name: "Pry Bar" },
-      run: null,
-    });
-    expect(parseRequest(["play", "shed", "Rust", "paying", "Charge In"])).toEqual({
-      command: "play",
-      action: { kind: "shed", name: "Rust", pay: "Charge In" },
-      run: null,
-    });
-    expect(() => parseRequest(["play", "shed", "Rust"])).toThrow(UsageError);
   });
 
   it("reads undo and show with no positionals", () => {

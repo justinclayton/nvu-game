@@ -1,6 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { CARD_CONTENT } from "@content/index";
-import { card, pile, player, rig, room } from "@domain/__fixtures__/rig";
+import { FULL_CONTENT as CARD_CONTENT, card, pile, player, rig, room } from "@domain/__fixtures__/rig";
 import type { Command } from "@domain/types";
 import {
   canUndo,
@@ -176,7 +175,7 @@ describe("notes", () => {
     const session = createSessionFrom(
       rig({
         phase: "Play",
-        activeRoom: room("Sorting Room"),
+        activeRoom: room("Security Turnstile"),
         Red: player({ deck: pile("Shove", 4), hand: [card("Pry Bar")] }),
         Gray: player({ deck: pile("Duck Under", 4) }),
       }),

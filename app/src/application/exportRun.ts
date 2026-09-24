@@ -16,6 +16,8 @@
  * application layer stays as pure as the domain under it.
  */
 
+import { CARD_LIST_ID } from "@content/index";
+import { RULES_VERSION } from "@domain/setup";
 import type { Character, Command, DomainEvent } from "@domain/types";
 import { describeEvent } from "./narrate";
 import { saveOf, type Note, type SessionState } from "./session";
@@ -283,6 +285,10 @@ export function runTurns(session: SessionState, at: Date): ExportFile {
 export interface RunFile {
   readonly format: "nvu-run/1";
   readonly exportedAt: string;
+  /** `CARD_LIST_ID` at export time, so a later card-list change shows itself on replay instead of silently misplaying. Missing on a run recorded before this field existed. */
+  readonly cards?: string;
+  /** `RULES_VERSION` at export time, so a later rules change shows itself on replay instead of silently misplaying. Missing on a run recorded before this field existed. */
+  readonly rules?: string;
   readonly floor: number;
   readonly turn: number;
   readonly phase: string;
@@ -294,11 +300,25 @@ export interface RunFile {
   readonly log: readonly string[];
 }
 
+/**
+ * `"cards"` or `"rules"`, whichever a run file's recording is missing or does
+ * not match on this build, checked in that order — or null if both match.
+ * Neither the cards a run names nor the rules that ran it can be replayed
+ * once either has moved on.
+ */
+export function mismatchedField(file: Pick<RunFile, "cards" | "rules">): "cards" | "rules" | null {
+  if (file.cards !== CARD_LIST_ID) return "cards";
+  if (file.rules !== RULES_VERSION) return "rules";
+  return null;
+}
+
 export function runData(session: SessionState, at: Date): ExportFile {
   const saved = saveOf(session);
   const file: RunFile = {
     format: "nvu-run/1",
     exportedAt: at.toISOString(),
+    cards: CARD_LIST_ID,
+    rules: RULES_VERSION,
     floor: session.state.floor,
     turn: session.state.turn,
     phase: session.state.phase,

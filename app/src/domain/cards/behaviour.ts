@@ -11,6 +11,8 @@ import type {
   GameState,
   Pending,
   PendingSource,
+  Pile,
+  Room,
   StepResult,
 } from "../types";
 
@@ -25,8 +27,9 @@ export interface BehaviourContext {
 /** The answer to a question a card asked through `state.pending`. */
 export type ChoiceAnswer =
   | { readonly kind: "character"; readonly tag: string; readonly character: Character }
+  | { readonly kind: "pile"; readonly tag: string; readonly pile: Pile }
   | { readonly kind: "cards"; readonly tag: string; readonly cards: readonly Card[] }
-  | { readonly kind: "order"; readonly tag: string; readonly cards: readonly Card[] };
+  | { readonly kind: "order"; readonly tag: string; readonly cards: readonly (Card | Room)[] };
 
 /**
  * What a `Holding:` line changes for as long as the card sits in hand.
@@ -77,6 +80,12 @@ export interface CardBehaviour {
    * held card before the play zone is swept, and may `ask` a question.
    */
   onCleanup?(state: GameState, ctx: BehaviourContext): StepResult;
+  /**
+   * A `Holding:` line that acts once at Turn Start, after the draw
+   * (Corrosive Acid). Called on the held card once both hands have drawn,
+   * before Play begins.
+   */
+  onTurnStart?(state: GameState, ctx: BehaviourContext): StepResult;
 }
 
 export type Registry = Readonly<Record<string, CardBehaviour>>;

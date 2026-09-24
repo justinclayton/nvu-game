@@ -6,6 +6,7 @@ import {
   metThresholds,
   payOptions,
   playableCards,
+  scrapForStatsCards,
   settleableStuff,
   statPool,
   thresholdLines,
@@ -174,6 +175,9 @@ export function moveHint(state: GameState, staged: readonly StagedAnswer[] = [])
           const payers = payOptions(state, c, card.id).map((x) => x.name);
           const pay = cost > 0 ? ` pay <${String(cost)} of: ${payers.join(", ")}>` : "";
           lines.push(`card ${c} ${card.name} (cost ${String(cost)})${pay}`);
+        }
+        for (const card of scrapForStatsCards(state, c)) {
+          lines.push(`scrap ${c} ${card.name} for <Oomph|Scramble>`);
         }
       }
       lines.push("end — end the Play phase and resolve the room");

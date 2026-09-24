@@ -9,7 +9,15 @@
  * the new state. Nothing mutates the state handed to it.
  */
 
-import type { Card, Character, DomainEvent, DiscardedFrom, GameState, PlayerState } from "./types";
+import type {
+  Card,
+  Character,
+  DiscardedFrom,
+  DomainEvent,
+  GameState,
+  PlayerState,
+  Stat,
+} from "./types";
 import { drawBlind, shuffle } from "./rng";
 
 export const CHARACTERS: readonly Character[] = ["Red", "Gray"];
@@ -312,6 +320,18 @@ export const applyPoolPenalty = (state: GameState, oomph: number, scramble: numb
     poolPenalty: {
       oomph: state.thisTurn.poolPenalty.oomph + oomph,
       scramble: state.thisTurn.poolPenalty.scramble + scramble,
+    },
+  },
+});
+
+/** Bio-Hazard Containment Vault: bank a stat gain against this turn's shared pool. */
+export const applyPoolBonus = (state: GameState, stat: Stat, amount: number): GameState => ({
+  ...state,
+  thisTurn: {
+    ...state.thisTurn,
+    poolBonus: {
+      oomph: state.thisTurn.poolBonus.oomph + (stat === "Oomph" ? amount : 0),
+      scramble: state.thisTurn.poolBonus.scramble + (stat === "Scramble" ? amount : 0),
     },
   },
 });

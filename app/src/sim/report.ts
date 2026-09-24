@@ -134,6 +134,9 @@ class Accumulator {
       if (event.type === "CARD_SCRAPPED" && event.character !== null) {
         this.lossTally(before.floor, event.character).scrapped += 1;
       }
+      if (event.type === "CARD_SCRAPPED_FOR_STATS") {
+        this.lossTally(before.floor, event.character).scrapped += 1;
+      }
       if (event.type === "COST_PAID") {
         this.lossTally(before.floor, event.character).paidAsCost += event.cards.length;
       }

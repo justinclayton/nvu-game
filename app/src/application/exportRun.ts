@@ -16,6 +16,7 @@
  * application layer stays as pure as the domain under it.
  */
 
+import { CARD_LIST_ID } from "@content/index";
 import type { Character, Command, DomainEvent } from "@domain/types";
 import { describeEvent } from "./narrate";
 import { saveOf, type Note, type SessionState } from "./session";
@@ -283,6 +284,8 @@ export function runTurns(session: SessionState, at: Date): ExportFile {
 export interface RunFile {
   readonly format: "nvu-run/1";
   readonly exportedAt: string;
+  /** `CARD_LIST_ID` at export time, so a later card-list change shows itself on replay instead of silently misplaying. Missing on a run recorded before this field existed. */
+  readonly cards?: string;
   readonly floor: number;
   readonly turn: number;
   readonly phase: string;
@@ -299,6 +302,7 @@ export function runData(session: SessionState, at: Date): ExportFile {
   const file: RunFile = {
     format: "nvu-run/1",
     exportedAt: at.toISOString(),
+    cards: CARD_LIST_ID,
     floor: session.state.floor,
     turn: session.state.turn,
     phase: session.state.phase,

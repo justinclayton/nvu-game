@@ -27,6 +27,8 @@ export function describeEvent(event: DomainEvent): string {
       return `${event.character} discards ${event.card.name} from their ${event.from === "playZone" ? "play zone" : event.from}.`;
     case "CARD_SCRAPPED":
       return `${event.card.name} is Scrapped.`;
+    case "CARD_SCRAPPED_FOR_STATS":
+      return `${event.character} Scraps ${event.card.name} for +${String(event.amount)} ${event.stat}.`;
     case "CARD_EXHAUSTED":
       return `${event.character} Exhausts ${event.card.name}.`;
     case "EXHAUST_PREVENTED":

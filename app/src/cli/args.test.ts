@@ -45,6 +45,17 @@ describe("parseRequest", () => {
     });
   });
 
+  it("reads a scrap-for-stats play, requiring 'for' and a stat", () => {
+    expect(parseRequest(["play", "scrap", "Red", "Pry Bar", "for", "Oomph"])).toEqual({
+      command: "play",
+      action: { kind: "scrap", character: "Red", name: "Pry Bar", stat: "Oomph" },
+      run: null,
+    });
+    expect(() => parseRequest(["play", "scrap", "Red", "Pry Bar"])).toThrow(UsageError);
+    expect(() => parseRequest(["play", "scrap", "Red"])).toThrow(UsageError);
+    expect(() => parseRequest(["play", "scrap"])).toThrow(UsageError);
+  });
+
   it("reads choose, with a character, cards, or none", () => {
     expect(parseRequest(["play", "choose", "Red"])).toEqual({
       command: "play",

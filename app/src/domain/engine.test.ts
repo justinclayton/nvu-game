@@ -4,7 +4,7 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import { execute } from "./engine";
 import { roomId } from "./ids";
-import { statPool, thresholdIsMet } from "./queries";
+import { costOf, statPool, thresholdIsMet } from "./queries";
 import { shuffle } from "./rng";
 import {
   card,
@@ -20,7 +20,7 @@ import {
   rig,
   room,
 } from "./__fixtures__/rig";
-import type { CardId, Challenge, Command, Room, Threshold } from "./types";
+import type { CardId, Challenge, Command, GameState, Room, Threshold } from "./types";
 
 beforeEach(resetRig);
 
@@ -723,5 +723,111 @@ describe("Room kinds: Room and Stairwell", () => {
       expect(eventTypes(events)).not.toContain("CARD_SCRAPPED");
       expect(next.Gray.hand.some((c) => c.name === "Rust")).toBe(true);
     });
+  });
+});
+
+describe("SCRAP_FOR_STATS — Bio-Hazard Containment Vault's own text", () => {
+  const rigged = (overrides: Partial<GameState> = {}) =>
+    rig({
+      phase: "Play",
+      activeRoom: room("Bio-Hazard Containment Vault"),
+      Red: player({ deck: pile("Shove", 4), hand: [card("Pry Bar"), card("Shove")] }),
+      Gray: player({ deck: pile("Duck Under", 4) }),
+      ...overrides,
+    });
+
+  it("is refused outside the Play phase", () => {
+    const state = rigged({ phase: "Outcome" });
+    const pryBar = state.Red.hand[0];
+    if (!pryBar) throw new Error("rig");
+    const rejected = execute(state, {
+      type: "SCRAP_FOR_STATS",
+      character: "Red",
+      cardId: pryBar.id,
+      stat: "Oomph",
+    });
+    expect(rejected.ok).toBe(false);
+    if (!rejected.ok) expect(rejected.reason.code).toBe("WrongPhase");
+  });
+
+  it("is refused while a different room is active", () => {
+    const state = rigged({ activeRoom: room("Security Turnstile") });
+    const pryBar = state.Red.hand[0];
+    if (!pryBar) throw new Error("rig");
+    const rejected = execute(state, {
+      type: "SCRAP_FOR_STATS",
+      character: "Red",
+      cardId: pryBar.id,
+      stat: "Oomph",
+    });
+    expect(rejected.ok).toBe(false);
+    if (!rejected.ok) expect(rejected.reason.code).toBe("RoomDoesNotAllow");
+  });
+
+  it("is refused for a card that is not Good Stuff", () => {
+    const state = rigged();
+    const shove = state.Red.hand.find((c) => c.name === "Shove");
+    if (!shove) throw new Error("rig");
+    const rejected = execute(state, {
+      type: "SCRAP_FOR_STATS",
+      character: "Red",
+      cardId: shove.id,
+      stat: "Oomph",
+    });
+    expect(rejected.ok).toBe(false);
+    if (!rejected.ok) expect(rejected.reason.code).toBe("NotGoodStuff");
+  });
+
+  it("is refused for a card not in that character's hand", () => {
+    const state = rigged();
+    const notHeld = card("Pry Bar");
+    const rejected = execute(state, {
+      type: "SCRAP_FOR_STATS",
+      character: "Red",
+      cardId: notHeld.id,
+      stat: "Oomph",
+    });
+    expect(rejected.ok).toBe(false);
+    if (!rejected.ok) expect(rejected.reason.code).toBe("NotInHand");
+  });
+
+  it("Scraps the card and adds +3 to the chosen stat", () => {
+    const state = rigged();
+    const pryBar = state.Red.hand.find((c) => c.name === "Pry Bar");
+    if (!pryBar) throw new Error("rig");
+    const { state: next, events } = must(state, {
+      type: "SCRAP_FOR_STATS",
+      character: "Red",
+      cardId: pryBar.id,
+      stat: "Oomph",
+    });
+    expect(next.Red.hand.some((c) => c.id === pryBar.id)).toBe(false);
+    expect(next.scrapyard.some((c) => c.id === pryBar.id)).toBe(true);
+    expect(statPool(next).oomph).toBe(3);
+    expect(statPool(next).scramble).toBe(0);
+    expect(eventTypes(events)).toContain("CARD_SCRAPPED_FOR_STATS");
+    expect(eventTypes(events)).not.toContain("CARD_PLAYED");
+  });
+
+  it("does not count as a played card for effects like Fast Follow / Tag Team", () => {
+    const state = rig({
+      phase: "Play",
+      activeRoom: room("Bio-Hazard Containment Vault"),
+      Red: player({ deck: pile("Shove", 4), hand: [card("Fast Follow")] }),
+      Gray: player({ deck: pile("Duck Under", 4), hand: [card("Pry Bar")] }),
+    });
+    const fastFollow = state.Red.hand[0];
+    const pryBar = state.Gray.hand[0];
+    if (!fastFollow || !pryBar) throw new Error("rig");
+    expect(costOf(state, "Red", fastFollow)).toBe(1);
+
+    const { state: next } = must(state, {
+      type: "SCRAP_FOR_STATS",
+      character: "Gray",
+      cardId: pryBar.id,
+      stat: "Scramble",
+    });
+    // Fast Follow reads free only once Gray has *played* a card; Gray only Scrapped one.
+    expect(costOf(next, "Red", fastFollow)).toBe(1);
   });
 });

@@ -13,10 +13,10 @@ import { stdout } from "node:process";
 import { runData, type RunFile } from "@application/exportRun";
 import { logLines, tailEvents } from "@application/narrate";
 import { createSession, loadSession, type Note, type SavedRun, type Session } from "@application/session";
-import { CARD_CONTENT } from "@content/index";
+import { CARD_CONTENT, CARD_LIST_ID } from "@content/index";
 import { resolveCardName } from "@content/names";
 import { costOf, payOptions, playableCards } from "@domain/queries";
-import type { Card, CardId, Character, Command, GameState } from "@domain/types";
+import type { Card, CardId, Character, Command, GameState, Stat } from "@domain/types";
 import { CHARACTERS, playerOf } from "@domain/verbs";
 import { POLICIES, randomPolicy } from "@sim/policy";
 import { buildReport, type BalanceReport } from "@sim/report";
@@ -150,6 +150,14 @@ function matchCharacter(raw: string): Character {
   return found;
 }
 
+const STATS: readonly Stat[] = ["Oomph", "Scramble"];
+
+function matchStat(raw: string): Stat {
+  const found = STATS.find((s) => s.toLowerCase() === raw.toLowerCase());
+  if (!found) throw new MoveRefused(`"${raw}" is not a stat — choose Oomph or Scramble.`);
+  return found;
+}
+
 /* ------------------------------------------------------- building commands */
 
 /**
@@ -188,6 +196,20 @@ function buildPlayCard(
     throw new MoveRefused(`${card.name} costs ${String(cost)}; ${String(payWith.length)} named.`);
   }
   return { type: "PLAY_CARD", character, cardId: card.id, payWith };
+}
+
+function buildScrapForStats(
+  state: GameState,
+  action: Extract<PlayAction, { kind: "scrap" }>,
+): Command {
+  if (state.phase !== "Play") {
+    throw new MoveRefused(`Cannot Scrap for stats during the ${state.phase} phase.`);
+  }
+  const character = matchCharacter(action.character);
+  const named = resolveCardName(action.name, playerOf(state, character).hand);
+  if (!named.ok) throw new MoveRefused(named.reason);
+  const stat = matchStat(action.stat);
+  return { type: "SCRAP_FOR_STATS", character, cardId: named.card.id, stat };
 }
 
 function buildChoose(state: GameState, action: Extract<PlayAction, { kind: "choose" }>): Command {
@@ -310,6 +332,8 @@ function describeAction(action: PlayAction): string {
       return action.pay.length > 0
         ? `Played ${action.name}, paying ${action.pay.join(", ")}.`
         : `Played ${action.name}.`;
+    case "scrap":
+      return `Scrapped ${action.name} for +3 ${action.stat}.`;
     case "choose":
       return action.names.length === 0 ? "Chose none." : `Chose ${action.names.join(", ")}.`;
     case "order":
@@ -431,6 +455,9 @@ function play(request: PlayRequest): number {
       case "card":
         dispatchOrThrow(session, buildPlayCard(session.getState().state, action));
         break;
+      case "scrap":
+        dispatchOrThrow(session, buildScrapForStats(session.getState().state, action));
+        break;
       case "choose":
         dispatchOrThrow(session, buildChoose(session.getState().state, action));
         break;
@@ -509,6 +536,12 @@ function cardFace(request: CardRequest): number {
 function replayRun(request: ReplayRequest): number {
   const file = readRunFile(request.file);
   if (!file.run) throw new UsageError(`${request.file} was not played from a seed and cannot replay.`);
+  if (file.cards !== CARD_LIST_ID) {
+    out(
+      `${request.file} was recorded on a different card list (${file.cards ?? "none recorded"}); this build is ${CARD_LIST_ID}. Not replaying.`,
+    );
+    return 2;
+  }
   const session = loadRun(file.run, file.notes ?? []);
   const s = session.getState();
 

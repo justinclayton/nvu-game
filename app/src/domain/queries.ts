@@ -5,6 +5,7 @@
  */
 
 import { behaviourOf, type HeldModifiers } from "./cards/behaviours";
+import { roomAllowsScrapForStats } from "./cards/rooms";
 import { HAND_CAP } from "./setup";
 import type {
   Card,
@@ -126,12 +127,15 @@ export function statPool(state: GameState, side?: Character): StatTotals {
     oomph += c.oomph;
     scramble += c.scramble;
   }
-  // System Feedback banks a loss against the shared pool, not either side's
-  // own display-only contribution.
+  // System Feedback banks a loss and Bio-Hazard Containment Vault a gain
+  // against the shared pool, not either side's own display-only contribution.
   if (side) return { oomph, scramble };
   return {
-    oomph: Math.max(0, oomph - state.thisTurn.poolPenalty.oomph),
-    scramble: Math.max(0, scramble - state.thisTurn.poolPenalty.scramble),
+    oomph: Math.max(0, oomph - state.thisTurn.poolPenalty.oomph + state.thisTurn.poolBonus.oomph),
+    scramble: Math.max(
+      0,
+      scramble - state.thisTurn.poolPenalty.scramble + state.thisTurn.poolBonus.scramble,
+    ),
   };
 }
 
@@ -311,6 +315,15 @@ export function playableCards(state: GameState, c: Character): readonly Card[] {
   const p = playerOf(state, c);
   if (p.down) return [];
   return p.hand.filter((card) => payOptions(state, c, card.id).length >= costOf(state, c, card));
+}
+
+/** This character's Good Stuff cards eligible for `SCRAP_FOR_STATS` right now — only while the active room's own text allows it (e.g. Bio-Hazard Containment Vault). */
+export function scrapForStatsCards(state: GameState, c: Character): readonly Card[] {
+  if (state.phase !== "Play" || state.pending !== null) return [];
+  if (!state.activeRoom || !roomAllowsScrapForStats(state.activeRoom)) return [];
+  const p = playerOf(state, c);
+  if (p.down) return [];
+  return p.hand.filter((card) => card.kind === "good_stuff");
 }
 
 /* ------------------------------------------------------------- Rulebook, Ascending */

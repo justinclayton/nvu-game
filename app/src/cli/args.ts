@@ -15,6 +15,7 @@ export type PlayAction =
   | { readonly kind: "flip" }
   | { readonly kind: "end" }
   | { readonly kind: "card"; readonly character: string; readonly name: string; readonly pay: readonly string[] }
+  | { readonly kind: "scrap"; readonly character: string; readonly name: string; readonly stat: string }
   | { readonly kind: "choose"; readonly names: readonly string[] }
   | { readonly kind: "order"; readonly names: readonly string[] }
   | { readonly kind: "take" }
@@ -82,6 +83,7 @@ export const USAGE = `North vs Up — the CLI. The same rules engine as the web 
   bin/nvu play flip                                  FLIP_ROOM (Turn Start: flip and draw)
   bin/nvu play end                                    END_PLAY
   bin/nvu play card Red Charge In [pay Rope Flare]     PLAY_CARD
+  bin/nvu play scrap Red "Pry Bar" for Oomph           SCRAP_FOR_STATS (only where a room's own text allows it)
   bin/nvu play choose Red                              CHOOSE_CHARACTER
   bin/nvu play choose Rope Flare | play choose none     CHOOSE_CARDS
   bin/nvu play order Rope Flare Shove                  ORDER_CARDS, top first
@@ -161,6 +163,20 @@ function parseMove(action: string, actionRest: readonly string[]): PlayAction {
       return { kind: "card", character, name, pay: pay ?? [] };
     }
 
+    case "scrap": {
+      const [character, ...rest] = actionRest;
+      if (character === undefined) {
+        throw new UsageError('play scrap wants: scrap <Character> <Card> for <Oomph|Scramble>.');
+      }
+      const at = rest.findIndex((p) => p === "for");
+      if (at === -1) {
+        throw new UsageError('play scrap wants: scrap <Character> <Card> for <Oomph|Scramble>.');
+      }
+      const name = oneName(rest.slice(0, at), "play scrap");
+      const stat = oneName(rest.slice(at + 1), 'play scrap ... "for"');
+      return { kind: "scrap", character, name, stat };
+    }
+
     case "choose": {
       if (actionRest.length === 0) {
         throw new UsageError("play choose wants a name (a character or a card) or 'none'.");
@@ -205,7 +221,7 @@ function parseMove(action: string, actionRest: readonly string[]): PlayAction {
 
     default:
       throw new UsageError(
-        `Unknown "play ${action}". Choose flip, end, card, choose, order, take, skip, keep, return, shed, undo, note, show or pile.`,
+        `Unknown "play ${action}". Choose flip, end, card, scrap, choose, order, take, skip, keep, return, shed, undo, note, show or pile.`,
       );
   }
 }

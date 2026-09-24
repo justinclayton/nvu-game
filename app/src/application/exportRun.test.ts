@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { CARD_CONTENT } from "@content/index";
+import { CARD_CONTENT, CARD_LIST_ID } from "@content/index";
 import { costOf, payOptions, playableCards } from "@domain/queries";
 import type { AscendChoice, Character, Command, GameState } from "@domain/types";
 import { EXPORTS, runData, runTranscript, runTurns, turnRows, type RunFile } from "./exportRun";
@@ -173,6 +173,7 @@ describe("the run itself (.json)", () => {
     expect(file.run?.commands).toEqual(session.getState().commands);
     expect(file.notes).toEqual(session.getState().notes);
     expect(file.log).toHaveLength(session.getState().events.length);
+    expect(file.cards).toBe(CARD_LIST_ID);
   });
 
   it("replays to the same event log, with the notes back where they were typed", () => {

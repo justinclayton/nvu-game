@@ -14,7 +14,7 @@
  * Turn, Turn Start), so there is no separate case for either here.
  */
 
-import { costOf, payOptions, playableCards } from "@domain/queries";
+import { costOf, payOptions, playableCards, scrapForStatsCards } from "@domain/queries";
 import type {
   AscendChoice,
   Card,
@@ -109,6 +109,14 @@ export function playsOf(state: GameState, c: Character, card: Card): readonly Co
   }));
 }
 
+/** Every legal `SCRAP_FOR_STATS`, one per eligible Good Stuff card and stat (Bio-Hazard Containment Vault). */
+export function scrapsOf(state: GameState, c: Character): readonly Command[] {
+  const stats = ["Oomph", "Scramble"] as const;
+  return scrapForStatsCards(state, c).flatMap((card) =>
+    stats.map((stat): Command => ({ type: "SCRAP_FOR_STATS", character: c, cardId: card.id, stat })),
+  );
+}
+
 /* ---------------------------------------------------------------- Ascend */
 
 /**
@@ -177,6 +185,7 @@ export function legalCommands(state: GameState): readonly Command[] {
       const out: Command[] = [];
       for (const c of CHARACTERS) {
         for (const card of playableCards(state, c)) out.push(...playsOf(state, c, card));
+        out.push(...scrapsOf(state, c));
       }
       out.push({ type: "END_PLAY" });
       return out;

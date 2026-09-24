@@ -19,6 +19,7 @@ const FILES = [
   "app/src/domain/cards/red.ts",
   "app/src/domain/cards/gray.ts",
   "app/src/domain/cards/stuff.ts",
+  "app/src/domain/cards/rooms.ts",
 ];
 
 function norm(s) {
@@ -57,7 +58,7 @@ function checkFile(path, textByName) {
   const full = readFileSync(join(ROOT, path), "utf8");
   const lines = full.split("\n");
 
-  const startIdx = lines.findIndex((l) => /^export const \w+: Registry = \{$/.test(l));
+  const startIdx = lines.findIndex((l) => /^export const \w+: \w+ = \{$/.test(l));
   if (startIdx === -1) { problems.push(`${path}: no "export const X: Registry = {" found`); return problems; }
   let endIdx = lines.findIndex((l, i) => i > startIdx && l === "};");
   if (endIdx === -1) endIdx = lines.length;

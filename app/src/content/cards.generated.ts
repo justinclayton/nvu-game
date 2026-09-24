@@ -170,7 +170,7 @@ export const CARD_CONTENT = {
       oomph: 2,
       scramble: 0,
       conditionalStat: false,
-      text: "This has Oomph +2 for each card you paid with this turn.",
+      text: "This card gains Oomph +2 for each card spent to play it this turn.",
     },
     {
       name: "Heavy Pockets",

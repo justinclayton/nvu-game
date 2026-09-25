@@ -167,7 +167,7 @@ export function Table({ onNewRun }: { readonly onNewRun: () => void }) {
       ) : state.phase === "GameOver" ? (
         <section className="over">
           <h2>
-            {state.outcome === "Victory" ? "You reach the rooftop." : "Both of you are Down."}
+            {state.outcome === "Victory" ? "You reach the rooftop." : "Both players are Down."}
           </h2>
           <button type="button" className="button button--primary" onClick={onNewRun}>
             Go again

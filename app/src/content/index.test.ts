@@ -47,11 +47,11 @@ describe("content", () => {
     }
   });
 
-  it("only an `Ascend` outcome sets `ascends`", () => {
+  it("only an `Ascend` or `You Win` outcome sets `ascends`", () => {
     for (const room of CARD_CONTENT.rooms) {
       for (const c of room.challenges) {
         for (const t of c.thresholds) {
-          expect(t.ascends).toBe(/ascend/i.test(t.outcome));
+          expect(t.ascends).toBe(/ascend|you win/i.test(t.outcome));
         }
       }
     }

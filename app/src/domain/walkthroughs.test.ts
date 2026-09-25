@@ -219,7 +219,7 @@ describe("walkthrough 7 — one Down ends the run immediately, mid multi-effect 
       Red: player({ deck: [], discard: [], hand: [] }),
       Gray: player({ deck: pile("Duck Under", 4), hand: [] }),
     });
-    // "Both of you Exhaust 1, and one of you gets Bad Stuff." Nobody played
+    // "Both players Exhaust 1, and one of you gets Bad Stuff." Nobody played
     // anything, so the room Flees; Red's own Exhaust is first in the queue,
     // and Red has nothing left to lose it from.
     const { state: next, events } = must(state, { type: "END_PLAY" });

@@ -764,11 +764,11 @@ describe("Panic — 'Holding: every room threshold requires +2 Scramble to be me
       activeRoom: room("The Sentry Drone"),
       Gray: player({ deck: pile("Duck Under", 4), hand: [card("Panic")] }),
     });
-    // Challenge 1: Scramble 8.
+    // Challenge 1: Scramble 6.
     const line = state.activeRoom?.challenges[1]?.thresholds[0];
     if (!line) throw new Error("rig");
-    expect(line.requires).toEqual({ oomph: 0, scramble: 8 });
-    expect(thresholdRequirement(state, line)).toEqual({ oomph: 0, scramble: 10 });
+    expect(line.requires).toEqual({ oomph: 0, scramble: 6 });
+    expect(thresholdRequirement(state, line)).toEqual({ oomph: 0, scramble: 8 });
   });
 
   it("adds a Scramble 2 requirement to an Oomph-only line", () => {
@@ -776,11 +776,11 @@ describe("Panic — 'Holding: every room threshold requires +2 Scramble to be me
       activeRoom: room("The Sentry Drone"),
       Gray: player({ deck: pile("Duck Under", 4), hand: [card("Panic")] }),
     });
-    // Challenge 0: Oomph 8, no printed Scramble.
+    // Challenge 0: Oomph 6, no printed Scramble.
     const line = state.activeRoom?.challenges[0]?.thresholds[0];
     if (!line) throw new Error("rig");
-    expect(line.requires).toEqual({ oomph: 8, scramble: 0 });
-    expect(thresholdRequirement(state, line)).toEqual({ oomph: 8, scramble: 2 });
+    expect(line.requires).toEqual({ oomph: 6, scramble: 0 });
+    expect(thresholdRequirement(state, line)).toEqual({ oomph: 6, scramble: 2 });
   });
 
   it("adds to a dual threshold's own printed Scramble, not a second floor", () => {
@@ -803,7 +803,7 @@ describe("Panic — 'Holding: every room threshold requires +2 Scramble to be me
     });
     const line = state.activeRoom?.challenges[0]?.thresholds[0];
     if (!line) throw new Error("rig");
-    expect(thresholdRequirement(state, line)).toEqual({ oomph: 8, scramble: 4 });
+    expect(thresholdRequirement(state, line)).toEqual({ oomph: 6, scramble: 4 });
   });
 
   it("blocks an Oomph line from clearing on Oomph alone while Panic is held", () => {
@@ -837,7 +837,7 @@ describe("Panic — 'Holding: every room threshold requires +2 Scramble to be me
     });
     const line = state.activeRoom?.challenges[0]?.thresholds[0];
     if (!line) throw new Error("rig");
-    expect(thresholdRequirement(state, line)).toEqual({ oomph: 8, scramble: 0 });
+    expect(thresholdRequirement(state, line)).toEqual({ oomph: 6, scramble: 0 });
     expect(thresholdIsMet(state, line)).toBe(true);
   });
 

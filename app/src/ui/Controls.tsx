@@ -117,6 +117,25 @@ function PendingChoice({ state, dispatch }: Props) {
         </div>
       );
 
+    case "ChooseStat":
+      return (
+        <div className="controls controls--pending">
+          <p className="controls__prompt">{pending.prompt}</p>
+          {pending.options.map((s) => (
+            <button
+              key={s}
+              type="button"
+              className="button button--primary"
+              onClick={() => {
+                dispatch({ type: "CHOOSE_STAT", stat: s });
+              }}
+            >
+              {s}
+            </button>
+          ))}
+        </div>
+      );
+
     case "TakeReward":
       return (
         <div className="controls controls--pending">

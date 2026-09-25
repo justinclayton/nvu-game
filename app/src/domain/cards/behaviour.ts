@@ -13,6 +13,7 @@ import type {
   PendingSource,
   Pile,
   Room,
+  Stat,
   StepResult,
 } from "../types";
 
@@ -28,6 +29,7 @@ export interface BehaviourContext {
 export type ChoiceAnswer =
   | { readonly kind: "character"; readonly tag: string; readonly character: Character }
   | { readonly kind: "pile"; readonly tag: string; readonly pile: Pile }
+  | { readonly kind: "stat"; readonly tag: string; readonly stat: Stat }
   | { readonly kind: "cards"; readonly tag: string; readonly cards: readonly Card[] }
   | { readonly kind: "order"; readonly tag: string; readonly cards: readonly (Card | Room)[] };
 

@@ -83,6 +83,14 @@ export interface CardBehaviour {
    */
   onCleanup?(state: GameState, ctx: BehaviourContext): StepResult;
   /**
+   * A played card's own line printed "at the end of the turn" that actually
+   * fires at the end of the Play phase (Riot Shield) — before Outcome's own
+   * effects resolve, and well before Cleanup, so a card it returns to hand
+   * is in hand in time for a Cleanup `Holding:` line (Spore Cloud) to count
+   * or discard it. Called once the room's Clear/Flee outcome is known.
+   */
+  onPlayEnd?(state: GameState, ctx: BehaviourContext): StepResult;
+  /**
    * A `Holding:` line that acts once at Turn Start, after the draw
    * (Corrosive Acid). Called on the held card once both hands have drawn,
    * before Play begins.

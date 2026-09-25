@@ -134,9 +134,12 @@ export const STUFF: Registry = {
     },
   },
 
-  /* "If the room is Cleared, return this card to your hand at the end of the turn." */
+  /* "If the room is Cleared, return this card to your hand at the end of the
+   * turn." Despite the print, this fires at the end of the Play phase, ahead
+   * of Cleanup — Justin's ruling on the ambiguous ordering against Cleanup
+   * `Holding:` lines like Spore Cloud. */
   "Riot Shield": {
-    onCleanup(state, ctx) {
+    onPlayEnd(state, ctx) {
       if (state.resolution?.roomEnded !== "Cleared") return nothing(state);
       const events: DomainEvent[] = [];
       return done(returnToHand(state, ctx.character, ctx.card, events), events);

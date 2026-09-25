@@ -126,7 +126,7 @@ describe("Winning and losing", () => {
       Red: player({ deck: [], discard: [], hand: [] }),
       Gray: player({ deck: pile("Duck Under", 4), hand: pile("Duck Under", 2) }),
     });
-    // Security Turnstile's Flee line, Both of you Exhaust 1, sends Red Down
+    // Security Turnstile's Flee line, Both players Exhaust 1, sends Red Down
     // immediately: Red's deck and discard pile are both already empty.
     const { state: next, events } = must(state, { type: "END_PLAY" });
     expect(next.phase).toBe("GameOver");

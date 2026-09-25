@@ -302,7 +302,7 @@ const NO_FLEE_PRINTED = "Leave empty-handed.";
 
 function who(word) {
   const w = word.trim().toLowerCase();
-  if (w === "both of you" || w === "both") return "both";
+  if (w === "both players" || w === "both") return "both";
   if (w === "one of you" || w === "one") return "one";
   if (w === "red") return "Red";
   if (w === "gray") return "Gray";
@@ -313,27 +313,28 @@ function who(word) {
    the clause raises; `effect` is what it does. */
 const CLAUSES = [
   [/^(?:and )?ascend$/i, () => ({ clears: true, ascends: true })],
+  [/^you win$/i, () => ({ clears: true, ascends: true })],
   [/^(?:and )?clear(?: the room)?$/i, () => ({ clears: true })],
   [/^(?:and )?flee this room for free$/i, () => ({ fleeFree: true })],
   [/^(?:and )?leave empty-handed$/i, () => ({})],
   [
-    /^(both of you|one of you|red|gray) exhausts? (\d+)$/i,
+    /^(both players|one of you|red|gray) exhausts? (\d+)$/i,
     (m) => ({ effect: { type: "ExhaustFromDeck", who: who(m[1]), amount: Number(m[2]) } }),
   ],
   [
-    /^(both of you|one of you|red|gray) (?:gets?|takes?) (?:(\d+) )?bad stuff$/i,
+    /^(both players|one of you|red|gray) (?:gets?|takes?) (?:(\d+) )?bad stuff$/i,
     (m) => ({ effect: { type: "DealBadStuff", who: who(m[1]), count: Number(m[2] ?? 1) } }),
   ],
   [
-    /^(both of you|one of you|red|gray) (?:gets?|takes?) (?:(\d+) )?good stuff$/i,
+    /^(both players|one of you|red|gray) (?:gets?|takes?) (?:(\d+) )?good stuff$/i,
     (m) => ({ effect: { type: "TakeGoodStuff", who: who(m[1]), count: Number(m[2] ?? 1) } }),
   ],
   [
-    /^(both of you|one of you|red|gray) reveals? (?:a |the )?(?:card )?reward$/i,
+    /^(both players|one of you|red|gray) reveals? (?:a |the )?(?:card )?reward$/i,
     (m) => ({ effect: { type: "RevealReward", who: who(m[1]) } }),
   ],
   [
-    /^(both of you|one of you|red|gray) may scrap a bad stuff card from (?:your|their) hand$/i,
+    /^(both players|one of you|red|gray) may scrap a bad stuff card from (?:your|their) hand$/i,
     (m) => ({ effect: { type: "ScrapBadStuffFromHand", who: who(m[1]), optional: true } }),
   ],
 ];
@@ -341,7 +342,7 @@ const CLAUSES = [
 /** Split printed prose into clauses: on full stops, commas, and a joining "and". */
 function clausesOf(prose) {
   return prose
-    .split(/[.;]|,\s*(?:and\s+)?|\s+and\s+/i)
+    .split(/[.;!]|,\s*(?:and\s+)?|\s+and\s+/i)
     .map((c) => c.replace(/^\s*but\s+/i, "").trim())
     .filter((c) => c !== "");
 }

@@ -244,13 +244,11 @@ describe("Cleanup", () => {
       Red: player({ deck: pile("Shove", 5), hand: [card("Pry Bar"), card("Shove")] }),
       Gray: player({ deck: pile("Duck Under", 5), hand: pile("Coil Of Cable", 3) }),
     });
-    // Three free Coil Of Cables meet the Sentry Drone's Scramble 8 line
-    // (Ascend, and one of you gets Good Stuff), which asks who first.
+    // Three free Coil Of Cables meet the Sentry Drone's Scramble 6 line.
     const g = ids(state, "Gray");
     const { state: next } = play(state, [
       ...g.map((id): Command => playFree("Gray", id as CardId)),
       { type: "END_PLAY" },
-      { type: "CHOOSE_CHARACTER", character: "Gray" },
     ]);
     expect(next.Red.hand.map((c) => c.name)).toEqual(["Pry Bar", "Shove"]);
   });
@@ -266,7 +264,7 @@ describe("Cleanup", () => {
       Gray: player({ deck: pile("Duck Under", 5) }),
     });
     const fledRoom = state.activeRoom as Room;
-    // Security Turnstile's Flee line, Both of you Exhaust 1, needs no choice
+    // Security Turnstile's Flee line, Both players Exhaust 1, needs no choice
     // and pulls from a deck of 5, so it never touches the discard pile or the
     // RNG — the only shuffle left to check is the one at Cleanup.
     const { state: next, events } = play(state, [{ type: "END_PLAY" }]);
@@ -339,7 +337,7 @@ describe("Room kinds: Room and Stairwell", () => {
     const thresholds: Threshold[] = [
       {
         requires: { oomph: 0, scramble: 2 },
-        outcome: "Both of you Exhaust 1.",
+        outcome: "Both players Exhaust 1.",
         clears: false,
         fleeFree: false,
         ascends: false,
@@ -582,7 +580,7 @@ describe("Room kinds: Room and Stairwell", () => {
     expect(eventTypes(events)).not.toContain("ROOM_CLEARED");
     expect(next.cleared).toEqual([]);
     expect(eventTypes(events)).not.toContain("STUFF_TAKEN");
-    // Security Turnstile's Flee line, Both of you Exhaust 1, is the one
+    // Security Turnstile's Flee line, Both players Exhaust 1, is the one
     // punishment — no Stuff changes hands either way.
     expect(next.Red.deck).toHaveLength(4);
     // Same turn: it is already back in the Floor deck by the time Cleanup ends.
@@ -642,7 +640,7 @@ describe("Room kinds: Room and Stairwell", () => {
   });
 
   it("a met threshold against an empty Bad Stuff pool deals nothing and says so", () => {
-    // Overgrown Hydroponics Bay's Scramble 6 line owes both of you Bad Stuff,
+    // Overgrown Hydroponics Bay's Scramble 6 line owes both players Bad Stuff,
     // but the pool is dry.
     const state = rig({
       phase: "Play",

@@ -46,6 +46,8 @@ function nextCommand(state: GameState): Command {
         return { type: "CHOOSE_CHARACTER", character: pending.options[0] ?? "Red" };
       case "ChoosePile":
         return { type: "CHOOSE_PILE", pile: pending.options[0] ?? "Red deck" };
+      case "ChooseStat":
+        return { type: "CHOOSE_STAT", stat: pending.options[0] ?? "Oomph" };
       case "ChooseCards":
         return {
           type: "CHOOSE_CARDS",

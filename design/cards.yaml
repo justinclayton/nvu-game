@@ -351,7 +351,7 @@ cards:
   ## Good Stuff
 
   - name: Pry Bar
-    count: 3
+    count: 5
     set: proposed
     kind: good_stuff
     rarity: Fine
@@ -360,7 +360,7 @@ cards:
     flavor: Simple, solid steel. Good for prying open grates or cracking skulls.
 
   - name: Coil Of Cable
-    count: 3
+    count: 5
     set: proposed
     kind: good_stuff
     rarity: Fine
@@ -369,7 +369,7 @@ cards:
     flavor: High-tensile wire. Essential for rigging quick bypasses.
 
   - name: Crowbar
-    count: 3
+    count: 5
     set: proposed
     kind: good_stuff
     rarity: Fine
@@ -380,7 +380,7 @@ cards:
     flavor: Versatile tool that helps pop open supply crates.
 
   - name: Duct Tape & Wire
-    count: 3
+    count: 5
     set: proposed
     kind: good_stuff
     rarity: Fine
@@ -390,7 +390,7 @@ cards:
     flavor: Quick repairs that surprisingly hold together under pressure.
 
   - name: Stim Pack
-    count: 3
+    count: 5
     set: proposed
     kind: good_stuff
     rarity: Fine
@@ -400,7 +400,7 @@ cards:
     flavor: Adrenaline surge to keep moving when stamina is low.
 
   - name: Cutting Torch
-    count: 2
+    count: 3
     set: proposed
     kind: good_stuff
     rarity: Cool
@@ -409,7 +409,7 @@ cards:
     flavor: Burns through reinforced bulkheads in seconds.
 
   - name: Riot Shield
-    count: 2
+    count: 3
     set: proposed
     kind: good_stuff
     rarity: Cool
@@ -419,7 +419,7 @@ cards:
     flavor: Heavy poly-carb barrier that survives multiple engagements.
 
   - name: Overcharged Battery
-    count: 2
+    count: 3
     set: proposed
     kind: good_stuff
     rarity: Cool
@@ -430,7 +430,7 @@ cards:
     flavor: Sparks fly as raw current surges through your gear.
 
   - name: A Pair Of Stitch-Em-Ups
-    count: 2
+    count: 3
     set: proposed
     kind: good_stuff
     rarity: Cool
@@ -439,7 +439,7 @@ cards:
     flavor: Field-grade medical staples to restore lost Stamina.
 
   - name: High-Frequency Scanner
-    count: 2
+    count: 3
     set: proposed
     kind: good_stuff
     rarity: Cool
@@ -447,6 +447,45 @@ cards:
     scramble: 3
     text: "Play: Look at the top 3 cards of the Floor deck."
     flavor: Pings upcoming hazards before you step into the room.
+
+  - name: Scrap Magnet
+    count: 3
+    set: proposed
+    kind: good_stuff
+    rarity: Fine
+    cost: 0
+    text: "Play: Scrap 1 Bad Stuff card from your hand. If you do, gain 2 Oomph or 2 Scramble."
+    flavor: "A heavy electromagnetic tool that pulls toxic shrapnel right out of your pack."
+
+  - name: Pocket Dynamo
+    count: 3
+    set: proposed
+    kind: good_stuff
+    rarity: Fine
+    cost: 0
+    text: "Play: Draw 1 card. If both you and your partner played a card this turn, gain 1 Oomph and 1 Scramble."
+    flavor: "A hand-cranked generator that charges when team tempo builds."
+
+  - name: Salvaged Blueprint
+    count: 2
+    set: proposed
+    kind: good_stuff
+    rarity: Cool
+    cost: 1
+    scramble: 2
+    text: "Play: Draw 2 cards, then place 1 card from your hand on top of your deck."
+    flavor: "Quick tactical schematic that reorganizes upcoming options."
+
+  - name: Emergency Breaker
+    count: 2
+    set: proposed
+    kind: good_stuff
+    rarity: Cool
+    cost: 1
+    oomph: 2
+    scramble: 2
+    text: "Play: Scrap 1 card from your hand. Your partner draws 1 card."
+    flavor: "Shatter a jammed valve to clear your pack and open a window for your partner."
 
   - name: Grav Harness
     set: proposed

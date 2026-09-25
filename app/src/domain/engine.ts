@@ -98,6 +98,7 @@ export function validate(state: GameState, command: Command): Rejection | null {
   switch (command.type) {
     case "CHOOSE_CHARACTER":
     case "CHOOSE_PILE":
+    case "CHOOSE_STAT":
     case "CHOOSE_CARDS":
     case "ORDER_CARDS":
     case "TAKE_REWARD":
@@ -198,6 +199,12 @@ function validateAnswer(pending: Pending, command: Command): Rejection | null {
         ? null
         : reject("NotAnOption", `${command.pile} is not one of the options.`);
 
+    case "CHOOSE_STAT":
+      if (pending.kind !== "ChooseStat") return waiting;
+      return pending.options.includes(command.stat)
+        ? null
+        : reject("NotAnOption", `${command.stat} is not one of the options.`);
+
     case "CHOOSE_CARDS": {
       if (pending.kind !== "ChooseCards") return waiting;
       const chosen = new Set(command.cardIds);
@@ -284,6 +291,8 @@ function apply(state: GameState, command: Command, run: Run): GameState {
       return answerCharacter(state, command.character, run);
     case "CHOOSE_PILE":
       return answerPile(state, command.pile, run);
+    case "CHOOSE_STAT":
+      return answerStat(state, command.stat, run);
     case "CHOOSE_CARDS":
       return answerCards(state, command.cardIds, "cards", run);
     case "ORDER_CARDS":
@@ -988,6 +997,15 @@ function answerPile(state: GameState, pile: Pile, run: Run): GameState {
   }
   if (!pending.source) throw new CorruptStateError("No card is waiting on a pile answer.");
   return runChoice(state, { kind: "pile", tag: pending.source.tag, pile }, run);
+}
+
+function answerStat(state: GameState, stat: Stat, run: Run): GameState {
+  const pending = state.pending;
+  if (pending?.kind !== "ChooseStat") {
+    throw new CorruptStateError("Answered a stat choice that was not being asked.");
+  }
+  if (!pending.source) throw new CorruptStateError("No card is waiting on a stat answer.");
+  return runChoice(state, { kind: "stat", tag: pending.source.tag, stat }, run);
 }
 
 /** The one thing a room-asked (not card-asked) `ChooseCards` answers today. */

@@ -185,6 +185,13 @@ export type Pending =
       readonly source: PendingSource | null;
     }
   | {
+      readonly kind: "ChooseStat";
+      readonly prompt: string;
+      readonly character: Character;
+      readonly options: readonly Stat[];
+      readonly source: PendingSource | null;
+    }
+  | {
       readonly kind: "ChooseCards";
       readonly prompt: string;
       readonly character: Character;
@@ -292,6 +299,7 @@ export type Command =
     }
   | { readonly type: "CHOOSE_CHARACTER"; readonly character: Character }
   | { readonly type: "CHOOSE_PILE"; readonly pile: Pile }
+  | { readonly type: "CHOOSE_STAT"; readonly stat: Stat }
   | { readonly type: "CHOOSE_CARDS"; readonly cardIds: readonly CardId[] }
   | { readonly type: "ORDER_CARDS"; readonly cardIds: readonly (CardId | RoomId)[] }
   | { readonly type: "TAKE_REWARD"; readonly take: boolean }

@@ -2,9 +2,10 @@
  * See rulebook §8, Card anatomy: Stuff cards.
  */
 
-import type { Character, DomainEvent, GameState, Pending } from "../types";
-import { exhaustXPreventedBy } from "../queries";
+import type { Character, DomainEvent, GameState, Pending, Stat } from "../types";
+import { exhaustXPreventedBy, playedBy } from "../queries";
 import {
+  applyPoolBonus,
   applyPoolPenalty,
   CHARACTERS,
   discardFromHand,
@@ -20,8 +21,11 @@ import {
   scrap,
   takeFrom,
   takeGoodStuff,
+  topDeck,
 } from "../verbs";
 import { ask, done, nothing, source, type BehaviourContext, type Registry } from "./behaviour";
+
+const STATS: readonly Stat[] = ["Oomph", "Scramble"];
 
 /** The `ChooseCards` question for a Stitch-Em-Ups heal, once the target is known. */
 function healCardsAsk(state: GameState, ctx: BehaviourContext, target: Character): Pending {
@@ -163,6 +167,146 @@ export const STUFF: Registry = {
       return done(state, [
         { type: "CARDS_PEEKED", character: ctx.character, pile: "Floor deck", cards: top },
       ]);
+    },
+  },
+
+  /* "Play: Scrap 1 Bad Stuff card from your hand. If you do, gain 2 Oomph or
+   * 2 Scramble."
+   *
+   * No Bad Stuff in hand: no Scrap, no stat question, no prompt at all. */
+  "Scrap Magnet": {
+    onPlay(state, ctx) {
+      const options = playerOf(state, ctx.character).hand.filter((c) => c.kind === "bad_stuff");
+      if (options.length === 0) return nothing(state);
+      return ask(state, {
+        kind: "ChooseCards",
+        prompt: "Scrap which Bad Stuff card from your hand?",
+        character: ctx.character,
+        options,
+        count: 1,
+        optional: false,
+        source: source(ctx, "scrap-magnet-card"),
+      });
+    },
+    onChoice(answer, state, ctx) {
+      if (answer.kind === "cards") {
+        const chosen = answer.cards[0];
+        if (!chosen) return nothing(state);
+        const events: DomainEvent[] = [];
+        const lifted = takeFrom(state, ctx.character, "hand", [chosen]);
+        const scrapped = scrap(lifted, ctx.character, chosen, events);
+        return ask(
+          scrapped,
+          {
+            kind: "ChooseStat",
+            prompt: "Gain 2 Oomph or 2 Scramble?",
+            character: ctx.character,
+            options: STATS,
+            source: source(ctx, "scrap-magnet-stat"),
+          },
+          events,
+        );
+      }
+      if (answer.kind !== "stat") return nothing(state);
+      return done(applyPoolBonus(state, answer.stat, 2));
+    },
+  },
+
+  /* "Play: Draw 1 card. If both you and your partner played a card this
+   * turn, gain 1 Oomph and 1 Scramble."
+   *
+   * Pocket Dynamo counts as the card "you" played, so this fires off the
+   * partner's play whether it landed before this card or lands afterwards —
+   * the same look-back-then-listen shape as Crowbar, above. */
+  "Pocket Dynamo": {
+    onPlay(state, ctx) {
+      const events: DomainEvent[] = [];
+      let s = drawOne(state, ctx.character, events);
+      if (playedBy(s, other(ctx.character)) > 0) {
+        const key = `${ctx.card.id}:pocket-dynamo`;
+        s = applyPoolBonus(applyPoolBonus(markFired(s, key), "Oomph", 1), "Scramble", 1);
+      }
+      return done(s, events);
+    },
+    onEvent(event, state, ctx) {
+      if (ctx.zone !== "playZone") return nothing(state);
+      if (event.type !== "CARD_PLAYED" || event.character !== other(ctx.character)) {
+        return nothing(state);
+      }
+      const key = `${ctx.card.id}:pocket-dynamo`;
+      if (hasFired(state, key)) return nothing(state);
+      const s = applyPoolBonus(applyPoolBonus(markFired(state, key), "Oomph", 1), "Scramble", 1);
+      return done(s);
+    },
+  },
+
+  /* "Play: Draw 2 cards, then place 1 card from your hand on top of your
+   * deck." */
+  "Salvaged Blueprint": {
+    onPlay(state, ctx) {
+      const events: DomainEvent[] = [];
+      let s = drawOne(state, ctx.character, events);
+      s = drawOne(s, ctx.character, events);
+      const hand = playerOf(s, ctx.character).hand;
+      if (hand.length === 0) return done(s, events);
+      return ask(
+        s,
+        {
+          kind: "ChooseCards",
+          prompt: "Place which card from your hand on top of your deck?",
+          character: ctx.character,
+          options: hand,
+          count: 1,
+          optional: false,
+          source: source(ctx, "salvaged-blueprint"),
+        },
+        events,
+      );
+    },
+    onChoice(answer, state, ctx) {
+      if (answer.kind !== "cards") return nothing(state);
+      const chosen = answer.cards[0];
+      if (!chosen) return nothing(state);
+      const events: DomainEvent[] = [
+        { type: "CARD_MOVED", character: ctx.character, card: chosen, to: "deck" },
+      ];
+      const lifted = takeFrom(state, ctx.character, "hand", [chosen]);
+      return done(topDeck(lifted, ctx.character, chosen), events);
+    },
+  },
+
+  /* "Play: Scrap 1 card from your hand. Your partner draws 1 card."
+   *
+   * The Scrap is required whenever the hand isn't empty; the partner draws
+   * either way. */
+  "Emergency Breaker": {
+    onPlay(state, ctx) {
+      const hand = playerOf(state, ctx.character).hand;
+      if (hand.length === 0) {
+        const events: DomainEvent[] = [];
+        return done(drawOne(state, other(ctx.character), events), events);
+      }
+      return ask(state, {
+        kind: "ChooseCards",
+        prompt: "Scrap which card from your hand?",
+        character: ctx.character,
+        options: hand,
+        count: 1,
+        optional: false,
+        source: source(ctx, "emergency-breaker"),
+      });
+    },
+    onChoice(answer, state, ctx) {
+      if (answer.kind !== "cards") return nothing(state);
+      const chosen = answer.cards[0];
+      const events: DomainEvent[] = [];
+      let s = state;
+      if (chosen) {
+        const lifted = takeFrom(s, ctx.character, "hand", [chosen]);
+        s = scrap(lifted, ctx.character, chosen, events);
+      }
+      s = drawOne(s, other(ctx.character), events);
+      return done(s, events);
     },
   },
 

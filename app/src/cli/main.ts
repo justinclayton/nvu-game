@@ -247,6 +247,18 @@ function buildChoose(state: GameState, action: Extract<PlayAction, { kind: "choo
     return { type: "CHOOSE_PILE", pile: only };
   }
 
+  if (pending.kind === "ChooseStat") {
+    const [only, ...extra] = action.names;
+    if (only === undefined || extra.length > 0) {
+      throw new MoveRefused(`Choose one of: ${pending.options.join(", ")}.`);
+    }
+    const stat = matchStat(only);
+    if (!pending.options.includes(stat)) {
+      throw new MoveRefused(`"${only}" is not one of: ${pending.options.join(", ")}.`);
+    }
+    return { type: "CHOOSE_STAT", stat };
+  }
+
   if (pending.kind === "ChooseCards") {
     const cardIds = resolveEach(action.names, pending.options).map((c) => c.id);
     return { type: "CHOOSE_CARDS", cardIds };

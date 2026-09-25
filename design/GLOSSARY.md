@@ -49,7 +49,7 @@ Cards gained from Rooms rather than from a character's deck. Stuff is either Goo
 
 **Good Stuff** / **Bad Stuff**
 
-The two kinds of Stuff card. Good Stuff is chosen: the player reveals the top 3 of the Good Stuff pool, keeps one in hand, and puts the rest on the bottom (rulebook, Keywords > `Get Good Stuff`). Bad Stuff is drawn face down from its pool into the player's hand. Bad Stuff cards, unlike Good Stuff, don't display a rarity border.
+The two kinds of Stuff card. Good Stuff is chosen: the player reveals the top 3 of the Good Stuff pool, keeps one in hand, and puts the rest on the bottom (rulebook, Keywords > `Get Good Stuff`). Each Good Stuff gained is its own spread of 3, and when both players gain it from one outcome, both spreads are revealed before either player chooses. Bad Stuff is not chosen: the top card of its pool goes into the player's hand (rulebook, Keywords > `Get Bad Stuff`). `[you, 2026-09-25]` Bad Stuff cards, unlike Good Stuff, don't display a rarity border.
 
 **Good Stuff pool** / **Bad Stuff pool**
 

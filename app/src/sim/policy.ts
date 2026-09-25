@@ -13,10 +13,10 @@ import { validate } from "@domain/engine";
 import {
   allThresholds,
   contributionOf,
+  costOf,
   exhaustXPreventedBy,
   metThresholds,
   ownedPlayerCards,
-  playableCards,
   statPool,
   thresholdIsMet,
   thresholdRequirement,
@@ -29,6 +29,7 @@ import type {
   Character,
   Command,
   GameState,
+  RoomEffect,
   RoomId,
   Stat,
   Threshold,
@@ -55,29 +56,53 @@ export const randomPolicy: Policy = {
 const statValue = (totals: StatTotals, stat: Stat): number =>
   stat === "Oomph" ? totals.oomph : totals.scramble;
 
-/** Would `totals` meet this threshold's requirement, dual stats and all? */
-const meetsRequirement = (state: GameState, totals: StatTotals, t: Threshold): boolean => {
-  const req = thresholdRequirement(state, t);
-  return totals.oomph >= req.oomph && totals.scramble >= req.scramble;
-};
-
-/**
- * Would adding `card`'s contribution meet a Clearing threshold the pool has
- * not already met? A "flee this room for free" threshold (`clears: false`)
- * does not Clear the room on its own (rulebook, Outcome), so it does not count.
- */
-function clearsARoom(state: GameState, character: Character, card: Card): boolean {
-  const room = state.activeRoom;
-  if (!room) return false;
-  const before = statPool(state);
-  const gain = contributionOf(state, { owner: character, card });
-  const after: StatTotals = { oomph: before.oomph + gain.oomph, scramble: before.scramble + gain.scramble };
-  return allThresholds(room).some((t) => t.clears && !thresholdIsMet(state, t) && meetsRequirement(state, after, t));
-}
-
 /** Has the room already been Cleared by something the pool now meets? */
 function roomIsCleared(state: GameState): boolean {
   return metThresholds(state).some((t) => t.clears);
+}
+
+/** What the pool still lacks to meet this line, per stat, never below zero. */
+function deficitOf(state: GameState, t: Threshold): StatTotals {
+  const pool = statPool(state);
+  const req = thresholdRequirement(state, t);
+  return { oomph: Math.max(0, req.oomph - pool.oomph), scramble: Math.max(0, req.scramble - pool.scramble) };
+}
+
+/** How much of `gain` closes `deficit`: a stat the line does not ask for counts for nothing. */
+const towards = (gain: StatTotals, deficit: StatTotals): number =>
+  Math.min(gain.oomph, deficit.oomph) + Math.min(gain.scramble, deficit.scramble);
+
+const lessDeficit = (deficit: StatTotals, gain: StatTotals): StatTotals => ({
+  oomph: Math.max(0, deficit.oomph - gain.oomph),
+  scramble: Math.max(0, deficit.scramble - gain.scramble),
+});
+
+/**
+ * A room line's printed consequences as one number: Stuff gained and a
+ * reward revealed count up, cards Exhausted and Bad Stuff dealt count down.
+ * Only what is permanent is counted — paying and discarding are not.
+ */
+function effectsValue(effects: readonly RoomEffect[]): number {
+  let value = 0;
+  for (const e of effects) {
+    const heads = e.who === "both" ? 2 : 1;
+    switch (e.type) {
+      case "ExhaustFromDeck":
+        value -= heads * e.amount;
+        break;
+      case "DealBadStuff":
+        value -= heads * e.count;
+        break;
+      case "TakeGoodStuff":
+        value += heads * e.count;
+        break;
+      case "RevealReward":
+      case "ScrapBadStuffFromHand":
+        value += 1;
+        break;
+    }
+  }
+  return value;
 }
 
 /**
@@ -93,116 +118,149 @@ function exhaustCost(state: GameState, character: Character, card: Card): number
 }
 
 /**
- * The most either character's hand could add to the pool this turn, playing
- * every playable card for free — a generous upper bound that ignores payment
- * (a card spent paying could otherwise have been played for its own stats).
- * Used only to tell "unreachable" apart from "not reached yet".
+ * How much a card in hand is worth keeping while the turn still needs
+ * `deficit`: Bad Stuff is worth less than nothing (paying with it is the
+ * cheapest way to be rid of a `Holding:` line), then a card counts by what
+ * it would add toward the line, then by its raw stats, and a card that
+ * needs payers itself is worth a little less than one that plays free.
  */
-function maxAdditionalGain(state: GameState): StatTotals {
-  let oomph = 0;
-  let scramble = 0;
-  for (const character of CHARACTERS) {
-    for (const card of playableCards(state, character)) {
-      const gain = contributionOf(state, { owner: character, card });
-      oomph += gain.oomph;
-      scramble += gain.scramble;
-    }
-  }
-  return { oomph, scramble };
+function keepValue(state: GameState, character: Character, card: Card, deficit: StatTotals): number {
+  if (card.kind === "bad_stuff") return -1;
+  const gain = contributionOf(state, { owner: character, card });
+  return towards(gain, deficit) * 10 + gain.oomph + gain.scramble - costOf(state, character, card);
+}
+
+interface Step {
+  readonly character: Character;
+  readonly card: Card;
+}
+
+interface Plan {
+  readonly steps: readonly Step[];
+  /** Cards played and paid, both hands together. */
+  readonly spent: number;
+  /** Cards the plan's own plays would Exhaust. */
+  readonly harm: number;
 }
 
 /**
- * Could anything still in hand clear the room this turn? If not, the room
- * will be Fled regardless of what else gets played — the rulebook shuffles
- * it back into the Floor deck either way (Outcome, Flee) — so there is
- * nothing left to buy with a further Exhaust or a further card at all.
+ * The plays that would close this line's deficit before the turn ends, by a
+ * rule a person at the table could follow: play the card that closes the most
+ * of what is still missing (a card's Scramble is no help toward an Oomph
+ * line), pay for it with the cards worth least, and repeat. Both hands are
+ * walked together, so Red's Oomph and Gray's Scramble stack on the one line
+ * a dual-stat threshold asks for. Null when the hands cannot get there, which
+ * is the moment to stop rather than pour cards into a room getting Fled anyway.
  */
-function roomIsClearableThisTurn(state: GameState): boolean {
+function planFor(state: GameState, target: Threshold): Plan | null {
+  let deficit = deficitOf(state, target);
+  const hands: Record<Character, readonly Card[]> = {
+    Red: playerOf(state, "Red").down ? [] : playerOf(state, "Red").hand,
+    Gray: playerOf(state, "Gray").down ? [] : playerOf(state, "Gray").hand,
+  };
+  const steps: Step[] = [];
+  let spent = 0;
+  let harm = 0;
+  while (deficit.oomph > 0 || deficit.scramble > 0) {
+    let best: { character: Character; card: Card; gain: number; harm: number; cost: number } | null = null;
+    for (const character of CHARACTERS) {
+      for (const card of hands[character]) {
+        const cost = costOf(state, character, card);
+        if (cost > hands[character].length - 1) continue;
+        const gain = towards(contributionOf(state, { owner: character, card }), deficit);
+        if (gain === 0) continue;
+        const h = exhaustCost(state, character, card);
+        const better =
+          best === null ||
+          gain > best.gain ||
+          (gain === best.gain && h < best.harm) ||
+          (gain === best.gain && h === best.harm && cost < best.cost) ||
+          (gain === best.gain && h === best.harm && cost === best.cost && card.id < best.card.id);
+        if (better) best = { character, card, gain, harm: h, cost };
+      }
+    }
+    if (best === null) return null;
+    const chosen = best;
+    const others = [...hands[chosen.character]]
+      .filter((c) => c.id !== chosen.card.id)
+      .sort((a, b) => keepValue(state, chosen.character, a, deficit) - keepValue(state, chosen.character, b, deficit) || a.id.localeCompare(b.id));
+    hands[chosen.character] = others.slice(chosen.cost);
+    deficit = lessDeficit(deficit, contributionOf(state, { owner: chosen.character, card: chosen.card }));
+    steps.push({ character: chosen.character, card: chosen.card });
+    spent += 1 + chosen.cost;
+    harm += chosen.harm;
+  }
+  return { steps, spent, harm };
+}
+
+interface Target {
+  readonly threshold: Threshold;
+  readonly plan: Plan;
+  /** The line's printed outcome, less what reaching it would Exhaust. */
+  readonly value: number;
+}
+
+/**
+ * Which line to go for this turn, if any: the reachable Clearing line the
+ * team comes out of best — an Ascend above all, then the outcome worth most
+ * once the plan's own Exhaust is taken off, then the fewest cards spent,
+ * then printed order. Null when Fleeing costs less than any reachable line
+ * (the room only shuffles back into the Floor deck, while an Exhaust is for
+ * good), or, once the room is already Cleared, when no further line would
+ * add anything.
+ */
+function chooseTarget(state: GameState): Target | null {
   const room = state.activeRoom;
-  if (!room) return false;
-  const now = statPool(state);
-  const potential = maxAdditionalGain(state);
-  const reachable: StatTotals = { oomph: now.oomph + potential.oomph, scramble: now.scramble + potential.scramble };
-  return allThresholds(room).some(
-    (t) => t.clears && !thresholdIsMet(state, t) && meetsRequirement(state, reachable, t),
-  );
+  if (!room) return null;
+  let best: Target | null = null;
+  for (const threshold of allThresholds(room)) {
+    if (!threshold.clears || thresholdIsMet(state, threshold)) continue;
+    const plan = planFor(state, threshold);
+    if (!plan) continue;
+    const value = effectsValue(threshold.effects) - plan.harm;
+    const better =
+      best === null ||
+      (threshold.ascends && !best.threshold.ascends) ||
+      (threshold.ascends === best.threshold.ascends &&
+        (value > best.value || (value === best.value && plan.spent < best.plan.spent)));
+    if (better) best = { threshold, plan, value };
+  }
+  if (!best || best.threshold.ascends) return best;
+  const floor = roomIsCleared(state) ? 0 : effectsValue(room.flee.effects);
+  const worthIt = roomIsCleared(state) ? best.value > floor : best.value >= floor;
+  return worthIt ? best : null;
 }
 
 function findInHand(state: GameState, character: Character, id: CardId): Card | undefined {
   return playerOf(state, character).hand.find((c) => c.id === id);
 }
 
-/** "Pay with the cheapest cards": minimize what the payment itself is worth, hand back distinct ties. */
-function paymentValue(state: GameState, character: Character, payWith: readonly CardId[]): number {
-  return payWith.reduce((sum, id) => sum + (findInHand(state, character, id)?.cost ?? 0), 0);
-}
-
 function tieBreak(payWith: readonly CardId[]): string {
   return [...payWith].sort().join(",");
 }
 
-/** "Play the cards that clear the room", then make the most progress, then pay cheap. */
+/** Pick a line, play the first card of the plan that reaches it, and pay with what is worth least. */
 function choosePlay(state: GameState, legal: readonly Command[]): Command {
   const plays = legal.filter((c): c is Extract<Command, { type: "PLAY_CARD" }> => c.type === "PLAY_CARD");
   const endPlay = legal.find((c) => c.type === "END_PLAY");
   if (!endPlay) throw new Error("greedy: Play phase offered no END_PLAY");
   if (plays.length === 0) return endPlay;
-  if (roomIsCleared(state)) return endPlay; // Already cleared — stop spending stamina.
-  // Nothing left in hand could clear it either — the room is Fled regardless
-  // of what else gets played, so stop pouring cards (and Exhaust) into it.
-  if (!roomIsClearableThisTurn(state)) return endPlay;
 
-  let bestCharacter: Character | null = null;
-  let bestCardId: CardId | null = null;
-  let bestClears = false;
-  let bestHarm = Number.POSITIVE_INFINITY;
-  let bestTotal = -1;
-  const seen = new Set<string>();
-  for (const play of plays) {
-    const key = `${play.character}:${String(play.cardId)}`;
-    if (seen.has(key)) continue;
-    seen.add(key);
-    const card = findInHand(state, play.character, play.cardId);
-    if (!card) continue;
-    const clears = clearsARoom(state, play.character, card);
-    const harm = exhaustCost(state, play.character, card);
-    const gain = contributionOf(state, { owner: play.character, card });
-    const total = gain.oomph + gain.scramble;
-    // Prefer a play that Clears; among plays that both Clear, prefer the one
-    // that costs the least permanent loss — this is what makes a cheaper,
-    // harmless play beat Reckless or Panic whenever either would clear the
-    // room just as well. Short of Clearing, maximize progress first, same as
-    // before, and only fall back to harm as a tie-break — a harmless card
-    // that does nothing is not a substitute for one that helps.
-    const better =
-      bestCardId === null ||
-      (clears && !bestClears) ||
-      (clears === bestClears && clears && harm < bestHarm) ||
-      (clears === bestClears && clears && harm === bestHarm && total > bestTotal) ||
-      (clears === bestClears && !clears && total > bestTotal) ||
-      (clears === bestClears && !clears && total === bestTotal && harm < bestHarm) ||
-      (clears === bestClears &&
-        total === bestTotal &&
-        harm === bestHarm &&
-        (play.character < (bestCharacter ?? play.character) ||
-          (play.character === bestCharacter && play.cardId < bestCardId)));
-    if (better) {
-      bestCharacter = play.character;
-      bestCardId = play.cardId;
-      bestClears = clears;
-      bestHarm = harm;
-      bestTotal = total;
-    }
-  }
-  if (bestCharacter === null || bestCardId === null) return endPlay;
+  const target = chooseTarget(state);
+  const step = target?.plan.steps[0];
+  if (!target || !step) return endPlay;
 
-  const character = bestCharacter;
-  const cardId = bestCardId;
-  const candidates = plays.filter((p) => p.character === character && p.cardId === cardId);
+  const candidates = plays.filter((p) => p.character === step.character && p.cardId === step.card.id);
   let best = candidates[0];
   if (!best) return endPlay;
+  const deficit = deficitOf(state, target.threshold);
+  const worth = (payWith: readonly CardId[]): number =>
+    payWith.reduce((sum, id) => {
+      const card = findInHand(state, step.character, id);
+      return sum + (card ? keepValue(state, step.character, card, deficit) : 0);
+    }, 0);
   for (const c of candidates.slice(1)) {
-    const diff = paymentValue(state, character, c.payWith) - paymentValue(state, character, best.payWith);
+    const diff = worth(c.payWith) - worth(best.payWith);
     if (diff < 0 || (diff === 0 && tieBreak(c.payWith) < tieBreak(best.payWith))) best = c;
   }
   return best;
@@ -320,8 +378,9 @@ function choosePending(state: GameState, legal: readonly Command[]): Command {
 }
 
 /**
- * A fixed, deterministic bot: play what clears the room, pay
- * with the cheapest cards, and take the reward. It never draws on `rng` —
+ * A fixed, deterministic bot: pick the room line the team comes out of best,
+ * play toward that one line, pay with the cards worth least, Flee when
+ * Clearing would cost more, and take the reward. It never draws on `rng` —
  * ties are broken by card id — so the same seed always plays the same game.
  * Everywhere but Ascend it only answers from the move generator's own legal
  * list; at Ascend it composes its own `ASCEND` command (see `composeChoice`)

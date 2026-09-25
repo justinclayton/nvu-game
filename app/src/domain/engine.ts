@@ -837,8 +837,33 @@ function finishTurn(state: GameState, run: Run): GameState {
     run.events.push({ type: "CLEANUP_BEGAN" });
     s = settle(s, run);
     if (s.phase === "GameOver") return s;
+
+    // A played card's own "return to hand at the end of the turn" line (Riot
+    // Shield) resolves at the end of the Play phase — before Cleanup's held
+    // Holding lines (Spore Cloud's "discard until you hold 3"), so a returned
+    // card counts toward what's held.
+    s = returnPlayZoneCards(s, run);
+    if (s.phase === "GameOver") return s;
   }
   return cleanupHands(s, run);
+}
+
+/** A played card that takes itself somewhere else at the end of the turn (Riot Shield). */
+function returnPlayZoneCards(state: GameState, run: Run): GameState {
+  let s = state;
+  for (const played of s.playZone) {
+    const onCleanup = behaviourOf(played.card.name)?.onCleanup;
+    if (!onCleanup) continue;
+    const step = onCleanup(s, {
+      card: played.card,
+      character: played.owner,
+      zone: "playZone",
+    });
+    run.events.push(...step.events);
+    s = settle(step.state, run);
+    if (s.phase === "GameOver") return s;
+  }
+  return s;
 }
 
 /**
@@ -908,27 +933,14 @@ function finishCleanup(state: GameState, run: Run): GameState {
   return { ...s, phase: "Turn Start", playZone: [] };
 }
 
-/** Each Turn, Cleanup: discard the entire play zone. The hand carries over untouched. */
+/**
+ * Each Turn, Cleanup: discard the entire play zone. The hand carries over
+ * untouched. A card that took itself elsewhere (Riot Shield) is already gone
+ * from the play zone by now — see `returnPlayZoneCards`.
+ */
 function cleanupPiles(state: GameState, run: Run): GameState {
   let s = state;
 
-  // Any played card that takes itself somewhere else. It has to happen
-  // before the play zone is discarded, or a card returning to hand would be
-  // discarded straight back out of it.
-  for (const played of s.playZone) {
-    const onCleanup = behaviourOf(played.card.name)?.onCleanup;
-    if (!onCleanup) continue;
-    const step = onCleanup(s, {
-      card: played.card,
-      character: played.owner,
-      zone: "playZone",
-    });
-    run.events.push(...step.events);
-    s = settle(step.state, run);
-    if (s.phase === "GameOver") return s;
-  }
-
-  // Then the play zone itself.
   for (const c of CHARACTERS) {
     const played = s.playZone.filter((x) => x.owner === c).map((x) => x.card);
     for (const card of played) s = discard(s, c, card, "playZone", run.events);

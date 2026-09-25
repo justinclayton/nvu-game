@@ -574,8 +574,8 @@ cards:
       - thresholds:
           - stat: Oomph
             value: 5
-            outcome: Clear, and Red gets Good Stuff, but both of you Exhaust 1.
-    flee: Both of you Exhaust 1.
+            outcome: Clear, and Red gets Good Stuff, but both players Exhaust 1.
+    flee: Both players Exhaust 1.
 
   - name: Flooded Ventilation Shaft
     count: 10
@@ -590,7 +590,7 @@ cards:
             outcome: Clear.
       - thresholds:
           - stats: { Oomph: 3, Scramble: 3 }
-            outcome: Clear, and Gray gets Good Stuff.
+            outcome: Clear, and both players get Good Stuff.
     flee: Gray Exhausts 2.
 
   - name: The Sentry Drone
@@ -602,13 +602,16 @@ cards:
     challenges:
       - thresholds:
           - stat: Oomph
-            value: 8
+            value: 6
             outcome: Ascend.
       - thresholds:
           - stat: Scramble
-            value: 8
-            outcome: Ascend, and one of you gets Good Stuff.
-    flee: Both of you Exhaust 1, and Red gets Bad Stuff.
+            value: 6
+            outcome: Ascend.
+      - thresholds:
+          - stats: { Oomph: 4, Scramble: 4 }
+            outcome: Ascend, and both players get 2 Good Stuff!
+    flee: Both players Exhaust 1, and both players get Bad Stuff.
 
   ## Band 2 (floors 4–6)
 
@@ -627,7 +630,7 @@ cards:
           - stat: Oomph
             value: 10
             outcome: Clear, and one of you may Scrap a Bad Stuff card from your hand.
-    flee: Both of you Exhaust 2, and both of you get Bad Stuff.
+    flee: Both players Exhaust 2, and both players get Bad Stuff.
 
   - name: Pressurized Maintenance Hub
     count: 4
@@ -644,7 +647,7 @@ cards:
           - stat: Scramble
             value: 7
             outcome: Clear, and Gray reveals a card reward.
-    flee: Both of you Exhaust 2.
+    flee: Both players Exhaust 2.
 
   - name: Overgrown Hydroponics Bay
     count: 4
@@ -656,12 +659,12 @@ cards:
       - thresholds:
           - stat: Scramble
             value: 6
-            outcome: Clear, but both of you get Bad Stuff.
+            outcome: Clear, but both players get Bad Stuff.
       - thresholds:
           - stat: Scramble
             value: 11
-            outcome: Clear, and both of you get Good Stuff.
-    flee: Both of you Exhaust 2, and Gray gets Bad Stuff.
+            outcome: Clear, and both players get Good Stuff.
+    flee: Both players Exhaust 2, and Gray gets Bad Stuff.
 
   - name: Gears & Glitch
     count: 3
@@ -677,7 +680,7 @@ cards:
       - thresholds:
           - stats: { Oomph: 7, Scramble: 7 }
             outcome: Ascend, and one of you reveals a card reward.
-    flee: Both of you Exhaust 3, and Red gets Bad Stuff.
+    flee: Both players Exhaust 3, and Red gets Bad Stuff.
 
   ## Band 3 (floors 7–9)
 
@@ -695,8 +698,8 @@ cards:
       - thresholds:
           - stat: Oomph
             value: 18
-            outcome: Clear, but both of you Exhaust 2.
-    flee: Both of you Exhaust 4.
+            outcome: Clear, but both players Exhaust 2.
+    flee: Both players Exhaust 4.
 
   - name: Bio-Hazard Containment Vault
     count: 2
@@ -714,7 +717,7 @@ cards:
           - stat: Scramble
             value: 15
             outcome: Clear, and one of you reveals a card reward.
-    flee: Both of you get 2 Bad Stuff, and both of you Exhaust 2.
+    flee: Both players get 2 Bad Stuff, and both players Exhaust 2.
 
   - name: Smoldering Armory
     count: 2
@@ -730,7 +733,7 @@ cards:
       - thresholds:
           - stat: Oomph
             value: 16
-            outcome: Clear; both of you reveal a card reward, and both of you get Good Stuff.
+            outcome: Clear; both players reveal a card reward, and both players get Good Stuff.
     flee: Red Exhausts 5.
 
   - name: The Iron Sentinel
@@ -742,12 +745,12 @@ cards:
     challenges:
       - thresholds:
           - stats: { Oomph: 10, Scramble: 10 }
-            outcome: Ascend, and both of you reveal a card reward.
+            outcome: Ascend, and both players reveal a card reward.
       - thresholds:
           - stat: Oomph
             value: 18
-            outcome: Ascend, but both of you Exhaust 3.
-    flee: Both of you Exhaust 4, and both of you get Bad Stuff.
+            outcome: Ascend, but both players Exhaust 3.
+    flee: Both players Exhaust 4, and both players get Bad Stuff.
 
   ## Floor 10 (the roof)
 
@@ -759,9 +762,9 @@ cards:
     challenges:
       - thresholds:
           - stats: { Oomph: 10, Scramble: 10 }
-            outcome: Ascend.
+            outcome: You Win!
       - thresholds:
           - stat: Oomph
             value: 22
-            outcome: Ascend, but both of you Exhaust 3.
-    flee: Both of you Exhaust 5.
+            outcome: You Win!
+    flee: Both players Exhaust 5.

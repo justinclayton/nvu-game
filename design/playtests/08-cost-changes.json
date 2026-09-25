@@ -1,0 +1,468 @@
+{
+  "format": "nvu-run/1",
+  "exportedAt": "2026-09-24T20:04:17.584Z",
+  "cards": "74bf74e78a62",
+  "rules": "0.2.4",
+  "floor": 2,
+  "turn": 10,
+  "phase": "GameOver",
+  "outcome": "Defeat",
+  "run": {
+    "seed": 33,
+    "commands": [
+      {
+        "type": "FLIP_ROOM"
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Red",
+        "cardId": "Overdrive#1",
+        "payWith": []
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Red",
+        "cardId": "Lean In#1",
+        "payWith": [
+          "Shove#3"
+        ]
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Gray",
+        "cardId": "Duck Under#2",
+        "payWith": [
+          "Peek Around Corner#1"
+        ]
+      },
+      {
+        "type": "END_PLAY"
+      },
+      {
+        "type": "FLIP_ROOM"
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Gray",
+        "cardId": "Pick The Lock#3",
+        "payWith": [
+          "Peek Around Corner#2",
+          "Duck Under#1"
+        ]
+      },
+      {
+        "type": "END_PLAY"
+      },
+      {
+        "type": "FLIP_ROOM"
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Red",
+        "cardId": "Overdrive#2",
+        "payWith": []
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Red",
+        "cardId": "Shove#4",
+        "payWith": [
+          "Charge In#1"
+        ]
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Gray",
+        "cardId": "Crowbar#1",
+        "payWith": []
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Gray",
+        "cardId": "Duck Under#4",
+        "payWith": [
+          "Pick The Lock#1"
+        ]
+      },
+      {
+        "type": "END_PLAY"
+      },
+      {
+        "type": "FLIP_ROOM"
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Red",
+        "cardId": "Overdrive#2",
+        "payWith": []
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Gray",
+        "cardId": "Duct Tape & Wire#3",
+        "payWith": [
+          "Pick The Lock#2"
+        ]
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Red",
+        "cardId": "Charge In#4",
+        "payWith": [
+          "Shove#1",
+          "Lean In#1"
+        ]
+      },
+      {
+        "type": "END_PLAY"
+      },
+      {
+        "type": "ASCEND",
+        "Red": {
+          "takeRewardId": "Junk Launcher#2"
+        },
+        "Gray": {
+          "takeRewardId": "Quick Vault#1"
+        }
+      },
+      {
+        "type": "FLIP_ROOM"
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Gray",
+        "cardId": "Coil Of Cable#3",
+        "payWith": []
+      },
+      {
+        "type": "END_PLAY"
+      },
+      {
+        "type": "FLIP_ROOM"
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Gray",
+        "cardId": "Work The Angles#1",
+        "payWith": [
+          "Duck Under#3"
+        ]
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Gray",
+        "cardId": "Quick Vault#1",
+        "payWith": [
+          "Pick The Lock#5"
+        ]
+      },
+      {
+        "type": "END_PLAY"
+      },
+      {
+        "type": "FLIP_ROOM"
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Gray",
+        "cardId": "Pick The Lock#4",
+        "payWith": [
+          "Duck Under#1",
+          "Quick Vault#1"
+        ]
+      },
+      {
+        "type": "END_PLAY"
+      },
+      {
+        "type": "FLIP_ROOM"
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Red",
+        "cardId": "Overdrive#2",
+        "payWith": []
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Gray",
+        "cardId": "Pick The Lock#3",
+        "payWith": [
+          "Duck Under#2",
+          "Peek Around Corner#1"
+        ]
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Red",
+        "cardId": "Junk Launcher#2",
+        "payWith": [
+          "Shove#4",
+          "Shove#1"
+        ]
+      },
+      {
+        "type": "END_PLAY"
+      },
+      {
+        "type": "FLIP_ROOM"
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Gray",
+        "cardId": "Crowbar#2",
+        "payWith": []
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Gray",
+        "cardId": "Work The Angles#1",
+        "payWith": [
+          "Duck Under#3"
+        ]
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Gray",
+        "cardId": "Duct Tape & Wire#3",
+        "payWith": [
+          "Pick The Lock#2"
+        ]
+      },
+      {
+        "type": "END_PLAY"
+      },
+      {
+        "type": "FLIP_ROOM"
+      },
+      {
+        "type": "END_PLAY"
+      }
+    ]
+  },
+  "notes": [
+    {
+      "at": 163,
+      "text": "Junk Launcher's cooperative wording confirmed: play zone at resolution was Red Overdrive(printed cost 0), Red Junk Launcher(printed cost 2, itself), Gray Pick The Lock(printed cost 2) = printed-cost total 4. Junk Launcher gave Oomph 4 (stat pool rose from Overdrive's 2 to 6, so Junk Launcher contributed 4). This counts Gray's card and Junk Launcher's own printed cost, matching the new rulebook text 'total printed cost of all cards in the play zone' -- both characters' cards counted, as intended."
+    },
+    {
+      "at": 201,
+      "text": "The Sentry Drone needs Oomph8 or Scramble8 to Ascend. Checked the max reachable this turn: Red hand (Charge In c2 O4, Overdrive c0 O2, Shove c1 O2, Shove c1 O2, Junk Launcher c2 conditional) tops out at Oomph 6 played straight, or Oomph 4 via Junk Launcher plus Overdrive's 2 = 6 either way, since only 5 cards total limits how much can be both played and used as payment. Gray hand (2x Pick The Lock c2 Scr4, Duck Under c1 Scr2, Crowbar c0 O1S1, Peek Around Corner c1 Scr1) tops out at Oomph 1 / Scramble 5, since only one Pick The Lock is payable with the other three cards. Combined best case is Oomph 7 or Scramble 5, one short of the room's own Oomph 8 line. Since Flee triggers whenever no threshold is met regardless of how close the stat pool gets, played nothing this turn and kept the full hand for next attempt rather than spending cards toward a total that still falls short."
+    },
+    {
+      "at": 209,
+      "text": "Red went Down on this Flee because Red's deck AND discard were both empty (Red: deck 0, discard 0, exhaust 8 going into the Flee) -- the Flee's own text is 'Both of you Exhaust 1, and Red gets Bad Stuff,' and Exhausting draws from the top of the deck. Rulebook Empty deck: 'If you must draw or Exhaust a card and your deck is empty, first shuffle your discard pile... If your discard pile is also empty, you go Down.' This matches the rule exactly, not an engine bug. But it flags a real trap: choosing not to play any cards this turn (to avoid spending toward a threshold that could not be reached anyway) left Red's discard pile at 0 too, since nothing got paid away or played into it. Had Red played anything at all this turn -- even a single card discarded as payment -- that card would have sat in the discard pile as a buffer for the forced Exhaust, and Red would have survived the Flee. The choice to hold the whole hand back, reasonable on its own (see previous note), removed Red's only safety net against this specific Flee."
+    }
+  ],
+  "log": [
+    "Floor 1 is built: 10 rooms.",
+    "You are in: Flooded Ventilation Shaft.",
+    "Red draws Lean In.",
+    "Red draws Overdrive.",
+    "Red draws Charge In.",
+    "Red draws Charge In.",
+    "Red draws Shove.",
+    "Gray draws Pick The Lock.",
+    "Gray draws Pick The Lock.",
+    "Gray draws Peek Around Corner.",
+    "Gray draws Duck Under.",
+    "Gray draws Peek Around Corner.",
+    "Red plays Overdrive.",
+    "Red Exhausts Shove.",
+    "Red Exhausts Charge In.",
+    "Red discards Shove from their hand.",
+    "Red pays with Shove.",
+    "Red plays Lean In.",
+    "Gray discards Peek Around Corner from their hand.",
+    "Gray pays with Peek Around Corner.",
+    "Gray plays Duck Under.",
+    "Oomph 3 and Scramble 3 met — Clear, and Gray gets Good Stuff.",
+    "Flooded Ventilation Shaft is Cleared.",
+    "Gray gets Crowbar.",
+    "Gray takes Crowbar into hand.",
+    "Cleanup.",
+    "Red discards Overdrive from their play zone.",
+    "Red discards Lean In from their play zone.",
+    "Gray discards Duck Under from their play zone.",
+    "— end of turn 1 —",
+    "You are in: Security Turnstile.",
+    "Red draws Shove.",
+    "Red draws Shove.",
+    "Red draws Overdrive.",
+    "Gray draws Duck Under.",
+    "Gray discards Peek Around Corner from their hand.",
+    "Gray discards Duck Under from their hand.",
+    "Gray pays with Peek Around Corner, Duck Under.",
+    "Gray plays Pick The Lock.",
+    "Scramble 3 met — Clear.",
+    "Security Turnstile is Cleared.",
+    "Cleanup.",
+    "Gray discards Pick The Lock from their play zone.",
+    "— end of turn 2 —",
+    "You are in: Flooded Ventilation Shaft.",
+    "Gray draws Duck Under.",
+    "Gray draws Pick The Lock.",
+    "Gray draws Pick The Lock.",
+    "Red plays Overdrive.",
+    "Red Exhausts Charge In.",
+    "Red Exhausts Charge In.",
+    "Red discards Charge In from their hand.",
+    "Red pays with Charge In.",
+    "Red plays Shove.",
+    "Gray plays Crowbar.",
+    "Gray discards Pick The Lock from their hand.",
+    "Gray pays with Pick The Lock.",
+    "Gray plays Duck Under.",
+    "Oomph 3 and Scramble 3 met — Clear, and Gray gets Good Stuff.",
+    "Flooded Ventilation Shaft is Cleared.",
+    "Gray gets Coil Of Cable.",
+    "Gray takes Coil Of Cable into hand.",
+    "Gray gets Duct Tape & Wire.",
+    "Gray takes Duct Tape & Wire into hand.",
+    "Cleanup.",
+    "Red discards Overdrive from their play zone.",
+    "Red discards Shove from their play zone.",
+    "Gray discards Crowbar from their play zone.",
+    "Gray discards Duck Under from their play zone.",
+    "— end of turn 3 —",
+    "You are in: The Sentry Drone.",
+    "Red's deck is empty — the discard pile shuffles in to make a new one (6 cards).",
+    "Red draws Lean In.",
+    "Red draws Charge In.",
+    "Red draws Overdrive.",
+    "Gray draws Pick The Lock.",
+    "Red plays Overdrive.",
+    "Red Exhausts Shove.",
+    "Red Exhausts Overdrive.",
+    "Gray discards Pick The Lock from their hand.",
+    "Gray pays with Pick The Lock.",
+    "Gray plays Duct Tape & Wire.",
+    "Red discards Shove from their hand.",
+    "Red discards Lean In from their hand.",
+    "Red pays with Shove, Lean In.",
+    "Red plays Charge In.",
+    "Oomph 8 met — Ascend.",
+    "The Sentry Drone is Cleared.",
+    "Cleanup.",
+    "Red discards Overdrive from their play zone.",
+    "Red discards Charge In from their play zone.",
+    "Gray discards Duct Tape & Wire from their play zone.",
+    "— end of turn 4 —",
+    "Floor 1 is clear.",
+    "Red shuffles 1 card(s) back in.",
+    "Red takes Junk Launcher.",
+    "Red shuffles 1 card(s) back in.",
+    "Gray shuffles 3 card(s) back in.",
+    "Gray takes Quick Vault.",
+    "Gray shuffles 1 card(s) back in.",
+    "Floor 2 is built: 9 rooms.",
+    "You are in: Security Turnstile.",
+    "Red draws Charge In.",
+    "Red draws Shove.",
+    "Red draws Junk Launcher.",
+    "Red's deck is empty — the discard pile shuffles in to make a new one (4 cards).",
+    "Red draws Overdrive.",
+    "Red draws Shove.",
+    "Gray draws Work The Angles.",
+    "Gray draws Quick Vault.",
+    "Gray draws Duck Under.",
+    "Gray draws Coil Of Cable.",
+    "Gray draws Pick The Lock.",
+    "Gray plays Coil Of Cable.",
+    "Scramble 3 met — Clear.",
+    "Security Turnstile is Cleared.",
+    "Cleanup.",
+    "Gray discards Coil Of Cable from their play zone.",
+    "— end of turn 5 —",
+    "You are in: Security Turnstile.",
+    "Gray draws Pick The Lock.",
+    "Gray discards Duck Under from their hand.",
+    "Gray pays with Duck Under.",
+    "Gray plays Work The Angles.",
+    "Gray discards Pick The Lock from their hand.",
+    "Gray pays with Pick The Lock.",
+    "Gray plays Quick Vault.",
+    "Scramble 3 met — Clear.",
+    "Security Turnstile is Cleared.",
+    "Cleanup.",
+    "Gray discards Work The Angles from their play zone.",
+    "Gray discards Quick Vault from their play zone.",
+    "— end of turn 6 —",
+    "You are in: Security Turnstile.",
+    "Gray's deck is empty — the discard pile shuffles in to make a new one (15 cards).",
+    "Gray draws Quick Vault.",
+    "Gray draws Pick The Lock.",
+    "Gray draws Duck Under.",
+    "Gray draws Pick The Lock.",
+    "Gray discards Duck Under from their hand.",
+    "Gray discards Quick Vault from their hand.",
+    "Gray pays with Duck Under, Quick Vault.",
+    "Gray plays Pick The Lock.",
+    "Scramble 3 met — Clear.",
+    "Security Turnstile is Cleared.",
+    "Cleanup.",
+    "Gray discards Pick The Lock from their play zone.",
+    "— end of turn 7 —",
+    "You are in: Flooded Ventilation Shaft.",
+    "Gray draws Peek Around Corner.",
+    "Gray draws Work The Angles.",
+    "Gray draws Duck Under.",
+    "Red plays Overdrive.",
+    "Red Exhausts Lean In.",
+    "Red Exhausts Charge In.",
+    "Gray discards Duck Under from their hand.",
+    "Gray discards Peek Around Corner from their hand.",
+    "Gray pays with Duck Under, Peek Around Corner.",
+    "Gray plays Pick The Lock.",
+    "Red discards Shove from their hand.",
+    "Red discards Shove from their hand.",
+    "Red pays with Shove, Shove.",
+    "Red plays Junk Launcher.",
+    "Scramble 4 met — Clear.",
+    "Oomph 3 and Scramble 3 met — Clear, and Gray gets Good Stuff.",
+    "Flooded Ventilation Shaft is Cleared.",
+    "Gray gets Crowbar.",
+    "Gray takes Crowbar into hand.",
+    "Cleanup.",
+    "Red discards Overdrive from their play zone.",
+    "Red discards Junk Launcher from their play zone.",
+    "Gray discards Pick The Lock from their play zone.",
+    "— end of turn 8 —",
+    "You are in: Security Turnstile.",
+    "Red's deck is empty — the discard pile shuffles in to make a new one (4 cards).",
+    "Red draws Overdrive.",
+    "Red draws Shove.",
+    "Red draws Shove.",
+    "Red draws Junk Launcher.",
+    "Gray draws Duck Under.",
+    "Gray draws Duct Tape & Wire.",
+    "Gray plays Crowbar.",
+    "Gray discards Duck Under from their hand.",
+    "Gray pays with Duck Under.",
+    "Gray plays Work The Angles.",
+    "Gray discards Pick The Lock from their hand.",
+    "Gray pays with Pick The Lock.",
+    "Gray plays Duct Tape & Wire.",
+    "Scramble 3 met — Clear.",
+    "Security Turnstile is Cleared.",
+    "Cleanup.",
+    "Gray discards Crowbar from their play zone.",
+    "Gray discards Work The Angles from their play zone.",
+    "Gray discards Duct Tape & Wire from their play zone.",
+    "— end of turn 9 —",
+    "You are in: The Sentry Drone.",
+    "Gray draws Pick The Lock.",
+    "Gray draws Duck Under.",
+    "Gray draws Pick The Lock.",
+    "Gray draws Crowbar.",
+    "Gray draws Peek Around Corner.",
+    "You Flee The Sentry Drone.",
+    "Red is Down — a room's printed punishment. The run is lost.",
+    "Red discards Charge In from their hand.",
+    "Red discards Overdrive from their hand.",
+    "Red discards Shove from their hand.",
+    "Red discards Shove from their hand.",
+    "Red discards Junk Launcher from their hand.",
+    "You lose."
+  ]
+}

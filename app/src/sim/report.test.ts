@@ -11,16 +11,18 @@ const FROM = 1;
 const SEEDS = 5;
 
 describe("buildReport", () => {
-  it("totals play and reward-take events that match the run's own event log", () => {
+  it("totals play, take and paid-as-cost events that match the run's own event log", () => {
     let playedTotal = 0;
     let takenTotal = 0;
+    let paidTotal = 0;
     let ascendCommands = 0;
     for (let seed = FROM; seed < FROM + SEEDS; seed++) {
       simulate(seed, greedyPolicy, CARD_CONTENT, {
         onStep: (_before, command, _after, events) => {
           for (const event of events) {
             if (event.type === "CARD_PLAYED") playedTotal += 1;
-            if (event.type === "REWARD_TAKEN") takenTotal += 1;
+            if (event.type === "REWARD_TAKEN" || event.type === "STUFF_TAKEN") takenTotal += 1;
+            if (event.type === "COST_PAID") paidTotal += event.cards.length;
           }
           if (command.type === "ASCEND") ascendCommands += 1;
         },
@@ -30,11 +32,21 @@ describe("buildReport", () => {
     const report = buildReport(greedyPolicy, CARD_CONTENT, FROM, SEEDS);
     const reportPlayed = report.cards.reduce((sum, c) => sum + c.played, 0);
     const reportTaken = report.cards.reduce((sum, c) => sum + c.taken, 0);
+    const reportPaid = report.cards.reduce((sum, c) => sum + c.paid, 0);
 
     expect(reportPlayed).toBe(playedTotal);
     expect(reportTaken).toBe(takenTotal);
+    expect(reportPaid).toBe(paidTotal);
     expect(report.characters.Red.ascends).toBe(ascendCommands);
     expect(report.characters.Gray.ascends).toBe(ascendCommands);
+  });
+
+  it("lists Bad Stuff in the per-card table once a room has dealt it, so a Bad Stuff change is measurable", () => {
+    const report = buildReport(greedyPolicy, CARD_CONTENT, FROM, SEEDS);
+    const badStuffNames = new Set<string>(CARD_CONTENT.cards.filter((c) => c.kind === "bad_stuff").map((c) => c.name));
+    const listed = report.cards.filter((c) => badStuffNames.has(c.name));
+    expect(listed.length).toBeGreaterThan(0);
+    expect(listed.some((c) => c.taken > 0)).toBe(true);
   });
 
   it("floor and end-reason counts each sum to the run count", () => {

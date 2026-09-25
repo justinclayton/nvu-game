@@ -589,9 +589,9 @@ function renderReport(report: BalanceReport): string {
     );
   }
   lines.push("");
-  lines.push("Per card — played / taken:");
+  lines.push("Per card — played / taken / paid as cost:");
   for (const card of report.cards) {
-    lines.push(`  ${card.name}: ${String(card.played)} / ${String(card.taken)}`);
+    lines.push(`  ${card.name}: ${String(card.played)} / ${String(card.taken)} / ${String(card.paid)}`);
   }
   lines.push("");
   lines.push("Where cards went, by floor — Exhausted / Scrapped / paid as cost:");

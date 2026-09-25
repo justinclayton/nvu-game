@@ -699,7 +699,6 @@ cards:
           - stat: Scramble
             value: 6
             outcome: Clear, but both players get Bad Stuff.
-      - thresholds:
           - stat: Scramble
             value: 11
             outcome: Clear, and both players get Good Stuff.
@@ -769,7 +768,6 @@ cards:
           - stat: Oomph
             value: 10
             outcome: Clear, and Red gets Good Stuff.
-      - thresholds:
           - stat: Oomph
             value: 16
             outcome: Clear; both players reveal a card reward, and both players get Good Stuff.

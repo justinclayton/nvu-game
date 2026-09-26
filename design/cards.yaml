@@ -185,6 +185,29 @@ cards:
     text: Exhaust 1.
     flavor: A heavy two-part combination attack.
 
+  - name: Break Through
+    count: 2
+    set: proposed
+    kind: player
+    owner: Red
+    rarity: Fine
+    cost: 1
+    oomph: 2
+    text: "Play: Scrap 1 card from your hand."
+    flavor: "Smash through the obstacle and leave the broken starter gear behind."
+
+  - name: Set 'Em Up
+    count: 2
+    set: proposed
+    kind: player
+    owner: Red
+    rarity: Fine
+    cost: 1
+    oomph: 2
+    scramble: 1
+    text: "Play: The next card Gray plays this turn gains +2 Scramble."
+    flavor: "Clear the heavy debris so Gray can maneuver effortlessly."
+
   - name: Second Wind
     count: 2
     set: proposed
@@ -230,6 +253,39 @@ cards:
     scramble: 2
     text: If Gray played a card this turn, draw 1 card.
     flavor: Seamless hand-off between partners.
+
+  - name: Brute Recycle
+    count: 2
+    set: proposed
+    kind: player
+    owner: Red
+    rarity: Cool
+    cost: 1
+    oomph: 3
+    text: "Play: Scrap 1 starter card from your hand or discard pile. If you do, draw 1 card."
+    flavor: "Crush outdated gear into raw momentum."
+
+  - name: Rhythm & Bruise
+    count: 2
+    set: proposed
+    kind: player
+    owner: Red
+    rarity: Cool
+    cost: 1
+    oomph: 2
+    text: "Play: Gains Oomph +2 for each card Gray has played this turn. If Gray played 2 or more cards, draw 1 card."
+    flavor: "Time your heaviest strike right when Gray creates the breach."
+
+  - name: Momentum Shift
+    count: 2
+    set: proposed
+    kind: player
+    owner: Red
+    rarity: Cool
+    cost: 1
+    oomph: 2
+    text: "Play: Draw 2 cards, then Exhaust 1 card from your hand."
+    flavor: "Keep charging forward without looking back."
 
   ### Gray
 
@@ -346,12 +402,23 @@ cards:
     text: The next card Red plays this turn costs 1 fewer card to play.
     flavor: Create a wide opening for Red to land a massive strike.
 
+  - name: Synergy Link
+    count: 2
+    set: proposed
+    kind: player
+    owner: Gray
+    rarity: Cool
+    cost: 1
+    scramble: 2
+    text: "Play: Draw 1 card. If Red has played a card this turn, draw 1 additional card."
+    flavor: "Match Red's momentum to keep the tactical loop spinning."
+
   # Stuff
 
   ## Good Stuff
 
   - name: Pry Bar
-    count: 3
+    count: 5
     set: proposed
     kind: good_stuff
     rarity: Fine
@@ -360,7 +427,7 @@ cards:
     flavor: Simple, solid steel. Good for prying open grates or cracking skulls.
 
   - name: Coil Of Cable
-    count: 3
+    count: 5
     set: proposed
     kind: good_stuff
     rarity: Fine
@@ -369,7 +436,7 @@ cards:
     flavor: High-tensile wire. Essential for rigging quick bypasses.
 
   - name: Crowbar
-    count: 3
+    count: 5
     set: proposed
     kind: good_stuff
     rarity: Fine
@@ -380,7 +447,7 @@ cards:
     flavor: Versatile tool that helps pop open supply crates.
 
   - name: Duct Tape & Wire
-    count: 3
+    count: 5
     set: proposed
     kind: good_stuff
     rarity: Fine
@@ -390,7 +457,7 @@ cards:
     flavor: Quick repairs that surprisingly hold together under pressure.
 
   - name: Stim Pack
-    count: 3
+    count: 5
     set: proposed
     kind: good_stuff
     rarity: Fine
@@ -400,7 +467,7 @@ cards:
     flavor: Adrenaline surge to keep moving when stamina is low.
 
   - name: Cutting Torch
-    count: 2
+    count: 3
     set: proposed
     kind: good_stuff
     rarity: Cool
@@ -409,7 +476,7 @@ cards:
     flavor: Burns through reinforced bulkheads in seconds.
 
   - name: Riot Shield
-    count: 2
+    count: 3
     set: proposed
     kind: good_stuff
     rarity: Cool
@@ -419,7 +486,7 @@ cards:
     flavor: Heavy poly-carb barrier that survives multiple engagements.
 
   - name: Overcharged Battery
-    count: 2
+    count: 3
     set: proposed
     kind: good_stuff
     rarity: Cool
@@ -430,7 +497,7 @@ cards:
     flavor: Sparks fly as raw current surges through your gear.
 
   - name: A Pair Of Stitch-Em-Ups
-    count: 2
+    count: 3
     set: proposed
     kind: good_stuff
     rarity: Cool
@@ -439,7 +506,7 @@ cards:
     flavor: Field-grade medical staples to restore lost Stamina.
 
   - name: High-Frequency Scanner
-    count: 2
+    count: 3
     set: proposed
     kind: good_stuff
     rarity: Cool
@@ -447,6 +514,45 @@ cards:
     scramble: 3
     text: "Play: Look at the top 3 cards of the Floor deck."
     flavor: Pings upcoming hazards before you step into the room.
+
+  - name: Scrap Magnet
+    count: 3
+    set: proposed
+    kind: good_stuff
+    rarity: Fine
+    cost: 0
+    text: "Play: Scrap 1 Bad Stuff card from your hand. If you do, gain 2 Oomph or 2 Scramble."
+    flavor: "A heavy electromagnetic tool that pulls toxic shrapnel right out of your pack."
+
+  - name: Pocket Dynamo
+    count: 3
+    set: proposed
+    kind: good_stuff
+    rarity: Fine
+    cost: 0
+    text: "Play: Draw 1 card. If both you and your partner played a card this turn, gain 1 Oomph and 1 Scramble."
+    flavor: "A hand-cranked generator that charges when team tempo builds."
+
+  - name: Salvaged Blueprint
+    count: 2
+    set: proposed
+    kind: good_stuff
+    rarity: Cool
+    cost: 1
+    scramble: 2
+    text: "Play: Draw 2 cards, then place 1 card from your hand on top of your deck."
+    flavor: "Quick tactical schematic that reorganizes upcoming options."
+
+  - name: Emergency Breaker
+    count: 2
+    set: proposed
+    kind: good_stuff
+    rarity: Cool
+    cost: 1
+    oomph: 2
+    scramble: 2
+    text: "Play: Scrap 1 card from your hand. Your partner draws 1 card."
+    flavor: "Shatter a jammed valve to clear your pack and open a window for your partner."
 
   - name: Grav Harness
     set: proposed
@@ -660,7 +766,6 @@ cards:
           - stat: Scramble
             value: 6
             outcome: Clear, but both players get Bad Stuff.
-      - thresholds:
           - stat: Scramble
             value: 11
             outcome: Clear, and both players get Good Stuff.
@@ -730,7 +835,6 @@ cards:
           - stat: Oomph
             value: 10
             outcome: Clear, and Red gets Good Stuff.
-      - thresholds:
           - stat: Oomph
             value: 16
             outcome: Clear; both players reveal a card reward, and both players get Good Stuff.

@@ -291,10 +291,13 @@ function rewardScore(card: Card, weak: Stat): number {
 }
 
 function chooseReward(state: GameState, character: Character): CardId | null {
-  const offered = state.offer?.[character] ?? [];
+  return bestReward(state.offer?.[character] ?? [], weakerStat(state, character));
+}
+
+/** The revealed card that best fits a deck short on `weak`, ties broken toward the lower card id. */
+function bestReward(offered: readonly Card[], weak: Stat): CardId | null {
   const first = offered[0];
   if (!first) return null;
-  const weak = weakerStat(state, character);
   let best = first;
   let bestScore = rewardScore(first, weak);
   for (const card of offered.slice(1)) {
@@ -333,8 +336,16 @@ function choosePending(state: GameState, legal: readonly Command[]): Command {
   if (!pending) throw new Error("greedy: no pending choice to answer");
 
   if (pending.kind === "TakeReward") {
-    const take = legal.find((c) => c.type === "TAKE_REWARD" && c.take);
+    // The same fit as the Ascend reward: always take the best one.
+    const wanted = bestReward(pending.cards, weakerStat(state, pending.character));
+    const take = legal.find((c) => c.type === "TAKE_REWARD" && c.cardId === wanted);
     if (take) return take;
+  }
+
+  if (pending.kind === "ChooseGoodStuff") {
+    const wanted = bestReward(pending.options, weakerStat(state, pending.character));
+    const keep = legal.find((c) => c.type === "CHOOSE_CARDS" && c.cardIds[0] === wanted);
+    if (keep) return keep;
   }
 
   if (pending.kind === "ChooseCharacter") {

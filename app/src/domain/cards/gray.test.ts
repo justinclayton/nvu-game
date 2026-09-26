@@ -413,3 +413,34 @@ describe("Distract & Pivot — 'The next card Red plays this turn costs 1 fewer 
   });
 });
 
+
+describe("Synergy Link — 'Draw 1 card. If Red has played a card this turn, draw 1 additional card'", () => {
+  const link = (redPlays: boolean) => {
+    const state = playing({
+      Red: player({ deck: pile("Shove", 3), hand: [card("Coil Of Cable")] }),
+      Gray: player({
+        deck: pile("Duck Under", 4),
+        hand: [card("Synergy Link"), card("Duck Under")],
+      }),
+    });
+    const ready = redPlays ? play(state, [free("Red", ids(state, "Red")[0] as CardId)]).state : state;
+    return must(ready, {
+      type: "PLAY_CARD",
+      character: "Gray",
+      cardId: handCard(ready, "Gray", "Synergy Link").id,
+      payWith: [handCard(ready, "Gray", "Duck Under").id],
+    });
+  };
+
+  it("draws 1 while Red has played nothing", () => {
+    const { state, events } = link(false);
+    expect(eventTypes(events).filter((t) => t === "CARD_DRAWN")).toHaveLength(1);
+    expect(state.Gray.deck).toHaveLength(3);
+  });
+
+  it("draws 2 once Red has played a card", () => {
+    const { state, events } = link(true);
+    expect(eventTypes(events).filter((t) => t === "CARD_DRAWN")).toHaveLength(2);
+    expect(state.Gray.deck).toHaveLength(2);
+  });
+});

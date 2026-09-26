@@ -162,18 +162,27 @@ export function placements(state: GameState, debug = false): readonly Placement[
     const offered = state.phase === "Ascend" ? (state.offer?.[c] ?? []) : [];
     const offeredIds = new Set(offered.map((x) => x.id));
     cards(offered, zoneOf(c, "offer"), { topFirst: false, faceUp: true, owner: c });
-    // A revealed reward is the top of the pool, turned face up while the
-    // character decides.
-    const revealing = state.pending?.kind === "TakeReward" && state.pending.character === c;
+    // A revealed card reward is the top 3 of the pool, turned face up while
+    // the character decides.
+    const revealed = new Set(
+      state.pending?.kind === "TakeReward" && state.pending.character === c
+        ? state.pending.cards.map((x) => x.id)
+        : [],
+    );
     cards(
       state.pools[c].filter((x) => !offeredIds.has(x.id)),
       zoneOf(c, "rewards"),
-      { topFirst: true, faceUp: (_card, isTop) => revealing && isTop, owner: c },
+      { topFirst: true, faceUp: (card) => revealed.has(card.id), owner: c },
     );
   }
 
-  // Stuff is drawn face down from its pool, so the pools stay face down.
-  cards(state.pools.goodStuff, "good", { topFirst: true, faceUp: false });
+  // Stuff pools stay face down, except a Good Stuff spread being chosen from.
+  const spread = new Set(
+    state.pending?.kind === "ChooseGoodStuff"
+      ? state.pending.spreads.flatMap((s) => s.cards.map((x) => x.id))
+      : [],
+  );
+  cards(state.pools.goodStuff, "good", { topFirst: true, faceUp: (card) => spread.has(card.id) });
   cards(state.pools.badStuff, "bad", { topFirst: true, faceUp: false });
   cards(state.scrapyard, "scrap", { topFirst: false, faceUp: true });
 

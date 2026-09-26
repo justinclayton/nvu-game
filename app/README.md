@@ -41,7 +41,7 @@ another. The domain and application layers know nothing about any of this.
 
 On ascending, the three cards each character is offered are lifted off their reward pool and
 float above that character's side of the mat until one is clicked or the ascent is confirmed; the
-taken card then travels into the deck and the others settle back onto the pool. The choice itself
+taken card then travels into the discard pile and the others settle back onto the pool. The choice itself
 is owned by `Table.tsx`, so the floating cards and the ascension panel read the same one.
 
 Card faces (`CardFace.tsx`) are sized in em from the card's width, so the same face prints at

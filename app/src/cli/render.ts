@@ -150,6 +150,9 @@ export function moveHint(state: GameState, staged: readonly StagedAnswer[] = [])
       case "ChoosePile":
         lines.push(`choose <Pile> — one of: ${pending.options.join(", ")}`);
         break;
+      case "ChooseStat":
+        lines.push(`choose <Stat> — one of: ${pending.options.join(", ")}`);
+        break;
       case "ChooseCards": {
         const names = pending.options.map((c) => c.name).join(", ") || "nothing";
         const want = Math.min(pending.count, pending.options.length);
@@ -162,7 +165,10 @@ export function moveHint(state: GameState, staged: readonly StagedAnswer[] = [])
         lines.push(`order <Name> <Name>... — top first, every one of: ${pending.cards.map((c) => c.name).join(", ")}`);
         break;
       case "TakeReward":
-        lines.push(`take | skip — ${pending.card.name}`);
+        lines.push(`take <Name> — one of: ${pending.cards.map((c) => c.name).join(", ")} — or skip`);
+        break;
+      case "ChooseGoodStuff":
+        lines.push(`choose <Name> — keep 1 of: ${pending.options.map((c) => c.name).join(", ")}`);
         break;
     }
     lines.push("undo — step back to the last checkpoint");

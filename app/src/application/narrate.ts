@@ -62,11 +62,13 @@ export function describeEvent(event: DomainEvent): string {
     case "WENT_DOWN":
       return `${event.character} is Down — ${event.cause}. The run is lost.`;
     case "REWARD_REVEALED":
-      return `${event.character}'s reward pool shows ${event.card.name}.`;
+      return `${event.character}'s reward pool shows ${event.cards.map((c) => c.name).join(", ")}.`;
+    case "GOOD_STUFF_REVEALED":
+      return `${event.character} reveals Good Stuff: ${event.cards.map((c) => c.name).join(", ")}.`;
     case "REWARD_POOL_EMPTY":
       return `${event.character}'s reward pool is empty — nothing to reveal.`;
     case "REWARD_TAKEN":
-      return `${event.character} takes ${event.card.name}.`;
+      return `${event.character} takes ${event.card.name} into their discard pile.`;
     case "REWARD_DECLINED":
       return `${event.character} declines the reward.`;
     case "CLEANUP_BEGAN":

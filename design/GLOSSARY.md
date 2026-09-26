@@ -2,7 +2,7 @@
 
 The project's domain terms and nothing else: what each thing is, the rulebook section that governs
 it, and the ticket or ruling that settled it. The rules themselves live in
-[`rulebook.md`](rulebook.md) (rules version 0.2.4), which wins
+[`rulebook.md`](rulebook.md) (rules version 0.2.5), which wins
 wherever this file disagrees with it. Code uses these terms spelled this way.
 
 ---
@@ -49,7 +49,7 @@ Cards gained from Rooms rather than from a character's deck. Stuff is either Goo
 
 **Good Stuff** / **Bad Stuff**
 
-The two kinds of Stuff card, drawn face down from their matching pool into a player's hand. Bad Stuff cards, unlike Good Stuff, don't display a rarity border.
+The two kinds of Stuff card. Good Stuff is chosen: the player reveals the top 3 of the Good Stuff pool, keeps one in hand, and puts the rest on the bottom (rulebook, Keywords > `Get Good Stuff`). Each Good Stuff gained is its own spread of 3, and when both players gain it from one outcome, both spreads are revealed before either player chooses. Bad Stuff is not chosen: the top card of its pool goes into the player's hand (rulebook, Keywords > `Get Bad Stuff`). `[you, 2026-09-25]` Bad Stuff cards, unlike Good Stuff, don't display a rarity border.
 
 **Good Stuff pool** / **Bad Stuff pool**
 
@@ -93,7 +93,7 @@ The outcome, printed on some Thresholds, that clears the entire floor rather tha
 
 **Card reward**
 
-A card offered to a player from their reward pool. Comes from a Room's Threshold outcome (one card, take or skip) or from Ascending (top 3 cards revealed, take up to one into your deck).
+A card offered to a player from their reward pool. A Room's Threshold outcome and Ascending offer it the same way: reveal the top 3, put up to one into your discard pile, the rest to the bottom of the pool (rulebook, Keywords > `Reveal a card reward`). The discard pile, not the deck, as in most deckbuilders. `[you, 2026-09-26]`
 
 **Reward pool**
 

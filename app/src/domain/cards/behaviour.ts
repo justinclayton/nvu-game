@@ -13,6 +13,7 @@ import type {
   PendingSource,
   Pile,
   Room,
+  Stat,
   StepResult,
 } from "../types";
 
@@ -28,6 +29,7 @@ export interface BehaviourContext {
 export type ChoiceAnswer =
   | { readonly kind: "character"; readonly tag: string; readonly character: Character }
   | { readonly kind: "pile"; readonly tag: string; readonly pile: Pile }
+  | { readonly kind: "stat"; readonly tag: string; readonly stat: Stat }
   | { readonly kind: "cards"; readonly tag: string; readonly cards: readonly Card[] }
   | { readonly kind: "order"; readonly tag: string; readonly cards: readonly (Card | Room)[] };
 
@@ -80,6 +82,14 @@ export interface CardBehaviour {
    * held card before the play zone is swept, and may `ask` a question.
    */
   onCleanup?(state: GameState, ctx: BehaviourContext): StepResult;
+  /**
+   * A played card's own line printed "at the end of the turn" that actually
+   * fires at the end of the Play phase (Riot Shield) — before Outcome's own
+   * effects resolve, and well before Cleanup, so a card it returns to hand
+   * is in hand in time for a Cleanup `Holding:` line (Spore Cloud) to count
+   * or discard it. Called once the room's Clear/Flee outcome is known.
+   */
+  onPlayEnd?(state: GameState, ctx: BehaviourContext): StepResult;
   /**
    * A `Holding:` line that acts once at Turn Start, after the draw
    * (Corrosive Acid). Called on the held card once both hands have drawn,

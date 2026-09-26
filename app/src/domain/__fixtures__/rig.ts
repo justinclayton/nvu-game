@@ -138,6 +138,24 @@ export function play(state: GameState, commands: readonly Command[]): Ran {
   return { state: s, events };
 }
 
+/**
+ * Answer every Good Stuff spread the run is waiting on by keeping its first
+ * card (rulebook, Keywords: `Get Good Stuff`), for a test about something
+ * other than which piece is kept.
+ */
+export function keepFirstGoodStuff(ran: Ran): Ran {
+  let s = ran.state;
+  const events = [...ran.events];
+  while (s.pending?.kind === "ChooseGoodStuff") {
+    const first = s.pending.options[0];
+    if (!first) throw new Error("rig: a Good Stuff spread with nothing in it");
+    const next = must(s, { type: "CHOOSE_CARDS", cardIds: [first.id] });
+    s = next.state;
+    events.push(...next.events);
+  }
+  return { state: s, events };
+}
+
 export const eventTypes = (events: readonly DomainEvent[]): readonly string[] =>
   events.map((e) => e.type);
 

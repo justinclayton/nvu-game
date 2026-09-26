@@ -72,6 +72,8 @@ function answers(pending: Pending): readonly Command[] {
       return pending.options.map((character) => ({ type: "CHOOSE_CHARACTER", character }));
     case "ChoosePile":
       return pending.options.map((pile) => ({ type: "CHOOSE_PILE", pile }));
+    case "ChooseStat":
+      return pending.options.map((stat) => ({ type: "CHOOSE_STAT", stat }));
     case "ChooseCards": {
       const wanted = Math.min(pending.count, pending.options.length);
       const picks = combinations(pending.options, wanted).map((cards): Command => ({
@@ -92,9 +94,11 @@ function answers(pending: Pending): readonly Command[] {
     }
     case "TakeReward":
       return [
-        { type: "TAKE_REWARD", take: true },
-        { type: "TAKE_REWARD", take: false },
+        ...pending.cards.map((card): Command => ({ type: "TAKE_REWARD", cardId: card.id })),
+        { type: "TAKE_REWARD", cardId: null },
       ];
+    case "ChooseGoodStuff":
+      return pending.options.map((card): Command => ({ type: "CHOOSE_CARDS", cardIds: [card.id] }));
   }
 }
 

@@ -99,9 +99,9 @@ The moves, one per engine command: `[agent, accepted]`
 | `play scrap Red "Pry Bar" for Oomph` | `SCRAP_FOR_STATS`, legal only where the active room's own printed text allows it (e.g. Bio-Hazard Containment Vault) `[agent]` |
 | `play choose Red` | `CHOOSE_CHARACTER` |
 | `play choose Floor deck` | `CHOOSE_PILE` |
-| `play choose Rope Flare`, `play choose none` | `CHOOSE_CARDS` |
+| `play choose Rope Flare`, `play choose none` | `CHOOSE_CARDS`; also which piece of a Good Stuff spread to keep |
 | `play order Rope Flare Shove` | `ORDER_CARDS`, top first |
-| `play take`, `play skip` | `TAKE_REWARD` |
+| `play take Zen Mode`, `play take none`, `play skip` | a room's card reward: `TAKE_REWARD`, one of the 3 revealed or none. A bare `play take` works when only one was revealed. `[agent]` rules 0.2.5 |
 | `play take Zen Mode`, `play take none` | one character's Ascend answer, composed into `ASCEND`, see below |
 
 There is no Draw phase and no draw move. `[agent]` Rulebook 0.2 folded Draw up to five into Turn
@@ -224,7 +224,8 @@ discarded to pay for a lesser one (issue #190). A card asking an optional choice
 on (e.g. Level Up's "Scrap a card?") is declined rather than answered with the cheapest option. At Ascend
 (issue #97) it takes whichever offered reward best fits the deck: the character's weaker stat,
 doubled, plus the reward's own total stats, docked for twice any printed `Exhaust X` the reward
-itself carries, ties broken toward the lower card id. Everywhere but Ascend it answers only from
+itself carries, ties broken toward the lower card id. Under rules 0.2.5 a room's card reward and a Good Stuff
+spread are picked by the same fit, and a room's card reward is always taken. `[agent]` Everywhere but Ascend it answers only from
 the move generator's own list (`sim/moves.ts`), never a command it invents. At Ascend it composes
 each character's choice directly, the same shape the CLI's staging builds (`cli/ascend.ts`,
 `composeAscend`), and validates the composed command against the engine; a composed command the

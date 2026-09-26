@@ -8,6 +8,7 @@ import {
   free,
   handCard,
   ids,
+  keepFirstGoodStuff,
   must,
   pile,
   play,
@@ -17,7 +18,7 @@ import {
   rig,
   room,
 } from "../__fixtures__/rig";
-import { takeGoodStuff } from "../verbs";
+import { dealBadStuff } from "../verbs";
 import type { CardId } from "../types";
 
 beforeEach(resetRig);
@@ -27,9 +28,9 @@ describe("Crowbar — 'Play: if you get any Good Stuff this turn, get an additio
     const state = playing({
       Red: player({ deck: pile("Shove", 4), hand: [card("Crowbar")] }),
     });
-    const { state: next, events } = play(state, [
+    const { state: next, events } = keepFirstGoodStuff(play(state, [
       free("Red", handCard(state, "Red", "Crowbar").id),
-    ]);
+    ]));
     expect(eventTypes(events)).not.toContain("STUFF_TAKEN");
     expect(next.Red.hand).toEqual([]);
   });
@@ -44,9 +45,9 @@ describe("Crowbar — 'Play: if you get any Good Stuff this turn, get an additio
       ...rigged,
       thisTurn: { ...rigged.thisTurn, goodStuffTaken: { Red: 1, Gray: 0 } },
     };
-    const { state: next, events } = play(state, [
+    const { state: next, events } = keepFirstGoodStuff(play(state, [
       free("Red", handCard(state, "Red", "Crowbar").id),
-    ]);
+    ]));
     expect(eventTypes(events)).toContain("STUFF_TAKEN");
     expect(next.Red.hand.filter((c) => c.kind === "good_stuff")).toHaveLength(1);
   });
@@ -66,12 +67,12 @@ describe("Crowbar — 'Play: if you get any Good Stuff this turn, get an additio
     const crowbar = handCard(state, "Red", "Crowbar");
     const [toPlay, toPay] = state.Red.hand.filter((c) => c.name === "Shove");
     if (!toPlay || !toPay) throw new Error("Red is not holding two Shoves");
-    const { state: next, events } = play(state, [
+    const { state: next, events } = keepFirstGoodStuff(play(state, [
       free("Red", crowbar.id), // Crowbar, cost 0, nothing to look back at yet
       { type: "PLAY_CARD", character: "Red", cardId: toPlay.id, payWith: [toPay.id] }, // Shove, Oomph 2
       free("Red", handCard(state, "Red", "Pry Bar").id), // Pry Bar, Oomph 3
       { type: "END_PLAY" },
-    ]);
+    ]));
     // Security Turnstile's Oomph-5 line meets on Crowbar's own Oomph 1 plus
     // Shove's 2 plus Pry Bar's 3, and pays Red one piece at Outcome; the
     // played Crowbar catches that payout as it lands and pays a second.
@@ -96,15 +97,17 @@ describe("Crowbar — 'Play: if you get any Good Stuff this turn, get an additio
     const crowbar = handCard(state, "Red", "Crowbar");
     const [toPlay, toPay] = state.Red.hand.filter((c) => c.name === "Shove");
     if (!toPlay || !toPay) throw new Error("Red is not holding two Shoves");
-    const { state: next } = play(state, [
-      free("Red", crowbar.id), // Crowbar: fires now, at play, off the look-back
+    // Crowbar fires now, at play, off the look-back, and its spread is kept at once.
+    const { state: bonus } = keepFirstGoodStuff(play(state, [free("Red", crowbar.id)]));
+    const { state: next } = keepFirstGoodStuff(play(bonus, [
       { type: "PLAY_CARD", character: "Red", cardId: toPlay.id, payWith: [toPay.id] }, // Shove, Oomph 2
       free("Red", handCard(state, "Red", "Pry Bar").id), // Pry Bar, Oomph 3
       { type: "END_PLAY" }, // pays Red another piece at Outcome — Crowbar stays quiet
-    ]);
+    ]));
     // One from the look-back bonus, one from the room's own Outcome payout —
     // never a second bonus on top.
     expect(next.Red.hand.filter((c) => c.kind === "good_stuff")).toHaveLength(2);
+    expect(next.pending).toBeNull();
   });
 
   it("two Crowbars played by the same controller pay two extra pieces", () => {
@@ -120,20 +123,20 @@ describe("Crowbar — 'Play: if you get any Good Stuff this turn, get an additio
     if (!firstCrowbar || !secondCrowbar || !toPlay || !toPay) {
       throw new Error("Red is not holding two Crowbars and two Shoves");
     }
-    const { state: next } = play(state, [
+    const { state: next } = keepFirstGoodStuff(play(state, [
       free("Red", firstCrowbar.id),
       free("Red", secondCrowbar.id),
       { type: "PLAY_CARD", character: "Red", cardId: toPlay.id, payWith: [toPay.id] }, // Shove, Oomph 2
       free("Red", handCard(state, "Red", "Pry Bar").id), // Pry Bar, Oomph 3
       { type: "END_PLAY" },
-    ]);
+    ]));
     // The room's own piece, plus one bonus per Crowbar.
     expect(next.Red.hand.filter((c) => c.kind === "good_stuff")).toHaveLength(3);
   });
 
   it("pays nothing and logs an empty pool when its own bonus draw finds none left", () => {
     // The room's payout goes first and spends the pool's one remaining card;
-    // Crowbar's own bonus draw then goes through `takeGoodStuff` and finds it
+    // Crowbar's own bonus spread then finds it
     // empty, the same as any other draw would.
     const rigged = playing({
       activeRoom: room("Security Turnstile"),
@@ -149,12 +152,12 @@ describe("Crowbar — 'Play: if you get any Good Stuff this turn, get an additio
     const crowbar = handCard(state, "Red", "Crowbar");
     const [toPlay, toPay] = state.Red.hand.filter((c) => c.name === "Shove");
     if (!toPlay || !toPay) throw new Error("Red is not holding two Shoves");
-    const { state: next, events } = play(state, [
+    const { state: next, events } = keepFirstGoodStuff(play(state, [
       free("Red", crowbar.id),
       { type: "PLAY_CARD", character: "Red", cardId: toPlay.id, payWith: [toPay.id] },
       free("Red", handCard(state, "Red", "Pry Bar").id), // Pry Bar, Oomph 3
       { type: "END_PLAY" },
-    ]);
+    ]));
     expect(eventTypes(events).filter((t) => t === "STUFF_TAKEN")).toHaveLength(1);
     expect(eventTypes(events).filter((t) => t === "STUFF_POOL_EMPTY")).toHaveLength(1);
     expect(next.Red.hand.filter((c) => c.kind === "good_stuff")).toHaveLength(1);
@@ -174,7 +177,7 @@ describe("Crowbar — 'Play: if you get any Good Stuff this turn, get an additio
     const state = { ...rigged, pools: { ...rigged.pools, goodStuff: [card("Crowbar")] } };
     const chargeIn = handCard(state, "Red", "Charge In");
     const payWith = state.Red.hand.filter((c) => c.name === "Shove").map((c) => c.id);
-    const { state: next } = play(state, [
+    const { state: next } = keepFirstGoodStuff(play(state, [
       {
         type: "PLAY_CARD",
         character: "Red",
@@ -183,7 +186,7 @@ describe("Crowbar — 'Play: if you get any Good Stuff this turn, get an additio
       },
       free("Red", handCard(state, "Red", "Pry Bar").id),
       { type: "END_PLAY" },
-    ]);
+    ]));
     const stuff = next.Red.hand.filter((c) => c.kind === "good_stuff");
     expect(stuff).toHaveLength(1);
     expect(stuff[0]?.name).toBe("Crowbar");
@@ -418,6 +421,38 @@ describe("Riot Shield — 'If the room is Cleared, return this to your hand at t
     expect(next.Red.hand.some((c) => c.name === "Riot Shield")).toBe(false);
     expect(next.Red.discard.some((c) => c.name === "Riot Shield")).toBe(true);
   });
+
+  it("is back in hand in time for Spore Cloud's Cleanup discard to count and offer it", () => {
+    const state = playing({
+      activeRoom: room("Security Turnstile"),
+      Red: player({
+        deck: pile("Shove", 3),
+        hand: [
+          card("Riot Shield"),
+          card("Spore Cloud"),
+          card("Shove"),
+          card("Shove"),
+          card("Shove"),
+        ],
+      }),
+    });
+    const asked = play(state, [
+      {
+        type: "PLAY_CARD",
+        character: "Red",
+        cardId: handCard(state, "Red", "Riot Shield").id,
+        payWith: [handCard(state, "Red", "Shove").id],
+      },
+      { type: "END_PLAY" },
+    ]).state;
+    expect(asked.cleared).toHaveLength(1);
+    // Hand going into Cleanup: Spore Cloud, Shove, Shove, Riot Shield — 4
+    // cards, one over the limit.
+    const pending = asked.pending;
+    if (pending?.kind !== "ChooseCards") throw new Error("expected a card choice");
+    expect(pending.count).toBe(1);
+    expect(pending.options.map((c) => c.name).sort()).toEqual(["Riot Shield", "Shove", "Shove"]);
+  });
 });
 
 describe("Overcharged Battery — 'The next card played this turn is played for free'", () => {
@@ -556,6 +591,204 @@ describe("High-Frequency Scanner — 'Play: Look at the top 3 cards of the Floor
     const peeked = events.find((e) => e.type === "CARDS_PEEKED");
     if (peeked?.type !== "CARDS_PEEKED") throw new Error("expected a peek");
     expect(peeked.cards).toHaveLength(1);
+  });
+});
+
+describe("Scrap Magnet — 'Play: Scrap 1 Bad Stuff card from your hand. If you do, gain 2 Oomph or 2 Scramble.'", () => {
+  it("does nothing, and asks nothing, with no Bad Stuff in hand", () => {
+    const state = playing({
+      Red: player({ deck: pile("Shove", 3), hand: [card("Scrap Magnet")] }),
+    });
+    const { state: next, events } = must(state, free("Red", handCard(state, "Red", "Scrap Magnet").id));
+    expect(next.pending).toBeNull();
+    expect(eventTypes(events)).not.toContain("CARD_SCRAPPED");
+    expect(statPool(next)).toEqual({ oomph: 0, scramble: 0 });
+  });
+
+  it("Scraps the chosen Bad Stuff, then gains the chosen stat", () => {
+    const state = playing({
+      Red: player({ deck: pile("Shove", 3), hand: [card("Scrap Magnet"), card("Rust")] }),
+    });
+    const asked = must(state, free("Red", handCard(state, "Red", "Scrap Magnet").id));
+    const cardChoice = asked.state.pending;
+    if (cardChoice?.kind !== "ChooseCards") throw new Error("expected a card choice");
+    expect(cardChoice.options.map((c) => c.name)).toEqual(["Rust"]);
+    const rust = cardChoice.options[0];
+    if (!rust) throw new Error("rig");
+
+    const scrapped = must(asked.state, { type: "CHOOSE_CARDS", cardIds: [rust.id] });
+    expect(eventTypes(scrapped.events)).toContain("CARD_SCRAPPED");
+    expect(scrapped.state.Red.hand.some((c) => c.name === "Rust")).toBe(false);
+    expect(scrapped.state.scrapyard.some((c) => c.name === "Rust")).toBe(true);
+    const statChoice = scrapped.state.pending;
+    if (statChoice?.kind !== "ChooseStat") throw new Error("expected a stat choice");
+    expect(statChoice.options).toEqual(["Oomph", "Scramble"]);
+
+    const { state: next } = must(scrapped.state, { type: "CHOOSE_STAT", stat: "Oomph" });
+    expect(statPool(next)).toEqual({ oomph: 2, scramble: 0 });
+  });
+
+  it("gains Scramble instead when Scramble is chosen", () => {
+    const state = playing({
+      Red: player({ deck: pile("Shove", 3), hand: [card("Scrap Magnet"), card("Torn Seal")] }),
+    });
+    const asked = must(state, free("Red", handCard(state, "Red", "Scrap Magnet").id));
+    const cardChoice = asked.state.pending;
+    if (cardChoice?.kind !== "ChooseCards") throw new Error("expected a card choice");
+    const tornSeal = cardChoice.options[0];
+    if (!tornSeal) throw new Error("rig");
+    const scrapped = must(asked.state, { type: "CHOOSE_CARDS", cardIds: [tornSeal.id] });
+
+    const { state: next } = must(scrapped.state, { type: "CHOOSE_STAT", stat: "Scramble" });
+    expect(statPool(next)).toEqual({ oomph: 0, scramble: 2 });
+  });
+});
+
+describe("Pocket Dynamo — 'Play: Draw 1 card. If both you and your partner played a card this turn, gain 1 Oomph and 1 Scramble.'", () => {
+  it("draws a card and grants nothing when the partner never plays this turn", () => {
+    const state = playing({
+      Red: player({ deck: pile("Shove", 4), hand: [card("Pocket Dynamo")] }),
+    });
+    const { state: next, events } = must(state, free("Red", handCard(state, "Red", "Pocket Dynamo").id));
+    expect(eventTypes(events)).toContain("CARD_DRAWN");
+    expect(next.Red.hand).toHaveLength(1);
+    expect(statPool(next)).toEqual({ oomph: 0, scramble: 0 });
+  });
+
+  it("grants the bonus right away when the partner already played this turn", () => {
+    const state = playing({
+      Red: player({ deck: pile("Shove", 4), hand: [card("Pocket Dynamo")] }),
+      Gray: player({ deck: pile("Duck Under", 4), hand: [card("Duck Under"), card("Duck Under")] }),
+    });
+    const [gray1, gray2] = state.Gray.hand;
+    if (!gray1 || !gray2) throw new Error("Gray is not holding two Duck Unders");
+    const { state: next } = play(state, [
+      { type: "PLAY_CARD", character: "Gray", cardId: gray1.id, payWith: [gray2.id] },
+      free("Red", handCard(state, "Red", "Pocket Dynamo").id),
+    ]);
+    // Asserted on the banked bonus itself, not the shared pool: Duck Under's
+    // own printed Scramble 2 also lands in that pool and would muddy this.
+    expect(next.thisTurn.poolBonus).toEqual({ oomph: 1, scramble: 1 });
+  });
+
+  it("grants the bonus once the partner plays afterward, not before", () => {
+    const state = playing({
+      Red: player({ deck: pile("Shove", 4), hand: [card("Pocket Dynamo")] }),
+      Gray: player({ deck: pile("Duck Under", 4), hand: [card("Duck Under"), card("Duck Under")] }),
+    });
+    const afterDynamo = must(state, free("Red", handCard(state, "Red", "Pocket Dynamo").id));
+    expect(afterDynamo.state.thisTurn.poolBonus).toEqual({ oomph: 0, scramble: 0 });
+
+    const [gray1, gray2] = state.Gray.hand;
+    if (!gray1 || !gray2) throw new Error("Gray is not holding two Duck Unders");
+    const { state: next } = must(afterDynamo.state, {
+      type: "PLAY_CARD",
+      character: "Gray",
+      cardId: gray1.id,
+      payWith: [gray2.id],
+    });
+    expect(next.thisTurn.poolBonus).toEqual({ oomph: 1, scramble: 1 });
+  });
+
+  it("pays out only once even when the partner plays twice", () => {
+    const state = playing({
+      Red: player({ deck: pile("Shove", 4), hand: [card("Pocket Dynamo")] }),
+      Gray: player({
+        deck: pile("Duck Under", 4),
+        hand: [card("Duck Under"), card("Duck Under"), card("Duck Under"), card("Duck Under")],
+      }),
+    });
+    const afterDynamo = must(state, free("Red", handCard(state, "Red", "Pocket Dynamo").id));
+    const [g1, g2, g3, g4] = state.Gray.hand;
+    if (!g1 || !g2 || !g3 || !g4) throw new Error("Gray is not holding four Duck Unders");
+    const step1 = must(afterDynamo.state, {
+      type: "PLAY_CARD",
+      character: "Gray",
+      cardId: g1.id,
+      payWith: [g2.id],
+    });
+    expect(step1.state.thisTurn.poolBonus).toEqual({ oomph: 1, scramble: 1 });
+    const step2 = must(step1.state, {
+      type: "PLAY_CARD",
+      character: "Gray",
+      cardId: g3.id,
+      payWith: [g4.id],
+    });
+    expect(step2.state.thisTurn.poolBonus).toEqual({ oomph: 1, scramble: 1 });
+  });
+});
+
+describe("Salvaged Blueprint — 'Play: Draw 2 cards, then place 1 card from your hand on top of your deck.'", () => {
+  it("draws 2, then places the chosen card on top of the deck", () => {
+    const state = playing({
+      Red: player({ deck: pile("Shove", 5), hand: [card("Salvaged Blueprint"), card("Pry Bar")] }),
+    });
+    const asked = must(state, {
+      type: "PLAY_CARD",
+      character: "Red",
+      cardId: handCard(state, "Red", "Salvaged Blueprint").id,
+      payWith: [handCard(state, "Red", "Pry Bar").id],
+    });
+    expect(asked.state.Red.hand).toHaveLength(2);
+    const pending = asked.state.pending;
+    if (pending?.kind !== "ChooseCards") throw new Error("expected a card choice");
+    expect(pending.count).toBe(1);
+    expect(pending.options).toHaveLength(2);
+
+    const chosen = pending.options[0];
+    if (!chosen) throw new Error("rig");
+    const { state: next, events } = must(asked.state, { type: "CHOOSE_CARDS", cardIds: [chosen.id] });
+    expect(eventTypes(events)).toContain("CARD_MOVED");
+    expect(next.Red.hand).toHaveLength(1);
+    expect(next.Red.hand.some((c) => c.id === chosen.id)).toBe(false);
+    expect(next.Red.deck[0]?.id).toBe(chosen.id);
+    expect(next.Red.deck).toHaveLength(4);
+  });
+});
+
+describe("Emergency Breaker — 'Play: Scrap 1 card from your hand. Your partner draws 1 card.'", () => {
+  it("asks which card to Scrap, then draws the partner a card", () => {
+    const state = playing({
+      Red: player({
+        deck: pile("Shove", 3),
+        hand: [card("Emergency Breaker"), card("Pry Bar"), card("Rust")],
+      }),
+      Gray: player({ deck: pile("Duck Under", 3) }),
+    });
+    const asked = must(state, {
+      type: "PLAY_CARD",
+      character: "Red",
+      cardId: handCard(state, "Red", "Emergency Breaker").id,
+      payWith: [handCard(state, "Red", "Pry Bar").id],
+    });
+    const pending = asked.state.pending;
+    if (pending?.kind !== "ChooseCards") throw new Error("expected a card choice");
+    expect(pending.options.map((c) => c.name)).toEqual(["Rust"]);
+    const rust = pending.options[0];
+    if (!rust) throw new Error("rig");
+
+    const { state: next, events } = must(asked.state, { type: "CHOOSE_CARDS", cardIds: [rust.id] });
+    expect(eventTypes(events)).toContain("CARD_SCRAPPED");
+    expect(next.scrapyard.some((c) => c.name === "Rust")).toBe(true);
+    expect(eventTypes(events)).toContain("CARD_DRAWN");
+    expect(next.Gray.hand).toHaveLength(1);
+  });
+
+  it("still draws the partner a card when the hand is already empty", () => {
+    const state = playing({
+      Red: player({ deck: pile("Shove", 3), hand: [card("Emergency Breaker"), card("Pry Bar")] }),
+      Gray: player({ deck: pile("Duck Under", 3) }),
+    });
+    const { state: next, events } = must(state, {
+      type: "PLAY_CARD",
+      character: "Red",
+      cardId: handCard(state, "Red", "Emergency Breaker").id,
+      payWith: [handCard(state, "Red", "Pry Bar").id],
+    });
+    expect(next.pending).toBeNull();
+    expect(eventTypes(events)).not.toContain("CARD_SCRAPPED");
+    expect(eventTypes(events)).toContain("CARD_DRAWN");
+    expect(next.Gray.hand).toHaveLength(1);
   });
 });
 
@@ -1044,16 +1277,16 @@ describe("System Feedback — 'Holding: Whenever you play a card with Cost 0, lo
 });
 
 describe("Stuff pools are ordered piles", () => {
-  it("gains off the top with no reshuffle, so a reorder decides what comes next", () => {
+  it("deals Bad Stuff off the top with no reshuffle, so a reorder decides what comes next", () => {
     const state = rig({
       Red: player({ deck: pile("Shove", 4) }),
-      pools: { Red: [], Gray: [], goodStuff: pile("Stim Pack", 3), badStuff: [] },
+      pools: { Red: [], Gray: [], goodStuff: [], badStuff: [card("Rust"), card("Panic"), card("Sluggish")] },
     });
-    const reordered = [...state.pools.goodStuff].reverse();
+    const reordered = [...state.pools.badStuff].reverse();
     const seed = state.seed;
-    const next = takeGoodStuff({ ...state, pools: { ...state.pools, goodStuff: reordered } }, "Red", 1, []);
+    const next = dealBadStuff({ ...state, pools: { ...state.pools, badStuff: reordered } }, "Red", 1, []);
     expect(next.Red.hand.map((c) => c.id)).toEqual([reordered[0]?.id]);
-    expect(next.pools.goodStuff.map((c) => c.id)).toEqual(reordered.slice(1).map((c) => c.id));
+    expect(next.pools.badStuff.map((c) => c.id)).toEqual(reordered.slice(1).map((c) => c.id));
     // No shuffle happened, so the seed is untouched.
     expect(next.seed).toBe(seed);
   });

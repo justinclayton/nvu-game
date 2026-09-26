@@ -11,6 +11,7 @@ import {
   eventTypes,
   free,
   handCard,
+  keepFirstGoodStuff,
   must,
   names,
   pile,
@@ -98,7 +99,7 @@ describe("a reaction resolves where its event happens", () => {
     const [shove, payment] = state.Red.hand.filter((c) => c.name === "Shove").map((c) => c.id);
     if (!shove || !payment) throw new Error("Red is not holding two Shoves");
     const pryBar = handCard(state, "Red", "Pry Bar").id;
-    const { events } = play(state, [
+    const { events } = keepFirstGoodStuff(play(state, [
       { type: "PLAY_CARD", character: "Red", cardId: crowbar, payWith: [] },
       {
         type: "PLAY_CARD",
@@ -108,7 +109,7 @@ describe("a reaction resolves where its event happens", () => {
       },
       { type: "PLAY_CARD", character: "Red", cardId: pryBar, payWith: [] },
       { type: "END_PLAY" },
-    ]);
+    ]));
     const types = eventTypes(events);
     expect(types.filter((t) => t === "STUFF_TAKEN")).toHaveLength(2);
     expect(types.lastIndexOf("STUFF_TAKEN")).toBeLessThan(types.indexOf("CLEANUP_BEGAN"));

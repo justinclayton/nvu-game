@@ -2,7 +2,7 @@
  *
  * Every name here is a term from design/GLOSSARY.md, spelled the same way: discard pile,
  * Exhaust pile, Fled, Cleared, Scrapyard, Down, stat pool, play zone. Section
- * numbers in the comments point at design/rulebook.md, rules version 0.2.1.
+ * numbers in the comments point at design/rulebook.md, rules version 0.2.5.
  *
  * Everything is readonly. The engine never mutates; it returns a new state.
  */
@@ -114,6 +114,12 @@ export interface TurnRecord {
    */
   readonly goodStuffTaken: Readonly<Record<Character, number>>;
   /**
+   * Good Stuff each character has earned and not yet picked (rulebook,
+   * Keywords: `Get Good Stuff`). Earning it only counts it here; the engine
+   * turns what is owed into spreads of 3 as soon as nothing else is waiting.
+   */
+  readonly goodStuffOwed: Readonly<Record<Character, number>>;
+  /**
    * Once-per-turn markers, so a trigger that could feed itself fires once.
    * Crowbar keys this by its own card id, so two copies each get their own
    * marker.
@@ -124,6 +130,13 @@ export interface TurnRecord {
    * next play, spent one per play regardless of what it saves.
    */
   readonly playDiscount: Readonly<Record<Character, number>>;
+  /**
+   * Set 'Em Up: Scramble banked for a character's very next play. The card
+   * that play puts in the zone takes it into `cardScramble`.
+   */
+  readonly nextPlayScramble: Readonly<Record<Character, number>>;
+  /** Scramble a played card has gained this turn, by card id. */
+  readonly cardScramble: Readonly<Record<string, number>>;
   /** System Feedback: banked off the shared pool this turn; a stat never reads below zero. */
   readonly poolPenalty: { readonly oomph: number; readonly scramble: number };
   /** Bio-Hazard Containment Vault: banked onto the shared pool this turn by Scrapping Good Stuff. */
@@ -159,6 +172,16 @@ export const PILES = [
 ] as const;
 export type Pile = (typeof PILES)[number];
 
+/**
+ * One character's spread of Good Stuff: up to 3 cards off the top of the pool,
+ * face up. The cards stay in the pool until every spread revealed with it has
+ * been answered (rulebook, Keywords: `Get Good Stuff`).
+ */
+export interface GoodStuffSpread {
+  readonly character: Character;
+  readonly cards: readonly Card[];
+}
+
 /** Which card asked the question, when a card did rather than a room. */
 export interface PendingSource {
   readonly card: Card;
@@ -185,6 +208,13 @@ export type Pending =
       readonly source: PendingSource | null;
     }
   | {
+      readonly kind: "ChooseStat";
+      readonly prompt: string;
+      readonly character: Character;
+      readonly options: readonly Stat[];
+      readonly source: PendingSource | null;
+    }
+  | {
       readonly kind: "ChooseCards";
       readonly prompt: string;
       readonly character: Character;
@@ -202,11 +232,28 @@ export type Pending =
       readonly source: PendingSource | null;
     }
   | {
+      /** Rulebook, Keywords: `Reveal a card reward` — the top 3 of the character's reward pool, still in the pool. */
       readonly kind: "TakeReward";
       readonly prompt: string;
       readonly character: Character;
-      readonly card: Card;
+      readonly cards: readonly Card[];
       readonly source: PendingSource | null;
+    }
+  | {
+      /**
+       * Rulebook, Keywords: `Get Good Stuff` — `character` keeps one of
+       * `options`, answered with `CHOOSE_CARDS`. `spreads` is every spread
+       * revealed at the same time, in answering order, and `picked` holds the
+       * answers given so far; the picks go to hand together once the last
+       * spread is answered.
+       */
+      readonly kind: "ChooseGoodStuff";
+      readonly prompt: string;
+      readonly character: Character;
+      readonly options: readonly Card[];
+      readonly spreads: readonly GoodStuffSpread[];
+      readonly picked: readonly Card[];
+      readonly source: null;
     };
 
 /**
@@ -292,9 +339,14 @@ export type Command =
     }
   | { readonly type: "CHOOSE_CHARACTER"; readonly character: Character }
   | { readonly type: "CHOOSE_PILE"; readonly pile: Pile }
+  | { readonly type: "CHOOSE_STAT"; readonly stat: Stat }
   | { readonly type: "CHOOSE_CARDS"; readonly cardIds: readonly CardId[] }
   | { readonly type: "ORDER_CARDS"; readonly cardIds: readonly (CardId | RoomId)[] }
-  | { readonly type: "TAKE_REWARD"; readonly take: boolean }
+  | {
+      /** One of the revealed card rewards, or null to take none. */
+      readonly type: "TAKE_REWARD";
+      readonly cardId: CardId | null;
+    }
   | { readonly type: "ASCEND"; readonly Red: AscendChoice; readonly Gray: AscendChoice };
 
 export type CommandType = Command["type"];
@@ -379,7 +431,12 @@ export type DomainEvent =
   | { readonly type: "ROOM_FLED"; readonly room: Room }
   | { readonly type: "FLED_RESHUFFLED"; readonly room: Room }
   | { readonly type: "WENT_DOWN"; readonly character: Character; readonly cause: string }
-  | { readonly type: "REWARD_REVEALED"; readonly character: Character; readonly card: Card }
+  | { readonly type: "REWARD_REVEALED"; readonly character: Character; readonly cards: readonly Card[] }
+  | {
+      readonly type: "GOOD_STUFF_REVEALED";
+      readonly character: Character;
+      readonly cards: readonly Card[];
+    }
   | { readonly type: "REWARD_POOL_EMPTY"; readonly character: Character }
   | { readonly type: "REWARD_TAKEN"; readonly character: Character; readonly card: Card }
   | { readonly type: "REWARD_DECLINED"; readonly character: Character }

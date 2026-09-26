@@ -282,6 +282,16 @@ export function takeFrom(
   return withPlayer(state, c, { ...p, exhaust: without(p.exhaust) });
 }
 
+/**
+ * Rulebook, Keywords: `Reveal a card reward` — a taken reward goes into the
+ * discard pile, so it reaches the deck the next time the discard pile is
+ * shuffled in. No event: `REWARD_TAKEN` says so.
+ */
+export function gainToDiscard(state: GameState, c: Character, card: Card): GameState {
+  const p = playerOf(state, c);
+  return withPlayer(state, c, { ...p, discard: [...p.discard, card] });
+}
+
 /** Under the deck, so it is the last thing you will see rather than the next. */
 export function moveToBottomOfDeck(
   state: GameState,
@@ -295,7 +305,7 @@ export function moveToBottomOfDeck(
 }
 
 /**
- * A card taking itself back out of the play zone, at cleanup.
+ * A card taking itself back out of the play zone and into its owner's hand.
  *
  * Rulebook, Going Down: no card may be put into a Down character's hand, so a card whose owner is
  * out stays in the play zone and is discarded with everything else.
@@ -354,6 +364,48 @@ export const clearPlayDiscount = (state: GameState): GameState =>
     ? state
     : { ...state, thisTurn: { ...state.thisTurn, playDiscount: { Red: 0, Gray: 0 } } };
 
+/** Set 'Em Up: bank Scramble for this character's very next play. */
+export const bankNextPlayScramble = (state: GameState, c: Character, amount: number): GameState => ({
+  ...state,
+  thisTurn: {
+    ...state.thisTurn,
+    nextPlayScramble: {
+      ...state.thisTurn.nextPlayScramble,
+      [c]: state.thisTurn.nextPlayScramble[c] + amount,
+    },
+  },
+});
+
+/** The card just played takes whatever Scramble was banked for its player. */
+export function attachNextPlayScramble(state: GameState, c: Character, card: Card): GameState {
+  const banked = state.thisTurn.nextPlayScramble[c];
+  if (banked === 0) return state;
+  return {
+    ...state,
+    thisTurn: {
+      ...state.thisTurn,
+      nextPlayScramble: { ...state.thisTurn.nextPlayScramble, [c]: 0 },
+      cardScramble: { ...state.thisTurn.cardScramble, [card.id]: banked },
+    },
+  };
+}
+
+/** Rulebook, Card anatomy: Keywords: Exhaust a chosen card from hand, gone for the run. */
+export function exhaustFromHand(
+  state: GameState,
+  c: Character,
+  cards: readonly Card[],
+  events: DomainEvent[],
+): GameState {
+  let next = takeFrom(state, c, "hand", cards);
+  for (const card of cards) {
+    const p = playerOf(next, c);
+    events.push({ type: "CARD_EXHAUSTED", character: c, card });
+    next = withPlayer(next, c, { ...p, exhaust: [...p.exhaust, card] });
+  }
+  return next;
+}
+
 /** System Feedback: bank a one-shot loss against this turn's shared stat pool. */
 export const applyPoolPenalty = (state: GameState, oomph: number, scramble: number): GameState => ({
   ...state,
@@ -387,48 +439,61 @@ export function topDeck(state: GameState, c: Character, card: Card): GameState {
 /* -------------------------------------------------------------------- Stuff */
 
 /**
- * What you earn is drawn face down from the Good Stuff pool and goes to that
- * character's hand. A Down character earns nothing.
+ * Rulebook, Keywords: `Get X Good Stuff` — earning Good Stuff only counts it
+ * as owed. The engine reveals a spread of 3 for each piece owed as soon as
+ * nothing else is waiting (`offerGoodStuff` in engine.ts), so a card that
+ * earns it mid-effect (Crowbar) never has to suspend. A Down character earns
+ * nothing.
+ */
+export function earnGoodStuff(state: GameState, c: Character, count: number): GameState {
+  if (count <= 0 || playerOf(state, c).down) return state;
+  const owed = state.thisTurn.goodStuffOwed;
+  return { ...state, thisTurn: { ...state.thisTurn, goodStuffOwed: { ...owed, [c]: owed[c] + count } } };
+}
+
+/**
+ * Rulebook, Keywords: `Get Good Stuff` — the picks from one set of spreads go
+ * into hand at the same time, and every other revealed card goes to the
+ * bottom of the pool in the order it was revealed.
  *
  * Every piece handed over is also tallied on `thisTurn.goodStuffTaken`, which
  * is how Crowbar's own "if you got any Good Stuff this turn" looks backward
  * at what has already landed.
  */
-export function takeGoodStuff(
+export function giveGoodStuff(
   state: GameState,
-  c: Character,
-  count: number,
+  spreads: readonly { readonly character: Character; readonly cards: readonly Card[] }[],
+  picked: readonly Card[],
   events: DomainEvent[],
 ): GameState {
-  let next = state;
-  for (let i = 0; i < count; i++) {
-    if (playerOf(next, c).down) return next;
-    const [card, rest, seed] = drawFromPool(next.pools.goodStuff, next.seed);
-    // Unkept Good Stuff returns to this pool at Ascend, but it can still run
-    // dry mid-floor. Say so — a reward the log announced but the pool could
-    // not pay must not go silent.
-    if (!card) {
-      events.push({ type: "STUFF_POOL_EMPTY", character: c, pool: "good_stuff" });
-      return next;
-    }
-    next = { ...next, seed, pools: { ...next.pools, goodStuff: rest } };
+  const revealed = new Set(spreads.flatMap((s) => s.cards.map((x) => x.id)));
+  const kept = new Set(picked.map((x) => x.id));
+  const returned = spreads.flatMap((s) => s.cards.filter((x) => !kept.has(x.id)));
+  let next: GameState = {
+    ...state,
+    pools: {
+      ...state.pools,
+      goodStuff: [...state.pools.goodStuff.filter((x) => !revealed.has(x.id)), ...returned],
+    },
+  };
+  spreads.forEach((spread, i) => {
+    const card = picked[i];
+    if (!card) return;
+    const c = spread.character;
     events.push({ type: "STUFF_TAKEN", character: c, card });
     next = moveToHand(next, c, card, events);
     next = {
       ...next,
       thisTurn: {
         ...next.thisTurn,
-        goodStuffTaken: {
-          ...next.thisTurn.goodStuffTaken,
-          [c]: next.thisTurn.goodStuffTaken[c] + 1,
-        },
+        goodStuffTaken: { ...next.thisTurn.goodStuffTaken, [c]: next.thisTurn.goodStuffTaken[c] + 1 },
       },
     };
-  }
+  });
   return next;
 }
 
-/** Bad Stuff is dealt to you, as a room's printed "gets Bad Stuff" punishment. */
+/** Rulebook, Keywords: `Get Bad Stuff` — the top card of the pool, unchosen, into your hand. */
 export function dealBadStuff(
   state: GameState,
   c: Character,

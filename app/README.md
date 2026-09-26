@@ -15,14 +15,14 @@ make app-check  lint, typecheck, tests
 
 Dependencies point inward, and `eslint.config.js` enforces the table.
 
-| Layer                | What is in it                                                           | May import                   |
-| -------------------- | ----------------------------------------------------------------------- | ---------------------------- |
-| `src/domain`         | the rules: state, commands, events, `execute`, queries, card behaviours | domain only                  |
-| `src/content`        | `cards.generated.ts`, emitted from `design/cards.yaml`; data, not rules | domain                       |
-| `src/application`    | the session: store, command log, event log, undo, replay                | domain, content              |
-| `src/infrastructure` | adapters: seed source, storage                                          | domain, application          |
-| `src/ui`             | React components and hooks                                              | domain, application, content |
-| `src/sim`            | move generation, the run loop; pure, no IO                              | domain, content, application |
+| Layer                | What is in it                                                           | May import                                        |
+| -------------------- | ----------------------------------------------------------------------- | ------------------------------------------------- |
+| `src/domain`         | the rules: state, commands, events, `execute`, queries, card behaviours | domain only                                       |
+| `src/content`        | `cards.generated.ts`, emitted from `design/cards.yaml`; data, not rules | domain                                            |
+| `src/application`    | the session: store, command log, event log, undo, replay                | domain, content                                   |
+| `src/infrastructure` | adapters: seed source, storage                                          | domain, application                               |
+| `src/ui`             | React components and hooks                                              | domain, application, content                      |
+| `src/sim`            | move generation, the run loop; pure, no IO                              | domain, content, application                      |
 | `src/cli`            | the terminal: arguments, printing, files                                | domain, content, application, infrastructure, sim |
 
 The domain has no React, no `fetch`, no `Math.random` and no `Date.now`; its randomness is the
@@ -69,6 +69,17 @@ export read the same log. `application/exportRun.ts` writes the three files:
 
 `loadSession(run, content, notes)` takes a `.json` export back: a fold of `execute` over the
 command log rebuilds the run, and the notes go back where they were typed.
+
+## Replaying a run
+
+"Open run…" in the header, or dropping a run file on the table, opens it as a replay: the table
+at the seed and a bar (`ReplayBar.tsx`) in place of the controls. `application/replay.ts` holds
+the recorded command log as a script and a live session; stepping forward dispatches the next
+scripted command into the session, so a replay animates exactly as play does, and the notes appear
+as the log reaches them. Stepping back rebuilds the session from the seed, because undo cannot
+reach past a revealed card. "Take over" drops the rest of the script and the session plays on live
+from there. A file recorded on another card list or rules version is refused, as `replay` refuses
+it in the CLI.
 
 ## The CLI
 

@@ -200,13 +200,26 @@ describe("greedy", () => {
 
   it("stacks both hands on one stat of a Stairwell instead of splitting 4 Oomph and 4 Scramble across its two lines", () => {
     resetRig();
-    // The Sentry Drone: Oomph 6 → Ascend, or Scramble 6 → Ascend. Red can
-    // reach 8 alone (Charge In 4, Overdrive 2, Overdrive 2); Gray tops out at 2.
+    // A Stairwell with only Oomph 8 → Ascend and Scramble 8 → Ascend; no line
+    // pays for a 4-and-4 split. Red can reach 8 alone (Charge In 4, Overdrive
+    // 2, Overdrive 2); Gray tops out at 6.
+    const ascend = (oomph: number, scramble: number): Threshold => ({
+      requires: { oomph, scramble },
+      outcome: "Ascend.",
+      clears: true,
+      fleeFree: false,
+      ascends: true,
+      effects: [],
+    });
+    const stairwell: Room = {
+      ...room("The Sentry Drone"),
+      challenges: [{ thresholds: [ascend(8, 0)] }, { thresholds: [ascend(0, 8)] }],
+    };
     const red = [card("Charge In"), card("Overdrive"), card("Overdrive"), card("Shove"), card("Shove")];
-    const gray = pile("Peek Around Corner", 5);
+    const gray = [card("Pick The Lock"), card("Duck Under"), card("Duck Under"), card("Peek Around Corner"), card("Peek Around Corner")];
     const state: GameState = rig({
       phase: "Play",
-      activeRoom: room("The Sentry Drone"),
+      activeRoom: stairwell,
       floorDeck: [room("Security Turnstile")],
       Red: player({ hand: red, deck: pile("Shove", 4) }),
       Gray: player({ hand: gray, deck: pile("Duck Under", 4) }),

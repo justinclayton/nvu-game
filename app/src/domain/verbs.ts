@@ -364,6 +364,48 @@ export const clearPlayDiscount = (state: GameState): GameState =>
     ? state
     : { ...state, thisTurn: { ...state.thisTurn, playDiscount: { Red: 0, Gray: 0 } } };
 
+/** Set 'Em Up: bank Scramble for this character's very next play. */
+export const bankNextPlayScramble = (state: GameState, c: Character, amount: number): GameState => ({
+  ...state,
+  thisTurn: {
+    ...state.thisTurn,
+    nextPlayScramble: {
+      ...state.thisTurn.nextPlayScramble,
+      [c]: state.thisTurn.nextPlayScramble[c] + amount,
+    },
+  },
+});
+
+/** The card just played takes whatever Scramble was banked for its player. */
+export function attachNextPlayScramble(state: GameState, c: Character, card: Card): GameState {
+  const banked = state.thisTurn.nextPlayScramble[c];
+  if (banked === 0) return state;
+  return {
+    ...state,
+    thisTurn: {
+      ...state.thisTurn,
+      nextPlayScramble: { ...state.thisTurn.nextPlayScramble, [c]: 0 },
+      cardScramble: { ...state.thisTurn.cardScramble, [card.id]: banked },
+    },
+  };
+}
+
+/** Rulebook, Card anatomy: Keywords: Exhaust a chosen card from hand, gone for the run. */
+export function exhaustFromHand(
+  state: GameState,
+  c: Character,
+  cards: readonly Card[],
+  events: DomainEvent[],
+): GameState {
+  let next = takeFrom(state, c, "hand", cards);
+  for (const card of cards) {
+    const p = playerOf(next, c);
+    events.push({ type: "CARD_EXHAUSTED", character: c, card });
+    next = withPlayer(next, c, { ...p, exhaust: [...p.exhaust, card] });
+  }
+  return next;
+}
+
 /** System Feedback: bank a one-shot loss against this turn's shared stat pool. */
 export const applyPoolPenalty = (state: GameState, oomph: number, scramble: number): GameState => ({
   ...state,

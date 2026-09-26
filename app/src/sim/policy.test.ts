@@ -200,10 +200,10 @@ describe("greedy", () => {
 
   it("stacks both hands on one stat of a Stairwell instead of splitting 4 Oomph and 4 Scramble across its two lines", () => {
     resetRig();
-    // The Sentry Drone: Oomph 8 → Ascend, or Scramble 8 → Ascend. Red can
-    // reach 8 alone (Charge In 4, Overdrive 2, Overdrive 2); Gray tops out at 6.
+    // The Sentry Drone: Oomph 6 → Ascend, or Scramble 6 → Ascend. Red can
+    // reach 8 alone (Charge In 4, Overdrive 2, Overdrive 2); Gray tops out at 2.
     const red = [card("Charge In"), card("Overdrive"), card("Overdrive"), card("Shove"), card("Shove")];
-    const gray = [card("Pick The Lock"), card("Duck Under"), card("Duck Under"), card("Peek Around Corner"), card("Peek Around Corner")];
+    const gray = pile("Peek Around Corner", 5);
     const state: GameState = rig({
       phase: "Play",
       activeRoom: room("The Sentry Drone"),

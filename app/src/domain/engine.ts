@@ -46,6 +46,7 @@ import type {
 import { CorruptStateError } from "./types";
 import {
   applyPoolBonus,
+  attachNextPlayScramble,
   CHARACTERS,
   clearFreePlays,
   clearPlayDiscount,
@@ -541,6 +542,7 @@ function playCard(
   const after = playerOf(s, c);
   s = withPlayer(s, c, { ...after, hand: after.hand.filter((x) => x.id !== cardId) });
   s = { ...s, playZone: [...s.playZone, { owner: c, card }] };
+  s = attachNextPlayScramble(s, c, card);
   run.events.push({ type: "CARD_PLAYED", character: c, card });
   const to = run.events.length;
   trackEntries(run, from, to);

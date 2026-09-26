@@ -11,7 +11,12 @@ describe("initials collisions", () => {
   it("names every pair of cards sharing initials", () => {
     const pairs = initialsCollisions(CARD_CONTENT.cards).map(([a, b]) => `${a} / ${b}`);
     expect(pairs.sort()).toEqual(
-      ["Reckless Swing / Riot Shield", "Reckless / Rust", "Shove / Sluggish"].sort(),
+      [
+        "Brute Recycle / Bull Rush",
+        "Reckless Swing / Riot Shield",
+        "Reckless / Rust",
+        "Shove / Sluggish",
+      ].sort(),
     );
   });
 });

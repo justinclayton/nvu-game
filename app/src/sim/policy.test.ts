@@ -189,7 +189,8 @@ describe("greedy", () => {
   function playOut(state: GameState): { readonly state: GameState; readonly commands: readonly Command[] } {
     let s = state;
     const commands: Command[] = [];
-    while (s.phase === "Play" && !s.pending) {
+    // Through Outcome's own questions too, such as which Good Stuff to keep.
+    while (s.phase === "Play" || s.pending) {
       const [command] = greedyPolicy.choose(s, legalCommands(s), policySeed(1));
       commands.push(command);
       s = must(s, command).state;
@@ -199,13 +200,26 @@ describe("greedy", () => {
 
   it("stacks both hands on one stat of a Stairwell instead of splitting 4 Oomph and 4 Scramble across its two lines", () => {
     resetRig();
-    // The Sentry Drone: Oomph 8 → Ascend, or Scramble 8 → Ascend. Red can
-    // reach 8 alone (Charge In 4, Overdrive 2, Overdrive 2); Gray tops out at 6.
+    // A Stairwell with only Oomph 8 → Ascend and Scramble 8 → Ascend; no line
+    // pays for a 4-and-4 split. Red can reach 8 alone (Charge In 4, Overdrive
+    // 2, Overdrive 2); Gray tops out at 6.
+    const ascend = (oomph: number, scramble: number): Threshold => ({
+      requires: { oomph, scramble },
+      outcome: "Ascend.",
+      clears: true,
+      fleeFree: false,
+      ascends: true,
+      effects: [],
+    });
+    const stairwell: Room = {
+      ...room("The Sentry Drone"),
+      challenges: [{ thresholds: [ascend(8, 0)] }, { thresholds: [ascend(0, 8)] }],
+    };
     const red = [card("Charge In"), card("Overdrive"), card("Overdrive"), card("Shove"), card("Shove")];
     const gray = [card("Pick The Lock"), card("Duck Under"), card("Duck Under"), card("Peek Around Corner"), card("Peek Around Corner")];
     const state: GameState = rig({
       phase: "Play",
-      activeRoom: room("The Sentry Drone"),
+      activeRoom: stairwell,
       floorDeck: [room("Security Turnstile")],
       Red: player({ hand: red, deck: pile("Shove", 4) }),
       Gray: player({ hand: gray, deck: pile("Duck Under", 4) }),
@@ -285,19 +299,22 @@ describe("greedy", () => {
     expect(chosen).toEqual({ type: "END_PLAY" });
   });
 
-  it("takes the reward when one is offered", () => {
+  it("takes the reward that fits best when card rewards are revealed", () => {
     resetRig();
-    const offered = card("Fast Follow");
+    const weak = card("Shove"); // Oomph 2
+    const best = card("Fast Follow"); // Oomph 3
     const state: GameState = rig({
       phase: "Play",
-      pending: { kind: "TakeReward", prompt: "Take it?", character: "Red", card: offered, source: null },
+      Red: player({ deck: pile("Duck Under", 6) }), // all Scramble: Red is weak on Oomph
+      pending: { kind: "TakeReward", prompt: "Take one?", character: "Red", cards: [weak, best], source: null },
     });
     const legal: readonly Command[] = [
-      { type: "TAKE_REWARD", take: true },
-      { type: "TAKE_REWARD", take: false },
+      { type: "TAKE_REWARD", cardId: weak.id },
+      { type: "TAKE_REWARD", cardId: best.id },
+      { type: "TAKE_REWARD", cardId: null },
     ];
     const [chosen] = greedyPolicy.choose(state, legal, policySeed(1));
-    expect(chosen).toEqual({ type: "TAKE_REWARD", take: true });
+    expect(chosen).toEqual({ type: "TAKE_REWARD", cardId: best.id });
   });
 
   it("picks the reward that fits the character's weaker stat over the first one offered", () => {

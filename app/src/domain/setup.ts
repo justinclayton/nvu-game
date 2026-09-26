@@ -12,7 +12,7 @@ import { shuffle } from "./rng";
 import type { Card, DomainEvent, GameState, PlayerState, Room, TurnRecord } from "./types";
 
 /** The rulebook this engine implements (design/rulebook.md). See #83. */
-export const RULES_VERSION = "0.2.4";
+export const RULES_VERSION = "0.2.5";
 
 /** The tenth floor is the roof: clearing it wins the run (rulebook, Winning and losing). */
 export const TOP_FLOOR = 10;
@@ -167,8 +167,11 @@ export function returnRoomsToSupply(state: GameState): GameState {
 export const emptyTurnRecord = (): TurnRecord => ({
   freePlays: 0,
   goodStuffTaken: { Red: 0, Gray: 0 },
+  goodStuffOwed: { Red: 0, Gray: 0 },
   fired: [],
   playDiscount: { Red: 0, Gray: 0 },
+  nextPlayScramble: { Red: 0, Gray: 0 },
+  cardScramble: {},
   poolPenalty: { oomph: 0, scramble: 0 },
   poolBonus: { oomph: 0, scramble: 0 },
 });

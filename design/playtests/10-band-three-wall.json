@@ -1,0 +1,2636 @@
+{
+  "format": "nvu-run/1",
+  "exportedAt": "2026-09-25T23:36:54.118Z",
+  "cards": "51ca389c9a2d",
+  "rules": "0.2.4",
+  "floor": 7,
+  "turn": 36,
+  "phase": "GameOver",
+  "outcome": "Defeat",
+  "run": {
+    "seed": 10,
+    "commands": [
+      {
+        "type": "FLIP_ROOM"
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Red",
+        "cardId": "Charge In#2",
+        "payWith": [
+          "Shove#3",
+          "Shove#1"
+        ]
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Gray",
+        "cardId": "Pick The Lock#5",
+        "payWith": [
+          "Peek Around Corner#2",
+          "Duck Under#1"
+        ]
+      },
+      {
+        "type": "END_PLAY"
+      },
+      {
+        "type": "FLIP_ROOM"
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Gray",
+        "cardId": "Crowbar#5",
+        "payWith": []
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Gray",
+        "cardId": "Pick The Lock#3",
+        "payWith": [
+          "Peek Around Corner#1",
+          "Duck Under#3"
+        ]
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Red",
+        "cardId": "Charge In#1",
+        "payWith": [
+          "Shove#2",
+          "Lean In#1"
+        ]
+      },
+      {
+        "type": "END_PLAY"
+      },
+      {
+        "type": "ASCEND",
+        "Red": {
+          "takeRewardId": "Fast Follow#1"
+        },
+        "Gray": {
+          "takeRewardId": "Hack the Doors#2"
+        }
+      },
+      {
+        "type": "FLIP_ROOM"
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Gray",
+        "cardId": "Crowbar#3",
+        "payWith": []
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Red",
+        "cardId": "Fast Follow#1",
+        "payWith": []
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Red",
+        "cardId": "Crowbar#4",
+        "payWith": []
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Red",
+        "cardId": "Riot Shield#3",
+        "payWith": [
+          "Shove#4"
+        ]
+      },
+      {
+        "type": "END_PLAY"
+      },
+      {
+        "type": "FLIP_ROOM"
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Red",
+        "cardId": "Pry Bar#4",
+        "payWith": []
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Red",
+        "cardId": "Riot Shield#3",
+        "payWith": [
+          "Overdrive#2"
+        ]
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Gray",
+        "cardId": "Stim Pack#3",
+        "payWith": []
+      },
+      {
+        "type": "END_PLAY"
+      },
+      {
+        "type": "FLIP_ROOM"
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Red",
+        "cardId": "Overcharged Battery#3",
+        "payWith": [
+          "Charge In#5"
+        ]
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Red",
+        "cardId": "Duct Tape & Wire#2",
+        "payWith": []
+      },
+      {
+        "type": "END_PLAY"
+      },
+      {
+        "type": "FLIP_ROOM"
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Red",
+        "cardId": "Overcharged Battery#1",
+        "payWith": [
+          "A Pair Of Stitch-Em-Ups#1"
+        ]
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Red",
+        "cardId": "Charge In#4",
+        "payWith": []
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Gray",
+        "cardId": "Pick The Lock#2",
+        "payWith": [
+          "A Pair Of Stitch-Em-Ups#3",
+          "Scrap Magnet#1"
+        ]
+      },
+      {
+        "type": "END_PLAY"
+      },
+      {
+        "type": "ASCEND",
+        "Red": {
+          "takeRewardId": "Fast Follow#2"
+        },
+        "Gray": {
+          "takeRewardId": "One Man's Junk#2"
+        }
+      },
+      {
+        "type": "FLIP_ROOM"
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Gray",
+        "cardId": "Riot Shield#2",
+        "payWith": [
+          "Duck Under#2"
+        ]
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Red",
+        "cardId": "Fast Follow#2",
+        "payWith": []
+      },
+      {
+        "type": "END_PLAY"
+      },
+      {
+        "type": "FLIP_ROOM"
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Red",
+        "cardId": "Coil Of Cable#4",
+        "payWith": []
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Red",
+        "cardId": "Cutting Torch#2",
+        "payWith": [
+          "Overdrive#1",
+          "Salvaged Blueprint#1"
+        ]
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Gray",
+        "cardId": "Riot Shield#2",
+        "payWith": [
+          "Duck Under#4"
+        ]
+      },
+      {
+        "type": "END_PLAY"
+      },
+      {
+        "type": "ASCEND",
+        "Red": {
+          "takeRewardId": "Tag Team#2"
+        },
+        "Gray": {
+          "takeRewardId": "In Step#2"
+        }
+      },
+      {
+        "type": "FLIP_ROOM"
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Gray",
+        "cardId": "Riot Shield#1",
+        "payWith": [
+          "Hack the Doors#2"
+        ]
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Red",
+        "cardId": "Riot Shield#3",
+        "payWith": [
+          "Duct Tape & Wire#3"
+        ]
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Red",
+        "cardId": "Tag Team#2",
+        "payWith": [
+          "Charge In#3"
+        ]
+      },
+      {
+        "type": "END_PLAY"
+      },
+      {
+        "type": "FLIP_ROOM"
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Red",
+        "cardId": "Overcharged Battery#1",
+        "payWith": [
+          "Shove#2"
+        ]
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Red",
+        "cardId": "Riot Shield#3",
+        "payWith": []
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Gray",
+        "cardId": "In Step#2",
+        "payWith": [
+          "One Man's Junk#2"
+        ]
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Gray",
+        "cardId": "Pocket Dynamo#3",
+        "payWith": []
+      },
+      {
+        "type": "END_PLAY"
+      },
+      {
+        "type": "FLIP_ROOM"
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Gray",
+        "cardId": "Coil Of Cable#1",
+        "payWith": []
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Gray",
+        "cardId": "Riot Shield#1",
+        "payWith": [
+          "Salvaged Blueprint#2"
+        ]
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Red",
+        "cardId": "Riot Shield#3",
+        "payWith": [
+          "Shove#1"
+        ]
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Red",
+        "cardId": "Duct Tape & Wire#1",
+        "payWith": [
+          "Lean In#1"
+        ]
+      },
+      {
+        "type": "END_PLAY"
+      },
+      {
+        "type": "CHOOSE_CARDS",
+        "cardIds": [
+          "High-Frequency Scanner#2"
+        ]
+      },
+      {
+        "type": "FLIP_ROOM"
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Gray",
+        "cardId": "Stim Pack#5",
+        "payWith": []
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Red",
+        "cardId": "Coil Of Cable#5",
+        "payWith": []
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Red",
+        "cardId": "Riot Shield#3",
+        "payWith": [
+          "Torn Seal#2"
+        ]
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Gray",
+        "cardId": "Riot Shield#1",
+        "payWith": [
+          "Spore Cloud#2"
+        ]
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Gray",
+        "cardId": "Riot Shield#2",
+        "payWith": [
+          "Pry Bar#5"
+        ]
+      },
+      {
+        "type": "END_PLAY"
+      },
+      {
+        "type": "FLIP_ROOM"
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Gray",
+        "cardId": "Riot Shield#1",
+        "payWith": [
+          "Torn Seal#1"
+        ]
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Red",
+        "cardId": "Riot Shield#3",
+        "payWith": [
+          "System Feedback#1"
+        ]
+      },
+      {
+        "type": "END_PLAY"
+      },
+      {
+        "type": "FLIP_ROOM"
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Red",
+        "cardId": "Overdrive#1",
+        "payWith": []
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Red",
+        "cardId": "Cutting Torch#1",
+        "payWith": [
+          "Faceful Of Slime#2",
+          "Charge In#1"
+        ]
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Gray",
+        "cardId": "Cutting Torch#3",
+        "payWith": [
+          "Corrosive Acid#1",
+          "Pick The Lock#4"
+        ]
+      },
+      {
+        "type": "END_PLAY"
+      },
+      {
+        "type": "ASCEND",
+        "Red": {
+          "takeRewardId": "Second Wind#2"
+        },
+        "Gray": {
+          "takeRewardId": "Hack the Doors#1"
+        }
+      },
+      {
+        "type": "FLIP_ROOM"
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Gray",
+        "cardId": "Pry Bar#2",
+        "payWith": []
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Red",
+        "cardId": "Fast Follow#1",
+        "payWith": []
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Red",
+        "cardId": "Coil Of Cable#4",
+        "payWith": []
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Gray",
+        "cardId": "Riot Shield#2",
+        "payWith": [
+          "Hack the Doors#1"
+        ]
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Gray",
+        "cardId": "Pocket Dynamo#1",
+        "payWith": []
+      },
+      {
+        "type": "END_PLAY"
+      },
+      {
+        "type": "TAKE_REWARD",
+        "take": true
+      },
+      {
+        "type": "TAKE_REWARD",
+        "take": true
+      },
+      {
+        "type": "FLIP_ROOM"
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Gray",
+        "cardId": "Overcharged Battery#2",
+        "payWith": [
+          "I'll Take That#2"
+        ]
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Gray",
+        "cardId": "Pick The Lock#1",
+        "payWith": []
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Gray",
+        "cardId": "Riot Shield#2",
+        "payWith": [
+          "Riot Shield#1"
+        ]
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Red",
+        "cardId": "Charge In#5",
+        "payWith": [
+          "Shove#4",
+          "Salvaged Blueprint#1"
+        ]
+      },
+      {
+        "type": "END_PLAY"
+      },
+      {
+        "type": "FLIP_ROOM"
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Gray",
+        "cardId": "Stim Pack#3",
+        "payWith": []
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Red",
+        "cardId": "Charge In#4",
+        "payWith": [
+          "System Feedback#2",
+          "Overdrive#2"
+        ]
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Red",
+        "cardId": "Pry Bar#4",
+        "payWith": []
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Gray",
+        "cardId": "Pick The Lock#3",
+        "payWith": [
+          "Spore Cloud#2",
+          "Duck Under#4"
+        ]
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Gray",
+        "cardId": "Riot Shield#1",
+        "payWith": [
+          "One Man's Junk#2"
+        ]
+      },
+      {
+        "type": "END_PLAY"
+      },
+      {
+        "type": "CHOOSE_CHARACTER",
+        "character": "Gray"
+      },
+      {
+        "type": "TAKE_REWARD",
+        "take": true
+      },
+      {
+        "type": "ASCEND",
+        "Red": {
+          "takeRewardId": "Reckless Swing#1"
+        },
+        "Gray": {
+          "takeRewardId": "One Man's Junk#1"
+        }
+      },
+      {
+        "type": "FLIP_ROOM"
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Gray",
+        "cardId": "Stim Pack#5",
+        "payWith": []
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Gray",
+        "cardId": "Crowbar#5",
+        "payWith": []
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Gray",
+        "cardId": "Pry Bar#5",
+        "payWith": []
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Gray",
+        "cardId": "High-Frequency Scanner#2",
+        "payWith": [
+          "Duck Under#3"
+        ]
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Red",
+        "cardId": "Fast Follow#2",
+        "payWith": []
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Red",
+        "cardId": "Crowbar#4",
+        "payWith": []
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Red",
+        "cardId": "Riot Shield#3",
+        "payWith": [
+          "Second Wind#2"
+        ]
+      },
+      {
+        "type": "END_PLAY"
+      },
+      {
+        "type": "CHOOSE_CHARACTER",
+        "character": "Gray"
+      },
+      {
+        "type": "CHOOSE_CARDS",
+        "cardIds": []
+      },
+      {
+        "type": "FLIP_ROOM"
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Gray",
+        "cardId": "Stim Pack#4",
+        "payWith": []
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Gray",
+        "cardId": "Crowbar#1",
+        "payWith": []
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Gray",
+        "cardId": "Crowbar#3",
+        "payWith": []
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Gray",
+        "cardId": "Hack the Doors#2",
+        "payWith": [
+          "Torn Seal#1"
+        ]
+      },
+      {
+        "type": "CHOOSE_PILE",
+        "pile": "Floor deck"
+      },
+      {
+        "type": "ORDER_CARDS",
+        "cardIds": [
+          "Automated Defense Turret#6",
+          "Overgrown Hydroponics Bay#3",
+          "Gears & Glitch#3"
+        ]
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Red",
+        "cardId": "Riot Shield#3",
+        "payWith": [
+          "Shove#3"
+        ]
+      },
+      {
+        "type": "END_PLAY"
+      },
+      {
+        "type": "FLIP_ROOM"
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Gray",
+        "cardId": "Coil Of Cable#1",
+        "payWith": []
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Gray",
+        "cardId": "Riot Shield#1",
+        "payWith": [
+          "Scrap Magnet#2"
+        ]
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Red",
+        "cardId": "Riot Shield#3",
+        "payWith": [
+          "Reckless Swing#1"
+        ]
+      },
+      {
+        "type": "END_PLAY"
+      },
+      {
+        "type": "FLIP_ROOM"
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Gray",
+        "cardId": "A Pair Of Stitch-Em-Ups#2",
+        "payWith": [
+          "Pry Bar#1"
+        ]
+      },
+      {
+        "type": "CHOOSE_CHARACTER",
+        "character": "Red"
+      },
+      {
+        "type": "CHOOSE_CARDS",
+        "cardIds": [
+          "Cutting Torch#2",
+          "Overcharged Battery#3"
+        ]
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Gray",
+        "cardId": "Riot Shield#1",
+        "payWith": [
+          "Pry Bar#2"
+        ]
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Red",
+        "cardId": "Riot Shield#3",
+        "payWith": [
+          "System Feedback#1"
+        ]
+      },
+      {
+        "type": "END_PLAY"
+      },
+      {
+        "type": "FLIP_ROOM"
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Red",
+        "cardId": "Riot Shield#3",
+        "payWith": [
+          "Sluggish#1",
+          "Junk Launcher#2"
+        ]
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Red",
+        "cardId": "Duct Tape & Wire#2",
+        "payWith": [
+          "Charge In#3"
+        ]
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Gray",
+        "cardId": "Cutting Torch#3",
+        "payWith": [
+          "Corrosive Acid#2",
+          "Pick The Lock#4"
+        ]
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Gray",
+        "cardId": "Riot Shield#1",
+        "payWith": [
+          "Duct Tape & Wire#5"
+        ]
+      },
+      {
+        "type": "END_PLAY"
+      },
+      {
+        "type": "CHOOSE_CHARACTER",
+        "character": "Red"
+      },
+      {
+        "type": "TAKE_REWARD",
+        "take": true
+      },
+      {
+        "type": "ASCEND",
+        "Red": {
+          "takeRewardId": "Fast Follow#3"
+        },
+        "Gray": {
+          "takeRewardId": "Quick Vault#1"
+        }
+      },
+      {
+        "type": "FLIP_ROOM"
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Red",
+        "cardId": "Coil Of Cable#4",
+        "payWith": []
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Gray",
+        "cardId": "Pocket Dynamo#3",
+        "payWith": []
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Red",
+        "cardId": "Fast Follow#2",
+        "payWith": []
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Red",
+        "cardId": "Duct Tape & Wire#1",
+        "payWith": [
+          "Shove#4"
+        ]
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Gray",
+        "cardId": "Pocket Dynamo#1",
+        "payWith": []
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Gray",
+        "cardId": "I'll Take That#2",
+        "payWith": [
+          "A Pair Of Stitch-Em-Ups#3"
+        ]
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Gray",
+        "cardId": "In Step#2",
+        "payWith": [
+          "Scrap Magnet#1"
+        ]
+      },
+      {
+        "type": "END_PLAY"
+      },
+      {
+        "type": "CHOOSE_CHARACTER",
+        "character": "Red"
+      },
+      {
+        "type": "TAKE_REWARD",
+        "take": true
+      },
+      {
+        "type": "FLIP_ROOM"
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Red",
+        "cardId": "Second Wind#2",
+        "payWith": [
+          "Lean In#1",
+          "Junk Launcher#1"
+        ]
+      },
+      {
+        "type": "CHOOSE_CARDS",
+        "cardIds": [
+          "Charge In#2"
+        ]
+      },
+      {
+        "type": "END_PLAY"
+      },
+      {
+        "type": "FLIP_ROOM"
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Red",
+        "cardId": "Heavy Pockets#2",
+        "payWith": [
+          "Overdrive#2"
+        ]
+      },
+      {
+        "type": "CHOOSE_CARDS",
+        "cardIds": [
+          "Panic#1"
+        ]
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Gray",
+        "cardId": "Hack the Doors#1",
+        "payWith": [
+          "Faceful Of Slime#1"
+        ]
+      },
+      {
+        "type": "CHOOSE_PILE",
+        "pile": "Gray reward pool"
+      },
+      {
+        "type": "ORDER_CARDS",
+        "cardIds": [
+          "Distract & Pivot#2",
+          "Quick Vault#2",
+          "Here, Catch#1"
+        ]
+      },
+      {
+        "type": "END_PLAY"
+      },
+      {
+        "type": "FLIP_ROOM"
+      },
+      {
+        "type": "END_PLAY"
+      },
+      {
+        "type": "FLIP_ROOM"
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Gray",
+        "cardId": "One Man's Junk#1",
+        "payWith": [
+          "Duck Under#2"
+        ]
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Red",
+        "cardId": "Tag Team#2",
+        "payWith": [
+          "Shove#2"
+        ]
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Red",
+        "cardId": "Overcharged Battery#1",
+        "payWith": [
+          "Charge In#5"
+        ]
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Red",
+        "cardId": "Charge In#1",
+        "payWith": []
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Red",
+        "cardId": "Pry Bar#4",
+        "payWith": []
+      },
+      {
+        "type": "SCRAP_FOR_STATS",
+        "character": "Gray",
+        "cardId": "Riot Shield#1",
+        "stat": "Oomph"
+      },
+      {
+        "type": "END_PLAY"
+      },
+      {
+        "type": "CHOOSE_CHARACTER",
+        "character": "Gray"
+      },
+      {
+        "type": "TAKE_REWARD",
+        "take": true
+      },
+      {
+        "type": "FLIP_ROOM"
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Gray",
+        "cardId": "A Pair Of Stitch-Em-Ups#2",
+        "payWith": [
+          "Catch Your Breath#2"
+        ]
+      },
+      {
+        "type": "CHOOSE_CHARACTER",
+        "character": "Red"
+      },
+      {
+        "type": "CHOOSE_CARDS",
+        "cardIds": [
+          "Shove#1",
+          "Reckless Swing#1"
+        ]
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Red",
+        "cardId": "Salvaged Blueprint#1",
+        "payWith": [
+          "Torn Seal#2"
+        ]
+      },
+      {
+        "type": "CHOOSE_CARDS",
+        "cardIds": [
+          "Faceful Of Slime#2"
+        ]
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Red",
+        "cardId": "Shove#3",
+        "payWith": [
+          "System Feedback#2"
+        ]
+      },
+      {
+        "type": "END_PLAY"
+      },
+      {
+        "type": "FLIP_ROOM"
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Gray",
+        "cardId": "Cutting Torch#3",
+        "payWith": [
+          "Distract & Pivot#2",
+          "Hack the Doors#2"
+        ]
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Red",
+        "cardId": "Fast Follow#2",
+        "payWith": []
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Gray",
+        "cardId": "Pocket Dynamo#1",
+        "payWith": []
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Red",
+        "cardId": "Junk Launcher#2",
+        "payWith": [
+          "Lean In#1",
+          "Charge In#2"
+        ]
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Gray",
+        "cardId": "High-Frequency Scanner#2",
+        "payWith": [
+          "Pick The Lock#3"
+        ]
+      },
+      {
+        "type": "END_PLAY"
+      },
+      {
+        "type": "FLIP_ROOM"
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Gray",
+        "cardId": "Stim Pack#5",
+        "payWith": []
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Red",
+        "cardId": "Shove#4",
+        "payWith": [
+          "System Feedback#1"
+        ]
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Gray",
+        "cardId": "Pocket Dynamo#3",
+        "payWith": []
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Gray",
+        "cardId": "Pry Bar#2",
+        "payWith": []
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Gray",
+        "cardId": "One Man's Junk#2",
+        "payWith": [
+          "Spore Cloud#2"
+        ]
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Gray",
+        "cardId": "Duct Tape & Wire#5",
+        "payWith": [
+          "Scrap Magnet#2"
+        ]
+      },
+      {
+        "type": "END_PLAY"
+      },
+      {
+        "type": "FLIP_ROOM"
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Red",
+        "cardId": "Charge In#1",
+        "payWith": [
+          "Panic#2",
+          "Torn Seal#2"
+        ]
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Gray",
+        "cardId": "One Man's Junk#1",
+        "payWith": [
+          "Rust#1"
+        ]
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Gray",
+        "cardId": "Stim Pack#5",
+        "payWith": []
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Gray",
+        "cardId": "Pry Bar#5",
+        "payWith": []
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Gray",
+        "cardId": "Pocket Dynamo#1",
+        "payWith": []
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Gray",
+        "cardId": "Hack the Doors#2",
+        "payWith": [
+          "Duck Under#2"
+        ]
+      },
+      {
+        "type": "CHOOSE_PILE",
+        "pile": "Red deck"
+      },
+      {
+        "type": "ORDER_CARDS",
+        "cardIds": [
+          "Second Wind#2",
+          "Duct Tape & Wire#1",
+          "Junk Launcher#1"
+        ]
+      },
+      {
+        "type": "END_PLAY"
+      },
+      {
+        "type": "FLIP_ROOM"
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Gray",
+        "cardId": "A Pair Of Stitch-Em-Ups#2",
+        "payWith": [
+          "Spore Cloud#1"
+        ]
+      },
+      {
+        "type": "CHOOSE_CHARACTER",
+        "character": "Red"
+      },
+      {
+        "type": "CHOOSE_CARDS",
+        "cardIds": [
+          "Riot Shield#3",
+          "Charge In#4"
+        ]
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Red",
+        "cardId": "Fast Follow#2",
+        "payWith": []
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Gray",
+        "cardId": "Pocket Dynamo#3",
+        "payWith": []
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Gray",
+        "cardId": "Cutting Torch#3",
+        "payWith": [
+          "Pick The Lock#3",
+          "Duct Tape & Wire#5"
+        ]
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Red",
+        "cardId": "Charge In#5",
+        "payWith": [
+          "Overdrive#1",
+          "Overdrive#2",
+          "Sluggish#2"
+        ]
+      },
+      {
+        "type": "END_PLAY"
+      },
+      {
+        "type": "FLIP_ROOM"
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Gray",
+        "cardId": "Cutting Torch#3",
+        "payWith": [
+          "Spore Cloud#1",
+          "Rust#1"
+        ]
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Red",
+        "cardId": "Salvaged Blueprint#1",
+        "payWith": [
+          "Panic#2"
+        ]
+      },
+      {
+        "type": "CHOOSE_CARDS",
+        "cardIds": [
+          "System Feedback#1"
+        ]
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Red",
+        "cardId": "Charge In#1",
+        "payWith": [
+          "Lean In#1",
+          "Junk Launcher#2"
+        ]
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Gray",
+        "cardId": "Pocket Dynamo#3",
+        "payWith": []
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Gray",
+        "cardId": "A Pair Of Stitch-Em-Ups#2",
+        "payWith": [
+          "Duct Tape & Wire#5"
+        ]
+      },
+      {
+        "type": "CHOOSE_CHARACTER",
+        "character": "Gray"
+      },
+      {
+        "type": "CHOOSE_CARDS",
+        "cardIds": [
+          "Riot Shield#2",
+          "Pry Bar#1"
+        ]
+      },
+      {
+        "type": "END_PLAY"
+      },
+      {
+        "type": "FLIP_ROOM"
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Red",
+        "cardId": "Riot Shield#3",
+        "payWith": [
+          "Panic#2"
+        ]
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Gray",
+        "cardId": "Stim Pack#5",
+        "payWith": []
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Red",
+        "cardId": "Fast Follow#2",
+        "payWith": []
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Gray",
+        "cardId": "Pry Bar#1",
+        "payWith": []
+      },
+      {
+        "type": "END_PLAY"
+      },
+      {
+        "type": "FLIP_ROOM"
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Gray",
+        "cardId": "A Pair Of Stitch-Em-Ups#2",
+        "payWith": [
+          "My Head Is Quantum Spinning#2"
+        ]
+      },
+      {
+        "type": "CHOOSE_CHARACTER",
+        "character": "Red"
+      },
+      {
+        "type": "CHOOSE_CARDS",
+        "cardIds": [
+          "Fast Follow#3",
+          "Charge In#3"
+        ]
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Red",
+        "cardId": "Riot Shield#3",
+        "payWith": [
+          "Rust#2"
+        ]
+      },
+      {
+        "type": "END_PLAY"
+      },
+      {
+        "type": "FLIP_ROOM"
+      }
+    ]
+  },
+  "notes": [
+    {
+      "at": 225,
+      "text": "Band 1 cleared in 8 turns with zero Exhaust on either side. Every room hit its Good Stuff line; the Sentry Drone came up as the 2nd or 3rd room of floors 2 and 3, so floor 3 (8 rooms) lasted two turns. Hands are fat with Good Stuff: Gray held 8 cards at turn 6. Nothing in the rulebook caps hand size."
+    },
+    {
+      "at": 317,
+      "text": "Spore Cloud (Holding: at Cleanup discard down to 3) resolved before Riot Shield's end-of-turn return, so Gray ends the turn holding 4 (Pick The Lock, Stim Pack, Spore Cloud, Riot Shield). The rulebook's Cleanup lists only 'Discard your play zone' and gives no order for Cleanup-time card effects against each other or against that step. Is the returned Riot Shield meant to dodge Spore Cloud?"
+    },
+    {
+      "at": 350,
+      "text": "Riot Shield is carrying Scramble. Gray now holds two and Red one; each returns to hand on a Clear, so it is a standing Scramble 3 for one card paid, turn after turn. Bad Stuff, meanwhile, costs almost nothing here: Torn Seal and Spore Cloud were both just used as payment for Riot Shield, which sends them to the discard pile to come back later."
+    },
+    {
+      "at": 357,
+      "text": "Third Overgrown Hydroponics Bay. Scramble 11 is out of reach (9 max, both hands have only Oomph left after the Riot Shields), so I take Scramble 6 on purpose: two Riot Shields paid with the two Bad Stuff we hold, both Shields come back, and we trade two Bad Stuff out for two new ones. Clearing on a Bad Stuff line is strictly better than Fleeing here."
+    },
+    {
+      "at": 428,
+      "text": "Pressurized Maintenance Hub's 'reveals a card reward' offered one card, take or skip, and the taken card went into the deck (Red deck 13 to 14). The rulebook never defines 'reveals a card reward'; only the Glossary does ('one card, take or skip'), and neither says where a taken card goes: top of deck, shuffled in, or discard, nor where a skipped one goes."
+    },
+    {
+      "at": 444,
+      "text": "Misplay: I meant Charge In then Junk Launcher (cost 2) for Oomph 12+, but after paying Charge In with Shove and Salvaged Blueprint, Red held only Charge In and Junk Launcher, one card short to pay for Junk Launcher. Oomph 6 / Scramble 8, one Oomph short of the 7/7 line, so we Flee. Not undoing a legal move. The refusal read 'Junk Launcher matches nothing, nothing is eligible here', which does not say the problem is the cost."
+    },
+    {
+      "at": 533,
+      "text": "Turret's Oomph 10 line offers to Scrap a Bad Stuff card, and I decline. Torn Seal has no text; in hand it is a free payment for any cost-1 card, and in the deck it is one more card of Stamina to absorb Exhaust. Scrapping Bad Stuff shrinks the deck, so with Stamina as HP the 'reward' reads as a cost. Is that intended?"
+    },
+    {
+      "at": 655,
+      "text": "Entering Band 3 at turn 22 with Red deck 28+, exhaust 3; Gray about 40 cards, exhaust 5. Band 2 took 14 turns and one Flee (my misplay). The Scramble side of Band 2 was never in doubt thanks to Riot Shield; the Oomph side was the squeeze every time."
+    },
+    {
+      "at": 708,
+      "text": "Iron Sentinel on the second room of floor 7, unreachable: best is Oomph 8/Scramble 5 or Oomph 5/Scramble 7 against 10/10. Gray's five cards all cost 1, so at most two of them play. Hack the Doors and Catch Your Breath can't help with a Flee's Exhaust: all of the top 4 go regardless of order. I play only Second Wind to pull Charge In back, and keep Gray's hand intact for next turn."
+    },
+    {
+      "at": 736,
+      "text": "Laser Grid out of reach: Scramble 9 max against 14, Oomph 10ish against 18. Before fleeing I spend Heavy Pockets to shuffle Panic out of Red's hand (Panic had shown the room as 'Scramble 16 (printed 14)' and 'Oomph 18 and Scramble 2 (printed 0)'), and Hack the Doors to dump Faceful Of Slime from Gray's hand. Second Flee in a row; Band 3 rooms look out of reach for a 5-card hand without several free cards."
+    },
+    {
+      "at": 756,
+      "text": "Laser Grid again, immediately: the Fled room shuffled back into a 3-card Floor deck and came straight back up. Still out of reach (Scramble 8 at most), so a third Flee in a row, 12 cards Exhausted across the team in three turns. With the Floor deck this small, a Fled room returns about one turn in three, so there is no running from it."
+    },
+    {
+      "at": 768,
+      "text": "Shape problem: a Flee where nobody plays leaves both hands full, so Turn Start draws nothing and the next room meets the exact same 10 cards. Flee Exhaust comes off the deck, never the hand, so holding cards feels safe, but it freezes the hand. From here I spend cards on Flee turns just to cycle them."
+    },
+    {
+      "at": 782,
+      "text": "Cleared Bio-Hazard at Oomph 16 against 15, entirely on one draw: Tag Team drew Overcharged Battery, which made the second Charge In free. Without that draw the best was 14. Gray Scrapped the team's last Riot Shield for the final +3."
+    },
+    {
+      "at": 807,
+      "text": "A Pair Of Stitch-Em-Ups on Red with Red's deck at 2: the 2 cards go to the bottom, so this turn's Flee (Exhaust 4) takes all four. The heal still leaves Red 2 cards up overall, but whatever I pick is exhausted again at once, so I pick the cheapest (Shove, Reckless Swing). The picker offers Panic and other Stuff as well as Red's own cards; the card text says 'cards', so that reads right."
+    },
+    {
+      "at": 853,
+      "text": "Laser Grid a fourth time. Tried the Oomph 18 line (Clear, but Exhaust 2, better than a Flee's 4): Cutting Torch, Fast Follow, Pocket Dynamo, then Junk Launcher. Best reachable is 17 with Overdrive, one short. Junk Launcher came to 6. Spending the rest only to cycle the hands."
+    },
+    {
+      "at": 853,
+      "text": "Junk Launcher counted the play zone when it was played: Oomph 9 to 14 (+5 = Cutting Torch 2, Fast Follow 1, Pocket Dynamo 0, Junk Launcher 2). High-Frequency Scanner played after it added nothing to it. The card text ('Oomph equal to the total printed cost of all cards in the play zone') and the rulebook ('Stats on played cards add together', checked at Outcome) don't say whether a conditional stat is fixed at play or counted at Outcome. Question for the designer."
+    },
+    {
+      "at": 894,
+      "text": "Iron Sentinel: Oomph 12 / Scramble 5 without the Overdrives, 16 with both. Neither 10/10 nor Oomph 18 is in reach, so a fifth Flee on floor 7. Red's hand is now two Overdrives and Torn Seal, cards I won't play into a Flee, so Red draws only 2 next turn."
+    },
+    {
+      "at": 986,
+      "text": "Laser Grid a fifth time, out of reach. Spent the turn on Stamina and cycling: Stitch-Em-Ups on Red while Red's deck is 10 deep, so the bottom 2 survive this Flee; Fast Follow free through Sluggish (rulebook: 'for free' ignores cost modifiers); Charge In paid with both Overdrives and Sluggish to clear Red's dead hand."
+    },
+    {
+      "at": 1074,
+      "text": "Iron Sentinel with Panic paid away: best split is Oomph 10 / Scramble 9 or Oomph 12 / Scramble 8, one Scramble short of 10/10 again. Found a timing edge: a Flee's Exhaust resolves at Outcome, before Cleanup moves the play zone to the discard pile. So cards in hand or in play are safe, and cards paid as a cost go to the discard, where a short deck's reshuffle feeds them to the Exhaust. On a doomed turn, free plays are safe and paying is not."
+    },
+    {
+      "at": 1108,
+      "text": "Laser Grid again, out of reach, and Red is out of Stamina: 6 live cards, plus 2 from Stitch-Em-Ups. A Flee Exhausts 4, and the 4 left can't cover next turn's draw to 5, so Red goes Down at the next Turn Start whatever I do. Red pays Riot Shield with Rust only so this Flee doesn't end the run on the spot."
+    },
+    {
+      "at": 1133,
+      "text": "Defeat, turn 36, floor 7: Red went Down drawing at Turn Start. Floor 7 had 4 rooms. We cleared the two Bio-Hazards and Fled Laser Grid (x6) and The Iron Sentinel (x5) eleven times in 13 turns. After the Down, the log shows Red's hand discarded; the rulebook doesn't say anything happens to it. Harmless, but not in the rules."
+    }
+  ],
+  "log": [
+    "Floor 1 is built: 10 rooms.",
+    "You are in: Flooded Ventilation Shaft.",
+    "Red draws Lean In.",
+    "Red draws Charge In.",
+    "Red draws Shove.",
+    "Red draws Charge In.",
+    "Red draws Shove.",
+    "Gray draws Pick The Lock.",
+    "Gray draws Pick The Lock.",
+    "Gray draws Peek Around Corner.",
+    "Gray draws Duck Under.",
+    "Gray draws Pick The Lock.",
+    "Red discards Shove from their hand.",
+    "Red discards Shove from their hand.",
+    "Red pays with Shove, Shove.",
+    "Red plays Charge In.",
+    "Gray discards Peek Around Corner from their hand.",
+    "Gray discards Duck Under from their hand.",
+    "Gray pays with Peek Around Corner, Duck Under.",
+    "Gray plays Pick The Lock.",
+    "Scramble 4 met — Clear.",
+    "Oomph 3 and Scramble 3 met — Clear, and both players get Good Stuff.",
+    "Flooded Ventilation Shaft is Cleared.",
+    "Red gets Riot Shield.",
+    "Red takes Riot Shield into hand.",
+    "Gray gets Crowbar.",
+    "Gray takes Crowbar into hand.",
+    "Cleanup.",
+    "Red discards Charge In from their play zone.",
+    "Gray discards Pick The Lock from their play zone.",
+    "— end of turn 1 —",
+    "You are in: The Sentry Drone.",
+    "Red draws Shove.",
+    "Red draws Charge In.",
+    "Gray draws Peek Around Corner.",
+    "Gray draws Duck Under.",
+    "Gray plays Crowbar.",
+    "Gray discards Peek Around Corner from their hand.",
+    "Gray discards Duck Under from their hand.",
+    "Gray pays with Peek Around Corner, Duck Under.",
+    "Gray plays Pick The Lock.",
+    "Red discards Shove from their hand.",
+    "Red discards Lean In from their hand.",
+    "Red pays with Shove, Lean In.",
+    "Red plays Charge In.",
+    "Oomph 4 and Scramble 4 met — Ascend, and both players get 2 Good Stuff!",
+    "The Sentry Drone is Cleared.",
+    "Red gets Crowbar.",
+    "Red takes Crowbar into hand.",
+    "Red gets Overcharged Battery.",
+    "Red takes Overcharged Battery into hand.",
+    "Gray gets Pry Bar.",
+    "Gray takes Pry Bar into hand.",
+    "Gray gets Scrap Magnet.",
+    "Gray takes Scrap Magnet into hand.",
+    "Gray gets Crowbar.",
+    "Gray takes Crowbar into hand.",
+    "Cleanup.",
+    "Red discards Charge In from their play zone.",
+    "Gray discards Crowbar from their play zone.",
+    "Gray discards Pick The Lock from their play zone.",
+    "— end of turn 2 —",
+    "Floor 1 is clear.",
+    "Red shuffles 4 card(s) back in.",
+    "Red takes Fast Follow.",
+    "Red shuffles 1 card(s) back in.",
+    "Gray shuffles 4 card(s) back in.",
+    "Gray takes Hack the Doors.",
+    "Gray shuffles 1 card(s) back in.",
+    "Floor 2 is built: 9 rooms.",
+    "You are in: Flooded Ventilation Shaft.",
+    "Red draws Crowbar.",
+    "Red draws Charge In.",
+    "Red draws Riot Shield.",
+    "Red draws Shove.",
+    "Red draws Fast Follow.",
+    "Gray draws Pick The Lock.",
+    "Gray draws Crowbar.",
+    "Gray draws Pick The Lock.",
+    "Gray draws Duck Under.",
+    "Gray draws Hack the Doors.",
+    "Gray plays Crowbar.",
+    "Red plays Fast Follow.",
+    "Red plays Crowbar.",
+    "Red discards Shove from their hand.",
+    "Red pays with Shove.",
+    "Red plays Riot Shield.",
+    "Scramble 4 met — Clear.",
+    "Oomph 3 and Scramble 3 met — Clear, and both players get Good Stuff.",
+    "Flooded Ventilation Shaft is Cleared.",
+    "Red gets Overcharged Battery.",
+    "Red takes Overcharged Battery into hand.",
+    "Red gets Pry Bar.",
+    "Red takes Pry Bar into hand.",
+    "Gray gets Stim Pack.",
+    "Gray takes Stim Pack into hand.",
+    "Gray gets A Pair Of Stitch-Em-Ups.",
+    "Gray takes A Pair Of Stitch-Em-Ups into hand.",
+    "Cleanup.",
+    "Red takes Riot Shield into hand.",
+    "Red discards Fast Follow from their play zone.",
+    "Red discards Crowbar from their play zone.",
+    "Gray discards Crowbar from their play zone.",
+    "— end of turn 3 —",
+    "You are in: Flooded Ventilation Shaft.",
+    "Red draws Overdrive.",
+    "Red plays Pry Bar.",
+    "Red discards Overdrive from their hand.",
+    "Red pays with Overdrive.",
+    "Red plays Riot Shield.",
+    "Gray plays Stim Pack.",
+    "Gray draws Scrap Magnet.",
+    "Oomph 3 and Scramble 3 met — Clear, and both players get Good Stuff.",
+    "Flooded Ventilation Shaft is Cleared.",
+    "Red gets Duct Tape & Wire.",
+    "Red takes Duct Tape & Wire into hand.",
+    "Gray gets Riot Shield.",
+    "Gray takes Riot Shield into hand.",
+    "Cleanup.",
+    "Red takes Riot Shield into hand.",
+    "Red discards Pry Bar from their play zone.",
+    "Gray discards Stim Pack from their play zone.",
+    "— end of turn 4 —",
+    "You are in: Flooded Ventilation Shaft.",
+    "Red draws Overcharged Battery.",
+    "Red discards Charge In from their hand.",
+    "Red pays with Charge In.",
+    "Red plays Overcharged Battery.",
+    "Red plays Duct Tape & Wire.",
+    "Oomph 3 and Scramble 3 met — Clear, and both players get Good Stuff.",
+    "Flooded Ventilation Shaft is Cleared.",
+    "Red gets A Pair Of Stitch-Em-Ups.",
+    "Red takes A Pair Of Stitch-Em-Ups into hand.",
+    "Gray gets High-Frequency Scanner.",
+    "Gray takes High-Frequency Scanner into hand.",
+    "Cleanup.",
+    "Red discards Overcharged Battery from their play zone.",
+    "Red discards Duct Tape & Wire from their play zone.",
+    "— end of turn 5 —",
+    "You are in: The Sentry Drone.",
+    "Red draws Charge In.",
+    "Red draws Charge In.",
+    "Red discards A Pair Of Stitch-Em-Ups from their hand.",
+    "Red pays with A Pair Of Stitch-Em-Ups.",
+    "Red plays Overcharged Battery.",
+    "Red plays Charge In.",
+    "Gray discards A Pair Of Stitch-Em-Ups from their hand.",
+    "Gray discards Scrap Magnet from their hand.",
+    "Gray pays with A Pair Of Stitch-Em-Ups, Scrap Magnet.",
+    "Gray plays Pick The Lock.",
+    "Oomph 6 met — Ascend.",
+    "Oomph 4 and Scramble 4 met — Ascend, and both players get 2 Good Stuff!",
+    "The Sentry Drone is Cleared.",
+    "Red gets Cutting Torch.",
+    "Red takes Cutting Torch into hand.",
+    "Red gets Salvaged Blueprint.",
+    "Red takes Salvaged Blueprint into hand.",
+    "Gray gets Pocket Dynamo.",
+    "Gray takes Pocket Dynamo into hand.",
+    "Gray gets Pry Bar.",
+    "Gray takes Pry Bar into hand.",
+    "Cleanup.",
+    "Red discards Overcharged Battery from their play zone.",
+    "Red discards Charge In from their play zone.",
+    "Gray discards Pick The Lock from their play zone.",
+    "— end of turn 6 —",
+    "Floor 2 is clear.",
+    "Red shuffles 4 card(s) back in.",
+    "Red takes Fast Follow.",
+    "Red shuffles 1 card(s) back in.",
+    "Gray shuffles 7 card(s) back in.",
+    "Gray takes One Man's Junk.",
+    "Gray shuffles 1 card(s) back in.",
+    "Floor 3 is built: 8 rooms.",
+    "You are in: Flooded Ventilation Shaft.",
+    "Red draws Cutting Torch.",
+    "Red draws Riot Shield.",
+    "Red draws Fast Follow.",
+    "Red draws Overdrive.",
+    "Red draws Salvaged Blueprint.",
+    "Gray draws Duck Under.",
+    "Gray draws High-Frequency Scanner.",
+    "Gray draws Duck Under.",
+    "Gray draws Work The Angles.",
+    "Gray draws Riot Shield.",
+    "Gray discards Duck Under from their hand.",
+    "Gray pays with Duck Under.",
+    "Gray plays Riot Shield.",
+    "Red plays Fast Follow.",
+    "Oomph 3 and Scramble 3 met — Clear, and both players get Good Stuff.",
+    "Flooded Ventilation Shaft is Cleared.",
+    "Red gets Coil Of Cable.",
+    "Red takes Coil Of Cable into hand.",
+    "Gray gets Overcharged Battery.",
+    "Gray takes Overcharged Battery into hand.",
+    "Cleanup.",
+    "Gray takes Riot Shield into hand.",
+    "Red discards Fast Follow from their play zone.",
+    "— end of turn 7 —",
+    "You are in: The Sentry Drone.",
+    "Red plays Coil Of Cable.",
+    "Red discards Overdrive from their hand.",
+    "Red discards Salvaged Blueprint from their hand.",
+    "Red pays with Overdrive, Salvaged Blueprint.",
+    "Red plays Cutting Torch.",
+    "Gray discards Duck Under from their hand.",
+    "Gray pays with Duck Under.",
+    "Gray plays Riot Shield.",
+    "Scramble 6 met — Ascend.",
+    "Oomph 4 and Scramble 4 met — Ascend, and both players get 2 Good Stuff!",
+    "The Sentry Drone is Cleared.",
+    "Red gets Duct Tape & Wire.",
+    "Red takes Duct Tape & Wire into hand.",
+    "Red gets Duct Tape & Wire.",
+    "Red takes Duct Tape & Wire into hand.",
+    "Gray gets Salvaged Blueprint.",
+    "Gray takes Salvaged Blueprint into hand.",
+    "Gray gets Riot Shield.",
+    "Gray takes Riot Shield into hand.",
+    "Cleanup.",
+    "Gray takes Riot Shield into hand.",
+    "Red discards Coil Of Cable from their play zone.",
+    "Red discards Cutting Torch from their play zone.",
+    "— end of turn 8 —",
+    "Floor 3 is clear.",
+    "Red shuffles 3 card(s) back in.",
+    "Red takes Tag Team.",
+    "Red shuffles 1 card(s) back in.",
+    "Gray shuffles 6 card(s) back in.",
+    "Gray takes In Step.",
+    "Gray shuffles 1 card(s) back in.",
+    "Floor 4 is built: 7 rooms.",
+    "You are in: Automated Defense Turret.",
+    "Red draws Charge In.",
+    "Red draws Tag Team.",
+    "Red draws Riot Shield.",
+    "Red draws Duct Tape & Wire.",
+    "Red draws Duct Tape & Wire.",
+    "Gray draws One Man's Junk.",
+    "Gray draws In Step.",
+    "Gray draws Pick The Lock.",
+    "Gray draws Hack the Doors.",
+    "Gray draws Riot Shield.",
+    "Gray discards Hack the Doors from their hand.",
+    "Gray pays with Hack the Doors.",
+    "Gray plays Riot Shield.",
+    "Red discards Duct Tape & Wire from their hand.",
+    "Red pays with Duct Tape & Wire.",
+    "Red plays Riot Shield.",
+    "Red discards Charge In from their hand.",
+    "Red pays with Charge In.",
+    "Red plays Tag Team.",
+    "Red's deck is empty — the discard pile shuffles in to make a new one (24 cards).",
+    "Red draws Shove.",
+    "Scramble 8 met — Clear, and Gray gets Good Stuff.",
+    "Automated Defense Turret is Cleared.",
+    "Gray gets Pocket Dynamo.",
+    "Gray takes Pocket Dynamo into hand.",
+    "Cleanup.",
+    "Gray takes Riot Shield into hand.",
+    "Red takes Riot Shield into hand.",
+    "Red discards Tag Team from their play zone.",
+    "— end of turn 9 —",
+    "You are in: Automated Defense Turret.",
+    "Red draws Shove.",
+    "Red draws Overcharged Battery.",
+    "Red discards Shove from their hand.",
+    "Red pays with Shove.",
+    "Red plays Overcharged Battery.",
+    "Red plays Riot Shield.",
+    "Gray discards One Man's Junk from their hand.",
+    "Gray pays with One Man's Junk.",
+    "Gray plays In Step.",
+    "Gray plays Pocket Dynamo.",
+    "Gray draws Salvaged Blueprint.",
+    "Scramble 8 met — Clear, and Gray gets Good Stuff.",
+    "Automated Defense Turret is Cleared.",
+    "Gray gets Coil Of Cable.",
+    "Gray takes Coil Of Cable into hand.",
+    "Cleanup.",
+    "Red takes Riot Shield into hand.",
+    "Red discards Overcharged Battery from their play zone.",
+    "Gray discards In Step from their play zone.",
+    "Gray discards Pocket Dynamo from their play zone.",
+    "— end of turn 10 —",
+    "You are in: Overgrown Hydroponics Bay.",
+    "Red draws Lean In.",
+    "Red draws Charge In.",
+    "Gray draws High-Frequency Scanner.",
+    "Gray plays Coil Of Cable.",
+    "Gray discards Salvaged Blueprint from their hand.",
+    "Gray pays with Salvaged Blueprint.",
+    "Gray plays Riot Shield.",
+    "Red discards Shove from their hand.",
+    "Red pays with Shove.",
+    "Red plays Riot Shield.",
+    "Red discards Lean In from their hand.",
+    "Red pays with Lean In.",
+    "Red plays Duct Tape & Wire.",
+    "Scramble 6 met — Clear, but both players get Bad Stuff.",
+    "Scramble 11 met — Clear, and both players get Good Stuff.",
+    "Overgrown Hydroponics Bay is Cleared.",
+    "Red gets Torn Seal.",
+    "Red takes Torn Seal into hand.",
+    "Gray gets Spore Cloud.",
+    "Gray takes Spore Cloud into hand.",
+    "Red gets Coil Of Cable.",
+    "Red takes Coil Of Cable into hand.",
+    "Gray gets Stim Pack.",
+    "Gray takes Stim Pack into hand.",
+    "Cleanup.",
+    "Gray discards High-Frequency Scanner from their hand.",
+    "Gray takes Riot Shield into hand.",
+    "Red takes Riot Shield into hand.",
+    "Red discards Duct Tape & Wire from their play zone.",
+    "Gray discards Coil Of Cable from their play zone.",
+    "— end of turn 11 —",
+    "You are in: Overgrown Hydroponics Bay.",
+    "Red draws Overdrive.",
+    "Gray draws Pry Bar.",
+    "Gray plays Stim Pack.",
+    "Gray draws Riot Shield.",
+    "Red plays Coil Of Cable.",
+    "Red discards Torn Seal from their hand.",
+    "Red pays with Torn Seal.",
+    "Red plays Riot Shield.",
+    "Gray discards Spore Cloud from their hand.",
+    "Gray pays with Spore Cloud.",
+    "Gray plays Riot Shield.",
+    "Gray discards Pry Bar from their hand.",
+    "Gray pays with Pry Bar.",
+    "Gray plays Riot Shield.",
+    "Scramble 6 met — Clear, but both players get Bad Stuff.",
+    "Scramble 11 met — Clear, and both players get Good Stuff.",
+    "Overgrown Hydroponics Bay is Cleared.",
+    "Red gets System Feedback.",
+    "Red takes System Feedback into hand.",
+    "Gray gets Torn Seal.",
+    "Gray takes Torn Seal into hand.",
+    "Red gets Cutting Torch.",
+    "Red takes Cutting Torch into hand.",
+    "Gray gets Cutting Torch.",
+    "Gray takes Cutting Torch into hand.",
+    "Cleanup.",
+    "Red takes Riot Shield into hand.",
+    "Gray takes Riot Shield into hand.",
+    "Gray takes Riot Shield into hand.",
+    "Red discards Coil Of Cable from their play zone.",
+    "Gray discards Stim Pack from their play zone.",
+    "— end of turn 12 —",
+    "You are in: Overgrown Hydroponics Bay.",
+    "Gray discards Torn Seal from their hand.",
+    "Gray pays with Torn Seal.",
+    "Gray plays Riot Shield.",
+    "Red discards System Feedback from their hand.",
+    "Red pays with System Feedback.",
+    "Red plays Riot Shield.",
+    "Scramble 6 met — Clear, but both players get Bad Stuff.",
+    "Overgrown Hydroponics Bay is Cleared.",
+    "Red gets Faceful Of Slime.",
+    "Red takes Faceful Of Slime into hand.",
+    "Gray gets Corrosive Acid.",
+    "Gray takes Corrosive Acid into hand.",
+    "Cleanup.",
+    "Gray takes Riot Shield into hand.",
+    "Red takes Riot Shield into hand.",
+    "— end of turn 13 —",
+    "You are in: Gears & Glitch.",
+    "Gray Exhausts Work The Angles.",
+    "Red plays Overdrive.",
+    "Red Exhausts A Pair Of Stitch-Em-Ups.",
+    "Red Exhausts Charge In.",
+    "Red discards Faceful Of Slime from their hand.",
+    "Red discards Charge In from their hand.",
+    "Red pays with Faceful Of Slime, Charge In.",
+    "Red plays Cutting Torch.",
+    "Gray discards Corrosive Acid from their hand.",
+    "Gray discards Pick The Lock from their hand.",
+    "Gray pays with Corrosive Acid, Pick The Lock.",
+    "Gray plays Cutting Torch.",
+    "Oomph 12 met — Ascend.",
+    "Gears & Glitch is Cleared.",
+    "Cleanup.",
+    "Red discards Overdrive from their play zone.",
+    "Red discards Cutting Torch from their play zone.",
+    "Gray discards Cutting Torch from their play zone.",
+    "— end of turn 14 —",
+    "Floor 4 is clear.",
+    "Red shuffles 1 card(s) back in.",
+    "Red takes Second Wind.",
+    "Red shuffles 1 card(s) back in.",
+    "Gray shuffles 2 card(s) back in.",
+    "Gray takes Hack the Doors.",
+    "Gray shuffles 1 card(s) back in.",
+    "Floor 5 is built: 6 rooms.",
+    "You are in: Pressurized Maintenance Hub.",
+    "Red draws Charge In.",
+    "Red draws Charge In.",
+    "Red draws Shove.",
+    "Red draws Coil Of Cable.",
+    "Red draws Fast Follow.",
+    "Gray draws Pocket Dynamo.",
+    "Gray draws Hack the Doors.",
+    "Gray draws Pick The Lock.",
+    "Gray draws Riot Shield.",
+    "Gray draws Pry Bar.",
+    "Gray plays Pry Bar.",
+    "Red plays Fast Follow.",
+    "Red plays Coil Of Cable.",
+    "Gray discards Hack the Doors from their hand.",
+    "Gray pays with Hack the Doors.",
+    "Gray plays Riot Shield.",
+    "Gray plays Pocket Dynamo.",
+    "Gray draws Overcharged Battery.",
+    "Oomph 7 met — Clear, and Red reveals a card reward.",
+    "Scramble 7 met — Clear, and Gray reveals a card reward.",
+    "Pressurized Maintenance Hub is Cleared.",
+    "Red's reward pool shows Junk Launcher.",
+    "Red takes Junk Launcher.",
+    "Gray's reward pool shows I'll Take That.",
+    "Gray takes I'll Take That.",
+    "Cleanup.",
+    "Gray takes Riot Shield into hand.",
+    "Red discards Fast Follow from their play zone.",
+    "Red discards Coil Of Cable from their play zone.",
+    "Gray discards Pry Bar from their play zone.",
+    "Gray discards Pocket Dynamo from their play zone.",
+    "— end of turn 15 —",
+    "You are in: Gears & Glitch.",
+    "Red draws Junk Launcher.",
+    "Red draws Salvaged Blueprint.",
+    "Gray draws I'll Take That.",
+    "Gray draws Riot Shield.",
+    "Gray discards I'll Take That from their hand.",
+    "Gray pays with I'll Take That.",
+    "Gray plays Overcharged Battery.",
+    "Gray plays Pick The Lock.",
+    "Gray discards Riot Shield from their hand.",
+    "Gray pays with Riot Shield.",
+    "Gray plays Riot Shield.",
+    "Red discards Shove from their hand.",
+    "Red discards Salvaged Blueprint from their hand.",
+    "Red pays with Shove, Salvaged Blueprint.",
+    "Red plays Charge In.",
+    "You Flee Gears & Glitch.",
+    "Red Exhausts Duct Tape & Wire.",
+    "Red Exhausts Overcharged Battery.",
+    "Red Exhausts Cutting Torch.",
+    "Gray's deck is empty — the discard pile shuffles in to make a new one (33 cards).",
+    "Gray Exhausts Pick The Lock.",
+    "Gray Exhausts Duck Under.",
+    "Gray Exhausts Peek Around Corner.",
+    "Red gets System Feedback.",
+    "Red takes System Feedback into hand.",
+    "Cleanup.",
+    "Red discards Charge In from their play zone.",
+    "Gray discards Overcharged Battery from their play zone.",
+    "Gray discards Pick The Lock from their play zone.",
+    "Gray discards Riot Shield from their play zone.",
+    "Gears & Glitch shuffles back into the Floor deck.",
+    "— end of turn 16 —",
+    "You are in: Gears & Glitch.",
+    "Red draws Pry Bar.",
+    "Red draws Overdrive.",
+    "Gray draws One Man's Junk.",
+    "Gray draws Riot Shield.",
+    "Gray draws Stim Pack.",
+    "Gray draws Spore Cloud.",
+    "Gray draws Duck Under.",
+    "Gray plays Stim Pack.",
+    "Gray draws Pick The Lock.",
+    "Red discards System Feedback from their hand.",
+    "Red discards Overdrive from their hand.",
+    "Red pays with System Feedback, Overdrive.",
+    "Red plays Charge In.",
+    "Red plays Pry Bar.",
+    "Gray discards Spore Cloud from their hand.",
+    "Gray discards Duck Under from their hand.",
+    "Gray pays with Spore Cloud, Duck Under.",
+    "Gray plays Pick The Lock.",
+    "Gray discards One Man's Junk from their hand.",
+    "Gray pays with One Man's Junk.",
+    "Gray plays Riot Shield.",
+    "Oomph 7 and Scramble 7 met — Ascend, and one of you reveals a card reward.",
+    "Gears & Glitch is Cleared.",
+    "Gray's reward pool shows Catch Your Breath.",
+    "Gray takes Catch Your Breath.",
+    "Cleanup.",
+    "Gray takes Riot Shield into hand.",
+    "Red discards Charge In from their play zone.",
+    "Red discards Pry Bar from their play zone.",
+    "Gray discards Stim Pack from their play zone.",
+    "Gray discards Pick The Lock from their play zone.",
+    "— end of turn 17 —",
+    "Floor 5 is clear.",
+    "Red shuffles 1 card(s) back in.",
+    "Red takes Reckless Swing.",
+    "Red shuffles 1 card(s) back in.",
+    "Gray shuffles 1 card(s) back in.",
+    "Gray takes One Man's Junk.",
+    "Gray shuffles 1 card(s) back in.",
+    "Floor 6 is built: 5 rooms.",
+    "You are in: Automated Defense Turret.",
+    "Red draws Second Wind.",
+    "Red draws Riot Shield.",
+    "Red draws Duct Tape & Wire.",
+    "Red draws Fast Follow.",
+    "Red draws Crowbar.",
+    "Gray draws Torn Seal.",
+    "Gray draws Stim Pack.",
+    "Gray draws Pry Bar.",
+    "Gray draws Crowbar.",
+    "Gray draws Duck Under.",
+    "Gray plays Stim Pack.",
+    "Gray draws High-Frequency Scanner.",
+    "Gray plays Crowbar.",
+    "Gray plays Pry Bar.",
+    "Gray discards Duck Under from their hand.",
+    "Gray pays with Duck Under.",
+    "Gray plays High-Frequency Scanner.",
+    "A look at the Floor deck: Automated Defense Turret, Automated Defense Turret, Gears & Glitch.",
+    "Red plays Fast Follow.",
+    "Red plays Crowbar.",
+    "Red discards Second Wind from their hand.",
+    "Red pays with Second Wind.",
+    "Red plays Riot Shield.",
+    "Scramble 8 met — Clear, and Gray gets Good Stuff.",
+    "Oomph 10 met — Clear, and one of you may Scrap a Bad Stuff card from your hand.",
+    "Automated Defense Turret is Cleared.",
+    "Gray gets Stim Pack.",
+    "Gray takes Stim Pack into hand.",
+    "Gray gets Crowbar.",
+    "Gray takes Crowbar into hand.",
+    "Cleanup.",
+    "Red takes Riot Shield into hand.",
+    "Red discards Fast Follow from their play zone.",
+    "Red discards Crowbar from their play zone.",
+    "Gray discards Stim Pack from their play zone.",
+    "Gray discards Crowbar from their play zone.",
+    "Gray discards Pry Bar from their play zone.",
+    "Gray discards High-Frequency Scanner from their play zone.",
+    "— end of turn 18 —",
+    "You are in: Automated Defense Turret.",
+    "Red draws Junk Launcher.",
+    "Red draws Shove.",
+    "Red draws Reckless Swing.",
+    "Gray draws Crowbar.",
+    "Gray draws Hack the Doors.",
+    "Gray plays Stim Pack.",
+    "Gray draws Riot Shield.",
+    "Gray plays Crowbar.",
+    "Gray plays Crowbar.",
+    "Gray discards Torn Seal from their hand.",
+    "Gray pays with Torn Seal.",
+    "Gray plays Hack the Doors.",
+    "A look at the Floor deck: Automated Defense Turret, Gears & Glitch, Overgrown Hydroponics Bay.",
+    "Red discards Shove from their hand.",
+    "Red pays with Shove.",
+    "Red plays Riot Shield.",
+    "Scramble 8 met — Clear, and Gray gets Good Stuff.",
+    "Automated Defense Turret is Cleared.",
+    "Gray gets Scrap Magnet.",
+    "Gray takes Scrap Magnet into hand.",
+    "Gray gets Pry Bar.",
+    "Gray takes Pry Bar into hand.",
+    "Gray gets Duct Tape & Wire.",
+    "Gray takes Duct Tape & Wire into hand.",
+    "Cleanup.",
+    "Red takes Riot Shield into hand.",
+    "Gray discards Stim Pack from their play zone.",
+    "Gray discards Crowbar from their play zone.",
+    "Gray discards Crowbar from their play zone.",
+    "Gray discards Hack the Doors from their play zone.",
+    "— end of turn 19 —",
+    "You are in: Automated Defense Turret.",
+    "Red draws Charge In.",
+    "Gray draws Coil Of Cable.",
+    "Gray plays Coil Of Cable.",
+    "Gray discards Scrap Magnet from their hand.",
+    "Gray pays with Scrap Magnet.",
+    "Gray plays Riot Shield.",
+    "Red discards Reckless Swing from their hand.",
+    "Red pays with Reckless Swing.",
+    "Red plays Riot Shield.",
+    "Scramble 8 met — Clear, and Gray gets Good Stuff.",
+    "Automated Defense Turret is Cleared.",
+    "Gray gets A Pair Of Stitch-Em-Ups.",
+    "Gray takes A Pair Of Stitch-Em-Ups into hand.",
+    "Cleanup.",
+    "Gray takes Riot Shield into hand.",
+    "Red takes Riot Shield into hand.",
+    "Gray discards Coil Of Cable from their play zone.",
+    "— end of turn 20 —",
+    "You are in: Overgrown Hydroponics Bay.",
+    "Red's deck is empty — the discard pile shuffles in to make a new one (27 cards).",
+    "Red draws System Feedback.",
+    "Gray draws Pry Bar.",
+    "Gray discards Pry Bar from their hand.",
+    "Gray pays with Pry Bar.",
+    "Gray plays A Pair Of Stitch-Em-Ups.",
+    "Cutting Torch goes to Red's deck.",
+    "Overcharged Battery goes to Red's deck.",
+    "Gray discards Pry Bar from their hand.",
+    "Gray pays with Pry Bar.",
+    "Gray plays Riot Shield.",
+    "Red discards System Feedback from their hand.",
+    "Red pays with System Feedback.",
+    "Red plays Riot Shield.",
+    "Scramble 6 met — Clear, but both players get Bad Stuff.",
+    "Overgrown Hydroponics Bay is Cleared.",
+    "Red gets Sluggish.",
+    "Red takes Sluggish into hand.",
+    "Gray gets Corrosive Acid.",
+    "Gray takes Corrosive Acid into hand.",
+    "Cleanup.",
+    "Gray takes Riot Shield into hand.",
+    "Red takes Riot Shield into hand.",
+    "Gray discards A Pair Of Stitch-Em-Ups from their play zone.",
+    "— end of turn 21 —",
+    "You are in: Gears & Glitch.",
+    "Gray draws Cutting Torch.",
+    "Gray draws Pick The Lock.",
+    "Gray Exhausts Peek Around Corner.",
+    "Red discards Sluggish from their hand.",
+    "Red discards Junk Launcher from their hand.",
+    "Red pays with Sluggish, Junk Launcher.",
+    "Red plays Riot Shield.",
+    "Red discards Charge In from their hand.",
+    "Red pays with Charge In.",
+    "Red plays Duct Tape & Wire.",
+    "Gray discards Corrosive Acid from their hand.",
+    "Gray discards Pick The Lock from their hand.",
+    "Gray pays with Corrosive Acid, Pick The Lock.",
+    "Gray plays Cutting Torch.",
+    "Gray discards Duct Tape & Wire from their hand.",
+    "Gray pays with Duct Tape & Wire.",
+    "Gray plays Riot Shield.",
+    "Oomph 7 and Scramble 7 met — Ascend, and one of you reveals a card reward.",
+    "Gears & Glitch is Cleared.",
+    "Red's reward pool shows Heavy Pockets.",
+    "Red takes Heavy Pockets.",
+    "Cleanup.",
+    "Red takes Riot Shield into hand.",
+    "Gray takes Riot Shield into hand.",
+    "Red discards Duct Tape & Wire from their play zone.",
+    "Gray discards Cutting Torch from their play zone.",
+    "— end of turn 22 —",
+    "Floor 6 is clear.",
+    "Red shuffles 1 card(s) back in.",
+    "Red takes Fast Follow.",
+    "Red shuffles 1 card(s) back in.",
+    "Gray shuffles 1 card(s) back in.",
+    "Gray takes Quick Vault.",
+    "Gray shuffles 1 card(s) back in.",
+    "Floor 7 is built: 4 rooms.",
+    "You are in: Bio-Hazard Containment Vault.",
+    "Red draws Shove.",
+    "Red draws Coil Of Cable.",
+    "Red draws Duct Tape & Wire.",
+    "Red draws Overdrive.",
+    "Red draws Fast Follow.",
+    "Gray draws I'll Take That.",
+    "Gray draws Scrap Magnet.",
+    "Gray draws A Pair Of Stitch-Em-Ups.",
+    "Gray draws In Step.",
+    "Gray draws Pocket Dynamo.",
+    "Red plays Coil Of Cable.",
+    "Gray plays Pocket Dynamo.",
+    "Gray draws Pocket Dynamo.",
+    "Red plays Fast Follow.",
+    "Red discards Shove from their hand.",
+    "Red pays with Shove.",
+    "Red plays Duct Tape & Wire.",
+    "Gray plays Pocket Dynamo.",
+    "Gray draws Hack the Doors.",
+    "Gray discards A Pair Of Stitch-Em-Ups from their hand.",
+    "Gray pays with A Pair Of Stitch-Em-Ups.",
+    "Gray plays I'll Take That.",
+    "Gray discards Scrap Magnet from their hand.",
+    "Gray pays with Scrap Magnet.",
+    "Gray plays In Step.",
+    "Scramble 15 met — Clear, and one of you reveals a card reward.",
+    "Bio-Hazard Containment Vault is Cleared.",
+    "Red's reward pool shows Junk Launcher.",
+    "Red takes Junk Launcher.",
+    "Cleanup.",
+    "Red discards Coil Of Cable from their play zone.",
+    "Red discards Fast Follow from their play zone.",
+    "Red discards Duct Tape & Wire from their play zone.",
+    "Gray discards Pocket Dynamo from their play zone.",
+    "Gray discards Pocket Dynamo from their play zone.",
+    "Gray discards I'll Take That from their play zone.",
+    "Gray discards In Step from their play zone.",
+    "— end of turn 23 —",
+    "You are in: The Iron Sentinel.",
+    "Red draws Junk Launcher.",
+    "Red draws Charge In.",
+    "Red draws Second Wind.",
+    "Red draws Lean In.",
+    "Gray draws Riot Shield.",
+    "Gray draws One Man's Junk.",
+    "Gray draws Duck Under.",
+    "Gray draws Catch Your Breath.",
+    "Red discards Lean In from their hand.",
+    "Red discards Junk Launcher from their hand.",
+    "Red pays with Lean In, Junk Launcher.",
+    "Red plays Second Wind.",
+    "Red shuffles 1 card(s) back in.",
+    "You Flee The Iron Sentinel.",
+    "Red Exhausts Coil Of Cable.",
+    "Red Exhausts Reckless Swing.",
+    "Red Exhausts Shove.",
+    "Red Exhausts Overcharged Battery.",
+    "Gray Exhausts Quick Vault.",
+    "Gray Exhausts Corrosive Acid.",
+    "Gray Exhausts Pick The Lock.",
+    "Gray Exhausts Salvaged Blueprint.",
+    "Red gets Panic.",
+    "Red takes Panic into hand.",
+    "Gray gets Faceful Of Slime.",
+    "Gray takes Faceful Of Slime into hand.",
+    "Cleanup.",
+    "Red discards Second Wind from their play zone.",
+    "The Iron Sentinel shuffles back into the Floor deck.",
+    "— end of turn 24 —",
+    "You are in: Laser Grid Security Hall.",
+    "Red draws Charge In.",
+    "Red draws Heavy Pockets.",
+    "Red discards Overdrive from their hand.",
+    "Red pays with Overdrive.",
+    "Red plays Heavy Pockets.",
+    "Red shuffles 1 card(s) back in.",
+    "Gray discards Faceful Of Slime from their hand.",
+    "Gray pays with Faceful Of Slime.",
+    "Gray plays Hack the Doors.",
+    "A look at the Gray reward pool: Distract & Pivot, Quick Vault, Here, Catch.",
+    "You Flee Laser Grid Security Hall.",
+    "Red Exhausts Crowbar.",
+    "Red Exhausts Panic.",
+    "Red Exhausts Fast Follow.",
+    "Red Exhausts Fast Follow.",
+    "Gray's deck is empty — the discard pile shuffles in to make a new one (34 cards).",
+    "Gray Exhausts Crowbar.",
+    "Gray Exhausts A Pair Of Stitch-Em-Ups.",
+    "Gray Exhausts Duck Under.",
+    "Gray Exhausts Pry Bar.",
+    "Cleanup.",
+    "Red discards Heavy Pockets from their play zone.",
+    "Gray discards Hack the Doors from their play zone.",
+    "Laser Grid Security Hall shuffles back into the Floor deck.",
+    "— end of turn 25 —",
+    "You are in: Laser Grid Security Hall.",
+    "Red draws Tag Team.",
+    "Red draws Shove.",
+    "Red draws Pry Bar.",
+    "Gray draws Hack the Doors.",
+    "You Flee Laser Grid Security Hall.",
+    "Red Exhausts Cutting Torch.",
+    "Red Exhausts Riot Shield.",
+    "Red Exhausts Cutting Torch.",
+    "Red Exhausts Charge In.",
+    "Gray Exhausts I'll Take That.",
+    "Gray Exhausts Torn Seal.",
+    "Gray Exhausts Stim Pack.",
+    "Gray Exhausts Coil Of Cable.",
+    "Cleanup.",
+    "Laser Grid Security Hall shuffles back into the Floor deck.",
+    "— end of turn 26 —",
+    "You are in: Bio-Hazard Containment Vault.",
+    "Gray discards Duck Under from their hand.",
+    "Gray pays with Duck Under.",
+    "Gray plays One Man's Junk.",
+    "Red discards Shove from their hand.",
+    "Red pays with Shove.",
+    "Red plays Tag Team.",
+    "Red draws Overcharged Battery.",
+    "Red discards Charge In from their hand.",
+    "Red pays with Charge In.",
+    "Red plays Overcharged Battery.",
+    "Red plays Charge In.",
+    "Red plays Pry Bar.",
+    "Gray Scraps Riot Shield for +3 Oomph.",
+    "Oomph 15 met — Clear, and one of you reveals a card reward.",
+    "Bio-Hazard Containment Vault is Cleared.",
+    "Gray's reward pool shows Distract & Pivot.",
+    "Gray takes Distract & Pivot.",
+    "Cleanup.",
+    "Red discards Tag Team from their play zone.",
+    "Red discards Overcharged Battery from their play zone.",
+    "Red discards Charge In from their play zone.",
+    "Red discards Pry Bar from their play zone.",
+    "Gray discards One Man's Junk from their play zone.",
+    "— end of turn 27 —",
+    "You are in: Laser Grid Security Hall.",
+    "Red draws Torn Seal.",
+    "Red draws Overdrive.",
+    "Red draws System Feedback.",
+    "Red draws Shove.",
+    "Red draws Salvaged Blueprint.",
+    "Gray draws Distract & Pivot.",
+    "Gray draws Cutting Torch.",
+    "Gray draws A Pair Of Stitch-Em-Ups.",
+    "Gray discards Catch Your Breath from their hand.",
+    "Gray pays with Catch Your Breath.",
+    "Gray plays A Pair Of Stitch-Em-Ups.",
+    "Shove goes to Red's deck.",
+    "Reckless Swing goes to Red's deck.",
+    "Red discards Torn Seal from their hand.",
+    "Red pays with Torn Seal.",
+    "Red plays Salvaged Blueprint.",
+    "Red draws Charge In.",
+    "Red draws Faceful Of Slime.",
+    "Faceful Of Slime goes to Red's deck.",
+    "Red discards System Feedback from their hand.",
+    "Red pays with System Feedback.",
+    "Red plays Shove.",
+    "You Flee Laser Grid Security Hall.",
+    "Red Exhausts Faceful Of Slime.",
+    "Red Exhausts Shove.",
+    "Red Exhausts Reckless Swing.",
+    "Red's deck is empty — the discard pile shuffles in to make a new one (22 cards).",
+    "Red Exhausts Overcharged Battery.",
+    "Gray Exhausts Stim Pack.",
+    "Gray Exhausts Scrap Magnet.",
+    "Gray Exhausts Crowbar.",
+    "Gray Exhausts Duck Under.",
+    "Cleanup.",
+    "Red discards Salvaged Blueprint from their play zone.",
+    "Red discards Shove from their play zone.",
+    "Gray discards A Pair Of Stitch-Em-Ups from their play zone.",
+    "Laser Grid Security Hall shuffles back into the Floor deck.",
+    "— end of turn 28 —",
+    "You are in: Laser Grid Security Hall.",
+    "Red draws Fast Follow.",
+    "Red draws Lean In.",
+    "Red draws Junk Launcher.",
+    "Gray draws Pocket Dynamo.",
+    "Gray draws High-Frequency Scanner.",
+    "Gray discards Distract & Pivot from their hand.",
+    "Gray discards Hack the Doors from their hand.",
+    "Gray pays with Distract & Pivot, Hack the Doors.",
+    "Gray plays Cutting Torch.",
+    "Red plays Fast Follow.",
+    "Gray plays Pocket Dynamo.",
+    "Gray draws Pick The Lock.",
+    "Red discards Lean In from their hand.",
+    "Red discards Charge In from their hand.",
+    "Red pays with Lean In, Charge In.",
+    "Red plays Junk Launcher.",
+    "Gray discards Pick The Lock from their hand.",
+    "Gray pays with Pick The Lock.",
+    "Gray plays High-Frequency Scanner.",
+    "A look at the Floor deck: The Iron Sentinel.",
+    "You Flee Laser Grid Security Hall.",
+    "Red Exhausts Sluggish.",
+    "Red Exhausts System Feedback.",
+    "Red Exhausts Shove.",
+    "Red Exhausts Heavy Pockets.",
+    "Gray Exhausts Pick The Lock.",
+    "Gray Exhausts Corrosive Acid.",
+    "Gray Exhausts Pick The Lock.",
+    "Gray Exhausts In Step.",
+    "Cleanup.",
+    "Red discards Fast Follow from their play zone.",
+    "Red discards Junk Launcher from their play zone.",
+    "Gray discards Cutting Torch from their play zone.",
+    "Gray discards Pocket Dynamo from their play zone.",
+    "Gray discards High-Frequency Scanner from their play zone.",
+    "Laser Grid Security Hall shuffles back into the Floor deck.",
+    "— end of turn 29 —",
+    "You are in: The Iron Sentinel.",
+    "Red draws Torn Seal.",
+    "Red draws System Feedback.",
+    "Red draws Overdrive.",
+    "Red draws Shove.",
+    "Gray draws Pry Bar.",
+    "Gray draws Pocket Dynamo.",
+    "Gray draws Stim Pack.",
+    "Gray draws Scrap Magnet.",
+    "Gray draws Spore Cloud.",
+    "Gray plays Stim Pack.",
+    "Gray draws Duct Tape & Wire.",
+    "Red discards System Feedback from their hand.",
+    "Red pays with System Feedback.",
+    "Red plays Shove.",
+    "Gray plays Pocket Dynamo.",
+    "Gray draws One Man's Junk.",
+    "Gray plays Pry Bar.",
+    "Gray discards Spore Cloud from their hand.",
+    "Gray pays with Spore Cloud.",
+    "Gray plays One Man's Junk.",
+    "Gray discards Scrap Magnet from their hand.",
+    "Gray pays with Scrap Magnet.",
+    "Gray plays Duct Tape & Wire.",
+    "You Flee The Iron Sentinel.",
+    "Red Exhausts Coil Of Cable.",
+    "Red Exhausts Pry Bar.",
+    "Red Exhausts Duct Tape & Wire.",
+    "Red Exhausts Charge In.",
+    "Gray Exhausts Riot Shield.",
+    "Gray Exhausts Faceful Of Slime.",
+    "Gray Exhausts Crowbar.",
+    "Gray Exhausts Overcharged Battery.",
+    "Red gets Panic.",
+    "Red takes Panic into hand.",
+    "Gray gets Rust.",
+    "Gray takes Rust into hand.",
+    "Cleanup.",
+    "Red discards Shove from their play zone.",
+    "Gray discards Stim Pack from their play zone.",
+    "Gray discards Pocket Dynamo from their play zone.",
+    "Gray discards Pry Bar from their play zone.",
+    "Gray discards One Man's Junk from their play zone.",
+    "Gray discards Duct Tape & Wire from their play zone.",
+    "The Iron Sentinel shuffles back into the Floor deck.",
+    "— end of turn 30 —",
+    "You are in: The Iron Sentinel.",
+    "Red draws Charge In.",
+    "Gray draws Pry Bar.",
+    "Gray's deck is empty — the discard pile shuffles in to make a new one (18 cards).",
+    "Gray draws Stim Pack.",
+    "Gray draws One Man's Junk.",
+    "Gray draws Hack the Doors.",
+    "Red discards Panic from their hand.",
+    "Red discards Torn Seal from their hand.",
+    "Red pays with Panic, Torn Seal.",
+    "Red plays Charge In.",
+    "Gray discards Rust from their hand.",
+    "Gray pays with Rust.",
+    "Gray plays One Man's Junk.",
+    "Gray plays Stim Pack.",
+    "Gray draws Pocket Dynamo.",
+    "Gray plays Pry Bar.",
+    "Gray plays Pocket Dynamo.",
+    "Gray draws Duck Under.",
+    "Gray discards Duck Under from their hand.",
+    "Gray pays with Duck Under.",
+    "Gray plays Hack the Doors.",
+    "A look at the Red deck: Second Wind, Duct Tape & Wire, Junk Launcher.",
+    "You Flee The Iron Sentinel.",
+    "Red Exhausts Second Wind.",
+    "Red Exhausts Duct Tape & Wire.",
+    "Red Exhausts Junk Launcher.",
+    "Red Exhausts Tag Team.",
+    "Gray Exhausts High-Frequency Scanner.",
+    "Gray Exhausts One Man's Junk.",
+    "Gray Exhausts Hack the Doors.",
+    "Gray Exhausts Pry Bar.",
+    "Red gets Sluggish.",
+    "Red takes Sluggish into hand.",
+    "Gray gets Spore Cloud.",
+    "Gray takes Spore Cloud into hand.",
+    "Cleanup.",
+    "Red discards Charge In from their play zone.",
+    "Gray discards One Man's Junk from their play zone.",
+    "Gray discards Stim Pack from their play zone.",
+    "Gray discards Pry Bar from their play zone.",
+    "Gray discards Pocket Dynamo from their play zone.",
+    "Gray discards Hack the Doors from their play zone.",
+    "The Iron Sentinel shuffles back into the Floor deck.",
+    "— end of turn 31 —",
+    "You are in: Laser Grid Security Hall.",
+    "Red draws Charge In.",
+    "Red's deck is empty — the discard pile shuffles in to make a new one (11 cards).",
+    "Red draws Fast Follow.",
+    "Gray draws Pick The Lock.",
+    "Gray draws Pocket Dynamo.",
+    "Gray draws A Pair Of Stitch-Em-Ups.",
+    "Gray draws Cutting Torch.",
+    "Gray discards Spore Cloud from their hand.",
+    "Gray pays with Spore Cloud.",
+    "Gray plays A Pair Of Stitch-Em-Ups.",
+    "Riot Shield goes to Red's deck.",
+    "Charge In goes to Red's deck.",
+    "Red plays Fast Follow.",
+    "Gray plays Pocket Dynamo.",
+    "Gray draws Duct Tape & Wire.",
+    "Gray discards Pick The Lock from their hand.",
+    "Gray discards Duct Tape & Wire from their hand.",
+    "Gray pays with Pick The Lock, Duct Tape & Wire.",
+    "Gray plays Cutting Torch.",
+    "Red discards Overdrive from their hand.",
+    "Red discards Overdrive from their hand.",
+    "Red discards Sluggish from their hand.",
+    "Red pays with Overdrive, Overdrive, Sluggish.",
+    "Red plays Charge In.",
+    "You Flee Laser Grid Security Hall.",
+    "Red Exhausts Charge In.",
+    "Red Exhausts Torn Seal.",
+    "Red Exhausts Shove.",
+    "Red Exhausts Shove.",
+    "Gray Exhausts Scrap Magnet.",
+    "Gray Exhausts Distract & Pivot.",
+    "Gray Exhausts Catch Your Breath.",
+    "Gray Exhausts Spore Cloud.",
+    "Cleanup.",
+    "Red discards Fast Follow from their play zone.",
+    "Red discards Charge In from their play zone.",
+    "Gray discards A Pair Of Stitch-Em-Ups from their play zone.",
+    "Gray discards Pocket Dynamo from their play zone.",
+    "Gray discards Cutting Torch from their play zone.",
+    "Laser Grid Security Hall shuffles back into the Floor deck.",
+    "— end of turn 32 —",
+    "You are in: The Iron Sentinel.",
+    "Red draws Charge In.",
+    "Red draws Junk Launcher.",
+    "Red draws Lean In.",
+    "Red draws Salvaged Blueprint.",
+    "Red draws Panic.",
+    "Gray's deck is empty — the discard pile shuffles in to make a new one (13 cards).",
+    "Gray draws Spore Cloud.",
+    "Gray draws Cutting Torch.",
+    "Gray draws Pocket Dynamo.",
+    "Gray draws Rust.",
+    "Gray draws Duct Tape & Wire.",
+    "Gray discards Spore Cloud from their hand.",
+    "Gray discards Rust from their hand.",
+    "Gray pays with Spore Cloud, Rust.",
+    "Gray plays Cutting Torch.",
+    "Red discards Panic from their hand.",
+    "Red pays with Panic.",
+    "Red plays Salvaged Blueprint.",
+    "Red draws System Feedback.",
+    "Red draws Riot Shield.",
+    "System Feedback goes to Red's deck.",
+    "Red discards Lean In from their hand.",
+    "Red discards Junk Launcher from their hand.",
+    "Red pays with Lean In, Junk Launcher.",
+    "Red plays Charge In.",
+    "Gray plays Pocket Dynamo.",
+    "Gray draws A Pair Of Stitch-Em-Ups.",
+    "Gray discards Duct Tape & Wire from their hand.",
+    "Gray pays with Duct Tape & Wire.",
+    "Gray plays A Pair Of Stitch-Em-Ups.",
+    "Riot Shield goes to Gray's deck.",
+    "Pry Bar goes to Gray's deck.",
+    "You Flee The Iron Sentinel.",
+    "Red Exhausts System Feedback.",
+    "Red Exhausts Charge In.",
+    "Red's deck is empty — the discard pile shuffles in to make a new one (8 cards).",
+    "Red Exhausts Junk Launcher.",
+    "Red Exhausts Charge In.",
+    "Gray Exhausts Duck Under.",
+    "Gray Exhausts Pocket Dynamo.",
+    "Gray Exhausts Pry Bar.",
+    "Gray Exhausts Pick The Lock.",
+    "Red gets My Head Is Quantum Spinning.",
+    "Red takes My Head Is Quantum Spinning into hand.",
+    "Gray gets My Head Is Quantum Spinning.",
+    "Gray takes My Head Is Quantum Spinning into hand.",
+    "Cleanup.",
+    "Red discards Salvaged Blueprint from their play zone.",
+    "Red discards Charge In from their play zone.",
+    "Gray discards Cutting Torch from their play zone.",
+    "Gray discards Pocket Dynamo from their play zone.",
+    "Gray discards A Pair Of Stitch-Em-Ups from their play zone.",
+    "The Iron Sentinel shuffles back into the Floor deck.",
+    "— end of turn 33 —",
+    "You are in: The Iron Sentinel.",
+    "Red draws Panic.",
+    "Red draws Fast Follow.",
+    "Red draws Overdrive.",
+    "Gray draws Hack the Doors.",
+    "Gray draws One Man's Junk.",
+    "Gray draws Stim Pack.",
+    "Gray draws Riot Shield.",
+    "Red discards Panic from their hand.",
+    "Red pays with Panic.",
+    "Red plays Riot Shield.",
+    "Gray plays Stim Pack.",
+    "Gray draws Pry Bar.",
+    "Red Exhausts Sluggish.",
+    "Red plays Fast Follow.",
+    "Gray plays Pry Bar.",
+    "You Flee The Iron Sentinel.",
+    "Red Exhausts Lean In.",
+    "Red Exhausts Overdrive.",
+    "Red's deck is empty — the discard pile shuffles in to make a new one (3 cards).",
+    "Red Exhausts Panic.",
+    "Red Exhausts Charge In.",
+    "Gray's deck is empty — the discard pile shuffles in to make a new one (6 cards).",
+    "Gray Exhausts Spore Cloud.",
+    "Gray Exhausts Duct Tape & Wire.",
+    "Gray Exhausts Rust.",
+    "Gray Exhausts Cutting Torch.",
+    "Red gets Rust.",
+    "Red takes Rust into hand.",
+    "The Bad Stuff pool is empty — Gray gets nothing.",
+    "Cleanup.",
+    "Red discards Riot Shield from their play zone.",
+    "Red discards Fast Follow from their play zone.",
+    "Gray discards Stim Pack from their play zone.",
+    "Gray discards Pry Bar from their play zone.",
+    "The Iron Sentinel shuffles back into the Floor deck.",
+    "— end of turn 34 —",
+    "You are in: Laser Grid Security Hall.",
+    "Red draws Salvaged Blueprint.",
+    "Red's deck is empty — the discard pile shuffles in to make a new one (2 cards).",
+    "Red draws Riot Shield.",
+    "Gray draws A Pair Of Stitch-Em-Ups.",
+    "Gray discards My Head Is Quantum Spinning from their hand.",
+    "Gray pays with My Head Is Quantum Spinning.",
+    "Gray plays A Pair Of Stitch-Em-Ups.",
+    "Fast Follow goes to Red's deck.",
+    "Charge In goes to Red's deck.",
+    "Red discards Rust from their hand.",
+    "Red pays with Rust.",
+    "Red plays Riot Shield.",
+    "You Flee Laser Grid Security Hall.",
+    "Red Exhausts Fast Follow.",
+    "Red Exhausts Fast Follow.",
+    "Red Exhausts Charge In.",
+    "Red's deck is empty — the discard pile shuffles in to make a new one (1 cards).",
+    "Red Exhausts Rust.",
+    "Gray Exhausts Pocket Dynamo.",
+    "Gray's deck is empty — the discard pile shuffles in to make a new one (3 cards).",
+    "Gray Exhausts My Head Is Quantum Spinning.",
+    "Gray Exhausts Stim Pack.",
+    "Gray Exhausts Pry Bar.",
+    "Cleanup.",
+    "Red discards Riot Shield from their play zone.",
+    "Gray discards A Pair Of Stitch-Em-Ups from their play zone.",
+    "Laser Grid Security Hall shuffles back into the Floor deck.",
+    "— end of turn 35 —",
+    "You are in: Laser Grid Security Hall.",
+    "Red's deck is empty — the discard pile shuffles in to make a new one (1 cards).",
+    "Red draws Riot Shield.",
+    "Red is Down — drew from an empty deck and discard pile. The run is lost.",
+    "Red discards My Head Is Quantum Spinning from their hand.",
+    "Red discards Overdrive from their hand.",
+    "Red discards Salvaged Blueprint from their hand.",
+    "Red discards Riot Shield from their hand.",
+    "You lose."
+  ]
+}

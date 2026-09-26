@@ -6,7 +6,7 @@
  * in the state, so a run replays exactly from its seed and its command log.
  *
  * Section numbers point at design/rulebook.md, rules version
- * 0.2.1, which is the authority.
+ * 0.2.5, which is the authority.
  */
 
 import { behaviourOf, type BehaviourContext, type ChoiceAnswer } from "./cards/behaviours";
@@ -30,6 +30,7 @@ import type {
   Command,
   DomainEvent,
   GameState,
+  GoodStuffSpread,
   Pending,
   Pile,
   Rejection,
@@ -53,6 +54,8 @@ import {
   discard,
   exhaustFromDeck,
   discardFromHand,
+  earnGoodStuff,
+  giveGoodStuff,
   playerOf,
   scrap,
   shuffleIntoDeck,
@@ -60,8 +63,6 @@ import {
   spendPlayDiscount,
   standing,
   takeFrom,
-  takeGoodStuff,
-  topDeck,
   withPlayer,
 } from "./verbs";
 
@@ -206,6 +207,13 @@ function validateAnswer(pending: Pending, command: Command): Rejection | null {
         : reject("NotAnOption", `${command.stat} is not one of the options.`);
 
     case "CHOOSE_CARDS": {
+      if (pending.kind === "ChooseGoodStuff") {
+        const [only, ...extra] = command.cardIds;
+        if (only === undefined || extra.length > 0) return reject("NotAnOption", "Choose 1.");
+        return pending.options.some((x) => x.id === only)
+          ? null
+          : reject("NotAnOption", "That card was not revealed.");
+      }
       if (pending.kind !== "ChooseCards") return waiting;
       const chosen = new Set(command.cardIds);
       if (chosen.size !== command.cardIds.length) {
@@ -230,7 +238,11 @@ function validateAnswer(pending: Pending, command: Command): Rejection | null {
     }
 
     case "TAKE_REWARD":
-      return pending.kind === "TakeReward" ? null : waiting;
+      if (pending.kind !== "TakeReward") return waiting;
+      if (command.cardId === null) return null;
+      return pending.cards.some((x) => x.id === command.cardId)
+        ? null
+        : reject("NotOffered", "That card was not revealed.");
 
     default:
       return waiting;
@@ -273,7 +285,10 @@ export function execute(state: GameState, command: Command): Result {
   const reason = validate(state, command);
   if (reason) return { ok: false, reason };
   const run: Run = { events: [], settled: 0, enteredAt: new Map() };
-  const next = settle(apply(state, command, run), run);
+  let next = settle(apply(state, command, run), run);
+  // A card played during Play can earn Good Stuff (Crowbar); its spread is
+  // revealed once the play has finished. Outcome's own drain does the same.
+  if (next.phase === "Play") next = offerGoodStuff(next, run);
   return { ok: true, state: next, events: run.events };
 }
 
@@ -298,7 +313,7 @@ function apply(state: GameState, command: Command, run: Run): GameState {
     case "ORDER_CARDS":
       return answerCards(state, command.cardIds, "order", run);
     case "TAKE_REWARD":
-      return answerReward(state, command.take, run);
+      return answerReward(state, command.cardId, run);
     case "ASCEND":
       return ascend(state, command.Red, command.Gray, run);
     default:
@@ -708,7 +723,7 @@ function applyEffect(state: GameState, effect: RoomEffect, who: Character, run: 
     case "DealBadStuff":
       return dealBadStuff(state, who, effect.count, run.events);
     case "TakeGoodStuff":
-      return takeGoodStuff(state, who, effect.count, run.events);
+      return earnGoodStuff(state, who, effect.count);
     case "RevealReward":
       throw new CorruptStateError("A reward reveal is a pending choice, not an effect.");
     case "ScrapBadStuffFromHand":
@@ -728,11 +743,21 @@ function drain(state: GameState, run: Run): GameState {
   let s = state;
   for (;;) {
     if (s.phase === "GameOver") return s;
+    s = offerGoodStuff(s, run);
+    if (s.pending || s.phase === "GameOver") return s;
     const resolution = s.resolution;
     if (!resolution) return s;
     const head = resolution.effects[0];
     if (!head) return finishTurn(s, run);
     const rest = resolution.effects.slice(1);
+
+    if (head.type === "TakeGoodStuff" && head.who === "both") {
+      // Rulebook, Keywords: `Get Good Stuff` — when both players get it from
+      // the same outcome, both spreads are revealed before either chooses.
+      for (const c of CHARACTERS) s = earnGoodStuff(s, c, head.count);
+      s = withEffects(s, rest);
+      continue;
+    }
 
     if (head.who === "both") {
       s = withEffects(s, [...CHARACTERS.map((c) => retarget(head, c)), ...rest]);
@@ -763,24 +788,25 @@ function drain(state: GameState, run: Run): GameState {
     }
 
     if (head.type === "RevealReward") {
-      // Turn the top card of that character's reward pool face up, and take
-      // it or skip it.
-      const card = s.pools[head.who][0];
+      // Rulebook, Keywords: `Reveal a card reward` — the top 3 of that
+      // character's reward pool, face up; they stay in the pool until the
+      // choice is made.
+      const cards = s.pools[head.who].slice(0, REVEALED);
       s = withEffects(s, rest);
-      if (!card) {
+      if (cards.length === 0) {
         run.events.push({ type: "REWARD_POOL_EMPTY", character: head.who });
         continue;
       }
-      run.events.push({ type: "REWARD_REVEALED", character: head.who, card });
+      run.events.push({ type: "REWARD_REVEALED", character: head.who, cards });
       s = settle(s, run);
       if (s.phase === "GameOver") return s;
       return {
         ...s,
         pending: {
           kind: "TakeReward",
-          prompt: `Take ${card.name}, or skip it?`,
+          prompt: `${head.who}: shuffle one of ${cards.map((x) => x.name).join(", ")} into your deck, or take none?`,
           character: head.who,
-          card,
+          cards,
           source: null,
         },
       };
@@ -1037,6 +1063,11 @@ function answerCards(
 ): GameState {
   const pending = state.pending;
   if (!pending) throw new CorruptStateError("No card is waiting on that answer.");
+  if (kind === "cards" && pending.kind === "ChooseGoodStuff") {
+    const [only] = ids as readonly CardId[];
+    if (only === undefined) throw new CorruptStateError("Kept no Good Stuff.");
+    return answerGoodStuff(state, only, run);
+  }
   if (kind === "cards") {
     if (!pending.source) return answerRoomCards(state, pending, ids as readonly CardId[], run);
     if (pending.kind !== "ChooseCards") throw new CorruptStateError("No card choice is waiting on that answer.");
@@ -1055,25 +1086,113 @@ function answerCards(
   return runChoice(state, { kind: "order", tag: pending.source.tag, cards }, run);
 }
 
-function answerReward(state: GameState, take: boolean, run: Run): GameState {
+/**
+ * Rulebook, Keywords: `Reveal a card reward` — shuffle one of the revealed
+ * cards into your deck, or none; the rest go to the bottom of the pool. The
+ * same rule Ascending's own reward uses (`ascendOne`).
+ */
+function answerReward(state: GameState, cardId: CardId | null, run: Run): GameState {
   const pending = state.pending;
   if (pending?.kind !== "TakeReward") {
     throw new CorruptStateError("No reward reveal is waiting for an answer.");
   }
-  const { character, card } = pending;
-  const rest = state.pools[character].slice(1);
+  const { character, cards } = pending;
+  const taken = cards.find((x) => x.id === cardId) ?? null;
+  const returned = cards.filter((x) => x.id !== taken?.id);
   let s: GameState = { ...state, pending: null };
-  if (take) {
-    // Nothing shuffles during a floor, so it is the very next card they draw.
-    s = setPool(s, character, rest);
-    s = topDeck(s, character, card);
-    run.events.push({ type: "REWARD_TAKEN", character, card });
+  s = setPool(s, character, [...s.pools[character].slice(cards.length), ...returned]);
+  if (taken) {
+    run.events.push({ type: "REWARD_TAKEN", character, card: taken });
+    s = shuffleIntoDeck(s, character, [taken], run.events);
   } else {
-    // Bottom of its pool, as a declined ascension reward does.
-    s = setPool(s, character, [...rest, card]);
     run.events.push({ type: "REWARD_DECLINED", character });
   }
   return drain(settle(s, run), run);
+}
+
+/* ------------------------------------------------------------ Good Stuff */
+
+/** How many cards a spread or a card reward reveals (rulebook, Keywords). */
+const REVEALED = 3;
+
+/**
+ * Rulebook, Keywords: `Get Good Stuff`. Every standing character still owed
+ * Good Stuff reveals one spread of up to 3 at the same time, the first
+ * character off the top of the pool and the next off the cards below. A
+ * character who finds the pool empty gains nothing for that piece. Does
+ * nothing while another question is waiting.
+ */
+function offerGoodStuff(state: GameState, run: Run): GameState {
+  if (state.pending || state.phase === "GameOver") return state;
+  const owing = standing(state).filter((c) => state.thisTurn.goodStuffOwed[c] > 0);
+  if (owing.length === 0) return state;
+
+  const owed = { ...state.thisTurn.goodStuffOwed };
+  const spreads: GoodStuffSpread[] = [];
+  let pool = state.pools.goodStuff;
+  for (const c of owing) {
+    owed[c] -= 1;
+    const cards = pool.slice(0, REVEALED);
+    pool = pool.slice(cards.length);
+    if (cards.length === 0) {
+      run.events.push({ type: "STUFF_POOL_EMPTY", character: c, pool: "good_stuff" });
+      continue;
+    }
+    run.events.push({ type: "GOOD_STUFF_REVEALED", character: c, cards });
+    spreads.push({ character: c, cards });
+  }
+  const s: GameState = { ...state, thisTurn: { ...state.thisTurn, goodStuffOwed: owed } };
+  if (spreads.length === 0) return offerGoodStuff(s, run);
+  return askGoodStuff(s, spreads, [], run);
+}
+
+/**
+ * Ask the next spread still unanswered. A spread of one card has no choice in
+ * it and is taken as it stands. Once every spread is answered, the picks go to
+ * hand together, and anything they set off (Crowbar) may owe another spread.
+ */
+function askGoodStuff(
+  state: GameState,
+  spreads: readonly GoodStuffSpread[],
+  picked: readonly Card[],
+  run: Run,
+): GameState {
+  const chosen = [...picked];
+  for (;;) {
+    const next = spreads[chosen.length];
+    if (!next) break;
+    const [only, ...more] = next.cards;
+    if (only && more.length === 0) {
+      chosen.push(only);
+      continue;
+    }
+    return {
+      ...state,
+      pending: {
+        kind: "ChooseGoodStuff",
+        prompt: `${next.character}: keep which Good Stuff?`,
+        character: next.character,
+        options: next.cards,
+        spreads,
+        picked: chosen,
+        source: null,
+      },
+    };
+  }
+  const s = settle(giveGoodStuff(state, spreads, chosen, run.events), run);
+  return offerGoodStuff(s, run);
+}
+
+function answerGoodStuff(state: GameState, cardId: CardId, run: Run): GameState {
+  const pending = state.pending;
+  if (pending?.kind !== "ChooseGoodStuff") {
+    throw new CorruptStateError("No Good Stuff spread is waiting for an answer.");
+  }
+  const card = pending.options.find((x) => x.id === cardId);
+  if (!card) throw new CorruptStateError("Kept a card that was not revealed.");
+  const s = askGoodStuff({ ...state, pending: null }, pending.spreads, [...pending.picked, card], run);
+  // Back to whatever earned it: a room's Outcome still draining, or Play.
+  return s.pending || s.phase === "GameOver" ? s : drain(s, run);
 }
 
 const setPool = (state: GameState, c: Character, cards: readonly Card[]): GameState =>

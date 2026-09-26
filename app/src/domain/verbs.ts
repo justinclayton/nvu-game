@@ -387,48 +387,61 @@ export function topDeck(state: GameState, c: Character, card: Card): GameState {
 /* -------------------------------------------------------------------- Stuff */
 
 /**
- * What you earn is drawn face down from the Good Stuff pool and goes to that
- * character's hand. A Down character earns nothing.
+ * Rulebook, Keywords: `Get X Good Stuff` — earning Good Stuff only counts it
+ * as owed. The engine reveals a spread of 3 for each piece owed as soon as
+ * nothing else is waiting (`offerGoodStuff` in engine.ts), so a card that
+ * earns it mid-effect (Crowbar) never has to suspend. A Down character earns
+ * nothing.
+ */
+export function earnGoodStuff(state: GameState, c: Character, count: number): GameState {
+  if (count <= 0 || playerOf(state, c).down) return state;
+  const owed = state.thisTurn.goodStuffOwed;
+  return { ...state, thisTurn: { ...state.thisTurn, goodStuffOwed: { ...owed, [c]: owed[c] + count } } };
+}
+
+/**
+ * Rulebook, Keywords: `Get Good Stuff` — the picks from one set of spreads go
+ * into hand at the same time, and every other revealed card goes to the
+ * bottom of the pool in the order it was revealed.
  *
  * Every piece handed over is also tallied on `thisTurn.goodStuffTaken`, which
  * is how Crowbar's own "if you got any Good Stuff this turn" looks backward
  * at what has already landed.
  */
-export function takeGoodStuff(
+export function giveGoodStuff(
   state: GameState,
-  c: Character,
-  count: number,
+  spreads: readonly { readonly character: Character; readonly cards: readonly Card[] }[],
+  picked: readonly Card[],
   events: DomainEvent[],
 ): GameState {
-  let next = state;
-  for (let i = 0; i < count; i++) {
-    if (playerOf(next, c).down) return next;
-    const [card, rest, seed] = drawFromPool(next.pools.goodStuff, next.seed);
-    // Unkept Good Stuff returns to this pool at Ascend, but it can still run
-    // dry mid-floor. Say so — a reward the log announced but the pool could
-    // not pay must not go silent.
-    if (!card) {
-      events.push({ type: "STUFF_POOL_EMPTY", character: c, pool: "good_stuff" });
-      return next;
-    }
-    next = { ...next, seed, pools: { ...next.pools, goodStuff: rest } };
+  const revealed = new Set(spreads.flatMap((s) => s.cards.map((x) => x.id)));
+  const kept = new Set(picked.map((x) => x.id));
+  const returned = spreads.flatMap((s) => s.cards.filter((x) => !kept.has(x.id)));
+  let next: GameState = {
+    ...state,
+    pools: {
+      ...state.pools,
+      goodStuff: [...state.pools.goodStuff.filter((x) => !revealed.has(x.id)), ...returned],
+    },
+  };
+  spreads.forEach((spread, i) => {
+    const card = picked[i];
+    if (!card) return;
+    const c = spread.character;
     events.push({ type: "STUFF_TAKEN", character: c, card });
     next = moveToHand(next, c, card, events);
     next = {
       ...next,
       thisTurn: {
         ...next.thisTurn,
-        goodStuffTaken: {
-          ...next.thisTurn.goodStuffTaken,
-          [c]: next.thisTurn.goodStuffTaken[c] + 1,
-        },
+        goodStuffTaken: { ...next.thisTurn.goodStuffTaken, [c]: next.thisTurn.goodStuffTaken[c] + 1 },
       },
     };
-  }
+  });
   return next;
 }
 
-/** Bad Stuff is dealt to you, as a room's printed "gets Bad Stuff" punishment. */
+/** Rulebook, Keywords: `Get Bad Stuff` — the top card of the pool, unchosen, into your hand. */
 export function dealBadStuff(
   state: GameState,
   c: Character,

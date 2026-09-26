@@ -20,7 +20,7 @@ import {
   returnToHand,
   scrap,
   takeFrom,
-  takeGoodStuff,
+  earnGoodStuff,
   topDeck,
 } from "../verbs";
 import { ask, done, nothing, source, type BehaviourContext, type Registry } from "./behaviour";
@@ -51,8 +51,7 @@ export const STUFF: Registry = {
     onPlay(state, ctx) {
       if (state.thisTurn.goodStuffTaken[ctx.character] === 0) return nothing(state);
       const key = `${ctx.card.id}:crowbar`;
-      const events: DomainEvent[] = [];
-      return done(takeGoodStuff(markFired(state, key), ctx.character, 1, events), events);
+      return done(earnGoodStuff(markFired(state, key), ctx.character, 1));
     },
     onEvent(event, state, ctx) {
       if (ctx.zone !== "playZone") return nothing(state);
@@ -60,8 +59,7 @@ export const STUFF: Registry = {
       if (event.card.kind !== "good_stuff") return nothing(state);
       const key = `${ctx.card.id}:crowbar`;
       if (hasFired(state, key)) return nothing(state);
-      const events: DomainEvent[] = [];
-      return done(takeGoodStuff(markFired(state, key), ctx.character, 1, events), events);
+      return done(earnGoodStuff(markFired(state, key), ctx.character, 1));
     },
   },
 

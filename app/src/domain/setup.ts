@@ -167,6 +167,7 @@ export function returnRoomsToSupply(state: GameState): GameState {
 export const emptyTurnRecord = (): TurnRecord => ({
   freePlays: 0,
   goodStuffTaken: { Red: 0, Gray: 0 },
+  goodStuffOwed: { Red: 0, Gray: 0 },
   fired: [],
   playDiscount: { Red: 0, Gray: 0 },
   poolPenalty: { oomph: 0, scramble: 0 },

@@ -200,14 +200,16 @@ describe("walkthrough 6 — a Room's Challenge reads the shared pool, not either
     expect(
       cleared.pending && "character" in cleared.pending ? cleared.pending.character : null,
     ).toBe("Red");
-    const { state: afterRed } = must(cleared, { type: "TAKE_REWARD", take: true });
+    const firstRevealed = (s: typeof cleared) =>
+      s.pending?.kind === "TakeReward" ? (s.pending.cards[0]?.id ?? null) : null;
+    const { state: afterRed } = must(cleared, { type: "TAKE_REWARD", cardId: firstRevealed(cleared) });
     expect(afterRed.pending?.kind).toBe("TakeReward");
     expect(
       afterRed.pending && "character" in afterRed.pending ? afterRed.pending.character : null,
     ).toBe("Gray");
-    const { state: next } = must(afterRed, { type: "TAKE_REWARD", take: true });
-    expect(next.Red.deck[0]?.owner).toBe("Red");
-    expect(next.Gray.deck[0]?.owner).toBe("Gray");
+    const { state: next } = must(afterRed, { type: "TAKE_REWARD", cardId: firstRevealed(afterRed) });
+    expect(next.Red.deck.some((c) => c.owner === "Red" && !c.starter)).toBe(true);
+    expect(next.Gray.deck.some((c) => c.owner === "Gray" && !c.starter)).toBe(true);
   });
 });
 

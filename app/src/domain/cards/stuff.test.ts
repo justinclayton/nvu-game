@@ -423,8 +423,6 @@ describe("Riot Shield — 'If the room is Cleared, return this to your hand at t
   });
 
   it("is back in hand in time for Spore Cloud's Cleanup discard to count and offer it", () => {
-    // Rules ruling (#149): Riot Shield's return fires at the end of the Play
-    // phase, ahead of Cleanup, so a holder's Spore Cloud sees it in hand.
     const state = playing({
       activeRoom: room("Security Turnstile"),
       Red: player({

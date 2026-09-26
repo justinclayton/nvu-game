@@ -473,8 +473,8 @@ describe("Room kinds: Room and Stairwell", () => {
     expect(afterChoice.pending?.kind).toBe("TakeReward");
     expect(afterChoice.phase).toBe("Outcome");
 
-    // Rulebook, Keywords: `Reveal a card reward` — the top 3, one shuffled
-    // into the deck, the other two to the bottom of the pool.
+    // Rulebook, Keywords: `Reveal a card reward` — the top 3, one into the
+    // discard pile, the other two to the bottom of the pool.
     const revealed = afterChoice.pending?.kind === "TakeReward" ? afterChoice.pending.cards : [];
     expect(revealed.map((c) => c.id)).toEqual(grayPool.slice(0, 3).map((c) => c.id));
     const [, taken, ...rest] = revealed;
@@ -484,8 +484,8 @@ describe("Room kinds: Room and Stairwell", () => {
       cardId: taken.id,
     });
     expect(eventTypes(takeEvents)).toContain("REWARD_TAKEN");
-    expect(eventTypes(takeEvents)).toContain("CARDS_SHUFFLED_IN");
-    expect(afterTake.Gray.deck.map((c) => c.id)).toContain(taken.id);
+    expect(afterTake.Gray.discard.map((c) => c.id)).toContain(taken.id);
+    expect(afterTake.Gray.deck.map((c) => c.id)).not.toContain(taken.id);
     expect(afterTake.pools.Gray.map((c) => c.id)).toEqual([
       ...grayPool.slice(3).map((c) => c.id),
       grayPool[0]?.id,
@@ -552,8 +552,8 @@ describe("Room kinds: Room and Stairwell", () => {
 
     const { state: next } = must(afterRed, { type: "TAKE_REWARD", cardId: grayPool[0]?.id ?? null });
     expect(next.cleared).toHaveLength(1);
-    expect(next.Red.deck.map((c) => c.id)).toContain(redPool[0]?.id);
-    expect(next.Gray.deck.map((c) => c.id)).toContain(grayPool[0]?.id);
+    expect(next.Red.discard.map((c) => c.id)).toContain(redPool[0]?.id);
+    expect(next.Gray.discard.map((c) => c.id)).toContain(grayPool[0]?.id);
   });
 
   it("a dual threshold is met only when the pool meets both stats", () => {

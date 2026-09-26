@@ -208,8 +208,8 @@ describe("walkthrough 6 — a Room's Challenge reads the shared pool, not either
       afterRed.pending && "character" in afterRed.pending ? afterRed.pending.character : null,
     ).toBe("Gray");
     const { state: next } = must(afterRed, { type: "TAKE_REWARD", cardId: firstRevealed(afterRed) });
-    expect(next.Red.deck.some((c) => c.owner === "Red" && !c.starter)).toBe(true);
-    expect(next.Gray.deck.some((c) => c.owner === "Gray" && !c.starter)).toBe(true);
+    expect(next.Red.discard.some((c) => c.owner === "Red" && !c.starter)).toBe(true);
+    expect(next.Gray.discard.some((c) => c.owner === "Gray" && !c.starter)).toBe(true);
   });
 });
 
@@ -279,9 +279,10 @@ describe("walkthrough 8 — ascending end to end: shuffle the hand in, then the 
     // No heal: the 3 Charge Ins from before this floor are still there, plus
     // the 2 Shoves that paid for Charge In, the Charge In itself and the two
     // Pry Bars played alongside it — all discarded at Cleanup, and none of
-    // it swept anywhere: Stuff stays until it is Scrapped or Exhausted.
-    expect(next.Red.discard).toHaveLength(8);
-    // The reward is shuffled into the deck.
-    expect(next.Red.deck.some((c) => c.id === offer.id)).toBe(true);
+    // it swept anywhere: Stuff stays until it is Scrapped or Exhausted. The
+    // reward joins them: it goes into the discard pile, not the deck.
+    expect(next.Red.discard).toHaveLength(9);
+    expect(next.Red.discard.some((c) => c.id === offer.id)).toBe(true);
+    expect(next.Red.deck.some((c) => c.id === offer.id)).toBe(false);
   });
 });

@@ -93,7 +93,7 @@ The outcome, printed on some Thresholds, that clears the entire floor rather tha
 
 **Card reward**
 
-A card offered to a player from their reward pool. A Room's Threshold outcome and Ascending offer it the same way: reveal the top 3, shuffle up to one into your deck, the rest to the bottom of the pool (rulebook, Keywords > `Reveal a card reward`).
+A card offered to a player from their reward pool. A Room's Threshold outcome and Ascending offer it the same way: reveal the top 3, put up to one into your discard pile, the rest to the bottom of the pool (rulebook, Keywords > `Reveal a card reward`). The discard pile, not the deck, as in most deckbuilders. `[you, 2026-09-26]`
 
 **Reward pool**
 

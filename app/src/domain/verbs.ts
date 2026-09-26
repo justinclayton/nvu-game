@@ -282,6 +282,16 @@ export function takeFrom(
   return withPlayer(state, c, { ...p, exhaust: without(p.exhaust) });
 }
 
+/**
+ * Rulebook, Keywords: `Reveal a card reward` — a taken reward goes into the
+ * discard pile, so it reaches the deck the next time the discard pile is
+ * shuffled in. No event: `REWARD_TAKEN` says so.
+ */
+export function gainToDiscard(state: GameState, c: Character, card: Card): GameState {
+  const p = playerOf(state, c);
+  return withPlayer(state, c, { ...p, discard: [...p.discard, card] });
+}
+
 /** Under the deck, so it is the last thing you will see rather than the next. */
 export function moveToBottomOfDeck(
   state: GameState,

@@ -55,6 +55,7 @@ import {
   exhaustFromDeck,
   discardFromHand,
   earnGoodStuff,
+  gainToDiscard,
   giveGoodStuff,
   playerOf,
   scrap,
@@ -804,7 +805,7 @@ function drain(state: GameState, run: Run): GameState {
         ...s,
         pending: {
           kind: "TakeReward",
-          prompt: `${head.who}: shuffle one of ${cards.map((x) => x.name).join(", ")} into your deck, or take none?`,
+          prompt: `${head.who}: take one of ${cards.map((x) => x.name).join(", ")} into your discard pile, or none?`,
           character: head.who,
           cards,
           source: null,
@@ -1087,8 +1088,8 @@ function answerCards(
 }
 
 /**
- * Rulebook, Keywords: `Reveal a card reward` — shuffle one of the revealed
- * cards into your deck, or none; the rest go to the bottom of the pool. The
+ * Rulebook, Keywords: `Reveal a card reward` — put one of the revealed cards
+ * into your discard pile, or none; the rest go to the bottom of the pool. The
  * same rule Ascending's own reward uses (`ascendOne`).
  */
 function answerReward(state: GameState, cardId: CardId | null, run: Run): GameState {
@@ -1103,7 +1104,7 @@ function answerReward(state: GameState, cardId: CardId | null, run: Run): GameSt
   s = setPool(s, character, [...s.pools[character].slice(cards.length), ...returned]);
   if (taken) {
     run.events.push({ type: "REWARD_TAKEN", character, card: taken });
-    s = shuffleIntoDeck(s, character, [taken], run.events);
+    s = gainToDiscard(s, character, taken);
   } else {
     run.events.push({ type: "REWARD_DECLINED", character });
   }
@@ -1223,16 +1224,16 @@ function shuffleHandIntoDeck(state: GameState, c: Character, run: Run): GameStat
 function ascendOne(state: GameState, c: Character, choice: AscendChoice, run: Run): GameState {
   let s = shuffleHandIntoDeck(state, c, run);
 
-  // Rulebook, Ascending, step 2: Choose a reward. Three cards from their own pool;
-  // take one, shuffled into the deck, or decline. A declined card goes to the
-  // bottom of its pool.
+  // Rulebook, Ascending, step 2: Choose a reward, by `Reveal a card reward`.
+  // Three cards from their own pool; take one into the discard pile, or
+  // decline. The cards not taken go to the bottom of the pool.
   const offered = state.offer?.[c] ?? [];
   const taken = offered.find((x) => x.id === choice.takeRewardId) ?? null;
   const returned = offered.filter((x) => x.id !== taken?.id);
   s = setPool(s, c, [...s.pools[c].slice(offered.length), ...returned]);
   if (taken) {
     run.events.push({ type: "REWARD_TAKEN", character: c, card: taken });
-    s = shuffleIntoDeck(s, c, [taken], run.events);
+    s = gainToDiscard(s, c, taken);
   } else {
     run.events.push({ type: "REWARD_DECLINED", character: c });
   }

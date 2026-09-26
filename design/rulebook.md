@@ -1,6 +1,6 @@
 # *North vs Up*: Rulebook
 
-Rules version: 0.2.4
+Rules version: 0.2.5
 
 ---
 
@@ -161,6 +161,10 @@ A `Stuff` card shows the same parts as a player card, with these differences:
 - `Discard X cards from your hand`: Choose **X** cards from your hand and move them to your discard pile.
 - `Exhaust X cards from your deck`: Move the top **X** cards of your deck to your Exhaust pile. If your deck is empty, see `Empty deck`.
 - `Exhaust X`: the same as `Exhaust X cards from your deck`.
+- `Get Good Stuff`: Reveal the top **3** cards of the Good Stuff pool. Put **one** into your hand. Put the rest on the bottom of the Good Stuff pool. When both players get Good Stuff from the same outcome, both players reveal their 3 before either chooses, then both put their chosen card into their hand at the same time.
+- `Get X Good Stuff`: `Get Good Stuff` **X** times.
+- `Get Bad Stuff`: Move the top card of the Bad Stuff pool into your hand.
+- `Reveal a card reward`: Reveal the top **3** cards of your reward pool. You may put **one** into your discard pile. Put the cards you did not take on the bottom of your reward pool.
 - `Peek X`: Look at the top **X** cards of any deck, then put them back in the same order.
 - `any deck`: any face-down pile on the table: a character deck, a reward pool, the Floor deck, or a Stuff pool.
 - `Scrap`: Move the card to the Scrapyard. It is removed from play for the rest of the game.
@@ -180,7 +184,7 @@ When a resolved outcome says `Ascend`, you escape the current floor and move to 
 After Cleanup, each player does the following:
 
 1. **Shuffle your hand into your deck.**
-2. **Choose a reward:** Reveal the top **3** cards of your reward pool. You may shuffle **one** into your deck. Put the cards you did not take on the bottom of your reward pool.
+2. **Choose a reward:** `Reveal a card reward` (section 8, *Keywords*).
 3. **Build the next floor:** Return every room still in the floor deck, Fled rooms included, to its band's pool. Rooms you cleared, the Stairwell included, stay on the Rooms pile. Then assemble the new floor as in Setup, *Floor deck*.
 
 ---

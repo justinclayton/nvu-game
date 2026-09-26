@@ -106,7 +106,7 @@ describe("Ascending, Stuff stays until Scrapped or Exhausted", () => {
 });
 
 describe("Ascending, the reward", () => {
-  it("'you may shuffle one into your deck'", () => {
+  it("'you may put one into your discard pile'", () => {
     const state = atAscension();
     const offered = state.offer?.Red ?? [];
     const taken = offered[0];
@@ -116,7 +116,8 @@ describe("Ascending, the reward", () => {
       Red: { takeRewardId: taken.id },
       Gray: NOTHING,
     });
-    expect(next.Red.deck.some((c) => c.id === taken.id)).toBe(true);
+    expect(next.Red.discard.some((c) => c.id === taken.id)).toBe(true);
+    expect(next.Red.deck.some((c) => c.id === taken.id)).toBe(false);
     expect(next.pools.Red.some((c) => c.id === taken.id)).toBe(false);
     // The two not taken go back to the bottom of the pool.
     const bottom = next.pools.Red.slice(-2).map((c) => c.id);

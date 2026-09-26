@@ -1488,3 +1488,37 @@ body {
 .pile-panel__empty {
   color: var(--print);
 }
+
+/* ------------------------------------------------------------- replay */
+
+.replay {
+  flex-wrap: wrap;
+  align-items: center;
+}
+.replay__where {
+  font: 600 13px/1 var(--display);
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+}
+.replay__scrub {
+  flex: 1 1 160px;
+  min-width: 120px;
+  accent-color: var(--woah);
+}
+.replay__next {
+  flex-basis: 100%;
+  font-size: 13px;
+  opacity: 0.75;
+}
+.table--replaying .card,
+.table--replaying .sprite {
+  cursor: default;
+}
+.open-run {
+  display: inline-flex;
+  align-items: center;
+  cursor: pointer;
+}
+.open-run input {
+  display: none;
+}

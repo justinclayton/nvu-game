@@ -5,7 +5,10 @@
  */
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import { useStore } from "zustand";
+import { createStore } from "zustand/vanilla";
 
+import type { Replay } from "@application/replay";
 import { canUndo, type SessionState } from "@application/session";
 import { costOf, payOptions } from "@domain/queries";
 import type { AscendChoice, Card, Character, Command, GameState } from "@domain/types";
@@ -16,12 +19,23 @@ import { Controls } from "./Controls";
 import { EventLog } from "./EventLog";
 import { Mat } from "./Mat";
 import { moveDelays, type ZoneId } from "./placements";
+import { OpenRun } from "./OpenRun";
 import { PilePanel } from "./PilePanel";
+import { ReplayBar } from "./ReplayBar";
 import { useMetrics } from "./useMetrics";
 import { useSession, useSessionState } from "./useSession";
 
-export function Table({ onNewRun }: { readonly onNewRun: () => void }) {
+interface Props {
+  readonly onNewRun: () => void;
+  /** A run file's text, dropped or picked, to replay. */
+  readonly onOpenRun: (text: string) => void;
+  /** Set while a recording is being stepped through; the table is view-only until taken over. */
+  readonly replay?: Replay | undefined;
+}
+
+export function Table({ onNewRun, onOpenRun, replay }: Props) {
   const session = useSession();
+  const replaying = useStore(replay ?? NO_REPLAY, (r) => r !== null && !r.live);
   const state = useSessionState((s: SessionState) => s.state);
   const events = useSessionState((s: SessionState) => s.events);
   const rejection = useSessionState((s: SessionState) => s.lastRejection);
@@ -53,17 +67,19 @@ export function Table({ onNewRun }: { readonly onNewRun: () => void }) {
 
   const dispatch = useCallback(
     (command: Command) => {
+      if (replaying) return;
       session.getState().dispatch(command);
       setPaying(null);
       if (command.type === "ASCEND") setAscend(NO_CHOICES);
     },
-    [session],
+    [session, replaying],
   );
 
   /* Picking a card in hand: a free card is played at once, and a card with a
    * cost starts a payment. The set of legal payments is `payOptions`. */
   const pickCard = useCallback(
     (character: Character, card: Card) => {
+      if (replaying) return;
       const play = (cardId: Card["id"], payWith: readonly Card["id"][]) => {
         session.getState().dispatch({ type: "PLAY_CARD", character, cardId, payWith });
         setPaying(null);
@@ -91,7 +107,7 @@ export function Table({ onNewRun }: { readonly onNewRun: () => void }) {
         setPaying({ ...paying, chosen });
       }
     },
-    [session, state, paying],
+    [session, state, paying, replaying],
   );
 
   /* The zoomed card follows the pointer's hover; a card that moves out from
@@ -109,7 +125,17 @@ export function Table({ onNewRun }: { readonly onNewRun: () => void }) {
       : null;
 
   return (
-    <div className="table">
+    <div
+      className={`table${replaying ? " table--replaying" : ""}`}
+      onDragOver={(e) => {
+        e.preventDefault();
+      }}
+      onDrop={(e) => {
+        e.preventDefault();
+        const file = e.dataTransfer.files[0];
+        if (file) void file.text().then(onOpenRun);
+      }}
+    >
       <header className="table__head">
         <h1>North vs Up</h1>
         <div className="table__meta">
@@ -118,7 +144,10 @@ export function Table({ onNewRun }: { readonly onNewRun: () => void }) {
           <span className="table__phase">{state.phase}</span>
         </div>
         <div className="table__actions">
-          <label className="debug-toggle" title="Turn every pile face up, for inspecting the table.">
+          <label
+            className="debug-toggle"
+            title="Turn every pile face up, for inspecting the table."
+          >
             <input
               type="checkbox"
               checked={debug}
@@ -129,10 +158,11 @@ export function Table({ onNewRun }: { readonly onNewRun: () => void }) {
             />
             Debug
           </label>
+          <OpenRun onOpen={onOpenRun} />
           <button
             type="button"
             className="button"
-            disabled={!undoable}
+            disabled={!undoable || replaying}
             title="Undo reaches back to the last thing that showed you a card."
             onClick={() => {
               session.getState().undo();
@@ -162,7 +192,9 @@ export function Table({ onNewRun }: { readonly onNewRun: () => void }) {
         onOpenPile={setOpenPile}
       />
 
-      {state.phase === "Ascend" ? (
+      {replaying && replay ? (
+        <ReplayBar replay={replay} />
+      ) : state.phase === "Ascend" ? (
         <AscendPanel state={state} dispatch={dispatch} choices={ascend} onChoose={choose} />
       ) : state.phase === "GameOver" ? (
         <section className="over">
@@ -202,6 +234,9 @@ export function Table({ onNewRun }: { readonly onNewRun: () => void }) {
     </div>
   );
 }
+
+/** A store that says "no replay", so the hook above has something to subscribe to. */
+const NO_REPLAY = createStore<null>()(() => null);
 
 function cardById(state: GameState, character: Character, id: Card["id"]): Card {
   const found = state[character].hand.find((c) => c.id === id);

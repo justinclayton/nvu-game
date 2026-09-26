@@ -19,7 +19,7 @@ const noop = () => {
 
 beforeEach(() => {
   session = createSession(SEED, CARD_CONTENT);
-  render(<App session={session} onNewRun={noop} />);
+  render(<App session={session} onNewRun={noop} onOpenRun={noop} />);
 });
 
 describe("the table", () => {

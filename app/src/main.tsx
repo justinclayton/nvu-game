@@ -6,6 +6,7 @@
 import { StrictMode } from "react";
 import { createRoot, type Root } from "react-dom/client";
 
+import { openRunFile } from "@application/replay";
 import { createSession } from "@application/session";
 import { CARD_CONTENT } from "@content/index";
 import { freshSeed } from "@infrastructure/seed";
@@ -19,7 +20,29 @@ function startFresh(): void {
   const session = createSession(freshSeed(), CARD_CONTENT);
   root.render(
     <StrictMode>
-      <App session={session} onNewRun={startFresh} />
+      <App session={session} onNewRun={startFresh} onOpenRun={startReplay} />
+    </StrictMode>,
+  );
+}
+
+/**
+ * A run file (the `.json` export, or one the CLI or a bot wrote) opens as a
+ * replay: the table at the seed, and a bar that steps through the recording.
+ */
+function startReplay(text: string): void {
+  const opened = openRunFile(text, CARD_CONTENT);
+  if (!opened.ok) {
+    window.alert(opened.reason);
+    return;
+  }
+  root.render(
+    <StrictMode>
+      <App
+        session={opened.replay.getState().session}
+        onNewRun={startFresh}
+        onOpenRun={startReplay}
+        replay={opened.replay}
+      />
     </StrictMode>,
   );
 }
@@ -36,7 +59,7 @@ function startFromFixture(name: string): void {
     root.render(
       <StrictMode>
         {found.ok ? (
-          <App session={found.session} onNewRun={startFresh} />
+          <App session={found.session} onNewRun={startFresh} onOpenRun={startReplay} />
         ) : (
           <UnknownFixture requested={found.requested} fixtures={found.fixtures} />
         )}

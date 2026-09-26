@@ -82,6 +82,44 @@ function choosingCards(): GameState {
   return asked;
 }
 
+/** A pending `ChooseGoodStuff`: Flooded Ventilation Shaft paid both players, and both spreads are face up. */
+function goodStuffSpread(): GameState {
+  const state = rig({
+    phase: "Play",
+    activeRoom: room("Flooded Ventilation Shaft"),
+    Red: player({ deck: pile("Shove", 5), hand: [card("Pry Bar"), card("Coil Of Cable")] }),
+    Gray: player({ deck: pile("Duck Under", 5) }),
+  });
+  const [pry, coil] = state.Red.hand;
+  if (!pry || !coil) throw new Error("rig");
+  const { state: asked } = play(state, [
+    { type: "PLAY_CARD", character: "Red", cardId: pry.id, payWith: [] },
+    { type: "PLAY_CARD", character: "Red", cardId: coil.id, payWith: [] },
+    { type: "END_PLAY" },
+  ]);
+  return asked;
+}
+
+/** A pending `TakeReward`: Pressurized Maintenance Hub revealed the top 3 of Red's reward pool. */
+function cardReward(): GameState {
+  const state = rig({
+    phase: "Play",
+    activeRoom: room("Pressurized Maintenance Hub"),
+    Red: player({
+      deck: pile("Shove", 5),
+      hand: [card("Charge In"), card("Shove"), card("Shove"), card("Pry Bar")],
+    }),
+    Gray: player({ deck: pile("Duck Under", 5) }),
+  });
+  const r = state.Red.hand;
+  const { state: asked } = play(state, [
+    { type: "PLAY_CARD", character: "Red", cardId: r[0]!.id, payWith: [r[1]!.id, r[2]!.id] },
+    { type: "PLAY_CARD", character: "Red", cardId: r[3]!.id, payWith: [] },
+    { type: "END_PLAY" },
+  ]);
+  return asked;
+}
+
 /** A pending `ChooseCharacter` raised at Outcome: The Sentry Drone's Scramble line asks who gets Good Stuff. */
 function outcomeChoice(): GameState {
   const state = rig({
@@ -256,6 +294,16 @@ export const FIXTURES: readonly Fixture[] = [
     name: "outcome-choice",
     description: "A room's ChooseCharacter pending at Outcome (who reveals the reward).",
     build: stable(outcomeChoice),
+  },
+  {
+    name: "good-stuff-spread",
+    description: "Both players' Good Stuff spreads face up, Red choosing first.",
+    build: stable(goodStuffSpread),
+  },
+  {
+    name: "card-reward",
+    description: "A room's card reward: the top 3 of Red's reward pool, one to take or none.",
+    build: stable(cardReward),
   },
   {
     name: "cleanup-choice",

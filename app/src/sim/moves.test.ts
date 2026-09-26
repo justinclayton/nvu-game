@@ -122,14 +122,19 @@ describe("legalCommands", () => {
     expect(legalCommands(queued)).toEqual([{ type: "FLIP_ROOM" }]);
   });
 
-  it("answers a TakeReward both ways and a ChooseCharacter with each option", () => {
+  it("answers a TakeReward with each revealed card or none, and a ChooseCharacter with each option", () => {
     resetRig();
     const reward = card("Reckless Swing");
+    const other = card("Fast Follow");
     const asked = rig({
       phase: "Play",
-      pending: { kind: "TakeReward", prompt: "?", character: "Red", card: reward, source: null },
+      pending: { kind: "TakeReward", prompt: "?", character: "Red", cards: [reward, other], source: null },
     });
-    expect(legalCommands(asked).map((c) => c.type)).toEqual(["TAKE_REWARD", "TAKE_REWARD"]);
+    expect(legalCommands(asked)).toEqual([
+      { type: "TAKE_REWARD", cardId: reward.id },
+      { type: "TAKE_REWARD", cardId: other.id },
+      { type: "TAKE_REWARD", cardId: null },
+    ]);
 
     const who = rig({
       phase: "Play",

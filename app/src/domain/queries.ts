@@ -107,7 +107,7 @@ export function contributionOf(state: GameState, played: PlayedCard): StatTotals
   const stuffDelta = card.kind === "good_stuff" ? m.stuffPowerDelta : 0;
   return {
     oomph: Math.max(0, base.oomph + m.playedPowerDelta + stuffDelta),
-    scramble: Math.max(0, base.scramble + stuffDelta),
+    scramble: Math.max(0, base.scramble + stuffDelta + (state.thisTurn.cardScramble[card.id] ?? 0)),
   };
 }
 
@@ -342,6 +342,7 @@ const REVEALING: ReadonlySet<DomainEvent["type"]> = new Set([
   "STUFF_TAKEN",
   "CARDS_PEEKED",
   "REWARD_REVEALED",
+  "GOOD_STUFF_REVEALED",
   "REWARD_TAKEN",
 ]);
 

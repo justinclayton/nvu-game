@@ -12,6 +12,7 @@ import {
   free,
   handCard,
   ids,
+  keepFirstGoodStuff,
   must,
   pile,
   play,
@@ -472,13 +473,24 @@ describe("Room kinds: Room and Stairwell", () => {
     expect(afterChoice.pending?.kind).toBe("TakeReward");
     expect(afterChoice.phase).toBe("Outcome");
 
+    // Rulebook, Keywords: `Reveal a card reward` — the top 3, one into the
+    // discard pile, the other two to the bottom of the pool.
+    const revealed = afterChoice.pending?.kind === "TakeReward" ? afterChoice.pending.cards : [];
+    expect(revealed.map((c) => c.id)).toEqual(grayPool.slice(0, 3).map((c) => c.id));
+    const [, taken, ...rest] = revealed;
+    if (!taken) throw new Error("rig: Gray's pool reveals fewer than 3");
     const { state: afterTake, events: takeEvents } = must(afterChoice, {
       type: "TAKE_REWARD",
-      take: true,
+      cardId: taken.id,
     });
     expect(eventTypes(takeEvents)).toContain("REWARD_TAKEN");
-    expect(afterTake.Gray.deck[0]?.name).toBe(grayPool[0]?.name);
-    expect(afterTake.pools.Gray).toHaveLength(grayPool.length - 1);
+    expect(afterTake.Gray.discard.map((c) => c.id)).toContain(taken.id);
+    expect(afterTake.Gray.deck.map((c) => c.id)).not.toContain(taken.id);
+    expect(afterTake.pools.Gray.map((c) => c.id)).toEqual([
+      ...grayPool.slice(3).map((c) => c.id),
+      grayPool[0]?.id,
+      ...rest.map((c) => c.id),
+    ]);
   });
 
   it("each challenge on a card resolves on its own, and meeting both fires both — Pressurized Maintenance Hub", () => {
@@ -532,16 +544,16 @@ describe("Room kinds: Room and Stairwell", () => {
       afterPlay.pending && "character" in afterPlay.pending ? afterPlay.pending.character : null,
     ).toBe("Red");
 
-    const { state: afterRed } = must(afterPlay, { type: "TAKE_REWARD", take: true });
+    const { state: afterRed } = must(afterPlay, { type: "TAKE_REWARD", cardId: redPool[0]?.id ?? null });
     expect(afterRed.pending?.kind).toBe("TakeReward");
     expect(
       afterRed.pending && "character" in afterRed.pending ? afterRed.pending.character : null,
     ).toBe("Gray");
 
-    const { state: next } = must(afterRed, { type: "TAKE_REWARD", take: true });
+    const { state: next } = must(afterRed, { type: "TAKE_REWARD", cardId: grayPool[0]?.id ?? null });
     expect(next.cleared).toHaveLength(1);
-    expect(next.Red.deck[0]?.name).toBe(redPool[0]?.name);
-    expect(next.Gray.deck[0]?.name).toBe(grayPool[0]?.name);
+    expect(next.Red.discard.map((c) => c.id)).toContain(redPool[0]?.id);
+    expect(next.Gray.discard.map((c) => c.id)).toContain(grayPool[0]?.id);
   });
 
   it("a dual threshold is met only when the pool meets both stats", () => {
@@ -599,11 +611,13 @@ describe("Room kinds: Room and Stairwell", () => {
     });
     const r = ids(state, "Red");
     const g = ids(state, "Gray");
-    const { state: next } = play(state, [
-      { type: "PLAY_CARD", character: "Red", cardId: r[0] as CardId, payWith: [r[1] as CardId, r[2] as CardId] },
-      playFree("Gray", g[0] as CardId),
-      { type: "END_PLAY" },
-    ]);
+    const { state: next } = keepFirstGoodStuff(
+      play(state, [
+        { type: "PLAY_CARD", character: "Red", cardId: r[0] as CardId, payWith: [r[1] as CardId, r[2] as CardId] },
+        playFree("Gray", g[0] as CardId),
+        { type: "END_PLAY" },
+      ]),
+    );
     expect(next.Red.hand.some((c) => c.kind === "good_stuff")).toBe(true);
   });
 
@@ -886,5 +900,130 @@ describe("SCRAP_FOR_STATS — Bio-Hazard Containment Vault's own text", () => {
     });
     // Fast Follow reads free only once Gray has *played* a card; Gray only Scrapped one.
     expect(costOf(next, "Red", fastFollow)).toBe(1);
+  });
+});
+
+describe("Rules 0.2.5: Good Stuff and card rewards come as a spread of 3", () => {
+  const goodStuff = () => [
+    card("Stim Pack"),
+    card("Pry Bar"),
+    card("Coil Of Cable"),
+    card("Duct Tape & Wire"),
+    card("Riot Shield"),
+    card("Cutting Torch"),
+    card("Scrap Magnet"),
+  ];
+  const idsOf = (cards: readonly { readonly id: CardId }[]) => cards.map((c) => c.id);
+
+  /** Flooded Ventilation Shaft's Oomph 3 and Scramble 3 line: "both players get Good Stuff". */
+  function bothEarn(pool: ReturnType<typeof goodStuff>) {
+    const state = rig({
+      phase: "Play",
+      activeRoom: room("Flooded Ventilation Shaft"),
+      Red: player({ deck: pile("Shove", 5), hand: [card("Pry Bar"), card("Coil Of Cable")] }),
+      Gray: player({ deck: pile("Duck Under", 5) }),
+      pools: { Red: [], Gray: [], goodStuff: pool, badStuff: [] },
+    });
+    const r = ids(state, "Red");
+    return play(state, [playFree("Red", r[0] as CardId), playFree("Red", r[1] as CardId), { type: "END_PLAY" }]);
+  }
+
+  it("reveals both spreads before either player chooses, then hands both picks over together", () => {
+    const pool = goodStuff();
+    const { state: asked, events } = bothEarn(pool);
+
+    expect(eventTypes(events).filter((t) => t === "GOOD_STUFF_REVEALED")).toHaveLength(2);
+    expect(eventTypes(events)).not.toContain("STUFF_TAKEN");
+    const pending = asked.pending;
+    if (pending?.kind !== "ChooseGoodStuff") throw new Error("no Good Stuff spread is waiting");
+    expect(pending.character).toBe("Red");
+    expect(idsOf(pending.options)).toEqual(idsOf(pool.slice(0, 3)));
+    expect(pending.spreads.map((s) => s.character)).toEqual(["Red", "Gray"]);
+    expect(idsOf(pending.spreads[1]?.cards ?? [])).toEqual(idsOf(pool.slice(3, 6)));
+
+    const redKeeps = pool[1];
+    const grayKeeps = pool[5];
+    if (!redKeeps || !grayKeeps) throw new Error("rig");
+    const { state: grayAsked, events: redAnswer } = must(asked, { type: "CHOOSE_CARDS", cardIds: [redKeeps.id] });
+    expect(eventTypes(redAnswer)).not.toContain("STUFF_TAKEN");
+    expect(grayAsked.Red.hand).toEqual([]);
+    expect(grayAsked.pending?.kind === "ChooseGoodStuff" && grayAsked.pending.character).toBe("Gray");
+
+    const { state: next, events: grayAnswer } = must(grayAsked, { type: "CHOOSE_CARDS", cardIds: [grayKeeps.id] });
+    expect(eventTypes(grayAnswer).filter((t) => t === "STUFF_TAKEN")).toHaveLength(2);
+    expect(idsOf(next.Red.hand)).toEqual([redKeeps.id]);
+    expect(idsOf(next.Gray.hand)).toEqual([grayKeeps.id]);
+    // The unrevealed card stays on top; the four not kept go under it, in the order they were revealed.
+    expect(idsOf(next.pools.goodStuff)).toEqual(idsOf([pool[6], pool[0], pool[2], pool[3], pool[4]] as typeof pool));
+    expect(next.pending).toBeNull();
+    expect(next.phase).toBe("Turn Start");
+  });
+
+  it("refuses to keep a card that is not in the spread being asked about", () => {
+    const pool = goodStuff();
+    const { state: asked } = bothEarn(pool);
+    const grays = pool[4];
+    if (!grays) throw new Error("rig");
+    const result = execute(asked, { type: "CHOOSE_CARDS", cardIds: [grays.id] });
+    expect(result.ok).toBe(false);
+  });
+
+  it("takes a spread of one card without asking, and pays nothing from an empty pool", () => {
+    const only = card("Stim Pack");
+    const { state: next, events } = bothEarn([only]);
+    expect(next.pending).toBeNull();
+    expect(idsOf(next.Red.hand)).toEqual([only.id]);
+    expect(next.Gray.hand).toEqual([]);
+    expect(eventTypes(events)).toContain("STUFF_POOL_EMPTY");
+  });
+
+  it("'get 2 Good Stuff' is two spreads each, one after the other", () => {
+    const state = rig({
+      phase: "Play",
+      activeRoom: room("The Sentry Drone"),
+      Red: player({
+        deck: pile("Shove", 5),
+        hand: [card("Charge In"), card("Shove"), card("Shove"), card("Coil Of Cable"), card("Riot Shield"), card("Shove")],
+      }),
+      Gray: player({ deck: pile("Duck Under", 5) }),
+      pools: { Red: pile("Fast Follow", 3), Gray: pile("Quick Vault", 3), goodStuff: [...goodStuff(), ...goodStuff()], badStuff: [] },
+    });
+    const h = ids(state, "Red");
+    const { state: asked, events } = play(state, [
+      { type: "PLAY_CARD", character: "Red", cardId: h[0] as CardId, payWith: [h[1] as CardId, h[2] as CardId] },
+      playFree("Red", h[3] as CardId),
+      { type: "PLAY_CARD", character: "Red", cardId: h[4] as CardId, payWith: [h[5] as CardId] },
+      { type: "END_PLAY" },
+    ]);
+    expect(eventTypes(events).filter((t) => t === "GOOD_STUFF_REVEALED")).toHaveLength(2);
+    const { state: next, events: rest } = keepFirstGoodStuff({ state: asked, events: [] });
+    expect(eventTypes(rest).filter((t) => t === "GOOD_STUFF_REVEALED")).toHaveLength(2);
+    expect(eventTypes(rest).filter((t) => t === "STUFF_TAKEN")).toHaveLength(4);
+    expect(next.phase).toBe("Ascend");
+  });
+
+  it("a room's card reward reveals 3; taking none sends all 3 to the bottom of the pool", () => {
+    const rewards = [card("Fast Follow"), card("Tag Team"), card("Bull Rush"), card("Second Wind"), card("Reckless Swing")];
+    const state = rig({
+      phase: "Play",
+      activeRoom: room("Pressurized Maintenance Hub"),
+      Red: player({ deck: pile("Shove", 5), hand: [card("Charge In"), card("Shove"), card("Shove"), card("Pry Bar")] }),
+      Gray: player({ deck: pile("Duck Under", 5) }),
+      pools: { Red: rewards, Gray: [], goodStuff: [], badStuff: [] },
+    });
+    const r = ids(state, "Red");
+    const { state: asked, events } = play(state, [
+      { type: "PLAY_CARD", character: "Red", cardId: r[0] as CardId, payWith: [r[1] as CardId, r[2] as CardId] },
+      playFree("Red", r[3] as CardId),
+      { type: "END_PLAY" },
+    ]);
+    const revealed = events.find((e) => e.type === "REWARD_REVEALED");
+    expect(revealed?.type === "REWARD_REVEALED" && idsOf(revealed.cards)).toEqual(idsOf(rewards.slice(0, 3)));
+    expect(asked.pending?.kind === "TakeReward" && idsOf(asked.pending.cards)).toEqual(idsOf(rewards.slice(0, 3)));
+
+    const { state: next, events: answer } = must(asked, { type: "TAKE_REWARD", cardId: null });
+    expect(eventTypes(answer)).toContain("REWARD_DECLINED");
+    expect(idsOf(next.pools.Red)).toEqual(idsOf([...rewards.slice(3), ...rewards.slice(0, 3)]));
+    expect(next.Red.deck.some((c) => rewards.includes(c))).toBe(false);
   });
 });

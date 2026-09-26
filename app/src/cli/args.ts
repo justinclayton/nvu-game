@@ -85,8 +85,8 @@ export const USAGE = `North vs Up — the CLI. The same rules engine as the web 
   bin/nvu play choose Floor deck                       CHOOSE_PILE
   bin/nvu play choose Rope Flare | play choose none     CHOOSE_CARDS
   bin/nvu play order Rope Flare Shove                  ORDER_CARDS, top first
-  bin/nvu play take | play skip                        TAKE_REWARD
-  bin/nvu play take Zen Mode | play take none          Ascend: the reward
+  bin/nvu play take Zen Mode | play take none          a card reward, room or Ascend
+  bin/nvu play skip                                    a room's card reward: take none
   bin/nvu play undo           [--run FILE]
   bin/nvu play note "text"    [--run FILE]
   bin/nvu play show [--events N] [--table] [--moves] [--run FILE]

@@ -264,7 +264,38 @@ function buildChoose(state: GameState, action: Extract<PlayAction, { kind: "choo
     return { type: "CHOOSE_CARDS", cardIds };
   }
 
+  if (pending.kind === "ChooseGoodStuff") {
+    if (action.names.length !== 1) {
+      throw new MoveRefused(`Keep 1 of: ${pending.options.map((c) => c.name).join(", ")}.`);
+    }
+    const cardIds = resolveEach(action.names, pending.options).map((c) => c.id);
+    return { type: "CHOOSE_CARDS", cardIds };
+  }
+
   throw new MoveRefused(`Waiting on: ${pending.prompt}`);
+}
+
+/**
+ * A room's card reward (rulebook, Keywords: `Reveal a card reward`): `take
+ * <Name>` names one of the revealed cards, `take none` or `skip` takes none,
+ * and a bare `take` works only when a single card was revealed.
+ */
+function buildTakeReward(state: GameState, name: string | null, bare: boolean): Command {
+  const pending = state.pending;
+  if (pending?.kind !== "TakeReward") {
+    throw new MoveRefused(pending ? `Waiting on: ${pending.prompt}` : "No card reward is revealed.");
+  }
+  if (bare) {
+    const [only, ...more] = pending.cards;
+    if (!only || more.length > 0) {
+      throw new MoveRefused(`Name one: take <Name> — one of: ${pending.cards.map((c) => c.name).join(", ")}.`);
+    }
+    return { type: "TAKE_REWARD", cardId: only.id };
+  }
+  if (name === null) return { type: "TAKE_REWARD", cardId: null };
+  const named = resolveCardName(name, pending.cards);
+  if (!named.ok) throw new MoveRefused(named.reason);
+  return { type: "TAKE_REWARD", cardId: named.card.id };
 }
 
 function buildOrder(state: GameState, action: Extract<PlayAction, { kind: "order" }>): Command {
@@ -435,13 +466,17 @@ function play(request: PlayRequest): number {
         dispatchOrThrow(session, buildOrder(session.getState().state, action));
         break;
       case "take":
-        dispatchOrThrow(session, { type: "TAKE_REWARD", take: true });
+        dispatchOrThrow(session, buildTakeReward(session.getState().state, null, true));
         break;
       case "skip":
-        dispatchOrThrow(session, { type: "TAKE_REWARD", take: false });
+        dispatchOrThrow(session, { type: "TAKE_REWARD", cardId: null });
         break;
       case "takeAscend": {
         const state = session.getState().state;
+        if (state.pending?.kind === "TakeReward") {
+          dispatchOrThrow(session, buildTakeReward(state, action.name, false));
+          break;
+        }
         if (state.phase !== "Ascend") {
           throw new MoveRefused(`Cannot answer Ascend outside the Ascend phase (currently ${state.phase}).`);
         }

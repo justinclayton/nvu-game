@@ -31,7 +31,7 @@ export function AscendPanel({ state, dispatch, choices, onChoose }: Props) {
       <h2>The floor is clear. Up the stairs.</h2>
       <p className="ascend__note">
         Your hand shuffles into your deck. Each of you is offered three cards from your own
-        reward pool: they are floating above your side of the table. Take one, or take none.
+        reward pool: they are floating above your side of the table. Take one into your discard pile, or take none.
       </p>
 
       {(["Red", "Gray"] as const).map((c) => (

@@ -41,7 +41,9 @@ function nextCommand(state: GameState): Command | null {
       case "OrderCards":
         return { type: "ORDER_CARDS", cardIds: pending.cards.map((c) => c.id) };
       case "TakeReward":
-        return { type: "TAKE_REWARD", take: true };
+        return { type: "TAKE_REWARD", cardId: pending.cards[0]?.id ?? null };
+      case "ChooseGoodStuff":
+        return { type: "CHOOSE_CARDS", cardIds: pending.options.slice(0, 1).map((c) => c.id) };
     }
   }
 
@@ -169,7 +171,7 @@ describe("seeded-run invariants", () => {
     const illegal: Command[] = [
       { type: "END_PLAY" },
       { type: "ASCEND", Red: DECLINE, Gray: DECLINE },
-      { type: "TAKE_REWARD", take: true },
+      { type: "TAKE_REWARD", cardId: null },
       { type: "CHOOSE_CHARACTER", character: "Gray" },
     ];
     for (const command of illegal) {

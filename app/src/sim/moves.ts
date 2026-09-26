@@ -94,9 +94,11 @@ function answers(pending: Pending): readonly Command[] {
     }
     case "TakeReward":
       return [
-        { type: "TAKE_REWARD", take: true },
-        { type: "TAKE_REWARD", take: false },
+        ...pending.cards.map((card): Command => ({ type: "TAKE_REWARD", cardId: card.id })),
+        { type: "TAKE_REWARD", cardId: null },
       ];
+    case "ChooseGoodStuff":
+      return pending.options.map((card): Command => ({ type: "CHOOSE_CARDS", cardIds: [card.id] }));
   }
 }
 

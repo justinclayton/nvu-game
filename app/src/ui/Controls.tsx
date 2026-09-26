@@ -140,25 +140,44 @@ function PendingChoice({ state, dispatch }: Props) {
       return (
         <div className="controls controls--pending">
           <p className="controls__prompt">{pending.prompt}</p>
-          <CardView card={pending.card} />
-          <button
-            type="button"
-            className="button button--primary"
-            onClick={() => {
-              dispatch({ type: "TAKE_REWARD", take: true });
-            }}
-          >
-            Take it
-          </button>
+          <div className="zone">
+            {pending.cards.map((card) => (
+              <CardView
+                key={card.id}
+                card={card}
+                onClick={() => {
+                  dispatch({ type: "TAKE_REWARD", cardId: card.id });
+                }}
+              />
+            ))}
+          </div>
           <button
             type="button"
             className="button"
             onClick={() => {
-              dispatch({ type: "TAKE_REWARD", take: false });
+              dispatch({ type: "TAKE_REWARD", cardId: null });
             }}
           >
-            Skip it
+            Take none
           </button>
+        </div>
+      );
+
+    case "ChooseGoodStuff":
+      return (
+        <div className="controls controls--pending">
+          <p className="controls__prompt">{pending.prompt}</p>
+          <div className="zone">
+            {pending.options.map((card) => (
+              <CardView
+                key={card.id}
+                card={card}
+                onClick={() => {
+                  dispatch({ type: "CHOOSE_CARDS", cardIds: [card.id] });
+                }}
+              />
+            ))}
+          </div>
         </div>
       );
 

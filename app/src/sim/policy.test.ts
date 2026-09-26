@@ -189,7 +189,8 @@ describe("greedy", () => {
   function playOut(state: GameState): { readonly state: GameState; readonly commands: readonly Command[] } {
     let s = state;
     const commands: Command[] = [];
-    while (s.phase === "Play" && !s.pending) {
+    // Through Outcome's own questions too, such as which Good Stuff to keep.
+    while (s.phase === "Play" || s.pending) {
       const [command] = greedyPolicy.choose(s, legalCommands(s), policySeed(1));
       commands.push(command);
       s = must(s, command).state;
@@ -298,19 +299,22 @@ describe("greedy", () => {
     expect(chosen).toEqual({ type: "END_PLAY" });
   });
 
-  it("takes the reward when one is offered", () => {
+  it("takes the reward that fits best when card rewards are revealed", () => {
     resetRig();
-    const offered = card("Fast Follow");
+    const weak = card("Shove"); // Oomph 2
+    const best = card("Fast Follow"); // Oomph 3
     const state: GameState = rig({
       phase: "Play",
-      pending: { kind: "TakeReward", prompt: "Take it?", character: "Red", card: offered, source: null },
+      Red: player({ deck: pile("Duck Under", 6) }), // all Scramble: Red is weak on Oomph
+      pending: { kind: "TakeReward", prompt: "Take one?", character: "Red", cards: [weak, best], source: null },
     });
     const legal: readonly Command[] = [
-      { type: "TAKE_REWARD", take: true },
-      { type: "TAKE_REWARD", take: false },
+      { type: "TAKE_REWARD", cardId: weak.id },
+      { type: "TAKE_REWARD", cardId: best.id },
+      { type: "TAKE_REWARD", cardId: null },
     ];
     const [chosen] = greedyPolicy.choose(state, legal, policySeed(1));
-    expect(chosen).toEqual({ type: "TAKE_REWARD", take: true });
+    expect(chosen).toEqual({ type: "TAKE_REWARD", cardId: best.id });
   });
 
   it("picks the reward that fits the character's weaker stat over the first one offered", () => {

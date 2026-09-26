@@ -124,6 +124,13 @@ export interface TurnRecord {
    * next play, spent one per play regardless of what it saves.
    */
   readonly playDiscount: Readonly<Record<Character, number>>;
+  /**
+   * Set 'Em Up: Scramble banked for a character's very next play. The card
+   * that play puts in the zone takes it into `cardScramble`.
+   */
+  readonly nextPlayScramble: Readonly<Record<Character, number>>;
+  /** Scramble a played card has gained this turn, by card id. */
+  readonly cardScramble: Readonly<Record<string, number>>;
   /** System Feedback: banked off the shared pool this turn; a stat never reads below zero. */
   readonly poolPenalty: { readonly oomph: number; readonly scramble: number };
   /** Bio-Hazard Containment Vault: banked onto the shared pool this turn by Scrapping Good Stuff. */

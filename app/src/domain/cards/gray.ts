@@ -190,4 +190,14 @@ export const GRAY: Registry = {
       return done(grantPlayDiscount(state, "Red"));
     },
   },
+
+  /* "Play: Draw 1 card. If Red has played a card this turn, draw 1 additional card." */
+  "Synergy Link": {
+    onPlay(state, ctx) {
+      const events: DomainEvent[] = [];
+      let s = drawOne(state, ctx.character, events);
+      if (playedBy(s, "Red") > 0) s = drawOne(s, ctx.character, events);
+      return done(s, events);
+    },
+  },
 };

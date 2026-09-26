@@ -683,7 +683,27 @@ function endPlay(state: GameState, run: Run): GameState {
       ascends: outcome.ascends,
     },
   };
+  s = playEndEffects(s, run);
+  if (s.phase === "GameOver") return s;
   return drain(settle(s, run), run);
+}
+
+/**
+ * A played card's own end-of-Play-phase line (Riot Shield): resolved once the
+ * room's Clear/Flee is known, before Outcome's own effects and well before
+ * Cleanup — see `onPlayEnd`.
+ */
+function playEndEffects(state: GameState, run: Run): GameState {
+  let s = state;
+  for (const played of s.playZone) {
+    const onPlayEnd = behaviourOf(played.card.name)?.onPlayEnd;
+    if (!onPlayEnd) continue;
+    const step = onPlayEnd(s, { card: played.card, character: played.owner, zone: "playZone" });
+    run.events.push(...step.events);
+    s = settle(step.state, run);
+    if (s.phase === "GameOver") return s;
+  }
+  return s;
 }
 
 const withEffects = (state: GameState, effects: readonly RoomEffect[]): GameState =>

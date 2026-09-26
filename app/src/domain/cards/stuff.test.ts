@@ -421,6 +421,38 @@ describe("Riot Shield — 'If the room is Cleared, return this to your hand at t
     expect(next.Red.hand.some((c) => c.name === "Riot Shield")).toBe(false);
     expect(next.Red.discard.some((c) => c.name === "Riot Shield")).toBe(true);
   });
+
+  it("is back in hand in time for Spore Cloud's Cleanup discard to count and offer it", () => {
+    const state = playing({
+      activeRoom: room("Security Turnstile"),
+      Red: player({
+        deck: pile("Shove", 3),
+        hand: [
+          card("Riot Shield"),
+          card("Spore Cloud"),
+          card("Shove"),
+          card("Shove"),
+          card("Shove"),
+        ],
+      }),
+    });
+    const asked = play(state, [
+      {
+        type: "PLAY_CARD",
+        character: "Red",
+        cardId: handCard(state, "Red", "Riot Shield").id,
+        payWith: [handCard(state, "Red", "Shove").id],
+      },
+      { type: "END_PLAY" },
+    ]).state;
+    expect(asked.cleared).toHaveLength(1);
+    // Hand going into Cleanup: Spore Cloud, Shove, Shove, Riot Shield — 4
+    // cards, one over the limit.
+    const pending = asked.pending;
+    if (pending?.kind !== "ChooseCards") throw new Error("expected a card choice");
+    expect(pending.count).toBe(1);
+    expect(pending.options.map((c) => c.name).sort()).toEqual(["Riot Shield", "Shove", "Shove"]);
+  });
 });
 
 describe("Overcharged Battery — 'The next card played this turn is played for free'", () => {

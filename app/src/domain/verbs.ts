@@ -305,7 +305,7 @@ export function moveToBottomOfDeck(
 }
 
 /**
- * A card taking itself back out of the play zone, at cleanup.
+ * A card taking itself back out of the play zone and into its owner's hand.
  *
  * Rulebook, Going Down: no card may be put into a Down character's hand, so a card whose owner is
  * out stays in the play zone and is discarded with everything else.

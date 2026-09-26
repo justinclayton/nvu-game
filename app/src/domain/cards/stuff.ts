@@ -134,7 +134,7 @@ export const STUFF: Registry = {
 
   /* "If the room is Cleared, return this card to your hand at the end of the turn." */
   "Riot Shield": {
-    onCleanup(state, ctx) {
+    onPlayEnd(state, ctx) {
       if (state.resolution?.roomEnded !== "Cleared") return nothing(state);
       const events: DomainEvent[] = [];
       return done(returnToHand(state, ctx.character, ctx.card, events), events);

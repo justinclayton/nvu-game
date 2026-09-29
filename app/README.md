@@ -45,8 +45,14 @@ taken card then travels into the discard pile and the others settle back onto th
 is owned by `Table.tsx`, so the floating cards and the ascension panel read the same one.
 
 Card faces (`CardFace.tsx`) are sized in em from the card's width, so the same face prints at
-table scale, in a panel, and zoomed under the pointer. The type colours and rarity edges are the
-ones `tools/card-sheet.html` prints.
+table scale, in a panel, and zoomed under the pointer.
+
+The look is the Ration design system: a flat off-white ground, full-strength ink borders, hard
+offset shadows, square corners and one hot pink. Its tokens are the variables at the top of
+`table.css`, with a dark theme under `prefers-color-scheme`. Ration has no success or error
+colours, so state is drawn as shape: a met threshold becomes a pink slab, and rarity is a small
+square in the card's foot (hollow Fine, hatched Cool, solid Woah). Cards stay white stock in both
+themes.
 
 ## The log, notes and exports
 

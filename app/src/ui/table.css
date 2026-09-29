@@ -1,61 +1,116 @@
-/* The Mat.
+/* The Mat, in Ration.
  *
- * A printed playmat seen from above, with cardstock on it. The mat's zones are
- * stencilled in cream on slate-teal neoprene; the cards are cream stock with a
- * type bar, a rarity edge and a colour field where art would go. The type
- * colours and rarity colours are the ones tools/card-sheet.html prints, so
- * a card on this screen matches the card that comes out of the printer.
+ * The table is drawn in the Ration design system: a flat off-white ground,
+ * full-strength ink borders, hard offset shadows with no blur, square corners,
+ * and one hot pink (`--ration`) for identity. There are no success or error
+ * colours: state is shape — a met threshold turns into a pink slab, rarity is
+ * a Stamp square, a card on offer ticks rather than floats.
+ *
+ * Cards are printed stock, so a card keeps the light theme's paper and ink in
+ * both themes (see `.card, .sprite` below); everything around them follows the
+ * page's theme.
  *
  * Everything on a card face is sized in em, and `.card` / `.sprite` set their
  * font size from their width, so one face prints at table scale and zoomed.
  */
 
 :root {
-  --felt: #24363a;
-  --felt-deep: #1a2a2d;
-  --table: #171f21;
-  --print: rgba(245, 239, 225, 0.4);
-  --print-faint: rgba(245, 239, 225, 0.18);
-  --stock: #f5efe1;
-  --stock-edge: #cfc4ab;
-  --ink: #1c1a17;
-  --ink-soft: #5a5347;
-  --red: #b8382c;
-  --red-light: #e08a80;
-  --gray: #62707c;
-  --gray-light: #b6c6d2;
-  --good: #3f8f4a;
-  --bad: #5a3a6e;
-  --met: #2f6b3a;
-  --met-light: #8fd39b;
-  --fine: #0fa3a8;
-  --cool: #8f6fc4;
-  --woah: #daa520;
-  --stairwell: #8d1f18;
-  --room: #c98a12;
+  /* Ration tokens — light, the primary theme. */
+  --ground: #eaeaea;
+  --paper: #ffffff;
+  --ink: #000000;
+  --ink-muted: #4a4a4a;
+  --border: var(--ink);
+  --void: #000000;
+  --on-void: #eaeaea;
+  --on-void-muted: #a3a3a3;
+  /* A void panel's outline: invisible in light, the ink stroke dark needs,
+   * where void sits within 1.2:1 of the ground. */
+  --void-edge: var(--void);
+  --ration: #ea3564;
+  --ration-ink: #b8124a;
+  --on-ration: #000000;
+  --on-ration-display: #ffffff;
+  --focus: var(--ration);
+  --shadow-color: #000000;
+  --shadow-hard: 6px 6px 0 0 var(--shadow-color);
+  --shadow-hard-s: 3px 3px 0 0 var(--shadow-color);
+
+  --stroke-1: 1px;
+  --stroke-2: 2px;
+  --stroke-4: 4px;
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --press: 80ms steps(2);
+
+  --display: Tektur, "Share Tech Mono", ui-monospace, monospace;
+  --grotesk: Archivo, "Helvetica Neue", Arial, sans-serif;
+  --readout: "Share Tech Mono", ui-monospace, "SF Mono", Menlo, monospace;
+
+  /* The game's own tones, drawn from Ration: Red is the identity pink, Gray
+   * is a flat mid-grey that holds 3:1 on paper as a fill. */
+  --tone-red: var(--ration);
+  --tone-gray: #8a8a8a;
 
   --cw: 88px;
   --ch: 123px;
   --pad: 8px;
-  --card-radius: 0.75em;
   --travel: 550ms cubic-bezier(0.2, 0.8, 0.2, 1);
   --flip: 600ms cubic-bezier(0.3, 0.7, 0.3, 1);
+}
 
-  --sans: "Alegreya Sans", "Gill Sans", "Trebuchet MS", sans-serif;
-  --display: "Barlow Semi Condensed", "Arial Narrow", "Helvetica Neue", sans-serif;
-  --stencil: "Saira Stencil One", "Arial Black", sans-serif;
+@media (prefers-color-scheme: dark) {
+  :root {
+    --ground: #0b0b0b;
+    --paper: #161616;
+    --ink: #eaeaea;
+    --ink-muted: #a3a3a3;
+    --void: #1c1c1c;
+    --void-edge: var(--ink);
+    --ration-ink: #ff5a85;
+    --shadow-color: var(--ration);
+    --tone-gray: #9a9a9a;
+  }
 }
 
 * {
   box-sizing: border-box;
 }
 
+/* The page is framed by ration bars, flush to the top and bottom edges. */
 body {
   margin: 0;
-  background: radial-gradient(ellipse at 50% -10%, #263336, var(--table) 60%);
-  color: var(--stock);
-  font: 15px/1.45 var(--sans);
+  display: flex;
+  flex-direction: column;
   min-height: 100vh;
+  background: var(--ground);
+  color: var(--ink);
+  font: 15px/1.45 var(--grotesk);
+}
+body::before,
+body::after {
+  content: "";
+  flex: none;
+  height: 12px;
+  background: var(--ration);
+}
+#root {
+  flex: 1 0 auto;
+}
+
+/* A small plus: the Directive marker, scaled down to lead a notice. */
+.controls--pending .controls__prompt::before,
+.rejection::before {
+  content: "";
+  flex: none;
+  width: 18px;
+  height: 18px;
+  margin-top: 2px;
+  background:
+    linear-gradient(var(--plus, var(--ration)), var(--plus, var(--ration))) center / 100% 6px
+      no-repeat,
+    linear-gradient(var(--plus, var(--ration)), var(--plus, var(--ration))) center / 6px 100%
+      no-repeat;
 }
 
 /* ------------------------------------------------------------------ chrome */
@@ -63,65 +118,93 @@ body {
 .table {
   max-width: 1180px;
   margin: 0 auto;
-  padding: 14px 20px 40px;
+  padding: 0 20px 40px;
   overflow-x: auto;
 }
 
+/* The header hangs off the top bar as one ration slab. */
 .table__head {
   display: flex;
-  align-items: baseline;
+  align-items: center;
   gap: 18px;
-  padding: 4px 4px 12px;
+  margin-bottom: 20px;
+  padding: 14px 16px 16px;
+  background: var(--ration);
+  color: var(--on-ration);
+  border: var(--stroke-2) solid var(--ink);
+  border-top: 0;
 }
 .table__head h1 {
   margin: 0;
-  font: 700 24px/1 var(--display);
-  letter-spacing: 0.06em;
+  font: 700 28px/1 var(--display);
+  letter-spacing: 0.02em;
   text-transform: uppercase;
+  color: var(--on-ration-display);
 }
 .table__meta {
   display: flex;
+  align-items: center;
   gap: 14px;
-  color: var(--print);
-  font-size: 14px;
+  font: 400 14px/1.2 var(--readout);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
 }
 .table__phase {
-  font-weight: 700;
-  color: var(--stock);
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  font-family: var(--display);
+  padding: 3px 8px;
+  background: var(--void);
+  color: var(--on-void);
 }
 .table__actions {
   margin-left: auto;
   display: flex;
-  gap: 8px;
+  align-items: center;
+  gap: 12px;
 }
 
 .button {
-  font: 600 14px/1 var(--display);
-  letter-spacing: 0.04em;
+  font: 400 14px/1.2 var(--readout);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
   padding: 8px 14px;
-  border: 1px solid rgba(245, 239, 225, 0.7);
-  border-radius: 4px;
-  background: transparent;
-  color: var(--stock);
+  border: var(--stroke-2) solid var(--border);
+  border-radius: 0;
+  background: var(--paper);
+  color: var(--ink);
+  box-shadow: var(--shadow-hard-s);
   cursor: pointer;
+  transition:
+    transform var(--press),
+    box-shadow var(--press);
 }
 .button:hover:not(:disabled) {
-  background: rgba(245, 239, 225, 0.1);
+  transform: translate(3px, 3px);
+  box-shadow: none;
+}
+.button:active:not(:disabled) {
+  transform: translate(3px, 3px);
+  box-shadow: none;
 }
 .button:disabled {
-  opacity: 0.35;
   cursor: not-allowed;
+  border-style: dashed;
+  background: var(--ground);
+  color: var(--ink-muted);
+  box-shadow: none;
 }
+/* The primary is the full-size press: pink, with the 6px shadow it sinks into. */
 .button--primary {
-  background: var(--stock);
-  color: var(--ink);
-  border-color: var(--stock);
+  padding: 12px 24px;
+  background: var(--ration);
+  color: var(--on-ration);
+  box-shadow: var(--shadow-hard);
 }
 .button--primary:hover:not(:disabled) {
-  background: #fff;
+  transform: translate(3px, 3px);
+  box-shadow: var(--shadow-hard-s);
+}
+.button--primary:active:not(:disabled) {
+  transform: translate(6px, 6px);
+  box-shadow: none;
 }
 .button--small {
   font-size: 12px;
@@ -130,7 +213,7 @@ body {
 .button:focus-visible,
 .sprite:focus-visible,
 .card:focus-visible {
-  outline: 2px solid var(--woah);
+  outline: 3px solid var(--focus);
   outline-offset: 2px;
 }
 
@@ -143,16 +226,10 @@ body {
   gap: 20px;
   min-width: 1140px;
   padding: 18px 20px 20px;
-  border-radius: 14px;
-  color: var(--stock);
-  background:
-    radial-gradient(ellipse at 50% 0%, rgba(255, 255, 255, 0.07), transparent 60%),
-    repeating-linear-gradient(45deg, rgba(0, 0, 0, 0.05) 0 2px, transparent 2px 4px),
-    linear-gradient(180deg, var(--felt), var(--felt-deep));
-  box-shadow:
-    inset 0 0 0 1px rgba(255, 255, 255, 0.06),
-    inset 0 0 60px rgba(0, 0, 0, 0.25),
-    0 14px 34px rgba(0, 0, 0, 0.45);
+  background: var(--paper);
+  color: var(--ink);
+  border: var(--stroke-2) solid var(--border);
+  box-shadow: var(--shadow-hard);
 }
 
 .mat__main {
@@ -168,7 +245,7 @@ body {
 }
 .mat__divider {
   width: 0;
-  border-left: 1.5px solid var(--print-faint);
+  border-left: var(--stroke-2) solid var(--border);
   margin: 16px 2px 0;
 }
 .mat__rail {
@@ -177,39 +254,40 @@ body {
   gap: 12px;
   align-content: start;
   padding-left: 18px;
-  border-left: 1.5px dashed var(--print-faint);
+  border-left: var(--stroke-2) solid var(--border);
 }
 
-/* A slot is a stencilled outline with a label above it. The well is the box the
- * card layer measures; nothing is ever rendered inside it. */
+/* A slot is a dashed outline with a readout label above it. The well is the
+ * box the card layer measures; nothing is ever rendered inside it. */
+/* The slot sets no z-index of its own, so its count shares a stacking context
+ * with the card layer: above a resting pile's solid shadow (a pile is z 1–60),
+ * below a card in flight (200+) or on offer (300+). */
 .slot {
   position: relative;
   padding-top: 16px;
-  z-index: 0;
 }
 .slot__label {
   position: absolute;
-  left: 6px;
+  left: 2px;
   top: 0;
-  font: 400 10px/16px var(--stencil);
-  letter-spacing: 0.14em;
+  font: 400 11px/16px var(--readout);
+  letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: var(--print);
+  color: var(--ink);
   white-space: nowrap;
 }
 .slot__count {
   position: absolute;
   right: -7px;
   bottom: -7px;
-  z-index: 400;
+  z-index: 190;
   min-width: 20px;
   height: 20px;
-  padding: 0 5px;
-  border-radius: 10px;
-  border: 1px solid var(--print);
-  background: var(--ink);
-  color: var(--stock);
-  font: 700 11px/18px var(--display);
+  padding: 0 4px;
+  border: var(--stroke-1) solid var(--border);
+  background: var(--void);
+  color: var(--on-void);
+  font: 400 11px/18px var(--readout);
   text-align: center;
   font-variant-numeric: tabular-nums;
   pointer-events: none;
@@ -217,8 +295,7 @@ body {
 .well {
   width: calc(var(--cw) + 2 * var(--pad));
   height: calc(var(--ch) + 2 * var(--pad));
-  border: 1.5px dashed var(--print);
-  border-radius: 9px;
+  border: var(--stroke-2) dashed var(--border);
 }
 .slot--row {
   flex: 1 1 auto;
@@ -231,18 +308,18 @@ body {
   width: auto;
 }
 .slot--red .well {
-  border-color: rgba(224, 138, 128, 0.55);
+  border-color: var(--tone-red);
 }
 .slot--red .slot__label,
 .slot--red .slot__title {
-  color: var(--red-light);
+  color: var(--ration-ink);
 }
 .slot--gray .well {
-  border-color: rgba(182, 198, 210, 0.55);
+  border-color: var(--tone-gray);
 }
 .slot--gray .slot__label,
 .slot--gray .slot__title {
-  color: var(--gray-light);
+  color: var(--ink-muted);
 }
 
 /* The hand slot carries the character's name, their state and the Draw button. */
@@ -256,27 +333,29 @@ body {
   align-items: baseline;
   gap: 10px;
   height: 28px;
-  padding: 0 6px;
+  padding: 0 2px;
 }
 .slot__title {
   margin: 0;
-  font: 700 16px/1 var(--display);
-  letter-spacing: 0.06em;
+  font: 700 18px/1 var(--display);
+  letter-spacing: 0.04em;
   text-transform: uppercase;
 }
 .slot__label--inline {
   position: static;
 }
 .status {
-  font-size: 11px;
+  font: 400 11px/1.2 var(--readout);
   text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: var(--print);
+  letter-spacing: 0.12em;
+  color: var(--ink-muted);
 }
+/* A character in trouble is stamped: a pink tag, not a pink word. */
 .status--last-stand,
 .status--down {
-  color: var(--red-light);
-  font-weight: 700;
+  padding: 1px 5px;
+  background: var(--ration);
+  color: var(--on-ration);
 }
 .slot__head .button {
   margin-left: auto;
@@ -296,16 +375,17 @@ body {
   pointer-events: none;
 }
 
-/* The room at reading size, beside the room card. */
+/* The room at reading size, beside the room card: a void display window. */
 .brief {
   flex: 1 1 auto;
   min-width: 0;
   margin-top: 16px;
   height: calc(var(--ch) + 2 * var(--pad));
-  padding: 8px 12px;
-  border: 1.5px solid var(--print-faint);
-  border-radius: 9px;
-  background: rgba(0, 0, 0, 0.18);
+  padding: 8px 14px;
+  border-radius: var(--radius-md);
+  background: var(--void);
+  color: var(--on-void);
+  outline: var(--stroke-2) solid var(--void-edge);
   overflow: auto;
 }
 .brief__head {
@@ -315,31 +395,31 @@ body {
   flex-wrap: wrap;
 }
 .brief__kind {
-  font: 400 10px/16px var(--stencil);
-  letter-spacing: 0.14em;
+  font: 400 11px/16px var(--readout);
+  letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: var(--print);
+  color: var(--ration);
 }
 .brief__name {
   margin: 0;
-  font: 700 18px/1.1 var(--display);
-  letter-spacing: 0.01em;
+  font: 700 20px/1.1 var(--display);
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
 }
 .brief--stairwell .brief__name {
-  color: var(--red-light);
-}
-.brief--room .brief__name {
-  color: #f0c96a;
+  color: var(--ration);
 }
 .brief__pool {
   margin-left: auto;
-  font-size: 13px;
-  color: var(--print);
+  font: 400 12px/1.2 var(--readout);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--on-void-muted);
   white-space: nowrap;
 }
 .brief__pool b {
-  color: var(--stock);
-  font: 700 16px/1 var(--display);
+  color: var(--on-void);
+  font: 400 20px/1 var(--readout);
 }
 .brief__lines {
   list-style: none;
@@ -351,38 +431,39 @@ body {
   grid-template-columns: 96px minmax(0, 1fr) auto;
   gap: 10px;
   align-items: baseline;
-  padding: 2px 0;
-  border-bottom: 1px dotted var(--print-faint);
+  margin: 0 -6px;
+  padding: 2px 6px;
+  border-bottom: var(--stroke-1) dashed var(--on-void-muted);
   font-size: 13px;
 }
 .bline__need {
-  font: 700 14px/1.3 var(--display);
+  font: 800 14px/1.3 var(--grotesk);
 }
 .bline__have {
-  color: var(--print);
-  font-size: 12px;
+  color: var(--on-void-muted);
+  font: 400 12px/1.3 var(--readout);
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
 }
-.bline.is-met {
-  color: var(--met-light);
-}
+/* A met line becomes a pink slab: state as shape, not a green tint. */
+.bline.is-met,
 .bline.is-met .bline__have {
-  color: var(--met-light);
+  background: var(--ration);
+  color: var(--on-ration);
 }
 .bline.is-met .bline__need::after {
-  content: " ✓";
+  content: " ■";
 }
 .brief__flee {
   margin: 6px 0 0;
   font-size: 12.5px;
-  color: var(--print);
+  color: var(--on-void-muted);
 }
 .brief__flee b {
-  color: var(--stock);
+  font: 400 11px/1 var(--readout);
+  color: var(--ration);
   text-transform: uppercase;
-  letter-spacing: 0.08em;
-  font-size: 10.5px;
+  letter-spacing: 0.12em;
   margin-right: 4px;
 }
 .brief--empty {
@@ -393,9 +474,8 @@ body {
 }
 .brief__blurb {
   margin: 0;
-  font-style: italic;
-  font-size: 15px;
-  color: var(--stock);
+  font: 700 17px/1.25 var(--grotesk);
+  color: var(--on-void);
 }
 
 /* ------------------------------------------------------------- card layer */
@@ -419,7 +499,6 @@ body {
   font: inherit;
   font-size: calc(var(--cw) / 11);
   text-align: left;
-  color: var(--ink);
   pointer-events: auto;
   transition: transform var(--travel);
   will-change: transform;
@@ -437,34 +516,37 @@ body {
 }
 
 /* The pose is one transform fed by variables: the layer sets the lean and the
- * scale, and the states below only move the lift, so none of them fight. */
+ * scale, and the states below only move the lift, so none of them fight. The
+ * shadow is a hard offset that grows as the card leaves the table. */
 .sprite__pose {
   --lift: 0px;
-  --shadow: drop-shadow(1px 2px 2px rgba(0, 0, 0, 0.45));
+  --shadow: drop-shadow(2px 2px 0 var(--shadow-color));
   display: block;
   width: 100%;
   height: 100%;
   transform: translateY(var(--lift)) rotate(var(--lean, 0deg)) scale(var(--scale, 1));
   transition:
-    transform 300ms ease,
-    filter 300ms ease;
+    transform 120ms steps(2),
+    filter 120ms steps(2);
   filter: var(--shadow);
   perspective: 700px;
 }
 .sprite.is-moving .sprite__pose {
-  --shadow: drop-shadow(3px 10px 10px rgba(0, 0, 0, 0.5));
+  --shadow: drop-shadow(5px 5px 0 var(--shadow-color));
 }
 .sprite.is-clickable:hover .sprite__pose,
 .sprite:focus-visible .sprite__pose {
   --lift: -10px;
   --lean: 0deg;
+  --shadow: drop-shadow(4px 4px 0 var(--shadow-color));
 }
 .sprite.is-selected .sprite__pose {
   --lift: -14px;
   --lean: 0deg;
+  --shadow: drop-shadow(5px 5px 0 var(--shadow-color));
 }
 .sprite.is-dimmed .sprite__pose {
-  filter: var(--shadow) saturate(0.25) brightness(0.8);
+  filter: var(--shadow) grayscale(1) brightness(0.8);
 }
 .sprite.is-chosen .sprite__pose {
   --lift: 6px;
@@ -472,12 +554,13 @@ body {
 }
 
 /* Cards on offer at ascension are held up off the table: larger, with a long
- * shadow, and a slow bob. The chosen one is ringed and lifted higher. */
+ * hard shadow, ticking up and down in two steps rather than bobbing. The
+ * chosen one is ringed in pink and lifted higher. */
 .sprite--float .sprite__pose {
-  --shadow: drop-shadow(0 18px 18px rgba(0, 0, 0, 0.55));
+  --shadow: drop-shadow(6px 6px 0 var(--shadow-color));
 }
 .sprite--float .sprite__in {
-  animation: bob 3.2s ease-in-out infinite;
+  animation: tick 1.6s steps(1, jump-end) infinite;
   animation-delay: var(--bob-delay, 0s);
 }
 .sprite--float.is-clickable:hover .sprite__pose,
@@ -486,20 +569,20 @@ body {
 }
 .sprite--float.is-selected .sprite__pose {
   --lift: -24px;
-  --shadow: drop-shadow(0 26px 22px rgba(0, 0, 0, 0.6));
+  --shadow: drop-shadow(8px 8px 0 var(--shadow-color));
 }
 .sprite--float.is-selected .face {
   box-shadow:
-    0 0 0 0.3em var(--stock),
-    0 0 0 0.6em var(--woah);
+    0 0 0 0.3em var(--paper),
+    0 0 0 0.6em var(--ration);
 }
-@keyframes bob {
+@keyframes tick {
   0%,
   100% {
     translate: 0 0;
   }
   50% {
-    translate: 0 -5px;
+    translate: 0 -4px;
   }
 }
 
@@ -516,6 +599,19 @@ body {
 
 /* --------------------------------------------------------------- the card */
 
+/* A card is printed stock: white paper and black ink in either theme. */
+.card,
+.sprite {
+  --paper: #ffffff;
+  --ink: #000000;
+  --ink-muted: #4a4a4a;
+  --border: #000000;
+  --void: #000000;
+  --ration-ink: #b8124a;
+  --tone-gray: #8a8a8a;
+  color: var(--ink);
+}
+
 .card {
   --cw: 88px;
   --ch: 123px;
@@ -530,7 +626,6 @@ body {
   font: inherit;
   font-size: calc(var(--cw) / 11);
   text-align: left;
-  color: var(--ink);
 }
 .card--large {
   --cw: 230px;
@@ -540,20 +635,20 @@ body {
   cursor: pointer;
 }
 .card.is-clickable:hover .face {
-  box-shadow: 0 0 0 2px var(--stock);
+  box-shadow: 3px 3px 0 0 var(--shadow-color);
 }
 .card.is-selected .face {
-  box-shadow: 0 0 0 3px var(--woah);
+  box-shadow: 0 0 0 4px var(--ration);
 }
 .card.is-dimmed {
-  opacity: 0.45;
+  filter: grayscale(1);
+  opacity: 0.55;
 }
 
 .face,
 .back {
   position: absolute;
   inset: 0;
-  border-radius: var(--card-radius);
   backface-visibility: hidden;
   -webkit-backface-visibility: hidden;
   overflow: hidden;
@@ -562,45 +657,33 @@ body {
   transform: rotateY(180deg);
 }
 
-/* The type bar along the top says who owns the card; the edge is its rarity. */
+/* The type bar along the top says who owns the card; the Stamp in the foot is its rarity. */
 .face {
   display: flex;
   flex-direction: column;
   gap: 0.3em;
   padding: 0.7em 0.8em 0.6em;
-  background: var(--stock);
-  border: 0.18em solid var(--stock-edge);
-  border-top: 0.6em solid var(--tone, #1b1b1b);
+  background: var(--paper);
+  border: 0.18em solid var(--border);
+  border-top: 0.7em solid var(--tone, var(--ink));
 }
 .tone--red {
-  --tone: var(--red);
+  --tone: var(--tone-red);
 }
 .tone--gray {
-  --tone: var(--gray);
+  --tone: var(--tone-gray);
 }
 .tone--good {
-  --tone: var(--good);
+  --tone: var(--ration);
 }
 .tone--bad {
-  --tone: var(--bad);
+  --tone: var(--void);
 }
 .tone--stairwell {
-  --tone: var(--stairwell);
+  --tone: var(--ration);
 }
 .tone--room {
-  --tone: var(--room);
-}
-.rarity--fine .face {
-  border-color: var(--fine);
-  border-top-color: var(--tone);
-}
-.rarity--cool .face {
-  border-color: var(--cool);
-  border-top-color: var(--tone);
-}
-.rarity--woah .face {
-  border-color: var(--woah);
-  border-top-color: var(--tone);
+  --tone: var(--void);
 }
 
 .face__head {
@@ -610,8 +693,9 @@ body {
   gap: 0.5em;
 }
 .name {
-  font: 700 1.45em/1.05 var(--display);
-  letter-spacing: 0.005em;
+  font: 800 1.45em/1.02 var(--grotesk);
+  font-stretch: 75%;
+  letter-spacing: -0.01em;
 }
 /* A name too long for two lines at 1.45em — shrunk so it wraps to fewer,
  * shorter lines instead of pushing the text below it further down. */
@@ -622,57 +706,36 @@ body {
   flex: none;
   width: 2.1em;
   height: 2.1em;
-  border-radius: 50%;
-  border: 0.16em solid var(--ink);
+  border: 0.16em solid var(--border);
   display: grid;
   place-items: center;
   font: 700 1.2em/1 var(--display);
 }
 .face__type {
-  font-size: 0.95em;
-  font-weight: 700;
+  font: 400 0.95em/1.2 var(--readout);
   text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: var(--ink-soft);
+  letter-spacing: 0.1em;
+  color: var(--ink-muted);
 }
 
-/* Where art would go. A field of the type's colour, so a hand can be read by colour alone. */
+/* Where art would go: a flat field in the type's tone, so a hand can be read
+ * at a glance. Stuff and rooms get a pattern as well as a colour, so no two
+ * types are told apart by hue alone. */
 .face__art {
   position: relative;
   flex: 1 1 auto;
   min-height: 3.2em;
-  border-radius: 0.4em;
-  background: var(--art, linear-gradient(135deg, #3a3a3a, #1b1b1b));
-}
-.face__art::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  background: linear-gradient(
-    180deg,
-    rgba(255, 255, 255, 0.14),
-    transparent 45%,
-    rgba(0, 0, 0, 0.2)
-  );
-}
-.tone--red .face__art {
-  --art: radial-gradient(circle at 30% 65%, #e0574a, #8f2a22 60%, #5e1a15);
-}
-.tone--gray .face__art {
-  --art: radial-gradient(circle at 70% 30%, #a9bac8, #62707c 60%, #3e4a55);
+  border: 0.12em solid var(--border);
+  background: var(--art, var(--tone, var(--ink)));
 }
 .tone--good .face__art {
-  --art: radial-gradient(circle at 50% 40%, #86d195, #3f8f4a 60%, #24562c);
-}
-.tone--bad .face__art {
-  --art: radial-gradient(circle at 40% 60%, #b892d1, #5a3a6e 60%, #34203f);
+  --art: repeating-linear-gradient(45deg, var(--ration) 0 0.35em, var(--paper) 0.35em 0.7em);
 }
 .tone--stairwell .face__art {
-  --art: radial-gradient(ellipse at 50% 60%, #d84a3e, #6a1a14 55%, #1c0907);
+  --art: repeating-linear-gradient(180deg, var(--void) 0 0.6em, var(--ration) 0.6em 0.9em);
 }
 .tone--room .face__art {
-  --art: repeating-linear-gradient(-45deg, #d9a21b 0 0.8em, #2a2622 0.8em 1.6em);
+  --art: repeating-linear-gradient(-45deg, var(--ink) 0 0.8em, var(--paper) 0.8em 1.6em);
 }
 
 .face__stats {
@@ -684,24 +747,19 @@ body {
   display: flex;
   align-items: baseline;
   gap: 0.3em;
-  font-family: var(--display);
 }
 .stat b {
-  font-size: 1.9em;
-  line-height: 1;
-  font-weight: 700;
+  font: 700 1.9em/1 var(--display);
 }
 .stat i {
-  font-size: 0.95em;
+  font: 400 0.95em/1 var(--readout);
   font-style: normal;
-  font-weight: 600;
   text-transform: uppercase;
-  letter-spacing: 0.06em;
-  color: var(--ink-soft);
+  letter-spacing: 0.08em;
+  color: var(--ink-muted);
 }
 .stat--conditional {
-  font-size: 1.7em;
-  font-weight: 700;
+  font: 700 1.7em/1 var(--display);
 }
 /* Oomph and Scramble together, shrunk enough to stay on one line rather than
  * wrapping and eating the row height text below needs. */
@@ -716,13 +774,15 @@ body {
   font-size: 1.5em;
 }
 .face__stats--pair .stat i {
-  font-size: 0.8em;
+  font-size: 0.75em;
+  letter-spacing: 0.02em;
 }
 .face__text {
   margin: 0;
   font-size: 1.02em;
-  line-height: 1.25;
-  color: #333;
+  font-stretch: 87.5%;
+  line-height: 1.22;
+  color: var(--ink);
 }
 
 /* A card that prints text yields the art window to it rather than clipping:
@@ -766,6 +826,7 @@ body {
   flex: 0 0 auto;
   min-height: 0;
   height: 0.3em;
+  border-width: 0;
 }
 .face--text-xl .face__text {
   font-size: 0.76em;
@@ -782,19 +843,37 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: baseline;
-  font-size: 0.9em;
+  font: 400 0.9em/1 var(--readout);
   text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: #8a8270;
+  letter-spacing: 0.1em;
+  color: var(--ink-muted);
 }
-.rarity--fine .rarity {
-  color: var(--fine);
+
+/* Rarity is a Stamp: hollow for Fine, hatched for Cool, solid for Woah. */
+.rarity--fine .rarity::before,
+.rarity--cool .rarity::before,
+.rarity--woah .rarity::before {
+  content: "";
+  display: inline-block;
+  width: 0.9em;
+  height: 0.9em;
+  margin-right: 0.4em;
+  vertical-align: -0.1em;
+  border-radius: 0.12em;
 }
-.rarity--cool .rarity {
-  color: var(--cool);
+.rarity--fine .rarity::before {
+  border: 0.18em solid var(--ink);
 }
+.rarity--cool .rarity::before {
+  border: 0.18em solid var(--ration);
+  background: repeating-linear-gradient(45deg, var(--ration) 0 0.12em, transparent 0.12em 0.3em);
+}
+.rarity--woah .rarity::before {
+  background: var(--ration);
+}
+.rarity--cool .rarity,
 .rarity--woah .rarity {
-  color: #a8790a;
+  color: var(--ration-ink);
 }
 
 /* A room card prints its threshold lines and its Flee line. Like a player
@@ -818,33 +897,39 @@ body {
   font-size: 0.85em;
 }
 .line {
-  padding: 0.12em 0;
-  border-bottom: 1px dotted var(--stock-edge);
+  padding: 0.12em 0.2em;
+  margin: 0 -0.2em;
+  border-bottom: 1px dashed var(--ink-muted);
   line-height: 1.15;
 }
 .line b {
   display: block;
-  font: 700 1.1em/1.15 var(--display);
+  font: 800 1.1em/1.15 var(--grotesk);
+  font-stretch: 75%;
 }
 .line.is-met {
-  color: var(--met);
+  background: var(--ration);
+  color: var(--on-ration);
 }
 .line.is-met b::after {
-  content: " ✓";
+  content: " ■";
 }
 .flee {
   margin-top: auto;
   padding-top: 0.2em;
-  border-top: 1px solid var(--stock-edge);
+  border-top: 0.12em solid var(--border);
   font-size: 0.8em;
   line-height: 1.2;
-  color: var(--ink-soft);
+  color: var(--ink-muted);
 }
 .flee b {
+  font-family: var(--readout);
+  font-weight: 400;
   text-transform: uppercase;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.1em;
   font-size: 0.9em;
   margin-right: 0.3em;
+  color: var(--ration-ink);
 }
 .face--room.face--text-m .lines {
   font-size: 0.78em;
@@ -859,7 +944,7 @@ body {
   font-size: 0.72em;
 }
 .face--room.face--text-l .line {
-  padding: 0.08em 0;
+  padding: 0.08em 0.2em;
 }
 .face--room.face--text-l .flee {
   font-size: 0.68em;
@@ -868,6 +953,7 @@ body {
 .face--room.face--text-xl .face__art {
   min-height: 0;
   flex: 0 0 0;
+  border-width: 0;
 }
 .face--room.face--text-xl .name {
   font-size: 1em;
@@ -876,7 +962,7 @@ body {
   font-size: 0.64em;
 }
 .face--room.face--text-xl .line {
-  padding: 0.05em 0;
+  padding: 0.05em 0.2em;
   line-height: 1.05;
 }
 .face--room.face--text-xl .flee {
@@ -885,9 +971,11 @@ body {
   line-height: 1.1;
 }
 
+/* A card back is a ration pack: a pink panel inset in a paper frame. */
 .back {
-  background: repeating-linear-gradient(135deg, #2c2a27 0 3px, #34312d 3px 6px);
-  border: 0.18em solid #111;
+  background: var(--ration);
+  border: 0.18em solid var(--border);
+  box-shadow: inset 0 0 0 0.45em var(--paper);
 }
 .back::after {
   content: "N↑U";
@@ -895,58 +983,61 @@ body {
   inset: 0;
   display: grid;
   place-items: center;
-  font: 400 2.4em/1 var(--stencil);
-  letter-spacing: 0.1em;
-  color: rgba(245, 239, 225, 0.55);
+  font: 700 2.4em/1 var(--display);
+  letter-spacing: 0.04em;
+  color: var(--on-ration);
 }
 .back--room {
-  background: repeating-linear-gradient(90deg, #1b1b1b 0 4px, #262626 4px 8px);
+  background: var(--void);
 }
 .back--room::after {
   content: "ROOM";
   font-size: 1.6em;
+  color: var(--ration);
 }
 
 .card__badge {
   position: absolute;
   top: -0.8em;
   right: -0.6em;
-  padding: 0.15em 0.6em;
-  border-radius: 1em;
-  background: var(--ink);
-  color: var(--stock);
-  font: 700 1em/1.4 var(--display);
+  padding: 0.2em 0.6em;
+  background: var(--void);
+  color: #eaeaea;
+  font: 400 1em/1.3 var(--readout);
   text-transform: uppercase;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.1em;
 }
 
 /* --------------------------------------------------------------- panels */
 
 .controls {
-  margin-top: 14px;
-  padding: 12px 14px;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 8px;
-  background: rgba(255, 255, 255, 0.04);
+  margin-top: 20px;
+  padding: 14px 16px;
+  border: var(--stroke-2) solid var(--border);
+  background: var(--paper);
+  box-shadow: var(--shadow-hard);
   display: flex;
-  gap: 12px;
+  gap: 14px;
   align-items: center;
   flex-wrap: wrap;
 }
 .controls--pending {
-  border-color: var(--woah);
+  border-width: var(--stroke-4);
 }
 .controls__prompt {
   width: 100%;
   margin: 0;
-  font: 700 16px/1.3 var(--display);
+  display: flex;
+  gap: 12px;
+  font: 700 18px/1.25 var(--grotesk);
 }
 .controls__why {
-  color: var(--print);
+  color: var(--ink-muted);
   font-size: 13px;
 }
 .controls__hint {
-  color: #f2d48a;
+  color: var(--ration-ink);
+  font-weight: 700;
   font-size: 14px;
 }
 
@@ -958,42 +1049,53 @@ body {
   padding: 6px 0;
 }
 .zone__empty {
-  color: var(--print);
+  color: var(--ink-muted);
   margin: 0;
   font-size: 13px;
 }
 
 .rejection {
-  margin: 10px 0 0;
-  padding: 8px 12px;
-  border-left: 4px solid var(--red-light);
-  background: rgba(224, 138, 128, 0.12);
+  --plus: var(--on-ration);
+  display: flex;
+  gap: 12px;
+  margin: 16px 0 0;
+  padding: 10px 14px;
+  border: var(--stroke-2) solid var(--border);
+  background: var(--ration);
+  color: var(--on-ration);
+  font: 700 15px/1.3 var(--grotesk);
 }
 
+/* Ascension is the void window: black, one soft corner set, pink marks. The
+ * buttons in it throw pink shadows, since a black one would vanish. */
 .ascend {
-  margin-top: 14px;
-  padding: 14px 16px 16px;
-  border: 1px solid var(--woah);
-  border-radius: 8px;
-  background: rgba(0, 0, 0, 0.25);
+  --shadow-hard: 6px 6px 0 0 var(--ration);
+  --shadow-hard-s: 3px 3px 0 0 var(--ration);
+  margin-top: 20px;
+  padding: 18px 20px 20px;
+  border-radius: var(--radius-md);
+  background: var(--void);
+  color: var(--on-void);
+  outline: var(--stroke-2) solid var(--void-edge);
 }
 .ascend h2 {
-  margin: 0 0 6px;
-  font: 700 22px/1.1 var(--display);
+  margin: 0 0 8px;
+  font: 800 32px/1 var(--grotesk);
+  letter-spacing: -0.03em;
 }
 .ascend h3 {
   margin: 0;
-  font: 700 16px/1 var(--display);
+  font: 700 18px/1 var(--display);
   text-transform: uppercase;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.04em;
 }
 .ascend__note {
-  color: var(--print);
+  color: var(--on-void-muted);
   margin: 0 0 12px;
   max-width: 70ch;
 }
 .ascend__character {
-  border-top: 1px solid rgba(255, 255, 255, 0.12);
+  border-top: var(--stroke-1) dashed var(--on-void-muted);
   padding-top: 12px;
   margin-top: 12px;
 }
@@ -1002,92 +1104,93 @@ body {
   font-size: 14px;
 }
 .ascend__reward b {
-  font-family: var(--display);
-  font-size: 15px;
+  font: 700 15px/1 var(--display);
+  text-transform: uppercase;
 }
 .ascend__reward .button {
   margin-left: 6px;
 }
 .ascend__declining {
-  color: var(--print);
+  color: var(--on-void-muted);
 }
 .ascend h4 {
-  margin: 10px 0 2px;
-  font: 400 10px/16px var(--stencil);
-  letter-spacing: 0.14em;
+  margin: 10px 0 4px;
+  font: 400 11px/16px var(--readout);
+  letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: var(--print);
+  color: var(--ration);
+}
+.ascend .controls {
+  background: transparent;
+  border-color: var(--on-void);
+  box-shadow: none;
+}
+.ascend .controls__why {
+  color: var(--on-void-muted);
 }
 
+/* The one slogan on the screen. */
 .over {
-  margin-top: 20px;
+  margin-top: 28px;
   text-align: center;
 }
 .over h2 {
-  font: 700 28px/1.1 var(--display);
+  margin: 0 0 24px;
+  font: 800 56px/0.95 var(--grotesk);
+  letter-spacing: -0.035em;
 }
 
 /* The log, the note box that writes into it and the buttons that take it away
  * are one block, so they stay together wherever the log goes — under the mat,
  * or in its own column beside it on a wide screen. */
 .log {
-  margin-top: 18px;
+  margin-top: 24px;
 }
 .log__head {
   display: flex;
   align-items: baseline;
   gap: 12px;
-  margin: 0 0 4px;
+  margin: 0 0 8px;
 }
-.log__title {
+.log__title,
+.log__exports-label,
+.note-box__label {
   margin: 0;
-  font: 400 10px/16px var(--stencil);
-  letter-spacing: 0.14em;
+  font: 400 11px/16px var(--readout);
+  letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: var(--print);
+  color: var(--ink);
 }
 .log__exports {
   margin-left: auto;
   display: flex;
   align-items: baseline;
-  gap: 6px;
-}
-.log__exports-label {
-  font: 400 10px/16px var(--stencil);
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: var(--print);
+  gap: 10px;
 }
 
 /* A note is typed into the log, so the box sits against the bottom of it. */
 .note-box {
   display: flex;
   align-items: center;
-  gap: 8px;
-  margin-top: 6px;
-}
-.note-box__label {
-  font: 400 10px/16px var(--stencil);
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: var(--print);
+  gap: 10px;
+  margin-top: 10px;
 }
 .note-box__input {
   flex: 1 1 auto;
   min-width: 0;
-  padding: 7px 10px;
-  border: 1px solid rgba(245, 239, 225, 0.35);
-  border-radius: 4px;
-  background: rgba(0, 0, 0, 0.25);
-  color: var(--stock);
-  font: 14px/1.2 var(--sans);
+  padding: 8px 10px;
+  border: var(--stroke-2) solid var(--border);
+  border-radius: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font: 14px/1.2 var(--grotesk);
 }
 .note-box__input::placeholder {
-  color: var(--print-faint);
+  color: var(--ink-muted);
 }
 .note-box__input:focus-visible {
-  outline: 2px solid var(--woah);
-  outline-offset: 1px;
+  outline: 3px solid var(--focus);
+  outline-offset: 2px;
 }
 .log__lines {
   list-style: none;
@@ -1095,37 +1198,41 @@ body {
   padding: 8px 12px;
   max-height: 160px;
   overflow-y: auto;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 8px;
-  background: rgba(0, 0, 0, 0.25);
+  border: var(--stroke-2) solid var(--border);
+  background: var(--paper);
   font-size: 13px;
 }
 .log__line {
   padding: 1px 0;
 }
 .log__line--turn_ended {
-  color: var(--print);
+  color: var(--ink-muted);
+  font: 400 11px/1.6 var(--readout);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
   text-align: center;
 }
 .log__line--went_down,
-.log__line--game_over {
-  color: var(--red-light);
-  font-weight: 700;
-}
+.log__line--game_over,
 .log__line--stuff_pool_empty {
-  color: var(--red-light);
+  color: var(--ration-ink);
+  font-weight: 700;
 }
 .log__line--room_cleared,
 .log__line--floor_cleared {
-  color: var(--met-light);
+  font-weight: 700;
+}
+.log__line--room_cleared::before,
+.log__line--floor_cleared::before {
+  content: "■ ";
+  color: var(--ration);
 }
 /* A typed note, marked out from the rules' own narration around it. */
 .log__line--note {
-  margin: 2px 0;
+  margin: 3px 0;
   padding: 2px 8px;
-  border-left: 3px solid var(--woah);
-  background: rgba(218, 165, 32, 0.12);
-  color: #f2d48a;
+  background: var(--ration);
+  color: var(--on-ration);
   font-weight: 700;
 }
 
@@ -1136,7 +1243,7 @@ body {
   bottom: 18px;
   z-index: 1000;
   pointer-events: none;
-  filter: drop-shadow(0 14px 28px rgba(0, 0, 0, 0.6));
+  filter: drop-shadow(6px 6px 0 var(--shadow-color));
 }
 /* Past the wide table's own cap (below), there is room beside it again, and
  * the zoomed card sits there instead of over the mat. */
@@ -1160,21 +1267,29 @@ body {
   body {
     font-size: 14px;
   }
+  body::before,
+  body::after {
+    height: 8px;
+  }
   .table {
-    padding: 8px max(10px, env(safe-area-inset-right)) 24px max(10px, env(safe-area-inset-left));
+    padding: 0 max(10px, env(safe-area-inset-right)) 24px max(10px, env(safe-area-inset-left));
     overflow-x: hidden;
   }
   .table__head {
     flex-wrap: wrap;
     gap: 10px 14px;
-    padding: 2px 2px 8px;
+    margin-bottom: 12px;
+    padding: 8px 10px 10px;
   }
   .table__head h1 {
-    font-size: 18px;
+    font-size: 20px;
   }
   .table__meta {
     gap: 10px;
     font-size: 12px;
+  }
+  .table__actions {
+    gap: 10px;
   }
   .table__actions .button {
     padding: 6px 10px;
@@ -1186,7 +1301,7 @@ body {
     gap: 10px;
     min-width: 0;
     padding: 10px 10px 12px;
-    border-radius: 10px;
+    box-shadow: var(--shadow-hard-s);
   }
   .mat__main {
     gap: 10px;
@@ -1202,16 +1317,16 @@ body {
     gap: 8px;
     padding: 10px 0 0;
     border-left: 0;
-    border-top: 1.5px dashed var(--print-faint);
+    border-top: var(--stroke-2) solid var(--border);
   }
   .mat__rail .slot {
     flex: none;
   }
 
   .slot__label {
-    font-size: 8px;
-    letter-spacing: 0.1em;
-    left: 4px;
+    font-size: 9px;
+    letter-spacing: 0.08em;
+    left: 1px;
   }
   .slot__count {
     min-width: 17px;
@@ -1224,10 +1339,10 @@ body {
   .slot__head {
     gap: 6px;
     height: 24px;
-    padding: 0 4px;
+    padding: 0 2px;
   }
   .slot__title {
-    font-size: 13px;
+    font-size: 14px;
   }
   .status {
     font-size: 9px;
@@ -1241,16 +1356,16 @@ body {
     padding: 5px 8px;
   }
   .brief__kind {
-    font-size: 8px;
+    font-size: 9px;
   }
   .brief__name {
-    font-size: 14px;
+    font-size: 15px;
   }
   .brief__pool {
-    font-size: 11px;
+    font-size: 10px;
   }
   .brief__pool b {
-    font-size: 13px;
+    font-size: 14px;
   }
   .brief__lines {
     margin-top: 3px;
@@ -1259,7 +1374,8 @@ body {
     grid-template-columns: 72px minmax(0, 1fr) auto;
     gap: 6px;
     font-size: 11px;
-    padding: 1px 0;
+    padding: 1px 4px;
+    margin: 0 -4px;
   }
   .bline__need {
     font-size: 12px;
@@ -1272,26 +1388,30 @@ body {
     font-size: 11px;
   }
   .brief__blurb {
-    font-size: 13px;
+    font-size: 14px;
   }
 
   .controls {
-    margin-top: 10px;
+    margin-top: 12px;
     padding: 8px 10px;
-    gap: 8px;
+    gap: 10px;
+    box-shadow: var(--shadow-hard-s);
   }
   .controls__prompt {
-    font-size: 14px;
+    font-size: 15px;
   }
   .ascend {
-    margin-top: 10px;
+    margin-top: 12px;
     padding: 10px 12px 12px;
   }
   .ascend h2 {
-    font-size: 18px;
+    font-size: 22px;
+  }
+  .over h2 {
+    font-size: 36px;
   }
   .log {
-    margin-top: 12px;
+    margin-top: 14px;
   }
   .log__lines {
     max-height: 100px;
@@ -1309,7 +1429,7 @@ body {
     font-size: 13px;
   }
   .log__exports {
-    gap: 4px;
+    gap: 6px;
   }
 
   /* The zoomed card, small enough to leave the hands visible on a short screen. */
@@ -1326,12 +1446,12 @@ body {
 /* --------------------------------------------------------------- wide table
  *
  * From `WIDE_ABOVE` in metrics.ts (1700px), there is room to spare: the mat
- * draws at the `WIDE` metrics tier — bigger cards, not more empty felt around
+ * draws at the `WIDE` metrics tier — bigger cards, not more empty paper around
  * the same ones — and the log moves to a column of its own beside the mat
  * instead of stacking underneath it, since it is the thing a playtester reads
  * most. `.table` becomes the grid; everything below the mat row still spans
  * both columns, in DOM order. Capped rather than filling ever-wider screens,
- * so the same "empty felt" problem doesn't just reappear at a larger scale. */
+ * so the same "empty paper" problem doesn't just reappear at a larger scale. */
 @media (min-width: 1700px) {
   .table {
     max-width: min(96vw, 2000px);
@@ -1377,7 +1497,8 @@ body {
 @media (prefers-reduced-motion: reduce) {
   .sprite,
   .sprite__in,
-  .sprite__pose {
+  .sprite__pose,
+  .button {
     transition: none !important;
     animation: none !important;
   }
@@ -1396,14 +1517,15 @@ body {
   align-items: center;
   gap: 6px;
   margin-right: 4px;
-  font: 600 13px/1 var(--display);
-  letter-spacing: 0.04em;
+  font: 400 13px/1 var(--readout);
+  letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: var(--print);
+  color: var(--on-ration);
   cursor: pointer;
 }
 .debug-toggle input {
   cursor: pointer;
+  accent-color: var(--void);
 }
 
 .slot__inspect {
@@ -1411,21 +1533,21 @@ body {
   top: 0;
   right: 0;
   z-index: 401;
-  padding: 1px 6px;
-  border: 1px solid var(--print-faint);
-  border-radius: 4px;
-  background: var(--ink);
-  color: var(--print);
-  font: 600 9px/16px var(--display);
-  letter-spacing: 0.06em;
+  padding: 0 5px;
+  border: var(--stroke-1) solid var(--border);
+  background: var(--paper);
+  color: var(--ink);
+  font: 400 9px/14px var(--readout);
+  letter-spacing: 0.08em;
   text-transform: uppercase;
   cursor: pointer;
 }
 .slot__inspect:hover {
-  color: var(--stock);
-  border-color: var(--print);
+  background: var(--ration);
+  color: var(--on-ration);
 }
 
+/* No dimming veil: the table behind the pile panel is hatched out in ink. */
 .pile-panel__backdrop {
   position: fixed;
   inset: 0;
@@ -1434,7 +1556,7 @@ body {
   align-items: center;
   justify-content: center;
   padding: 24px;
-  background: rgba(0, 0, 0, 0.6);
+  background: repeating-linear-gradient(45deg, var(--ink) 0 2px, transparent 2px 8px);
 }
 .pile-panel {
   display: flex;
@@ -1443,10 +1565,10 @@ body {
   max-width: min(900px, 100%);
   max-height: 100%;
   padding: 16px 18px;
-  border-radius: 10px;
-  background: linear-gradient(180deg, var(--felt), var(--felt-deep));
-  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
-  color: var(--stock);
+  border: var(--stroke-2) solid var(--border);
+  background: var(--paper);
+  box-shadow: var(--shadow-hard);
+  color: var(--ink);
 }
 .pile-panel__head {
   display: flex;
@@ -1455,13 +1577,15 @@ body {
 }
 .pile-panel__head h2 {
   margin: 0;
-  font: 700 18px/1 var(--display);
-  letter-spacing: 0.05em;
+  font: 700 20px/1 var(--display);
+  letter-spacing: 0.04em;
   text-transform: uppercase;
 }
 .pile-panel__count {
-  color: var(--print);
-  font-size: 13px;
+  color: var(--ink-muted);
+  font: 400 12px/1 var(--readout);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
 }
 .pile-panel__head .button {
   margin-left: auto;
@@ -1471,7 +1595,7 @@ body {
   flex-wrap: wrap;
   gap: 14px;
   overflow-y: auto;
-  padding: 4px 2px;
+  padding: 4px 8px 8px 2px;
 }
 .pile-panel__item {
   display: flex;
@@ -1480,13 +1604,13 @@ body {
   gap: 4px;
 }
 .pile-panel__pos {
-  font: 700 10px/1 var(--display);
-  letter-spacing: 0.08em;
+  font: 400 10px/1 var(--readout);
+  letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: var(--print);
+  color: var(--ink-muted);
 }
 .pile-panel__empty {
-  color: var(--print);
+  color: var(--ink-muted);
 }
 
 /* ------------------------------------------------------------- replay */
@@ -1496,19 +1620,20 @@ body {
   align-items: center;
 }
 .replay__where {
-  font: 600 13px/1 var(--display);
-  letter-spacing: 0.04em;
+  font: 400 13px/1 var(--readout);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
   white-space: nowrap;
 }
 .replay__scrub {
   flex: 1 1 160px;
   min-width: 120px;
-  accent-color: var(--woah);
+  accent-color: var(--ration);
 }
 .replay__next {
   flex-basis: 100%;
   font-size: 13px;
-  opacity: 0.75;
+  color: var(--ink-muted);
 }
 .table--replaying .card,
 .table--replaying .sprite {

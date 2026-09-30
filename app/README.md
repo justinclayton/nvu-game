@@ -47,12 +47,17 @@ is owned by `Table.tsx`, so the floating cards and the ascension panel read the 
 Card faces (`CardFace.tsx`) are sized in em from the card's width, so the same face prints at
 table scale, in a panel, and zoomed under the pointer.
 
-The look is the Ration design system: a flat off-white ground, full-strength ink borders, hard
-offset shadows, square corners and one hot pink. Its tokens are the variables at the top of
-`table.css`, with a dark theme under `prefers-color-scheme`. Ration has no success or error
-colours, so state is drawn as shape: a met threshold becomes a pink slab, and rarity is a small
+The look is the Ration design system's structure (a flat off-white ground, full-strength ink
+borders, hard offset shadows, square corners) in three colours of the game's own: oxblood for
+Red, a cool slate for Gray, and ochre for the table. They are the variables at the top of
+`table.css`, with a dark theme under `prefers-color-scheme`. There are no success or error
+colours, so state is drawn as shape: a met threshold becomes an ochre slab, and rarity is a small
 square in the card's foot (hollow Fine, hatched Cool, solid Woah). Cards stay white stock in both
 themes.
+
+A card's back names the face-down pile it lies in (`backPileOf` in `placements.ts`), not the card
+itself, so the top of a deck never gives away that a Stuff card is next. A card turning face up
+keeps the back of the pile it left.
 
 ## The log, notes and exports
 

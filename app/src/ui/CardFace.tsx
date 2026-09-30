@@ -10,8 +10,15 @@
  * a field of the type's colour, which is what tells a hand apart at a glance.
  */
 
-import { allThresholds, costOf, printedThresholdLines, thresholdIsMet, thresholdLines } from "@domain/queries";
+import {
+  allThresholds,
+  costOf,
+  printedThresholdLines,
+  thresholdIsMet,
+  thresholdLines,
+} from "@domain/queries";
 import type { Card, Character, GameState, Room } from "@domain/types";
+import type { BackPile } from "./placements";
 
 const TYPE_LINE: Record<Card["kind"], string> = {
   player: "",
@@ -157,6 +164,23 @@ export function RoomFace({ room, state }: RoomFaceProps) {
   );
 }
 
-export function CardBack({ kind }: { readonly kind: "card" | "room" }) {
-  return <div className={`back back--${kind}`} aria-hidden="true" />;
+/** What each face-down pile prints on the backs of its cards: a big name, then which pile it is. */
+const BACK_LABEL: Record<BackPile, { readonly name: string; readonly kind: string }> = {
+  floor: { name: "Room", kind: "Floor" },
+  good: { name: "Good", kind: "Stuff" },
+  bad: { name: "Bad", kind: "Stuff" },
+  "red-deck": { name: "Red", kind: "Deck" },
+  "gray-deck": { name: "Gray", kind: "Deck" },
+  "red-rewards": { name: "Red", kind: "Rewards" },
+  "gray-rewards": { name: "Gray", kind: "Rewards" },
+};
+
+export function CardBack({ pile }: { readonly pile: BackPile }) {
+  const { name, kind } = BACK_LABEL[pile];
+  return (
+    <div className={`back back--${pile}`} aria-hidden="true">
+      <span className="back__name">{name}</span>
+      <span className="back__kind">{kind}</span>
+    </div>
+  );
 }

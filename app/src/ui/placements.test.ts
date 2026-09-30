@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 import { createSession } from "@application/session";
 import { CARD_CONTENT } from "@content/index";
 import type { DomainEvent } from "@domain/types";
-import { moveDelays, pileOf, placements } from "./placements";
+import { backPileOf, moveDelays, pileOf, placements } from "./placements";
 
 /* The card layer draws one sprite per placement, so the placements have to
  * account for every physical card exactly once, and put the top of each pile on
@@ -126,5 +126,28 @@ describe("the reward offer", () => {
     // Outside the Ascend phase the offer is not picked up, even if one is set.
     const notYet = placements({ ...state, phase: "Turn Start" });
     expect(notYet.filter((p) => p.zone === "red-offer")).toHaveLength(0);
+  });
+});
+
+/* A face-down pile names itself on the back of every card in it, so a back
+ * never gives away what kind of card is on top of a deck. */
+describe("backPileOf", () => {
+  const { state } = createSession(7, CARD_CONTENT).getState();
+  const redReward = state.pools.Red[0]!;
+
+  it("names the face-down pile the card lies in", () => {
+    expect(backPileOf("red-rewards", redReward)).toBe("red-rewards");
+    expect(backPileOf("gray-deck", state.pools.badStuff[0]!, "bad")).toBe("gray-deck");
+  });
+
+  it("keeps the pile a face-up card came from, for the back it shows as it turns over", () => {
+    expect(backPileOf("red-hand", redReward, "red-rewards")).toBe("red-rewards");
+  });
+
+  it("falls back to the pile a card's kind starts in when it has not lain in one", () => {
+    expect(backPileOf("red-hand", state.pools.goodStuff[0]!)).toBe("good");
+    expect(backPileOf("gray-hand", state.pools.badStuff[0]!)).toBe("bad");
+    expect(backPileOf("gray-discard", state.pools.Gray[0]!)).toBe("gray-deck");
+    expect(backPileOf("room", state.floorDeck[0]!)).toBe("floor");
   });
 });

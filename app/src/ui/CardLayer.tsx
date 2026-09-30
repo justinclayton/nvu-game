@@ -13,7 +13,15 @@ import { costOf, playableCards } from "@domain/queries";
 import type { Card, Character, GameState, Room } from "@domain/types";
 import { CardBack, CardFace, RoomFace, toneOf } from "./CardFace";
 import { FLOAT_SCALE, STACK_STEP_MAX, STACK_STEP_X, STACK_STEP_Y, type Metrics } from "./metrics";
-import { LOOSE_ZONES, ZONE_SHAPE, placements, type Placement, type ZoneId } from "./placements";
+import {
+  LOOSE_ZONES,
+  ZONE_SHAPE,
+  backPileOf,
+  placements,
+  type BackPile,
+  type Placement,
+  type ZoneId,
+} from "./placements";
 import type { Rect, SlotRects } from "./useSlotRects";
 
 export interface Paying {
@@ -123,8 +131,14 @@ export function CardLayer({
     const before = previousZones.current.get(p.id);
     if (before !== undefined && before !== p.zone) moving.add(p.id);
   }
+  /* A card's back names the face-down pile it last lay in, so one turning
+   * face up still shows the pile it left. Remembered the same way. */
+  const lastPiles = useRef<Map<string, BackPile>>(new Map());
+  const backOf = (p: Placement): BackPile =>
+    backPileOf(p.zone, p.kind === "card" ? p.card : p.room, lastPiles.current.get(p.id));
   useLayoutEffect(() => {
     previousZones.current = new Map(placed.map((p) => [p.id, p.zone]));
+    lastPiles.current = new Map(placed.map((p) => [p.id, backOf(p)]));
     if (moving.size === 0) return;
     const timer = setTimeout(() => {
       settle((n) => n + 1);
@@ -233,7 +247,7 @@ export function CardLayer({
             ) : (
               <div className="face" />
             )}
-            <CardBack kind={p.kind} />
+            <CardBack pile={backOf(p)} />
             {chosen ? <span className="card__badge">paying</span> : null}
           </div>
         );

@@ -1,10 +1,12 @@
 /* The Mat, in Ration.
  *
- * The table is drawn in the Ration design system: a flat off-white ground,
- * full-strength ink borders, hard offset shadows with no blur, square corners,
- * and one hot pink (`--ration`) for identity. There are no success or error
- * colours: state is shape — a met threshold turns into a pink slab, rarity is
- * a Stamp square, a card on offer ticks rather than floats.
+ * The table is drawn in the Ration design system's structure — a flat
+ * off-white ground, full-strength ink borders, hard offset shadows with no
+ * blur, square corners — in the game's own three colours: oxblood for Red, a
+ * cool slate for Gray, and ochre (`--accent`) for the table itself. There are
+ * no success or error colours: state is shape — a met threshold turns into an
+ * ochre slab, rarity is a Stamp square, a card on offer ticks rather than
+ * floats.
  *
  * Cards are printed stock, so a card keeps the light theme's paper and ink in
  * both themes (see `.card, .sprite` below); everything around them follows the
@@ -27,11 +29,12 @@
   /* A void panel's outline: invisible in light, the ink stroke dark needs,
    * where void sits within 1.2:1 of the ground. */
   --void-edge: var(--void);
-  --ration: #ea3564;
-  --ration-ink: #b8124a;
-  --on-ration: #000000;
-  --on-ration-display: #ffffff;
-  --focus: var(--ration);
+  /* Ochre is a fill: it is too light for text or thin marks on the ground
+   * (1.8:1), so those use `--accent-ink` (4.8:1), and so does focus. */
+  --accent: #e0a526;
+  --accent-ink: #8a5d00;
+  --on-accent: #000000;
+  --focus: var(--accent-ink);
   --shadow-color: #000000;
   --shadow-hard: 6px 6px 0 0 var(--shadow-color);
   --shadow-hard-s: 3px 3px 0 0 var(--shadow-color);
@@ -47,10 +50,16 @@
   --grotesk: Archivo, "Helvetica Neue", Arial, sans-serif;
   --readout: "Share Tech Mono", ui-monospace, "SF Mono", Menlo, monospace;
 
-  /* The game's own tones, drawn from Ration: Red is the identity pink, Gray
-   * is a flat mid-grey that holds 3:1 on paper as a fill. */
-  --tone-red: var(--ration);
-  --tone-gray: #8a8a8a;
+  /* The characters. `--red` and `--gray` are fills, the same in both themes
+   * (Gray holds 3.9:1 on paper); `--red-ink` and `--gray-ink` are for text
+   * and dashed lines on the ground. Red and Gray differ in lightness (3:1),
+   * not hue alone, and the slate leans toward red's opposite hue. */
+  --red: #751005;
+  --red-ink: #751005;
+  --on-red: #ffffff;
+  --gray: #71858a;
+  --gray-ink: #4d5c60;
+  --on-gray: #000000;
 
   --cw: 88px;
   --ch: 123px;
@@ -67,9 +76,10 @@
     --ink-muted: #a3a3a3;
     --void: #1c1c1c;
     --void-edge: var(--ink);
-    --ration-ink: #ff5a85;
-    --shadow-color: var(--ration);
-    --tone-gray: #9a9a9a;
+    --accent-ink: var(--accent);
+    --red-ink: #e0694f;
+    --gray-ink: #9aabb0;
+    --shadow-color: var(--accent);
   }
 }
 
@@ -77,7 +87,7 @@
   box-sizing: border-box;
 }
 
-/* The page is framed by ration bars, flush to the top and bottom edges. */
+/* The page is framed by ochre bars, flush to the top and bottom edges. */
 body {
   margin: 0;
   display: flex;
@@ -92,7 +102,7 @@ body::after {
   content: "";
   flex: none;
   height: 12px;
-  background: var(--ration);
+  background: var(--accent);
 }
 #root {
   flex: 1 0 auto;
@@ -107,10 +117,10 @@ body::after {
   height: 18px;
   margin-top: 2px;
   background:
-    linear-gradient(var(--plus, var(--ration)), var(--plus, var(--ration))) center / 100% 6px
-      no-repeat,
-    linear-gradient(var(--plus, var(--ration)), var(--plus, var(--ration))) center / 6px 100%
-      no-repeat;
+    linear-gradient(var(--plus, var(--accent-ink)), var(--plus, var(--accent-ink))) center / 100%
+      6px no-repeat,
+    linear-gradient(var(--plus, var(--accent-ink)), var(--plus, var(--accent-ink))) center / 6px
+      100% no-repeat;
 }
 
 /* ------------------------------------------------------------------ chrome */
@@ -122,15 +132,15 @@ body::after {
   overflow-x: auto;
 }
 
-/* The header hangs off the top bar as one ration slab. */
+/* The header hangs off the top bar as one ochre slab. */
 .table__head {
   display: flex;
   align-items: center;
   gap: 18px;
   margin-bottom: 20px;
   padding: 14px 16px 16px;
-  background: var(--ration);
-  color: var(--on-ration);
+  background: var(--accent);
+  color: var(--on-accent);
   border: var(--stroke-2) solid var(--ink);
   border-top: 0;
 }
@@ -139,7 +149,7 @@ body::after {
   font: 700 28px/1 var(--display);
   letter-spacing: 0.02em;
   text-transform: uppercase;
-  color: var(--on-ration-display);
+  color: var(--on-accent);
 }
 .table__meta {
   display: flex;
@@ -191,11 +201,11 @@ body::after {
   color: var(--ink-muted);
   box-shadow: none;
 }
-/* The primary is the full-size press: pink, with the 6px shadow it sinks into. */
+/* The primary is the full-size press: ochre, with the 6px shadow it sinks into. */
 .button--primary {
   padding: 12px 24px;
-  background: var(--ration);
-  color: var(--on-ration);
+  background: var(--accent);
+  color: var(--on-accent);
   box-shadow: var(--shadow-hard);
 }
 .button--primary:hover:not(:disabled) {
@@ -308,18 +318,18 @@ body::after {
   width: auto;
 }
 .slot--red .well {
-  border-color: var(--tone-red);
+  border-color: var(--red-ink);
 }
 .slot--red .slot__label,
 .slot--red .slot__title {
-  color: var(--ration-ink);
+  color: var(--red-ink);
 }
 .slot--gray .well {
-  border-color: var(--tone-gray);
+  border-color: var(--gray);
 }
 .slot--gray .slot__label,
 .slot--gray .slot__title {
-  color: var(--ink-muted);
+  color: var(--gray-ink);
 }
 
 /* The hand slot carries the character's name, their state and the Draw button. */
@@ -350,12 +360,12 @@ body::after {
   letter-spacing: 0.12em;
   color: var(--ink-muted);
 }
-/* A character in trouble is stamped: a pink tag, not a pink word. */
+/* A character in trouble is stamped: an ochre tag, not a coloured word. */
 .status--last-stand,
 .status--down {
   padding: 1px 5px;
-  background: var(--ration);
-  color: var(--on-ration);
+  background: var(--accent);
+  color: var(--on-accent);
 }
 .slot__head .button {
   margin-left: auto;
@@ -398,7 +408,7 @@ body::after {
   font: 400 11px/16px var(--readout);
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: var(--ration);
+  color: var(--accent);
 }
 .brief__name {
   margin: 0;
@@ -407,7 +417,7 @@ body::after {
   text-transform: uppercase;
 }
 .brief--stairwell .brief__name {
-  color: var(--ration);
+  color: var(--accent);
 }
 .brief__pool {
   margin-left: auto;
@@ -445,11 +455,11 @@ body::after {
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
 }
-/* A met line becomes a pink slab: state as shape, not a green tint. */
+/* A met line becomes an ochre slab: state as shape, not a green tint. */
 .bline.is-met,
 .bline.is-met .bline__have {
-  background: var(--ration);
-  color: var(--on-ration);
+  background: var(--accent);
+  color: var(--on-accent);
 }
 .bline.is-met .bline__need::after {
   content: " ■";
@@ -461,7 +471,7 @@ body::after {
 }
 .brief__flee b {
   font: 400 11px/1 var(--readout);
-  color: var(--ration);
+  color: var(--accent);
   text-transform: uppercase;
   letter-spacing: 0.12em;
   margin-right: 4px;
@@ -555,7 +565,7 @@ body::after {
 
 /* Cards on offer at ascension are held up off the table: larger, with a long
  * hard shadow, ticking up and down in two steps rather than bobbing. The
- * chosen one is ringed in pink and lifted higher. */
+ * chosen one is ringed in ochre and lifted higher. */
 .sprite--float .sprite__pose {
   --shadow: drop-shadow(6px 6px 0 var(--shadow-color));
 }
@@ -574,7 +584,7 @@ body::after {
 .sprite--float.is-selected .face {
   box-shadow:
     0 0 0 0.3em var(--paper),
-    0 0 0 0.6em var(--ration);
+    0 0 0 0.6em var(--accent);
 }
 @keyframes tick {
   0%,
@@ -607,8 +617,9 @@ body::after {
   --ink-muted: #4a4a4a;
   --border: #000000;
   --void: #000000;
-  --ration-ink: #b8124a;
-  --tone-gray: #8a8a8a;
+  --accent-ink: #8a5d00;
+  --red-ink: #751005;
+  --gray-ink: #4d5c60;
   color: var(--ink);
 }
 
@@ -638,7 +649,7 @@ body::after {
   box-shadow: 3px 3px 0 0 var(--shadow-color);
 }
 .card.is-selected .face {
-  box-shadow: 0 0 0 4px var(--ration);
+  box-shadow: 0 0 0 4px var(--accent);
 }
 .card.is-dimmed {
   filter: grayscale(1);
@@ -668,19 +679,19 @@ body::after {
   border-top: 0.7em solid var(--tone, var(--ink));
 }
 .tone--red {
-  --tone: var(--tone-red);
+  --tone: var(--red);
 }
 .tone--gray {
-  --tone: var(--tone-gray);
+  --tone: var(--gray);
 }
 .tone--good {
-  --tone: var(--ration);
+  --tone: var(--accent);
 }
 .tone--bad {
   --tone: var(--void);
 }
 .tone--stairwell {
-  --tone: var(--ration);
+  --tone: var(--accent);
 }
 .tone--room {
   --tone: var(--void);
@@ -729,10 +740,10 @@ body::after {
   background: var(--art, var(--tone, var(--ink)));
 }
 .tone--good .face__art {
-  --art: repeating-linear-gradient(45deg, var(--ration) 0 0.35em, var(--paper) 0.35em 0.7em);
+  --art: repeating-linear-gradient(45deg, var(--accent) 0 0.35em, var(--paper) 0.35em 0.7em);
 }
 .tone--stairwell .face__art {
-  --art: repeating-linear-gradient(180deg, var(--void) 0 0.6em, var(--ration) 0.6em 0.9em);
+  --art: repeating-linear-gradient(180deg, var(--void) 0 0.6em, var(--accent) 0.6em 0.9em);
 }
 .tone--room .face__art {
   --art: repeating-linear-gradient(-45deg, var(--ink) 0 0.8em, var(--paper) 0.8em 1.6em);
@@ -849,7 +860,8 @@ body::after {
   color: var(--ink-muted);
 }
 
-/* Rarity is a Stamp: hollow for Fine, hatched for Cool, solid for Woah. */
+/* Rarity is a Stamp: hollow for Fine, hatched for Cool, solid for Woah. Each
+ * keeps an ink edge, since ochre alone barely shows on white. */
 .rarity--fine .rarity::before,
 .rarity--cool .rarity::before,
 .rarity--woah .rarity::before {
@@ -865,15 +877,16 @@ body::after {
   border: 0.18em solid var(--ink);
 }
 .rarity--cool .rarity::before {
-  border: 0.18em solid var(--ration);
-  background: repeating-linear-gradient(45deg, var(--ration) 0 0.12em, transparent 0.12em 0.3em);
+  border: 0.18em solid var(--ink);
+  background: repeating-linear-gradient(45deg, var(--accent) 0 0.12em, transparent 0.12em 0.3em);
 }
 .rarity--woah .rarity::before {
-  background: var(--ration);
+  border: 0.18em solid var(--ink);
+  background: var(--accent);
 }
 .rarity--cool .rarity,
 .rarity--woah .rarity {
-  color: var(--ration-ink);
+  color: var(--accent-ink);
 }
 
 /* A room card prints its threshold lines and its Flee line. Like a player
@@ -908,8 +921,8 @@ body::after {
   font-stretch: 75%;
 }
 .line.is-met {
-  background: var(--ration);
-  color: var(--on-ration);
+  background: var(--accent);
+  color: var(--on-accent);
 }
 .line.is-met b::after {
   content: " ■";
@@ -929,7 +942,7 @@ body::after {
   letter-spacing: 0.1em;
   font-size: 0.9em;
   margin-right: 0.3em;
-  color: var(--ration-ink);
+  color: var(--accent-ink);
 }
 .face--room.face--text-m .lines {
   font-size: 0.78em;
@@ -971,29 +984,71 @@ body::after {
   line-height: 1.1;
 }
 
-/* A card back is a ration pack: a pink panel inset in a paper frame. */
+/* A card back names the face-down pile it lies in: a big name and, under it,
+ * which pile that is, on a panel inset in a paper frame. A deck is solid in
+ * its character's colour; that character's reward pool is the same colour as
+ * a frame around white, so the two read as a pair but never as one pile. */
 .back {
-  background: var(--ration);
+  --field: var(--void);
+  --label: var(--on-void);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.3em;
+  background: var(--field);
   border: 0.18em solid var(--border);
   box-shadow: inset 0 0 0 0.45em var(--paper);
+  color: var(--label);
+  text-align: center;
+  text-transform: uppercase;
 }
-.back::after {
-  content: "N↑U";
-  position: absolute;
-  inset: 0;
-  display: grid;
-  place-items: center;
-  font: 700 2.4em/1 var(--display);
-  letter-spacing: 0.04em;
-  color: var(--on-ration);
+.back__name {
+  font: 700 2em/1 var(--display);
+  letter-spacing: 0.02em;
 }
-.back--room {
+.back__kind {
+  font: 400 0.95em/1 var(--readout);
+  letter-spacing: 0.12em;
+}
+.back--red-deck {
+  --field: var(--red);
+  --label: var(--on-red);
+}
+.back--gray-deck {
+  --field: var(--gray);
+  --label: var(--on-gray);
+}
+.back--red-rewards,
+.back--gray-rewards {
+  --field: var(--paper);
+  box-shadow:
+    inset 0 0 0 0.45em var(--paper),
+    inset 0 0 0 1.1em var(--frame);
+}
+.back--red-rewards {
+  --frame: var(--red);
+  --label: var(--red-ink);
+}
+.back--gray-rewards {
+  --frame: var(--gray);
+  --label: var(--gray-ink);
+}
+.back--good {
+  --field: var(--accent);
+  --label: var(--on-accent);
+}
+.back--bad {
+  --label: var(--accent);
+}
+/* The Floor deck is hazard striped, its name on a void label across it. */
+.back--floor {
+  background: repeating-linear-gradient(-45deg, var(--void) 0 0.6em, var(--accent) 0.6em 1.2em);
+}
+.back--floor .back__name,
+.back--floor .back__kind {
+  padding: 0.1em 0.3em;
   background: var(--void);
-}
-.back--room::after {
-  content: "ROOM";
-  font-size: 1.6em;
-  color: var(--ration);
 }
 
 .card__badge {
@@ -1036,7 +1091,7 @@ body::after {
   font-size: 13px;
 }
 .controls__hint {
-  color: var(--ration-ink);
+  color: var(--accent-ink);
   font-weight: 700;
   font-size: 14px;
 }
@@ -1055,22 +1110,22 @@ body::after {
 }
 
 .rejection {
-  --plus: var(--on-ration);
+  --plus: var(--on-accent);
   display: flex;
   gap: 12px;
   margin: 16px 0 0;
   padding: 10px 14px;
   border: var(--stroke-2) solid var(--border);
-  background: var(--ration);
-  color: var(--on-ration);
+  background: var(--accent);
+  color: var(--on-accent);
   font: 700 15px/1.3 var(--grotesk);
 }
 
-/* Ascension is the void window: black, one soft corner set, pink marks. The
- * buttons in it throw pink shadows, since a black one would vanish. */
+/* Ascension is the void window: black, one soft corner set, ochre marks. The
+ * buttons in it throw ochre shadows, since a black one would vanish. */
 .ascend {
-  --shadow-hard: 6px 6px 0 0 var(--ration);
-  --shadow-hard-s: 3px 3px 0 0 var(--ration);
+  --shadow-hard: 6px 6px 0 0 var(--accent);
+  --shadow-hard-s: 3px 3px 0 0 var(--accent);
   margin-top: 20px;
   padding: 18px 20px 20px;
   border-radius: var(--radius-md);
@@ -1118,7 +1173,7 @@ body::after {
   font: 400 11px/16px var(--readout);
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: var(--ration);
+  color: var(--accent);
 }
 .ascend .controls {
   background: transparent;
@@ -1215,7 +1270,7 @@ body::after {
 .log__line--went_down,
 .log__line--game_over,
 .log__line--stuff_pool_empty {
-  color: var(--ration-ink);
+  color: var(--accent-ink);
   font-weight: 700;
 }
 .log__line--room_cleared,
@@ -1225,14 +1280,14 @@ body::after {
 .log__line--room_cleared::before,
 .log__line--floor_cleared::before {
   content: "■ ";
-  color: var(--ration);
+  color: var(--accent);
 }
 /* A typed note, marked out from the rules' own narration around it. */
 .log__line--note {
   margin: 3px 0;
   padding: 2px 8px;
-  background: var(--ration);
-  color: var(--on-ration);
+  background: var(--accent);
+  color: var(--on-accent);
   font-weight: 700;
 }
 
@@ -1520,7 +1575,7 @@ body::after {
   font: 400 13px/1 var(--readout);
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: var(--on-ration);
+  color: var(--on-accent);
   cursor: pointer;
 }
 .debug-toggle input {
@@ -1543,8 +1598,8 @@ body::after {
   cursor: pointer;
 }
 .slot__inspect:hover {
-  background: var(--ration);
-  color: var(--on-ration);
+  background: var(--accent);
+  color: var(--on-accent);
 }
 
 /* No dimming veil: the table behind the pile panel is hatched out in ink. */
@@ -1628,7 +1683,7 @@ body::after {
 .replay__scrub {
   flex: 1 1 160px;
   min-width: 120px;
-  accent-color: var(--ration);
+  accent-color: var(--accent);
 }
 .replay__next {
   flex-basis: 100%;

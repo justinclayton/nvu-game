@@ -70,6 +70,40 @@ export const LOOSE_ZONES: ReadonlySet<ZoneId> = new Set<ZoneId>([
   "gray-exhaust",
 ]);
 
+/** A face-down pile. Every card lying in one shows the pile's name on its back. */
+export type BackPile =
+  "floor" | "good" | "bad" | "red-deck" | "gray-deck" | "red-rewards" | "gray-rewards";
+
+const BACK_PILES: ReadonlySet<ZoneId> = new Set<BackPile>([
+  "floor",
+  "good",
+  "bad",
+  "red-deck",
+  "gray-deck",
+  "red-rewards",
+  "gray-rewards",
+]);
+
+function isBackPile(zone: ZoneId): zone is BackPile {
+  return BACK_PILES.has(zone);
+}
+
+/**
+ * The pile a card's back names. The back belongs to the pile rather than the
+ * card, so the top of a deck never shows whether a Stuff card is next. A card
+ * in a face-down pile shows that pile. Anywhere else its back is only seen as
+ * it turns over, so it keeps the pile it `cameFrom`; a card that has not lain
+ * in one shows the pile its kind starts in.
+ */
+export function backPileOf(zone: ZoneId, item: Card | Room, cameFrom?: BackPile): BackPile {
+  if (isBackPile(zone)) return zone;
+  if (cameFrom) return cameFrom;
+  if ("challenges" in item) return "floor";
+  if (item.kind === "good_stuff") return "good";
+  if (item.kind === "bad_stuff") return "bad";
+  return item.owner === "Gray" ? "gray-deck" : "red-deck";
+}
+
 interface Placed {
   readonly id: string;
   readonly zone: ZoneId;
@@ -120,7 +154,8 @@ export function placements(state: GameState, debug = false): readonly Placement[
         zone,
         index,
         count,
-        faceUp: debug || (typeof opts.faceUp === "function" ? opts.faceUp(card, isTop) : opts.faceUp),
+        faceUp:
+          debug || (typeof opts.faceUp === "function" ? opts.faceUp(card, isTop) : opts.faceUp),
         owner: opts.owner ?? card.owner,
       });
     });

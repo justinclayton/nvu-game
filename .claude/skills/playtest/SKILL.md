@@ -48,8 +48,8 @@ bin/nvu play show
 bin/nvu play undo
 ```
 
-Later calls default to the run `new` started. Each move prints what happened, the table, and the
-moves open to you. A refused move prints the engine's reason; that refusal is a finding, so note it
+Later calls default to the run `new` started. Each move prints what happened, then the table (after
+`flip`, `end` and `undo`) or only what changed (after any other move), then the moves open to you. A refused move prints the engine's reason; that refusal is a finding, so note it
 and what you expected. Keep your context small: `play show` prints the same table you already have,
 so call it only when you need something you don't, not after every move.
 

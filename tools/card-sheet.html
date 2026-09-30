@@ -17,6 +17,8 @@
     --band-1: #2d6a4f;  /* forest green: floors 1-3 */
     --band-2: #1d4e89;  /* deep blue: floors 4-6 */
     --band-3: #7c2d12;  /* rust: floors 7-9 */
+    --oomph: #b52d24;
+    --scramble: #4a6a9a;
   }
   * { box-sizing: border-box; }
   body {
@@ -57,38 +59,37 @@
     font-size: 8pt; text-transform: uppercase; letter-spacing: .06em;
     color: #333; margin-top: 1mm; font-weight: 600;
   }
-  .art {
-    flex: 1 1 auto; margin: 2mm 0;
-    border: 0.3mm dashed #bbb; border-radius: 1.5mm;
-    display: flex; align-items: center; justify-content: center;
-    color: #bbb; font-size: 8pt; letter-spacing: .1em;
-    min-height: 18mm;
-  }
-  .stat {
-    font-size: 12pt; font-weight: 700; margin-bottom: 1.5mm;
-  }
-  .text { font-size: 8.5pt; line-height: 1.35; }
-  .text em { color: #444; }
-  .rarity-word {
-    position: absolute; bottom: 2mm; right: 3mm;
-    font-size: 7pt; letter-spacing: .1em; text-transform: uppercase; color: #999;
-  }
+  .stats { display: flex; gap: 2mm; margin: 2.5mm 0 2mm; }
+  .stats .s { flex: 1; border: 0.5mm solid; border-radius: 1.5mm; padding: 1.2mm 0 1mm; text-align: center; }
+  .stats .s.oomph { border-color: var(--oomph); color: var(--oomph); }
+  .stats .s.scramble { border-color: var(--scramble); color: var(--scramble); }
+  .stats .s .n { font-size: 20pt; font-weight: 800; line-height: 1; }
+  .stats .s .l { font-size: 6.5pt; letter-spacing: .12em; text-transform: uppercase; margin-top: .8mm; }
+  .stats .s.cond .n { font-size: 14pt; }
+  .text { font-size: 9.5pt; line-height: 1.4; margin-top: 1.5mm; }
+  .text p { margin: 0 0 1.5mm; }
+  .foot { display: flex; justify-content: flex-end; margin-top: auto; padding-top: 1.5mm; }
+  .rarity-word { font-size: 7pt; letter-spacing: .1em; text-transform: uppercase; color: #999; }
 
   /* room cards */
   .card.room .type-bar { background: var(--floor); }
   .card.room.band-1 .type-bar { background: var(--band-1); }
   .card.room.band-2 .type-bar { background: var(--band-2); }
   .card.room.band-3 .type-bar { background: var(--band-3); }
-  .flavor { font-size: 8pt; font-style: italic; color: #555; margin: -1mm 0 1mm; }
-  .thresholds { font-size: 9pt; line-height: 1.4; }
-  .thresholds .th { margin-bottom: 1.5mm; }
-  .thresholds .th b { font-weight: 700; }
-  .challenge + .challenge { margin-top: 1.5mm; padding-top: 1.5mm; border-top: 0.2mm dotted #ccc; }
+  .flavor { margin: 1.5mm 0 2mm; font-size: 8.5pt; font-style: italic; color: #555; line-height: 1.35; }
+  .thresholds .th { font-size: 9.5pt; line-height: 1.35; }
+  /* Within a challenge only one threshold's outcome resolves (rulebook, Outcome). */
+  .thresholds .or { font-size: 7.5pt; font-weight: 800; letter-spacing: .1em; color: #444; margin: .8mm 0; }
+  .thresholds .th b.oomph { color: var(--oomph); }
+  .thresholds .th b.scramble { color: var(--scramble); }
+  /* A rule above and below each challenge: tiers of one test stay inside one block. */
+  .challenge { padding: 1.5mm 0; border-top: 0.2mm dotted #999; }
+  .challenge:last-child { border-bottom: 0.2mm dotted #999; }
   .flee {
     margin-top: auto; padding-top: 2mm; border-top: 0.3mm solid #999;
     font-size: 8.5pt; line-height: 1.3;
   }
-  .flee b { text-transform: uppercase; letter-spacing: .06em; font-size: 8pt; }
+  .flee .label { text-transform: uppercase; letter-spacing: .06em; font-size: 8pt; }
 
   @media print {
     body { margin: 8mm; }
@@ -124,19 +125,36 @@ function roomTypeLine(c) {
   return ROOM_KIND_LABEL[c.kind] + " · " + (BAND_FLOORS[c.band] || "?");
 }
 
+/* Keywords (rulebook, "Keywords") and the game's own nouns print bold. */
+var KEYWORD = /\b(Play:|Holding:|[Ee]xhausts?|Scrap|Peek|[Dd]raws?|Good Stuff|Bad Stuff|Stuff|Oomph|Scramble|Turn Start|Cleanup|Cleared|Clear|Ascend|for free|card reward)(?![A-Za-z])/g;
+
+function rich(s) {
+  return esc(s).replace(KEYWORD, "<b>$1</b>");
+}
+
 /* A threshold prints one stat (`stat`/`value`) or both at once
    (`stats: { Oomph, Scramble }`, design/cards.yaml). */
 function thresholdLabel(t) {
-  if (t.stats) return "Oomph " + t.stats.Oomph + " and Scramble " + t.stats.Scramble;
-  return esc(t.stat) + " " + t.value;
+  if (t.stats) {
+    return '<b class="oomph">Oomph ' + t.stats.Oomph + '</b> and <b class="scramble">Scramble ' + t.stats.Scramble + "</b>";
+  }
+  return '<b class="' + esc(t.stat).toLowerCase() + '">' + esc(t.stat) + " " + t.value + "</b>";
 }
 
-function statLine(c) {
-  var parts = [];
-  if (c.oomph) parts.push("Oomph " + c.oomph);
-  if (c.scramble) parts.push("Scramble " + c.scramble);
-  if (parts.length) return '<div class="stat">' + parts.join(", ") + "</div>";
-  return "";
+function statTile(cls, n, label) {
+  return '<div class="s ' + cls + '"><div class="n">' + n + '</div><div class="l">' + label + "</div></div>";
+}
+
+/* A `conditional_stat` card's number is in its text; the tile shows which stat. */
+function statBlock(c) {
+  var tiles = "";
+  if (c.conditional_stat) {
+    var which = /Oomph/.test(c.text) ? "oomph" : "scramble";
+    tiles += statTile("cond " + which, "\u2731", which);
+  }
+  if (c.oomph) tiles += statTile("oomph", c.oomph, "Oomph");
+  if (c.scramble) tiles += statTile("scramble", c.scramble, "Scramble");
+  return tiles ? '<div class="stats">' + tiles + "</div>" : "";
 }
 
 /* The YAML holds a card's text as one string; the sheet wants its clauses as
@@ -144,7 +162,11 @@ function statLine(c) {
 function textBlock(c) {
   if (!c.text) return "";
   var clauses = c.text.split(/(?<=\.)\s+(?=[A-Z])/);
-  return '<div class="text">' + clauses.map(esc).join("<br><br>") + "</div>";
+  return '<div class="text">' + clauses.map(function (s) { return "<p>" + rich(s) + "</p>"; }).join("") + "</div>";
+}
+
+function flavorBlock(c) {
+  return c.flavor ? '<div class="flavor">' + esc(c.flavor) + "</div>" : "";
 }
 
 function costPip(c) {
@@ -161,29 +183,24 @@ function playerCardHTML(c) {
     '<div class="top"><div><div class="name">' + esc(c.name) + "</div>" +
     '<div class="typeline">' + esc(ownerTypeLine || TYPE_LINE[c.kind]) + "</div></div>" +
     costPip(c) + "</div>" +
-    '<div class="art"></div>' +
-    statLine(c) +
+    statBlock(c) +
     textBlock(c) +
-    (c.rarity ? '<div class="rarity-word">' + esc(c.rarity) + "</div>" : "") +
+    '<div class="foot">' + (c.rarity ? '<div class="rarity-word">' + esc(c.rarity) + "</div>" : "") + "</div>" +
     "</div>";
 }
 
 function roomCardHTML(c) {
   var challenges = (c.challenges || []).map(function (ch) {
     var lines = (ch.thresholds || []).map(function (t) {
-      return '<div class="th"><b>' + thresholdLabel(t) + ":</b> " + esc(t.outcome) + "</div>";
-    }).join("");
+      return '<div class="th">' + thresholdLabel(t) + ": " + rich(t.outcome) + "</div>";
+    }).join('<div class="or">OR</div>');
     return '<div class="challenge">' + lines + "</div>";
   }).join("");
-  var flavor = c.flavor ? '<div class="flavor">' + esc(c.flavor) + "</div>" : "";
-  var foot = c.flee
-    ? '<div class="flee"><b>Flee:</b> ' + esc(c.flee) + "</div>"
-    : '<div class="flee"><b>Flee:</b> Leave empty handed.</div>';
+  var foot = '<div class="flee"><b class="label">Flee:</b> ' + rich(c.flee || "Leave empty handed.") + "</div>";
   return '<div class="card room band-' + (c.band === null ? "10" : c.band) + '"><div class="type-bar"></div>' +
     '<div class="top"><div><div class="name">' + esc(c.name) + "</div>" +
     '<div class="typeline">' + esc(roomTypeLine(c)) + "</div></div></div>" +
-    '<div class="art"></div>' +
-    flavor +
+    flavorBlock(c) +
     '<div class="thresholds">' + challenges + "</div>" + foot + "</div>";
 }
 

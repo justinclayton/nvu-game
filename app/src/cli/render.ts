@@ -2,6 +2,7 @@
 
 import {
   allThresholds,
+  contributionOf,
   costOf,
   metThresholds,
   payOptions,
@@ -15,7 +16,19 @@ import type { CardFace, RoomFace, StatRequirement } from "@domain/printed";
 import { CHARACTERS, playerOf } from "@domain/verbs";
 import { currentQuestion, describeStagedAnswer, type StagedAnswer } from "./ascend";
 
-const statsOf = (card: Card | CardFace): string => {
+/**
+ * `now` is the value a conditional stat has right now (`contributionOf`, the
+ * same calculation `statPool` uses), so the hand line and the stat pool agree.
+ * Without it — no state and character to compute from, as for a bare printed
+ * face — a conditional stat falls back to the `(conditional)` marker.
+ */
+const statsOf = (card: Card | CardFace, now?: { oomph: number; scramble: number }): string => {
+  if (card.conditionalStat && now) {
+    const parts: string[] = [];
+    if (now.oomph > 0) parts.push(`Oomph ${String(now.oomph)} now`);
+    if (now.scramble > 0) parts.push(`Scramble ${String(now.scramble)} now`);
+    return parts.join(", ");
+  }
   const parts: string[] = [];
   if (card.oomph > 0) parts.push(`Oomph ${String(card.oomph)}`);
   if (card.scramble > 0) parts.push(`Scramble ${String(card.scramble)}`);
@@ -33,7 +46,8 @@ export function cardLine(state: GameState, c: Character, card: Card): string {
     cost !== card.cost
       ? `cost ${String(cost)} (printed ${String(card.cost)})`
       : `cost ${String(cost)}`;
-  const bits = [costNote, statsOf(card), kindOf(card)].filter((s) => s !== "");
+  const now = card.conditionalStat ? contributionOf(state, { owner: c, card }) : undefined;
+  const bits = [costNote, statsOf(card, now), kindOf(card)].filter((s) => s !== "");
   const text = card.text.trim() === "" ? "" : ` — ${card.text.trim()}`;
   return `${card.name} [${bits.join("; ")}]${text}`;
 }

@@ -39,8 +39,12 @@ function nextCommand(state: GameState): Command {
         };
       case "OrderCards":
         return { type: "ORDER_CARDS", cardIds: pending.cards.map((c) => c.id) };
+      case "ChooseStat":
+        return { type: "CHOOSE_STAT", stat: pending.options[0] ?? "Oomph" };
       case "TakeReward":
         return { type: "TAKE_REWARD", cardId: pending.cards[0]?.id ?? null };
+      case "ChooseGoodStuff":
+        return { type: "CHOOSE_CARDS", cardIds: pending.options.slice(0, 1).map((c) => c.id) };
     }
   }
   switch (state.phase) {

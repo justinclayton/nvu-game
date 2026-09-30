@@ -196,9 +196,6 @@ function buildPlayCard(
   const character = matchCharacter(action.character);
   const named = resolveCardName(action.name, playableCards(state, character));
   if (!named.ok) {
-    // playableCards only excludes a hand card for being unaffordable (phase,
-    // pending and Down are ruled out above and by the pending check below) —
-    // so a name that resolves against the hand here failed on cost alone.
     if (state.pending === null && !playerOf(state, character).down) {
       const inHand = resolveCardName(action.name, playerOf(state, character).hand);
       if (inHand.ok) {

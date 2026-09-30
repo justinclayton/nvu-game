@@ -181,14 +181,14 @@ body {
 }
 
 /* One character's side of the table row: their deck, discard and Exhaust
- * piles above, and their play zone spanning the full width below — the same
- * flex share of the row that their hand gets in the row underneath, so the
- * two line up. */
+ * piles above, and their play zone spanning the full width below. A zero
+ * flex basis, here and on the hand slot, splits both rows evenly regardless
+ * of what each side holds, so a play zone is as wide as the hand under it. */
 .mat-side {
   display: flex;
   flex-direction: column;
   gap: 12px;
-  flex: 1 1 auto;
+  flex: 1 1 0;
   min-width: 72px;
 }
 .mat-side__piles {
@@ -264,6 +264,7 @@ body {
 .slot--hand {
   display: flex;
   flex-direction: column;
+  flex-basis: 0;
   padding-top: 0;
 }
 .slot__head {

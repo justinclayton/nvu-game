@@ -180,6 +180,22 @@ body {
   border-left: 1.5px dashed var(--print-faint);
 }
 
+/* One character's side of the table row: their deck, discard and Exhaust
+ * piles above, and their play zone spanning the full width below. A zero
+ * flex basis, here and on the hand slot, splits both rows evenly regardless
+ * of what each side holds, so a play zone is as wide as the hand under it. */
+.mat-side {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  flex: 1 1 0;
+  min-width: 72px;
+}
+.mat-side__piles {
+  display: flex;
+  gap: 12px;
+}
+
 /* A slot is a stencilled outline with a label above it. The well is the box the
  * card layer measures; nothing is ever rendered inside it. */
 .slot {
@@ -222,9 +238,8 @@ body {
 }
 .slot--row {
   flex: 1 1 auto;
-  /* Enough to hold its own label ("Play zone") without it running into the
-   * fixed-width stack slot beside it — the table now has four of those per
-   * side (deck, play zone, discard, Exhaust) instead of three. */
+  /* Enough to hold its own label ("Play zone", a character's name) without
+   * it running into whatever else shares the flex row beside it. */
   min-width: 72px;
 }
 .slot--row .well {
@@ -249,6 +264,7 @@ body {
 .slot--hand {
   display: flex;
   flex-direction: column;
+  flex-basis: 0;
   padding-top: 0;
 }
 .slot__head {
@@ -1192,6 +1208,12 @@ body {
     gap: 10px;
   }
   .mat-row {
+    gap: 8px;
+  }
+  .mat-side {
+    gap: 8px;
+  }
+  .mat-side__piles {
     gap: 8px;
   }
   .mat__divider {

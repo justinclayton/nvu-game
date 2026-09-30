@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>North vs Up — card backs (print &amp; cut)</title>
+<style>
+  * { box-sizing: border-box; }
+  body { font-family: "Helvetica Neue", Arial, sans-serif; margin: 12mm; color: #111; background: #fff; }
+  h1 { font-size: 14pt; margin: 0 0 2mm; }
+  p.note { font-size: 9.5pt; color: #444; max-width: 170mm; margin: 0 0 6mm; line-height: 1.4; }
+  .sheet { display: flex; flex-wrap: wrap; gap: 4mm; }
+  .back { width: 63mm; height: 88mm; border-radius: 3mm; overflow: hidden; border: 0.2mm solid #bbb; page-break-inside: avoid; break-inside: avoid; }
+  .back svg { display: block; width: 100%; height: 100%; }
+  .caption { font-size: 8pt; color: #555; margin-top: 1.5mm; max-width: 63mm; line-height: 1.35; }
+  .cell { display: flex; flex-direction: column; }
+  @media print { body { margin: 8mm; } h1, p.note, .caption { display: none; } }
+</style>
+</head>
+<body>
+
+<h1>Card backs</h1>
+<p class="note">One back per face-down pile that has to be told apart on the table. Starters and
+rewards share a back because a reward joins the deck. Rooms and Stairwells share a back because a
+floor shuffles them together. White backs to spare ink: the pool colour carries only the frame, glyph and words, matching the type bar on the card faces.</p>
+
+<div id="sheet" class="sheet"></div>
+
+<script src="card-backs.js"></script>
+<script>
+"use strict";
+
+document.getElementById("sheet").innerHTML = NVU_BACKS.BACKS.map(function (b) {
+  return '<div class="cell"><div class="back">' + NVU_BACKS.backSVG(b) + '</div><div class="caption">' + b.caption + "</div></div>";
+}).join("");
+</script>
+
+</body>
+</html>

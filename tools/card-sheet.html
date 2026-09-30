@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<title>North vs Up — the card sheet (print &amp; cut)</title>
+<title>North vs Up — the card sheet (double-sided, print &amp; cut)</title>
 <style>
   :root {
     --fine: #0fa3a8;   /* robin egg blue */
@@ -17,17 +17,48 @@
     --band-1: #2d6a4f;  /* forest green: floors 1-3 */
     --band-2: #1d4e89;  /* deep blue: floors 4-6 */
     --band-3: #7c2d12;  /* rust: floors 7-9 */
+    --band-10: #b8860b; /* gold: floor 10 */
     --oomph: #b52d24;
     --scramble: #4a6a9a;
   }
   * { box-sizing: border-box; }
   body {
     font-family: "Helvetica Neue", Arial, sans-serif;
-    margin: 12mm;
+    margin: 0; padding: 8mm 0;
     color: #111;
-    background: #fff;
+    background: #9a9a9a;
   }
-  .sheet { display: flex; flex-wrap: wrap; gap: 4mm; }
+  .howto {
+    width: 215.9mm; margin: 0 auto 6mm; padding: 4mm 6mm; background: #fff;
+    font-size: 9.5pt; line-height: 1.45;
+  }
+  .howto h1 { font-size: 13pt; margin: 0 0 1.5mm; }
+  .howto p { margin: 0 0 1mm; }
+
+  /* One US Letter sheet, 3x3 of 63x88mm. The grid is centred left-right and
+     sits 7.7mm from the top and bottom, inside most printers' printable area. */
+  @page { size: 8.5in 11in; margin: 0; }
+  .page {
+    width: 215.9mm; height: 279.4mm; position: relative; overflow: hidden;
+    background: #fff; margin: 0 auto 8mm;
+    page-break-after: always; break-after: page;
+  }
+  .grid {
+    position: absolute; left: 13.45mm; top: 7.7mm;
+    display: grid; grid-template-columns: repeat(3, 63mm); grid-template-rows: repeat(3, 88mm);
+  }
+  .marks { position: absolute; left: 0; top: 0; width: 215.9mm; height: 279.4mm; pointer-events: none; }
+  .marks line { stroke: #000; stroke-width: 0.15mm; }
+  /* Up the left margin, 8mm in from the edge: printers can't reach the last
+     few millimetres at the foot of the page, and the crop marks stop short of it too. */
+  .page-label {
+    position: absolute; left: 0; top: 0; width: 279.4mm; height: 8mm;
+    line-height: 8mm; text-align: center; transform-origin: 0 0; transform: rotate(90deg) translateY(-8mm);
+    font-size: 6.5pt; color: #777; letter-spacing: .08em;
+  }
+  .card.blank { border: 0; }
+  .card.back { border: 0; padding: 0; }
+  .card.back svg { display: block; width: 63mm; height: 88mm; }
 
   .card {
     width: 63mm; height: 88mm;
@@ -35,7 +66,6 @@
     border-radius: 3mm;
     padding: 3mm;
     display: flex; flex-direction: column;
-    page-break-inside: avoid; break-inside: avoid;
     position: relative;
   }
 
@@ -70,12 +100,15 @@
   .text p { margin: 0 0 1.5mm; }
   .foot { display: flex; justify-content: flex-end; margin-top: auto; padding-top: 1.5mm; }
   .rarity-word { font-size: 7pt; letter-spacing: .1em; text-transform: uppercase; color: #999; }
+  /* Which rules this card was printed under, in the bottom padding of every front. */
+  .stamp { position: absolute; left: 3mm; bottom: 0.8mm; font-size: 5.5pt; color: #999; letter-spacing: .04em; }
 
   /* room cards */
   .card.room .type-bar { background: var(--floor); }
   .card.room.band-1 .type-bar { background: var(--band-1); }
   .card.room.band-2 .type-bar { background: var(--band-2); }
   .card.room.band-3 .type-bar { background: var(--band-3); }
+  .card.room.band-10 .type-bar { background: var(--band-10); }
   .flavor { margin: 1.5mm 0 2mm; font-size: 8.5pt; font-style: italic; color: #555; line-height: 1.35; }
   .thresholds .th { font-size: 9.5pt; line-height: 1.35; }
   /* Within a challenge only one threshold's outcome resolves (rulebook, Outcome). */
@@ -92,15 +125,28 @@
   .flee .label { text-transform: uppercase; letter-spacing: .06em; font-size: 8pt; }
 
   @media print {
-    body { margin: 8mm; }
+    body { padding: 0; background: #fff; }
+    .howto { display: none; }
+    .page { margin: 0; }
   }
 </style>
 </head>
 <body>
 
+<div class="howto">
+  <h1>North vs Up — the card sheet, double-sided</h1>
+  <p id="edition"></p>
+  <p>Print on US Letter at <b>100%</b> (no “fit to page”), <b>two-sided, flip on long edge</b>. Each front
+  page is followed by its back page, mirrored, so the backs land behind their fronts.</p>
+  <p>Cut along the crop marks on the front side; a back that drifts a millimetre is white on white.
+  If your printer offsets the back consistently, add <code>?shift=x,y</code> (millimetres) to the address to nudge every back page.
+  <code>?sheet=N</code> prints one sheet alone.</p>
+</div>
+
 <div id="sheets"></div>
 
 <script src="cards.js"></script>
+<script src="card-backs.js"></script>
 <script>
 "use strict";
 
@@ -169,6 +215,10 @@ function flavorBlock(c) {
   return c.flavor ? '<div class="flavor">' + esc(c.flavor) + "</div>" : "";
 }
 
+function stamp() {
+  return '<div class="stamp">rules ' + esc(NVU_CARDS.rulesVersion) + "</div>";
+}
+
 function costPip(c) {
   if (c.cost === null || c.cost === undefined) return '<div class="cost">?</div>';
   return '<div class="cost">' + c.cost + "</div>";
@@ -186,7 +236,7 @@ function playerCardHTML(c) {
     statBlock(c) +
     textBlock(c) +
     '<div class="foot">' + (c.rarity ? '<div class="rarity-word">' + esc(c.rarity) + "</div>" : "") + "</div>" +
-    "</div>";
+    stamp() + "</div>";
 }
 
 function roomCardHTML(c) {
@@ -201,15 +251,14 @@ function roomCardHTML(c) {
     '<div class="top"><div><div class="name">' + esc(c.name) + "</div>" +
     '<div class="typeline">' + esc(roomTypeLine(c)) + "</div></div></div>" +
     flavorBlock(c) +
-    '<div class="thresholds">' + challenges + "</div>" + foot + "</div>";
+    '<div class="thresholds">' + challenges + "</div>" + foot + stamp() + "</div>";
 }
 
 function cardHTML(c) {
   return c.kind === "room" || c.kind === "stairwell" ? roomCardHTML(c) : playerCardHTML(c);
 }
 
-/* The sheet's groupings, in cutting order — the cards print as one unbroken
-   grid, but stay grouped so like cards land near each other. */
+/* The sheet's groupings, in cutting order, so like cards land near each other. */
 function player(owner, starter) {
   return function (c) {
     return c.kind === "player" && c.owner === owner && Boolean(c.starter) === starter;
@@ -243,14 +292,81 @@ function expand(cards) {
   return out;
 }
 
+/* US Letter, 3x3 per side. A front page then its back page, the back's
+   columns reversed so a long-edge flip puts each back behind its front. */
+var COLS = 3, ROWS = 3, PER_PAGE = COLS * ROWS;
+var GRID_X = [13.45, 76.45, 139.45, 202.45], GRID_Y = [7.7, 95.7, 183.7, 271.7];
+var PAGE_W = 215.9, PAGE_H = 279.4, MARK = 4, GAP = 1;
+
+function cropMarks() {
+  var out = "";
+  GRID_X.forEach(function (x) {
+    out += '<line x1="' + x + '" y1="' + (GRID_Y[0] - GAP) + '" x2="' + x + '" y2="' + (GRID_Y[0] - GAP - MARK) + '"/>' +
+      '<line x1="' + x + '" y1="' + (GRID_Y[3] + GAP) + '" x2="' + x + '" y2="' + (GRID_Y[3] + GAP + MARK) + '"/>';
+  });
+  GRID_Y.forEach(function (y) {
+    out += '<line x1="' + (GRID_X[0] - GAP) + '" y1="' + y + '" x2="' + (GRID_X[0] - GAP - MARK) + '" y2="' + y + '"/>' +
+      '<line x1="' + (GRID_X[3] + GAP) + '" y1="' + y + '" x2="' + (GRID_X[3] + GAP + MARK) + '" y2="' + y + '"/>';
+  });
+  return '<svg class="marks" viewBox="0 0 ' + PAGE_W + " " + PAGE_H + '">' + out + "</svg>";
+}
+
+function backHTML(c) {
+  if (!c) return '<div class="card blank"></div>';
+  return '<div class="card back">' + NVU_BACKS.backSVG(NVU_BACKS.byId[NVU_BACKS.backFor(c)]) + "</div>";
+}
+
+function frontHTML(c) {
+  return c ? cardHTML(c) : '<div class="card blank"></div>';
+}
+
+/* `?shift=x,y` nudges every back page by that many millimetres, for a printer
+   whose duplex side lands consistently off. */
+function backShift() {
+  var m = /[?&]shift=(-?[\d.]+),(-?[\d.]+)/.exec(location.search);
+  return m ? ' style="transform: translate(' + m[1] + "mm, " + m[2] + 'mm)"' : "";
+}
+
+/* `?sheet=N` prints only sheet N (front and back), for a reprint. */
+function onlySheet() {
+  var m = /[?&]sheet=(\d+)/.exec(location.search);
+  return m ? Number(m[1]) : 0;
+}
+
+/* The rules version and card list this sheet was printed under, on every page. */
+function edition() {
+  return "rules " + esc(NVU_CARDS.rulesVersion) + " · cards " + esc(NVU_CARDS.cardListId);
+}
+
+function pages(cards) {
+  var out = "", shift = backShift(), only = onlySheet();
+  for (var p = 0; p * PER_PAGE < cards.length; p++) {
+    if (only && only !== p + 1) continue;
+    var slots = [];
+    for (var i = 0; i < PER_PAGE; i++) slots.push(cards[p * PER_PAGE + i] || null);
+    var n = p + 1;
+    out += '<div class="page"><div class="grid">' + slots.map(frontHTML).join("") + "</div>" +
+      cropMarks() + '<div class="page-label">Sheet ' + n + " · front · " + edition() + "</div></div>";
+    var mirrored = [];
+    for (var r = 0; r < ROWS; r++) {
+      for (var k = COLS - 1; k >= 0; k--) mirrored.push(slots[r * COLS + k]);
+    }
+    out += '<div class="page"><div class="grid"' + shift + ">" + mirrored.map(backHTML).join("") + "</div>" +
+      '<div class="page-label">Sheet ' + n + " · back · " + edition() + "</div></div>";
+  }
+  return out;
+}
+
 (function render() {
-  var out = "", seen = 0;
+  var all = [], seen = 0;
   SECTIONS.forEach(function (s) {
     var cards = NVU_CARDS.cards.filter(s.pick);
     seen += cards.length;
-    out += expand(cards).map(cardHTML).join("");
+    all = all.concat(expand(cards));
   });
-  document.getElementById("sheets").innerHTML = '<div class="sheet">' + out + "</div>";
+  document.getElementById("edition").textContent =
+    "Printed under " + edition() + ", " + all.length + " cards on " + Math.ceil(all.length / PER_PAGE) + " sheets.";
+  document.getElementById("sheets").innerHTML = pages(all);
 
   /* Loud, on the page, if a card in the list reaches no section. */
   if (seen !== NVU_CARDS.cards.length) {

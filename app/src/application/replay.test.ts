@@ -40,7 +40,7 @@ function nextCommand(state: GameState): Command {
       case "OrderCards":
         return { type: "ORDER_CARDS", cardIds: pending.cards.map((c) => c.id) };
       case "TakeReward":
-        return { type: "TAKE_REWARD", take: true };
+        return { type: "TAKE_REWARD", cardId: pending.cards[0]?.id ?? null };
     }
   }
   switch (state.phase) {

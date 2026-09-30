@@ -195,7 +195,22 @@ function buildPlayCard(
   }
   const character = matchCharacter(action.character);
   const named = resolveCardName(action.name, playableCards(state, character));
-  if (!named.ok) throw new MoveRefused(named.reason);
+  if (!named.ok) {
+    // playableCards only excludes a hand card for being unaffordable (phase,
+    // pending and Down are ruled out above and by the pending check below) —
+    // so a name that resolves against the hand here failed on cost alone.
+    if (state.pending === null && !playerOf(state, character).down) {
+      const inHand = resolveCardName(action.name, playerOf(state, character).hand);
+      if (inHand.ok) {
+        const cost = costOf(state, character, inHand.card);
+        const held = payOptions(state, character, inHand.card.id).length;
+        throw new MoveRefused(
+          `${inHand.card.name} costs ${String(cost)}; you hold ${String(held)} other card${held === 1 ? "" : "s"}.`,
+        );
+      }
+    }
+    throw new MoveRefused(named.reason);
+  }
   const card = named.card;
 
   const payWith = resolveEach(action.pay, payOptions(state, character, card.id)).map((c) => c.id);
@@ -338,7 +353,7 @@ function describeAction(action: PlayAction): string {
     case "choose":
       return action.names.length === 0 ? "Chose none." : `Chose ${action.names.join(", ")}.`;
     case "order":
-      return `Ordered ${action.names.join(", ")}.`;
+      return `Ordered ${action.names.map((n) => `"${n}"`).join(", ")}.`;
     case "take":
       return "Took the reward.";
     case "skip":

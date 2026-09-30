@@ -80,7 +80,7 @@ export const STUFF: Registry = {
       }
       return ask(state, {
         kind: "ChooseCharacter",
-        prompt: "Heal which character?",
+        prompt: "Choose a character.",
         options: eligible,
         source: source(ctx, "stich-em-ups-character"),
       });

@@ -23,7 +23,7 @@ gh issue edit <n> --add-label in-progress --remove-label ready-for-agent
 
 An issue that says "design first" or asks for `/grilling` carries `needs-human` instead of `ready-for-agent`: the designer settles the design in a session, records the outcome on the issue, and swaps the label. Agents never claim `needs-human` issues.
 
-Name the working branch `claude/issue-<n>` after the issue number. Open the PR with `Closes #<n>` in the body; the merge closes the issue and the `in-progress` label goes with it.
+Name the working branch `claude/issue-<n>` after the issue number. Open the PR with `Closes #<n>` in the body; the merge closes the issue, but closing does not remove labels, so the coordinator clears `in-progress` and `ready-for-review` after merging.
 
 Infer the repo from `git remote -v`; `gh` does this automatically when run inside a clone.
 

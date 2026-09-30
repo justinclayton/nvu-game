@@ -18,6 +18,7 @@ Arguments: `$ARGUMENTS` is an issue number. With none, take the lowest-numbered 
 4. **PR.** Push, open the PR closing the issue per the tracker doc's convention, with media for anything visible per the doc. Then swap the issue's label, creating `ready-for-review` if it doesn't exist yet:
    ```
    gh label create ready-for-review --description "A PR is open for this issue" --color 1d76db 2>/dev/null || true
-   gh issue edit <n> --add-label ready-for-review --remove-label in-progress
+   gh issue edit <n> --add-label ready-for-review
+   gh issue edit <n> --remove-label in-progress 2>/dev/null || true
    ```
    Report the PR number, what was verified and how, and any Done-when line not met.

@@ -115,8 +115,9 @@ file is the only state — every call loads it, replays the command log from the
 `nvu-run/1` file `application/exportRun.ts` writes, so the web game can open a run the CLI wrote and
 the CLI can continue a run the web game saved. `--run` defaults to `runs/<seed>.json`, which
 `runs/` is gitignored; a run worth keeping is copied into `design/playtests/` by hand next to its
-playtest note. After every move the CLI prints what just happened (`application/narrate.ts`), the
-table, and the legal moves, numbered; `show` prints the table and the moves without moving.
+playtest note. After every move the CLI prints what just happened (`application/narrate.ts`), then
+the table (after `flip`, `end`, `new` and `undo`) or only what changed (after any other move), then
+the legal moves, numbered; `show` prints the table and the moves without moving.
 
 `src/sim/moves.ts` lists what is legal by asking the same queries the UI asks — the engine still
 checks every command it is handed, so the list only saves a caller from guessing. There is no

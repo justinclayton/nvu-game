@@ -145,14 +145,18 @@ After a move, in this order:
    same lines the web game's log shows, so the agent's account of a run and the log agree word for
    word. A call that produced no event says so in one line, naming what it did, so an answer that
    only narrows the next question is never silent.
-2. The table: floor, turn, phase, the room and its thresholds, each character's deck and discard
-   counts and hand with each card's cost, stats and text. The room stays on the table while a
-   prompt about it is open. Anywhere a card is offered, in a reward reveal as in the Ascend offer,
-   the full face is printed.
+2. The table, after `flip`, `end`, `new` and `undo`: floor, turn, phase, the room and its
+   thresholds, each character's live-card count (deck, discard and hand added together; Exhaust is
+   not counted) with the piles it sums, and the hand with each card's cost, stats and text. The
+   room stays on the table while a prompt about it is open. Anywhere a card is offered, in a reward
+   reveal as in the Ascend offer, the full face is printed. The table printed after `end` shows the
+   turn that comes next. Every other move — `card`, `scrap` and answering a prompt — prints only
+   what changed: the stat pool line, any prompt now waiting, and each character's live-card
+   count. `[agent, accepted]` (issue #213)
 3. The moves hint.
 
-`show` prints 2 and 3. `show --events N` prints the last N narrated lines, `--table` and `--moves`
-print only that part. `note` confirms itself in one line and prints nothing else. A refused move
+`show` prints the full table and 3. `show --events N` prints the last N narrated lines, `--table`
+and `--moves` print only that part. `note` confirms itself in one line and prints nothing else. A refused move
 prints the engine's reason and the moves hint, never the help text. `pile` prints the named pile as
 card faces. `card NAME` prints a card's or a Room's face from the content, with no run needed — a
 Room prints its thresholds and Flee text as printed, not against any run's state.

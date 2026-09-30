@@ -41,8 +41,6 @@ function nextCommand(state: GameState): Command {
         };
       case "OrderCards":
         return { type: "ORDER_CARDS", cardIds: pending.cards.map((c) => c.id) };
-      case "ChooseStat":
-        return { type: "CHOOSE_STAT", stat: pending.options[0] ?? "Oomph" };
       case "TakeReward":
         return { type: "TAKE_REWARD", cardId: pending.cards[0]?.id ?? null };
       case "ChooseGoodStuff":

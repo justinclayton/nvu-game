@@ -32,6 +32,8 @@ function nextCommand(state: GameState): Command {
         return { type: "CHOOSE_CHARACTER", character: pending.options[0] ?? "Red" };
       case "ChoosePile":
         return { type: "CHOOSE_PILE", pile: pending.options[0] ?? "Red deck" };
+      case "ChooseStat":
+        return { type: "CHOOSE_STAT", stat: pending.options[0] ?? "Oomph" };
       case "ChooseCards":
         return {
           type: "CHOOSE_CARDS",
@@ -40,7 +42,9 @@ function nextCommand(state: GameState): Command {
       case "OrderCards":
         return { type: "ORDER_CARDS", cardIds: pending.cards.map((c) => c.id) };
       case "TakeReward":
-        return { type: "TAKE_REWARD", take: true };
+        return { type: "TAKE_REWARD", cardId: pending.cards[0]?.id ?? null };
+      case "ChooseGoodStuff":
+        return { type: "CHOOSE_CARDS", cardIds: pending.options.slice(0, 1).map((c) => c.id) };
     }
   }
   switch (state.phase) {
@@ -54,8 +58,11 @@ function nextCommand(state: GameState): Command {
       return { type: "END_PLAY" };
     case "Ascend":
       return { type: "ASCEND", Red: ascendChoice(state, "Red"), Gray: ascendChoice(state, "Gray") };
-    default:
-      throw new Error(`${state.phase} should never rest without a pending choice`);
+    case "Outcome":
+    case "Cleanup":
+      throw new Error(`${state.phase} is automatic and should never rest without a pending choice`);
+    case "GameOver":
+      throw new Error("the run is over");
   }
 }
 

@@ -205,6 +205,23 @@ function longestText(): GameState {
   });
 }
 
+/** Play phase, both play zones full, to check the zone reads as a row as wide as the hand. */
+function playZoneFull(): GameState {
+  const state = rig({
+    phase: "Play",
+    activeRoom: room(CLEARED_ROOM),
+    Red: player({ deck: pile("Shove", 3), hand: pile("Shove", 5) }),
+    Gray: player({ deck: pile("Duck Under", 3), hand: pile("Duck Under", 5) }),
+  });
+  return {
+    ...state,
+    playZone: [
+      ...pile("Shove", 4).map((c) => ({ owner: "Red" as const, card: c })),
+      ...pile("Duck Under", 4).map((c) => ({ owner: "Gray" as const, card: c })),
+    ],
+  };
+}
+
 /** The Ascend phase, both reward pools revealing three cards each. */
 function ascending(): GameState {
   const base = rig({
@@ -329,6 +346,11 @@ export const FIXTURES: readonly Fixture[] = [
     name: "longest-text",
     description: "Both hands holding the cards with the most printed text.",
     build: stable(longestText),
+  },
+  {
+    name: "play-zone",
+    description: "Both play zones full, to check the zone reads as a row as wide as the hand.",
+    build: stable(playZoneFull),
   },
   (() => {
     const ran = stableRan(emptyGoodStuffPool);

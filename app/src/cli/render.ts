@@ -2,6 +2,7 @@
 
 import {
   allThresholds,
+  contributionOf,
   costOf,
   metThresholds,
   payOptions,
@@ -15,7 +16,19 @@ import type { CardFace, RoomFace, StatRequirement } from "@domain/printed";
 import { CHARACTERS, playerOf } from "@domain/verbs";
 import { currentQuestion, describeStagedAnswer, type StagedAnswer } from "./ascend";
 
-const statsOf = (card: Card | CardFace): string => {
+/**
+ * `now` is the value a conditional stat has right now (`contributionOf`, the
+ * same calculation `statPool` uses), so the hand line and the stat pool agree.
+ * Without it — no state and character to compute from, as for a bare printed
+ * face — a conditional stat falls back to the `(conditional)` marker.
+ */
+const statsOf = (card: Card | CardFace, now?: { oomph: number; scramble: number }): string => {
+  if (card.conditionalStat && now) {
+    const parts: string[] = [];
+    if (now.oomph > 0) parts.push(`Oomph ${String(now.oomph)} now`);
+    if (now.scramble > 0) parts.push(`Scramble ${String(now.scramble)} now`);
+    return parts.join(", ");
+  }
   const parts: string[] = [];
   if (card.oomph > 0) parts.push(`Oomph ${String(card.oomph)}`);
   if (card.scramble > 0) parts.push(`Scramble ${String(card.scramble)}`);
@@ -26,6 +39,18 @@ const statsOf = (card: Card | CardFace): string => {
 const kindOf = (card: Card | CardFace): string =>
   card.kind === "good_stuff" ? "Good Stuff" : card.kind === "bad_stuff" ? "Bad Stuff" : "";
 
+/**
+ * What the card would add to the stat pool if it were in the play zone right
+ * now. A card not yet in the zone is counted as if played, so a stat that reads
+ * the zone (Junk Launcher counts its own cost) matches the pool it will join.
+ */
+const contributionOnceInPlay = (state: GameState, c: Character, card: Card) => {
+  const played = { owner: c, card };
+  const inZone = state.playZone.some((p) => p.card.id === card.id);
+  const asPlayed = inZone ? state : { ...state, playZone: [...state.playZone, played] };
+  return contributionOf(asPlayed, played);
+};
+
 /** One line for a card, as a hand, an offer or an answer to `card NAME` shows it. */
 export function cardLine(state: GameState, c: Character, card: Card): string {
   const cost = costOf(state, c, card);
@@ -33,7 +58,8 @@ export function cardLine(state: GameState, c: Character, card: Card): string {
     cost !== card.cost
       ? `cost ${String(cost)} (printed ${String(card.cost)})`
       : `cost ${String(cost)}`;
-  const bits = [costNote, statsOf(card), kindOf(card)].filter((s) => s !== "");
+  const now = card.conditionalStat ? contributionOnceInPlay(state, c, card) : undefined;
+  const bits = [costNote, statsOf(card, now), kindOf(card)].filter((s) => s !== "");
   const text = card.text.trim() === "" ? "" : ` — ${card.text.trim()}`;
   return `${card.name} [${bits.join("; ")}]${text}`;
 }
@@ -129,7 +155,9 @@ function ascendStatusLines(state: GameState, staged: readonly StagedAnswer[]): s
   lines.push("Offered:");
   for (const c of CHARACTERS) {
     const offer = state.offer?.[c] ?? [];
-    lines.push(`  ${c}: ${offer.length > 0 ? offer.map((card) => cardLine(state, c, card)).join(" | ") : "nothing"}`);
+    lines.push(
+      `  ${c}: ${offer.length > 0 ? offer.map((card) => cardLine(state, c, card)).join(" | ") : "nothing"}`,
+    );
   }
   if (staged.length > 0) {
     lines.push("Staged so far:");
@@ -192,10 +220,14 @@ export function moveHint(state: GameState, staged: readonly StagedAnswer[] = [])
         break;
       }
       case "OrderCards":
-        lines.push(`order <Name> <Name>... — top first, every one of: ${pending.cards.map((c) => c.name).join(", ")}`);
+        lines.push(
+          `order <Name> <Name>... — top first, every one of: ${pending.cards.map((c) => c.name).join(", ")}`,
+        );
         break;
       case "TakeReward":
-        lines.push(`take <Name> — one of: ${pending.cards.map((c) => c.name).join(", ")} — or skip`);
+        lines.push(
+          `take <Name> — one of: ${pending.cards.map((c) => c.name).join(", ")} — or skip`,
+        );
         break;
       case "ChooseGoodStuff":
         lines.push(`choose <Name> — keep 1 of: ${pending.options.map((c) => c.name).join(", ")}`);

@@ -1,11 +1,13 @@
 /* The mat: the printed layout every card sits on.
  *
  * Rulebook, Setup, drawn. The floor deck, its Cleared pile and the active
- * room across the top with the room's brief beside them; each character's deck,
- * side of the play zone, discard pile and Exhaust pile in the middle; their
- * hands along the near edge. The pools sit off to the right, as the rulebook
- * keeps them off to one side. Every slot here is an empty, measured box; the
- * card layer draws the cards over it.
+ * room across the top with the room's brief beside them; each character's
+ * deck, discard pile and Exhaust pile in the middle, with their side of the
+ * play zone spanning the full width beneath — as wide as their hand, since
+ * cards travel between the two; their hands along the near edge. The pools
+ * sit off to the right, as the rulebook keeps them off to one side. Every
+ * slot here is an empty, measured box; the card layer draws the cards over
+ * it.
  */
 
 import { useRef, type CSSProperties } from "react";
@@ -148,51 +150,59 @@ export function Mat({
         </div>
 
         <div className="mat-row mat-row--table">
-          <Slot
-            id="red-deck"
-            label="Deck"
-            count={state.Red.deck.length}
-            tone="red"
-            onOpenPile={openPile}
-          />
-          <Slot id="red-play" label="Play zone" row tone="red" />
-          <Slot
-            id="red-discard"
-            label="Discard"
-            count={state.Red.discard.length}
-            tone="red"
-            onOpenPile={openPile}
-          />
-          <Slot
-            id="red-exhaust"
-            label="Exhaust"
-            count={state.Red.exhaust.length}
-            tone="red"
-            onOpenPile={openPile}
-          />
+          <div className="mat-side">
+            <div className="mat-side__piles">
+              <Slot
+                id="red-deck"
+                label="Deck"
+                count={state.Red.deck.length}
+                tone="red"
+                onOpenPile={openPile}
+              />
+              <Slot
+                id="red-discard"
+                label="Discard"
+                count={state.Red.discard.length}
+                tone="red"
+                onOpenPile={openPile}
+              />
+              <Slot
+                id="red-exhaust"
+                label="Exhaust"
+                count={state.Red.exhaust.length}
+                tone="red"
+                onOpenPile={openPile}
+              />
+            </div>
+            <Slot id="red-play" label="Play zone" row tone="red" />
+          </div>
           <div className="mat__divider" />
-          <Slot
-            id="gray-deck"
-            label="Deck"
-            count={state.Gray.deck.length}
-            tone="gray"
-            onOpenPile={openPile}
-          />
-          <Slot id="gray-play" label="Play zone" row tone="gray" />
-          <Slot
-            id="gray-discard"
-            label="Discard"
-            count={state.Gray.discard.length}
-            tone="gray"
-            onOpenPile={openPile}
-          />
-          <Slot
-            id="gray-exhaust"
-            label="Exhaust"
-            count={state.Gray.exhaust.length}
-            tone="gray"
-            onOpenPile={openPile}
-          />
+          <div className="mat-side">
+            <div className="mat-side__piles">
+              <Slot
+                id="gray-deck"
+                label="Deck"
+                count={state.Gray.deck.length}
+                tone="gray"
+                onOpenPile={openPile}
+              />
+              <Slot
+                id="gray-discard"
+                label="Discard"
+                count={state.Gray.discard.length}
+                tone="gray"
+                onOpenPile={openPile}
+              />
+              <Slot
+                id="gray-exhaust"
+                label="Exhaust"
+                count={state.Gray.exhaust.length}
+                tone="gray"
+                onOpenPile={openPile}
+              />
+            </div>
+            <Slot id="gray-play" label="Play zone" row tone="gray" />
+          </div>
         </div>
 
         <div className="mat-row mat-row--hands">

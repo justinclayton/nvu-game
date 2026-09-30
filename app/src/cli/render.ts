@@ -109,14 +109,40 @@ function roomLines(state: GameState, room: Room): string[] {
   return lines;
 }
 
-function playerLines(state: GameState, c: Character): string[] {
+/** A character's live-card count: deck, discard and hand added together — exhaust is not counted. */
+function playerHeadLine(state: GameState, c: Character): string {
   const p = playerOf(state, c);
   const flags = [p.down ? "DOWN" : ""].filter((s) => s !== "");
-  const head = `${c}: deck ${String(p.deck.length)}, discard ${String(p.discard.length)}, exhaust ${String(p.exhaust.length)}, hand ${String(p.hand.length)}${flags.length ? "  " + flags.join(" ") : ""}`;
-  const lines = [head];
+  const live = p.deck.length + p.discard.length + p.hand.length;
+  return (
+    `${c}: live ${String(live)} (deck ${String(p.deck.length)}, discard ${String(p.discard.length)}, ` +
+    `hand ${String(p.hand.length)}), exhaust ${String(p.exhaust.length)}${flags.length ? "  " + flags.join(" ") : ""}`
+  );
+}
+
+function playerLines(state: GameState, c: Character): string[] {
+  const p = playerOf(state, c);
+  const lines = [playerHeadLine(state, c)];
   for (const card of p.hand) lines.push(`    ${cardLine(state, c, card)}`);
   const played = state.playZone.filter((x) => x.owner === c).map((x) => x.card.name);
   if (played.length > 0) lines.push(`    played: ${played.join(", ")}`);
+  return lines;
+}
+
+/**
+ * What a move changed, for `play card`, Scrap and answering a prompt: the
+ * stat pool, any prompt now waiting, and each character's live-card count —
+ * not the full table (design/cli-sim/spec.md via issue #213: "play card,
+ * draw and prompt answers print only what changed").
+ */
+export function shortStatusLines(state: GameState): string[] {
+  const lines: string[] = [];
+  const pool = statPool(state);
+  if (state.phase === "Play" || state.playZone.length > 0) {
+    lines.push(`Stat pool: Oomph ${String(pool.oomph)}, Scramble ${String(pool.scramble)}`);
+  }
+  if (state.pending) lines.push(`Waiting on: ${state.pending.prompt}`);
+  for (const c of CHARACTERS) lines.push(playerHeadLine(state, c));
   return lines;
 }
 
@@ -142,8 +168,12 @@ function ascendStatusLines(state: GameState, staged: readonly StagedAnswer[]): s
 
 export function renderTable(state: GameState, staged: readonly StagedAnswer[] = []): string {
   const lines: string[] = [];
+  // Turn Start sits between turns with the just-ended turn's number still on
+  // the state (the engine bumps it at the next flip, not here) — show the
+  // turn it is about to start instead.
+  const turn = state.phase === "Turn Start" ? state.turn + 1 : state.turn;
   lines.push(
-    `Floor ${String(state.floor)} · turn ${String(state.turn)} · ${state.phase}` +
+    `Floor ${String(state.floor)} · turn ${String(turn)} · ${state.phase}` +
       `   floor deck ${String(state.floorDeck.length)}, cleared ${String(state.cleared.length)}` +
       `   Good Stuff ${String(state.pools.goodStuff.length)}, Bad Stuff ${String(state.pools.badStuff.length)}`,
   );

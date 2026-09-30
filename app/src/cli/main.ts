@@ -42,7 +42,7 @@ import {
   type ReplayRequest,
   type SimRequest,
 } from "./args";
-import { cardLine, moveHint, printedFaceLine, printedRoomLines, renderTable } from "./render";
+import { cardLine, moveHint, printedFaceLine, printedRoomLines, renderTable, shortStatusLines } from "./render";
 
 const content = CARD_CONTENT;
 
@@ -414,6 +414,14 @@ function showPile(run: string | null, action: Extract<PlayAction, { kind: "pile"
   return 0;
 }
 
+/**
+ * Flip, end and a fresh run change the room, the phase or the whole board, so
+ * they print the full table; undo can land anywhere, so it does too. Every
+ * other move — playing a card, Scrapping, answering a prompt — only changes
+ * a few numbers, so it prints just what changed (issue #213).
+ */
+const FULL_TABLE_MOVES: ReadonlySet<PlayAction["kind"]> = new Set(["flip", "end", "new", "undo"]);
+
 function play(request: PlayRequest): number {
   const action = request.action;
   if (action.kind === "show") return showPlay(request.run, action);
@@ -525,7 +533,11 @@ function play(request: PlayRequest): number {
     out(manualNote ?? describeAction(action));
   }
   out("");
-  out(renderTable(state, staged));
+  if (FULL_TABLE_MOVES.has(action.kind)) {
+    out(renderTable(state, staged));
+  } else {
+    for (const line of shortStatusLines(state)) out(line);
+  }
   out("");
   out(moveHint(state, staged));
 

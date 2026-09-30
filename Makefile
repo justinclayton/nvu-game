@@ -10,8 +10,9 @@
 #   make app-check  lint, typecheck and test the web game, the sim and the CLI
 #   bin/nvu         the CLI: bin/nvu play, bin/nvu replay, bin/nvu fuzz, bin/nvu help
 #   make sheet      open the print-and-cut card sheet
+#   make pdf        print the sheet to print/card-sheet-v<rules version>.pdf
 
-.PHONY: help build check app app-check app-install sheet all
+.PHONY: help build check app app-check app-install sheet pdf all
 default: build
 
 help:
@@ -21,13 +22,15 @@ help:
 	@echo "make app-check  lint, typecheck and test the web game, the sim and the CLI"
 	@echo "bin/nvu         the CLI: bin/nvu play, bin/nvu replay, bin/nvu fuzz, bin/nvu help"
 	@echo "make sheet   open the print-and-cut card sheet in a browser"
+	@echo "make pdf     print the sheet to print/card-sheet-v<rules version>.pdf (needs Chrome)"
 	@echo ""
 	@echo "Change a card in design/cards.yaml, then: make build check"
 
 build: tools/cards.js
 
-# Regenerating is cheap, so cards.js is rebuilt whenever the source is newer.
-tools/cards.js: design/cards.yaml tools/cards.mjs
+# Regenerating is cheap, so cards.js is rebuilt whenever a source is newer.
+# The rulebook is one: its rules version is stamped on every printed card.
+tools/cards.js: design/cards.yaml design/rulebook.md tools/cards.mjs
 	node tools/cards.mjs build
 
 # `make check` also runs the app's content drift test when app/ is installed;
@@ -57,5 +60,24 @@ app-check: app/node_modules build
 # The print-and-cut card sheet, for playing on a table (tools/card-sheet.html).
 sheet: build
 	open tools/card-sheet.html
+
+# The same sheet as a PDF, named for the rules version it was printed under.
+# Headless Chrome does the printing; CHROME=/path/to/chrome overrides the search.
+RULES_VERSION = $(shell sed -n 's/^Rules version:[[:space:]]*//p' design/rulebook.md)
+PDF = print/card-sheet-v$(RULES_VERSION).pdf
+
+pdf: build
+	@chrome="$(CHROME)"; \
+	for c in "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" \
+	         "/Applications/Chromium.app/Contents/MacOS/Chromium" \
+	         google-chrome chromium chromium-browser; do \
+		[ -n "$$chrome" ] && break; \
+		if [ -x "$$c" ] || command -v "$$c" >/dev/null 2>&1; then chrome="$$c"; fi; \
+	done; \
+	if [ -z "$$chrome" ]; then echo "make pdf: no Chrome found; set CHROME=/path/to/chrome" >&2; exit 1; fi; \
+	mkdir -p print; \
+	"$$chrome" --headless=new --disable-gpu --no-pdf-header-footer \
+		--print-to-pdf="$(CURDIR)/$(PDF)" "file://$(CURDIR)/tools/card-sheet.html" 2>/dev/null; \
+	echo "wrote $(PDF)"
 
 all: check app-check

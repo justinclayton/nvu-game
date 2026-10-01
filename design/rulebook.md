@@ -1,6 +1,6 @@
 # *North vs Up*: Rulebook
 
-Rules version: 0.2.6
+Rules version: 0.2.7
 
 ---
 

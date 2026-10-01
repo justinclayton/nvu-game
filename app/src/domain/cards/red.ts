@@ -158,8 +158,8 @@ export const RED: Registry = {
     },
   },
 
-  /* "Play: Gains Oomph +2 for each card Gray has played this turn. If Gray played 2 or more
-   * cards, draw 1 card." */
+  /* "Gains Oomph +2 for each card Gray plays this turn, including after this one. Play: If Gray
+   * has played 2 or more cards, draw 1 card." */
   "Rhythm & Bruise": {
     stats(state, _owner, card) {
       return { oomph: card.oomph + 2 * playedBy(state, "Gray"), scramble: card.scramble };

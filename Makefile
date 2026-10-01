@@ -11,8 +11,9 @@
 #   bin/nvu         the CLI: bin/nvu play, bin/nvu replay, bin/nvu fuzz, bin/nvu help
 #   make sheet      open the print-and-cut card sheet
 #   make pdf        print the sheet to print/card-sheet-v<rules version>.pdf
+#   make rulebook   print the rulebook to print/rulebook-v<rules version>.pdf
 
-.PHONY: help build check app app-check app-install sheet pdf all
+.PHONY: help build check app app-check app-install sheet pdf rulebook all
 default: build
 
 help:
@@ -23,6 +24,7 @@ help:
 	@echo "bin/nvu         the CLI: bin/nvu play, bin/nvu replay, bin/nvu fuzz, bin/nvu help"
 	@echo "make sheet   open the print-and-cut card sheet in a browser"
 	@echo "make pdf     print the sheet to print/card-sheet-v<rules version>.pdf (needs Chrome)"
+	@echo "make rulebook  print the rulebook to print/rulebook-v<rules version>.pdf (needs Chrome)"
 	@echo ""
 	@echo "Change a card in design/cards.yaml, then: make build check"
 
@@ -61,23 +63,36 @@ app-check: app/node_modules build
 sheet: build
 	open tools/card-sheet.html
 
-# The same sheet as a PDF, named for the rules version it was printed under.
-# Headless Chrome does the printing; CHROME=/path/to/chrome overrides the search.
+# PDFs, named for the rules version they were printed under.  Headless Chrome
+# does the printing; CHROME=/path/to/chrome overrides the search.
 RULES_VERSION = $(shell sed -n 's/^Rules version:[[:space:]]*//p' design/rulebook.md)
 PDF = print/card-sheet-v$(RULES_VERSION).pdf
+RULEBOOK_HTML = print/rulebook-v$(RULES_VERSION).html
+RULEBOOK_PDF = print/rulebook-v$(RULES_VERSION).pdf
 
-pdf: build
-	@chrome="$(CHROME)"; \
+# print_pdf <page.html> <out.pdf>
+define print_pdf
+	chrome="$(CHROME)"; \
 	for c in "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" \
 	         "/Applications/Chromium.app/Contents/MacOS/Chromium" \
 	         google-chrome chromium chromium-browser; do \
 		[ -n "$$chrome" ] && break; \
 		if [ -x "$$c" ] || command -v "$$c" >/dev/null 2>&1; then chrome="$$c"; fi; \
 	done; \
-	if [ -z "$$chrome" ]; then echo "make pdf: no Chrome found; set CHROME=/path/to/chrome" >&2; exit 1; fi; \
+	if [ -z "$$chrome" ]; then echo "make $@: no Chrome found; set CHROME=/path/to/chrome" >&2; exit 1; fi; \
 	mkdir -p print; \
 	"$$chrome" --headless=new --disable-gpu --no-pdf-header-footer \
-		--print-to-pdf="$(CURDIR)/$(PDF)" "file://$(CURDIR)/tools/card-sheet.html" 2>/dev/null; \
-	echo "wrote $(PDF)"
+		--print-to-pdf="$(CURDIR)/$(2)" "file://$(CURDIR)/$(1)" 2>/dev/null; \
+	echo "wrote $(2)"
+endef
+
+# The card sheet.
+pdf: build
+	@$(call print_pdf,tools/card-sheet.html,$(PDF))
+
+# The rulebook (design/rulebook.md), laid out by tools/rulebook.mjs.
+rulebook:
+	@node tools/rulebook.mjs $(RULEBOOK_HTML)
+	@$(call print_pdf,$(RULEBOOK_HTML),$(RULEBOOK_PDF))
 
 all: check app-check

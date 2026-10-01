@@ -13,7 +13,7 @@
 var NVU_CARDS = {
   meta: {"updated":"2026-09-23"},
   rulesVersion: "0.2.6",
-  cardListId: "0e20e58ce5ce",
+  cardListId: "ab4e94b4f4fd",
   cards: [
     {"name":"Shove","set":"official","kind":"player","owner":"Red","starter":true,"cost":1,"oomph":2,"flavor":"A quick, decisive shove to clear space.","count":4},
     {"name":"Charge In","set":"official","kind":"player","owner":"Red","starter":true,"cost":2,"oomph":4,"flavor":"Lower your shoulder and put your full momentum into it.","count":5},
@@ -35,7 +35,7 @@ var NVU_CARDS = {
     {"name":"Heavy Pockets","set":"proposed","kind":"player","owner":"Red","rarity":"Cool","cost":1,"oomph":2,"scramble":1,"flavor":"Stash the heavy salvage where it won't weigh down your swing.","text":"Shuffle 1 Stuff from your hand into your deck.","count":2},
     {"name":"Tag Team","set":"proposed","kind":"player","owner":"Red","rarity":"Cool","cost":1,"oomph":2,"scramble":2,"flavor":"Seamless hand-off between partners.","text":"If Gray played a card this turn, draw 1 card.","count":2},
     {"name":"Brute Recycle","set":"proposed","kind":"player","owner":"Red","rarity":"Cool","cost":1,"oomph":3,"flavor":"Crush outdated gear into raw momentum.","text":"Play: Scrap 1 starter card from your hand or discard pile. If you do, draw 1 card.","count":2},
-    {"name":"Rhythm & Bruise","set":"proposed","kind":"player","owner":"Red","rarity":"Cool","cost":1,"oomph":2,"flavor":"Time your heaviest strike right when Gray creates the breach.","text":"Play: Gains Oomph +2 for each card Gray has played this turn. If Gray played 2 or more cards, draw 1 card.","count":2},
+    {"name":"Rhythm & Bruise","set":"proposed","kind":"player","owner":"Red","rarity":"Cool","cost":1,"oomph":2,"flavor":"Time your heaviest strike right when Gray creates the breach.","text":"Gains Oomph +2 for each card Gray plays this turn, including after this one. Play: If Gray has played 2 or more cards, draw 1 card.","count":2},
     {"name":"Momentum Shift","set":"proposed","kind":"player","owner":"Red","rarity":"Cool","cost":1,"oomph":2,"flavor":"Keep charging forward without looking back.","text":"Play: Draw 2 cards, then Exhaust 1 card from your hand.","count":2},
     {"name":"Catch Your Breath","set":"proposed","kind":"player","owner":"Gray","rarity":"Fine","cost":1,"scramble":2,"flavor":"Pause for a second to read the room.","text":"Look at top 2 cards of any deck. Put them back in either order.","count":2},
     {"name":"Here, Catch","set":"proposed","kind":"player","owner":"Gray","rarity":"Fine","cost":1,"scramble":3,"flavor":"Toss a heavy tool over before it bogs you down.","text":"Move 1 Stuff from your hand to Red's hand.","count":2},

@@ -462,7 +462,7 @@ describe("Brute Recycle — 'Scrap 1 starter card from your hand or discard pile
   });
 });
 
-describe("Rhythm & Bruise — 'Gains Oomph +2 for each card Gray has played this turn'", () => {
+describe("Rhythm & Bruise — 'Gains Oomph +2 for each card Gray plays this turn'", () => {
   const withGrayPlays = (n: number) => {
     const state = playing({
       Red: player({

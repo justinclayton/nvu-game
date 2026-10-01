@@ -36,7 +36,7 @@ export const CARD_CONTENT = {
     {"name":"Heavy Pockets","set":"proposed","kind":"player","owner":"Red","rarity":"Cool","starter":false,"count":2,"cost":1,"oomph":2,"scramble":1,"conditionalStat":false,"text":"Shuffle 1 Stuff from your hand into your deck.","flavor":"Stash the heavy salvage where it won't weigh down your swing."},
     {"name":"Tag Team","set":"proposed","kind":"player","owner":"Red","rarity":"Cool","starter":false,"count":2,"cost":1,"oomph":2,"scramble":2,"conditionalStat":false,"text":"If Gray played a card this turn, draw 1 card.","flavor":"Seamless hand-off between partners."},
     {"name":"Brute Recycle","set":"proposed","kind":"player","owner":"Red","rarity":"Cool","starter":false,"count":2,"cost":1,"oomph":3,"scramble":0,"conditionalStat":false,"text":"Play: Scrap 1 starter card from your hand or discard pile. If you do, draw 1 card.","flavor":"Crush outdated gear into raw momentum."},
-    {"name":"Rhythm & Bruise","set":"proposed","kind":"player","owner":"Red","rarity":"Cool","starter":false,"count":2,"cost":1,"oomph":2,"scramble":0,"conditionalStat":false,"text":"Play: Gains Oomph +2 for each card Gray has played this turn. If Gray played 2 or more cards, draw 1 card.","flavor":"Time your heaviest strike right when Gray creates the breach."},
+    {"name":"Rhythm & Bruise","set":"proposed","kind":"player","owner":"Red","rarity":"Cool","starter":false,"count":2,"cost":1,"oomph":2,"scramble":0,"conditionalStat":false,"text":"Gains Oomph +2 for each card Gray plays this turn, including after this one. Play: If Gray has played 2 or more cards, draw 1 card.","flavor":"Time your heaviest strike right when Gray creates the breach."},
     {"name":"Momentum Shift","set":"proposed","kind":"player","owner":"Red","rarity":"Cool","starter":false,"count":2,"cost":1,"oomph":2,"scramble":0,"conditionalStat":false,"text":"Play: Draw 2 cards, then Exhaust 1 card from your hand.","flavor":"Keep charging forward without looking back."},
     {"name":"Catch Your Breath","set":"proposed","kind":"player","owner":"Gray","rarity":"Fine","starter":false,"count":2,"cost":1,"oomph":0,"scramble":2,"conditionalStat":false,"text":"Look at top 2 cards of any deck. Put them back in either order.","flavor":"Pause for a second to read the room."},
     {"name":"Here, Catch","set":"proposed","kind":"player","owner":"Gray","rarity":"Fine","starter":false,"count":2,"cost":1,"oomph":0,"scramble":3,"conditionalStat":false,"text":"Move 1 Stuff from your hand to Red's hand.","flavor":"Toss a heavy tool over before it bogs you down."},
@@ -93,4 +93,4 @@ export const CARD_CONTENT = {
 } as const satisfies CardContent;
 
 /** The first 12 hex of sha256 over the JSON of CARD_CONTENT above — identifies this card list. */
-export const CARD_LIST_ID = "0e20e58ce5ce";
+export const CARD_LIST_ID = "ab4e94b4f4fd";

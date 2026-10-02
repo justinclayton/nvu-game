@@ -59,4 +59,6 @@ and in A it has its own dashed panel.
 
 ## Verdict
 
-Open. The designer reacts on the issue.
+A, Workbench, ruled 2026-10-02 `[you]`: "what I was expecting, more or less". The one place is a
+new app around the table, Status the first screen, the table one tab. #246 takes the
+architecture from here.

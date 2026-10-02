@@ -268,6 +268,8 @@ export interface Resolution {
   readonly room: Room;
   /** A met challenge said `Ascend`: Cleanup runs, then the Ascending steps (rulebook, Outcome). */
   readonly ascends: boolean;
+  /** The Stat pool when Play ended, so a card that leaves the zone in Outcome (Riot Shield) doesn't drop out of what the table shows. */
+  readonly pool?: { readonly oomph: number; readonly scramble: number };
 }
 
 /**

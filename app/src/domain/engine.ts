@@ -17,6 +17,7 @@ import {
   drawTargetFor,
   exhaustXPreventedBy,
   payOptions,
+  statPool,
   thresholdIsMet,
 } from "./queries";
 import { shuffle } from "./rng";
@@ -681,6 +682,7 @@ function endPlay(state: GameState, run: Run): GameState {
       roomEnded: outcome.cleared ? "Cleared" : "Fled",
       room,
       ascends: outcome.ascends,
+      pool: statPool(state),
     },
   };
   s = playEndEffects(s, run);

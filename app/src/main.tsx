@@ -68,11 +68,27 @@ function startFromFixture(name: string): void {
   });
 }
 
+/**
+ * Dev only, throwaway: `?prototype=one-place` opens the sketch of the one
+ * place (issue #245) around a live table. Same guard and dynamic import as
+ * the fixture loader, so a production build never carries it.
+ */
+function startPrototype(): void {
+  void import("./prototype/one-place").then(({ OnePlacePrototype }) => {
+    root.render(<OnePlacePrototype />);
+  });
+}
+
 function start(): void {
   if (import.meta.env.DEV) {
-    const fixture = new URLSearchParams(window.location.search).get("fixture");
+    const params = new URLSearchParams(window.location.search);
+    const fixture = params.get("fixture");
     if (fixture !== null) {
       startFromFixture(fixture);
+      return;
+    }
+    if (params.get("prototype") === "one-place") {
+      startPrototype();
       return;
     }
   }

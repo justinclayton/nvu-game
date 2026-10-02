@@ -1,0 +1,94 @@
+{
+  "format": "nvu-run/1",
+  "exportedAt": "2026-10-02T08:04:10.771Z",
+  "cards": "0e20e58ce5ce",
+  "rules": "0.2.6",
+  "floor": 1,
+  "turn": 2,
+  "phase": "Turn Start",
+  "outcome": null,
+  "run": {
+    "seed": 12,
+    "commands": [
+      {
+        "type": "FLIP_ROOM"
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Red",
+        "cardId": "Overdrive#2",
+        "payWith": []
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Gray",
+        "cardId": "Pick The Lock#5",
+        "payWith": ["Duck Under#3", "Duck Under#2"]
+      },
+      {
+        "type": "END_PLAY"
+      },
+      {
+        "type": "FLIP_ROOM"
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Red",
+        "cardId": "Charge In#4",
+        "payWith": ["Lean In#1", "Shove#3"]
+      },
+      {
+        "type": "END_PLAY"
+      }
+    ]
+  },
+  "notes": [
+    {
+      "at": 19,
+      "text": "flagged by the chain: stall candidate, turn 1 took the room on Overdrive alone"
+    }
+  ],
+  "log": [
+    "Floor 1 is built: 10 rooms.",
+    "You are in: Flooded Ventilation Shaft.",
+    "Red draws Charge In.",
+    "Red draws Charge In.",
+    "Red draws Lean In.",
+    "Red draws Shove.",
+    "Red draws Overdrive.",
+    "Gray draws Duck Under.",
+    "Gray draws Duck Under.",
+    "Gray draws Pick The Lock.",
+    "Gray draws Duck Under.",
+    "Gray draws Pick The Lock.",
+    "Red plays Overdrive.",
+    "Red Exhausts Charge In.",
+    "Red Exhausts Overdrive.",
+    "Gray discards Duck Under from their hand.",
+    "Gray discards Duck Under from their hand.",
+    "Gray pays with Duck Under, Duck Under.",
+    "Gray plays Pick The Lock.",
+    "Scramble 4 met — Clear.",
+    "Flooded Ventilation Shaft is Cleared.",
+    "Cleanup.",
+    "Red discards Overdrive from their play zone.",
+    "Gray discards Pick The Lock from their play zone.",
+    "— end of turn 1 —",
+    "You are in: Security Turnstile.",
+    "Red draws Shove.",
+    "Gray draws Pick The Lock.",
+    "Gray draws Peek Around Corner.",
+    "Gray draws Work The Angles.",
+    "Red discards Lean In from their hand.",
+    "Red discards Shove from their hand.",
+    "Red pays with Lean In, Shove.",
+    "Red plays Charge In.",
+    "You Flee Security Turnstile.",
+    "Red Exhausts Charge In.",
+    "Gray Exhausts Pick The Lock.",
+    "Cleanup.",
+    "Red discards Charge In from their play zone.",
+    "Security Turnstile shuffles back into the Floor deck.",
+    "— end of turn 2 —"
+  ]
+}

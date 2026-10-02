@@ -137,8 +137,8 @@ function playerLines(state: GameState, c: Character): string[] {
  */
 export function shortStatusLines(state: GameState): string[] {
   const lines: string[] = [];
-  const pool = statPool(state);
-  if (state.phase === "Play" || state.playZone.length > 0) {
+  const pool = state.resolution?.pool ?? statPool(state);
+  if (state.phase === "Play" || state.playZone.length > 0 || state.resolution?.pool) {
     lines.push(`Stat pool: Oomph ${String(pool.oomph)}, Scramble ${String(pool.scramble)}`);
   }
   if (state.pending) lines.push(`Waiting on: ${state.pending.prompt}`);
@@ -178,8 +178,8 @@ export function renderTable(state: GameState, staged: readonly StagedAnswer[] = 
       `   Good Stuff ${String(state.pools.goodStuff.length)}, Bad Stuff ${String(state.pools.badStuff.length)}`,
   );
   if (state.activeRoom) lines.push(...roomLines(state, state.activeRoom));
-  const pool = statPool(state);
-  if (state.phase === "Play" || state.playZone.length > 0) {
+  const pool = state.resolution?.pool ?? statPool(state);
+  if (state.phase === "Play" || state.playZone.length > 0 || state.resolution?.pool) {
     lines.push(`Stat pool: Oomph ${String(pool.oomph)}, Scramble ${String(pool.scramble)}`);
   }
   for (const c of CHARACTERS) lines.push(...playerLines(state, c));

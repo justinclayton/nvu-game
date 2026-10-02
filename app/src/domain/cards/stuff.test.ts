@@ -378,7 +378,7 @@ describe("Grav Harness — 'One of you draws 1 card, even if their hand is full'
   });
 });
 
-describe("Riot Shield — 'If the room is Cleared, return this to your hand at the end of the turn'", () => {
+describe("Riot Shield — 'If the room is Cleared, return this to your hand at the end of the Outcome phase'", () => {
   it("comes back to hand when the room is Cleared", () => {
     // Riot Shield's Scramble 3 alone meets Sorting Room's Scramble 2 line —
     // every Challenge reads the shared pool, so it does not matter that Red

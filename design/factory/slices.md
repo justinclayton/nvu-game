@@ -2,9 +2,23 @@
 
 This is the implementation breakdown for the [factory spec](spec.md). Each slice ends in an observable task or experiment outcome, not merely a schema, adapter, or scaffold.
 
-**Status:** the designer approved publishing slices 1–5 as the first wave. Slices 6–13 remain proposals, not approved tickets. Numbers below are plan references, not GitHub issue numbers. Use a fresh parent and project; do not reuse the previous GDLC map.
+**Status:** slices 1–5 are approved and published as the first wave. Slices 6–13 remain proposals, not approved tickets. Slice numbers below are plan references, not GitHub issue numbers.
 
 **Types:** HITL requires a designer decision or real playtest. AFK implementation can proceed once its contracts and blockers are settled; it does not authorize autonomous design rulings, merges, or publication.
+
+## Published first wave
+
+[Project](https://github.com/users/justinclayton/projects/2) · [Parent #254](https://github.com/justinclayton/nvu-game/issues/254) · [Planning PR #253](https://github.com/justinclayton/nvu-game/pull/253)
+
+| Slice | Issue | Type | Blocked by |
+| --- | --- | --- | --- |
+| 1 | [#255](https://github.com/justinclayton/nvu-game/issues/255) | HITL | None |
+| 2 | [#256](https://github.com/justinclayton/nvu-game/issues/256) | AFK | #255 |
+| 3 | [#257](https://github.com/justinclayton/nvu-game/issues/257) | AFK | #256 |
+| 4 | [#258](https://github.com/justinclayton/nvu-game/issues/258) | AFK | #257 |
+| 5 | [#259](https://github.com/justinclayton/nvu-game/issues/259) | AFK | #258 |
+
+The children are native sub-issues with native blocking dependencies. Only the first human gate carries `needs-human`; blocked AFK issues do not carry `ready-for-agent`. Publication did not launch workers or change the previous project.
 
 ## Proposed slices
 
@@ -185,6 +199,6 @@ New balance metrics, numerical anomaly definitions, advanced search, additional 
 
 ## Publication and archival `[you: scope; agent: readiness handling]`
 
-Publish a fresh **Pi Game Factory** parent and project, with slices 1–5 in dependency order. Link the spec rather than copying the entire architecture into each issue. Slice 1 carries `needs-human`. Keep `ready-for-agent` off the blocked AFK issues until their prerequisites are resolved, so publication cannot fire a readiness-label watcher. Record native dependencies and do not launch implementation workers.
+The fresh **Pi Game Factory** parent/project contains only the approved first wave, linked to the spec and published in dependency order. Slice 1 carries `needs-human`. Keep `ready-for-agent` off blocked AFK issues until their prerequisites are resolved, so publication cannot fire a readiness-label watcher. The published issues have native dependencies; no implementation workers were launched.
 
 Treat old GDLC research/prototypes as historical evidence. Do not move its open tickets into the new backlog, reuse its parent, or let old routine/solver/metric assumptions become new readiness conditions. The previous project and issues stay untouched; archival requires a separate explicit approval.

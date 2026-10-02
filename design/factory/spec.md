@@ -8,7 +8,7 @@ The first software path is a manually selected GitHub issue: check its readiness
 
 The first game-design path is one experiment: record a playtest observation and approved question, prepare a candidate, collect appropriate evidence, print an identified kit, play it at a table, and record the designer's decision. Numerical balance reports are optional, explicitly limited evidence rather than a prerequisite for this loop.
 
-**Status:** accepted direction with proposed implementation details. The designer approved publishing the first five [vertical slices](slices.md); later slices remain proposals. Nothing described as a new factory capability is implemented yet.
+**Status:** accepted direction with proposed implementation details. The first five [vertical slices](slices.md) are published under [parent #254](https://github.com/justinclayton/nvu-game/issues/254) in [Pi Game Factory](https://github.com/users/justinclayton/projects/2); later slices remain proposals. Nothing described as a new factory capability is implemented yet.
 
 **Provenance:** `[you]` records decisions made in this conversation. `[agent-proposed]` marks details still to approve. The previous GDLC effort is historical input, not this effort's backlog. Sources are the [SSSF audit](../research/03-sssf-source-audit.md), [factory recommendations](../research/04-pi-game-development-factory.md), the previous [decision map](https://github.com/justinclayton/nvu-game/issues/233), and the [bounded legacy decision audit](../research/05-previous-gdlc-decisions.md). Historical decisions do not automatically become new implementation requirements.
 
@@ -144,4 +144,4 @@ These are a small design gate for the first implementation wave, not a requireme
 
 Advanced search, exhaustive seed solving, further bots, personas, Jev triage/scoring, continuous candidate mutation, full analytics, remote access, and production-specific publishing extensions are not prerequisites for the first complete paths. Research and prototypes can earn them a place later; none should silently enter the critical path.
 
-Publish the approved first wave under a fresh Pi Game Factory parent and project. Publishing the plan does not launch workers or authorize archival of the previous project; that remains a separate explicit action.
+The first wave is tracked in the new Pi Game Factory parent/project, with its issue index in the [slice plan](slices.md#published-first-wave). No implementation workers were launched. The previous project and issues remain untouched; archival requires a separate explicit approval.

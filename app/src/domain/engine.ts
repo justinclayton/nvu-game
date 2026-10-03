@@ -6,7 +6,7 @@
  * in the state, so a run replays exactly from its seed and its command log.
  *
  * Section numbers point at design/rulebook.md, rules version
- * 0.2.8, which is the authority.
+ * 0.2.9, which is the authority.
  */
 
 import { behaviourOf, type BehaviourContext, type ChoiceAnswer } from "./cards/behaviours";
@@ -55,7 +55,7 @@ import {
   drawOne,
   discard,
   exhaustFromDeck,
-  discardFromHand,
+  payCostFromHand,
   earnGoodStuff,
   gainToDiscard,
   giveGoodStuff,
@@ -535,7 +535,7 @@ function playCard(
 
   // Each Turn, Play: you pay in *other* cards from your own hand. Red never pays for Gray.
   const from = run.events.length;
-  s = discardFromHand(s, c, payment, run.events);
+  s = payCostFromHand(s, c, payment);
   if (payment.length > 0) {
     run.events.push({ type: "COST_PAID", character: c, cards: payment });
   }

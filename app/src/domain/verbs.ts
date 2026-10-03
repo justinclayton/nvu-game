@@ -162,6 +162,16 @@ export function exhaustFromDeck(
   return next;
 }
 
+/**
+ * Rulebook, Each Turn, Play: the cards you pay with go from hand to your Exhaust pile, gone for
+ * the run. No event: `COST_PAID` says so.
+ */
+export function payCostFromHand(state: GameState, c: Character, cards: readonly Card[]): GameState {
+  const next = takeFrom(state, c, "hand", cards);
+  const p = playerOf(next, c);
+  return withPlayer(next, c, { ...p, exhaust: [...p.exhaust, ...cards] });
+}
+
 /** Rulebook, Card anatomy: Keywords: `Discard X cards from your hand` — a cost you chose. */
 export function discardFromHand(
   state: GameState,

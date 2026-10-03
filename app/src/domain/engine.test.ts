@@ -130,6 +130,31 @@ describe("Play", () => {
     if (!rejected.ok) expect(rejected.reason.code).toBe("WrongPayment");
   });
 
+  describe("'move that number of cards from your hand to your Exhaust pile' — paying", () => {
+    const paidWith = (payerName: string) => {
+      const state = playState({
+        Red: player({ deck: pile("Shove", 5), hand: [card("Charge In"), card(payerName), card(payerName)] }),
+      });
+      const charge = handCard(state, "Red", "Charge In");
+      const payers = state.Red.hand.filter((c) => c.name === payerName);
+      const { state: next } = must(state, {
+        type: "PLAY_CARD",
+        character: "Red",
+        cardId: charge.id,
+        payWith: payers.map((c) => c.id),
+      });
+      return { next, payers, charge };
+    };
+
+    it.each([["Shove"], ["Torn Seal"], ["Crowbar"]])("Exhausts %s paid as a cost", (payer) => {
+      const { next, payers, charge } = paidWith(payer);
+      expect(next.Red.exhaust.map((c) => c.id)).toEqual(payers.map((c) => c.id));
+      expect(next.Red.discard).toHaveLength(0);
+      expect(next.Red.hand).toHaveLength(0);
+      expect(next.playZone.map((z) => z.card.id)).toEqual([charge.id]);
+    });
+  });
+
   it("'you pay in other cards from your own hand' — never with the card itself", () => {
     const state = playState({
       Red: player({ deck: pile("Shove", 5), hand: [card("Shove"), card("Shove")] }),
@@ -234,8 +259,9 @@ describe("Cleanup", () => {
     ]);
     expect(next.playZone).toEqual([]);
     // The Shove played, then discarded from the play zone; the Charge In was
-    // discarded earlier, to pay its cost.
-    expect(next.Red.discard).toHaveLength(2);
+    // Exhausted earlier, to pay its cost.
+    expect(next.Red.discard).toHaveLength(1);
+    expect(next.Red.exhaust.map((c) => c.name)).toContain("Charge In");
   });
 
   it("'the hand carries over untouched'", () => {

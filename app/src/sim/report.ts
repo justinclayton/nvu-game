@@ -34,15 +34,15 @@ export interface CardStat {
   readonly played: number;
   /** Taken from a reward pool at Ascend, or dealt as Stuff — either way, into a character's cards. */
   readonly taken: number;
-  /** Discarded as another card's Play cost — the only way Bad Stuff with no reason to play it ever leaves a hand. */
+  /** Exhausted as another card's Play cost — the only way Bad Stuff with no reason to play it ever leaves a hand. */
   readonly paid: number;
 }
 
 /**
  * Where one character's cards went on one floor: Exhausted (`CARD_EXHAUSTED`),
  * Scrapped (`CARD_SCRAPPED`), and paid as a Play cost (`COST_PAID` —
- * discarded, not lost). Only the first two shrink the live deck (deck + hand
- * + discard) — paying a cost does not.
+ * Exhausted too, but counted apart from the cards a card's own text Exhausts). All
+ * three shrink the live deck (deck + hand + discard).
  */
 export interface FloorLossRow {
   readonly floor: number;

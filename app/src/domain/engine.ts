@@ -6,7 +6,7 @@
  * in the state, so a run replays exactly from its seed and its command log.
  *
  * Section numbers point at design/rulebook.md, rules version
- * 0.2.5, which is the authority.
+ * 0.2.7, which is the authority.
  */
 
 import { behaviourOf, type BehaviourContext, type ChoiceAnswer } from "./cards/behaviours";
@@ -17,6 +17,7 @@ import {
   drawTargetFor,
   exhaustXPreventedBy,
   payOptions,
+  statPool,
   thresholdIsMet,
 } from "./queries";
 import { shuffle } from "./rng";
@@ -681,6 +682,7 @@ function endPlay(state: GameState, run: Run): GameState {
       roomEnded: outcome.cleared ? "Cleared" : "Fled",
       room,
       ascends: outcome.ascends,
+      pool: statPool(state),
     },
   };
   s = playEndEffects(s, run);

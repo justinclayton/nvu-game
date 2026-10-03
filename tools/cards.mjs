@@ -29,6 +29,7 @@ const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 const YAML = join(ROOT, "design/cards.yaml");
 const OUT = join(ROOT, "tools/cards.js");
 const OUT_TS = join(ROOT, "app/src/content/cards.generated.ts");
+const RULEBOOK = join(ROOT, "design/rulebook.md");
 const SETS = new Set(["official", "proposed"]);
 
 /* ------------------------------------------------------------------ parser
@@ -246,6 +247,13 @@ function ordered(card) {
   return out;
 }
 
+/* The rulebook's "Rules version:" line; the printed sheet stamps it on every card. */
+function rulesVersion() {
+  const m = readFileSync(RULEBOOK, "utf8").match(/^Rules version:\s*(\S+)/m);
+  if (!m) throw new Error('design/rulebook.md has no "Rules version:" line');
+  return m[1];
+}
+
 function generate(doc) {
   const body = doc.cards.map((c) => "    " + JSON.stringify(ordered(c))).join(",\n");
   return `/* GENERATED FILE — DO NOT EDIT.
@@ -262,6 +270,8 @@ function generate(doc) {
  */
 var NVU_CARDS = {
   meta: ${JSON.stringify(doc.meta)},
+  rulesVersion: ${JSON.stringify(rulesVersion())},
+  cardListId: ${JSON.stringify(cardListId(structure(doc)))},
   cards: [
 ${body}
   ]
@@ -543,6 +553,7 @@ function baseContext(cardsJs) {
     Math, JSON, Date, parseInt, parseFloat, isNaN,
     String, Number, Array, Object, Boolean, setTimeout,
     localStorage: { getItem: () => null, setItem() { } },
+    location: { search: "" },
     document: {
       getElementById: (id) => (store[id] = store[id] || stubEl()),
       querySelector: stubEl, createElement: stubEl,
@@ -562,11 +573,16 @@ function checkRenders(doc, cardsJs) {
   try {
     const sheet = readFileSync(join(ROOT, "tools/card-sheet.html"), "utf8");
     const { ctx, store } = baseContext(cardsJs);
+    runInContext(readFileSync(join(ROOT, "tools/card-backs.js"), "utf8"), ctx);
     runInContext(sheet.match(/<script>\n"use strict";([\s\S]*?)<\/script>/)[1], ctx);
     const html = store.sheets.innerHTML;
-    const drawn = (html.match(/class="card /g) || []).length;
+    const drawn = (html.match(/class="card (?!back|blank)/g) || []).length;
+    const backs = (html.match(/class="card back"/g) || []).length;
     if (drawn !== totalWithCopies) {
       problems.push(`tools/card-sheet.html renders ${drawn} cards, not ${totalWithCopies}`);
+    }
+    if (backs !== drawn) {
+      problems.push(`tools/card-sheet.html renders ${backs} backs for ${drawn} fronts`);
     }
   } catch (e) {
     problems.push(`tools/card-sheet.html failed to render: ${e.message}`);

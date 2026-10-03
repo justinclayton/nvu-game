@@ -80,7 +80,7 @@ export const STUFF: Registry = {
       }
       return ask(state, {
         kind: "ChooseCharacter",
-        prompt: "Heal which character?",
+        prompt: "Choose a character.",
         options: eligible,
         source: source(ctx, "stich-em-ups-character"),
       });
@@ -132,7 +132,7 @@ export const STUFF: Registry = {
     },
   },
 
-  /* "If the room is Cleared, return this card to your hand at the end of the turn." */
+  /* "If the room is Cleared, return this card to your hand at the end of the Outcome phase." */
   "Riot Shield": {
     onPlayEnd(state, ctx) {
       if (state.resolution?.roomEnded !== "Cleared") return nothing(state);

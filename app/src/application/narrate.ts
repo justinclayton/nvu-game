@@ -22,7 +22,7 @@ export function describeEvent(event: DomainEvent): string {
     case "CARD_PLAYED":
       return `${event.character} plays ${event.card.name}.`;
     case "COST_PAID":
-      return `${event.character} pays with ${event.cards.map((c) => c.name).join(", ")}.`;
+      return `${event.character} pays with ${event.cards.map((c) => c.name).join(", ")}, Exhausting ${event.cards.length === 1 ? "it" : "them"}.`;
     case "CARD_DISCARDED":
       return `${event.character} discards ${event.card.name} from their ${event.from === "playZone" ? "play zone" : event.from}.`;
     case "CARD_SCRAPPED":

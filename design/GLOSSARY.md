@@ -77,7 +77,7 @@ The border on a Character or Good Stuff card — `Fine`, `Cool`, or `Woah` — w
 
 **Cost**
 
-The number of cards a player must discard from their hand to play a card. A Cost of 0 or less means the card is played for free.
+The number of cards a player must Exhaust from their hand to play a card (the paid cards go to their Exhaust pile). A Cost of 0 or less means the card is played for free.
 
 **Cleared**
 
@@ -133,7 +133,7 @@ The turn phase where players take turns playing a card from their hand into thei
 
 **Discard**
 
-To move a card to its owner's discard pile, from wherever it was: paying a Cost, the `Discard X cards from your hand` keyword, the play zone at Cleanup, or the hand of a character going Down.
+To move a card to its owner's discard pile, from wherever it was: the `Discard X cards from your hand` keyword, the play zone at Cleanup, or the hand of a character going Down.
 
 **Discard pile**
 
@@ -145,7 +145,7 @@ The keyword `Exhaust X`, also written `Exhaust X cards from your deck`: move the
 
 **Exhaust pile**
 
-A player's face-up pile of cards Exhausted off their deck. Permanent: unlike the discard pile, nothing here ever returns.
+A player's face-up pile of cards Exhausted off their deck, or from their hand to pay a Cost. Permanent: unlike the discard pile, nothing here ever returns.
 
 **Peek**
 

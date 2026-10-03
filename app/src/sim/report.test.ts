@@ -8,7 +8,7 @@ import { buildReport } from "./report";
 import { simulate } from "./run";
 
 const FROM = 1;
-const SEEDS = 5;
+const SEEDS = 20;
 
 describe("buildReport", () => {
   it("totals play, take and paid-as-cost events that match the run's own event log", () => {

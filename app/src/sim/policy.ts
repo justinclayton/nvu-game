@@ -109,7 +109,7 @@ function effectsValue(effects: readonly RoomEffect[]): number {
  * The permanent loss this card's own printed text would cost right now: a
  * bare `Exhaust X` line (Overdrive, Reckless Swing, Reckless, Panic), unless
  * this character holds something that stops it (Zen Mode). Payment cost is
- * not part of this — paying only discards, it does not lose a card for good.
+ * not part of this: the payers are chosen by `keepValue`, not charged to the card.
  */
 function exhaustCost(state: GameState, character: Character, card: Card): number {
   const x = behaviourOf(card.name)?.exhaustX ?? 0;

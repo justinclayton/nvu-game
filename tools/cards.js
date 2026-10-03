@@ -12,7 +12,7 @@
  */
 var NVU_CARDS = {
   meta: {"updated":"2026-09-23"},
-  rulesVersion: "0.2.7",
+  rulesVersion: "0.2.8",
   cardListId: "19975303a535",
   cards: [
     {"name":"Shove","set":"official","kind":"player","owner":"Red","starter":true,"cost":1,"oomph":2,"flavor":"A quick, decisive shove to clear space.","count":4},

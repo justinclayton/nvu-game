@@ -1,0 +1,18 @@
+#!/bin/sh
+# The generated card modules merge as "keep ours" (see .gitattributes), so after
+# a merge they can be stale. Regenerate them from the merged design/cards.yaml.
+# If that changed anything, stage it and refuse this commit: git ignores index
+# changes a pre-merge-commit hook makes, so the merge is finished by running
+# `git commit` once more, and the second run finds nothing left to regenerate.
+# If cards.yaml itself is conflicted the build fails and the commit is refused.
+[ -f tools/cards.mjs ] || exit 0
+gen="tools/cards.js app/src/content/cards.generated.ts"
+node tools/cards.mjs build || exit 1
+if ! git diff --quiet -- $gen; then
+  git add $gen || exit 1
+  echo "Regenerated the card modules from the merged design/cards.yaml and staged them." >&2
+  echo "Run 'git commit' again to finish the merge." >&2
+  exit 1
+fi
+node tools/cards.mjs check || exit 1
+exec node tools/check-rules-version.mjs --staged

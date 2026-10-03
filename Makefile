@@ -55,9 +55,12 @@ app/node_modules: app/package.json app/package-lock.json
 
 # Also turns on .githooks/pre-commit, which refuses a commit while the card
 # list has drifted or the rulebook changed without a higher Rules version.
-# Worktrees share this setting, so one install covers them all.
+# Also registers the merge driver .gitattributes names for the generated card
+# modules: it keeps our side, and .githooks/pre-merge-commit regenerates them.
+# Worktrees share these settings, so one install covers them all.
 app-install: app/node_modules
 	git config core.hooksPath .githooks
+	git config merge.cards-generated.driver true
 
 app: app/node_modules build
 	bin/nvu web

@@ -139,6 +139,51 @@ describe("greedy", () => {
     expect(chosen).toEqual({ type: "CHOOSE_CARDS", cardIds: [] });
   });
 
+  describe("a ChooseDraw", () => {
+    const asked = (red: GameState["Red"], count = 1): GameState =>
+      rig({
+        phase: "Play",
+        Red: red,
+        pending: {
+          kind: "ChooseDraw",
+          prompt: "Draw?",
+          options: Array.from({ length: count }, (_, i) => ({ character: "Red", count: i + 1 })),
+          source: null,
+        },
+      });
+    const choose = (state: GameState) => greedyPolicy.choose(state, legalCommands(state), policySeed(1))[0];
+
+    it("draws when there is a card to draw", () => {
+      resetRig();
+      expect(choose(asked(player({ deck: pile("Shove", 3) })))).toEqual({
+        type: "CHOOSE_DRAW",
+        character: "Red",
+        count: 1,
+      });
+    });
+
+    it("draws from the discard pile when the deck is empty", () => {
+      resetRig();
+      expect(choose(asked(player({ deck: [], discard: pile("Shove", 2) })))).toMatchObject({ count: 1 });
+    });
+
+    it("declines when the draw would put it Down", () => {
+      resetRig();
+      expect(choose(asked(player({ deck: [], discard: [] })))).toEqual({
+        type: "CHOOSE_DRAW",
+        character: null,
+        count: 0,
+      });
+    });
+
+    it("draws as many of 'up to 2' as the deck and discard can give without going Down", () => {
+      resetRig();
+      expect(choose(asked(player({ deck: pile("Shove", 5) }), 2))).toMatchObject({ count: 2 });
+      expect(choose(asked(player({ deck: pile("Shove", 1) }), 2))).toMatchObject({ count: 1 });
+      expect(choose(asked(player({ deck: [], discard: [] }), 2))).toMatchObject({ character: null });
+    });
+  });
+
   it("pays with the cards worth least: Bad Stuff first, then a card that adds nothing toward the line", () => {
     resetRig();
     const chargeIn = card("Charge In"); // cost 2, oomph 4 — clears a 4-Oomph line alone

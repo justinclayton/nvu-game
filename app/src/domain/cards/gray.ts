@@ -3,7 +3,7 @@
 import { playedBy } from "../queries";
 import { PILES, type Character, type DomainEvent, type Pending, type Pile } from "../types";
 import {
-  drawOne,
+  discard,
   grantPlayDiscount,
   moveToHand,
   pileCards,
@@ -11,10 +11,14 @@ import {
   shuffleIntoDeck,
   takeFrom,
   withPile,
+  withPlayer,
 } from "../verbs";
 import {
   ask,
+  askLater,
   done,
+  drawnAs,
+  drawQuestion,
   nothing,
   source,
   type BehaviourContext,
@@ -63,6 +67,47 @@ function peek(depth: number): CardBehaviour {
   };
 }
 
+/**
+ * Rulebook, Keywords: `Scry X` — look at the top X cards of your own deck,
+ * discard any number of them, put the rest back in the same order. Every
+ * printed Scry is Scry 1, so the choice is the one card or none. A short or
+ * empty deck looks at what is there; nothing reshuffles (Scry is not a draw).
+ */
+function scry(): CardBehaviour {
+  return {
+    onPlay(state, ctx) {
+      const top = playerOf(state, ctx.character).deck.slice(0, 1);
+      if (top.length === 0) return nothing(state);
+      return ask(
+        state,
+        {
+          kind: "ChooseCards",
+          prompt: `Scry 1: discard ${top[0]?.name ?? "it"}, or leave it on top?`,
+          character: ctx.character,
+          options: top,
+          count: 1,
+          optional: true,
+          source: source(ctx, "scry"),
+        },
+        [{ type: "CARDS_SCRIED", character: ctx.character, cards: top }],
+      );
+    },
+    onChoice(answer, state, ctx) {
+      if (answer.kind !== "cards") return nothing(state);
+      const events: DomainEvent[] = [];
+      const p = playerOf(state, ctx.character);
+      const gone = new Set(answer.cards.map((c) => c.id));
+      const lifted = withPlayer(state, ctx.character, {
+        ...p,
+        deck: p.deck.filter((c) => !gone.has(c.id)),
+      });
+      let next = lifted;
+      for (const card of answer.cards) next = discard(next, ctx.character, card, "deck", events);
+      return done(next, events);
+    },
+  };
+}
+
 /** Shared behaviour: shuffle a chosen Stuff card from one character's hand into their own deck. */
 function shuffleStuffFromHand(whose: (ctx: BehaviourContext) => Character): CardBehaviour {
   return {
@@ -91,8 +136,8 @@ function shuffleStuffFromHand(whose: (ctx: BehaviourContext) => Character): Card
 }
 
 export const GRAY: Registry = {
-  /* "Peek 1." */
-  "Peek Around Corner": peek(1),
+  /* "Scry 1." */
+  "Peek Around Corner": scry(),
 
   /* "Look at top 2 cards of any deck. Put them back in either order." */
   "Catch Your Breath": peek(2),
@@ -172,16 +217,28 @@ export const GRAY: Registry = {
   /* "Shuffle 1 Stuff from Red's hand into Red's deck." */
   "I'll Take That": shuffleStuffFromHand(() => "Red"),
 
-  /* "Every time Red plays a card this turn, draw 1 card."
+  /* "Every time Red plays a card this turn, you may draw 1 card."
    *
-   * A card-driven exception to Play's no-draw rule. */
+   * A card-driven exception to Play's no-draw rule. A reaction cannot suspend, so each Red play
+   * queues the question and the engine asks it once the play is done (`TurnRecord.questions`). */
   "Covering Fire": {
     onEvent(event, state, ctx) {
       if (ctx.zone !== "playZone") return nothing(state);
       if (event.type !== "CARD_PLAYED" || event.character !== "Red") return nothing(state);
-      const events: DomainEvent[] = [];
-      return done(drawOne(state, ctx.character, events), events);
+      if (playerOf(state, ctx.character).down) return nothing(state);
+      return done(
+        askLater(
+          state,
+          drawQuestion(
+            ctx,
+            "covering-fire",
+            `Covering Fire: Red played ${event.card.name}. Draw 1 card?`,
+            ctx.character,
+          ),
+        ),
+      );
     },
+    onChoice: (answer, state) => drawnAs(answer, state),
   },
 
   /* "The next card Red plays this turn costs 1 fewer card to play." */
@@ -191,13 +248,15 @@ export const GRAY: Registry = {
     },
   },
 
-  /* "Play: Draw 1 card. If Red has played a card this turn, draw 1 additional card." */
+  /* "Play: You may draw 1 card. If Red has played a card this turn, you may draw 1 more."
+   *
+   * One question: with Red's play behind it, the two optional draws come to "up to 2". */
   "Synergy Link": {
     onPlay(state, ctx) {
-      const events: DomainEvent[] = [];
-      let s = drawOne(state, ctx.character, events);
-      if (playedBy(s, "Red") > 0) s = drawOne(s, ctx.character, events);
-      return done(s, events);
+      const max = playedBy(state, "Red") > 0 ? 2 : 1;
+      const prompt = max === 2 ? "Draw up to 2 cards?" : "Draw 1 card?";
+      return ask(state, drawQuestion(ctx, "synergy-link", prompt, ctx.character, max));
     },
+    onChoice: (answer, state) => drawnAs(answer, state),
   },
 };

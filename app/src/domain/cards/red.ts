@@ -4,14 +4,14 @@ import type { DomainEvent } from "../types";
 import { playedBy } from "../queries";
 import {
   bankNextPlayScramble,
-  drawOne,
+  drawCards,
   exhaustFromHand,
   playerOf,
   scrap,
   shuffleIntoDeck,
   takeFrom,
 } from "../verbs";
-import { ask, done, nothing, source, type Registry } from "./behaviour";
+import { ask, done, drawnAs, drawQuestion, nothing, source, type Registry } from "./behaviour";
 
 export const RED: Registry = {
   /* "Exhaust 2." */
@@ -33,13 +33,13 @@ export const RED: Registry = {
     },
   },
 
-  /* "If Gray played a card this turn, draw 1 card." */
+  /* "If Gray played a card this turn, you may draw 1 card." */
   "Tag Team": {
     onPlay(state, ctx) {
       if (playedBy(state, "Gray") === 0) return nothing(state);
-      const events: DomainEvent[] = [];
-      return done(drawOne(state, ctx.character, events), events);
+      return ask(state, drawQuestion(ctx, "tag-team", "Draw 1 card?", ctx.character));
     },
+    onChoice: (answer, state) => drawnAs(answer, state),
   },
 
   /* "Shuffle a Red card from your Exhaust pile into your deck."
@@ -129,7 +129,7 @@ export const RED: Registry = {
     },
   },
 
-  /* "Play: Scrap 1 starter card from your hand or discard pile. If you do, draw 1 card." */
+  /* "Play: Scrap 1 starter card from your hand or discard pile. If you do, you may draw 1 card." */
   "Brute Recycle": {
     onPlay(state, ctx) {
       const p = playerOf(state, ctx.character);
@@ -146,6 +146,7 @@ export const RED: Registry = {
       });
     },
     onChoice(answer, state, ctx) {
+      if (answer.kind === "draw") return drawnAs(answer, state);
       if (answer.kind !== "cards") return nothing(state);
       const events: DomainEvent[] = [];
       const inHand = playerOf(state, ctx.character).hand;
@@ -154,46 +155,60 @@ export const RED: Registry = {
         const pile = inHand.some((c) => c.id === card.id) ? "hand" : "discard";
         s = scrap(takeFrom(s, ctx.character, pile, [card]), ctx.character, card, events);
       }
-      return done(drawOne(s, ctx.character, events), events);
+      return ask(
+        s,
+        drawQuestion(ctx, "brute-recycle-draw", "Draw 1 card?", ctx.character),
+        events,
+      );
     },
   },
 
   /* "Oomph equal to 2 times the number of cards Gray has played this turn. Play: If Gray has
-   * played 2 or more cards, draw 1 card." */
+   * played 2 or more cards, you may draw 1 card." */
   "Rhythm & Bruise": {
     stats(state, _owner, card) {
       return { oomph: card.oomph + 2 * playedBy(state, "Gray"), scramble: card.scramble };
     },
     onPlay(state, ctx) {
       if (playedBy(state, "Gray") < 2) return nothing(state);
-      const events: DomainEvent[] = [];
-      return done(drawOne(state, ctx.character, events), events);
+      return ask(state, drawQuestion(ctx, "rhythm-and-bruise", "Draw 1 card?", ctx.character));
     },
+    onChoice: (answer, state) => drawnAs(answer, state),
   },
 
-  /* "Play: Draw 2 cards, then Exhaust 1 card from your hand." */
+  /* "Play: You may draw up to 2 cards, then Exhaust 1 card from your hand."
+   *
+   * Only the draw is optional: the Exhaust happens whether or not any card was drawn. */
   "Momentum Shift": {
     onPlay(state, ctx) {
-      const events: DomainEvent[] = [];
-      let s = drawOne(state, ctx.character, events);
-      s = drawOne(s, ctx.character, events);
-      const options = playerOf(s, ctx.character).hand;
-      if (s.phase === "GameOver" || options.length === 0) return done(s, events);
       return ask(
-        s,
-        {
-          kind: "ChooseCards",
-          prompt: "Exhaust which card from your hand?",
-          character: ctx.character,
-          options,
-          count: 1,
-          optional: false,
-          source: source(ctx, "momentum-shift"),
-        },
-        events,
+        state,
+        drawQuestion(ctx, "momentum-shift-draw", "Draw up to 2 cards?", ctx.character, 2),
       );
     },
     onChoice(answer, state, ctx) {
+      if (answer.kind === "draw") {
+        const events: DomainEvent[] = [];
+        const s =
+          answer.character === null
+            ? state
+            : drawCards(state, answer.character, answer.count, events);
+        const options = playerOf(s, ctx.character).hand;
+        if (s.phase === "GameOver" || options.length === 0) return done(s, events);
+        return ask(
+          s,
+          {
+            kind: "ChooseCards",
+            prompt: "Exhaust which card from your hand?",
+            character: ctx.character,
+            options,
+            count: 1,
+            optional: false,
+            source: source(ctx, "momentum-shift"),
+          },
+          events,
+        );
+      }
       if (answer.kind !== "cards") return nothing(state);
       const events: DomainEvent[] = [];
       return done(exhaustFromHand(state, ctx.character, answer.cards, events), events);

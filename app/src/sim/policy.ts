@@ -377,6 +377,24 @@ function choosePending(state: GameState, legal: readonly Command[]): Command {
     if (found) return found;
   }
 
+  if (pending.kind === "ChooseDraw") {
+    // Draw as much as is on offer, unless the draw would run a deck and its discard pile dry
+    // and put the character Down.
+    const safe = pending.options
+      .filter((o) => {
+        const p = playerOf(state, o.character);
+        return o.count <= p.deck.length + p.discard.length;
+      })
+      .sort((a, b) => b.count - a.count || a.character.localeCompare(b.character));
+    const wanted = safe[0];
+    const found = legal.find((c) =>
+      wanted
+        ? c.type === "CHOOSE_DRAW" && c.character === wanted.character && c.count === wanted.count
+        : c.type === "CHOOSE_DRAW" && c.character === null,
+    );
+    if (found) return found;
+  }
+
   if (pending.kind === "OrderCards") {
     const desiredIds = pending.cards.map((c) => c.id);
     const found = legal.find((c) => c.type === "ORDER_CARDS" && cardsDeepEqual(c.cardIds, desiredIds));

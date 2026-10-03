@@ -39,6 +39,10 @@ function nextCommand(state: GameState): Command {
           type: "CHOOSE_CARDS",
           cardIds: pending.options.slice(0, pending.count).map((c) => c.id),
         };
+      case "ChooseDraw": {
+        const first = pending.options[0];
+        return { type: "CHOOSE_DRAW", character: first?.character ?? null, count: first?.count ?? 0 };
+      }
       case "OrderCards":
         return { type: "ORDER_CARDS", cardIds: pending.cards.map((c) => c.id) };
       case "TakeReward":

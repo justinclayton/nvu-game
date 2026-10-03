@@ -12,7 +12,7 @@ import { shuffle } from "./rng";
 import type { Card, DomainEvent, GameState, PlayerState, Room, TurnRecord } from "./types";
 
 /** The rulebook this engine implements (design/rulebook.md). See #83. */
-export const RULES_VERSION = "0.2.8";
+export const RULES_VERSION = "0.2.10";
 
 /** The tenth floor is the roof: clearing it wins the run (rulebook, Winning and losing). */
 export const TOP_FLOOR = 10;
@@ -168,6 +168,7 @@ export const emptyTurnRecord = (): TurnRecord => ({
   freePlays: 0,
   goodStuffTaken: { Red: 0, Gray: 0 },
   goodStuffOwed: { Red: 0, Gray: 0 },
+  questions: [],
   fired: [],
   playDiscount: { Red: 0, Gray: 0 },
   nextPlayScramble: { Red: 0, Gray: 0 },

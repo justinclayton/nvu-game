@@ -100,6 +100,7 @@ The moves, one per engine command: `[agent, accepted]`
 | `play choose Red` | `CHOOSE_CHARACTER` |
 | `play choose Floor deck` | `CHOOSE_PILE` |
 | `play choose Rope Flare`, `play choose none` | `CHOOSE_CARDS`; also which piece of a Good Stuff spread to keep |
+| `play choose 2`, `play choose Red 1`, `play choose none` | `CHOOSE_DRAW`: a card's "you may draw", with who and how many left out when only one answer is on offer; `none` draws nothing `[agent]` rules 0.2.10 |
 | `play order Rope Flare Shove` | `ORDER_CARDS`, top first |
 | `play take Zen Mode`, `play take none`, `play skip` | a room's card reward: `TAKE_REWARD`, one of the 3 revealed or none. A bare `play take` works when only one was revealed. `[agent]` rules 0.2.5 |
 | `play take Zen Mode`, `play take none` | one character's Ascend answer, composed into `ASCEND`, see below |

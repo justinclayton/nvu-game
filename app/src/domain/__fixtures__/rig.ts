@@ -194,3 +194,10 @@ export const goingDown = (hand: readonly Card[] = []): GameState =>
     Red: player({ deck: [], discard: [], hand }),
     Gray: player({ deck: pile("Duck Under", 4) }),
   });
+
+/** Answer a "you may draw" question by taking the draw: `c` draws `count`. */
+export const drawing = (c: Character, count: number): Command =>
+  ({ type: "CHOOSE_DRAW", character: c, count }) as const;
+
+/** Answer a "you may draw" question by drawing nothing. */
+export const noDraw: Command = { type: "CHOOSE_DRAW", character: null, count: 0 };

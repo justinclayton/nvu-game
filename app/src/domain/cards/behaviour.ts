@@ -4,6 +4,7 @@
  * directly, so a card effect announces itself with the same events a rule would.
  */
 
+import { drawCards } from "../verbs";
 import type {
   Card,
   Character,
@@ -31,6 +32,13 @@ export type ChoiceAnswer =
   | { readonly kind: "pile"; readonly tag: string; readonly pile: Pile }
   | { readonly kind: "stat"; readonly tag: string; readonly stat: Stat }
   | { readonly kind: "cards"; readonly tag: string; readonly cards: readonly Card[] }
+  | {
+      readonly kind: "draw";
+      readonly tag: string;
+      /** Who draws; null when the draw was declined. */
+      readonly character: Character | null;
+      readonly count: number;
+    }
   | { readonly kind: "order"; readonly tag: string; readonly cards: readonly (Card | Room)[] };
 
 /**
@@ -122,4 +130,39 @@ export const source = (ctx: BehaviourContext, tag: string): PendingSource => ({
   card: ctx.card,
   character: ctx.character,
   tag,
+});
+
+/* ------------------------------------------------------------ "you may draw" */
+
+/**
+ * Rulebook, Keywords: `you may draw` — a draw printed on a card is optional, so
+ * it is a question: draw 1, up to `max`, or none. `drawer` is who draws (the
+ * partner, for Emergency Breaker).
+ */
+export const drawQuestion = (
+  ctx: BehaviourContext,
+  tag: string,
+  prompt: string,
+  drawer: Character,
+  max = 1,
+): Pending => ({
+  kind: "ChooseDraw",
+  prompt,
+  options: Array.from({ length: max }, (_, i) => ({ character: drawer, count: i + 1 })),
+  source: source(ctx, tag),
+});
+
+/** Carry out a `draw` answer: the chosen character draws the chosen count, or nothing happens. */
+export function drawnAs(answer: ChoiceAnswer, state: GameState): StepResult {
+  if (answer.kind !== "draw" || answer.character === null || answer.count === 0) {
+    return nothing(state);
+  }
+  const events: DomainEvent[] = [];
+  return done(drawCards(state, answer.character, answer.count, events), events);
+}
+
+/** A this-turn trigger cannot suspend, so it leaves its question for the engine to ask when nothing else is waiting. */
+export const askLater = (state: GameState, pending: Pending): GameState => ({
+  ...state,
+  thisTurn: { ...state.thisTurn, questions: [...state.thisTurn.questions, pending] },
 });

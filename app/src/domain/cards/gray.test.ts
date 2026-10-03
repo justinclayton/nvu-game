@@ -213,13 +213,16 @@ describe("In Step — 'Scramble equal to 2 times the number of cards Red has pla
   it("reads Red's side of the play zone", () => {
     const state = playing({
       Red: player({ deck: pile("Shove", 4), hand: [card("Pry Bar"), card("Coil Of Cable")] }),
-      Gray: player({ deck: pile("Duck Under", 4), hand: [card("In Step"), card("Duck Under")] }),
+      Gray: player({
+        deck: pile("Duck Under", 4),
+        hand: [card("In Step"), card("Duck Under"), card("Duck Under")],
+      }),
     });
     const one = must(state, {
       type: "PLAY_CARD",
       character: "Gray",
       cardId: handCard(state, "Gray", "In Step").id,
-      payWith: [handCard(state, "Gray", "Duck Under").id],
+      payWith: state.Gray.hand.filter((c) => c.name === "Duck Under").map((c) => c.id),
     });
     expect(statPool(one.state, "Gray").scramble).toBe(0);
 

@@ -3,6 +3,7 @@
 import { playedBy } from "../queries";
 import { PILES, type Character, type DomainEvent, type Pending, type Pile } from "../types";
 import {
+  discard,
   drawOne,
   grantPlayDiscount,
   moveToHand,
@@ -11,6 +12,7 @@ import {
   shuffleIntoDeck,
   takeFrom,
   withPile,
+  withPlayer,
 } from "../verbs";
 import {
   ask,
@@ -63,6 +65,47 @@ function peek(depth: number): CardBehaviour {
   };
 }
 
+/**
+ * Rulebook, Keywords: `Scry X` — look at the top X cards of your own deck,
+ * discard any number of them, put the rest back in the same order. Every
+ * printed Scry is Scry 1, so the choice is the one card or none. A short or
+ * empty deck looks at what is there; nothing reshuffles (Scry is not a draw).
+ */
+function scry(): CardBehaviour {
+  return {
+    onPlay(state, ctx) {
+      const top = playerOf(state, ctx.character).deck.slice(0, 1);
+      if (top.length === 0) return nothing(state);
+      return ask(
+        state,
+        {
+          kind: "ChooseCards",
+          prompt: `Scry 1: discard ${top[0]?.name ?? "it"}, or leave it on top?`,
+          character: ctx.character,
+          options: top,
+          count: 1,
+          optional: true,
+          source: source(ctx, "scry"),
+        },
+        [{ type: "CARDS_SCRIED", character: ctx.character, cards: top }],
+      );
+    },
+    onChoice(answer, state, ctx) {
+      if (answer.kind !== "cards") return nothing(state);
+      const events: DomainEvent[] = [];
+      const p = playerOf(state, ctx.character);
+      const gone = new Set(answer.cards.map((c) => c.id));
+      const lifted = withPlayer(state, ctx.character, {
+        ...p,
+        deck: p.deck.filter((c) => !gone.has(c.id)),
+      });
+      let next = lifted;
+      for (const card of answer.cards) next = discard(next, ctx.character, card, "deck", events);
+      return done(next, events);
+    },
+  };
+}
+
 /** Shared behaviour: shuffle a chosen Stuff card from one character's hand into their own deck. */
 function shuffleStuffFromHand(whose: (ctx: BehaviourContext) => Character): CardBehaviour {
   return {
@@ -91,8 +134,8 @@ function shuffleStuffFromHand(whose: (ctx: BehaviourContext) => Character): Card
 }
 
 export const GRAY: Registry = {
-  /* "Peek 1." */
-  "Peek Around Corner": peek(1),
+  /* "Scry 1." */
+  "Peek Around Corner": scry(),
 
   /* "Look at top 2 cards of any deck. Put them back in either order." */
   "Catch Your Breath": peek(2),

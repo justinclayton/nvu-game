@@ -2,7 +2,7 @@
  *
  * Every name here is a term from design/GLOSSARY.md, spelled the same way: discard pile,
  * Exhaust pile, Fled, Cleared, Scrapyard, Down, stat pool, play zone. Section
- * numbers in the comments point at design/rulebook.md, rules version 0.2.7.
+ * numbers in the comments point at design/rulebook.md, rules version 0.2.8.
  *
  * Everything is readonly. The engine never mutates; it returns a new state.
  */
@@ -356,7 +356,7 @@ export type CommandType = Command["type"];
 /* --------------------------------------------------------------- events */
 
 /** Where a card was when it was discarded (rulebook, Card anatomy: Keywords). */
-export type DiscardedFrom = "hand" | "playZone";
+export type DiscardedFrom = "hand" | "playZone" | "deck";
 
 export type DomainEvent =
   | { readonly type: "FLOOR_BUILT"; readonly floor: number; readonly rooms: number }
@@ -421,6 +421,12 @@ export type DomainEvent =
       readonly character: Character;
       readonly pile: Pile;
       readonly cards: readonly (Card | Room)[];
+    }
+  | {
+      /** Rulebook, Keywords: Scry X — the top cards of one's own deck, looked at. */
+      readonly type: "CARDS_SCRIED";
+      readonly character: Character;
+      readonly cards: readonly Card[];
     }
   | { readonly type: "THRESHOLD_MET"; readonly room: Room; readonly threshold: Threshold }
   | { readonly type: "STUFF_TAKEN"; readonly character: Character; readonly card: Card }

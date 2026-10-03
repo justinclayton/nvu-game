@@ -94,32 +94,3 @@ describe("Sluggish — 'Holding: cards cost +1 to play'", () => {
     expect(costOf(played.state, "Red", remaining)).toBe(1);
   });
 });
-
-describe("Peek Around Corner — 'Look at the top card of any deck'", () => {
-  it("asks whose deck, then shows the top card and puts it back", () => {
-    const state = rig({
-      phase: "Play",
-      activeRoom: room("Security Turnstile"),
-      Red: player({ deck: pile("Shove", 3), hand: [] }),
-      Gray: player({ deck: pile("Duck Under", 3), hand: [card("Peek Around Corner"), card("Duck Under")] }),
-    });
-    const peek = handCard(state, "Gray", "Peek Around Corner");
-    const payer = handCard(state, "Gray", "Duck Under");
-    const asked = must(state, {
-      type: "PLAY_CARD",
-      character: "Gray",
-      cardId: peek.id,
-      payWith: [payer.id],
-    });
-    expect(asked.state.pending?.kind).toBe("ChoosePile");
-
-    const answered = must(asked.state, { type: "CHOOSE_PILE", pile: "Red deck" });
-    expect(answered.state.pending).toBeNull();
-    expect(eventTypes(answered.events)).toEqual(["CARDS_PEEKED"]);
-    const peeked = answered.events[0];
-    if (peeked?.type !== "CARDS_PEEKED") throw new Error("expected a peek");
-    expect(peeked.cards.map((c) => c.id)).toEqual([state.Red.deck[0]?.id]);
-    // Put back on top: the deck is untouched.
-    expect(answered.state.Red.deck.map((c) => c.id)).toEqual(state.Red.deck.map((c) => c.id));
-  });
-});

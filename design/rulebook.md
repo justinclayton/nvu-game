@@ -1,6 +1,6 @@
 # *North vs Up*: Rulebook
 
-Rules version: 0.2.7
+Rules version: 0.2.9
 
 ---
 
@@ -27,7 +27,7 @@ Some things to note about how *North vs Up* works:
 
 **You draw up to five cards each turn.** Cards you don't spend stay in your hand.
 
-**Playing a card costs other cards.** You pay for a card by discarding other cards from your hand. When your deck runs out, your discard pile becomes your new deck.
+**Playing a card costs other cards.** You pay for a card by Exhausting other cards from your hand: they go to your Exhaust pile and never come back. When your deck runs out, your discard pile becomes your new deck.
 
 ---
 ## Setup
@@ -81,7 +81,7 @@ In the middle of the table:
 
 Players take turns playing a card.
 
-- **Play**: Move a card from your hand into your play zone and pay for it: look at its `Cost`, then move that number of cards from your hand to your discard pile. Unless otherwise specified, you can only pay for a card with other cards from your own hand. If a card's cost is 0 or less, play the card for free. Resolve effects triggered by playing or paying for a card after that card's own text.
+- **Play**: Move a card from your hand into your play zone and pay for it: look at its `Cost`, then move that number of cards from your hand to your Exhaust pile. Unless otherwise specified, you can only pay for a card with other cards from your own hand. If a card's cost is 0 or less, play the card for free. Resolve effects triggered by playing or paying for a card after that card's own text.
 - **Add up stats**: Stats on played cards add together across both sides of the play zone into one team pool.
 
 > *Example: `Red` plays a card with `Oomph 2`. `Gray` plays two cards, which read `Oomph 1`, and `Scramble 2`. Together, they have `Oomph 3` and `Scramble 2`.*
@@ -137,7 +137,7 @@ A Character card shows:
 
 - **Name**
 - **Type line:** `Red` or `Gray`. Note that starter cards are also indicated as such on this line.
-- **`Cost`**: the number of cards you discard from your hand to play it.
+- **`Cost`**: the number of cards you Exhaust from your hand to play it. Good Stuff and Bad Stuff pay like any other card.
 - **Stats**: `Oomph` and/or `Scramble`. Some cards have neither, and some grant stats in their effect text.
 - **Effect text**: keywords and card-specific rules.
 - **Rarity border:** `Fine`, `Cool`, or `Woah`. Has no in-game effect.
@@ -166,7 +166,7 @@ A `Stuff` card shows the same parts as a player card, with these differences:
 - `Get X Good Stuff`: `Get Good Stuff` **X** times.
 - `Get Bad Stuff`: Move the top card of the Bad Stuff pool into your hand.
 - `Reveal a card reward`: Reveal the top **3** cards of your reward pool. You may put **one** into your discard pile. Put the cards you did not take on the bottom of your reward pool.
-- `Peek X`: Look at the top **X** cards of any deck, then put them back in the same order.
+- `Scry X`: Look at the top **X** cards of your deck. Discard any number of them. Put the rest back in the same order. A deck with fewer than X cards shows what is there; Scry never reshuffles the discard pile.
 - `any deck`: any face-down pile on the table: a character deck, a reward pool, the Floor deck, or a Stuff pool.
 - `Scrap`: Move the card to the Scrapyard. It is removed from play for the rest of the game.
 - `Empty deck`: If you must draw or Exhaust a card and your deck is empty, first shuffle your discard pile to form a new deck. If your discard pile is also empty, you go `Down` (section 9).

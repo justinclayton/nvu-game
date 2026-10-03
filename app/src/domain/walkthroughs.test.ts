@@ -277,11 +277,13 @@ describe("walkthrough 8 — ascending end to end: shuffle the hand in, then the 
     expect(next.floor).toBe(2);
     expect(next.phase).toBe("Turn Start");
     // No heal: the 3 Charge Ins from before this floor are still there, plus
-    // the 2 Shoves that paid for Charge In, the Charge In itself and the two
-    // Pry Bars played alongside it — all discarded at Cleanup, and none of
-    // it swept anywhere: Stuff stays until it is Scrapped or Exhausted. The
-    // reward joins them: it goes into the discard pile, not the deck.
-    expect(next.Red.discard).toHaveLength(9);
+    // the Charge In itself and the two Pry Bars played alongside it — all
+    // discarded at Cleanup, and none of it swept anywhere: Stuff stays until
+    // it is Scrapped or Exhausted. The 2 Shoves that paid for Charge In were
+    // Exhausted. The reward joins the discards: it goes into the discard
+    // pile, not the deck.
+    expect(next.Red.discard).toHaveLength(7);
+    expect(next.Red.exhaust.filter((c) => c.name === "Shove")).toHaveLength(2);
     expect(next.Red.discard.some((c) => c.id === offer.id)).toBe(true);
     expect(next.Red.deck.some((c) => c.id === offer.id)).toBe(false);
   });

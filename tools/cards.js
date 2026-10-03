@@ -12,8 +12,8 @@
  */
 var NVU_CARDS = {
   meta: {"updated":"2026-09-23"},
-  rulesVersion: "0.2.7",
-  cardListId: "40cfb6b098c5",
+  rulesVersion: "0.2.9",
+  cardListId: "0dc4dea567e1",
   cards: [
     {"name":"Shove","set":"official","kind":"player","owner":"Red","starter":true,"cost":1,"oomph":2,"flavor":"A quick, decisive shove to clear space.","count":4},
     {"name":"Charge In","set":"official","kind":"player","owner":"Red","starter":true,"cost":2,"oomph":4,"flavor":"Lower your shoulder and put your full momentum into it.","count":5},
@@ -22,7 +22,7 @@ var NVU_CARDS = {
     {"name":"Duck Under","set":"official","kind":"player","owner":"Gray","starter":true,"cost":1,"scramble":2,"flavor":"Stay low and keep moving.","count":4},
     {"name":"Pick The Lock","set":"official","kind":"player","owner":"Gray","starter":true,"cost":2,"scramble":4,"flavor":"Pop the pins before anyone notices you're there.","count":5},
     {"name":"Work The Angles","set":"proposed","kind":"player","owner":"Gray","starter":true,"cost":1,"oomph":1,"scramble":1,"flavor":"Find the structural weak point so Red can strike.","count":1},
-    {"name":"Peek Around Corner","set":"official","kind":"player","owner":"Gray","starter":true,"cost":1,"scramble":1,"flavor":"A quick glance ahead to spot hazards.","text":"Peek 1.","count":2},
+    {"name":"Peek Around Corner","set":"official","kind":"player","owner":"Gray","starter":true,"cost":1,"scramble":1,"flavor":"A quick glance ahead to spot hazards.","text":"Scry 1.","count":2},
     {"name":"Reckless Swing","set":"proposed","kind":"player","owner":"Red","rarity":"Fine","cost":1,"oomph":4,"flavor":"Put everything into a wide arc, damn the recoil.","text":"Exhaust 1.","count":3},
     {"name":"Fast Follow","set":"proposed","kind":"player","owner":"Red","rarity":"Fine","cost":1,"oomph":3,"flavor":"Stepping right into the opening Gray created.","text":"If Gray played a card this turn, play this card for free.","count":3},
     {"name":"Reckless","set":"proposed","kind":"player","owner":"Red","rarity":"Fine","cost":1,"oomph":5,"flavor":"Pure raw force that leaves you completely breathless.","text":"Exhaust 3.","count":2},
@@ -45,7 +45,7 @@ var NVU_CARDS = {
     {"name":"In Step","set":"proposed","kind":"player","owner":"Gray","rarity":"Cool","cost":2,"conditional_stat":true,"flavor":"Sync your movements perfectly with Red's brute rhythm.","text":"Scramble equal to 2 times the number of cards Red has played this turn.","count":2},
     {"name":"One Man's Junk","set":"proposed","kind":"player","owner":"Gray","rarity":"Cool","cost":1,"oomph":2,"scramble":2,"conditional_stat":true,"flavor":"Turn hazardous junk into a makeshift advantage.","text":"If any Bad Stuff is played this turn, gain Oomph +1 and Scramble +1.","count":2},
     {"name":"Hack the Doors","set":"proposed","kind":"player","owner":"Gray","rarity":"Cool","cost":1,"scramble":3,"flavor":"Bypass the security subroutines to peek ahead.","text":"Look at top 3 cards of any deck, put back in any order.","count":2},
-    {"name":"Covering Fire","set":"proposed","kind":"player","owner":"Gray","rarity":"Cool","cost":1,"scramble":2,"flavor":"Keep their eyes on you so Red can maneuver freely.","text":"Every time Red plays a card this turn, draw 1 card.","count":2},
+    {"name":"Covering Fire","set":"proposed","kind":"player","owner":"Gray","rarity":"Cool","cost":1,"flavor":"Keep their eyes on you so Red can maneuver freely.","text":"Every time Red plays a card this turn, draw 1 card.","count":2},
     {"name":"Distract & Pivot","set":"proposed","kind":"player","owner":"Gray","rarity":"Cool","cost":2,"oomph":2,"scramble":3,"flavor":"Create a wide opening for Red to land a massive strike.","text":"The next card Red plays this turn costs 1 fewer card to play.","count":2},
     {"name":"Synergy Link","set":"proposed","kind":"player","owner":"Gray","rarity":"Cool","cost":1,"scramble":2,"flavor":"Match Red's momentum to keep the tactical loop spinning.","text":"Play: Draw 1 card. If Red has played a card this turn, draw 1 additional card.","count":2},
     {"name":"Pry Bar","set":"proposed","kind":"good_stuff","rarity":"Fine","cost":0,"oomph":3,"flavor":"Simple, solid steel. Good for prying open grates or cracking skulls.","count":5},

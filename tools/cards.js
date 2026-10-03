@@ -50,7 +50,7 @@ var NVU_CARDS = {
     {"name":"Coil Of Cable","set":"proposed","kind":"good_stuff","rarity":"Fine","cost":0,"scramble":3,"flavor":"High-tensile wire. Essential for rigging quick bypasses.","count":5},
     {"name":"Crowbar","set":"proposed","kind":"good_stuff","rarity":"Fine","cost":0,"oomph":1,"scramble":1,"flavor":"Versatile tool that helps pop open supply crates.","text":"Play: If you get any Good Stuff this turn, get 1 additional Good Stuff.","count":5},
     {"name":"Duct Tape & Wire","set":"proposed","kind":"good_stuff","rarity":"Fine","cost":1,"oomph":2,"scramble":2,"flavor":"Quick repairs that surprisingly hold together under pressure.","count":5},
-    {"name":"Stim Pack","set":"proposed","kind":"good_stuff","rarity":"Fine","cost":0,"oomph":2,"flavor":"Adrenaline surge to keep moving when stamina is low.","text":"Play: Draw 1 card.","count":5},
+    {"name":"Stim Pack","set":"proposed","kind":"good_stuff","rarity":"Cool","cost":0,"oomph":2,"flavor":"Adrenaline surge to keep moving when stamina is low.","text":"Play: Draw 1 card.","count":3},
     {"name":"Cutting Torch","set":"proposed","kind":"good_stuff","rarity":"Cool","cost":2,"oomph":5,"flavor":"Burns through reinforced bulkheads in seconds.","count":3},
     {"name":"Riot Shield","set":"proposed","kind":"good_stuff","rarity":"Cool","cost":1,"scramble":3,"flavor":"Heavy poly-carb barrier that survives multiple engagements.","text":"If the room is Cleared, return this card to your hand at the end of the turn.","count":3},
     {"name":"Overcharged Battery","set":"proposed","kind":"good_stuff","rarity":"Cool","cost":1,"oomph":2,"scramble":1,"flavor":"Sparks fly as raw current surges through your gear.","text":"The next card played this turn is played for free.","count":3},

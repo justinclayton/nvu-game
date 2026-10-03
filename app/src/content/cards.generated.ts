@@ -53,7 +53,7 @@ export const CARD_CONTENT = {
     {"name":"Coil Of Cable","set":"proposed","kind":"good_stuff","owner":null,"rarity":"Fine","starter":false,"count":5,"cost":0,"oomph":0,"scramble":3,"conditionalStat":false,"text":"","flavor":"High-tensile wire. Essential for rigging quick bypasses."},
     {"name":"Crowbar","set":"proposed","kind":"good_stuff","owner":null,"rarity":"Fine","starter":false,"count":5,"cost":0,"oomph":1,"scramble":1,"conditionalStat":false,"text":"Play: If you get any Good Stuff this turn, get 1 additional Good Stuff.","flavor":"Versatile tool that helps pop open supply crates."},
     {"name":"Duct Tape & Wire","set":"proposed","kind":"good_stuff","owner":null,"rarity":"Fine","starter":false,"count":5,"cost":1,"oomph":2,"scramble":2,"conditionalStat":false,"text":"","flavor":"Quick repairs that surprisingly hold together under pressure."},
-    {"name":"Stim Pack","set":"proposed","kind":"good_stuff","owner":null,"rarity":"Fine","starter":false,"count":5,"cost":0,"oomph":2,"scramble":0,"conditionalStat":false,"text":"Play: Draw 1 card.","flavor":"Adrenaline surge to keep moving when stamina is low."},
+    {"name":"Stim Pack","set":"proposed","kind":"good_stuff","owner":null,"rarity":"Cool","starter":false,"count":3,"cost":0,"oomph":2,"scramble":0,"conditionalStat":false,"text":"Play: Draw 1 card.","flavor":"Adrenaline surge to keep moving when stamina is low."},
     {"name":"Cutting Torch","set":"proposed","kind":"good_stuff","owner":null,"rarity":"Cool","starter":false,"count":3,"cost":2,"oomph":5,"scramble":0,"conditionalStat":false,"text":"","flavor":"Burns through reinforced bulkheads in seconds."},
     {"name":"Riot Shield","set":"proposed","kind":"good_stuff","owner":null,"rarity":"Cool","starter":false,"count":3,"cost":1,"oomph":0,"scramble":3,"conditionalStat":false,"text":"If the room is Cleared, return this card to your hand at the end of the turn.","flavor":"Heavy poly-carb barrier that survives multiple engagements."},
     {"name":"Overcharged Battery","set":"proposed","kind":"good_stuff","owner":null,"rarity":"Cool","starter":false,"count":3,"cost":1,"oomph":2,"scramble":1,"conditionalStat":false,"text":"The next card played this turn is played for free.","flavor":"Sparks fly as raw current surges through your gear."},
@@ -93,4 +93,4 @@ export const CARD_CONTENT = {
 } as const satisfies CardContent;
 
 /** The first 12 hex of sha256 over the JSON of CARD_CONTENT above — identifies this card list. */
-export const CARD_LIST_ID = "92f010507388";
+export const CARD_LIST_ID = "81482853542b";

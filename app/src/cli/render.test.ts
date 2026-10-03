@@ -25,7 +25,7 @@ describe("cardLine — a conditional stat", () => {
     const line = cardLine(afterRedPlays, "Gray", handCard(afterRedPlays, "Gray", "In Step"));
 
     expect(line).toBe(
-      "In Step [cost 1; Scramble 2 now] — Scramble equal to 2 times the number of cards Red has played this turn.",
+      "In Step [cost 2; Scramble 2 now] — Scramble equal to 2 times the number of cards Red has played this turn.",
     );
   });
 
@@ -76,7 +76,7 @@ describe("cardLine — a conditional stat", () => {
     const face = CARD_CONTENT.cards.find((c) => c.name === "In Step");
     if (!face) throw new Error("rig: no In Step in design/cards.yaml");
     expect(printedFaceLine(face)).toBe(
-      "In Step [cost 1; (conditional)] — Scramble equal to 2 times the number of cards Red has played this turn.",
+      "In Step [cost 2; (conditional)] — Scramble equal to 2 times the number of cards Red has played this turn.",
     );
   });
 });

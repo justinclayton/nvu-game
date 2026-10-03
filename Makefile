@@ -47,11 +47,17 @@ check: build
 	fi
 
 # The web game (app/). See design/web-game/spec.md.
-app/node_modules: app/package.json
-	cd app && npm install
+# npm ci installs exactly what package-lock.json pins and never rewrites it;
+# npm install would, with any npm older or newer than the one that wrote it.
+app/node_modules: app/package.json app/package-lock.json
+	cd app && npm ci
 	@touch app/node_modules
 
+# Also turns on .githooks/pre-commit, which refuses a commit while the card
+# list has drifted or the rulebook changed without a higher Rules version.
+# Worktrees share this setting, so one install covers them all.
 app-install: app/node_modules
+	git config core.hooksPath .githooks
 
 app: app/node_modules build
 	bin/nvu web

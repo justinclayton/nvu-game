@@ -32,9 +32,9 @@ describe("Reckless Swing — 'Exhaust 1'", () => {
       payWith: [handCard(state, "Red", "Shove").id],
     });
     expect(next.Red.deck).toHaveLength(3);
-    // Paid from hand, not Exhausted.
-    expect(next.Red.discard).toHaveLength(1);
-    expect(next.Red.exhaust).toHaveLength(1);
+    // The Shove paid from hand is Exhausted too; the played card waits in the play zone.
+    expect(next.Red.discard).toHaveLength(0);
+    expect(next.Red.exhaust).toHaveLength(2);
   });
 });
 
@@ -66,7 +66,8 @@ describe("Cross Punch — 'Exhaust 1'", () => {
       payWith: [hand[1] as CardId, hand[2] as CardId],
     });
     expect(next.Red.deck).toHaveLength(3);
-    expect(next.Red.exhaust).toHaveLength(1);
+    // Two Shoves paid from hand, plus the one off the deck.
+    expect(next.Red.exhaust).toHaveLength(3);
   });
 });
 
@@ -519,6 +520,7 @@ describe("Momentum Shift — 'Draw 2 cards, then Exhaust 1 card from your hand'"
         hand: [card("Momentum Shift"), card("Shove")],
       }),
     });
+    const paid = handCard(state, "Red", "Shove");
     const asked = cast(state, "Red", "Momentum Shift");
     expect(asked.events.filter((e) => e.type === "CARD_DRAWN")).toHaveLength(2);
     const pending = pendingCards(asked.state);
@@ -526,7 +528,8 @@ describe("Momentum Shift — 'Draw 2 cards, then Exhaust 1 card from your hand'"
     const target = pending.options.find((c) => c.name === "Lean In");
     if (!target) throw new Error("drawn card not offered");
     const { state: next, events } = must(asked.state, { type: "CHOOSE_CARDS", cardIds: [target.id] });
-    expect(next.Red.exhaust.map((c) => c.id)).toEqual([target.id]);
+    // The Shove that paid for Momentum Shift is already there.
+    expect(next.Red.exhaust.map((c) => c.id)).toEqual([paid.id, target.id]);
     expect(next.Red.hand.some((c) => c.id === target.id)).toBe(false);
     expect(eventTypes(events)).toContain("CARD_EXHAUSTED");
   });

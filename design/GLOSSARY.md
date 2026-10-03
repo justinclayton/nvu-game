@@ -147,9 +147,9 @@ The keyword `Exhaust X`, also written `Exhaust X cards from your deck`: move the
 
 A player's face-up pile of cards Exhausted off their deck, or from their hand to pay a Cost. Permanent: unlike the discard pile, nothing here ever returns.
 
-**Peek**
+**Scry**
 
-The keyword `Peek X`: look at the top X cards of any deck, then put them back in the same order. `[agent, 2026-09-23]`
+The keyword `Scry X`: look at the top X cards of your own deck, discard any number of them, put the rest back in the same order. Replaces `Peek X` (issue #273). `[agent, 2026-10-03]`
 
 **Any deck**
 

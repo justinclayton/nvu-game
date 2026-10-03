@@ -12,8 +12,8 @@
  */
 var NVU_CARDS = {
   meta: {"updated":"2026-09-23"},
-  rulesVersion: "0.2.8",
-  cardListId: "19975303a535",
+  rulesVersion: "0.2.9",
+  cardListId: "8a2c27e642f9",
   cards: [
     {"name":"Shove","set":"official","kind":"player","owner":"Red","starter":true,"cost":1,"oomph":2,"flavor":"A quick, decisive shove to clear space.","count":4},
     {"name":"Charge In","set":"official","kind":"player","owner":"Red","starter":true,"cost":2,"oomph":4,"flavor":"Lower your shoulder and put your full momentum into it.","count":5},
@@ -22,7 +22,7 @@ var NVU_CARDS = {
     {"name":"Duck Under","set":"official","kind":"player","owner":"Gray","starter":true,"cost":1,"scramble":2,"flavor":"Stay low and keep moving.","count":4},
     {"name":"Pick The Lock","set":"official","kind":"player","owner":"Gray","starter":true,"cost":2,"scramble":4,"flavor":"Pop the pins before anyone notices you're there.","count":5},
     {"name":"Work The Angles","set":"proposed","kind":"player","owner":"Gray","starter":true,"cost":1,"oomph":1,"scramble":1,"flavor":"Find the structural weak point so Red can strike.","count":1},
-    {"name":"Peek Around Corner","set":"official","kind":"player","owner":"Gray","starter":true,"cost":1,"scramble":1,"flavor":"A quick glance ahead to spot hazards.","text":"Peek 1.","count":2},
+    {"name":"Peek Around Corner","set":"official","kind":"player","owner":"Gray","starter":true,"cost":1,"scramble":1,"flavor":"A quick glance ahead to spot hazards.","text":"Scry 1.","count":2},
     {"name":"Reckless Swing","set":"proposed","kind":"player","owner":"Red","rarity":"Fine","cost":1,"oomph":4,"flavor":"Put everything into a wide arc, damn the recoil.","text":"Exhaust 1.","count":3},
     {"name":"Fast Follow","set":"proposed","kind":"player","owner":"Red","rarity":"Fine","cost":1,"oomph":3,"flavor":"Stepping right into the opening Gray created.","text":"If Gray played a card this turn, play this card for free.","count":3},
     {"name":"Reckless","set":"proposed","kind":"player","owner":"Red","rarity":"Fine","cost":1,"oomph":5,"flavor":"Pure raw force that leaves you completely breathless.","text":"Exhaust 3.","count":2},

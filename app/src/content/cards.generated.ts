@@ -23,7 +23,7 @@ export const CARD_CONTENT = {
     {"name":"Duck Under","set":"official","kind":"player","owner":"Gray","rarity":null,"starter":true,"count":4,"cost":1,"oomph":0,"scramble":2,"conditionalStat":false,"text":"","flavor":"Stay low and keep moving."},
     {"name":"Pick The Lock","set":"official","kind":"player","owner":"Gray","rarity":null,"starter":true,"count":5,"cost":2,"oomph":0,"scramble":4,"conditionalStat":false,"text":"","flavor":"Pop the pins before anyone notices you're there."},
     {"name":"Work The Angles","set":"proposed","kind":"player","owner":"Gray","rarity":null,"starter":true,"count":1,"cost":1,"oomph":1,"scramble":1,"conditionalStat":false,"text":"","flavor":"Find the structural weak point so Red can strike."},
-    {"name":"Peek Around Corner","set":"official","kind":"player","owner":"Gray","rarity":null,"starter":true,"count":2,"cost":1,"oomph":0,"scramble":1,"conditionalStat":false,"text":"Peek 1.","flavor":"A quick glance ahead to spot hazards."},
+    {"name":"Peek Around Corner","set":"official","kind":"player","owner":"Gray","rarity":null,"starter":true,"count":2,"cost":1,"oomph":0,"scramble":1,"conditionalStat":false,"text":"Scry 1.","flavor":"A quick glance ahead to spot hazards."},
     {"name":"Reckless Swing","set":"proposed","kind":"player","owner":"Red","rarity":"Fine","starter":false,"count":3,"cost":1,"oomph":4,"scramble":0,"conditionalStat":false,"text":"Exhaust 1.","flavor":"Put everything into a wide arc, damn the recoil."},
     {"name":"Fast Follow","set":"proposed","kind":"player","owner":"Red","rarity":"Fine","starter":false,"count":3,"cost":1,"oomph":3,"scramble":0,"conditionalStat":false,"text":"If Gray played a card this turn, play this card for free.","flavor":"Stepping right into the opening Gray created."},
     {"name":"Reckless","set":"proposed","kind":"player","owner":"Red","rarity":"Fine","starter":false,"count":2,"cost":1,"oomph":5,"scramble":0,"conditionalStat":false,"text":"Exhaust 3.","flavor":"Pure raw force that leaves you completely breathless."},
@@ -93,4 +93,4 @@ export const CARD_CONTENT = {
 } as const satisfies CardContent;
 
 /** The first 12 hex of sha256 over the JSON of CARD_CONTENT above — identifies this card list. */
-export const CARD_LIST_ID = "19975303a535";
+export const CARD_LIST_ID = "8a2c27e642f9";

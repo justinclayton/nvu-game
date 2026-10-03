@@ -20,28 +20,68 @@ import type { CardId } from "../types";
 
 beforeEach(resetRig);
 
-describe("Peek Around Corner — 'Peek 1'", () => {
-  it("shows the top card of a chosen deck and puts it back", () => {
+function playScry(deckSize: number) {
+  const state = playing({
+    Gray: player({
+      deck: pile("Duck Under", deckSize),
+      hand: [card("Peek Around Corner"), card("Duck Under")],
+    }),
+  });
+  const g = ids(state, "Gray");
+  const asked = must(state, {
+    type: "PLAY_CARD",
+    character: "Gray",
+    cardId: g[0] as CardId,
+    payWith: [g[1] as CardId],
+  });
+  return { state, asked };
+}
+
+describe("Peek Around Corner — 'Scry 1'", () => {
+  it("on a full deck, lets the player discard the top card", () => {
+    const { asked } = playScry(4);
+    expect(eventTypes(asked.events)).toContain("CARDS_SCRIED");
+    const pending = asked.state.pending;
+    if (pending?.kind !== "ChooseCards") throw new Error("expected a card choice");
+    expect(pending.optional).toBe(true);
+    const top = asked.state.Gray.deck[0];
+    const done = must(asked.state, { type: "CHOOSE_CARDS", cardIds: [top?.id as CardId] });
+    expect(done.state.pending).toBeNull();
+    expect(done.state.Gray.deck).toHaveLength(3);
+    expect(done.state.Gray.discard.map((c) => c.id)).toContain(top?.id);
+  });
+
+  it("on a full deck, lets the player leave the top card", () => {
+    const { asked } = playScry(4);
+    const before = asked.state.Gray.deck.map((c) => c.id);
+    const done = must(asked.state, { type: "CHOOSE_CARDS", cardIds: [] });
+    expect(done.state.Gray.deck.map((c) => c.id)).toEqual(before);
+  });
+
+  it("on a one-card deck, looks at what is there", () => {
+    const { asked } = playScry(1);
+    const done = must(asked.state, { type: "CHOOSE_CARDS", cardIds: [asked.state.Gray.deck[0]?.id as CardId] });
+    expect(done.state.Gray.deck).toHaveLength(0);
+  });
+
+  it("on an empty deck, does nothing and does not reshuffle the discard pile", () => {
     const state = playing({
       Gray: player({
-        deck: pile("Duck Under", 4),
+        deck: [],
+        discard: pile("Duck Under", 3),
         hand: [card("Peek Around Corner"), card("Duck Under")],
       }),
     });
     const g = ids(state, "Gray");
-    const asked = must(state, {
+    const r = must(state, {
       type: "PLAY_CARD",
       character: "Gray",
       cardId: g[0] as CardId,
       payWith: [g[1] as CardId],
     });
-    expect(asked.state.pending?.kind).toBe("ChoosePile");
-
-    const looked = must(asked.state, { type: "CHOOSE_PILE", pile: "Red deck" });
-    expect(eventTypes(looked.events)).toContain("CARDS_PEEKED");
-    // Depth 1 has no order to choose: it goes straight back on top.
-    expect(looked.state.pending).toBeNull();
-    expect(looked.state.Red.deck).toHaveLength(6);
+    expect(r.state.pending).toBeNull();
+    expect(eventTypes(r.events)).not.toContain("DISCARD_RESHUFFLED");
+    expect(r.state.Gray.deck).toHaveLength(0);
   });
 });
 
@@ -179,33 +219,6 @@ describe("Hack the Doors — 'Look at the top 3 of any deck'", () => {
     const reversed = [...pending.cards].reverse().map((c) => c.id);
     const { state: next } = must(looked.state, { type: "ORDER_CARDS", cardIds: reversed });
     expect(next.pools.goodStuff.map((c) => c.id)).toEqual(reversed);
-  });
-});
-
-describe("Peek Around Corner on the Floor deck", () => {
-  it("emits the event and asks no order", () => {
-    const only = room("Security Turnstile");
-    const state = playing({
-      Gray: player({
-        deck: pile("Duck Under", 4),
-        hand: [card("Peek Around Corner"), card("Duck Under")],
-      }),
-      floorDeck: [only],
-    });
-    const g = ids(state, "Gray");
-    const asked = must(state, {
-      type: "PLAY_CARD",
-      character: "Gray",
-      cardId: g[0] as CardId,
-      payWith: [g[1] as CardId],
-    });
-    const looked = must(asked.state, { type: "CHOOSE_PILE", pile: "Floor deck" });
-    const peeked = looked.events.find((e) => e.type === "CARDS_PEEKED");
-    if (peeked?.type !== "CARDS_PEEKED") throw new Error("expected a peek");
-    expect(peeked.pile).toBe("Floor deck");
-    expect(peeked.cards.map((c) => c.id)).toEqual([only.id]);
-    expect(looked.state.pending).toBeNull();
-    expect(looked.state.floorDeck.map((c) => c.id)).toEqual([only.id]);
   });
 });
 

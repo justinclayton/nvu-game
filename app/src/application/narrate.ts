@@ -43,6 +43,8 @@ export function describeEvent(event: DomainEvent): string {
       return `${event.card.name} goes to ${event.character}'s ${event.to}.`;
     case "CARDS_PEEKED":
       return `A look at the ${event.pile}: ${event.cards.map((c) => c.name).join(", ")}.`;
+    case "CARDS_SCRIED":
+      return `${event.character} scries ${event.cards.map((c) => c.name).join(", ")}.`;
     case "THRESHOLD_MET": {
       const need = printedThresholdLines(event.threshold)
         .map((l) => `${l.stat} ${String(l.effective)}`)

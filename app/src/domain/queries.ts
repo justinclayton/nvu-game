@@ -341,6 +341,7 @@ const REVEALING: ReadonlySet<DomainEvent["type"]> = new Set([
   "CARD_EXHAUSTED",
   "STUFF_TAKEN",
   "CARDS_PEEKED",
+  "CARDS_SCRIED",
   "REWARD_REVEALED",
   "GOOD_STUFF_REVEALED",
   "REWARD_TAKEN",

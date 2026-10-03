@@ -122,7 +122,7 @@ cards:
     owner: Gray
     cost: 1
     scramble: 1
-    text: Peek 1.
+    text: Scry 1.
     flavor: A quick glance ahead to spot hazards.
 
   ## Character Reward Cards

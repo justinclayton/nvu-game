@@ -1,0 +1,157 @@
+{
+  "format": "nvu-run/1",
+  "exportedAt": "2026-10-03T07:29:21.833Z",
+  "cards": "0dc4dea567e1",
+  "rules": "0.2.9",
+  "floor": 1,
+  "turn": 5,
+  "phase": "GameOver",
+  "outcome": "Defeat",
+  "run": {
+    "seed": 13,
+    "commands": [
+      {
+        "type": "FLIP_ROOM"
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Gray",
+        "cardId": "Pick The Lock#3",
+        "payWith": [
+          "Peek Around Corner#2",
+          "Duck Under#1"
+        ]
+      },
+      {
+        "type": "END_PLAY"
+      },
+      {
+        "type": "FLIP_ROOM"
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Gray",
+        "cardId": "Pick The Lock#5",
+        "payWith": [
+          "Peek Around Corner#1",
+          "Duck Under#3"
+        ]
+      },
+      {
+        "type": "END_PLAY"
+      },
+      {
+        "type": "FLIP_ROOM"
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Gray",
+        "cardId": "Pick The Lock#4",
+        "payWith": [
+          "Duck Under#2",
+          "Duck Under#4"
+        ]
+      },
+      {
+        "type": "END_PLAY"
+      },
+      {
+        "type": "FLIP_ROOM"
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Gray",
+        "cardId": "Pick The Lock#1",
+        "payWith": [
+          "Work The Angles#1",
+          "Pick The Lock#2"
+        ]
+      },
+      {
+        "type": "END_PLAY"
+      },
+      {
+        "type": "FLIP_ROOM"
+      }
+    ]
+  },
+  "notes": [
+    {
+      "at": 23,
+      "text": "Floor 1 turn 2: second Security Turnstile in a row, Gray has the same hand shape. Cheapest Scramble 3 is Pick The Lock (S4) paid by Peek + Duck Under (S1 and S2, cost 1 each, also 2 cards exhausted). Every payment is an Exhaust now, so Scramble 3 costs 2 cards of 12 on turn 1 of the game."
+    },
+    {
+      "at": 46,
+      "text": "Turn 4: Gray is at 6 live after 4 turns (Exhaust 6) while Red has played nothing and holds a full unchanged hand. Gray pays 2 cards per Pick The Lock to clear Scramble 3-4 rooms; since payment now Exhausts, the deck is the HP bar and Gray's bar drains 2 per turn on cheap rooms. Is that the intended pace for Band 1?"
+    },
+    {
+      "at": 63,
+      "text": "Run over on turn 5: Gray went Down at the Turn Start draw with 4 live cards (hand 2, deck 1, discard 1) because drawing up to five needed 3 cards and only 2 existed. Rulebook sec 9 reads literally this way ('must draw ... deck and discard both empty'), but it means a character with fewer than 5 live cards is Down at the next flip, so the real Stamina is live minus 5. Question: is that intended? Also I never saw this coming from the table, which prints 'live 4' as if it were safe."
+    }
+  ],
+  "log": [
+    "Floor 1 is built: 10 rooms.",
+    "You are in: Security Turnstile.",
+    "Red draws Charge In.",
+    "Red draws Charge In.",
+    "Red draws Overdrive.",
+    "Red draws Shove.",
+    "Red draws Shove.",
+    "Gray draws Pick The Lock.",
+    "Gray draws Pick The Lock.",
+    "Gray draws Peek Around Corner.",
+    "Gray draws Pick The Lock.",
+    "Gray draws Duck Under.",
+    "Gray pays with Peek Around Corner, Duck Under, Exhausting them.",
+    "Gray plays Pick The Lock.",
+    "Scramble 3 met — Clear.",
+    "Security Turnstile is Cleared.",
+    "Cleanup.",
+    "Gray discards Pick The Lock from their play zone.",
+    "— end of turn 1 —",
+    "You are in: Security Turnstile.",
+    "Gray draws Peek Around Corner.",
+    "Gray draws Pick The Lock.",
+    "Gray draws Duck Under.",
+    "Gray pays with Peek Around Corner, Duck Under, Exhausting them.",
+    "Gray plays Pick The Lock.",
+    "Scramble 3 met — Clear.",
+    "Security Turnstile is Cleared.",
+    "Cleanup.",
+    "Gray discards Pick The Lock from their play zone.",
+    "— end of turn 2 —",
+    "You are in: Security Turnstile.",
+    "Gray draws Pick The Lock.",
+    "Gray draws Duck Under.",
+    "Gray draws Duck Under.",
+    "Gray pays with Duck Under, Duck Under, Exhausting them.",
+    "Gray plays Pick The Lock.",
+    "Scramble 3 met — Clear.",
+    "Security Turnstile is Cleared.",
+    "Cleanup.",
+    "Gray discards Pick The Lock from their play zone.",
+    "— end of turn 3 —",
+    "You are in: Flooded Ventilation Shaft.",
+    "Gray draws Work The Angles.",
+    "Gray's deck is empty — the discard pile shuffles in to make a new one (3 cards).",
+    "Gray draws Pick The Lock.",
+    "Gray draws Pick The Lock.",
+    "Gray pays with Work The Angles, Pick The Lock, Exhausting them.",
+    "Gray plays Pick The Lock.",
+    "Scramble 4 met — Clear.",
+    "Flooded Ventilation Shaft is Cleared.",
+    "Cleanup.",
+    "Gray discards Pick The Lock from their play zone.",
+    "— end of turn 4 —",
+    "You are in: Security Turnstile.",
+    "Gray draws Pick The Lock.",
+    "Gray's deck is empty — the discard pile shuffles in to make a new one (1 cards).",
+    "Gray draws Pick The Lock.",
+    "Gray is Down — drew from an empty deck and discard pile. The run is lost.",
+    "Gray discards Pick The Lock from their hand.",
+    "Gray discards Pick The Lock from their hand.",
+    "Gray discards Pick The Lock from their hand.",
+    "Gray discards Pick The Lock from their hand.",
+    "You lose."
+  ]
+}

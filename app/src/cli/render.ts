@@ -2,6 +2,7 @@
 
 import {
   allThresholds,
+  contributionOf,
   costOf,
   metThresholds,
   payOptions,
@@ -15,7 +16,19 @@ import type { CardFace, RoomFace, StatRequirement } from "@domain/printed";
 import { CHARACTERS, playerOf } from "@domain/verbs";
 import { currentQuestion, describeStagedAnswer, type StagedAnswer } from "./ascend";
 
-const statsOf = (card: Card | CardFace): string => {
+/**
+ * `now` is the value a conditional stat has right now (`contributionOf`, the
+ * same calculation `statPool` uses), so the hand line and the stat pool agree.
+ * Without it — no state and character to compute from, as for a bare printed
+ * face — a conditional stat falls back to the `(conditional)` marker.
+ */
+const statsOf = (card: Card | CardFace, now?: { oomph: number; scramble: number }): string => {
+  if (card.conditionalStat && now) {
+    const parts: string[] = [];
+    if (now.oomph > 0) parts.push(`Oomph ${String(now.oomph)} now`);
+    if (now.scramble > 0) parts.push(`Scramble ${String(now.scramble)} now`);
+    return parts.join(", ");
+  }
   const parts: string[] = [];
   if (card.oomph > 0) parts.push(`Oomph ${String(card.oomph)}`);
   if (card.scramble > 0) parts.push(`Scramble ${String(card.scramble)}`);
@@ -26,6 +39,18 @@ const statsOf = (card: Card | CardFace): string => {
 const kindOf = (card: Card | CardFace): string =>
   card.kind === "good_stuff" ? "Good Stuff" : card.kind === "bad_stuff" ? "Bad Stuff" : "";
 
+/**
+ * What the card would add to the stat pool if it were in the play zone right
+ * now. A card not yet in the zone is counted as if played, so a stat that reads
+ * the zone (Junk Launcher counts its own cost) matches the pool it will join.
+ */
+const contributionOnceInPlay = (state: GameState, c: Character, card: Card) => {
+  const played = { owner: c, card };
+  const inZone = state.playZone.some((p) => p.card.id === card.id);
+  const asPlayed = inZone ? state : { ...state, playZone: [...state.playZone, played] };
+  return contributionOf(asPlayed, played);
+};
+
 /** One line for a card, as a hand, an offer or an answer to `card NAME` shows it. */
 export function cardLine(state: GameState, c: Character, card: Card): string {
   const cost = costOf(state, c, card);
@@ -33,7 +58,8 @@ export function cardLine(state: GameState, c: Character, card: Card): string {
     cost !== card.cost
       ? `cost ${String(cost)} (printed ${String(card.cost)})`
       : `cost ${String(cost)}`;
-  const bits = [costNote, statsOf(card), kindOf(card)].filter((s) => s !== "");
+  const now = card.conditionalStat ? contributionOnceInPlay(state, c, card) : undefined;
+  const bits = [costNote, statsOf(card, now), kindOf(card)].filter((s) => s !== "");
   const text = card.text.trim() === "" ? "" : ` — ${card.text.trim()}`;
   return `${card.name} [${bits.join("; ")}]${text}`;
 }
@@ -83,14 +109,40 @@ function roomLines(state: GameState, room: Room): string[] {
   return lines;
 }
 
-function playerLines(state: GameState, c: Character): string[] {
+/** A character's live-card count: deck, discard and hand added together — exhaust is not counted. */
+function playerHeadLine(state: GameState, c: Character): string {
   const p = playerOf(state, c);
   const flags = [p.down ? "DOWN" : ""].filter((s) => s !== "");
-  const head = `${c}: deck ${String(p.deck.length)}, discard ${String(p.discard.length)}, exhaust ${String(p.exhaust.length)}, hand ${String(p.hand.length)}${flags.length ? "  " + flags.join(" ") : ""}`;
-  const lines = [head];
+  const live = p.deck.length + p.discard.length + p.hand.length;
+  return (
+    `${c}: live ${String(live)} (deck ${String(p.deck.length)}, discard ${String(p.discard.length)}, ` +
+    `hand ${String(p.hand.length)}), exhaust ${String(p.exhaust.length)}${flags.length ? "  " + flags.join(" ") : ""}`
+  );
+}
+
+function playerLines(state: GameState, c: Character): string[] {
+  const p = playerOf(state, c);
+  const lines = [playerHeadLine(state, c)];
   for (const card of p.hand) lines.push(`    ${cardLine(state, c, card)}`);
   const played = state.playZone.filter((x) => x.owner === c).map((x) => x.card.name);
   if (played.length > 0) lines.push(`    played: ${played.join(", ")}`);
+  return lines;
+}
+
+/**
+ * What a move changed, for `play card`, Scrap and answering a prompt: the
+ * stat pool, any prompt now waiting, and each character's live-card count —
+ * not the full table (design/cli-sim/spec.md via issue #213: "play card,
+ * draw and prompt answers print only what changed").
+ */
+export function shortStatusLines(state: GameState): string[] {
+  const lines: string[] = [];
+  const pool = state.resolution?.pool ?? statPool(state);
+  if (state.phase === "Play" || state.playZone.length > 0 || state.resolution?.pool) {
+    lines.push(`Stat pool: Oomph ${String(pool.oomph)}, Scramble ${String(pool.scramble)}`);
+  }
+  if (state.pending) lines.push(`Waiting on: ${state.pending.prompt}`);
+  for (const c of CHARACTERS) lines.push(playerHeadLine(state, c));
   return lines;
 }
 
@@ -103,7 +155,9 @@ function ascendStatusLines(state: GameState, staged: readonly StagedAnswer[]): s
   lines.push("Offered:");
   for (const c of CHARACTERS) {
     const offer = state.offer?.[c] ?? [];
-    lines.push(`  ${c}: ${offer.length > 0 ? offer.map((card) => cardLine(state, c, card)).join(" | ") : "nothing"}`);
+    lines.push(
+      `  ${c}: ${offer.length > 0 ? offer.map((card) => cardLine(state, c, card)).join(" | ") : "nothing"}`,
+    );
   }
   if (staged.length > 0) {
     lines.push("Staged so far:");
@@ -114,14 +168,18 @@ function ascendStatusLines(state: GameState, staged: readonly StagedAnswer[]): s
 
 export function renderTable(state: GameState, staged: readonly StagedAnswer[] = []): string {
   const lines: string[] = [];
+  // Turn Start sits between turns with the just-ended turn's number still on
+  // the state (the engine bumps it at the next flip, not here) — show the
+  // turn it is about to start instead.
+  const turn = state.phase === "Turn Start" ? state.turn + 1 : state.turn;
   lines.push(
-    `Floor ${String(state.floor)} · turn ${String(state.turn)} · ${state.phase}` +
+    `Floor ${String(state.floor)} · turn ${String(turn)} · ${state.phase}` +
       `   floor deck ${String(state.floorDeck.length)}, cleared ${String(state.cleared.length)}` +
       `   Good Stuff ${String(state.pools.goodStuff.length)}, Bad Stuff ${String(state.pools.badStuff.length)}`,
   );
   if (state.activeRoom) lines.push(...roomLines(state, state.activeRoom));
-  const pool = statPool(state);
-  if (state.phase === "Play" || state.playZone.length > 0) {
+  const pool = state.resolution?.pool ?? statPool(state);
+  if (state.phase === "Play" || state.playZone.length > 0 || state.resolution?.pool) {
     lines.push(`Stat pool: Oomph ${String(pool.oomph)}, Scramble ${String(pool.scramble)}`);
   }
   for (const c of CHARACTERS) lines.push(...playerLines(state, c));
@@ -162,10 +220,14 @@ export function moveHint(state: GameState, staged: readonly StagedAnswer[] = [])
         break;
       }
       case "OrderCards":
-        lines.push(`order <Name> <Name>... — top first, every one of: ${pending.cards.map((c) => c.name).join(", ")}`);
+        lines.push(
+          `order <Name> <Name>... — top first, every one of: ${pending.cards.map((c) => c.name).join(", ")}`,
+        );
         break;
       case "TakeReward":
-        lines.push(`take <Name> — one of: ${pending.cards.map((c) => c.name).join(", ")} — or skip`);
+        lines.push(
+          `take <Name> — one of: ${pending.cards.map((c) => c.name).join(", ")} — or skip`,
+        );
         break;
       case "ChooseGoodStuff":
         lines.push(`choose <Name> — keep 1 of: ${pending.options.map((c) => c.name).join(", ")}`);

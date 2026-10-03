@@ -462,7 +462,7 @@ describe("Brute Recycle — 'Scrap 1 starter card from your hand or discard pile
   });
 });
 
-describe("Rhythm & Bruise — 'Gains Oomph +2 for each card Gray has played this turn'", () => {
+describe("Rhythm & Bruise — 'Oomph equal to 2 times the number of cards Gray has played this turn'", () => {
   const withGrayPlays = (n: number) => {
     const state = playing({
       Red: player({
@@ -483,11 +483,11 @@ describe("Rhythm & Bruise — 'Gains Oomph +2 for each card Gray has played this
     const { state: next } = cast(state, "Red", "Rhythm & Bruise");
     const rhythm = next.playZone.find((p) => p.card.name === "Rhythm & Bruise");
     if (!rhythm) throw new Error("not played");
-    expect(contributionOf(next, rhythm).oomph).toBe(4);
+    expect(contributionOf(next, rhythm).oomph).toBe(2);
     const gray = next.Gray.hand[0];
     if (!gray) throw new Error("rig");
     const more = must(next, free("Gray", gray.id));
-    expect(contributionOf(more.state, rhythm).oomph).toBe(6);
+    expect(contributionOf(more.state, rhythm).oomph).toBe(4);
   });
 
   it("does not draw when Gray has played fewer than 2 cards", () => {

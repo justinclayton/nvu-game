@@ -15,4 +15,10 @@ Arguments: `$ARGUMENTS` is an issue number. With none, take the lowest-numbered 
 1. **Claim.** Switch to a new branch per the tracker doc's naming convention, then swap the label/status as the doc says. This is the first write.
 2. **Read.** Fetch the issue with its full history. The Done-when is the completion criterion for step 3; if the issue has none, write one from its body and post it before coding.
 3. **Implement.** Follow docs/agents/issue-tracker.md → "Running issues with subagents" for environment setup, any shared-resource rules (device pools, seed data), and how to verify. Done when every Done-when line holds.
-4. **PR.** Push, open the PR closing the issue per the tracker doc's convention, with media for anything visible per the doc. Report the PR number, what was verified and how, and any Done-when line not met.
+4. **PR.** Push, open the PR closing the issue per the tracker doc's convention, with media for anything visible per the doc. Then swap the issue's label, creating `ready-for-review` if it doesn't exist yet:
+   ```
+   gh label create ready-for-review --description "A PR is open for this issue" --color 1d76db 2>/dev/null || true
+   gh issue edit <n> --add-label ready-for-review
+   gh issue edit <n> --remove-label in-progress 2>/dev/null || true
+   ```
+   Report the PR number, what was verified and how, and any Done-when line not met.

@@ -457,10 +457,10 @@ cards:
     flavor: Quick repairs that surprisingly hold together under pressure.
 
   - name: Stim Pack
-    count: 5
+    count: 3
     set: proposed
     kind: good_stuff
-    rarity: Fine
+    rarity: Cool
     cost: 0
     oomph: 2
     text: "Play: Draw 1 card."

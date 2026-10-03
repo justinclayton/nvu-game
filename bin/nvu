@@ -21,7 +21,7 @@ tsx="$root/app/node_modules/.bin/tsx"
 # Not just "does node_modules exist" — a checkout from before this launcher
 # added tsx can have node_modules without it, and would otherwise never
 # reinstall.
-[ -x "$tsx" ] || (cd "$root/app" && npm install --silent)
+[ -x "$tsx" ] || (cd "$root/app" && npm ci --silent)
 make -s -C "$root" build
 
 if [ "$1" = "web" ]; then

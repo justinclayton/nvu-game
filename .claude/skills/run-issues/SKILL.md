@@ -22,7 +22,7 @@ Model per issue: `sonnet`, or `opus` when the issue is an architecture or refact
 
 Done when every issue in the batch has a wave, a model, and (where needed) a registered blocker.
 
-List the review queue with `gh pr list --state open --draft=false --json number,title,body`, whether or not the batch has issues. PRs are not waved. The PRs this run's agents open join the queue as they finish, and PRs this run sent back to draft for a gap rejoin it once fixed (step 6).
+List the review queue (the tracker doc's "List ready for review"), whether or not the batch has issues. PRs are not waved. The PRs this run's agents open join the queue as they finish, and PRs this run sent back to draft for a gap rejoin it once fixed (step 6).
 
 ## 2. First message to the user
 
@@ -77,13 +77,13 @@ Act on completion notifications. A notification that an agent is waiting on a sh
 Applies to every PR in the review queue, whether this run's agents opened it or another session did.
 
 - Find the issue it closes (`Closes #<n>` in the body) and read the issue's acceptance criteria. Read the PR diff and check each line against it.
-- Check `gh pr view <n> --json mergeable,statusCheckRollup`: mergeable, and every check passing.
+- Check it per the tracker doc's "Check before merging": `clean`, and every check passing. A `behind` PR gets "Update with main" first, then waits for its checks.
 - For a PR this run's agents opened, rely on the agent's verification report. For any other PR, check it out in a worktree (`git worktree add .claude/worktrees/pr-<n> <branch>`, then `make app-install`) and run the verify commands from the tracker doc. Remove the worktree when done.
-- A draft PR is not in the queue; leave it alone unless the user names it or this run sent it back for a gap, and if so run `gh pr ready <n>` only after it passes review.
-- **A gap.** Comment on the PR naming the gap, and convert it to a draft (`gh pr ready <n> --undo`) so it leaves the queue. Then either send a fresh agent to that branch's worktree with the gap named (step 4's brief plus the "state you inherit" block) and, when it reports the gap fixed, run `gh pr ready <n>` and review the PR again from the top, or, for a PR you cannot fix without a decision, report it to the user with the blocker.
-- **A pass.** Merge in dependency order with `gh pr merge <n> --merge` (this repo's history uses merge commits), once the user has authorised merging.
+- A draft PR is not in the queue; leave it alone unless the user names it or this run sent it back for a gap, and if so mark it ready for review (tracker doc) only after it passes review.
+- **A gap.** Comment on the PR naming the gap, and send it back to draft (tracker doc) so it leaves the queue. Then either send a fresh agent to that branch's worktree with the gap named (step 4's brief plus the "state you inherit" block) and, when it reports the gap fixed, mark it ready for review and review the PR again from the top, or, for a PR you cannot fix without a decision, report it to the user with the blocker.
+- **A pass.** Merge in dependency order (the tracker doc's "Merge"), once the user has authorised merging.
 - After each merge: update every still-open issue branch against the base branch (conflicts cluster wherever the doc's environment section says they do); a conflict an agent should resolve goes to a fresh Sonnet agent in that worktree.
-- Remove the worktree; confirm the issue closed, then clear its markers with `gh issue edit <n> --remove-label in-progress --remove-label ready-for-review 2>/dev/null || true` (closing does not remove labels).
+- Remove the worktree; confirm the issue closed, then remove its `in-progress` and `ready-for-review` labels (closing does not remove labels).
 
 Done when every PR in the queue is merged or reported back to the user with its blocker.
 

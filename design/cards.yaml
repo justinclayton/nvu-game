@@ -251,7 +251,7 @@ cards:
     cost: 1
     oomph: 2
     scramble: 2
-    text: If Gray played a card this turn, draw 1 card.
+    text: If Gray played a card this turn, you may draw 1 card.
     flavor: Seamless hand-off between partners.
 
   - name: Brute Recycle
@@ -262,7 +262,7 @@ cards:
     rarity: Cool
     cost: 1
     oomph: 3
-    text: "Play: Scrap 1 starter card from your hand or discard pile. If you do, draw 1 card."
+    text: "Play: Scrap 1 starter card from your hand or discard pile. If you do, you may draw 1 card."
     flavor: "Crush outdated gear into raw momentum."
 
   - name: Rhythm & Bruise
@@ -272,7 +272,7 @@ cards:
     owner: Red
     rarity: Cool
     cost: 1
-    text: "Oomph equal to 2 times the number of cards Gray has played this turn. Play: If Gray has played 2 or more cards, draw 1 card."
+    text: "Oomph equal to 2 times the number of cards Gray has played this turn. Play: If Gray has played 2 or more cards, you may draw 1 card."
     conditional_stat: true
     flavor: "Time your heaviest strike right when Gray creates the breach."
 
@@ -284,7 +284,7 @@ cards:
     rarity: Cool
     cost: 1
     oomph: 2
-    text: "Play: Draw 2 cards, then Exhaust 1 card from your hand."
+    text: "Play: You may draw up to 2 cards, then Exhaust 1 card from your hand."
     flavor: "Keep charging forward without looking back."
 
   ### Gray
@@ -387,7 +387,7 @@ cards:
     owner: Gray
     rarity: Cool
     cost: 1
-    text: Every time Red plays a card this turn, draw 1 card.
+    text: Every time Red plays a card this turn, you may draw 1 card.
     flavor: Keep their eyes on you so Red can maneuver freely.
 
   - name: Distract & Pivot
@@ -410,7 +410,7 @@ cards:
     rarity: Cool
     cost: 1
     scramble: 2
-    text: "Play: Draw 1 card. If Red has played a card this turn, draw 1 additional card."
+    text: "Play: You may draw 1 card. If Red has played a card this turn, you may draw 1 more."
     flavor: "Match Red's momentum to keep the tactical loop spinning."
 
   # Stuff
@@ -463,7 +463,7 @@ cards:
     rarity: Cool
     cost: 0
     oomph: 2
-    text: "Play: Draw 1 card."
+    text: "Play: You may draw 1 card."
     flavor: Adrenaline surge to keep moving when stamina is low.
 
   - name: Cutting Torch
@@ -530,7 +530,7 @@ cards:
     kind: good_stuff
     rarity: Fine
     cost: 0
-    text: "Play: Draw 1 card. If both you and your partner played a card this turn, gain 1 Oomph and 1 Scramble."
+    text: "Play: You may draw 1 card. If both you and your partner played a card this turn, gain 1 Oomph and 1 Scramble."
     flavor: "A hand-cranked generator that charges when team tempo builds."
 
   - name: Salvaged Blueprint
@@ -540,7 +540,7 @@ cards:
     rarity: Cool
     cost: 1
     scramble: 2
-    text: "Play: Draw 2 cards, then place 1 card from your hand on top of your deck."
+    text: "Play: You may draw up to 2 cards, then place 1 card from your hand on top of your deck."
     flavor: "Quick tactical schematic that reorganizes upcoming options."
 
   - name: Emergency Breaker
@@ -551,7 +551,7 @@ cards:
     cost: 1
     oomph: 2
     scramble: 2
-    text: "Play: Scrap 1 card from your hand. Your partner draws 1 card."
+    text: "Play: Scrap 1 card from your hand. Your partner may draw 1 card."
     flavor: "Shatter a jammed valve to clear your pack and open a window for your partner."
 
   - name: Grav Harness
@@ -561,7 +561,7 @@ cards:
     cost: 2
     oomph: 3
     scramble: 3
-    text: One of you draws 1 card.
+    text: One of you may draw 1 card.
     flavor: Defies local gravity to make heavy obstacles weightless.
 
   - name: Automated Salvage Kit

@@ -4,7 +4,6 @@ import { playedBy } from "../queries";
 import { PILES, type Character, type DomainEvent, type Pending, type Pile } from "../types";
 import {
   discard,
-  drawOne,
   grantPlayDiscount,
   moveToHand,
   pileCards,
@@ -16,7 +15,10 @@ import {
 } from "../verbs";
 import {
   ask,
+  askLater,
   done,
+  drawnAs,
+  drawQuestion,
   nothing,
   source,
   type BehaviourContext,
@@ -215,16 +217,28 @@ export const GRAY: Registry = {
   /* "Shuffle 1 Stuff from Red's hand into Red's deck." */
   "I'll Take That": shuffleStuffFromHand(() => "Red"),
 
-  /* "Every time Red plays a card this turn, draw 1 card."
+  /* "Every time Red plays a card this turn, you may draw 1 card."
    *
-   * A card-driven exception to Play's no-draw rule. */
+   * A card-driven exception to Play's no-draw rule. A reaction cannot suspend, so each Red play
+   * queues the question and the engine asks it once the play is done (`TurnRecord.questions`). */
   "Covering Fire": {
     onEvent(event, state, ctx) {
       if (ctx.zone !== "playZone") return nothing(state);
       if (event.type !== "CARD_PLAYED" || event.character !== "Red") return nothing(state);
-      const events: DomainEvent[] = [];
-      return done(drawOne(state, ctx.character, events), events);
+      if (playerOf(state, ctx.character).down) return nothing(state);
+      return done(
+        askLater(
+          state,
+          drawQuestion(
+            ctx,
+            "covering-fire",
+            `Covering Fire: Red played ${event.card.name}. Draw 1 card?`,
+            ctx.character,
+          ),
+        ),
+      );
     },
+    onChoice: (answer, state) => drawnAs(answer, state),
   },
 
   /* "The next card Red plays this turn costs 1 fewer card to play." */
@@ -234,13 +248,15 @@ export const GRAY: Registry = {
     },
   },
 
-  /* "Play: Draw 1 card. If Red has played a card this turn, draw 1 additional card." */
+  /* "Play: You may draw 1 card. If Red has played a card this turn, you may draw 1 more."
+   *
+   * One question: with Red's play behind it, the two optional draws come to "up to 2". */
   "Synergy Link": {
     onPlay(state, ctx) {
-      const events: DomainEvent[] = [];
-      let s = drawOne(state, ctx.character, events);
-      if (playedBy(s, "Red") > 0) s = drawOne(s, ctx.character, events);
-      return done(s, events);
+      const max = playedBy(state, "Red") > 0 ? 2 : 1;
+      const prompt = max === 2 ? "Draw up to 2 cards?" : "Draw 1 card?";
+      return ask(state, drawQuestion(ctx, "synergy-link", prompt, ctx.character, max));
     },
+    onChoice: (answer, state) => drawnAs(answer, state),
   },
 };

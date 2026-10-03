@@ -229,6 +229,18 @@ export function drawOne(
   });
 }
 
+/** `count` draws in a row; a draw that puts the character Down ends the run and stops the rest. */
+export function drawCards(
+  state: GameState,
+  c: Character,
+  count: number,
+  events: DomainEvent[],
+): GameState {
+  let next = state;
+  for (let i = 0; i < count; i++) next = drawOne(next, c, events);
+  return next;
+}
+
 /**
  * Rulebook, Going Down: no card may be put into a Down character's hand — you cannot park Stuff on
  * a partner who is out.

@@ -1,6 +1,6 @@
 # *North vs Up*: Rulebook
 
-Rules version: 0.2.9
+Rules version: 0.2.10
 
 ---
 
@@ -167,6 +167,7 @@ A `Stuff` card shows the same parts as a player card, with these differences:
 - `Get Bad Stuff`: Move the top card of the Bad Stuff pool into your hand.
 - `Reveal a card reward`: Reveal the top **3** cards of your reward pool. You may put **one** into your discard pile. Put the cards you did not take on the bottom of your reward pool.
 - `Scry X`: Look at the top **X** cards of your deck. Discard any number of them. Put the rest back in the same order. A deck with fewer than X cards shows what is there; Scry never reshuffles the discard pile.
+- `you may draw X cards`: Draw any number of cards from none up to **X**. `you may draw 1 card` is one card or none.
 - `any deck`: any face-down pile on the table: a character deck, a reward pool, the Floor deck, or a Stuff pool.
 - `Scrap`: Move the card to the Scrapyard. It is removed from play for the rest of the game.
 - `Empty deck`: If you must draw or Exhaust a card and your deck is empty, first shuffle your discard pile to form a new deck. If your discard pile is also empty, you go `Down` (section 9).

@@ -64,6 +64,20 @@ describe("Keywords: Empty deck", () => {
     expect(eventTypes(events)).toContain("WENT_DOWN");
   });
 
+  it("Turn Start's draw is not a question: both hands fill to 5 with nothing to decline", () => {
+    const state = rig({
+      phase: "Turn Start",
+      floorDeck: [room("Security Turnstile")],
+      Red: player({ deck: pile("Shove", 5) }),
+      Gray: player({ deck: pile("Duck Under", 5) }),
+    });
+    const { state: next, events } = must(state, { type: "FLIP_ROOM" });
+    expect(next.pending).toBeNull();
+    expect(next.Red.hand).toHaveLength(5);
+    expect(next.Gray.hand).toHaveLength(5);
+    expect(eventTypes(events).filter((t) => t === "CARD_DRAWN")).toHaveLength(10);
+  });
+
   it("'if your discard pile is also empty, you go Down' — on an Exhaust", () => {
     const state = rig({
       phase: "Play",

@@ -151,6 +151,10 @@ A player's face-up pile of cards Exhausted off their deck, or from their hand to
 
 The keyword `Scry X`: look at the top X cards of your own deck, discard any number of them, put the rest back in the same order. Replaces `Peek X` (issue #273). `[agent, 2026-10-03]`
 
+**You may draw**
+
+A draw printed on a card is optional: `you may draw 1 card` is one card or none, `you may draw up to 2 cards` is none, one or two. Only Turn Start's draw up to five is mandatory, so a card can never force a character Down by making them draw from an empty deck and discard pile (issue #275). `[agent, 2026-10-03]`
+
 **Any deck**
 
 On a card, any face-down pile on the table: a character deck, a reward pool, the Floor deck, or a Stuff pool (issue #147). `[you, 2026-09-23]`

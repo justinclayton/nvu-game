@@ -105,6 +105,42 @@ describe("undo", () => {
   });
 });
 
+describe("a \"you may draw\" question", () => {
+  const stimPack = () => {
+    const state = rig({
+      phase: "Play",
+      activeRoom: room("Security Turnstile"),
+      Red: player({ deck: pile("Shove", 3), hand: [card("Stim Pack")] }),
+      Gray: player({ deck: pile("Duck Under", 4) }),
+    });
+    const session = createSessionFrom(state);
+    const stim = state.Red.hand[0];
+    if (!stim) throw new Error("rig");
+    session.getState().dispatch({ type: "PLAY_CARD", character: "Red", cardId: stim.id, payWith: [] });
+    return session;
+  };
+
+  it("can be declined, and the decline can be taken back", () => {
+    const session = stimPack();
+    const asked = session.getState().state;
+    expect(asked.pending?.kind).toBe("ChooseDraw");
+
+    session.getState().dispatch({ type: "CHOOSE_DRAW", character: null, count: 0 });
+    expect(session.getState().state.pending).toBeNull();
+    expect(session.getState().state.Red.hand).toHaveLength(0);
+
+    expect(session.getState().undo()).toBe(true);
+    expect(session.getState().state).toEqual(asked);
+  });
+
+  it("cannot be taken back once the card is drawn", () => {
+    const session = stimPack();
+    session.getState().dispatch({ type: "CHOOSE_DRAW", character: "Red", count: 1 });
+    expect(session.getState().state.Red.hand).toHaveLength(1);
+    expect(session.getState().undo()).toBe(false);
+  });
+});
+
 describe("save and replay", () => {
   it("a run is its seed plus its command log", () => {
     const session = newSession();

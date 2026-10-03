@@ -1,0 +1,5 @@
+# Generated from design/cards.yaml. Any card edit rewrites their list-id hash, so
+# two branches editing different cards always collide here. The driver (set up by
+# `make app-install`) keeps our side; .githooks/pre-merge-commit then regenerates.
+tools/cards.js                       merge=cards-generated
+app/src/content/cards.generated.ts   merge=cards-generated

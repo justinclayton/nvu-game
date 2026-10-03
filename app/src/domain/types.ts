@@ -2,7 +2,7 @@
  *
  * Every name here is a term from design/GLOSSARY.md, spelled the same way: discard pile,
  * Exhaust pile, Fled, Cleared, Scrapyard, Down, stat pool, play zone. Section
- * numbers in the comments point at design/rulebook.md, rules version 0.2.9.
+ * numbers in the comments point at design/rulebook.md, rules version 0.2.10.
  *
  * Everything is readonly. The engine never mutates; it returns a new state.
  */
@@ -120,6 +120,12 @@ export interface TurnRecord {
    */
   readonly goodStuffOwed: Readonly<Record<Character, number>>;
   /**
+   * Questions a this-turn trigger (Covering Fire) raised in the middle of
+   * something else. A trigger cannot suspend, so it queues its question here
+   * and the engine asks it, oldest first, as soon as nothing else is waiting.
+   */
+  readonly questions: readonly Pending[];
+  /**
    * Once-per-turn markers, so a trigger that could feed itself fires once.
    * Crowbar keys this by its own card id, so two copies each get their own
    * marker.
@@ -191,6 +197,15 @@ export interface PendingSource {
 }
 
 /**
+ * One way to answer a "you may draw" question: `character` draws `count`
+ * cards. Declining is not an option in the list: it is always legal.
+ */
+export interface DrawOption {
+  readonly character: Character;
+  readonly count: number;
+}
+
+/**
  * A choice the engine is waiting on. While it is set, the answering command is
  * the only legal one. The UI renders exactly what is here and nothing else.
  */
@@ -222,6 +237,17 @@ export type Pending =
       readonly count: number;
       /** An optional choice may be answered with no cards at all. */
       readonly optional: boolean;
+      readonly source: PendingSource | null;
+    }
+  | {
+      /**
+       * Rulebook, Keywords: `you may draw` — a draw printed on a card is optional.
+       * `options` are the draws on offer (one per count, for each character who
+       * may draw); the answer is one of them, or no draw at all.
+       */
+      readonly kind: "ChooseDraw";
+      readonly prompt: string;
+      readonly options: readonly DrawOption[];
       readonly source: PendingSource | null;
     }
   | {
@@ -343,6 +369,12 @@ export type Command =
   | { readonly type: "CHOOSE_PILE"; readonly pile: Pile }
   | { readonly type: "CHOOSE_STAT"; readonly stat: Stat }
   | { readonly type: "CHOOSE_CARDS"; readonly cardIds: readonly CardId[] }
+  | {
+      /** One of the draws on offer, or `{ character: null, count: 0 }` to draw nothing. */
+      readonly type: "CHOOSE_DRAW";
+      readonly character: Character | null;
+      readonly count: number;
+    }
   | { readonly type: "ORDER_CARDS"; readonly cardIds: readonly (CardId | RoomId)[] }
   | {
       /** One of the revealed card rewards, or null to take none. */

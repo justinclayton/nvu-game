@@ -42,6 +42,7 @@ import {
   type ReplayRequest,
   type SimRequest,
 } from "./args";
+import { answerDraw } from "./draw";
 import { cardLine, moveHint, printedFaceLine, printedRoomLines, renderTable, shortStatusLines } from "./render";
 
 const content = CARD_CONTENT;
@@ -274,6 +275,12 @@ function buildChoose(state: GameState, action: Extract<PlayAction, { kind: "choo
   if (pending.kind === "ChooseCards") {
     const cardIds = resolveEach(action.names, pending.options).map((c) => c.id);
     return { type: "CHOOSE_CARDS", cardIds };
+  }
+
+  if (pending.kind === "ChooseDraw") {
+    const answer = answerDraw(pending.options, action.names);
+    if (!answer.ok) throw new MoveRefused(answer.reason);
+    return answer.command;
   }
 
   if (pending.kind === "ChooseGoodStuff") {

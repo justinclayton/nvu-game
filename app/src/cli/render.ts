@@ -219,6 +219,15 @@ export function moveHint(state: GameState, staged: readonly StagedAnswer[] = [])
         lines.push(`choose <Name>${plural} — choose ${String(want)} of: ${names}${optional}`);
         break;
       }
+      case "ChooseDraw": {
+        const drawers = new Set(pending.options.map((o) => o.character));
+        const draws = pending.options
+          .map((o) => (drawers.size > 1 ? `${o.character} ${String(o.count)}` : String(o.count)))
+          .join(", ");
+        const form = drawers.size > 1 ? "choose <Name>" : "choose <N>";
+        lines.push(`${form} — draw: ${draws} — or choose none`);
+        break;
+      }
       case "OrderCards":
         lines.push(
           `order <Name> <Name>... — top first, every one of: ${pending.cards.map((c) => c.name).join(", ")}`,

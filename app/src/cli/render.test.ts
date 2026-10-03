@@ -1,8 +1,8 @@
 /* A conditional stat's hand line shows its current value, not `(conditional)`. */
 
 import { beforeEach, describe, expect, it } from "vitest";
-import { cardLine, printedFaceLine } from "./render";
-import { card, handCard, must, pile, player, playing, resetRig } from "@domain/__fixtures__/rig";
+import { cardLine, moveHint, printedFaceLine } from "./render";
+import { card, handCard, must, pile, player, playing, resetRig, rig } from "@domain/__fixtures__/rig";
 import { CARD_CONTENT } from "@content/index";
 
 beforeEach(resetRig);
@@ -78,5 +78,23 @@ describe("cardLine — a conditional stat", () => {
     expect(printedFaceLine(face)).toBe(
       "In Step [cost 2; (conditional)] — Scramble equal to 2 times the number of cards Red has played this turn.",
     );
+  });
+});
+
+describe("moveHint — a 'you may draw'", () => {
+  const asking = (options: { character: "Red" | "Gray"; count: number }[]) =>
+    rig({
+      phase: "Play",
+      pending: { kind: "ChooseDraw", prompt: "Draw?", options, source: null },
+    });
+
+  it("says how to draw, and that none is an answer", () => {
+    const hint = moveHint(asking([{ character: "Red", count: 1 }, { character: "Red", count: 2 }]));
+    expect(hint).toContain("choose <N> — draw: 1, 2 — or choose none");
+  });
+
+  it("asks for a name when either character may draw", () => {
+    const hint = moveHint(asking([{ character: "Red", count: 1 }, { character: "Gray", count: 1 }]));
+    expect(hint).toContain("choose <Name> — draw: Red 1, Gray 1 — or choose none");
   });
 });

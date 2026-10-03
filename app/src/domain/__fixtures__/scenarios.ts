@@ -41,8 +41,8 @@ function playing(): GameState {
   return next;
 }
 
-/** A pending `ChooseCharacter`: Grav Harness asks who draws. */
-function choosingCharacter(): GameState {
+/** A pending `ChooseDraw`: Grav Harness asks who may draw, or neither. */
+function gravHarnessDraw(): GameState {
   const state = rig({
     phase: "Play",
     activeRoom: room(CLEARED_ROOM),
@@ -58,6 +58,37 @@ function choosingCharacter(): GameState {
     payWith: state.Red.hand.slice(1, 3).map((c) => c.id),
   });
   return asked;
+}
+
+/** A pending `ChooseDraw` for one: Stim Pack's "you may draw 1 card". */
+function stimPackDraw(): GameState {
+  const state = rig({
+    phase: "Play",
+    activeRoom: room(CLEARED_ROOM),
+    Red: player({ deck: pile("Shove", 4), hand: [card("Stim Pack"), ...pile("Shove", 3)] }),
+    Gray: player({ deck: pile("Duck Under", 6), hand: pile("Duck Under", 3) }),
+  });
+  const stim = state.Red.hand[0];
+  if (!stim) throw new Error("rig");
+  return must(state, { type: "PLAY_CARD", character: "Red", cardId: stim.id, payWith: [] }).state;
+}
+
+/** A pending `ChooseDraw` for up to two: Momentum Shift's "you may draw up to 2 cards". */
+function momentumShiftDraw(): GameState {
+  const state = rig({
+    phase: "Play",
+    activeRoom: room(CLEARED_ROOM),
+    Red: player({ deck: pile("Shove", 4), hand: [card("Momentum Shift"), ...pile("Shove", 3)] }),
+    Gray: player({ deck: pile("Duck Under", 6), hand: pile("Duck Under", 3) }),
+  });
+  const shift = state.Red.hand[0];
+  if (!shift) throw new Error("rig");
+  return must(state, {
+    type: "PLAY_CARD",
+    character: "Red",
+    cardId: shift.id,
+    payWith: state.Red.hand.slice(1, 2).map((c) => c.id),
+  }).state;
 }
 
 /** A pending `ChooseCards`: Automated Defense Turret's Scrap offer asks whether to. */
@@ -298,9 +329,19 @@ export const FIXTURES: readonly Fixture[] = [
     build: stable(playing),
   },
   {
-    name: "choose-character",
-    description: "Grav Harness pending a ChooseCharacter answer.",
-    build: stable(choosingCharacter),
+    name: "grav-harness-draw",
+    description: "Grav Harness pending a ChooseDraw answer: Red, Gray or neither.",
+    build: stable(gravHarnessDraw),
+  },
+  {
+    name: "stim-pack-draw",
+    description: "Stim Pack's 'you may draw 1 card' pending a ChooseDraw answer.",
+    build: stable(stimPackDraw),
+  },
+  {
+    name: "momentum-shift-draw",
+    description: "Momentum Shift's 'you may draw up to 2 cards' pending a ChooseDraw answer.",
+    build: stable(momentumShiftDraw),
   },
   {
     name: "choose-cards",

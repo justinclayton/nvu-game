@@ -1,14 +1,17 @@
 /* One test per entry in Gray's registry, beside the behaviour. */
 
 import { beforeEach, describe, expect, it } from "vitest";
+import { execute } from "../engine";
 import { costOf, statPool } from "../queries";
 import {
   card,
+  drawing,
   eventTypes,
   free,
   handCard,
   ids,
   must,
+  noDraw,
   pile,
   play,
   player,
@@ -374,8 +377,8 @@ describe("I'll Take That — 'Shuffle 1 Stuff from Red's hand into Red's deck'",
   });
 });
 
-describe("Covering Fire — 'Every time Red plays a card this turn, draw 1 card'", () => {
-  it("draws for Gray whenever Red plays, while it is on the table", () => {
+describe("Covering Fire — 'Every time Red plays a card this turn, you may draw 1 card'", () => {
+  const armedState = () => {
     const state = playing({
       Red: player({ deck: pile("Shove", 4), hand: [card("Pry Bar"), card("Coil Of Cable")] }),
       Gray: player({
@@ -383,20 +386,63 @@ describe("Covering Fire — 'Every time Red plays a card this turn, draw 1 card'
         hand: [card("Covering Fire"), card("Duck Under")],
       }),
     });
+    return must(state, {
+      type: "PLAY_CARD",
+      character: "Gray",
+      cardId: handCard(state, "Gray", "Covering Fire").id,
+      payWith: [handCard(state, "Gray", "Duck Under").id],
+    }).state;
+  };
+
+  it("asks Gray whether to draw whenever Red plays, while it is on the table", () => {
+    const armed = armedState();
+    expect(armed.Gray.hand).toHaveLength(0);
+    expect(armed.pending).toBeNull();
+
+    const once = must(armed, free("Red", handCard(armed, "Red", "Pry Bar").id));
+    expect(once.state.pending).toMatchObject({
+      kind: "ChooseDraw",
+      options: [{ character: "Gray", count: 1 }],
+    });
+    expect(once.state.Gray.hand).toHaveLength(0);
+    const drawn = must(once.state, drawing("Gray", 1));
+    expect(drawn.state.Gray.hand).toHaveLength(1);
+    expect(drawn.state.Gray.deck).toHaveLength(3);
+    expect(drawn.state.pending).toBeNull();
+
+    const twice = must(drawn.state, free("Red", handCard(drawn.state, "Red", "Coil Of Cable").id));
+    expect(twice.state.pending?.kind).toBe("ChooseDraw");
+    expect(must(twice.state, drawing("Gray", 1)).state.Gray.hand).toHaveLength(2);
+  });
+
+  it("lets Gray decline each time", () => {
+    const armed = armedState();
+    const once = must(armed, free("Red", handCard(armed, "Red", "Pry Bar").id));
+    const declined = must(once.state, noDraw);
+    expect(declined.state.Gray.hand).toHaveLength(0);
+    expect(declined.state.Gray.deck).toHaveLength(4);
+    expect(declined.state.pending).toBeNull();
+    // Declining once does not turn the next prompt off.
+    const twice = must(declined.state, free("Red", handCard(declined.state, "Red", "Coil Of Cable").id));
+    expect(twice.state.pending?.kind).toBe("ChooseDraw");
+    expect(must(twice.state, drawing("Gray", 1)).state.Gray.hand).toHaveLength(1);
+  });
+
+  it("asks nothing when Gray plays, only when Red does", () => {
+    const state = playing({
+      Gray: player({
+        deck: pile("Duck Under", 4),
+        hand: [card("Covering Fire"), card("Duck Under"), card("Coil Of Cable")],
+      }),
+    });
     const armed = must(state, {
       type: "PLAY_CARD",
       character: "Gray",
       cardId: handCard(state, "Gray", "Covering Fire").id,
       payWith: [handCard(state, "Gray", "Duck Under").id],
-    });
-    expect(armed.state.Gray.hand).toHaveLength(0);
-
-    const once = must(armed.state, free("Red", handCard(armed.state, "Red", "Pry Bar").id));
-    expect(once.state.Gray.hand).toHaveLength(1);
-    expect(once.state.Gray.deck).toHaveLength(3);
-
-    const twice = must(once.state, free("Red", handCard(once.state, "Red", "Coil Of Cable").id));
-    expect(twice.state.Gray.hand).toHaveLength(2);
+    }).state;
+    const next = must(armed, free("Gray", handCard(armed, "Gray", "Coil Of Cable").id));
+    expect(next.state.pending).toBeNull();
   });
 });
 
@@ -430,7 +476,7 @@ describe("Distract & Pivot — 'The next card Red plays this turn costs 1 fewer 
 });
 
 
-describe("Synergy Link — 'Draw 1 card. If Red has played a card this turn, draw 1 additional card'", () => {
+describe("Synergy Link — 'You may draw 1 card. If Red has played a card this turn, you may draw 1 more'", () => {
   const link = (redPlays: boolean) => {
     const state = playing({
       Red: player({ deck: pile("Shove", 3), hand: [card("Coil Of Cable")] }),
@@ -447,16 +493,31 @@ describe("Synergy Link — 'Draw 1 card. If Red has played a card this turn, dra
       payWith: [handCard(ready, "Gray", "Duck Under").id],
     });
   };
+  const drawnBy = (ran: ReturnType<typeof link>, command: Parameters<typeof must>[1]) =>
+    must(ran.state, command).state.Gray.hand.length;
 
-  it("draws 1 while Red has played nothing", () => {
-    const { state, events } = link(false);
-    expect(eventTypes(events).filter((t) => t === "CARD_DRAWN")).toHaveLength(1);
-    expect(state.Gray.deck).toHaveLength(3);
+  it("offers 1 while Red has played nothing", () => {
+    const asked = link(false);
+    expect(asked.state.pending).toMatchObject({
+      kind: "ChooseDraw",
+      options: [{ character: "Gray", count: 1 }],
+    });
+    expect(drawnBy(asked, drawing("Gray", 1))).toBe(1);
+    expect(drawnBy(asked, noDraw)).toBe(0);
+    expect(execute(asked.state, drawing("Gray", 2)).ok).toBe(false);
   });
 
-  it("draws 2 once Red has played a card", () => {
-    const { state, events } = link(true);
-    expect(eventTypes(events).filter((t) => t === "CARD_DRAWN")).toHaveLength(2);
-    expect(state.Gray.deck).toHaveLength(2);
+  it("offers up to 2 once Red has played a card", () => {
+    const asked = link(true);
+    expect(asked.state.pending).toMatchObject({
+      kind: "ChooseDraw",
+      options: [
+        { character: "Gray", count: 1 },
+        { character: "Gray", count: 2 },
+      ],
+    });
+    expect(drawnBy(asked, drawing("Gray", 2))).toBe(2);
+    expect(drawnBy(asked, drawing("Gray", 1))).toBe(1);
+    expect(drawnBy(asked, noDraw)).toBe(0);
   });
 });

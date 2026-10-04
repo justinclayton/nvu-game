@@ -2,7 +2,7 @@
 
 Recorded: 2026-09-06. Rules version: 0.1.0. Notes are the designer's, verbatim, tagged `[you]`. Nothing here is a ruling:
 each note is a question or an observation, with a pointer to the rule or card it touches so a
-later ticket has one place to start. The rulebook (`design/rulebook.md`) still says what is true.
+later ticket has one place to start. The rulebook (`rulebook.md`) still says what is true.
 
 ## Notes
 
@@ -19,12 +19,12 @@ later ticket has one place to start. The rulebook (`design/rulebook.md`) still s
    Touches §5 Draw, maximum hand size and the burned draw on a full hand. Observation, no proposal.
 
 4. **Bad stuff card idea: when one draws, the other must also draw.** `[you]`
-   A new `Bad Stuff` card for `design/cards.yaml`. Would need a ruling on what "must also draw"
+   A new `Bad Stuff` card for `cards.yaml`. Would need a ruling on what "must also draw"
    means against the §5 minimum and maximum, and against a partner in `Last Stand`.
 
 5. **Face full of slime should cost 2.** `[you]`
    `Faceful Of Slime` (`Bad Stuff`, cost 1, *Holding: you may not draw more than 1 card at draw
-   time*) in `design/cards.yaml`.
+   time*) in `cards.yaml`.
 
 6. **A lot of times we have an empty hand.** `[you]`
    Observation. Related to note 3 and to §5 Cleanup step 2, which Exhausts every non-`Hold` card
@@ -32,7 +32,7 @@ later ticket has one place to start. The rulebook (`design/rulebook.md`) still s
 
 7. **A pair of stitch-em-ups should heal either player.** `[you]`
    `A Pair Of Stich-Em-Ups` (`Good Stuff`, cost 1, *Move 2 cards from your exhaust pile to the
-   bottom of your deck*) in `design/cards.yaml`. Currently reads only its player's own exhaust
+   bottom of your deck*) in `cards.yaml`. Currently reads only its player's own exhaust
    pile and deck.
 
 8. **Is "Oomph" a better name than "Power"?** `[you]`

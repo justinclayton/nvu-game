@@ -6,7 +6,7 @@ turn-25 limit with both characters alive. Neither character ever entered Last St
 
 Notes are the agent's, verbatim, tagged `[agent]`, in the order they were written into the run. The
 analysis under each one is also the agent's. Nothing here is a ruling. A playtester checks a suspected
-bug against `design/rulebook.md` and `design/cards.yaml` only. This run's agent also read the engine
+bug against `rulebook.md` and `cards.yaml` only. This run's agent also read the engine
 source in several notes; those findings were verified separately before the note was merged, and the
 ones that held are filed as issues. The rulebook says what is true.
 
@@ -511,7 +511,7 @@ problems.
    I needed at that moment was the list I had just invalidated.
 
 5. **A card reward is offered by name only.** "Take One Man's Junk, or skip it?" with no cost, no
-   stats and no text. I had to open `design/cards.yaml` to answer (note 15). The Ascend offer prints
+   stats and no text. I had to open `cards.yaml` to answer (note 15). The Ascend offer prints
    full card faces, so the data is clearly to hand.
 
 6. **Answering a pending prompt sometimes prints nothing.** Choosing which character A Pair Of
@@ -539,7 +539,7 @@ problems.
 
 12. **There is no way to look up a card.** Nothing prints the contents of a deck, a discard pile or
     a reward pool, and nothing shows a single card's face on demand. Checking what a card said meant
-    reading `design/cards.yaml`.
+    reading `cards.yaml`.
 
 Things the tool got right, recorded because they changed how the run was played:
 

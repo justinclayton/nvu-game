@@ -11,8 +11,8 @@ raised so a floor no longer runs short at Setup. The card list is the proposed l
 playtest 6.
 
 Notes are the agent's, verbatim, tagged `[agent]`, in the order they were written into the run.
-Nothing here is a ruling. Suspected bugs were checked against `design/rulebook.md` and
-`design/cards.yaml` only; the engine was not read.
+Nothing here is a ruling. Suspected bugs were checked against `rulebook.md` and
+`cards.yaml` only; the engine was not read.
 
 ## How the run went
 
@@ -105,7 +105,7 @@ Live cards (deck, discard and hand together) and Exhaust pile size at each Ascen
    > card played for free is explicitly not discarding that number of cards. Question for the
    > designer: should a for-free play count as its printed cost or as 0 for this card's purposes?
 
-   `design/cards.yaml` gives Junk Launcher's text verbatim as "Oomph equal to total costs of all
+   `cards.yaml` gives Junk Launcher's text verbatim as "Oomph equal to total costs of all
    cards you played this turn," so the wording is confirmed, not misquoted. This is the third
    distinct Junk Launcher finding across three playtests (issue #144, playtest 6 note 13, this one):
    each time the card's actual value did not match a straightforward reading of its printed text.

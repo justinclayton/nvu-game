@@ -1105,7 +1105,7 @@
     },
     {
       "at": 244,
-      "text": "Overcharged Battery says 'The next card played this turn is played for free' (one card, design/cards.yaml). After playing it, the table showed cost 0 for every card in BOTH Red's and Gray's hands, not just one upcoming card. Playing Grav Harness next to see whether only it goes free or the discount is really general."
+      "text": "Overcharged Battery says 'The next card played this turn is played for free' (one card, cards.yaml). After playing it, the table showed cost 0 for every card in BOTH Red's and Gray's hands, not just one upcoming card. Playing Grav Harness next to see whether only it goes free or the discount is really general."
     },
     {
       "at": 245,
@@ -1125,7 +1125,7 @@
     },
     {
       "at": 615,
-      "text": "Overgrown Hydroponics Bay has Scramble 6 (Bad Stuff both) and Scramble 11 (Good Stuff both) as two SEPARATE challenges (checked design/cards.yaml: two challenges: entries, not one challenge with two thresholds), so meeting Scramble 11 does not skip the Scramble 6 penalty -- both resolved this turn (log shows both lines). Matches rulebook section 'If more than one challenge is met, their outcomes may be resolved in any order,' not a bug. But reaching the room's own better line still cost Bad Stuff on the way, which reads oddly for a design meant to reward hitting the higher number -- worth asking the designer whether that is intended for rooms shaped this way."
+      "text": "Overgrown Hydroponics Bay has Scramble 6 (Bad Stuff both) and Scramble 11 (Good Stuff both) as two SEPARATE challenges (checked cards.yaml: two challenges: entries, not one challenge with two thresholds), so meeting Scramble 11 does not skip the Scramble 6 penalty -- both resolved this turn (log shows both lines). Matches rulebook section 'If more than one challenge is met, their outcomes may be resolved in any order,' not a bug. But reaching the room's own better line still cost Bad Stuff on the way, which reads oddly for a design meant to reward hitting the higher number -- worth asking the designer whether that is intended for rooms shaped this way."
     },
     {
       "at": 640,

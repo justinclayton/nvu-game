@@ -11,8 +11,8 @@ actually holding one, and after `bin/nvu card` started printing a Room's thresho
 The card list is the proposed list carried over from playtest 7.
 
 Notes are the agent's, verbatim, tagged `[agent]`, in the order they were written into the run.
-Nothing here is a ruling. Suspected bugs were checked against `design/rulebook.md` and
-`design/cards.yaml` only; the engine was not read.
+Nothing here is a ruling. Suspected bugs were checked against `rulebook.md` and
+`cards.yaml` only; the engine was not read.
 
 ## How the run went
 
@@ -46,7 +46,7 @@ either one. Red went `Down` and the run ended in Defeat (note 3).
    > Launcher's own printed cost, matching the new rulebook text 'total printed cost of all cards
    > in the play zone' -- both characters' cards counted, as intended.
 
-   Checked against `design/cards.yaml`, which gives the text verbatim. The arithmetic (0 + 2 + 2 = 4,
+   Checked against `cards.yaml`, which gives the text verbatim. The arithmetic (0 + 2 + 2 = 4,
    matching the stat pool's rise) confirms the card reads the whole play zone, both sides, and
    counts its own printed cost too. This is the behavior the new wording was written to produce, and
    it worked as printed on the first test.
@@ -136,7 +136,7 @@ Justin asked four questions about this run; answers below, each citing the log l
 4. **Card Reward Pick Rates: do the new 2:1/3:1 Fine and Cool rewards feel like distinct power spikes over starters?**
 
    Only one Ascend happened this run (floor 1, turn 4, log 87), so only one reward pick per
-   character. Red took Junk Launcher (`rarity: Cool` in `design/cards.yaml`) over Reckless Swing
+   character. Red took Junk Launcher (`rarity: Cool` in `cards.yaml`) over Reckless Swing
    and Fast Follow. Gray took Quick Vault (`rarity: Fine`) over I'll Take That and Hit 'n Run.
    Neither reward card got a chance to prove itself as a power spike in this run: Junk Launcher was
    played once (note 1, a solid Oomph 4 off a cheap setup) and then sat unused or got discarded as

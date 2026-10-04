@@ -5,7 +5,7 @@ Recorded: 2026-09-17. Rules version: 0.1.0. Played in the web app (`app/`), floo
 Notes are the designer's, verbatim, tagged `[you]`. Where a note was checked against the engine the
 finding follows it, tagged `[agent]`. Rulings the designer made on reading those findings are tagged
 `[you, 2026-09-17]` and are settled. Everything else is still a question. The rulebook
-(`design/rulebook.md`) says what is true.
+(`rulebook.md`) says what is true.
 
 The run's event log is in the appendix; notes cite it by line.
 

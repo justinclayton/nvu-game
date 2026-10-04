@@ -68,10 +68,15 @@ jobs:
             echo
             echo "The loop runs inside this PR: a review of the diff files work issues and ruling questions, inner PRs land on this branch, and an agent playtest reports as an issue. Edit the sources again on this branch to run it again, or merge to \`main\` to close the loop."
           } > pr-body.md
-          gh api -X POST "repos/$GITHUB_REPOSITORY/pulls" \
+          if ! gh api -X POST "repos/$GITHUB_REPOSITORY/pulls" \
             -f title="Kit $kit: $subject" \
             -f head="$BRANCH" \
             -f base=main \
             -F draft=true \
             -F body=@pr-body.md \
-            --jq '"opened draft PR #\(.number): \(.html_url)"'
+            --jq '"opened draft PR #\(.number): \(.html_url)"'; then
+            echo "::error::Could not open the outer PR. With GITHUB_TOKEN this needs the repo setting" \
+              "'Allow GitHub Actions to create and approve pull requests' (Settings > Actions > General);" \
+              "with a LOOP_TOKEN secret it does not. See the loop's identity ruling issue."
+            exit 1
+          fi

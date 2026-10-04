@@ -1,4 +1,4 @@
-/* Good Stuff and Bad Stuff. Keyed by the name design/cards.yaml makes unique.
+/* Good Stuff and Bad Stuff. Keyed by the name cards.yaml makes unique.
  * See rulebook §8, Card anatomy: Stuff cards.
  */
 

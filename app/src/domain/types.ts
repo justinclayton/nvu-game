@@ -1,8 +1,8 @@
 /* The domain model. One aggregate, `GameState`; one way in, `execute`.
  *
- * Every name here is a term from design/GLOSSARY.md, spelled the same way: discard pile,
+ * Every name here is a term from the rulebook, spelled the same way: discard pile,
  * Exhaust pile, Fled, Cleared, Scrapyard, Down, stat pool, play zone. Section
- * numbers in the comments point at design/rulebook.md, rules version 0.2.10.
+ * numbers in the comments point at rulebook.md, rules version 0.2.11.
  *
  * Everything is readonly. The engine never mutates; it returns a new state.
  */
@@ -55,7 +55,7 @@ export interface Room {
   readonly name: string;
   readonly kind: RoomKind;
   /** Which floors' pool the card is drawn from; `null` for the one fixed Floor 10 Stairwell. */
-  readonly band: RoomBand;
+  readonly tier: RoomBand;
   readonly flavor: string;
   readonly challenges: readonly Challenge[];
   readonly flee: FleeLine;
@@ -132,17 +132,10 @@ export interface TurnRecord {
    */
   readonly fired: readonly string[];
   /**
-   * Distract & Pivot: one-shot "-1 cost" charges banked for a character's own
-   * next play, spent one per play regardless of what it saves.
+   * Pivot: one-shot "-1 cost" charges banked for a character's own next play,
+   * spent one per play regardless of what it saves.
    */
   readonly playDiscount: Readonly<Record<Character, number>>;
-  /**
-   * Set 'Em Up: Scramble banked for a character's very next play. The card
-   * that play puts in the zone takes it into `cardScramble`.
-   */
-  readonly nextPlayScramble: Readonly<Record<Character, number>>;
-  /** Scramble a played card has gained this turn, by card id. */
-  readonly cardScramble: Readonly<Record<string, number>>;
   /** System Feedback: banked off the shared pool this turn; a stat never reads below zero. */
   readonly poolPenalty: { readonly oomph: number; readonly scramble: number };
   /** Bio-Hazard Containment Vault: banked onto the shared pool this turn by Scrapping Good Stuff. */
@@ -453,12 +446,6 @@ export type DomainEvent =
       readonly character: Character;
       readonly pile: Pile;
       readonly cards: readonly (Card | Room)[];
-    }
-  | {
-      /** Rulebook, Keywords: Scry X — the top cards of one's own deck, looked at. */
-      readonly type: "CARDS_SCRIED";
-      readonly character: Character;
-      readonly cards: readonly Card[];
     }
   | { readonly type: "THRESHOLD_MET"; readonly room: Room; readonly threshold: Threshold }
   | { readonly type: "STUFF_TAKEN"; readonly character: Character; readonly card: Card }

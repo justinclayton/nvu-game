@@ -1,10 +1,10 @@
 #!/usr/bin/env node
 /* North vs Up — card list tooling.
  *
- *   node tools/cards.mjs build    regenerate the generated card modules from design/cards.yaml
+ *   node tools/cards.mjs build    regenerate the generated card modules from cards.yaml
  *   node tools/cards.mjs check    fail if either is stale or the card sheet stops rendering
  *
- * design/cards.yaml is the source of truth for every card.  Nothing else in the
+ * cards.yaml is the source of truth for every card.  Nothing else in the
  * repo may hold a card's name, cost, stats, rarity, or rules text except
  * as a generated copy.  There are two:
  *
@@ -26,14 +26,14 @@ import { createHash } from "node:crypto";
 import { checkCardComments } from "./check-card-comments.mjs";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
-const YAML = join(ROOT, "design/cards.yaml");
+const YAML = join(ROOT, "cards.yaml");
 const OUT = join(ROOT, "tools/cards.js");
 const OUT_TS = join(ROOT, "app/src/content/cards.generated.ts");
-const RULEBOOK = join(ROOT, "design/rulebook.md");
+const RULEBOOK = join(ROOT, "rulebook.md");
 const SETS = new Set(["official", "proposed"]);
 
 /* ------------------------------------------------------------------ parser
-   Handles exactly the subset design/cards.yaml uses: a top-level map, one list
+   Handles exactly the subset cards.yaml uses: a top-level map, one list
    of maps under `cards:`, scalars, `>-` folded blocks, and lists of block maps
    nested to whatever depth a card needs (a room's `challenges:`, each holding
    its own `thresholds:`).  Anything outside that subset is an error, not a
@@ -237,7 +237,7 @@ export function parseCardsYaml(text) {
 const FIELD_ORDER = [
   "name", "set", "kind", "owner", "starter", "rarity",
   "rarity_status", "cost", "oomph", "scramble", "conditional_stat",
-  "band", "flavor", "challenges", "flee", "text", "note", "flagged",
+  "tier", "flavor", "challenges", "flee", "text", "note", "flagged",
 ];
 
 function ordered(card) {
@@ -250,7 +250,7 @@ function ordered(card) {
 /* The rulebook's "Rules version:" line; the printed sheet stamps it on every card. */
 function rulesVersion() {
   const m = readFileSync(RULEBOOK, "utf8").match(/^Rules version:\s*(\S+)/m);
-  if (!m) throw new Error('design/rulebook.md has no "Rules version:" line');
+  if (!m) throw new Error('rulebook.md has no "Rules version:" line');
   return m[1];
 }
 
@@ -258,7 +258,7 @@ function generate(doc) {
   const body = doc.cards.map((c) => "    " + JSON.stringify(ordered(c))).join(",\n");
   return `/* GENERATED FILE — DO NOT EDIT.
  *
- * Source: design/cards.yaml       Regenerate: node tools/cards.mjs build
+ * Source: cards.yaml       Regenerate: node tools/cards.mjs build
  * Check:  node tools/cards.mjs check
  *
  * Every card in North vs Up, as printed.  EVERY NUMBER IS A PLACEHOLDER —
@@ -436,17 +436,17 @@ function challenge(raw, where) {
 function roomFace(c) {
   const challenges = (c.challenges ?? []).map((ch) => challenge(ch, c.name));
   if (challenges.length === 0) throw new Error(`${c.name}: a room prints at least one challenge`);
-  if (c.band !== 1 && c.band !== 2 && c.band !== 3 && c.band !== null) {
-    throw new Error(`${c.name}: a room needs a band of 1, 2, 3, or null for the fixed Floor 10 Stairwell`);
+  if (c.tier !== 1 && c.tier !== 2 && c.tier !== 3 && c.tier !== null) {
+    throw new Error(`${c.name}: a room needs a tier of 1, 2, 3, or null for the fixed Floor 10 Stairwell`);
   }
-  if (c.band === null && c.kind !== "stairwell") {
-    throw new Error(`${c.name}: only a Stairwell may print band: null`);
+  if (c.tier === null && c.kind !== "stairwell") {
+    throw new Error(`${c.name}: only a Stairwell may print tier: null`);
   }
   return {
     name: c.name,
     set: c.set,
     kind: c.kind,
-    band: c.band,
+    tier: c.tier,
     flavor: c.flavor ?? "",
     text: c.text ?? "",
     count: c.count ?? 1,
@@ -464,10 +464,10 @@ export function structure(doc) {
     else if (ROOM_KINDS.has(c.kind)) rooms.push(roomFace(c));
     else throw new Error(`${c.name}: unknown kind ${JSON.stringify(c.kind)}`);
   }
-  const fixedStairwells = rooms.filter((r) => r.band === null);
+  const fixedStairwells = rooms.filter((r) => r.tier === null);
   if (fixedStairwells.length !== 1) {
     throw new Error(
-      `expected exactly one Floor 10 Stairwell (band: null), found ${fixedStairwells.length}`,
+      `expected exactly one Floor 10 Stairwell (tier: null), found ${fixedStairwells.length}`,
     );
   }
   return { meta: { updated: String(doc.meta.updated ?? "") }, cards, rooms };
@@ -487,7 +487,7 @@ export function generateTs(doc) {
   const roomsBody = content.rooms.map((r) => "    " + JSON.stringify(r)).join(",\n");
   return `/* GENERATED FILE — DO NOT EDIT.
  *
- * Source: design/cards.yaml       Regenerate: node tools/cards.mjs build
+ * Source: cards.yaml       Regenerate: node tools/cards.mjs build
  * Check:  node tools/cards.mjs check
  *
  * Every card in North vs Up, as printed, with each room's threshold outcomes and
@@ -495,7 +495,7 @@ export function generateTs(doc) {
  * what a card says and nothing about what the engine does with it.
  *
  * EVERY NUMBER IS A PLACEHOLDER — costs, stats and thresholds are still open
- * design (design/rulebook.md, "NOT YET RULED").
+ * design (rulebook.md, "NOT YET RULED").
  */
 
 import type { CardContent } from "../domain/printed";
@@ -512,6 +512,9 @@ ${roomsBody}
 
 /** The first 12 hex of sha256 over the JSON of CARD_CONTENT above — identifies this card list. */
 export const CARD_LIST_ID = ${JSON.stringify(cardListId(content))};
+
+/** The rulebook's "Rules version:" line, which the print sheet stamps on every card. The engine and recorded runs read it from here. Kept out of CARD_CONTENT so a rules bump does not change CARD_LIST_ID. */
+export const RULES_VERSION = ${JSON.stringify(rulesVersion())};
 `;
 }
 

@@ -1,10 +1,10 @@
 #!/usr/bin/env node
 /* North vs Up — the rulebook as a printable page.
  *
- *   node tools/rulebook.mjs [out.html]    render design/rulebook.md to HTML
+ *   node tools/rulebook.mjs [out.html]    render rulebook.md to HTML
  *
  * The default output is print/rulebook-v<rules version>.html; `make rulebook`
- * prints that to a PDF beside it.  design/rulebook.md stays the one place the
+ * prints that to a PDF beside it.  rulebook.md stays the one place the
  * rules are written down, so this only renders the Markdown it already uses:
  * headings, paragraphs, bullet and numbered lists, block quotes, rules, and
  * bold, italic and `term` inline.  No dependencies, like tools/cards.mjs.
@@ -15,7 +15,7 @@ import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
-const RULEBOOK = join(ROOT, "design/rulebook.md");
+const RULEBOOK = join(ROOT, "rulebook.md");
 
 /* ---------------------------------------------------------------- inline */
 
@@ -232,7 +232,7 @@ ${bodyHTML}
 function build() {
   const md = readFileSync(RULEBOOK, "utf8");
   const m = md.match(/^Rules version:\s*(\S+)\s*$/m);
-  if (!m) throw new Error('design/rulebook.md has no "Rules version:" line');
+  if (!m) throw new Error('rulebook.md has no "Rules version:" line');
   const version = m[1];
   const body = md
     .replace(/^# .*\n/, "")

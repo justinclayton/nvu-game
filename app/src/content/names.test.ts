@@ -64,7 +64,7 @@ describe("resolveCardName", () => {
 });
 
 describe("initialsCollisions", () => {
-  it("reports every known pair from design/cards.yaml", () => {
+  it("reports every known pair from cards.yaml", () => {
     const eligible = [
       card("1", "Reckless Swing"),
       card("2", "Riot Shield"),

@@ -174,11 +174,11 @@ describe("Crowbar — 'Play: if you get any Good Stuff this turn, get an additio
       activeRoom: room("Security Turnstile"),
       Red: player({
         deck: pile("Shove", 4),
-        hand: [card("Charge In"), card("Shove"), card("Shove"), card("Pry Bar")],
+        hand: [card("Charge"), card("Shove"), card("Shove"), card("Pry Bar")],
       }),
     });
     const state = { ...rigged, pools: { ...rigged.pools, goodStuff: [card("Crowbar")] } };
-    const chargeIn = handCard(state, "Red", "Charge In");
+    const chargeIn = handCard(state, "Red", "Charge");
     const payWith = state.Red.hand.filter((c) => c.name === "Shove").map((c) => c.id);
     const { state: next } = keepFirstGoodStuff(play(state, [
       {
@@ -202,7 +202,7 @@ describe("A Pair Of Stitch-Em-Ups — 'Choose a character, move 2 cards from the
       Red: player({
         deck: pile("Shove", 2),
         hand: [card("A Pair Of Stitch-Em-Ups"), card("Shove")],
-        exhaust: pile("Charge In", 3),
+        exhaust: pile("Charge", 3),
       }),
     });
     const asked = must(state, {
@@ -231,7 +231,7 @@ describe("A Pair Of Stitch-Em-Ups — 'Choose a character, move 2 cards from the
       Red: player({
         deck: pile("Shove", 2),
         hand: [card("A Pair Of Stitch-Em-Ups"), card("Shove")],
-        exhaust: pile("Charge In", 3),
+        exhaust: pile("Charge", 3),
       }),
       Gray: player({
         deck: pile("Duck Under", 2),
@@ -443,7 +443,7 @@ describe("Overcharged Battery — 'The next card played this turn is played for 
     const state = playing({
       Red: player({
         deck: pile("Shove", 3),
-        hand: [card("Overcharged Battery"), card("Shove"), card("Charge In"), card("Charge In")],
+        hand: [card("Overcharged Battery"), card("Shove"), card("Charge"), card("Charge")],
       }),
     });
     const charged = must(state, {
@@ -452,8 +452,8 @@ describe("Overcharged Battery — 'The next card played this turn is played for 
       cardId: handCard(state, "Red", "Overcharged Battery").id,
       payWith: [handCard(state, "Red", "Shove").id],
     });
-    const [first, second] = charged.state.Red.hand.filter((c) => c.name === "Charge In");
-    if (!first || !second) throw new Error("Red is not holding two Charge Ins");
+    const [first, second] = charged.state.Red.hand.filter((c) => c.name === "Charge");
+    if (!first || !second) throw new Error("Red is not holding two Charges");
     expect(costOf(charged.state, "Red", first)).toBe(0);
 
     const spent = must(charged.state, free("Red", first.id));
@@ -486,7 +486,7 @@ describe("Overcharged Battery — 'The next card played this turn is played for 
     const state = playing({
       Red: player({
         deck: pile("Shove", 3),
-        hand: [card("Overcharged Battery"), card("Shove"), card("Pry Bar"), card("Charge In")],
+        hand: [card("Overcharged Battery"), card("Shove"), card("Pry Bar"), card("Charge")],
       }),
     });
     const charged = must(state, {
@@ -496,17 +496,17 @@ describe("Overcharged Battery — 'The next card played this turn is played for 
       payWith: [handCard(state, "Red", "Shove").id],
     });
     // Pry Bar is Cost 0 on its own, so it saves nothing and leaves the discount
-    // standing for Charge In.
+    // standing for Charge.
     const played = must(charged.state, free("Red", handCard(charged.state, "Red", "Pry Bar").id));
     expect(played.state.thisTurn.freePlays).toBe(1);
-    expect(costOf(played.state, "Red", handCard(played.state, "Red", "Charge In"))).toBe(0);
+    expect(costOf(played.state, "Red", handCard(played.state, "Red", "Charge"))).toBe(0);
   });
 
   it("does not survive the end of the Play phase", () => {
     const state = playing({
       Red: player({
         deck: pile("Shove", 3),
-        hand: [card("Overcharged Battery"), card("Shove"), card("Charge In")],
+        hand: [card("Overcharged Battery"), card("Shove"), card("Charge")],
       }),
     });
     const { state: next } = play(state, [
@@ -1170,8 +1170,8 @@ describe("Panic — 'Holding: every room threshold requires +2 Scramble to be me
       activeRoom: room("The Sentry Drone"),
       Gray: player({ hand: [card("Panic")] }),
       playZone: [
-        { owner: "Red", card: card("Charge In") },
-        { owner: "Red", card: card("Charge In") },
+        { owner: "Red", card: card("Charge") },
+        { owner: "Red", card: card("Charge") },
       ],
     });
     const line = state.activeRoom?.challenges[0]?.thresholds[0];
@@ -1190,8 +1190,8 @@ describe("Panic — 'Holding: every room threshold requires +2 Scramble to be me
     const state = playing({
       activeRoom: room("The Sentry Drone"),
       playZone: [
-        { owner: "Red", card: card("Charge In") },
-        { owner: "Red", card: card("Charge In") },
+        { owner: "Red", card: card("Charge") },
+        { owner: "Red", card: card("Charge") },
       ],
     });
     const line = state.activeRoom?.challenges[0]?.thresholds[0];
@@ -1382,7 +1382,7 @@ describe("System Feedback — 'Holding: Whenever you play a card with Cost 0, lo
     const state = playing({
       Red: player({
         deck: pile("Shove", 4),
-        hand: [card("System Feedback"), card("Charge In"), card("Shove"), card("Shove")],
+        hand: [card("System Feedback"), card("Charge"), card("Shove"), card("Shove")],
       }),
     });
     const r = ids(state, "Red");

@@ -11,8 +11,8 @@ six Red and Gray reward cards. The Floor decks dealt differently this time, so t
 run replayed.
 
 Notes are the agent's, verbatim, tagged `[agent]`, in the order they were written into the run.
-Nothing here is a ruling. Suspected bugs were checked against `design/rulebook.md` and
-`design/cards.yaml` only; the engine was not read.
+Nothing here is a ruling. Suspected bugs were checked against `rulebook.md` and
+`cards.yaml` only; the engine was not read.
 
 For context, `bin/nvu sim --seeds 500` (greedy) on the same build: 0/500 wins, 357 runs ending on
 floor 7. The bot on seed 10 alone dies on floor 7. The bot almost never plays the co-op cards this
@@ -64,7 +64,7 @@ Exhausted, Gray with 13.
 
    > Riot Shield came back to hand during Outcome, before the Good Stuff reveal, not 'at the end of the turn' as printed. The stat pool line then reads 'Oomph 5, Scramble 0' though Scramble 6 was just met: the Shields' Scramble left the pool with them. Harmless here, but the timing doesn't match the card, and the display misreports what cleared the room.
 
-   `design/cards.yaml`, Riot Shield: "If the room is Cleared, return this card to your hand at the
+   `cards.yaml`, Riot Shield: "If the room is Cleared, return this card to your hand at the
    end of the turn." The rulebook's turn has no step named "end of the turn"; the nearest is Cleanup
    ("Cleanup (end of turn)"). The log shows the return inside Outcome, before the Good Stuff reveal
    and before Cleanup. The same happened on every Clear with a Riot Shield in play, and the stat pool
@@ -102,7 +102,7 @@ Exhausted, Gray with 13.
 
    > Overcharged Battery played by Gray made Red's next card free (Grav Harness at cost 0). The card says 'The next card played this turn', not 'you play', so crossing players reads right. Smoldering Armory Oomph 16 cleared on the first Band 3 room: two Batteries chained into Grav Harness, Tag Team, Cutting Torch.
 
-   `design/cards.yaml`: "The next card played this turn is played for free." The engine applied it
+   `cards.yaml`: "The next card played this turn is played for free." The engine applied it
    to whichever player played next, and the moves list showed Red's cards at `cost 0`. That matches
    the text. It also means the free play is lost on a card that was free anyway: Pry Bar played
    right after would use it up. Not a bug; a sequencing trap worth knowing.
@@ -146,7 +146,7 @@ Exhausted, Gray with 13.
 
    > Rhythm & Bruise went from Oomph 6 to 8 when Gray played In Step after it: it counts Gray's cards live, not at the moment it was played. Its text opens with 'Play:', which reads as a one-time effect when played. Playtest 10 saw Junk Launcher fixed at play. Two conditional-stat cards, two timings?
 
-   `design/cards.yaml`, Rhythm & Bruise: "Play: Gains Oomph +2 for each card Gray has played this
+   `cards.yaml`, Rhythm & Bruise: "Play: Gains Oomph +2 for each card Gray has played this
    turn. If Gray played 2 or more cards, draw 1 card." The stat pool went from Oomph 12 to 14 when
    In Step (no Oomph) was played after it, so Rhythm & Bruise went from 6 to 8. On floor 7 it was
    played last, so the difference never showed. The rulebook's Keywords do not define `Play:`.

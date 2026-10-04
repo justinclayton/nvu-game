@@ -213,7 +213,7 @@ describe("Turn Start: 'Resolve effects triggered by these draws after both playe
 });
 
 describe("playing a card is heard after the card's own effect", () => {
-  it("Covering Fire, Red plays Reckless: Red Exhausts 3, then Gray draws", () => {
+  it("Covering Fire, Red plays Reckless: Red Exhausts 2, then Gray draws", () => {
     const state = rig({
       phase: "Play",
       activeRoom: room("Security Turnstile"),
@@ -222,12 +222,7 @@ describe("playing a card is heard after the card's own effect", () => {
       Gray: player({ deck: pile("Duck Under", 3) }),
     });
     const { events } = takingEveryDraw(must(state, playPaying(state, "Red", "Reckless", ["Shove"])));
-    expect(drawsAndLosses(events)).toEqual([
-      "Red: exhaust",
-      "Red: exhaust",
-      "Red: exhaust",
-      "Gray: draw",
-    ]);
+    expect(drawsAndLosses(events)).toEqual(["Red: exhaust", "Red: exhaust", "Gray: draw"]);
   });
 
   const playedHeard = () => probe.heard.filter((h) => h.event.type === "CARD_PLAYED");

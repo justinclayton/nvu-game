@@ -14,10 +14,10 @@
     --good-stuff: #3f8f4a;  /* green */
     --bad-stuff: #5a3a6e;   /* dark plum */
     --floor: #111;
-    --band-1: #2d6a4f;  /* forest green: floors 1-3 */
-    --band-2: #1d4e89;  /* deep blue: floors 4-6 */
-    --band-3: #7c2d12;  /* rust: floors 7-9 */
-    --band-10: #b8860b; /* gold: floor 10 */
+    --tier-1: #2d6a4f;  /* forest green: floors 1-3 */
+    --tier-2: #1d4e89;  /* deep blue: floors 4-6 */
+    --tier-3: #7c2d12;  /* rust: floors 7-9 */
+    --tier-10: #b8860b; /* gold: floor 10 */
     --oomph: #b52d24;
     --scramble: #4a6a9a;
   }
@@ -105,10 +105,10 @@
 
   /* room cards */
   .card.room .type-bar { background: var(--floor); }
-  .card.room.band-1 .type-bar { background: var(--band-1); }
-  .card.room.band-2 .type-bar { background: var(--band-2); }
-  .card.room.band-3 .type-bar { background: var(--band-3); }
-  .card.room.band-10 .type-bar { background: var(--band-10); }
+  .card.room.tier-1 .type-bar { background: var(--tier-1); }
+  .card.room.tier-2 .type-bar { background: var(--tier-2); }
+  .card.room.tier-3 .type-bar { background: var(--tier-3); }
+  .card.room.tier-10 .type-bar { background: var(--tier-10); }
   .flavor { margin: 1.5mm 0 2mm; font-size: 8.5pt; font-style: italic; color: #555; line-height: 1.35; }
   .thresholds .th { font-size: 9.5pt; line-height: 1.35; }
   /* Within a challenge only one threshold's outcome resolves (rulebook, Outcome). */
@@ -167,8 +167,8 @@ var ROOM_KIND_LABEL = { room: "Room", stairwell: "Stairwell" };
 var BAND_FLOORS = { 1: "Floors 1–3", 2: "Floors 4–6", 3: "Floors 7–9" };
 
 function roomTypeLine(c) {
-  if (c.band === null) return ROOM_KIND_LABEL[c.kind] + " · Floor 10";
-  return ROOM_KIND_LABEL[c.kind] + " · " + (BAND_FLOORS[c.band] || "?");
+  if (c.tier === null) return ROOM_KIND_LABEL[c.kind] + " · Floor 10";
+  return ROOM_KIND_LABEL[c.kind] + " · " + (BAND_FLOORS[c.tier] || "?");
 }
 
 /* Keywords (rulebook, "Keywords") and the game's own nouns print bold. */
@@ -179,7 +179,7 @@ function rich(s) {
 }
 
 /* A threshold prints one stat (`stat`/`value`) or both at once
-   (`stats: { Oomph, Scramble }`, design/cards.yaml). */
+   (`stats: { Oomph, Scramble }`, cards.yaml). */
 function thresholdLabel(t) {
   if (t.stats) {
     return '<b class="oomph">Oomph ' + t.stats.Oomph + '</b> and <b class="scramble">Scramble ' + t.stats.Scramble + "</b>";
@@ -247,7 +247,7 @@ function roomCardHTML(c) {
     return '<div class="challenge">' + lines + "</div>";
   }).join("");
   var foot = '<div class="flee"><b class="label">Flee:</b> ' + rich(c.flee || "Leave empty handed.") + "</div>";
-  return '<div class="card room band-' + (c.band === null ? "10" : c.band) + '"><div class="type-bar"></div>' +
+  return '<div class="card room tier-' + (c.tier === null ? "10" : c.tier) + '"><div class="type-bar"></div>' +
     '<div class="top"><div><div class="name">' + esc(c.name) + "</div>" +
     '<div class="typeline">' + esc(roomTypeLine(c)) + "</div></div></div>" +
     flavorBlock(c) +

@@ -7,8 +7,8 @@ This document is the handoff to the implementing agent. The map is [`map.md`](ma
 ## Context
 
 North vs Up is a two-character cooperative deckbuilder with ratified rules in
-[`design/rulebook.md`](../rulebook.md) and a settled vocabulary in [`design/GLOSSARY.md`](../GLOSSARY.md).
-Every card is written down once, in [`design/cards.yaml`](../cards.yaml). The engine is a pure
+[`rulebook.md`](../../rulebook.md) and a settled vocabulary in [`design/GLOSSARY.md`](../GLOSSARY.md).
+Every card is written down once, in [`cards.yaml`](../../cards.yaml). The engine is a pure
 `(state, command) -> [state, events]` function: it runs every ratified rule and replays a run
 exactly from its seed.
 
@@ -27,7 +27,7 @@ app/
   src/
     domain/          rules: GameState, Card, Room, Command, Event, execute(), pure queries,
                      card behaviours
-    content/         cards.generated.ts, emitted from design/cards.yaml; data, not rules
+    content/         cards.generated.ts, emitted from cards.yaml; data, not rules
     application/     session: the store, command log, event log, undo, replay
     infrastructure/  adapters: seed source, localStorage, clock
     ui/              React components and hooks

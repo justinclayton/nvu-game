@@ -30,7 +30,7 @@ function atAscension(over: Partial<GameState> = {}): GameState {
       ...Array.from({ length: 8 }, () => room("Security Turnstile")),
     ],
     cleared: [room("The Sentry Drone")],
-    Red: player({ deck: pile("Shove", 2), discard: pile("Charge In", 3) }),
+    Red: player({ deck: pile("Shove", 2), discard: pile("Charge", 3) }),
     Gray: player({ deck: pile("Duck Under", 2), discard: pile("Pick The Lock", 3) }),
     ...over,
   });
@@ -44,7 +44,7 @@ describe("Ascending, shuffle your hand into your deck", () => {
   it("'Shuffle your hand into your deck' — the hand's cards join the deck, not lost", () => {
     const held = card("Shove");
     const state = atAscension({
-      Red: player({ deck: pile("Shove", 2), hand: [held], discard: pile("Charge In", 3) }),
+      Red: player({ deck: pile("Shove", 2), hand: [held], discard: pile("Charge", 3) }),
     });
     const { state: next, events } = must(state, { type: "ASCEND", Red: NOTHING, Gray: NOTHING });
     expect(next.Red.hand).toEqual([]);
@@ -70,7 +70,7 @@ describe("Ascending, Stuff stays until Scrapped or Exhausted", () => {
   it("Bad Stuff found in the deck also stays, not shed to its pool", () => {
     const badStuff = card("Sluggish");
     const state = atAscension({
-      Red: player({ deck: [badStuff, ...pile("Shove", 2)], discard: pile("Charge In", 2) }),
+      Red: player({ deck: [badStuff, ...pile("Shove", 2)], discard: pile("Charge", 2) }),
     });
     const before = state.pools.badStuff.length;
     const { state: next } = must(state, { type: "ASCEND", Red: NOTHING, Gray: NOTHING });
@@ -81,7 +81,7 @@ describe("Ascending, Stuff stays until Scrapped or Exhausted", () => {
   it("Stuff sitting in the discard pile stays there too", () => {
     const inDiscard = card("Coil Of Cable");
     const state = atAscension({
-      Red: player({ deck: pile("Shove", 2), discard: [inDiscard, ...pile("Charge In", 2)] }),
+      Red: player({ deck: pile("Shove", 2), discard: [inDiscard, ...pile("Charge", 2)] }),
     });
     const before = state.pools.goodStuff.length;
     const { state: next } = must(state, { type: "ASCEND", Red: NOTHING, Gray: NOTHING });
@@ -91,7 +91,7 @@ describe("Ascending, Stuff stays until Scrapped or Exhausted", () => {
 
   it("'no heal' — the discard pile is untouched", () => {
     const state = atAscension({
-      Red: player({ deck: pile("Shove", 2), discard: pile("Charge In", 4) }),
+      Red: player({ deck: pile("Shove", 2), discard: pile("Charge", 4) }),
     });
     const { state: next } = must(state, { type: "ASCEND", Red: NOTHING, Gray: NOTHING });
     expect(next.Red.discard).toHaveLength(4);
@@ -155,7 +155,7 @@ describe("Winning and losing", () => {
       activeRoom: room("The Sentry Drone"),
       Red: player({
         deck: pile("Shove", 4),
-        hand: [card("Charge In"), card("Shove"), card("Shove"), card("Pry Bar"), card("Pry Bar")],
+        hand: [card("Charge"), card("Shove"), card("Shove"), card("Pry Bar"), card("Pry Bar")],
       }),
       Gray: player({ deck: pile("Duck Under", 4) }),
     });

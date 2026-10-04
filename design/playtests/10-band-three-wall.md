@@ -11,8 +11,8 @@ This is the first run after the Good Stuff pool was raised and four Good Stuff c
 came up.
 
 Notes are the agent's, verbatim, tagged `[agent]`, in the order they were written into the run.
-Nothing here is a ruling. Suspected bugs were checked against `design/rulebook.md` and
-`design/cards.yaml` only; the engine was not read.
+Nothing here is a ruling. Suspected bugs were checked against `rulebook.md` and
+`cards.yaml` only; the engine was not read.
 
 ## The bot sweep
 
@@ -78,7 +78,7 @@ Playtest 9 ended the same way: turn 36, floor 7, Red Down after Laser Grid and T
    > Band 1 cleared in 8 turns with zero Exhaust on either side. Every room hit its Good Stuff line; the Sentry Drone came up as the 2nd or 3rd room of floors 2 and 3, so floor 3 (8 rooms) lasted two turns. Hands are fat with Good Stuff: Gray held 8 cards at turn 6. Nothing in the rulebook caps hand size.
 
    Rulebook, Floor deck: each floor holds one Stairwell among its 10, 9, or 8 cards, so the Drone
-   turning up second or third is luck. Checked `design/cards.yaml`: every Band 1 card's cheapest
+   turning up second or third is luck. Checked `cards.yaml`: every Band 1 card's cheapest
    line (Scramble 3, Scramble 4, Oomph 6 or Scramble 6) is reachable from an opening hand. Band 1 set up the
    run and asked nothing of it. The sim agrees: all 500 greedy runs clear it. The rulebook indeed has
    no hand limit; with Stuff going to hand, hands only grow while rooms keep Clearing. Not a finding
@@ -105,7 +105,7 @@ Playtest 9 ended the same way: turn 36, floor 7, Red Down after Laser Grid and T
 
    > Third Overgrown Hydroponics Bay. Scramble 11 is out of reach (9 max, both hands have only Oomph left after the Riot Shields), so I take Scramble 6 on purpose: two Riot Shields paid with the two Bad Stuff we hold, both Shields come back, and we trade two Bad Stuff out for two new ones. Clearing on a Bad Stuff line is strictly better than Fleeing here.
 
-   Checked `design/cards.yaml`: Overgrown Hydroponics Bay's Scramble 6 and Scramble 11 are two
+   Checked `cards.yaml`: Overgrown Hydroponics Bay's Scramble 6 and Scramble 11 are two
    separate challenges, as playtest 9's note 7 found. Here the lower line was the better choice
    outright. Shape observation, no question.
 
@@ -186,7 +186,7 @@ Playtest 9 ended the same way: turn 36, floor 7, Red Down after Laser Grid and T
 
    > A Pair Of Stitch-Em-Ups on Red with Red's deck at 2: the 2 cards go to the bottom, so this turn's Flee (Exhaust 4) takes all four. The heal still leaves Red 2 cards up overall, but whatever I pick is exhausted again at once, so I pick the cheapest (Shove, Reckless Swing). The picker offers Panic and other Stuff as well as Red's own cards; the card text says 'cards', so that reads right.
 
-   Checked `design/cards.yaml`: "Move 2 cards from that character's Exhaust pile to the bottom of
+   Checked `cards.yaml`: "Move 2 cards from that character's Exhaust pile to the bottom of
    their deck." The picker offering Stuff is consistent with "cards". Playing it into a short deck
    right before a Flee returns the cards only to Exhaust them again. Not a bug.
 

@@ -1,6 +1,6 @@
 /* The printed face of every card and every room.
  *
- * design/cards.yaml is the one place a card is written down. `make build` turns
+ * cards.yaml is the one place a card is written down. `make build` turns
  * it into src/content/cards.generated.ts, which is shaped exactly like the types
  * here. The prose a room prints — its threshold outcomes and its Flee line — is
  * parsed into structure by the generator, so nothing in the app ever reads a
@@ -22,10 +22,10 @@ export type CardKind = "player" | "good_stuff" | "bad_stuff";
 /** The type line of a room card (rulebook, Card anatomy: Room Cards). */
 export type RoomKind = "room" | "stairwell";
 
-/** Rooms and Stairwells pool by band: floors 1–3, 4–6, 7–9 (rulebook Setup, "Floor deck"). */
+/** Rooms and Stairwells pool by tier: floors 1–3, 4–6, 7–9 (rulebook Setup, "Floor deck"). */
 export type Band = 1 | 2 | 3;
 
-/** A room's band, or `null` for the one fixed Floor 10 Stairwell (design/cards.yaml, "Rooms"). */
+/** A room's tier, or `null` for the one fixed Floor 10 Stairwell (cards.yaml, "Rooms"). */
 export type RoomBand = Band | null;
 
 /** Whether a card is ratified or still a proposal. Only official cards gate the build. */
@@ -50,10 +50,10 @@ export type RoomEffect =
 
 /**
  * What a threshold asks of the shared pool: an Oomph amount, a Scramble
- * amount, or both (design/cards.yaml, a threshold's `stat`/`value` or
+ * amount, or both (cards.yaml, a threshold's `stat`/`value` or
  * `stats: { Oomph, Scramble }`). 0 means that stat is not part of this line.
  * A threshold that prints both stats is met only when the pool meets or
- * exceeds both (design/rulebook.md).
+ * exceeds both (rulebook.md).
  */
 export interface StatRequirement {
   readonly oomph: number;
@@ -90,7 +90,7 @@ export interface Challenge {
 
 /**
  * The Flee line every room prints (rulebook, Card anatomy: Room Cards). No Stuff room in
- * design/cards.yaml prints one of its own, so the generator supplies
+ * cards.yaml prints one of its own, so the generator supplies
  * "Leave empty-handed." for display; it Flees like any other room, with no
  * Clear and no effects.
  */
@@ -128,7 +128,7 @@ export interface RoomFace {
   readonly set: CardSet;
   readonly kind: RoomKind;
   /** Which floors' pool the card is drawn from; `null` for the one fixed Floor 10 Stairwell. */
-  readonly band: RoomBand;
+  readonly tier: RoomBand;
   /** The printed flavor line. Empty until a card is given one. */
   readonly flavor: string;
   /** A room's own printed rule, beyond its thresholds and Flee line (e.g. Bio-Hazard Containment Vault). */
@@ -138,7 +138,7 @@ export interface RoomFace {
   readonly flee: FleeLine;
 }
 
-/** Everything design/cards.yaml prints, sorted by what the engine does with it. */
+/** Everything cards.yaml prints, sorted by what the engine does with it. */
 export interface CardContent {
   readonly meta: { readonly updated: string };
   readonly cards: readonly CardFace[];

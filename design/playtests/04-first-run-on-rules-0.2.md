@@ -14,7 +14,7 @@ for that re-tuning pass, not as verdicts.
 
 Notes are the agent's, verbatim, tagged `[agent]`, in the order they were written into the run. The
 analysis under each one is also the agent's. Nothing here is a ruling. A playtester checks a
-suspected bug against `design/rulebook.md` and `design/cards.yaml` only; this run's agent
+suspected bug against `rulebook.md` and `cards.yaml` only; this run's agent
 did not read the engine source under `app/src/` to diagnose anything.
 
 The run file is `04-first-run-on-rules-0.2.json`. The full transcript is the appendix, and notes cite
@@ -109,7 +109,7 @@ neither ever near it.
    cards.yaml, so there is nothing wrong to fix in the engine, but flagging it since it will produce
    a card that does literally nothing if played or held.** `[agent]` (log 175)
 
-   Card data gap, not an engine bug: `design/cards.yaml` line for Torn Seal reads `text: null`.
+   Card data gap, not an engine bug: `cards.yaml` line for Torn Seal reads `text: null`.
 
 7. **Engine fidelity check: playing the second Overdrive (Exhaust 2) mid-Play with Red's deck down
    to 1 card triggered a discard-to-deck reshuffle inside the Exhaust resolution itself -- deck went

@@ -28,7 +28,7 @@ beforeEach(resetRig);
 const playFree = free;
 
 /**
- * A room built by hand rather than looked up from design/cards.yaml, for a
+ * A room built by hand rather than looked up from cards.yaml, for a
  * rule that must hold regardless of which rooms the printed list carries.
  */
 let fixtureRoomCount = 0;
@@ -38,7 +38,7 @@ function fixtureRoom(challenges: readonly Challenge[]): Room {
     id: roomId(`fixture-room#${String(fixtureRoomCount)}`),
     name: "Fixture Room",
     kind: "room",
-    band: 1,
+    tier: 1,
     flavor: "",
     challenges,
     flee: { text: "Leave empty-handed.", clears: false, effects: [] },
@@ -84,7 +84,7 @@ describe("Turn Start", () => {
     const state = rig({
       phase: "Turn Start",
       floorDeck: [room("Security Turnstile")],
-      Red: player({ deck: pile("Shove", 5), hand: pile("Charge In", 5) }),
+      Red: player({ deck: pile("Shove", 5), hand: pile("Charge", 5) }),
       Gray: player({ deck: pile("Duck Under", 5) }),
     });
     const { state: next, events } = must(state, { type: "FLIP_ROOM" });
@@ -98,7 +98,7 @@ describe("Turn Start", () => {
     const state = rig({
       phase: "Turn Start",
       floorDeck: [room("Security Turnstile")],
-      Red: player({ deck: pile("Shove", 5), hand: pile("Charge In", 2) }),
+      Red: player({ deck: pile("Shove", 5), hand: pile("Charge", 2) }),
       Gray: player({ deck: pile("Duck Under", 5) }),
     });
     const { state: next } = must(state, { type: "FLIP_ROOM" });
@@ -112,14 +112,14 @@ describe("Play", () => {
     rig({
       phase: "Play",
       activeRoom: room("The Sentry Drone"),
-      Red: player({ deck: pile("Shove", 5), hand: [card("Charge In"), card("Shove")] }),
+      Red: player({ deck: pile("Shove", 5), hand: [card("Charge"), card("Shove")] }),
       Gray: player({ deck: pile("Duck Under", 5) }),
       ...over,
     });
 
   it("'to play a card, discard cards from your hand equal to its Cost'", () => {
     const state = playState();
-    const charge = handCard(state, "Red", "Charge In");
+    const charge = handCard(state, "Red", "Charge");
     const rejected = execute(state, {
       type: "PLAY_CARD",
       character: "Red",
@@ -133,9 +133,9 @@ describe("Play", () => {
   describe("'move that number of cards from your hand to your Exhaust pile' — paying", () => {
     const paidWith = (payerName: string) => {
       const state = playState({
-        Red: player({ deck: pile("Shove", 5), hand: [card("Charge In"), card(payerName), card(payerName)] }),
+        Red: player({ deck: pile("Shove", 5), hand: [card("Charge"), card(payerName), card(payerName)] }),
       });
-      const charge = handCard(state, "Red", "Charge In");
+      const charge = handCard(state, "Red", "Charge");
       const payers = state.Red.hand.filter((c) => c.name === payerName);
       const { state: next } = must(state, {
         type: "PLAY_CARD",
@@ -172,10 +172,10 @@ describe("Play", () => {
 
   it("'Red never pays for Gray' — a partner's card is not payment", () => {
     const state = playState({
-      Red: player({ deck: pile("Shove", 5), hand: [card("Charge In")] }),
+      Red: player({ deck: pile("Shove", 5), hand: [card("Charge")] }),
       Gray: player({ deck: pile("Duck Under", 5), hand: [card("Duck Under"), card("Duck Under")] }),
     });
-    const red = handCard(state, "Red", "Charge In");
+    const red = handCard(state, "Red", "Charge");
     const gray = handCard(state, "Gray", "Duck Under");
     const rejected = execute(state, {
       type: "PLAY_CARD",
@@ -245,7 +245,7 @@ describe("Cleanup", () => {
     const state = rig({
       phase: "Play",
       activeRoom: room("Security Turnstile"),
-      Red: player({ deck: pile("Shove", 3), hand: [card("Shove"), card("Charge In")] }),
+      Red: player({ deck: pile("Shove", 3), hand: [card("Shove"), card("Charge")] }),
       Gray: player({ deck: pile("Duck Under", 3) }),
     });
     const { state: next } = play(state, [
@@ -253,15 +253,15 @@ describe("Cleanup", () => {
         type: "PLAY_CARD",
         character: "Red",
         cardId: handCard(state, "Red", "Shove").id,
-        payWith: [handCard(state, "Red", "Charge In").id],
+        payWith: [handCard(state, "Red", "Charge").id],
       },
       { type: "END_PLAY" },
     ]);
     expect(next.playZone).toEqual([]);
-    // The Shove played, then discarded from the play zone; the Charge In was
+    // The Shove played, then discarded from the play zone; the Charge was
     // Exhausted earlier, to pay its cost.
     expect(next.Red.discard).toHaveLength(1);
-    expect(next.Red.exhaust.map((c) => c.name)).toContain("Charge In");
+    expect(next.Red.exhaust.map((c) => c.name)).toContain("Charge");
   });
 
   it("'the hand carries over untouched'", () => {
@@ -304,18 +304,18 @@ describe("Cleanup", () => {
 
 describe("Room kinds: Room and Stairwell", () => {
   it("a Stairwell ends the floor when it is Cleared", () => {
-    // The Sentry Drone wants Oomph 8: Charge In (Oomph 4, Cost 2) plus two
+    // The Sentry Drone wants Oomph 8: Charge (Oomph 4, Cost 2) plus two
     // free Pry Bars (Oomph 3 each) gets there with two Shoves as the payment.
     const state = rig({
       phase: "Play",
       activeRoom: room("The Sentry Drone"),
       Red: player({
         deck: pile("Shove", 5),
-        hand: [card("Charge In"), card("Shove"), card("Shove"), card("Pry Bar"), card("Pry Bar")],
+        hand: [card("Charge"), card("Shove"), card("Shove"), card("Pry Bar"), card("Pry Bar")],
       }),
       Gray: player({ deck: pile("Duck Under", 5) }),
     });
-    const chargeIn = handCard(state, "Red", "Charge In");
+    const chargeIn = handCard(state, "Red", "Charge");
     const pryBar = handCard(state, "Red", "Pry Bar");
     const shoves = state.Red.hand.filter((c) => c.name === "Shove").map((c) => c.id);
     const { state: next, events } = play(state, [
@@ -337,7 +337,7 @@ describe("Room kinds: Room and Stairwell", () => {
       activeRoom: room("The Sentry Drone"),
       Red: player({
         deck: pile("Shove", 5),
-        hand: [card("Charge In"), card("Shove"), card("Shove"), card("Pry Bar"), card("Pry Bar")],
+        hand: [card("Charge"), card("Shove"), card("Shove"), card("Pry Bar"), card("Pry Bar")],
       }),
       Gray: player({ deck: pile("Duck Under", 5) }),
       pools: { Red: pile("Grav Harness", 2), Gray: pile("Grav Harness", 3), goodStuff: [], badStuff: [] },
@@ -450,7 +450,7 @@ describe("Room kinds: Room and Stairwell", () => {
 
   it("'one of you reveals a card reward' asks who, then offers it — taken or skipped", () => {
     // Bio-Hazard Containment Vault's Oomph-15 challenge is its own "one of
-    // you reveals a card reward": two Charge Ins (Oomph 4 each) plus three
+    // you reveals a card reward": two Charges (Oomph 4 each) plus three
     // free Pry Bars (Oomph 3 each) clears it.
     const state = rig({
       phase: "Play",
@@ -458,8 +458,8 @@ describe("Room kinds: Room and Stairwell", () => {
       Red: player({
         deck: pile("Shove", 4),
         hand: [
-          card("Charge In"),
-          card("Charge In"),
+          card("Charge"),
+          card("Charge"),
           card("Pry Bar"),
           card("Pry Bar"),
           card("Pry Bar"),
@@ -521,7 +521,7 @@ describe("Room kinds: Room and Stairwell", () => {
 
   it("each challenge on a card resolves on its own, and meeting both fires both — Pressurized Maintenance Hub", () => {
     // Pressurized Maintenance Hub's Oomph and Scramble challenges are
-    // independent, each its own named reveal: Oomph 7 (Charge In, cost 2,
+    // independent, each its own named reveal: Oomph 7 (Charge, cost 2,
     // plus a free Pry Bar) pays Red; Scramble 7 (Pick The Lock, cost 2, plus
     // a free Coil Of Cable) pays Gray.
     const state = rig({
@@ -529,7 +529,7 @@ describe("Room kinds: Room and Stairwell", () => {
       activeRoom: room("Pressurized Maintenance Hub"),
       Red: player({
         deck: pile("Shove", 5),
-        hand: [card("Charge In"), card("Shove"), card("Shove"), card("Pry Bar")],
+        hand: [card("Charge"), card("Shove"), card("Shove"), card("Pry Bar")],
       }),
       Gray: player({
         deck: pile("Duck Under", 5),
@@ -626,13 +626,13 @@ describe("Room kinds: Room and Stairwell", () => {
   });
 
   it("a Room's Challenge reads the shared pool, not just the named character's own cards", () => {
-    // Security Turnstile's Oomph 5 line pays Red — met by Charge In's own 4
+    // Security Turnstile's Oomph 5 line pays Red — met by Charge's own 4
     // plus a Pry Bar Gray played, proving the pool is shared rather than read
     // from Red's own cards alone.
     const state = rig({
       phase: "Play",
       activeRoom: room("Security Turnstile"),
-      Red: player({ deck: pile("Shove", 5), hand: [card("Charge In"), card("Shove"), card("Shove")] }),
+      Red: player({ deck: pile("Shove", 5), hand: [card("Charge"), card("Shove"), card("Shove")] }),
       Gray: player({ deck: pile("Duck Under", 5), hand: [card("Pry Bar")] }),
     });
     const r = ids(state, "Red");
@@ -654,7 +654,7 @@ describe("Room kinds: Room and Stairwell", () => {
       activeRoom: room("Security Turnstile"),
       Red: player({
         deck: pile("Shove", 5),
-        hand: [card("Charge In"), card("Shove"), card("Shove"), card("Pry Bar")],
+        hand: [card("Charge"), card("Shove"), card("Shove"), card("Pry Bar")],
       }),
       Gray: player({ deck: pile("Duck Under", 5) }),
     });
@@ -734,7 +734,7 @@ describe("Room kinds: Room and Stairwell", () => {
         activeRoom: room("Automated Defense Turret"),
         Red: player({
           deck: pile("Shove", 4),
-          hand: [card("Charge In"), card("Charge In"), card("Pry Bar"), ...pile("Shove", 4)],
+          hand: [card("Charge"), card("Charge"), card("Pry Bar"), ...pile("Shove", 4)],
         }),
         // Rust, not Panic: a held Panic would itself raise the very
         // threshold this rig means to meet.
@@ -795,7 +795,7 @@ describe("Room kinds: Room and Stairwell", () => {
         activeRoom: room("Automated Defense Turret"),
         Red: player({
           deck: pile("Shove", 4),
-          hand: [card("Charge In"), card("Charge In"), card("Pry Bar"), ...pile("Shove", 4)],
+          hand: [card("Charge"), card("Charge"), card("Pry Bar"), ...pile("Shove", 4)],
         }),
         Gray: player({ deck: pile("Duck Under", 5) }),
       });
@@ -1009,7 +1009,7 @@ describe("Rules 0.2.5: Good Stuff and card rewards come as a spread of 3", () =>
       activeRoom: room("The Sentry Drone"),
       Red: player({
         deck: pile("Shove", 5),
-        hand: [card("Charge In"), card("Shove"), card("Shove"), card("Coil Of Cable"), card("Riot Shield"), card("Shove")],
+        hand: [card("Charge"), card("Shove"), card("Shove"), card("Coil Of Cable"), card("Riot Shield"), card("Shove")],
       }),
       Gray: player({ deck: pile("Duck Under", 5) }),
       pools: { Red: pile("Fast Follow", 3), Gray: pile("Quick Vault", 3), goodStuff: [...goodStuff(), ...goodStuff()], badStuff: [] },
@@ -1033,7 +1033,7 @@ describe("Rules 0.2.5: Good Stuff and card rewards come as a spread of 3", () =>
     const state = rig({
       phase: "Play",
       activeRoom: room("Pressurized Maintenance Hub"),
-      Red: player({ deck: pile("Shove", 5), hand: [card("Charge In"), card("Shove"), card("Shove"), card("Pry Bar")] }),
+      Red: player({ deck: pile("Shove", 5), hand: [card("Charge"), card("Shove"), card("Shove"), card("Pry Bar")] }),
       Gray: player({ deck: pile("Duck Under", 5) }),
       pools: { Red: rewards, Gray: [], goodStuff: [], badStuff: [] },
     });

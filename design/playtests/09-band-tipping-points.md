@@ -5,8 +5,8 @@ in for a human playtester, in the CLI (`bin/nvu`), seed 21, one shell call per d
 ended in **Defeat** on turn 36, floor 7, when Red went `Down` on a forced Exhaust from a Flee.
 
 Notes are the agent's, verbatim, tagged `[agent]`, in the order they were written into the run.
-Nothing here is a ruling. Suspected bugs were checked against `design/rulebook.md` and
-`design/cards.yaml` only; the engine was not read.
+Nothing here is a ruling. Suspected bugs were checked against `rulebook.md` and
+`cards.yaml` only; the engine was not read.
 
 This run tests the rework since playtest 8: The Sentry Drone now needs Oomph 6 or Scramble 6 to
 Ascend (an easier Oomph 4/Scramble 4 line gives both players 2 Good Stuff too, and its Flee gives
@@ -65,14 +65,14 @@ run in this series so far -- before Exhaustion itself ended it.
    > resolved; stat pool Scramble went from 1 to 5, a +4 gain matching 2x2. Card reads correctly as
    > printed.
 
-   Checked against `design/cards.yaml`'s text ("Scramble equal to 2 times the number of cards Red
+   Checked against `cards.yaml`'s text ("Scramble equal to 2 times the number of cards Red
    has played this turn"). The arithmetic matches exactly. No issue.
 
 2. **Overcharged Battery's on-screen cost-0 preview looked like a bug, then resolved as intended.**
    `[agent]` (log 246, resolved log 248)
 
    > Overcharged Battery says 'The next card played this turn is played for free' (one card,
-   > design/cards.yaml). After playing it, the table showed cost 0 for every card in BOTH Red's and
+   > cards.yaml). After playing it, the table showed cost 0 for every card in BOTH Red's and
    > Gray's hands, not just one upcoming card.
    >
    > Resolved: the cost-0 display after playing Overcharged Battery was a preview of what each hand
@@ -122,7 +122,7 @@ run in this series so far -- before Exhaustion itself ended it.
    622)
 
    > Overgrown Hydroponics Bay has Scramble 6 (Bad Stuff both) and Scramble 11 (Good Stuff both) as
-   > two SEPARATE challenges (checked design/cards.yaml: two challenges: entries, not one challenge
+   > two SEPARATE challenges (checked cards.yaml: two challenges: entries, not one challenge
    > with two thresholds), so meeting Scramble 11 does not skip the Scramble 6 penalty -- both
    > resolved this turn.
 
@@ -306,7 +306,7 @@ Justin asked four questions about this run; answers below, each citing the log l
 - **Things that worked:** `play take`/`play skip` for the single-card "reveal a reward" outcome
   (distinct from the 3-choice Ascend prompt) was clear and unambiguous -- the two never got
   confused despite this run hitting both types repeatedly. `bin/nvu card "<name>"` for checking
-  rarities and exact text against `design/cards.yaml` continued to work well with no run needed.
+  rarities and exact text against `cards.yaml` continued to work well with no run needed.
   `play note` after game-over (turn 36, no legal moves) still accepted the final note explaining
   the Down, same as playtest 8.
 - **The one moment of friction:** the cost-0 display after playing Overcharged Battery (note 2)
@@ -611,7 +611,7 @@ CLI improvements:
 243. Red discards Shove from their hand.
 244. Red pays with Shove.
 245. Red plays Overcharged Battery.
-246. NOTE — Overcharged Battery says 'The next card played this turn is played for free' (one card, design/cards.yaml). After playing it, the table showed cost 0 for every card in BOTH Red's and Gray's hands, not just one upcoming card. Playing Grav Harness next to see whether only it goes free or the discount is really general.
+246. NOTE — Overcharged Battery says 'The next card played this turn is played for free' (one card, cards.yaml). After playing it, the table showed cost 0 for every card in BOTH Red's and Gray's hands, not just one upcoming card. Playing Grav Harness next to see whether only it goes free or the discount is really general.
 247. Red plays Grav Harness.
 248. NOTE — Resolved: the cost-0 display after playing Overcharged Battery was a preview of what each hand card WOULD cost if played next, not a simultaneous discount on every card. After Grav Harness was actually played, Red's Charge In and Gray's whole hand reverted to their printed costs. Overcharged Battery reads correctly as printed.
 249. Gray draws Duck Under.
@@ -987,7 +987,7 @@ CLI improvements:
 619. Gray discards Pick The Lock from their play zone.
 620. Gray discards Catch Your Breath from their play zone.
 621. — end of turn 26 —
-622. NOTE — Overgrown Hydroponics Bay has Scramble 6 (Bad Stuff both) and Scramble 11 (Good Stuff both) as two SEPARATE challenges (checked design/cards.yaml: two challenges: entries, not one challenge with two thresholds), so meeting Scramble 11 does not skip the Scramble 6 penalty -- both resolved this turn (log shows both lines). Matches rulebook section 'If more than one challenge is met, their outcomes may be resolved in any order,' not a bug. But reaching the room's own better line still cost Bad Stuff on the way, which reads oddly for a design meant to reward hitting the higher number -- worth asking the designer whether that is intended for rooms shaped this way.
+622. NOTE — Overgrown Hydroponics Bay has Scramble 6 (Bad Stuff both) and Scramble 11 (Good Stuff both) as two SEPARATE challenges (checked cards.yaml: two challenges: entries, not one challenge with two thresholds), so meeting Scramble 11 does not skip the Scramble 6 penalty -- both resolved this turn (log shows both lines). Matches rulebook section 'If more than one challenge is met, their outcomes may be resolved in any order,' not a bug. But reaching the room's own better line still cost Bad Stuff on the way, which reads oddly for a design meant to reward hitting the higher number -- worth asking the designer whether that is intended for rooms shaped this way.
 623. You are in: Pressurized Maintenance Hub.
 624. Red draws Charge In.
 625. Red draws Duct Tape & Wire.

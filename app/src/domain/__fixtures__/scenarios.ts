@@ -98,7 +98,7 @@ function choosingCards(): GameState {
     activeRoom: room("Automated Defense Turret"),
     Red: player({
       deck: pile("Shove", 4),
-      hand: [card("Charge In"), card("Charge In"), card("Pry Bar"), ...pile("Shove", 4)],
+      hand: [card("Charge"), card("Charge"), card("Pry Bar"), ...pile("Shove", 4)],
     }),
     Gray: player({ deck: pile("Duck Under", 4), hand: [card("Rust")] }),
   });
@@ -138,7 +138,7 @@ function cardReward(): GameState {
     activeRoom: room("Pressurized Maintenance Hub"),
     Red: player({
       deck: pile("Shove", 5),
-      hand: [card("Charge In"), card("Shove"), card("Shove"), card("Pry Bar")],
+      hand: [card("Charge"), card("Shove"), card("Shove"), card("Pry Bar")],
     }),
     Gray: player({ deck: pile("Duck Under", 5) }),
   });
@@ -266,7 +266,7 @@ function ascending(): GameState {
       ...Array.from({ length: 8 }, () => room("Security Turnstile")),
     ],
     cleared: [room(CLEARED_ROOM)],
-    Red: player({ deck: pile("Shove", 2), discard: [...pile("Charge In", 3), card("Pry Bar")] }),
+    Red: player({ deck: pile("Shove", 2), discard: [...pile("Charge", 3), card("Pry Bar")] }),
     Gray: player({ deck: pile("Duck Under", 2), discard: pile("Pick The Lock", 3) }),
   });
   return {
@@ -286,7 +286,7 @@ function emptyGoodStuffPool(): Ran {
     activeRoom: room(SORTING_ROOM),
     Red: player({
       deck: pile("Shove", 5),
-      hand: [card("Charge In"), card("Shove"), card("Shove"), card("Pry Bar")],
+      hand: [card("Charge"), card("Shove"), card("Shove"), card("Pry Bar")],
     }),
     Gray: player({ deck: pile("Duck Under", 5) }),
   });

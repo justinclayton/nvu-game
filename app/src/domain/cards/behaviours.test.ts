@@ -17,8 +17,8 @@ import {
 
 beforeEach(resetRig);
 
-describe("Overdrive — 'Exhaust 2'", () => {
-  it("puts the top 2 cards of your own deck into your Exhaust pile", () => {
+describe("Overdrive — 'Exhaust 1'", () => {
+  it("puts the top card of your own deck into your Exhaust pile", () => {
     const state = rig({
       phase: "Play",
       activeRoom: room("Security Turnstile"),
@@ -31,21 +31,17 @@ describe("Overdrive — 'Exhaust 2'", () => {
       cardId: handCard(state, "Red", "Overdrive").id,
       payWith: [],
     });
-    expect(next.Red.deck).toHaveLength(2);
-    expect(next.Red.exhaust).toHaveLength(2);
+    expect(next.Red.deck).toHaveLength(3);
+    expect(next.Red.exhaust).toHaveLength(1);
     expect(next.Gray.deck).toHaveLength(4);
-    expect(eventTypes(events)).toEqual([
-      "CARD_PLAYED",
-      "CARD_EXHAUSTED",
-      "CARD_EXHAUSTED",
-    ]);
+    expect(eventTypes(events)).toEqual(["CARD_PLAYED", "CARD_EXHAUSTED"]);
   });
 
-  it("sends you Down if the deck runs out under it", () => {
+  it("sends you Down if the deck and discard pile are both empty under it", () => {
     const state = rig({
       phase: "Play",
       activeRoom: room("Security Turnstile"),
-      Red: player({ deck: [card("Shove")], hand: [card("Overdrive")] }),
+      Red: player({ deck: [], discard: [], hand: [card("Overdrive")] }),
       Gray: player({ deck: pile("Duck Under", 4) }),
     });
     const { state: next, events } = must(state, {

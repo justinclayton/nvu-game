@@ -5,8 +5,8 @@
  * here reads a clock, a network or Math.random — randomness is the seed carried
  * in the state, so a run replays exactly from its seed and its command log.
  *
- * Section numbers point at design/rulebook.md, rules version
- * 0.2.10, which is the authority.
+ * Section numbers point at rulebook.md, rules version
+ * 0.2.11, which is the authority.
  */
 
 import { behaviourOf, type BehaviourContext, type ChoiceAnswer } from "./cards/behaviours";
@@ -47,7 +47,6 @@ import type {
 import { CorruptStateError } from "./types";
 import {
   applyPoolBonus,
-  attachNextPlayScramble,
   CHARACTERS,
   clearFreePlays,
   clearPlayDiscount,
@@ -545,7 +544,7 @@ function playCard(
   if (costOverrideSpentBy(s, c, card)) {
     s = spendFreePlay(s);
   }
-  // Distract & Pivot: the very next card this character plays spends the charge.
+  // Pivot: the very next card this character plays spends the charge.
   if (s.thisTurn.playDiscount[c] > 0) {
     s = spendPlayDiscount(s, c);
   }
@@ -560,7 +559,6 @@ function playCard(
   const after = playerOf(s, c);
   s = withPlayer(s, c, { ...after, hand: after.hand.filter((x) => x.id !== cardId) });
   s = { ...s, playZone: [...s.playZone, { owner: c, card }] };
-  s = attachNextPlayScramble(s, c, card);
   run.events.push({ type: "CARD_PLAYED", character: c, card });
   const to = run.events.length;
   trackEntries(run, from, to);

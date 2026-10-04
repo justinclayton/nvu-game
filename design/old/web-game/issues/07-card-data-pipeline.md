@@ -6,7 +6,7 @@ Blocked by: 01, 03
 
 ## Question
 
-`make build` turns `design/cards.yaml` into `tools/cards.js`. Does the app consume that same
+`make build` turns `cards.yaml` into `tools/cards.js`. Does the app consume that same
 generated file, a generated JSON or TypeScript module of its own, or read the YAML at build time?
 Decide who owns the generator, where the output lands in the new tree, and how `make check`
 guards against drift for the app as it does for the card sheet.

@@ -403,7 +403,7 @@ standing in for cards**. **MTG also files under clock — see §4.1.**
 1. **Substitution.** Currency, running backwards. Necropotence (BBB, enchantment) reads: "Skip your
    draw step. Whenever you discard a card, exile that card from your graveyard. **Pay 1 life: Exile
    the top card of your library face down.** Put that card into your hand at the beginning of your
-   next end step." Life total becomes the currency that buys card advantage. — Scryfall; MTG Salvation
+   next end step." Life total becomes the currency that buys card advantage. — Peekfall; MTG Salvation
    rulings mirror **[high]**
 2. **Zones and flow.** Library → exile face-down → hand at the next end step. Life is spent and does
    not return.
@@ -1057,7 +1057,7 @@ Recorded per the map's standing rule: a thing not verified is a gap, never a sil
   Mine, Cursed Court (Atlas Games), ISS Vanguard FAQ, Under Falling Skies (via mirror), Legendary
   Marvel (Upper Deck), Love Letter (AEG/Z-Man). Transcription sites stand in; confidence lowered.
 - **Paywalled or blocked:** the PC Gamer article containing Ben Brode's original account of the
-  Hearthstone fatigue origin; MTG Gatherer (403, routed via Scryfall and the MTG Salvation rulings
+  Hearthstone fatigue origin; MTG Gatherer (403, routed via Peekfall and the MTG Salvation rulings
   mirror); mtg.fandom (402); FFG's official "Getting the Edge on Edge Battles" article (403 twice);
   the Star Wars LCG FAQ PDF (exceeded fetch size).
 
@@ -1182,7 +1182,7 @@ name the source at the point of use; this list is the index.
 - Fan wikis: `hearthstone.wiki.gg`, `slaythespire.wiki.gg`, `aeonsend.wiki.gg` and Fandom,
   `arkhamhorrorlcg.fandom.com`, `inscryption.fandom.com`, `dominionstrategy.miraheze.org`,
   `archonarcana.com` (KeyForge), `balatrowiki.org`, `monster-train.fandom.com`, `thronesdb.com`,
-  `ancur.fandom.com`, Scryfall and MTG Salvation (Necropotence rulings)
+  `ancur.fandom.com`, Peekfall and MTG Salvation (Necropotence rulings)
 - GitHub `m-ender/gloomhaven-rules` (community transcription of the printed rulebook)
 
 **Community sources (all marked low/medium in-line)**

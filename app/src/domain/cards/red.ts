@@ -1,9 +1,8 @@
-/* Red's cards. Keyed by the name design/cards.yaml makes unique. */
+/* Red's cards. Keyed by the name cards.yaml makes unique. */
 
 import type { DomainEvent } from "../types";
 import { playedBy } from "../queries";
 import {
-  bankNextPlayScramble,
   drawCards,
   exhaustFromHand,
   playerOf,
@@ -14,14 +13,14 @@ import {
 import { ask, done, drawnAs, drawQuestion, nothing, source, type Registry } from "./behaviour";
 
 export const RED: Registry = {
-  /* "Exhaust 2." */
-  Overdrive: { exhaustX: 2 },
-
   /* "Exhaust 1." */
+  Overdrive: { exhaustX: 1 },
+
+  /* "Exhaust 1 from the top of your deck." */
   "Reckless Swing": { exhaustX: 1 },
 
-  /* "Exhaust 3." */
-  Reckless: { exhaustX: 3 },
+  /* "Exhaust 2." */
+  Reckless: { exhaustX: 2 },
 
   /* "Exhaust 1." */
   "Cross Punch": { exhaustX: 1 },
@@ -122,10 +121,11 @@ export const RED: Registry = {
     },
   },
 
-  /* "Play: The next card Gray plays this turn gains +2 Scramble." */
+  /* "+2 Scramble if Gray also plays a card this turn." */
   "Set 'Em Up": {
-    onPlay(state) {
-      return done(bankNextPlayScramble(state, "Gray", 2));
+    stats(state, _owner, card) {
+      const bonus = playedBy(state, "Gray") > 0 ? 2 : 0;
+      return { oomph: card.oomph, scramble: card.scramble + bonus };
     },
   },
 

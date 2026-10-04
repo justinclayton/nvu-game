@@ -16,10 +16,10 @@ function runCard(name: string): { readonly status: number; readonly output: stri
 }
 
 describe("bin/nvu card", () => {
-  it("prints a Room's name, band, thresholds and Flee text", () => {
+  it("prints a Room's name, tier, thresholds and Flee text", () => {
     const { status, output } = runCard("Automated Defense Turret");
     expect(status).toBe(0);
-    expect(output).toContain("Automated Defense Turret [room; band 2]");
+    expect(output).toContain("Automated Defense Turret [room; tier 2]");
     expect(output).toContain("Scramble 8: Clear, and Gray gets Good Stuff.");
     expect(output).toContain("Oomph 10: Clear, and one of you may Scrap a Bad Stuff card from your hand.");
     expect(output).toContain("Flee: Both players Exhaust 2, and both players get Bad Stuff.");
@@ -28,13 +28,13 @@ describe("bin/nvu card", () => {
   it("matches a Room by an unambiguous prefix, same as a card", () => {
     const { status, output } = runCard("Automated Defense");
     expect(status).toBe(0);
-    expect(output).toContain("Automated Defense Turret [room; band 2]");
+    expect(output).toContain("Automated Defense Turret [room; tier 2]");
   });
 
   it("still prints a non-Room card as before", () => {
-    const { status, output } = runCard("Charge In");
+    const { status, output } = runCard("Charge");
     expect(status).toBe(0);
-    expect(output.trim()).toBe("Charge In [cost 2; Oomph 4]");
+    expect(output.trim()).toBe("Charge [cost 2; Oomph 4]");
   });
 
   it("refuses a name matching neither a card nor a Room", () => {

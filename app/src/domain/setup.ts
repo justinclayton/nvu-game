@@ -11,9 +11,6 @@ import type { Band, CardContent, CardFace, Character, RoomFace } from "./printed
 import { shuffle } from "./rng";
 import type { Card, DomainEvent, GameState, PlayerState, Room, TurnRecord } from "./types";
 
-/** The rulebook this engine implements (design/rulebook.md). See #83. */
-export const RULES_VERSION = "0.2.10";
-
 /** The tenth floor is the roof: clearing it wins the run (rulebook, Winning and losing). */
 export const TOP_FLOOR = 10;
 
@@ -30,11 +27,11 @@ export const STAIRWELLS_PER_FLOOR = 1;
 export const roomsOnFloor = (floor: number): number => TOP_FLOOR + 1 - floor;
 
 /**
- * Rooms and Stairwells pool by band: floors 1–3, 4–6, 7–9 (rulebook Setup,
- * "Floor deck"). Floor 10 draws from no band — it prints one fixed Stairwell
- * instead (design/cards.yaml, The Monolith Core; issue #66).
+ * Rooms and Stairwells pool by tier: floors 1–3, 4–6, 7–9 (rulebook Setup,
+ * "Floor deck"). Floor 10 draws from no tier — it prints one fixed Stairwell
+ * instead (cards.yaml, The Monolith Core; issue #66).
  */
-export function bandOf(floor: number): Band | null {
+export function tierOf(floor: number): Band | null {
   if (floor <= 3) return 1;
   if (floor <= 6) return 2;
   if (floor <= 9) return 3;
@@ -65,7 +62,7 @@ export function mintRoom(face: RoomFace, copy: number): Room {
     id: roomId(`${face.name}#${copy}`),
     name: face.name,
     kind: face.kind,
-    band: face.band,
+    tier: face.tier,
     flavor: face.flavor,
     challenges: face.challenges,
     flee: face.flee,
@@ -95,11 +92,11 @@ function takeRooms(
 }
 
 /**
- * One Stairwell from the floor's band, plus Rooms from the same band drawn at
+ * One Stairwell from the floor's tier, plus Rooms from the same tier drawn at
  * random until the floor is full (rulebook Setup, "Floor deck"). The floor
  * gets no harder as you climb — it gets emptier.
  *
- * Pools are sized so a band always has enough for its floors. If a band ever
+ * Pools are sized so a tier always has enough for its floors. If a tier ever
  * comes up short of one Stairwell plus enough Rooms, the run is void: the
  * floor is not built, and the game ends Aborted instead.
  */
@@ -107,12 +104,12 @@ export function buildFloor(state: GameState, events: DomainEvent[]): GameState {
   let seed = state.seed;
   let supply = state.roomSupply;
   const rooms: Room[] = [];
-  const band = bandOf(state.floor);
+  const tier = tierOf(state.floor);
   const need = roomsOnFloor(state.floor);
 
   const [stairwells, afterStairwell, s1] = takeRooms(
     supply,
-    (r) => r.kind === "stairwell" && r.band === band,
+    (r) => r.kind === "stairwell" && r.tier === tier,
     STAIRWELLS_PER_FLOOR,
     seed,
   );
@@ -122,7 +119,7 @@ export function buildFloor(state: GameState, events: DomainEvent[]): GameState {
 
   const [rest, afterRest, s2] = takeRooms(
     supply,
-    (r) => r.kind === "room" && r.band === band,
+    (r) => r.kind === "room" && r.tier === tier,
     need - STAIRWELLS_PER_FLOOR,
     seed,
   );
@@ -131,7 +128,7 @@ export function buildFloor(state: GameState, events: DomainEvent[]): GameState {
   seed = s2;
 
   if (rooms.length < need) {
-    const reason = `Floor ${String(state.floor)} needs ${String(need)} cards; band ${String(band)} holds ${String(rooms.length)}.`;
+    const reason = `Floor ${String(state.floor)} needs ${String(need)} cards; tier ${String(tier)} holds ${String(rooms.length)}.`;
     events.push({ type: "RUN_ABORTED", reason });
     return { ...state, phase: "GameOver", outcome: "Aborted" };
   }
@@ -148,7 +145,7 @@ export function buildFloor(state: GameState, events: DomainEvent[]): GameState {
 }
 
 /**
- * Unseen and Fled rooms go back to their band's pool, ready for the next
+ * Unseen and Fled rooms go back to their tier's pool, ready for the next
  * floor. Cleared rooms, the Stairwell included, stay on the Rooms pile for
  * the rest of the run (rulebook, Ascending).
  */
@@ -171,8 +168,6 @@ export const emptyTurnRecord = (): TurnRecord => ({
   questions: [],
   fired: [],
   playDiscount: { Red: 0, Gray: 0 },
-  nextPlayScramble: { Red: 0, Gray: 0 },
-  cardScramble: {},
   poolPenalty: { oomph: 0, scramble: 0 },
   poolBonus: { oomph: 0, scramble: 0 },
 });

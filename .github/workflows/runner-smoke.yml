@@ -5,8 +5,6 @@ name: Runner smoke test
 
 on:
   workflow_dispatch:
-  push:
-    branches: [claude/github-self-hosted-runner-65e807]
 
 jobs:
   smoke:

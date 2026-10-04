@@ -39,17 +39,20 @@ expect "R$r0.C$c0-v3" "$(sh tools/kit-revision.sh)" "the merge commit does not c
 echo "// generated" >> app/src/content/cards.generated.ts; git commit -qam "regen" --no-verify
 expect "R$r0.C$c0-v3" "$(sh tools/kit-revision.sh)" "the generated module does not count"
 
-echo "== a rulebook edit raises R once per branch and resets v =="
+echo "== every rulebook commit raises R and resets v =="
 git checkout -qb rules main
 echo "" >> rulebook.md; echo "A new line." >> rulebook.md
 sh tools/bump-revision.sh | grep -q "R$r0 -> R$((r0 + 1))" || fail "R not raised"
+sh tools/bump-revision.sh | grep -q "already raised" || fail "R raised twice for one edit"
 git commit -qam "rules edit" --no-verify
 expect "R$((r0 + 1)).C$c0-v1" "$(sh tools/kit-revision.sh)" "R raised, v back to 1"
-echo "Another line." >> rulebook.md
-sh tools/bump-revision.sh | grep -q "already raised" || fail "R raised twice on one branch"
-git commit -qam "rules edit 2" --no-verify
+sh tools/bump-revision.sh | grep -q "already raised" || fail "R raised with nothing edited"
 touch_engine three
 expect "R$((r0 + 1)).C$c0-v2" "$(sh tools/kit-revision.sh)" "an engine commit after the bump is v2"
+echo "Another line." >> rulebook.md
+sh tools/bump-revision.sh | grep -q "R$((r0 + 1)) -> R$((r0 + 2))" || fail "a second edit on the branch did not raise R"
+git commit -qam "rules edit 2" --no-verify
+expect "R$((r0 + 2)).C$c0-v1" "$(sh tools/kit-revision.sh)" "a second edit names a new state, v back to 1"
 
 echo "== a card edit raises C, on the staged copy too =="
 git checkout -qb cards main
@@ -66,7 +69,10 @@ git commit -qm "card edit" --no-verify
 expect "R$r0.C$((c0 + 1))-v1" "$(sh tools/kit-revision.sh)" "C raised, v back to 1"
 
 echo "== two branches reach the same R: the second is raised again after merging main =="
-git checkout -q main; git merge -q --no-ff rules -m "merge rules" --no-verify
+git checkout -qb rules-once main
+echo "" >> rulebook.md; echo "One rule edit." >> rulebook.md
+sh tools/bump-revision.sh >/dev/null; git commit -qam "rules once" --no-verify
+git checkout -q main; git merge -q --no-ff rules-once -m "merge rules-once" --no-verify
 git checkout -q cards; echo "Card branch rule." >> rulebook.md; git commit -qam "rules on cards branch" --no-verify
 sh tools/bump-revision.sh >/dev/null; git commit -qam "bump" --no-verify
 expect "R$((r0 + 1))" "$(sh tools/kit-revision.sh --sources | cut -d. -f1)" "both branches at the same R"

@@ -1,9 +1,16 @@
 #!/bin/sh
-# Raises the two kit revision counters when their source changed since the
-# branch left main and the counter is not already above main's:
+# Raises the two kit revision counters on every change to their source:
 #
 #   R   rulebook.md    the "Rules version: R<n>" line
 #   C   cards.yaml     the "version: C<n>" line under meta
+#
+# A source that differs from the last commit gets a counter above the last
+# commit's, so each commit that edits it names a new state, and each turn of
+# the design loop is playtested under its own kit revision. A source that
+# differs from main gets a counter above main's, so two branches that reach
+# the same number are told apart after one merges main. Either way the new
+# value is one more than the higher of the two. A counter the edit already
+# raised far enough is left alone.
 #
 # Run through `make bump-revision`, which the pre-commit hook, CI and a person
 # after a merge all use. design/loop/spec.md names the counters.
@@ -45,8 +52,14 @@ bump_counter() {
   before=$(git show "$base:$file" | value_of)
   before=${before:-0}
   after=${after:-0}
+  head_id=$(git rev-parse --verify --quiet "HEAD:$file" || true)
+  last=$(git show "HEAD:$file" 2>/dev/null | value_of || true)
+  last=${last:-0}
 
-  if [ "$current_id" = "$base_id" ] || [ "$after" -gt "$before" ]; then
+  short=
+  if [ "$current_id" != "$head_id" ] && [ "$after" -le "$last" ]; then short=1; fi
+  if [ "$current_id" != "$base_id" ] && [ "$after" -le "$before" ]; then short=1; fi
+  if [ -z "$short" ]; then
     echo "$file: $letter counter already raised, or the file is unchanged ($letter$after)"
     return 0
   fi
@@ -55,7 +68,8 @@ bump_counter() {
     echo "$file: has no $letter counter line to raise" >&2
     return 1
   fi
-  next=$((before + 1))
+  next=$(( (last > before ? last : before) + 1 ))
+  from=$after
   bump() { sed "s/^\($prefix\)$letter[0-9]*/\1$letter$next/"; }
 
   tmp=$(mktemp)
@@ -67,7 +81,7 @@ bump_counter() {
     blob=$(git show ":$file" | bump | git hash-object -w --stdin)
     git update-index --cacheinfo "$mode,$blob,$file"
   fi
-  echo "$file changed: $letter counter raised $letter$before -> $letter$next"
+  echo "$file changed: $letter counter raised $letter$from -> $letter$next"
 }
 
 bump_counter rulebook.md R 'Rules version:[[:space:]]*'

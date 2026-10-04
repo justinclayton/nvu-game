@@ -17,7 +17,7 @@ rm -f tools/bump-rules-version.sh
 git config user.email t@t; git config user.name t
 git config core.hooksPath .githooks
 git config merge.cards-generated.driver true
-git add -A; git commit -qm base --no-verify
+git add -A; git commit -qm base --no-verify --allow-empty
 base=$(git rev-parse --abbrev-ref HEAD)
 
 # a card flavor line, to edit in two ways

@@ -1,7 +1,11 @@
 "use strict";
 
-/* Card backs, one per face-down pile (rulebook, Setup). Shared by
-   card-backs.html (the gallery) and card-sheet.html (the duplex sheet). */
+/* Card backs, one per face-down pile that has to be told apart on the table
+   (rulebook, Setup). card-sheet.html prints each card's back behind it.
+   Starters and rewards share a back because a reward joins the deck. Rooms and
+   Stairwells share a back because a floor shuffles them together. White backs
+   spare ink: the pool colour carries only the frame, glyph and words, matching
+   the type bar on the card faces. */
 var NVU_BACKS = (function () {
 
 
@@ -37,22 +41,22 @@ var GLYPHS = {
 };
 
 var BACKS = [
-  { id: "red", label: "RED", ink: "#b52d24", glyph: "chevrons",
-    caption: "Red character deck and Red reward pool." },
-  { id: "gray", label: "GRAY", ink: "#5c6169", glyph: "scramble",
-    caption: "Gray character deck and Gray reward pool." },
-  { id: "good", label: "GOOD STUFF", ink: "#3f8f4a", glyph: "sparkle",
-    caption: "Good Stuff pool." },
-  { id: "bad", label: "BAD STUFF", ink: "#5a3a6e", glyph: "burst",
-    caption: "Bad Stuff pool." },
-  { id: "room-1", label: "ROOM", ink: "#2d6a4f", glyph: "tower1", tag: "FLOORS 1\u20133",
-    caption: "Floors 1\u20133 tier: its Rooms and Stairwells. One back per tier so a Stairwell hides among Rooms." },
-  { id: "room-2", label: "ROOM", ink: "#1d4e89", glyph: "tower2", tag: "FLOORS 4\u20136",
-    caption: "Floors 4\u20136 tier." },
-  { id: "room-3", label: "ROOM", ink: "#7c2d12", glyph: "tower3", tag: "FLOORS 7\u20139",
-    caption: "Floors 7\u20139 tier." },
-  { id: "room-4", label: "ROOM", ink: "#b8860b", glyph: "tower4", tag: "FLOOR 10",
-    caption: "Floor 10: the one fixed Stairwell." }
+  /* Red character deck and Red reward pool. */
+  { id: "red", label: "RED", ink: "#b52d24", glyph: "chevrons" },
+  /* Gray character deck and Gray reward pool. */
+  { id: "gray", label: "GRAY", ink: "#5c6169", glyph: "scramble" },
+  /* Good Stuff pool. */
+  { id: "good", label: "GOOD STUFF", ink: "#3f8f4a", glyph: "sparkle" },
+  /* Bad Stuff pool. */
+  { id: "bad", label: "BAD STUFF", ink: "#5a3a6e", glyph: "burst" },
+  /* Floors 1–3 tier: its Rooms and Stairwells. One back per tier so a Stairwell hides among Rooms. */
+  { id: "room-1", label: "ROOM", ink: "#2d6a4f", glyph: "tower1", tag: "FLOORS 1\u20133" },
+  /* Floors 4–6 tier. */
+  { id: "room-2", label: "ROOM", ink: "#1d4e89", glyph: "tower2", tag: "FLOORS 4\u20136" },
+  /* Floors 7–9 tier. */
+  { id: "room-3", label: "ROOM", ink: "#7c2d12", glyph: "tower3", tag: "FLOORS 7\u20139" },
+  /* Floor 10: the one fixed Stairwell. */
+  { id: "room-4", label: "ROOM", ink: "#b8860b", glyph: "tower4", tag: "FLOOR 10" }
 ];
 
 function wordmark(x, y, rot) {

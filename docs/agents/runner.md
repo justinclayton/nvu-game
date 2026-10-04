@@ -3,6 +3,9 @@
 Agent jobs in the [design loop](../../design/loop/spec.md) run on a GitHub
 Actions runner on the designer's Mac mini. Use `runs-on: self-hosted` in a job
 to land on it. Deterministic CI stays on `ubuntu-latest`.
+The one exception is *Print kit*, which prints the playtest PDFs here so every
+kit comes off the same machine with the same fonts. It fetches its own Chrome
+for Testing into `~/.cache/nvu-game/chrome` the first time (`tools/find-chrome.sh`).
 
 - **Install:** `~/actions-runner`, runner `Justins-Mac-mini-M2`, labels
   `self-hosted`, `macOS`, `ARM64`. Registered to this repo only.

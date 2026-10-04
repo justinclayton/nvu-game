@@ -11,8 +11,8 @@
 #   bin/nvu         the CLI: bin/nvu play, bin/nvu replay, bin/nvu fuzz, bin/nvu help
 #   make sheet      open the print-and-cut card sheet
 #   make revision   print the kit revision, R29.C43-v1 (tools/kit-revision.sh)
-#   make pdf        print the sheet to print/card-sheet-<kit revision>.pdf
-#   make rulebook   print the rulebook to print/rulebook-<kit revision>.pdf
+#   make pdf        print the sheet, fronts and backs, to print/card-sheet-R29.C43.pdf
+#   make rulebook   print the rulebook to print/rulebook-R29.C43.pdf
 
 .PHONY: help build check bump-revision bump-rules-version revision app app-check app-install sheet pdf rulebook all
 default: build
@@ -25,8 +25,8 @@ help:
 	@echo "bin/nvu         the CLI: bin/nvu play, bin/nvu replay, bin/nvu fuzz, bin/nvu help"
 	@echo "make revision   print the kit revision, R29.C43-v1"
 	@echo "make sheet   open the print-and-cut card sheet in a browser"
-	@echo "make pdf     print the sheet to print/card-sheet-<kit revision>.pdf (needs Chrome)"
-	@echo "make rulebook  print the rulebook to print/rulebook-<kit revision>.pdf (needs Chrome)"
+	@echo "make pdf     print the sheet, fronts and backs, to print/card-sheet-R29.C43.pdf"
+	@echo "make rulebook  print the rulebook to print/rulebook-R29.C43.pdf"
 	@echo ""
 	@echo "Change a card in cards.yaml, then: make build check"
 
@@ -82,36 +82,33 @@ app-check: app/node_modules build
 	cd app && npm run check
 
 # The print-and-cut card sheet, for playing on a table (tools/card-sheet.html).
-# The page stamps the full kit revision when told it in the URL.
 sheet: build
-	open "file://$(CURDIR)/tools/card-sheet.html?kit=$(KIT_REVISION)"
+	open tools/card-sheet.html
 
-# PDFs, named for the kit revision they were printed under.  Headless Chrome
-# does the printing; CHROME=/path/to/chrome overrides the search.
-KIT_REVISION = $(shell sh tools/kit-revision.sh)
-PDF = print/card-sheet-$(KIT_REVISION).pdf
-RULEBOOK_HTML = print/rulebook-$(KIT_REVISION).html
-RULEBOOK_PDF = print/rulebook-$(KIT_REVISION).pdf
+# PDFs, named for the physical kit: R and C, the counters printed on the cards.
+# The engine count is left off because nothing printed depends on the engine.
+# On a merge to main that changes either source, .github/workflows/print-kit.yml
+# runs these on the self-hosted runner and publishes them as a release.
+# tools/find-chrome.sh finds the headless Chrome that prints them, fetching one
+# into a cache if none is installed; CHROME=/path/to/chrome overrides it.
+KIT = $(shell sh tools/kit-revision.sh --sources)
+PDF = print/card-sheet-$(KIT).pdf
+RULEBOOK_HTML = print/rulebook-$(KIT).html
+RULEBOOK_PDF = print/rulebook-$(KIT).pdf
 
 # print_pdf <page.html> <out.pdf>
 define print_pdf
-	chrome="$(CHROME)"; \
-	for c in "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" \
-	         "/Applications/Chromium.app/Contents/MacOS/Chromium" \
-	         google-chrome chromium chromium-browser; do \
-		[ -n "$$chrome" ] && break; \
-		if [ -x "$$c" ] || command -v "$$c" >/dev/null 2>&1; then chrome="$$c"; fi; \
-	done; \
-	if [ -z "$$chrome" ]; then echo "make $@: no Chrome found; set CHROME=/path/to/chrome" >&2; exit 1; fi; \
+	chrome=$$(sh tools/find-chrome.sh) || exit 1; \
 	mkdir -p print; \
 	"$$chrome" --headless=new --disable-gpu --no-pdf-header-footer \
 		--print-to-pdf="$(CURDIR)/$(2)" "file://$(CURDIR)/$(1)" 2>/dev/null; \
+	test -s "$(2)" || { echo "make $@: Chrome wrote no $(2)" >&2; exit 1; }; \
 	echo "wrote $(2)"
 endef
 
 # The card sheet.
 pdf: build
-	@$(call print_pdf,tools/card-sheet.html?kit=$(KIT_REVISION),$(PDF))
+	@$(call print_pdf,tools/card-sheet.html,$(PDF))
 
 # The rulebook (rulebook.md), laid out by tools/rulebook.mjs.
 rulebook:

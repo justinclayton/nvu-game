@@ -5,7 +5,7 @@ import { FULL_CONTENT } from "@domain/__fixtures__/rig";
 import { costOf, payOptions, playableCards } from "@domain/queries";
 import type { CardContent } from "@domain/printed";
 import type { AscendChoice, Character, Command, GameState } from "@domain/types";
-import { EXPORTS, runData, runTranscript, runTurns, turnRows, type RunFile } from "./exportRun";
+import { EXPORTS, mismatchedField, runData, runTranscript, runTurns, turnRows, type RunFile } from "./exportRun";
 import { createSession, loadSession, type Session } from "./session";
 
 const content = CARD_CONTENT;
@@ -195,6 +195,16 @@ describe("the run itself (.json)", () => {
     expect(file.log).toHaveLength(session.getState().events.length);
     expect(file.cards).toBe(CARD_LIST_ID);
     expect(file.rules).toBe(RULES_VERSION);
+    expect(file.kit).toBeUndefined();
+  });
+
+  it("records the kit revision it is told, which replay does not check", () => {
+    const session = playedAndNoted();
+    const file = JSON.parse(runData(session.getState(), WHEN, "R29.C43-v7").text) as RunFile;
+
+    expect(file.kit).toBe("R29.C43-v7");
+    expect(file.rules).toBe(RULES_VERSION);
+    expect(mismatchedField(file)).toBeNull();
   });
 
   it("replays to the same event log, with the notes back where they were typed", () => {

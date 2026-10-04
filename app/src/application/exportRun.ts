@@ -288,6 +288,8 @@ export interface RunFile {
   readonly cards?: string;
   /** `RULES_VERSION` at export time, so a later rules change shows itself on replay instead of silently misplaying. Missing on a run recorded before this field existed. */
   readonly rules?: string;
+  /** The full kit revision at export time, `R29.C43-v1`: the rules and card list above plus the engine count, which only git knows (design/loop/spec.md). Tells two runs of the same rules and cards on different engine builds apart. Missing when the exporter was not told it. */
+  readonly kit?: string;
   readonly floor: number;
   readonly turn: number;
   readonly phase: string;
@@ -311,13 +313,14 @@ export function mismatchedField(file: Pick<RunFile, "cards" | "rules">): "cards"
   return null;
 }
 
-export function runData(session: SessionState, at: Date): ExportFile {
+export function runData(session: SessionState, at: Date, kit?: string): ExportFile {
   const saved = saveOf(session);
   const file: RunFile = {
     format: "nvu-run/1",
     exportedAt: at.toISOString(),
     cards: CARD_LIST_ID,
     rules: RULES_VERSION,
+    ...(kit === undefined ? {} : { kit }),
     floor: session.state.floor,
     turn: session.state.turn,
     phase: session.state.phase,
@@ -333,11 +336,11 @@ export function runData(session: SessionState, at: Date): ExportFile {
   };
 }
 
-/** The three exports, in the order the buttons offer them. */
+/** The three exports, in the order the buttons offer them. `kit` is the kit revision the caller knows, if any; only the `.json` run file records it. */
 export const EXPORTS: readonly {
   readonly extension: "txt" | "csv" | "json";
   readonly what: string;
-  readonly build: (session: SessionState, at: Date) => ExportFile;
+  readonly build: (session: SessionState, at: Date, kit?: string) => ExportFile;
 }[] = [
   { extension: "txt", what: "the log as you read it, notes in place", build: runTranscript },
   { extension: "csv", what: "one row per turn, for a spreadsheet", build: runTurns },

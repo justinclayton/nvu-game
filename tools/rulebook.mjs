@@ -3,8 +3,9 @@
  *
  *   node tools/rulebook.mjs [out.html]    render rulebook.md to HTML
  *
- * The default output is print/rulebook-v<rules version>.html; `make rulebook`
- * prints that to a PDF beside it.  rulebook.md stays the one place the
+ * The default output is print/rulebook-<rules version>.html, such as
+ * rulebook-R29.html; `make rulebook` names it for the kit instead and renders
+ * it to a PDF beside it.  rulebook.md stays the one place the
  * rules are written down, so this only renders the Markdown it already uses:
  * headings, paragraphs, bullet and numbered lists, block quotes, rules, and
  * bold, italic and `term` inline.  No dependencies, like tools/cards.mjs.
@@ -241,7 +242,7 @@ function build() {
 }
 
 const { version, html } = build();
-const out = process.argv[2] ?? join(ROOT, "print", `rulebook-v${version}.html`);
+const out = process.argv[2] ?? join(ROOT, "print", `rulebook-${version}.html`);
 mkdirSync(dirname(out), { recursive: true });
 writeFileSync(out, html);
 console.log(`wrote ${out.replace(ROOT + "/", "")}`);

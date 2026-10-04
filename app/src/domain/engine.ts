@@ -6,7 +6,7 @@
  * in the state, so a run replays exactly from its seed and its command log.
  *
  * Section numbers point at rulebook.md, rules version
- * 0.2.11, which is the authority.
+ * R29, which is the authority.
  */
 
 import { behaviourOf, type BehaviourContext, type ChoiceAnswer } from "./cards/behaviours";

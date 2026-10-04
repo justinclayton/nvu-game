@@ -24,6 +24,7 @@ import { PilePanel } from "./PilePanel";
 import { ReplayBar } from "./ReplayBar";
 import { useMetrics } from "./useMetrics";
 import { useSession, useSessionState } from "./useSession";
+import { KIT_REVISION } from "./kit";
 
 interface Props {
   readonly onNewRun: () => void;
@@ -142,6 +143,11 @@ export function Table({ onNewRun, onOpenRun, replay }: Props) {
           <span>Floor {state.floor}</span>
           <span>Turn {state.turn}</span>
           <span className="table__phase">{state.phase}</span>
+          {KIT_REVISION === undefined ? null : (
+            <span className="table__kit" title="Kit revision: rules, card list, engine build.">
+              {KIT_REVISION}
+            </span>
+          )}
         </div>
         <div className="table__actions">
           <label

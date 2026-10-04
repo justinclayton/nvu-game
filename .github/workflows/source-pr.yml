@@ -1,0 +1,106 @@
+# Step 2 of the design loop (design/loop/spec.md): a push to a branch whose
+# rulebook.md or cards.yaml differ from main gets a draft PR to main if none is
+# open for the branch. That branch is the source layer, the bottom of the
+# loop's stack. A branch built on another open branch is a layer above it,
+# whose PR gh stack opens against the layer below, so it gets none here.
+# Nothing here runs an agent; it is a GitHub write, so the self-hosted runner
+# is not needed.
+#
+# Opened with LOOP_TOKEN when the repo has that secret, because a PR opened
+# with the workflow's own GITHUB_TOKEN does not start the pull_request
+# workflows (CI, Kit revision) until the next push.
+name: Source layer PR
+
+on:
+  push:
+    branches-ignore:
+      - main
+      - pr-media
+
+permissions:
+  contents: read
+  pull-requests: write
+
+concurrency:
+  group: source-pr-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  open:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Did a source change since main?
+        id: sources
+        run: |
+          git fetch --quiet origin main
+          if git diff --quiet origin/main...HEAD -- rulebook.md cards.yaml; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+            echo "rulebook.md and cards.yaml match main: not a loop branch."
+          else
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Is this a layer above another branch?
+        id: layer
+        if: steps.sources.outputs.changed == 'true'
+        env:
+          BRANCH: ${{ github.ref_name }}
+        run: |
+          # A layer contains the tip of another branch that main does not.
+          below=
+          for ref in $(git for-each-ref --format='%(refname:short)' refs/remotes/origin); do
+            case "$ref" in origin/HEAD|origin|origin/main|origin/pr-media|"origin/$BRANCH") continue ;; esac
+            [ "$(git rev-parse "$ref")" = "$(git rev-parse HEAD)" ] && continue
+            git merge-base --is-ancestor "$ref" origin/main && continue
+            if git merge-base --is-ancestor "$ref" HEAD; then below=$ref; break; fi
+          done
+          if [ -n "$below" ]; then
+            echo "layer=true" >> "$GITHUB_OUTPUT"
+            echo "$BRANCH is built on ${below#origin/}: a layer of a stack, not a source layer."
+          else
+            echo "layer=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Open the source layer's draft PR if none is open
+        if: steps.sources.outputs.changed == 'true' && steps.layer.outputs.layer == 'false'
+        env:
+          GH_TOKEN: ${{ secrets.LOOP_TOKEN || github.token }}
+          BRANCH: ${{ github.ref_name }}
+        run: |
+          open=$(gh api "repos/$GITHUB_REPOSITORY/pulls?state=open&head=$GITHUB_REPOSITORY_OWNER:$BRANCH" --jq 'length')
+          if [ "$open" != "0" ]; then
+            echo "a PR is already open for $BRANCH"
+            exit 0
+          fi
+          kit=$(sh tools/kit-revision.sh)
+          subject=$(git log -1 --format=%s origin/main..HEAD -- rulebook.md cards.yaml)
+          {
+            echo "<!-- nvu-loop: source-pr -->"
+            echo "Draft PR for the source layer \`$BRANCH\`, opened by the design loop (design/loop/spec.md, step 2)."
+            echo
+            echo "Kit revision at opening: \`$kit\`."
+            echo
+            echo "Sources changed since \`main\`:"
+            echo
+            echo '```'
+            git diff --stat origin/main...HEAD -- rulebook.md cards.yaml
+            echo '```'
+            echo
+            echo "This branch is the bottom of the loop's stack: a review of the diff files work issues and ruling questions, each work issue becomes a code layer stacked above this one, and an agent playtest on the top layer reports as an issue. Edit the sources again on this branch to run it again, or merge the whole stack with \`gh stack merge <top PR> --merge\` to close the loop."
+          } > pr-body.md
+          if ! gh api -X POST "repos/$GITHUB_REPOSITORY/pulls" \
+            -f title="Kit $kit: $subject" \
+            -f head="$BRANCH" \
+            -f base=main \
+            -F draft=true \
+            -F body=@pr-body.md \
+            --jq '"opened draft PR #\(.number): \(.html_url)"'; then
+            echo "::error::Could not open the source layer PR. With GITHUB_TOKEN this needs the repo setting" \
+              "'Allow GitHub Actions to create and approve pull requests' (Settings > Actions > General);" \
+              "with a LOOP_TOKEN secret it does not. See the loop's identity ruling issue."
+            exit 1
+          fi

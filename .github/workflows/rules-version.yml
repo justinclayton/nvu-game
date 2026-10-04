@@ -1,4 +1,4 @@
-name: Rules version
+name: Kit revision
 
 on:
   pull_request:
@@ -14,10 +14,10 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-      - run: make bump-rules-version
-      - name: Fail if the rulebook changed without a version bump
+      - run: make bump-revision
+      - name: Fail if a source changed without its counter raised
         run: |
           git diff --exit-code --stat || {
-            echo "rulebook.md changed without a higher Rules version. Run: make bump-rules-version"
+            echo "rulebook.md or cards.yaml changed without R or C raised. Run: make bump-revision"
             exit 1
           }

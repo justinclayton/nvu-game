@@ -8,12 +8,16 @@ tmp=$(mktemp -d)
 trap 'rm -rf "$tmp"' EXIT
 git clone -q "$root" "$tmp/r"
 cd "$tmp/r"
-# carry over the working tree's version of the files under test
-cp "$root/.gitattributes" .; mkdir -p .githooks; cp "$root"/.githooks/* .githooks/
+# carry over the working tree's version of the files under test, and what the
+# hooks call: the Makefile, the bump scripts and the sources they stamp
+cp "$root/.gitattributes" "$root/Makefile" "$root/rulebook.md" "$root/cards.yaml" .
+mkdir -p .githooks; cp "$root"/.githooks/* .githooks/
+cp "$root"/tools/bump-revision.sh "$root"/tools/kit-revision.sh "$root"/tools/cards.mjs tools/
+rm -f tools/bump-rules-version.sh
 git config user.email t@t; git config user.name t
 git config core.hooksPath .githooks
 git config merge.cards-generated.driver true
-git add -A; git commit -qm base --no-verify
+git add -A; git commit -qm base --no-verify --allow-empty
 base=$(git rev-parse --abbrev-ref HEAD)
 
 # a card flavor line, to edit in two ways

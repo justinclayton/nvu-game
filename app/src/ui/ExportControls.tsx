@@ -6,6 +6,7 @@
  */
 
 import { EXPORTS, type ExportFile } from "@application/exportRun";
+import { KIT_REVISION } from "./kit";
 import { useSession } from "./useSession";
 
 function save(file: ExportFile): void {
@@ -34,7 +35,7 @@ export function ExportControls() {
           className="button button--small"
           title={`.${extension} — ${what}`}
           onClick={() => {
-            save(build(session.getState(), new Date()));
+            save(build(session.getState(), new Date(), KIT_REVISION));
           }}
         >
           .{extension}

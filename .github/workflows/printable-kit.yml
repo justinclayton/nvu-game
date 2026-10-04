@@ -1,0 +1,84 @@
+name: Create printable kit
+
+# Creates the printable playtest kit: PDFs of the card sheet, fronts and
+# backs, and the rulebook, named for R and C (print/card-sheet-R29.C43.pdf).
+#
+# On a merge to main that changes what goes into the kit, it publishes the PDFs
+# as the release kit-R29.C43. A change to the renderers alone recreates the
+# same kit and replaces that release's PDFs. Run it by hand on any branch from
+# the Actions tab to create that branch's kit instead: the PDFs land on the run
+# as an artifact for two weeks, and no release is made.
+#
+# It runs on the self-hosted runner so every kit's PDFs come from the same
+# machine with the same fonts. tools/find-chrome.sh fetches Chrome for Testing
+# into a cache there the first time; the runner has no Chrome of its own.
+# Only pushes to main and manual runs start it, never a pull request, which
+# keeps fork code off the runner.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - rulebook.md
+      - cards.yaml
+      - tools/card-sheet.html
+      - tools/card-backs.js
+      - tools/cards.mjs
+      - tools/rulebook.mjs
+      - tools/find-chrome.sh
+      - .github/workflows/printable-kit.yml
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: printable-kit-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  pdfs:
+    runs-on: self-hosted
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Create the card sheet and rulebook PDFs
+        id: pdfs
+        run: |
+          set -e
+          rm -rf print
+          make pdf rulebook
+          kit=$(sh tools/kit-revision.sh --sources)
+          echo "kit=$kit" >> "$GITHUB_OUTPUT"
+          ls -l print
+
+      - name: Publish the kit as a release
+        if: github.ref == 'refs/heads/main'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          KIT: ${{ steps.pdfs.outputs.kit }}
+        run: |
+          set -e
+          tag="kit-$KIT"
+          files="print/card-sheet-$KIT.pdf print/rulebook-$KIT.pdf"
+          notes="The printable kit $KIT: rules ${KIT%%.*}, card list ${KIT#*.}.
+          Created from $GITHUB_SHA by run $GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID.
+
+          Print the card sheet on US Letter at 100%, two-sided, flip on long edge."
+          if gh release view "$tag" >/dev/null 2>&1; then
+            gh release upload "$tag" $files --clobber
+            gh release edit "$tag" --notes "$notes"
+            echo "Replaced the PDFs on $tag"
+          else
+            gh release create "$tag" $files --target "$GITHUB_SHA" --title "Kit $KIT" --notes "$notes"
+            echo "Published $tag"
+          fi
+
+      - name: Keep the PDFs on the run
+        if: github.ref != 'refs/heads/main'
+        uses: actions/upload-artifact@v4
+        with:
+          name: kit-${{ steps.pdfs.outputs.kit }}
+          path: print/*.pdf
+          retention-days: 14

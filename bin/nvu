@@ -11,6 +11,7 @@
 #   bin/nvu replay runs/7.json          replay a run file and print its transcript
 #   bin/nvu fuzz --seeds 50             random legal play, failures only
 #   bin/nvu web                         the web game's dev server
+#   bin/nvu revision                    the kit revision, R29.C43-v1
 #   bin/nvu help                        the full grammar
 #
 # Installs app/node_modules on first use and regenerates the card modules if
@@ -23,6 +24,16 @@ tsx="$root/app/node_modules/.bin/tsx"
 # reinstall.
 [ -x "$tsx" ] || (cd "$root/app" && npm ci --silent)
 make -s -C "$root" build
+
+# The kit revision stamps the run file and the first line of a new run. Its
+# engine count comes from git, so it is read here, outside the engine.
+NVU_KIT_REVISION=$(sh "$root/tools/kit-revision.sh")
+export NVU_KIT_REVISION
+
+if [ "$1" = "revision" ]; then
+  echo "$NVU_KIT_REVISION"
+  exit 0
+fi
 
 if [ "$1" = "web" ]; then
   cd "$root/app" && exec npm run dev

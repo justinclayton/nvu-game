@@ -215,8 +215,21 @@ function flavorBlock(c) {
   return c.flavor ? '<div class="flavor">' + esc(c.flavor) + "</div>" : "";
 }
 
+/* The kit revision's stored part, R29.C43, on every card: what the physical
+   kit is. The engine count only exists in git, so the page edition line gets
+   the full revision when the printer passes it, as ?kit=R29.C43-v1 (make pdf
+   and make sheet do). */
+function sources() {
+  return NVU_CARDS.rulesVersion + "." + NVU_CARDS.cardsVersion;
+}
+
+function kitRevision() {
+  var m = /[?&]kit=([^&]+)/.exec(location.search);
+  return m ? decodeURIComponent(m[1]) : sources();
+}
+
 function stamp() {
-  return '<div class="stamp">rules ' + esc(NVU_CARDS.rulesVersion) + "</div>";
+  return '<div class="stamp">' + esc(sources()) + "</div>";
 }
 
 function costPip(c) {
@@ -333,9 +346,9 @@ function onlySheet() {
   return m ? Number(m[1]) : 0;
 }
 
-/* The rules version and card list this sheet was printed under, on every page. */
+/* The kit revision and card list id this sheet was printed under, on every page. */
 function edition() {
-  return "rules " + esc(NVU_CARDS.rulesVersion) + " · cards " + esc(NVU_CARDS.cardListId);
+  return "kit " + esc(kitRevision()) + " · cards " + esc(NVU_CARDS.cardListId);
 }
 
 function pages(cards) {

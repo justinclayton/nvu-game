@@ -247,11 +247,20 @@ function ordered(card) {
   return out;
 }
 
-/* The rulebook's "Rules version:" line; the printed sheet stamps it on every card. */
+/* The two stored parts of the kit revision (design/loop/spec.md): R from the
+   rulebook's "Rules version:" line, C from the "version:" line under meta in
+   cards.yaml. The printed sheet stamps "R29.C43" on every card; the engine
+   count, v, is git's to know and tools/kit-revision.sh prints the whole thing. */
 function rulesVersion() {
-  const m = readFileSync(RULEBOOK, "utf8").match(/^Rules version:\s*(\S+)/m);
-  if (!m) throw new Error('rulebook.md has no "Rules version:" line');
+  const m = readFileSync(RULEBOOK, "utf8").match(/^Rules version:\s*(R\d+)\s*$/m);
+  if (!m) throw new Error('rulebook.md has no "Rules version: R<n>" line');
   return m[1];
+}
+
+function cardsVersion(doc) {
+  const v = String(doc.meta.version ?? "");
+  if (!/^C\d+$/.test(v)) throw new Error('cards.yaml has no "version: C<n>" line under meta');
+  return v;
 }
 
 function generate(doc) {
@@ -271,6 +280,7 @@ function generate(doc) {
 var NVU_CARDS = {
   meta: ${JSON.stringify(doc.meta)},
   rulesVersion: ${JSON.stringify(rulesVersion())},
+  cardsVersion: ${JSON.stringify(cardsVersion(doc))},
   cardListId: ${JSON.stringify(cardListId(structure(doc)))},
   cards: [
 ${body}
@@ -513,8 +523,11 @@ ${roomsBody}
 /** The first 12 hex of sha256 over the JSON of CARD_CONTENT above — identifies this card list. */
 export const CARD_LIST_ID = ${JSON.stringify(cardListId(content))};
 
-/** The rulebook's "Rules version:" line, which the print sheet stamps on every card. The engine and recorded runs read it from here. Kept out of CARD_CONTENT so a rules bump does not change CARD_LIST_ID. */
+/** R of the kit revision: the rulebook's "Rules version:" line. Recorded runs refuse to replay across a change to it. Kept out of CARD_CONTENT so a rules bump does not change CARD_LIST_ID. */
 export const RULES_VERSION = ${JSON.stringify(rulesVersion())};
+
+/** C of the kit revision: the "version:" line under meta in cards.yaml, bumped when the card list changes. The print sheet stamps RULES_VERSION.CARDS_VERSION on every card; tools/kit-revision.sh adds the engine count. */
+export const CARDS_VERSION = ${JSON.stringify(cardsVersion(doc))};
 `;
 }
 

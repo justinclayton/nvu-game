@@ -1,0 +1,77 @@
+# Step 2 of the design loop (design/loop/spec.md): a push to a branch whose
+# rulebook.md or cards.yaml differ from main gets a draft "outer PR" if none is
+# open for the branch. The loop then runs inside that PR. Nothing here runs an
+# agent; it is a GitHub write, so the self-hosted runner is not needed.
+#
+# Opened with LOOP_TOKEN when the repo has that secret, because a PR opened
+# with the workflow's own GITHUB_TOKEN does not start the pull_request
+# workflows (CI, Kit revision) until the next push.
+name: Outer PR
+
+on:
+  push:
+    branches-ignore:
+      - main
+      - pr-media
+
+permissions:
+  contents: read
+  pull-requests: write
+
+concurrency:
+  group: outer-pr-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  open:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Did a source change since main?
+        id: sources
+        run: |
+          git fetch --quiet origin main
+          if git diff --quiet origin/main...HEAD -- rulebook.md cards.yaml; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+            echo "rulebook.md and cards.yaml match main: not a loop branch."
+          else
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Open the draft outer PR if none is open
+        if: steps.sources.outputs.changed == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.LOOP_TOKEN || github.token }}
+          BRANCH: ${{ github.ref_name }}
+        run: |
+          open=$(gh api "repos/$GITHUB_REPOSITORY/pulls?state=open&head=$GITHUB_REPOSITORY_OWNER:$BRANCH" --jq 'length')
+          if [ "$open" != "0" ]; then
+            echo "an outer PR is already open for $BRANCH"
+            exit 0
+          fi
+          kit=$(sh tools/kit-revision.sh)
+          subject=$(git log -1 --format=%s origin/main..HEAD -- rulebook.md cards.yaml)
+          {
+            echo "<!-- nvu-loop: outer-pr -->"
+            echo "Draft outer PR for \`$BRANCH\`, opened by the design loop (design/loop/spec.md, step 2)."
+            echo
+            echo "Kit revision at opening: \`$kit\`."
+            echo
+            echo "Sources changed since \`main\`:"
+            echo
+            echo '```'
+            git diff --stat origin/main...HEAD -- rulebook.md cards.yaml
+            echo '```'
+            echo
+            echo "The loop runs inside this PR: a review of the diff files work issues and ruling questions, inner PRs land on this branch, and an agent playtest reports as an issue. Edit the sources again on this branch to run it again, or merge to \`main\` to close the loop."
+          } > pr-body.md
+          gh api -X POST "repos/$GITHUB_REPOSITORY/pulls" \
+            -f title="Kit $kit: $subject" \
+            -f head="$BRANCH" \
+            -f base=main \
+            -F draft=true \
+            -F body=@pr-body.md \
+            --jq '"opened draft PR #\(.number): \(.html_url)"'

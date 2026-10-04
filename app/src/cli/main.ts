@@ -13,7 +13,7 @@ import { stdout } from "node:process";
 import { mismatchedField, runData, type RunFile } from "@application/exportRun";
 import { logLines, tailEvents } from "@application/narrate";
 import { createSession, loadSession, type Note, type SavedRun, type Session } from "@application/session";
-import { CARD_CONTENT, CARD_LIST_ID, RULES_VERSION } from "@content/index";
+import { CARD_CONTENT, CARD_LIST_ID, CARDS_VERSION, RULES_VERSION } from "@content/index";
 import { resolveCardName } from "@content/names";
 import { costOf, payOptions, playableCards } from "@domain/queries";
 import type { Card, CardId, Character, Command, GameState, RoomId, Stat } from "@domain/types";
@@ -45,6 +45,9 @@ import { answerDraw } from "./draw";
 import { cardLine, moveHint, printedFaceLine, printedRoomLines, renderTable, shortStatusLines } from "./render";
 
 const content = CARD_CONTENT;
+
+/** The kit revision, `R29.C43-v1`, as `bin/nvu` had `tools/kit-revision.sh` print it: v is counted from git, so the launcher passes it in. Unset when main.ts is run some other way. */
+const KIT_REVISION = process.env.NVU_KIT_REVISION || undefined;
 
 /** A card or a Room, named the same way (`bin/nvu card NAME`) — matched against both at once, so an ambiguous name across the two is refused like any other. */
 const PRINTABLES = [
@@ -81,7 +84,7 @@ function readRunFile(path: string): RunFile {
 
 function writeRunFile(path: string, session: Session): void {
   mkdirSync(dirname(path), { recursive: true });
-  writeFileSync(path, runData(session.getState(), new Date()).text);
+  writeFileSync(path, runData(session.getState(), new Date(), KIT_REVISION).text);
 }
 
 /** `loadSession`, with any load failure recast as the CLI's usage-error idiom. */
@@ -112,6 +115,7 @@ function runPathFor(action: string, run: string | null, seed: number | null): st
 
 function rememberRun(path: string): void {
   mkdirSync(dirname(path), { recursive: true });
+  mkdirSync(dirname(CURRENT), { recursive: true });
   writeFileSync(CURRENT, `${path}\n`);
 }
 
@@ -532,6 +536,9 @@ function play(request: PlayRequest): number {
   }
 
   const { state, events, notes } = session.getState();
+  if (action.kind === "new") {
+    out(`North vs Up ${KIT_REVISION ?? `${RULES_VERSION}.${CARDS_VERSION}`}, seed ${String(action.seed)}, run file ${path}`);
+  }
   const lines = logLines(events, notes).slice(before);
   if (lines.length > 0) {
     for (const line of lines) out(line.kind === "note" ? `NOTE — ${line.text}` : line.text);
@@ -597,7 +604,8 @@ function replayRun(request: ReplayRequest): number {
     out(renderTable(s.state));
     out("");
   }
-  out(`seed ${String(file.run.seed)}, ${String(file.run.commands.length)} command(s) replayed, ${now}.`);
+  const kit = file.kit === undefined ? "" : `, recorded on ${file.kit}`;
+  out(`seed ${String(file.run.seed)}, ${String(file.run.commands.length)} command(s) replayed${kit}, ${now}.`);
   if (recorded !== now) {
     out(`The file recorded ${recorded}; the rules now reach ${now}. The rules have changed since it was played.`);
     return 2;

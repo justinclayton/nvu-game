@@ -71,9 +71,10 @@ express, something you wished it printed, an error you hit.
 
 1. Copy the run file: `cp runs/N.json design/playtests/NN-<slug>.json`.
 2. Write `design/playtests/NN-<slug>.md` in the shape of the latest note there:
-   - A header: when, how, seed, and the outcome in a sentence. State that the notes are the
-     agent's, tagged `[agent]`, that nothing in the note is a ruling, and that suspected bugs were
-     checked against the rulebook and the card list only.
+   - A header: when, the kit revision as `bin/nvu revision` prints it (`R29.C43-v1`), how, seed,
+     and the outcome in a sentence. State that the notes are the agent's, tagged `[agent]`, that
+     nothing in the note is a ruling, and that suspected bugs were checked against the rulebook
+     and the card list only.
    - **How the run went.** The story of the run, a paragraph or two per floor that mattered.
    - **Notes.** Each in-run note as a numbered item, quoted as written, tagged `[agent]`, with its
      log line. Under it, your analysis: what you checked, what you found, and any question for the

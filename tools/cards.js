@@ -11,8 +11,9 @@
  * and no server.
  */
 var NVU_CARDS = {
-  meta: {"updated":"2026-10-03"},
-  rulesVersion: "0.2.11",
+  meta: {"version":"C43","updated":"2026-10-03"},
+  rulesVersion: "R29",
+  cardsVersion: "C43",
   cardListId: "38dc1a9df10e",
   cards: [
     {"name":"Shove","set":"official","kind":"player","owner":"Red","starter":true,"cost":1,"oomph":2,"flavor":"'Oomph!', he shouted.","count":4},

@@ -98,5 +98,8 @@ export const CARD_CONTENT = {
 /** The first 12 hex of sha256 over the JSON of CARD_CONTENT above — identifies this card list. */
 export const CARD_LIST_ID = "38dc1a9df10e";
 
-/** The rulebook's "Rules version:" line, which the print sheet stamps on every card. The engine and recorded runs read it from here. Kept out of CARD_CONTENT so a rules bump does not change CARD_LIST_ID. */
-export const RULES_VERSION = "0.2.11";
+/** R of the kit revision: the rulebook's "Rules version:" line. Recorded runs refuse to replay across a change to it. Kept out of CARD_CONTENT so a rules bump does not change CARD_LIST_ID. */
+export const RULES_VERSION = "R29";
+
+/** C of the kit revision: the "version:" line under meta in cards.yaml, bumped when the card list changes. The print sheet stamps RULES_VERSION.CARDS_VERSION on every card; tools/kit-revision.sh adds the engine count. */
+export const CARDS_VERSION = "C43";

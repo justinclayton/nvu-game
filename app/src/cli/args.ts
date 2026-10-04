@@ -97,6 +97,7 @@ export const USAGE = `North vs Up — the CLI. The same rules engine as the web 
   bin/nvu fuzz --seeds N [--from SEED]
   bin/nvu sim --seeds N [--from SEED] [--policy random|greedy] [--json]
   bin/nvu web
+  bin/nvu revision
   bin/nvu help
 
 A card name is the full name, the initials, or an unambiguous prefix,
@@ -110,6 +111,7 @@ replay  fold a run file back through the engine and print its transcript
 fuzz    play N seeds of uniformly random legal play under a command budget; prints failures only
 sim     play N seeds with a policy and print a balance report (win rate, floors, per-card stats)
 web     run the web game's dev server
+revision  print the kit revision, R29.C43-v1: rules, card list, engine build (design/loop/spec.md)
 `;
 
 const integer = (name: string, raw: string | undefined, fallback: number): number => {

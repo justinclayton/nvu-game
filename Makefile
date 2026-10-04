@@ -10,10 +10,11 @@
 #   make app-check  lint, typecheck and test the web game, the sim and the CLI
 #   bin/nvu         the CLI: bin/nvu play, bin/nvu replay, bin/nvu fuzz, bin/nvu help
 #   make sheet      open the print-and-cut card sheet
-#   make pdf        print the sheet to print/card-sheet-v<rules version>.pdf
-#   make rulebook   print the rulebook to print/rulebook-v<rules version>.pdf
+#   make revision   print the kit revision, R29.C43-v1 (tools/kit-revision.sh)
+#   make pdf        print the sheet to print/card-sheet-<kit revision>.pdf
+#   make rulebook   print the rulebook to print/rulebook-<kit revision>.pdf
 
-.PHONY: help build check bump-rules-version app app-check app-install sheet pdf rulebook all
+.PHONY: help build check bump-revision bump-rules-version revision app app-check app-install sheet pdf rulebook all
 default: build
 
 help:
@@ -22,9 +23,10 @@ help:
 	@echo "make app        run the web game's dev server (an alias for bin/nvu web)"
 	@echo "make app-check  lint, typecheck and test the web game, the sim and the CLI"
 	@echo "bin/nvu         the CLI: bin/nvu play, bin/nvu replay, bin/nvu fuzz, bin/nvu help"
+	@echo "make revision   print the kit revision, R29.C43-v1"
 	@echo "make sheet   open the print-and-cut card sheet in a browser"
-	@echo "make pdf     print the sheet to print/card-sheet-v<rules version>.pdf (needs Chrome)"
-	@echo "make rulebook  print the rulebook to print/rulebook-v<rules version>.pdf (needs Chrome)"
+	@echo "make pdf     print the sheet to print/card-sheet-<kit revision>.pdf (needs Chrome)"
+	@echo "make rulebook  print the rulebook to print/rulebook-<kit revision>.pdf (needs Chrome)"
 	@echo ""
 	@echo "Change a card in cards.yaml, then: make build check"
 
@@ -35,12 +37,17 @@ build: tools/cards.js
 tools/cards.js: cards.yaml rulebook.md tools/cards.mjs
 	node tools/cards.mjs build
 
-# Raise the Rules version if the rulebook changed without one, then rebuild the
-# generated card modules that stamp it. The pre-commit hook and CI run it too;
-# run it yourself after a merge that touched the rulebook.
-bump-rules-version:
-	sh tools/bump-rules-version.sh
+# Raise R or C if the rulebook or the card list changed without one, then
+# rebuild the generated card modules that stamp them. The pre-commit hook and
+# CI run it too; run it yourself after a merge that touched either source.
+# bump-rules-version is the old name, kept for muscle memory.
+bump-revision bump-rules-version:
+	sh tools/bump-revision.sh
 	node tools/cards.mjs build
+
+# The kit revision: R and C from the sources, the engine count from git.
+revision:
+	@sh tools/kit-revision.sh
 
 # `make check` also runs the app's content drift test when app/ is installed;
 # on a fresh clone the generator's own check still stands on its own.
@@ -75,15 +82,16 @@ app-check: app/node_modules build
 	cd app && npm run check
 
 # The print-and-cut card sheet, for playing on a table (tools/card-sheet.html).
+# The page stamps the full kit revision when told it in the URL.
 sheet: build
-	open tools/card-sheet.html
+	open "file://$(CURDIR)/tools/card-sheet.html?kit=$(KIT_REVISION)"
 
-# PDFs, named for the rules version they were printed under.  Headless Chrome
+# PDFs, named for the kit revision they were printed under.  Headless Chrome
 # does the printing; CHROME=/path/to/chrome overrides the search.
-RULES_VERSION = $(shell sed -n 's/^Rules version:[[:space:]]*//p' rulebook.md)
-PDF = print/card-sheet-v$(RULES_VERSION).pdf
-RULEBOOK_HTML = print/rulebook-v$(RULES_VERSION).html
-RULEBOOK_PDF = print/rulebook-v$(RULES_VERSION).pdf
+KIT_REVISION = $(shell sh tools/kit-revision.sh)
+PDF = print/card-sheet-$(KIT_REVISION).pdf
+RULEBOOK_HTML = print/rulebook-$(KIT_REVISION).html
+RULEBOOK_PDF = print/rulebook-$(KIT_REVISION).pdf
 
 # print_pdf <page.html> <out.pdf>
 define print_pdf
@@ -103,7 +111,7 @@ endef
 
 # The card sheet.
 pdf: build
-	@$(call print_pdf,tools/card-sheet.html,$(PDF))
+	@$(call print_pdf,tools/card-sheet.html?kit=$(KIT_REVISION),$(PDF))
 
 # The rulebook (rulebook.md), laid out by tools/rulebook.mjs.
 rulebook:

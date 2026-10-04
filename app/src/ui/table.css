@@ -85,6 +85,12 @@ body {
   color: var(--print);
   font-size: 14px;
 }
+.table__kit {
+  margin-left: auto;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 12px;
+  opacity: 0.7;
+}
 .table__phase {
   font-weight: 700;
   color: var(--stock);

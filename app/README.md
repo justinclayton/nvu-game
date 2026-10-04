@@ -96,7 +96,17 @@ bin/nvu play show          [--run FILE]
 bin/nvu replay FILE [--quiet]
 bin/nvu fuzz --seeds N [--from SEED]
 bin/nvu web
+bin/nvu revision
 ```
+
+`revision` prints the kit revision, `R29.C43-v1`: R and C are the counters stored in
+`rulebook.md` and `cards.yaml`, and v counts engine commits since either last changed
+(`tools/kit-revision.sh`; the shape is in [`design/loop/spec.md`](../design/loop/spec.md)). The
+launcher passes it to the CLI, which prints it when a run starts and writes it into the run file as
+`kit`; the web build bakes it in through `vite.config.ts` and shows it in the table header. A run
+file is still refused on a change to `rules` (R) or `cards` (the card list id), not on `kit`: two
+runs of the same R and C on different engine builds replay the same, and `kit` is there to tell
+them apart.
 
 `play` has no interactive loop: an agent playtesting a run makes one shell call per move. The run
 file is the only state — every call loads it, replays the command log from the seed through

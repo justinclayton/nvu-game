@@ -1,6 +1,6 @@
 # *North vs Up*: Rulebook
 
-Rules version: 0.2.9
+Rules version: 0.2.11
 
 ---
 
@@ -40,23 +40,27 @@ Each player grabs the **starter cards** for their character. This will form your
 
 ### Floor deck
 
-Floors 1–3, 4–6, and 7–9 each share one `Room` pool and one `Stairwell` pool, called a `band`. Floor 10 has no band: it uses one fixed `Stairwell` instead.
+The tower is made up of Floors, which are grouped into four tiers: Lower Floors (1–3), Middle Floors (4–6), Upper Floors (7–9), and the Penthouse (Floor 10). Each tier has its own set of cards, consisting of normal `Rooms`and special rooms called `Stairwells`. The Penthouse only contains one `Stairwell` room.
 
 Assemble the floor deck for the floor you're building:
 
-1. **Draw the Stairwell:** Take one `Stairwell` at random from the floor's band, or the fixed Floor 10 card.
-2. **Draw the Rooms:** Take `Room` cards at random from the same band until the deck holds this floor's count: **10** on Floor 1, one fewer each floor after.
-3. **Shuffle** the drawn cards together and place them in the middle of the table, face down.
 
-### Placeholder for diagram of an example table layout at start of game
+
+1.  **Pick the Stairwell:** Take one `Stairwell` at random from the tier for your floor (Lower Floors to start).
+1. **Pick the Rooms:** Randomly pick `Room` cards from that same tier. To start, pick 9 Room cards, combining with the Stairwell for a total of 10 rooms for Floor 1. As you move up, repeat this with one fewer room than the previous floor. Or, if this is easier for you to remember: for each floor, pick `11` minus the floor number. So floor 5 is `11 - 5 = 6` rooms total.)
+1. **Shuffle** the drawn cards together and place them in the middle of the table, face down.
+
+### Table Layout
+
+Placeholder for diagram of an example table layout at start of game
 
 By each player:
 
 - **Character Deck** (face down)
-- **Discard pile** (face up): Cards you have spent.
-- **Exhaust pile** (face up): Cards you have lost.
+- **Discard pile** (face up): Cards you have played that will be shuffled back in when your deck is empty.
+- **Exhaust pile** (face up): Cards you have lost. These cards will not reenter your deck until you complete each Floor.
 - **Hand**: Cards you draw, hold, and use to play.
-- **Reward Pool** (face down): Cards you will add to your deck throughout the game.
+- **Red and Gray Card Reward Pool** (face down): Cards you will add to your deck throughout the game.
 - **Play zone**: Blank area where your cards will be played.
 
 In the middle of the table:
@@ -70,18 +74,18 @@ In the middle of the table:
 ---
 ## Each Turn
 
-### 1. Turn Start
+### 1. Start of Turn
 
 1. **Flip the room:** Turn the top card of the Floor deck face up onto the Rooms pile. This is the new Active Room.
-2. **Draw up to five:** Each player draws cards from their deck until they hold **5**. If you already hold 5 or more, do not draw. Resolve effects triggered by these draws after both players have drawn.
+2. **Draw up to five:** Each player draws cards from their deck into their hand until they hold **5**. If you already hold 5 or more, do not draw. Resolve effects triggered by these draws after both players have drawn.
 
-- **Draw**: Move the top card of your deck into your hand. If your deck is empty, see `Empty deck` (section 8).
+>  **Empty Deck**: Whenever your deck is empty and you need to draw, reshuffle your discard pile to form a new deck first.
 
 ### 2. Play
 
-Players take turns playing a card.
+Players take turns playing a card. Either player may start. 
 
-- **Play**: Move a card from your hand into your play zone and pay for it: look at its `Cost`, then move that number of cards from your hand to your Exhaust pile. Unless otherwise specified, you can only pay for a card with other cards from your own hand. If a card's cost is 0 or less, play the card for free. Resolve effects triggered by playing or paying for a card after that card's own text.
+- **Play**: Move a card from your hand into your play zone and pay for it: look at its `Cost`, then move that number of cards from your hand to your Exhaust pile (NOT your discard pile). Unless otherwise specified, you can only pay for a card with other cards from your own hand. If a card's cost is 0 or less, simply play the card. Resolve effects triggered by playing or paying for a card after that card's own text.
 - **Add up stats**: Stats on played cards add together across both sides of the play zone into one team pool.
 
 > *Example: `Red` plays a card with `Oomph 2`. `Gray` plays two cards, which read `Oomph 1`, and `Scramble 2`. Together, they have `Oomph 3` and `Scramble 2`.*
@@ -104,41 +108,40 @@ Each player does the following:
 
 1. **Discard your play zone:** Move every card on your side of the play zone to your discard pile.
 
-> In the Play phase, players always alternate actions between each other, starting with either player. Either player may pass. If both players pass, the phase ends.
-
-*Example (Play phase): Red plays, Gray plays, Red plays, Gray passes, Red passes, phase ends.*
-
 ---
 ## Cards
 
 ## 8. Card anatomy
 
-A number never goes below zero. If an effect would take a card's stat, cost, or a threshold lower than zero, it stops at zero instead.
+Numbers on cards cannot be less than zero. If an effect would take a card's stat, cost, threshold, etc. lower than zero, it is zero.
 
 ### Room Cards
 
 A room card presents one or more **challenges** to the players. A challenge lists one or more **thresholds**, and each threshold has an outcome. Each turn players will work together to play cards from their hand until they either meet or exceed one or more of the challenges, or, if they are unwilling or unable to complete any challenges, they `Flee`.
 
-There are two kinds: `Room` and `Stairwell`. Only a `Stairwell`'s challenges print `Ascend`.
+There are two kinds: `Room` and `Stairwell`. `Stairwell` cards are essentially floor-bosses, and are how players `Ascend` to the next floor.
 
 #### Placeholder for diagram
 
 
 - **Name.**
-- **Type line:** `Room` or `Stairwell`, and the band of floors it belongs to (`Room · Floors 4–6`).
-- **Flavor line.**
-- **Challenges:** one or more, each listing one or more `threshold: outcome` lines. A threshold prints one stat, or both (`Oomph 7 and Scramble 7`).
+- **Type line:** `Room` or `Stairwell`, and the tier of floors it belongs to (`Room · Middle Floors`).
+- **Flavor text.**
+- **Challenges:** one or more, each listing one or more `threshold: outcome` lines. A threshold consists of one or more stats (`Oomph 7 and Scramble 7`).
 - **`Flee`**: what happens when no challenges are met.
 
 ### Character cards
 
-#### Placeholder for diagram
 A Character card shows:
 
+>  Placeholder for diagram
+
+ 
+
 - **Name**
-- **Type line:** `Red` or `Gray`. Note that starter cards are also indicated as such on this line.
+- **Type:** `Red` or `Gray`. The type of card. May also print `(starter)`.
 - **`Cost`**: the number of cards you Exhaust from your hand to play it. Good Stuff and Bad Stuff pay like any other card.
-- **Stats**: `Oomph` and/or `Scramble`. Some cards have neither, and some grant stats in their effect text.
+- **Stats**: `Oomph` and/or `Scramble`.
 - **Effect text**: keywords and card-specific rules.
 - **Rarity border:** `Fine`, `Cool`, or `Woah`. Has no in-game effect.
 
@@ -148,8 +151,10 @@ A Character card shows:
 
 Play and pay with Stuff cards as with Character cards. Either player may gain and use any Stuff card.
 
-#### Placeholder for diagram
-A `Stuff` card shows the same parts as a player card, with these differences:
+
+A `Stuff` card looks similar to a character card:
+
+>  Placeholder for diagram
 
 - **Type line:** `Good Stuff` or `Bad Stuff`.
 - `Bad Stuff` cards do not display a rarity.
@@ -166,27 +171,25 @@ A `Stuff` card shows the same parts as a player card, with these differences:
 - `Get X Good Stuff`: `Get Good Stuff` **X** times.
 - `Get Bad Stuff`: Move the top card of the Bad Stuff pool into your hand.
 - `Reveal a card reward`: Reveal the top **3** cards of your reward pool. You may put **one** into your discard pile. Put the cards you did not take on the bottom of your reward pool.
-- `Scry X`: Look at the top **X** cards of your deck. Discard any number of them. Put the rest back in the same order. A deck with fewer than X cards shows what is there; Scry never reshuffles the discard pile.
+- `Peek X`: Reveal the top **X** cards of ANY face-down pile. Discard any number of them, then put the rest back in any order. If there are fewer than X cards, look at as many as there are; you do not reshuffle the discard pile when you Peek.
+- `you may draw X cards`: Draw any number of cards from none up to **X**.
 - `any deck`: any face-down pile on the table: a character deck, a reward pool, the Floor deck, or a Stuff pool.
 - `Scrap`: Move the card to the Scrapyard. It is removed from play for the rest of the game.
-- `Empty deck`: If you must draw or Exhaust a card and your deck is empty, first shuffle your discard pile to form a new deck. If your discard pile is also empty, you go `Down` (section 9).
 
 ---
 ## 9. Going Down
 
-If you must draw or Exhaust a card and your deck and discard pile are both empty, you go `Down` and the game is lost (section 11).
+If one player has no cards in their hand, deck, or discard pile, you go `Down`, and the game is lost.
 
 ---
 
 ## 10. Ascending
 
-When a resolved outcome says `Ascend`, you escape the current floor and move to the next. On floor 10, skip this section: you have won (section 11).
+When a resolved outcome says `Ascend`, you escape the current floor! You are safe, for now. To move on to the next floor, after receiving your rewards and completing the Cleanup phase as normal, do the following:
 
-After Cleanup, each player does the following:
+1. **Heal and Reset:** Shuffle ALL your cards into your deck, including your hand, discard pile, AND exhaust pile.
 
-1. **Shuffle your hand into your deck.**
-2. **Choose a reward:** `Reveal a card reward` (section 8, *Keywords*).
-3. **Build the next floor:** Return every room still in the floor deck, Fled rooms included, to its band's pool. Rooms you cleared, the Stairwell included, stay on the Rooms pile. Then assemble the new floor as in Setup, *Floor deck*.
+3. **Build the next floor:** Assemble the new floor deck *(see Setup -> Floor deck*). All Rooms you cleared stay in the Rooms pile.
 
 ---
 
@@ -200,6 +203,3 @@ After Cleanup, each player does the following:
 
 ## Appendix
 
-## Playing Solo
-
-Play as both `Red` and `Gray`. Keep every deck, pile, and zone as in the two-player game. Each character draws up to five from their own deck. Play cards from either hand in any order. You may **not** pay for a `Red` card with a `Gray` card, or vice versa.

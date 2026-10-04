@@ -32,7 +32,7 @@ describe("walkthrough 1 — the deck runs dry mid-draw and the discard pile beco
     const state = rig({
       phase: "Turn Start",
       floorDeck: [room("Security Turnstile")],
-      Red: player({ deck: pile("Shove", 2), discard: pile("Charge In", 3) }),
+      Red: player({ deck: pile("Shove", 2), discard: pile("Charge", 3) }),
       Gray: player({ deck: pile("Duck Under", 5) }),
     });
     const { state: next, events } = must(state, { type: "FLIP_ROOM" });
@@ -80,7 +80,7 @@ describe("walkthrough 2 — Down when the deck and discard are both empty ends t
 
 describe("walkthrough 3 — Exhaust is permanent; only the discard pile recycles", () => {
   it("a reshuffle draws from the discard pile, and never from the Exhaust pile", () => {
-    const exhausted = pile("Charge In", 2);
+    const exhausted = pile("Charge", 2);
     const state = rig({
       phase: "Turn Start",
       floorDeck: [room("Security Turnstile")],
@@ -115,7 +115,7 @@ describe("walkthrough 4 — Stuff stays in the deck across an Ascend, until Scra
       Red: player({
         deck: [inDeck, ...pile("Shove", 2)],
         hand: [inHand],
-        discard: [inDiscard, ...pile("Charge In", 2)],
+        discard: [inDiscard, ...pile("Charge", 2)],
       }),
       Gray: player({ deck: pile("Duck Under", 2) }),
     });
@@ -143,7 +143,7 @@ describe("walkthrough 5 — Cleanup runs before Ascending", () => {
       activeRoom: room("The Sentry Drone"),
       Red: player({
         deck: pile("Shove", 5),
-        hand: [card("Charge In"), card("Shove"), card("Shove"), card("Pry Bar"), card("Pry Bar")],
+        hand: [card("Charge"), card("Shove"), card("Shove"), card("Pry Bar"), card("Pry Bar")],
       }),
       Gray: player({ deck: pile("Duck Under", 5) }),
     });
@@ -250,8 +250,8 @@ describe("walkthrough 8 — ascending end to end: shuffle the hand in, then the 
       ],
       Red: player({
         deck: pile("Shove", 5),
-        hand: [card("Charge In"), card("Shove"), card("Shove"), card("Pry Bar"), card("Pry Bar")],
-        discard: pile("Charge In", 3),
+        hand: [card("Charge"), card("Shove"), card("Shove"), card("Pry Bar"), card("Pry Bar")],
+        discard: pile("Charge", 3),
       }),
       Gray: player({ deck: pile("Duck Under", 5) }),
     });
@@ -276,10 +276,10 @@ describe("walkthrough 8 — ascending end to end: shuffle the hand in, then the 
 
     expect(next.floor).toBe(2);
     expect(next.phase).toBe("Turn Start");
-    // No heal: the 3 Charge Ins from before this floor are still there, plus
-    // the Charge In itself and the two Pry Bars played alongside it — all
+    // No heal: the 3 Charges from before this floor are still there, plus
+    // the Charge itself and the two Pry Bars played alongside it — all
     // discarded at Cleanup, and none of it swept anywhere: Stuff stays until
-    // it is Scrapped or Exhausted. The 2 Shoves that paid for Charge In were
+    // it is Scrapped or Exhausted. The 2 Shoves that paid for Charge were
     // Exhausted. The reward joins the discards: it goes into the discard
     // pile, not the deck.
     expect(next.Red.discard).toHaveLength(7);

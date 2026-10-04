@@ -14,4 +14,10 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-      - run: node tools/check-rules-version.mjs
+      - run: make bump-rules-version
+      - name: Fail if the rulebook changed without a version bump
+        run: |
+          git diff --exit-code --stat || {
+            echo "rulebook.md changed without a higher Rules version. Run: make bump-rules-version"
+            exit 1
+          }

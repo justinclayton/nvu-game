@@ -17,7 +17,7 @@ const withText = CARD_CONTENT.cards.filter((c) => hasText(c.text));
  * Cards whose printed text has no reading the rulebook settles, so nothing
  * implements them yet. Adding a card without code changes this list, which is the point: it stays a decision rather than an accident.
  */
-const UNIMPLEMENTED: readonly string[] = [];
+const UNIMPLEMENTED: readonly string[] = ["I Know Kung Fu", "Sharing Is Caring", "Zen Mode"];
 
 describe("behaviour coverage", () => {
   it("names every card whose printed text nothing implements yet", () => {

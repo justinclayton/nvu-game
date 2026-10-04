@@ -80,8 +80,8 @@ const requirementText = (requires: StatRequirement): string => {
 
 /** A Room's printed face, with no run to check thresholds against — `bin/nvu card NAME`. */
 export function printedRoomLines(room: RoomFace): string[] {
-  const band = room.band === null ? "no band" : `band ${String(room.band)}`;
-  const lines = [`${room.name} [${room.kind}; ${band}]`];
+  const tier = room.tier === null ? "no tier" : `tier ${String(room.tier)}`;
+  const lines = [`${room.name} [${room.kind}; ${tier}]`];
   if (room.text.trim() !== "") lines.push(`  ${room.text.trim()}`);
   for (const challenge of room.challenges) {
     for (const threshold of challenge.thresholds) {
@@ -217,6 +217,15 @@ export function moveHint(state: GameState, staged: readonly StagedAnswer[] = [])
         const plural = want > 1 ? " <Name>..." : "";
         const optional = pending.optional ? ", or choose none" : "";
         lines.push(`choose <Name>${plural} — choose ${String(want)} of: ${names}${optional}`);
+        break;
+      }
+      case "ChooseDraw": {
+        const drawers = new Set(pending.options.map((o) => o.character));
+        const draws = pending.options
+          .map((o) => (drawers.size > 1 ? `${o.character} ${String(o.count)}` : String(o.count)))
+          .join(", ");
+        const form = drawers.size > 1 ? "choose <Name>" : "choose <N>";
+        lines.push(`${form} — draw: ${draws} — or choose none`);
         break;
       }
       case "OrderCards":

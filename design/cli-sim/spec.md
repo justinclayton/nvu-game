@@ -100,6 +100,7 @@ The moves, one per engine command: `[agent, accepted]`
 | `play choose Red` | `CHOOSE_CHARACTER` |
 | `play choose Floor deck` | `CHOOSE_PILE` |
 | `play choose Rope Flare`, `play choose none` | `CHOOSE_CARDS`; also which piece of a Good Stuff spread to keep |
+| `play choose 2`, `play choose Red 1`, `play choose none` | `CHOOSE_DRAW`: a card's "you may draw", with who and how many left out when only one answer is on offer; `none` draws nothing `[agent]` rules 0.2.10 |
 | `play order Rope Flare Shove` | `ORDER_CARDS`, top first |
 | `play take Zen Mode`, `play take none`, `play skip` | a room's card reward: `TAKE_REWARD`, one of the 3 revealed or none. A bare `play take` works when only one was revealed. `[agent]` rules 0.2.5 |
 | `play take Zen Mode`, `play take none` | one character's Ascend answer, composed into `ASCEND`, see below |
@@ -118,7 +119,7 @@ the initials, or an unambiguous prefix, case-insensitively, so `CI` is Charge In
 The Lock. Quoting is only shell quoting for names with spaces. When more than one eligible card
 matches, the CLI refuses and lists the candidates; when the eligible cards are several copies of the
 same card, any copy is taken. A content test in `app/src/content` reports every pair of cards in
-`design/cards.yaml` that share initials, so the designer sees a new collision when it lands. Today
+`cards.yaml` that share initials, so the designer sees a new collision when it lands. Today
 those are Reckless Swing and Riot Shield, Reckless and Rust, Shove and Sluggish.
 
 **Ascending, one question at a time.** `[you]` The engine takes one `ASCEND` command holding both

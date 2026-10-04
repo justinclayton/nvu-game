@@ -5,8 +5,8 @@
  * here reads a clock, a network or Math.random — randomness is the seed carried
  * in the state, so a run replays exactly from its seed and its command log.
  *
- * Section numbers point at design/rulebook.md, rules version
- * 0.2.9, which is the authority.
+ * Section numbers point at rulebook.md, rules version
+ * 0.2.11, which is the authority.
  */
 
 import { behaviourOf, type BehaviourContext, type ChoiceAnswer } from "./cards/behaviours";
@@ -47,7 +47,6 @@ import type {
 import { CorruptStateError } from "./types";
 import {
   applyPoolBonus,
-  attachNextPlayScramble,
   CHARACTERS,
   clearFreePlays,
   clearPlayDiscount,
@@ -104,6 +103,7 @@ export function validate(state: GameState, command: Command): Rejection | null {
     case "CHOOSE_PILE":
     case "CHOOSE_STAT":
     case "CHOOSE_CARDS":
+    case "CHOOSE_DRAW":
     case "ORDER_CARDS":
     case "TAKE_REWARD":
       return reject("NoPendingChoice", "Nothing is waiting to be answered.");
@@ -232,6 +232,20 @@ function validateAnswer(pending: Pending, command: Command): Rejection | null {
       return reject("NotAnOption", `Choose ${String(wanted)}.`);
     }
 
+    case "CHOOSE_DRAW": {
+      if (pending.kind !== "ChooseDraw") return waiting;
+      if (command.character === null) {
+        return command.count === 0
+          ? null
+          : reject("NotAnOption", "To draw nothing, choose none.");
+      }
+      return pending.options.some(
+        (o) => o.character === command.character && o.count === command.count,
+      )
+        ? null
+        : reject("NotAnOption", "That draw is not on offer.");
+    }
+
     case "ORDER_CARDS": {
       if (pending.kind !== "OrderCards") return waiting;
       const want = [...pending.cards.map((x) => x.id)].sort();
@@ -291,7 +305,7 @@ export function execute(state: GameState, command: Command): Result {
   let next = settle(apply(state, command, run), run);
   // A card played during Play can earn Good Stuff (Crowbar); its spread is
   // revealed once the play has finished. Outcome's own drain does the same.
-  if (next.phase === "Play") next = offerGoodStuff(next, run);
+  if (next.phase === "Play") next = offerQueuedQuestion(offerGoodStuff(next, run));
   return { ok: true, state: next, events: run.events };
 }
 
@@ -313,6 +327,8 @@ function apply(state: GameState, command: Command, run: Run): GameState {
       return answerStat(state, command.stat, run);
     case "CHOOSE_CARDS":
       return answerCards(state, command.cardIds, "cards", run);
+    case "CHOOSE_DRAW":
+      return answerDraw(state, command.character, command.count, run);
     case "ORDER_CARDS":
       return answerCards(state, command.cardIds, "order", run);
     case "TAKE_REWARD":
@@ -528,7 +544,7 @@ function playCard(
   if (costOverrideSpentBy(s, c, card)) {
     s = spendFreePlay(s);
   }
-  // Distract & Pivot: the very next card this character plays spends the charge.
+  // Pivot: the very next card this character plays spends the charge.
   if (s.thisTurn.playDiscount[c] > 0) {
     s = spendPlayDiscount(s, c);
   }
@@ -543,7 +559,6 @@ function playCard(
   const after = playerOf(s, c);
   s = withPlayer(s, c, { ...after, hand: after.hand.filter((x) => x.id !== cardId) });
   s = { ...s, playZone: [...s.playZone, { owner: c, card }] };
-  s = attachNextPlayScramble(s, c, card);
   run.events.push({ type: "CARD_PLAYED", character: c, card });
   const to = run.events.length;
   trackEntries(run, from, to);
@@ -1041,6 +1056,20 @@ function answerCharacter(state: GameState, character: Character, run: Run): Game
   );
 }
 
+function answerDraw(
+  state: GameState,
+  character: Character | null,
+  count: number,
+  run: Run,
+): GameState {
+  const pending = state.pending;
+  if (pending?.kind !== "ChooseDraw") {
+    throw new CorruptStateError("Answered a draw choice that was not being asked.");
+  }
+  if (!pending.source) throw new CorruptStateError("No card is waiting on a draw answer.");
+  return runChoice(state, { kind: "draw", tag: pending.source.tag, character, count }, run);
+}
+
 function answerPile(state: GameState, pile: Pile, run: Run): GameState {
   const pending = state.pending;
   if (pending?.kind !== "ChoosePile") {
@@ -1136,6 +1165,18 @@ function answerReward(state: GameState, cardId: CardId | null, run: Run): GameSt
 }
 
 /* ------------------------------------------------------------ Good Stuff */
+
+/**
+ * A this-turn trigger (Covering Fire) cannot suspend in the middle of what set
+ * it off, so it queues its question on the turn record. Ask the oldest one as
+ * soon as nothing else is waiting; the next goes up when this one is answered.
+ */
+function offerQueuedQuestion(state: GameState): GameState {
+  if (state.pending || state.phase === "GameOver") return state;
+  const [next, ...rest] = state.thisTurn.questions;
+  if (!next) return state;
+  return { ...state, pending: next, thisTurn: { ...state.thisTurn, questions: rest } };
+}
 
 /** How many cards a spread or a card reward reveals (rulebook, Keywords). */
 const REVEALED = 3;

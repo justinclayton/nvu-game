@@ -83,6 +83,15 @@ function answers(pending: Pending): readonly Command[] {
       if (pending.optional && wanted > 0) picks.push({ type: "CHOOSE_CARDS", cardIds: [] });
       return picks;
     }
+    case "ChooseDraw":
+      return [
+        ...pending.options.map((o): Command => ({
+          type: "CHOOSE_DRAW",
+          character: o.character,
+          count: o.count,
+        })),
+        { type: "CHOOSE_DRAW", character: null, count: 0 },
+      ];
     case "OrderCards": {
       const pileIds = (items: readonly (Card | Room)[]): (CardId | RoomId)[] =>
         items.map((c) => c.id);

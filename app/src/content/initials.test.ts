@@ -1,6 +1,6 @@
 /* design/cli-sim/spec.md, "Card names": name resolution can match initials, so
  * two cards sharing initials collide on that query. This snapshot names every
- * pair design/cards.yaml holds today; a new card that creates a new pair
+ * pair cards.yaml holds today; a new card that creates a new pair
  * fails this test, so the designer sees the collision when it lands rather
  * than an agent discovering it mid-playtest. */
 import { describe, expect, it } from "vitest";
@@ -13,6 +13,8 @@ describe("initials collisions", () => {
     expect(pairs.sort()).toEqual(
       [
         "Brute Recycle / Bull Rush",
+        "Charge / Crowbar",
+        "Panic / Pivot",
         "Reckless Swing / Riot Shield",
         "Reckless / Rust",
         "Shove / Sluggish",

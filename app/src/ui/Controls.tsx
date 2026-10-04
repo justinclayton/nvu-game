@@ -136,6 +136,37 @@ function PendingChoice({ state, dispatch }: Props) {
         </div>
       );
 
+    case "ChooseDraw": {
+      // One drawer: "Draw 2". More than one (Grav Harness): "Red draws 1".
+      const drawers = new Set(pending.options.map((o) => o.character));
+      return (
+        <div className="controls controls--pending">
+          <p className="controls__prompt">{pending.prompt}</p>
+          {pending.options.map((o) => (
+            <button
+              key={`${o.character}:${String(o.count)}`}
+              type="button"
+              className="button button--primary"
+              onClick={() => {
+                dispatch({ type: "CHOOSE_DRAW", character: o.character, count: o.count });
+              }}
+            >
+              {drawers.size > 1 ? `${o.character} draws ${String(o.count)}` : `Draw ${String(o.count)}`}
+            </button>
+          ))}
+          <button
+            type="button"
+            className="button"
+            onClick={() => {
+              dispatch({ type: "CHOOSE_DRAW", character: null, count: 0 });
+            }}
+          >
+            Don&apos;t draw
+          </button>
+        </div>
+      );
+    }
+
     case "TakeReward":
       return (
         <div className="controls controls--pending">

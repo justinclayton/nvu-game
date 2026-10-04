@@ -17,8 +17,8 @@ of the old list were left out because the proposal defines only Fine and Cool po
 was done by separate agents before this run.
 
 Notes are the agent's, verbatim, tagged `[agent]`, in the order they were written into the run.
-Nothing here is a ruling. Suspected bugs were checked against `design/rulebook.md` and
-`design/cards.yaml` only; the playtester did not read `app/src`.
+Nothing here is a ruling. Suspected bugs were checked against `rulebook.md` and
+`cards.yaml` only; the playtester did not read `app/src`.
 
 The run file is `05-proposed-card-list.json`. The full transcript is the appendix, and notes cite it
 by line.

@@ -2,8 +2,9 @@
 import { act, fireEvent, render, screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it } from "vitest";
 
-import { createSession, type Session } from "@application/session";
+import { createSession, createSessionFrom, type Session } from "@application/session";
 import { FULL_CONTENT as CARD_CONTENT } from "@domain/__fixtures__/rig";
+import { buildFixture } from "@domain/__fixtures__/scenarios";
 import { App } from "./App";
 
 /* A handful of smoke tests. The rules are tested in domain; what is checked
@@ -90,6 +91,45 @@ describe("the table", () => {
     fireEvent.click(screen.getByRole("button", { name: /Flip the next room/ }));
     const log = screen.getByLabelText("Log");
     expect(log.textContent).toContain("You are in:");
+  });
+});
+
+describe("a 'you may draw' question", () => {
+  const ask = (name: string) => {
+    const state = buildFixture(name);
+    if (!state) throw new Error(`no fixture ${name}`);
+    act(() => {
+      render(<App session={createSessionFrom(state)} onNewRun={noop} onOpenRun={noop} />);
+    });
+  };
+  const labels = () => screen.getAllByRole("button").map((b) => b.textContent);
+
+  it("offers the draw and a way to decline", () => {
+    ask("stim-pack-draw");
+    expect(labels()).toEqual(expect.arrayContaining(["Draw 1", "Don't draw"]));
+    expect(labels()).not.toContain("Draw 2");
+  });
+
+  it("offers 0, 1 or 2 for 'up to 2'", () => {
+    ask("momentum-shift-draw");
+    expect(labels()).toEqual(expect.arrayContaining(["Draw 1", "Draw 2", "Don't draw"]));
+  });
+
+  it("names who draws when either may", () => {
+    ask("grav-harness-draw");
+    expect(labels()).toEqual(expect.arrayContaining(["Red draws 1", "Gray draws 1", "Don't draw"]));
+  });
+
+  it("declining leaves the hand as it was and clears the question", () => {
+    const state = buildFixture("stim-pack-draw");
+    if (!state) throw new Error("no fixture");
+    const own = createSessionFrom(state);
+    act(() => {
+      render(<App session={own} onNewRun={noop} onOpenRun={noop} />);
+    });
+    fireEvent.click(screen.getAllByRole("button", { name: "Don't draw" })[0] as HTMLElement);
+    expect(own.getState().state.pending).toBeNull();
+    expect(own.getState().state.Red.hand).toHaveLength(3);
   });
 });
 

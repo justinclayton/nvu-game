@@ -10,9 +10,8 @@ write them down at the moment you notice them. You do not read the engine.
 
 ## What you may read
 
-- `design/rulebook.md`. The authority on every rule.
-- `design/GLOSSARY.md`.
-- `design/cards.yaml`, when you need to check what a card says. A rulebook line can itself be wrong;
+- `rulebook.md`. The authority on every rule.
+- `cards.yaml`, when you need to check what a card says. A rulebook line can itself be wrong;
   the yaml is the truth for printed card text.
 - The existing notes in `design/playtests/`, for the format and for what earlier runs found.
 - `design/cli-sim/spec.md` and `bin/nvu help`, for how the tool works.

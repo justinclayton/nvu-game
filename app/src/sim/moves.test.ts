@@ -147,13 +147,35 @@ describe("legalCommands", () => {
   });
 });
 
+describe("a ChooseDraw", () => {
+  it("is answered with each draw on offer, and with none", () => {
+    const asked = rig({
+      phase: "Play",
+      pending: {
+        kind: "ChooseDraw",
+        prompt: "?",
+        options: [
+          { character: "Red", count: 1 },
+          { character: "Red", count: 2 },
+        ],
+        source: null,
+      },
+    });
+    expect(legalCommands(asked)).toEqual([
+      { type: "CHOOSE_DRAW", character: "Red", count: 1 },
+      { type: "CHOOSE_DRAW", character: "Red", count: 2 },
+      { type: "CHOOSE_DRAW", character: null, count: 0 },
+    ]);
+  });
+});
+
 describe("ascendChoices", () => {
   it("lists each offered reward, or none, and crosses both characters' choices in full", () => {
     resetRig();
     const state = rig({
       phase: "Ascend",
       roomSupply: [room("Security Turnstile")],
-      Red: player({ deck: pile("Shove", 2), discard: pile("Charge In", 2) }),
+      Red: player({ deck: pile("Shove", 2), discard: pile("Charge", 2) }),
       Gray: player({ deck: pile("Duck Under", 2) }),
     });
     const offered = { Red: state.pools.Red.slice(0, 3), Gray: state.pools.Gray.slice(0, 3) };

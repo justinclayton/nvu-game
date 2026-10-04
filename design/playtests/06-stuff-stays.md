@@ -20,8 +20,8 @@ engine findings stand: the Stuff pools (notes 9, 10, since fixed in the same sta
 it at `new`; the transcript is the appendix.
 
 Notes are the agent's, verbatim, tagged `[agent]`, in the order they were written into the run.
-Nothing here is a ruling. Suspected bugs were checked against `design/rulebook.md` and
-`design/cards.yaml` only; the engine was not read.
+Nothing here is a ruling. Suspected bugs were checked against `rulebook.md` and
+`cards.yaml` only; the engine was not read.
 
 ## How the run went
 

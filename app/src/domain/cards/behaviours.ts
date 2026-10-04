@@ -1,6 +1,6 @@
 /* The behaviour registry.
  *
- * design/cards.yaml is the one place a card is written down. What a card *does*
+ * cards.yaml is the one place a card is written down. What a card *does*
  * beyond its printed cost and stats lives here, keyed by that name. A vanilla
  * card — a cost and a stat, no text — has no entry, and an official card with
  * text and no entry fails `make check`.

@@ -229,6 +229,18 @@ export function drawOne(
   });
 }
 
+/** `count` draws in a row; a draw that puts the character Down ends the run and stops the rest. */
+export function drawCards(
+  state: GameState,
+  c: Character,
+  count: number,
+  events: DomainEvent[],
+): GameState {
+  let next = state;
+  for (let i = 0; i < count; i++) next = drawOne(next, c, events);
+  return next;
+}
+
 /**
  * Rulebook, Going Down: no card may be put into a Down character's hand — you cannot park Stuff on
  * a partner who is out.
@@ -350,7 +362,7 @@ export const spendFreePlay = (state: GameState): GameState => ({
   thisTurn: { ...state.thisTurn, freePlays: Math.max(0, state.thisTurn.freePlays - 1) },
 });
 
-/** Distract & Pivot: bank a one-shot "-1 cost" charge for this character's own next play. */
+/** Pivot: bank a one-shot "-1 cost" charge for this character's own next play. */
 export const grantPlayDiscount = (state: GameState, c: Character): GameState => ({
   ...state,
   thisTurn: {
@@ -373,32 +385,6 @@ export const clearPlayDiscount = (state: GameState): GameState =>
   state.thisTurn.playDiscount.Red === 0 && state.thisTurn.playDiscount.Gray === 0
     ? state
     : { ...state, thisTurn: { ...state.thisTurn, playDiscount: { Red: 0, Gray: 0 } } };
-
-/** Set 'Em Up: bank Scramble for this character's very next play. */
-export const bankNextPlayScramble = (state: GameState, c: Character, amount: number): GameState => ({
-  ...state,
-  thisTurn: {
-    ...state.thisTurn,
-    nextPlayScramble: {
-      ...state.thisTurn.nextPlayScramble,
-      [c]: state.thisTurn.nextPlayScramble[c] + amount,
-    },
-  },
-});
-
-/** The card just played takes whatever Scramble was banked for its player. */
-export function attachNextPlayScramble(state: GameState, c: Character, card: Card): GameState {
-  const banked = state.thisTurn.nextPlayScramble[c];
-  if (banked === 0) return state;
-  return {
-    ...state,
-    thisTurn: {
-      ...state.thisTurn,
-      nextPlayScramble: { ...state.thisTurn.nextPlayScramble, [c]: 0 },
-      cardScramble: { ...state.thisTurn.cardScramble, [card.id]: banked },
-    },
-  };
-}
 
 /** Rulebook, Card anatomy: Keywords: Exhaust a chosen card from hand, gone for the run. */
 export function exhaustFromHand(

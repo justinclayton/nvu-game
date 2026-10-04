@@ -79,11 +79,12 @@ export const USAGE = `North vs Up — the CLI. The same rules engine as the web 
   bin/nvu play new  --seed N [--run FILE]
   bin/nvu play flip                                  FLIP_ROOM (Turn Start: flip and draw)
   bin/nvu play end                                    END_PLAY
-  bin/nvu play card Red Charge In [pay Rope Flare]     PLAY_CARD
+  bin/nvu play card Red Charge [pay Rope Flare]     PLAY_CARD
   bin/nvu play scrap Red "Pry Bar" for Oomph           SCRAP_FOR_STATS (only where a room's own text allows it)
   bin/nvu play choose Red                              CHOOSE_CHARACTER
   bin/nvu play choose Floor deck                       CHOOSE_PILE
   bin/nvu play choose Rope Flare | play choose none     CHOOSE_CARDS
+  bin/nvu play choose 2 | play choose Red 1 | play choose none   CHOOSE_DRAW: a "you may draw" (none declines)
   bin/nvu play order Rope Flare Shove                  ORDER_CARDS, top first
   bin/nvu play take Zen Mode | play take none          a card reward, room or Ascend
   bin/nvu play skip                                    a room's card reward: take none
@@ -91,7 +92,7 @@ export const USAGE = `North vs Up — the CLI. The same rules engine as the web 
   bin/nvu play note "text"    [--run FILE]
   bin/nvu play show [--events N] [--table] [--moves] [--run FILE]
   bin/nvu play pile <Red|Gray> <hand|discard|play>     [--run FILE]
-  bin/nvu card "Charge In"
+  bin/nvu card "Charge"
   bin/nvu replay FILE [--quiet]
   bin/nvu fuzz --seeds N [--from SEED]
   bin/nvu sim --seeds N [--from SEED] [--policy random|greedy] [--json]

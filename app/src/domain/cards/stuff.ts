@@ -1,4 +1,4 @@
-/* Good Stuff and Bad Stuff. Keyed by the name design/cards.yaml makes unique.
+/* Good Stuff and Bad Stuff. Keyed by the name cards.yaml makes unique.
  * See rulebook §8, Card anatomy: Stuff cards.
  */
 
@@ -9,7 +9,7 @@ import {
   applyPoolPenalty,
   CHARACTERS,
   discardFromHand,
-  drawOne,
+  drawCards,
   exhaustFromDeck,
   grantFreePlay,
   hasFired,
@@ -23,7 +23,16 @@ import {
   earnGoodStuff,
   topDeck,
 } from "../verbs";
-import { ask, done, nothing, source, type BehaviourContext, type Registry } from "./behaviour";
+import {
+  ask,
+  done,
+  drawnAs,
+  drawQuestion,
+  nothing,
+  source,
+  type BehaviourContext,
+  type Registry,
+} from "./behaviour";
 
 const STATS: readonly Stat[] = ["Oomph", "Scramble"];
 
@@ -38,6 +47,16 @@ function healCardsAsk(state: GameState, ctx: BehaviourContext, target: Character
     optional: false,
     source: source(ctx, `stich-em-ups:${target}`),
   };
+}
+
+/** Emergency Breaker's second question: the partner takes or leaves the draw. */
+function partnerDraw(ctx: BehaviourContext): Pending {
+  return drawQuestion(
+    ctx,
+    "emergency-breaker-draw",
+    `${other(ctx.character)}: draw 1 card?`,
+    other(ctx.character),
+  );
 }
 
 export const STUFF: Registry = {
@@ -97,39 +116,27 @@ export const STUFF: Registry = {
     },
   },
 
-  /* "One of you draws 1 card."
+  /* "One of you may draw 1 card."
    *
-   * Rulebook, Keywords: Empty deck: an empty deck with a non-empty discard still
-   * draws — it reshuffles first — so only a character with both empty, or already
-   * Down, is not a legal choice.
-   *
-   * Skips the character choice when only one side is eligible to draw — the
-   * same "no real choice" shape as Stitch-Em-Ups' heal target above. */
+   * One question: Red draws 1, Gray draws 1, or neither. A Down character is not offered —
+   * a card cannot put anything in a Down character's hand. Drawing from an empty deck and
+   * discard pile is on offer like any other draw: it puts that character Down, and the team
+   * may decline (rulebook, Keywords: Empty deck). */
   "Grav Harness": {
     onPlay(state, ctx) {
-      const options = CHARACTERS.filter((c) => {
-        const p = playerOf(state, c);
-        return !p.down && (p.deck.length > 0 || p.discard.length > 0);
-      });
+      const options = CHARACTERS.filter((c) => !playerOf(state, c).down).map((character) => ({
+        character,
+        count: 1,
+      }));
       if (options.length === 0) return nothing(state);
-      if (options.length === 1) {
-        const only = options[0];
-        if (!only) return nothing(state);
-        const events: DomainEvent[] = [];
-        return done(drawOne(state, only, events), events);
-      }
       return ask(state, {
-        kind: "ChooseCharacter",
-        prompt: "Who draws a card?",
+        kind: "ChooseDraw",
+        prompt: "Who may draw a card?",
         options,
         source: source(ctx, "grav-harness"),
       });
     },
-    onChoice(answer, state) {
-      if (answer.kind !== "character") return nothing(state);
-      const events: DomainEvent[] = [];
-      return done(drawOne(state, answer.character, events), events);
-    },
+    onChoice: (answer, state) => drawnAs(answer, state),
   },
 
   /* "If the room is Cleared, return this card to your hand at the end of the Outcome phase." */
@@ -150,12 +157,12 @@ export const STUFF: Registry = {
     },
   },
 
-  /* "Play: Draw 1 card." */
+  /* "Play: You may draw 1 card." */
   "Stim Pack": {
     onPlay(state, ctx) {
-      const events: DomainEvent[] = [];
-      return done(drawOne(state, ctx.character, events), events);
+      return ask(state, drawQuestion(ctx, "stim-pack", "Draw 1 card?", ctx.character));
     },
+    onChoice: (answer, state) => drawnAs(answer, state),
   },
 
   /* "Play: Look at the top 3 cards of the Floor deck." */
@@ -210,22 +217,24 @@ export const STUFF: Registry = {
     },
   },
 
-  /* "Play: Draw 1 card. If both you and your partner played a card this
+  /* "Play: You may draw 1 card. If both you and your partner played a card this
    * turn, gain 1 Oomph and 1 Scramble."
+   *
+   * The bonus does not depend on the draw, so it is banked before the question.
    *
    * Pocket Dynamo counts as the card "you" played, so this fires off the
    * partner's play whether it landed before this card or lands afterwards —
    * the same look-back-then-listen shape as Crowbar, above. */
   "Pocket Dynamo": {
     onPlay(state, ctx) {
-      const events: DomainEvent[] = [];
-      let s = drawOne(state, ctx.character, events);
+      let s = state;
       if (playedBy(s, other(ctx.character)) > 0) {
         const key = `${ctx.card.id}:pocket-dynamo`;
         s = applyPoolBonus(applyPoolBonus(markFired(s, key), "Oomph", 1), "Scramble", 1);
       }
-      return done(s, events);
+      return ask(s, drawQuestion(ctx, "pocket-dynamo", "Draw 1 card?", ctx.character));
     },
+    onChoice: (answer, state) => drawnAs(answer, state),
     onEvent(event, state, ctx) {
       if (ctx.zone !== "playZone") return nothing(state);
       if (event.type !== "CARD_PLAYED" || event.character !== other(ctx.character)) {
@@ -238,30 +247,40 @@ export const STUFF: Registry = {
     },
   },
 
-  /* "Play: Draw 2 cards, then place 1 card from your hand on top of your
-   * deck." */
+  /* "Play: You may draw up to 2 cards, then place 1 card from your hand on top of your
+   * deck."
+   *
+   * Only the draw is optional: the card goes back on top whether or not any was drawn. */
   "Salvaged Blueprint": {
     onPlay(state, ctx) {
-      const events: DomainEvent[] = [];
-      let s = drawOne(state, ctx.character, events);
-      s = drawOne(s, ctx.character, events);
-      const hand = playerOf(s, ctx.character).hand;
-      if (hand.length === 0) return done(s, events);
       return ask(
-        s,
-        {
-          kind: "ChooseCards",
-          prompt: "Place which card from your hand on top of your deck?",
-          character: ctx.character,
-          options: hand,
-          count: 1,
-          optional: false,
-          source: source(ctx, "salvaged-blueprint"),
-        },
-        events,
+        state,
+        drawQuestion(ctx, "salvaged-blueprint-draw", "Draw up to 2 cards?", ctx.character, 2),
       );
     },
     onChoice(answer, state, ctx) {
+      if (answer.kind === "draw") {
+        const events: DomainEvent[] = [];
+        const s =
+          answer.character === null
+            ? state
+            : drawCards(state, answer.character, answer.count, events);
+        const hand = playerOf(s, ctx.character).hand;
+        if (s.phase === "GameOver" || hand.length === 0) return done(s, events);
+        return ask(
+          s,
+          {
+            kind: "ChooseCards",
+            prompt: "Place which card from your hand on top of your deck?",
+            character: ctx.character,
+            options: hand,
+            count: 1,
+            optional: false,
+            source: source(ctx, "salvaged-blueprint"),
+          },
+          events,
+        );
+      }
       if (answer.kind !== "cards") return nothing(state);
       const chosen = answer.cards[0];
       if (!chosen) return nothing(state);
@@ -273,16 +292,17 @@ export const STUFF: Registry = {
     },
   },
 
-  /* "Play: Scrap 1 card from your hand. Your partner draws 1 card."
+  /* "Play: Scrap 1 card from your hand. Your partner may draw 1 card."
    *
-   * The Scrap is required whenever the hand isn't empty; the partner draws
-   * either way. */
+   * The Scrap is required whenever the hand isn't empty; the partner's draw is the
+   * partner's to take or leave, either way. */
   "Emergency Breaker": {
     onPlay(state, ctx) {
       const hand = playerOf(state, ctx.character).hand;
       if (hand.length === 0) {
-        const events: DomainEvent[] = [];
-        return done(drawOne(state, other(ctx.character), events), events);
+        return playerOf(state, other(ctx.character)).down
+          ? nothing(state)
+          : ask(state, partnerDraw(ctx));
       }
       return ask(state, {
         kind: "ChooseCards",
@@ -295,6 +315,7 @@ export const STUFF: Registry = {
       });
     },
     onChoice(answer, state, ctx) {
+      if (answer.kind === "draw") return drawnAs(answer, state);
       if (answer.kind !== "cards") return nothing(state);
       const chosen = answer.cards[0];
       const events: DomainEvent[] = [];
@@ -303,8 +324,8 @@ export const STUFF: Registry = {
         const lifted = takeFrom(s, ctx.character, "hand", [chosen]);
         s = scrap(lifted, ctx.character, chosen, events);
       }
-      s = drawOne(s, other(ctx.character), events);
-      return done(s, events);
+      if (playerOf(s, other(ctx.character)).down) return done(s, events);
+      return ask(s, partnerDraw(ctx), events);
     },
   },
 

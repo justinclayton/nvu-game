@@ -1,8 +1,9 @@
 #!/bin/sh
-# Refuse to commit while the card list has drifted (stale cards.js, schema
-# problems, or a card sheet that stops printing the whole list), or while the
-# rulebook has changed without a higher Rules version.
+# Raise the Rules version when the rulebook changes without one, then refuse to
+# commit while the card list has drifted (stale cards.js, schema problems, or a
+# card sheet that stops printing the whole list).
 # The orphan `pr-media` branch holds only images, so there is no card list to check.
 [ -f tools/cards.mjs ] || exit 0
-node tools/cards.mjs check || exit 1
-exec node tools/check-rules-version.mjs --staged
+make bump-rules-version || exit 1
+git add tools/cards.js app/src/content/cards.generated.ts
+exec node tools/cards.mjs check

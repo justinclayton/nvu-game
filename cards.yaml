@@ -20,7 +20,7 @@
 #   starter true                 part of a starting deck rather than a reward pool
 #   text    string               the literal printed rules text
 #   flavor  string               the printed flavor line
-#   band    1 | 2 | 3 | null     room and stairwell only: which floors' pool the card is drawn from;
+#   tier    1 | 2 | 3 | null     room and stairwell only: which floors' pool the card is drawn from;
 #                                null marks the one fixed Floor 10 Stairwell
 #   challenges                   room and stairwell only: one or more, each a list of
 #                                `thresholds` (stat, value, outcome) in printed order. A threshold
@@ -29,7 +29,7 @@
 #   flee    string               room and stairwell only: the printed Flee line
 
 meta:
-  updated: 2026-09-23
+  updated: 2026-10-03
 
 cards:
 
@@ -47,39 +47,39 @@ cards:
     owner: Red
     cost: 1
     oomph: 2
-    flavor: A quick, decisive shove to clear space.
+    flavor: "'Oomph!', he shouted."
 
-  - name: Charge In
-    count: 5
+  - name: Charge
+    count: 4
     starter: true
     set: official
     kind: player
     owner: Red
     cost: 2
     oomph: 4
-    flavor: Lower your shoulder and put your full momentum into it.
+    flavor: I am bolder, so I lower my shoulder.
 
   - name: Lean In
     count: 1
     starter: true
-    set: proposed
+    set: official
     kind: player
     owner: Red
     cost: 1
     oomph: 1
     scramble: 1
-    flavor: Put your weight into helping Gray slip past.
+    flavor: Put your weight into it and we just might get through.
 
   - name: Overdrive
-    count: 2
+    count: 3
     starter: true
     set: official
     kind: player
     owner: Red
     cost: 0
-    oomph: 2
-    text: Exhaust 2.
-    flavor: Burn extra stamina for an immediate burst.
+    oomph: 3
+    text: Exhaust 1.
+    flavor: "See the fear in their eyes when they see the LACK of fear in mine?"
 
   ### Gray
 
@@ -91,7 +91,7 @@ cards:
     owner: Gray
     cost: 1
     scramble: 2
-    flavor: Stay low and keep moving.
+    flavor: If I stay low, maybe no one can hear me shudder in fear.
 
   - name: Pick The Lock
     count: 5
@@ -101,18 +101,18 @@ cards:
     owner: Gray
     cost: 2
     scramble: 4
-    flavor: Pop the pins before anyone notices you're there.
+    flavor: I went on a YouTube rabbit hole one weekend and now I guess I can pick locks.
 
   - name: Work The Angles
     count: 1
     starter: true
-    set: proposed
+    set: official
     kind: player
     owner: Gray
     cost: 1
     oomph: 1
     scramble: 1
-    flavor: Find the structural weak point so Red can strike.
+    flavor: I look for the glowing red spot.
 
   - name: Peek Around Corner
     count: 2
@@ -122,8 +122,8 @@ cards:
     owner: Gray
     cost: 1
     scramble: 1
-    text: Scry 1.
-    flavor: A quick glance ahead to spot hazards.
+    text: Peek 1.
+    flavor: "No harm in stopping to take in the scenery, right Red?"
 
   ## Character Reward Cards
 
@@ -131,36 +131,36 @@ cards:
 
   - name: Reckless Swing
     count: 3
-    set: proposed
+    set: official
     kind: player
     owner: Red
     rarity: Fine
     cost: 1
-    oomph: 4
-    text: Exhaust 1.
-    flavor: Put everything into a wide arc, damn the recoil.
+    oomph: 5
+    text: Exhaust 1 from the top of your deck.
+    flavor: Ok, NOW I'm mad!
 
   - name: Fast Follow
     count: 3
-    set: proposed
+    set: official
     kind: player
     owner: Red
     rarity: Fine
     cost: 1
     oomph: 3
     text: If Gray played a card this turn, play this card for free.
-    flavor: Stepping right into the opening Gray created.
+    flavor: The old one-two!
 
   - name: Reckless
     count: 2
-    set: proposed
+    set: official
     kind: player
     owner: Red
     rarity: Fine
     cost: 1
     oomph: 5
-    text: Exhaust 3.
-    flavor: Pure raw force that leaves you completely breathless.
+    text: Exhaust 2.
+    flavor: "GYAHHHHHHHOUCH"
 
   - name: Bull Rush
     count: 2
@@ -205,7 +205,8 @@ cards:
     cost: 1
     oomph: 2
     scramble: 1
-    text: "Play: The next card Gray plays this turn gains +2 Scramble."
+    conditional_stat: true
+    text: "+2 Scramble if Gray also plays a card this turn."
     flavor: "Clear the heavy debris so Gray can maneuver effortlessly."
 
   - name: Second Wind
@@ -240,7 +241,7 @@ cards:
     oomph: 2
     scramble: 1
     text: Shuffle 1 Stuff from your hand into your deck.
-    flavor: Stash the heavy salvage where it won't weigh down your swing.
+    flavor: The potion problem, now in card form.
 
   - name: Tag Team
     count: 2
@@ -251,7 +252,7 @@ cards:
     cost: 1
     oomph: 2
     scramble: 2
-    text: If Gray played a card this turn, draw 1 card.
+    text: If Gray played a card this turn, you may draw 1 card.
     flavor: Seamless hand-off between partners.
 
   - name: Brute Recycle
@@ -262,7 +263,7 @@ cards:
     rarity: Cool
     cost: 1
     oomph: 3
-    text: "Play: Scrap 1 starter card from your hand or discard pile. If you do, draw 1 card."
+    text: "Play: Scrap 1 starter card from your hand or discard pile. If you do, you may draw 1 card."
     flavor: "Crush outdated gear into raw momentum."
 
   - name: Rhythm & Bruise
@@ -272,9 +273,9 @@ cards:
     owner: Red
     rarity: Cool
     cost: 1
-    text: "Oomph equal to 2 times the number of cards Gray has played this turn. Play: If Gray has played 2 or more cards, draw 1 card."
+    text: "Oomph equal to 2 times the number of cards Gray has played this turn. Play: If Gray has played 2 or more cards, you may draw 1 card."
     conditional_stat: true
-    flavor: "Time your heaviest strike right when Gray creates the breach."
+    flavor: "Let's get it on...leeeettt's get it on..."
 
   - name: Momentum Shift
     count: 2
@@ -283,9 +284,19 @@ cards:
     owner: Red
     rarity: Cool
     cost: 1
-    oomph: 2
-    text: "Play: Draw 2 cards, then Exhaust 1 card from your hand."
+    oomph: 4
+    text: "Play: You may draw up to 2 cards, then Exhaust 1 card from your hand."
     flavor: "Keep charging forward without looking back."
+
+  - name: Zen Mode
+    count: 1
+    set: proposed
+    kind: player
+    owner: Gray
+    cost: 1
+    text: "While this is in play, you don't exhaust cards."
+    rarity: Woah
+    flavor: "Sorry, I can't hear you over the sound of how friggin calm I am"
 
   ### Gray
 
@@ -297,7 +308,7 @@ cards:
     rarity: Fine
     cost: 1
     scramble: 2
-    text: Look at top 2 cards of any deck. Put them back in either order.
+    text: Peek 3.
     flavor: Pause for a second to read the room.
 
   - name: Here, Catch
@@ -377,7 +388,7 @@ cards:
     rarity: Cool
     cost: 1
     scramble: 3
-    text: Look at top 3 cards of any deck, put back in any order.
+    text: Peek 3
     flavor: Bypass the security subroutines to peek ahead.
 
   - name: Covering Fire
@@ -387,10 +398,10 @@ cards:
     owner: Gray
     rarity: Cool
     cost: 1
-    text: Every time Red plays a card this turn, draw 1 card.
+    text: Every time Red plays a card this turn, you may draw 1 card.
     flavor: Keep their eyes on you so Red can maneuver freely.
 
-  - name: Distract & Pivot
+  - name: Pivot
     count: 2
     set: proposed
     kind: player
@@ -400,19 +411,39 @@ cards:
     oomph: 2
     scramble: 3
     text: The next card Red plays this turn costs 1 fewer card to play.
-    flavor: Create a wide opening for Red to land a massive strike.
+    flavor: Pronounced "Piv-aaahhht".
 
   - name: Synergy Link
+    count: 2
+    set: official
+    kind: player
+    owner: Gray
+    rarity: Cool
+    cost: 1
+    scramble: 2
+    text: "Play: You may draw 1 card. If Red has played a card this turn, you may draw 1 more."
+    flavor: "I understand it now."
+
+  - name: Sharing Is Caring
+    count: 1
+    set: proposed
+    kind: player
+    owner: Gray
+    cost: 0
+    text: "Play: both players may pay for cards from the other player's hand."
+    rarity: Woah
+    flavor: "My casa is your casa. Casa means case, right?"
+
+  - name: I Know Kung Fu
     count: 2
     set: proposed
     kind: player
     owner: Gray
     rarity: Cool
     cost: 1
-    scramble: 2
-    text: "Play: Draw 1 card. If Red has played a card this turn, draw 1 additional card."
-    flavor: "Match Red's momentum to keep the tactical loop spinning."
-
+    oomph: 5
+    text: "Play: every time a Scramble card is played this turn, you may draw a card."
+    flavor: "Master the art of combat with precision and grace."
   # Stuff
 
   ## Good Stuff
@@ -424,7 +455,7 @@ cards:
     rarity: Fine
     cost: 0
     oomph: 3
-    flavor: Simple, solid steel. Good for prying open grates or cracking skulls.
+    flavor: Good for prying open grates or smashing things like grapes.
 
   - name: Coil Of Cable
     count: 5
@@ -463,7 +494,7 @@ cards:
     rarity: Cool
     cost: 0
     oomph: 2
-    text: "Play: Draw 1 card."
+    text: "Play: You may draw 1 card."
     flavor: Adrenaline surge to keep moving when stamina is low.
 
   - name: Cutting Torch
@@ -483,7 +514,7 @@ cards:
     cost: 1
     scramble: 3
     text: If the room is Cleared, return this card to your hand at the end of the Outcome phase.
-    flavor: Heavy poly-carb barrier that survives multiple engagements.
+    flavor: "If they're gonna keep comin', I'm gonna keep pushin' em back."
 
   - name: Overcharged Battery
     count: 3
@@ -530,7 +561,7 @@ cards:
     kind: good_stuff
     rarity: Fine
     cost: 0
-    text: "Play: Draw 1 card. If both you and your partner played a card this turn, gain 1 Oomph and 1 Scramble."
+    text: "Play: You may draw 1 card. If both you and your partner played a card this turn, gain 1 Oomph and 1 Scramble."
     flavor: "A hand-cranked generator that charges when team tempo builds."
 
   - name: Salvaged Blueprint
@@ -540,7 +571,7 @@ cards:
     rarity: Cool
     cost: 1
     scramble: 2
-    text: "Play: Draw 2 cards, then place 1 card from your hand on top of your deck."
+    text: "Play: You may draw up to 2 cards, then place 1 card from your hand on top of your deck."
     flavor: "Quick tactical schematic that reorganizes upcoming options."
 
   - name: Emergency Breaker
@@ -551,7 +582,7 @@ cards:
     cost: 1
     oomph: 2
     scramble: 2
-    text: "Play: Scrap 1 card from your hand. Your partner draws 1 card."
+    text: "Play: Scrap 1 card from your hand. Your partner may draw 1 card."
     flavor: "Shatter a jammed valve to clear your pack and open a window for your partner."
 
   - name: Grav Harness
@@ -561,7 +592,7 @@ cards:
     cost: 2
     oomph: 3
     scramble: 3
-    text: One of you draws 1 card.
+    text: One of you may draw 1 card.
     flavor: Defies local gravity to make heavy obstacles weightless.
 
   - name: Automated Salvage Kit
@@ -670,7 +701,7 @@ cards:
     count: 14
     set: proposed
     kind: room
-    band: 1
+    tier: 1
     flavor: A rusted barrier blocks the thoroughfare. You can slip through quietly or tear it off its hinges.
     challenges:
       - thresholds:
@@ -687,7 +718,7 @@ cards:
     count: 10
     set: proposed
     kind: room
-    band: 1
+    tier: 1
     flavor: A narrow duct dripping with murky condensation. Red can force the grate while Gray navigates the wiring.
     challenges:
       - thresholds:
@@ -703,7 +734,7 @@ cards:
     count: 3
     set: proposed
     kind: stairwell
-    band: 1
+    tier: 1
     flavor: An automated defense unit guarding the stairwell. Destroy its chassis or cut its power harness.
     challenges:
       - thresholds:
@@ -725,7 +756,7 @@ cards:
     count: 7
     set: proposed
     kind: room
-    band: 2
+    tier: 2
     flavor: A heavy turretted cannon sweeps the corridor. Deactivating its targeting sensors requires precision; smashing it requires brute force.
     challenges:
       - thresholds:
@@ -742,7 +773,7 @@ cards:
     count: 4
     set: proposed
     kind: room
-    band: 2
+    tier: 2
     flavor: High-pressure steam pipes obstruct the gangway. Red must brace the valves while Gray hacks the overrides.
     challenges:
       - thresholds:
@@ -759,7 +790,7 @@ cards:
     count: 4
     set: proposed
     kind: room
-    band: 2
+    tier: 2
     flavor: Mutated flora fills the chamber, emitting dense spore clouds.
     challenges:
       - thresholds:
@@ -775,7 +806,7 @@ cards:
     count: 3
     set: proposed
     kind: stairwell
-    band: 2
+    tier: 2
     flavor: A pair of rogue maintenance constructs blocking the stairwell door.
     challenges:
       - thresholds:
@@ -793,7 +824,7 @@ cards:
     count: 2
     set: proposed
     kind: room
-    band: 3
+    tier: 3
     flavor: Interlocking laser beams cover every inch of the floor. Slip through without touching a beam, or shatter the emitter relay.
     challenges:
       - thresholds:
@@ -810,7 +841,7 @@ cards:
     count: 2
     set: proposed
     kind: room
-    band: 3
+    tier: 3
     flavor: A sealed vault holding experimental equipment. The door control requires an energy surge.
     text: Players may Scrap Good Stuff cards from their hand during Play to add +3 Oomph or +3 Scramble per card.
     challenges:
@@ -828,7 +859,7 @@ cards:
     count: 2
     set: proposed
     kind: room
-    band: 3
+    tier: 3
     flavor: An overheating weapons cache on the verge of exploding.
     challenges:
       - thresholds:
@@ -844,7 +875,7 @@ cards:
     count: 3
     set: proposed
     kind: stairwell
-    band: 3
+    tier: 3
     flavor: The massive titan guarding the doorway to the upper tower.
     challenges:
       - thresholds:
@@ -861,7 +892,7 @@ cards:
   - name: The Monolith Core
     set: proposed
     kind: stairwell
-    band: null
+    tier: null
     flavor: The central nexus at the apex of Pyramid Tower. It radiates crackling energy.
     challenges:
       - thresholds:

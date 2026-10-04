@@ -13,10 +13,9 @@ import { stdout } from "node:process";
 import { mismatchedField, runData, type RunFile } from "@application/exportRun";
 import { logLines, tailEvents } from "@application/narrate";
 import { createSession, loadSession, type Note, type SavedRun, type Session } from "@application/session";
-import { CARD_CONTENT, CARD_LIST_ID } from "@content/index";
+import { CARD_CONTENT, CARD_LIST_ID, RULES_VERSION } from "@content/index";
 import { resolveCardName } from "@content/names";
 import { costOf, payOptions, playableCards } from "@domain/queries";
-import { RULES_VERSION } from "@domain/setup";
 import type { Card, CardId, Character, Command, GameState, RoomId, Stat } from "@domain/types";
 import { CHARACTERS, playerOf } from "@domain/verbs";
 import { POLICIES, randomPolicy } from "@sim/policy";
@@ -42,6 +41,7 @@ import {
   type ReplayRequest,
   type SimRequest,
 } from "./args";
+import { answerDraw } from "./draw";
 import { cardLine, moveHint, printedFaceLine, printedRoomLines, renderTable, shortStatusLines } from "./render";
 
 const content = CARD_CONTENT;
@@ -274,6 +274,12 @@ function buildChoose(state: GameState, action: Extract<PlayAction, { kind: "choo
   if (pending.kind === "ChooseCards") {
     const cardIds = resolveEach(action.names, pending.options).map((c) => c.id);
     return { type: "CHOOSE_CARDS", cardIds };
+  }
+
+  if (pending.kind === "ChooseDraw") {
+    const answer = answerDraw(pending.options, action.names);
+    if (!answer.ok) throw new MoveRefused(answer.reason);
+    return answer.command;
   }
 
   if (pending.kind === "ChooseGoodStuff") {

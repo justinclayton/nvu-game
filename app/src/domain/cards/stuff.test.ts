@@ -1,15 +1,18 @@
 /* One test per entry in the Stuff registry, beside the behaviour. */
 
 import { beforeEach, describe, expect, it } from "vitest";
+import { execute } from "../engine";
 import { costOf, statPool, thresholdIsMet, thresholdRequirement } from "../queries";
 import {
   card,
+  drawing,
   eventTypes,
   free,
   handCard,
   ids,
   keepFirstGoodStuff,
   must,
+  noDraw,
   pile,
   play,
   player,
@@ -171,11 +174,11 @@ describe("Crowbar — 'Play: if you get any Good Stuff this turn, get an additio
       activeRoom: room("Security Turnstile"),
       Red: player({
         deck: pile("Shove", 4),
-        hand: [card("Charge In"), card("Shove"), card("Shove"), card("Pry Bar")],
+        hand: [card("Charge"), card("Shove"), card("Shove"), card("Pry Bar")],
       }),
     });
     const state = { ...rigged, pools: { ...rigged.pools, goodStuff: [card("Crowbar")] } };
-    const chargeIn = handCard(state, "Red", "Charge In");
+    const chargeIn = handCard(state, "Red", "Charge");
     const payWith = state.Red.hand.filter((c) => c.name === "Shove").map((c) => c.id);
     const { state: next } = keepFirstGoodStuff(play(state, [
       {
@@ -199,7 +202,7 @@ describe("A Pair Of Stitch-Em-Ups — 'Choose a character, move 2 cards from the
       Red: player({
         deck: pile("Shove", 2),
         hand: [card("A Pair Of Stitch-Em-Ups"), card("Shove")],
-        exhaust: pile("Charge In", 3),
+        exhaust: pile("Charge", 3),
       }),
     });
     const asked = must(state, {
@@ -228,7 +231,7 @@ describe("A Pair Of Stitch-Em-Ups — 'Choose a character, move 2 cards from the
       Red: player({
         deck: pile("Shove", 2),
         hand: [card("A Pair Of Stitch-Em-Ups"), card("Shove")],
-        exhaust: pile("Charge In", 3),
+        exhaust: pile("Charge", 3),
       }),
       Gray: player({
         deck: pile("Duck Under", 2),
@@ -286,95 +289,74 @@ describe("A Pair Of Stitch-Em-Ups — 'Choose a character, move 2 cards from the
   });
 });
 
-describe("Grav Harness — 'One of you draws 1 card, even if their hand is full'", () => {
-  it("asks who, and ignores the hand cap", () => {
+describe("Grav Harness — 'One of you may draw 1 card, even if their hand is full'", () => {
+  const graved = (over: Partial<Parameters<typeof playing>[0]> = {}) => {
     const state = playing({
       Red: player({ deck: pile("Shove", 4), hand: [card("Grav Harness"), ...pile("Shove", 5)] }),
+      ...over,
     });
     const grav = handCard(state, "Red", "Grav Harness");
-    const asked = must(state, {
+    return must(state, {
       type: "PLAY_CARD",
       character: "Red",
       cardId: grav.id,
       payWith: state.Red.hand.slice(1, 3).map((c) => c.id),
     });
-    expect(asked.state.pending?.kind).toBe("ChooseCharacter");
+  };
 
-    const { state: next, events } = must(asked.state, {
-      type: "CHOOSE_CHARACTER",
-      character: "Red",
+  it("asks who draws, and ignores the hand cap", () => {
+    const asked = graved();
+    expect(asked.state.pending).toMatchObject({
+      kind: "ChooseDraw",
+      options: [
+        { character: "Red", count: 1 },
+        { character: "Gray", count: 1 },
+      ],
     });
+
+    const { state: next, events } = must(asked.state, drawing("Red", 1));
     // Red held 4 after paying, so the cap was not in the way here; what matters
     // is that the card entered the hand rather than being burned.
     expect(eventTypes(events)).toEqual(["CARD_DRAWN"]);
     expect(next.Red.deck).toHaveLength(3);
   });
 
-  it("draws into a full hand rather than burning the card", () => {
-    const state = playing({
-      Red: player({ deck: pile("Shove", 4), hand: [card("Grav Harness"), ...pile("Shove", 5)] }),
-    });
-    const grav = handCard(state, "Red", "Grav Harness");
-    // Pay nothing: the Grav Harness costs 2, so give it a free ride by using
-    // Gray as the target with a full Red hand instead.
-    const asked = must(state, {
-      type: "PLAY_CARD",
-      character: "Red",
-      cardId: grav.id,
-      payWith: state.Red.hand.slice(1, 3).map((c) => c.id),
-    });
-    const { state: next, events } = must(asked.state, {
-      type: "CHOOSE_CHARACTER",
-      character: "Gray",
-    });
+  it("draws the other character when they are chosen", () => {
+    const { state: next, events } = must(graved().state, drawing("Gray", 1));
     expect(eventTypes(events)).toEqual(["CARD_DRAWN"]);
     expect(next.Gray.hand).toHaveLength(1);
+    expect(next.Red.deck).toHaveLength(4);
   });
 
-  it("still offers a character whose deck is empty but whose discard is not", () => {
-    const state = playing({
-      Red: player({ deck: pile("Shove", 4), hand: [card("Grav Harness"), ...pile("Shove", 5)] }),
-      Gray: player({ deck: [], discard: pile("Duck Under", 3) }),
-    });
-    const grav = state.Red.hand[0];
-    if (!grav) throw new Error("rig");
-    const asked = must(state, {
-      type: "PLAY_CARD",
-      character: "Red",
-      cardId: grav.id,
-      payWith: state.Red.hand.slice(1, 3).map((c) => c.id),
-    });
-    if (asked.state.pending?.kind !== "ChooseCharacter") throw new Error("rig");
+  it("draws neither character when the team declines", () => {
+    const { state: next, events } = must(graved().state, noDraw);
+    expect(events).toEqual([]);
+    expect(next.pending).toBeNull();
+    expect(next.Red.deck).toHaveLength(4);
+    expect(next.Gray.hand).toHaveLength(0);
+  });
+
+  it("offers a character whose deck is empty but whose discard is not, who reshuffles to draw", () => {
+    const asked = graved({ Gray: player({ deck: [], discard: pile("Duck Under", 3) }) });
     // Rulebook, Keywords: Empty deck — an empty deck with cards still in the
     // discard pile reshuffles rather than being unable to draw.
-    expect(asked.state.pending.options).toContain("Gray");
-
-    const { state: next, events } = must(asked.state, {
-      type: "CHOOSE_CHARACTER",
-      character: "Gray",
+    expect(asked.state.pending).toMatchObject({
+      options: expect.arrayContaining([{ character: "Gray", count: 1 }]),
     });
+    const { state: next, events } = must(asked.state, drawing("Gray", 1));
     expect(eventTypes(events)).toEqual(["DISCARD_RESHUFFLED", "CARD_DRAWN"]);
     expect(next.Gray.deck).toHaveLength(2);
     expect(next.Gray.discard).toHaveLength(0);
   });
 
-  it("skips the question when only one side is eligible, and draws for them directly", () => {
-    const state = playing({
-      Red: player({ deck: pile("Shove", 4), hand: [card("Grav Harness"), ...pile("Shove", 5)] }),
-      Gray: player({ down: true }),
+  it("does not offer a Down character, but still asks the one standing", () => {
+    const asked = graved({ Gray: player({ down: true }) });
+    expect(asked.state.pending).toMatchObject({
+      kind: "ChooseDraw",
+      options: [{ character: "Red", count: 1 }],
     });
-    const grav = state.Red.hand[0];
-    if (!grav) throw new Error("rig");
-    const { state: next, events } = play(state, [
-      {
-        type: "PLAY_CARD",
-        character: "Red",
-        cardId: grav.id,
-        payWith: state.Red.hand.slice(1, 3).map((c) => c.id),
-      },
-    ]);
-    expect(next.pending).toBeNull();
-    expect(eventTypes(events)).toContain("CARD_DRAWN");
+    expect(execute(asked.state, drawing("Gray", 1)).ok).toBe(false);
+    const { state: next } = must(asked.state, drawing("Red", 1));
     expect(next.Red.deck).toHaveLength(3);
   });
 });
@@ -461,7 +443,7 @@ describe("Overcharged Battery — 'The next card played this turn is played for 
     const state = playing({
       Red: player({
         deck: pile("Shove", 3),
-        hand: [card("Overcharged Battery"), card("Shove"), card("Charge In"), card("Charge In")],
+        hand: [card("Overcharged Battery"), card("Shove"), card("Charge"), card("Charge")],
       }),
     });
     const charged = must(state, {
@@ -470,8 +452,8 @@ describe("Overcharged Battery — 'The next card played this turn is played for 
       cardId: handCard(state, "Red", "Overcharged Battery").id,
       payWith: [handCard(state, "Red", "Shove").id],
     });
-    const [first, second] = charged.state.Red.hand.filter((c) => c.name === "Charge In");
-    if (!first || !second) throw new Error("Red is not holding two Charge Ins");
+    const [first, second] = charged.state.Red.hand.filter((c) => c.name === "Charge");
+    if (!first || !second) throw new Error("Red is not holding two Charges");
     expect(costOf(charged.state, "Red", first)).toBe(0);
 
     const spent = must(charged.state, free("Red", first.id));
@@ -504,7 +486,7 @@ describe("Overcharged Battery — 'The next card played this turn is played for 
     const state = playing({
       Red: player({
         deck: pile("Shove", 3),
-        hand: [card("Overcharged Battery"), card("Shove"), card("Pry Bar"), card("Charge In")],
+        hand: [card("Overcharged Battery"), card("Shove"), card("Pry Bar"), card("Charge")],
       }),
     });
     const charged = must(state, {
@@ -514,17 +496,17 @@ describe("Overcharged Battery — 'The next card played this turn is played for 
       payWith: [handCard(state, "Red", "Shove").id],
     });
     // Pry Bar is Cost 0 on its own, so it saves nothing and leaves the discount
-    // standing for Charge In.
+    // standing for Charge.
     const played = must(charged.state, free("Red", handCard(charged.state, "Red", "Pry Bar").id));
     expect(played.state.thisTurn.freePlays).toBe(1);
-    expect(costOf(played.state, "Red", handCard(played.state, "Red", "Charge In"))).toBe(0);
+    expect(costOf(played.state, "Red", handCard(played.state, "Red", "Charge"))).toBe(0);
   });
 
   it("does not survive the end of the Play phase", () => {
     const state = playing({
       Red: player({
         deck: pile("Shove", 3),
-        hand: [card("Overcharged Battery"), card("Shove"), card("Charge In")],
+        hand: [card("Overcharged Battery"), card("Shove"), card("Charge")],
       }),
     });
     const { state: next } = play(state, [
@@ -540,16 +522,58 @@ describe("Overcharged Battery — 'The next card played this turn is played for 
   });
 });
 
-describe("Stim Pack — 'Play: Draw 1 card'", () => {
-  it("draws the player who played it a card", () => {
+describe("Stim Pack — 'Play: You may draw 1 card'", () => {
+  it("draws the player who played it a card, if they take it", () => {
     const state = playing({
       Red: player({ deck: pile("Shove", 3), hand: [card("Stim Pack")] }),
     });
     const r = ids(state, "Red");
-    const { state: next, events } = must(state, free("Red", r[0] as CardId));
+    const asked = must(state, free("Red", r[0] as CardId));
+    expect(asked.state.pending).toMatchObject({
+      kind: "ChooseDraw",
+      options: [{ character: "Red", count: 1 }],
+    });
+    const { state: next, events } = must(asked.state, drawing("Red", 1));
     expect(eventTypes(events)).toContain("CARD_DRAWN");
     expect(next.Red.hand).toHaveLength(1);
     expect(next.Red.deck).toHaveLength(2);
+  });
+
+  it("draws nothing if they decline", () => {
+    const state = playing({
+      Red: player({ deck: pile("Shove", 3), hand: [card("Stim Pack")] }),
+    });
+    const asked = must(state, free("Red", ids(state, "Red")[0] as CardId));
+    const { state: next, events } = must(asked.state, noDraw);
+    expect(eventTypes(events)).not.toContain("CARD_DRAWN");
+    expect(next.pending).toBeNull();
+    expect(next.Red.hand).toHaveLength(0);
+    expect(next.Red.deck).toHaveLength(3);
+  });
+
+  it("lets a character with an empty deck and discard pile decline, and stay up", () => {
+    const state = playing({
+      Red: player({ deck: [], discard: [], hand: [card("Stim Pack")] }),
+    });
+    const asked = must(state, free("Red", handCard(state, "Red", "Stim Pack").id));
+    // The draw is on offer, and so is passing on it.
+    expect(asked.state.pending?.kind).toBe("ChooseDraw");
+    const { state: next, events } = must(asked.state, noDraw);
+    expect(next.Red.down).toBe(false);
+    expect(next.phase).toBe("Play");
+    expect(next.outcome).toBeNull();
+    expect(eventTypes(events)).not.toContain("WENT_DOWN");
+    expect(next.pending).toBeNull();
+  });
+
+  it("puts a character with an empty deck and discard pile Down only if they take the draw", () => {
+    const state = playing({
+      Red: player({ deck: [], discard: [], hand: [card("Stim Pack")] }),
+    });
+    const asked = must(state, free("Red", handCard(state, "Red", "Stim Pack").id));
+    const { state: next, events } = must(asked.state, drawing("Red", 1));
+    expect(eventTypes(events)).toContain("WENT_DOWN");
+    expect(next.Red.down).toBe(true);
   });
 });
 
@@ -645,15 +669,31 @@ describe("Scrap Magnet — 'Play: Scrap 1 Bad Stuff card from your hand. If you 
   });
 });
 
-describe("Pocket Dynamo — 'Play: Draw 1 card. If both you and your partner played a card this turn, gain 1 Oomph and 1 Scramble.'", () => {
+describe("Pocket Dynamo — 'Play: You may draw 1 card. If both you and your partner played a card this turn, gain 1 Oomph and 1 Scramble.'", () => {
   it("draws a card and grants nothing when the partner never plays this turn", () => {
     const state = playing({
       Red: player({ deck: pile("Shove", 4), hand: [card("Pocket Dynamo")] }),
     });
-    const { state: next, events } = must(state, free("Red", handCard(state, "Red", "Pocket Dynamo").id));
+    const asked = must(state, free("Red", handCard(state, "Red", "Pocket Dynamo").id));
+    const { state: next, events } = must(asked.state, drawing("Red", 1));
     expect(eventTypes(events)).toContain("CARD_DRAWN");
     expect(next.Red.hand).toHaveLength(1);
     expect(statPool(next)).toEqual({ oomph: 0, scramble: 0 });
+  });
+
+  it("grants the bonus even when the draw is declined", () => {
+    const state = playing({
+      Red: player({ deck: pile("Shove", 4), hand: [card("Pocket Dynamo")] }),
+      Gray: player({ deck: pile("Duck Under", 4), hand: [card("Duck Under"), card("Duck Under")] }),
+    });
+    const [gray1, gray2] = state.Gray.hand;
+    if (!gray1 || !gray2) throw new Error("Gray is not holding two Duck Unders");
+    const played = must(state, { type: "PLAY_CARD", character: "Gray", cardId: gray1.id, payWith: [gray2.id] });
+    const asked = must(played.state, free("Red", handCard(state, "Red", "Pocket Dynamo").id));
+    const { state: next, events } = must(asked.state, noDraw);
+    expect(eventTypes(events)).not.toContain("CARD_DRAWN");
+    expect(next.Red.hand).toHaveLength(0);
+    expect(next.thisTurn.poolBonus).toEqual({ oomph: 1, scramble: 1 });
   });
 
   it("grants the bonus right away when the partner already played this turn", () => {
@@ -666,6 +706,7 @@ describe("Pocket Dynamo — 'Play: Draw 1 card. If both you and your partner pla
     const { state: next } = play(state, [
       { type: "PLAY_CARD", character: "Gray", cardId: gray1.id, payWith: [gray2.id] },
       free("Red", handCard(state, "Red", "Pocket Dynamo").id),
+      drawing("Red", 1),
     ]);
     // Asserted on the banked bonus itself, not the shared pool: Duck Under's
     // own printed Scramble 2 also lands in that pool and would muddy this.
@@ -677,7 +718,10 @@ describe("Pocket Dynamo — 'Play: Draw 1 card. If both you and your partner pla
       Red: player({ deck: pile("Shove", 4), hand: [card("Pocket Dynamo")] }),
       Gray: player({ deck: pile("Duck Under", 4), hand: [card("Duck Under"), card("Duck Under")] }),
     });
-    const afterDynamo = must(state, free("Red", handCard(state, "Red", "Pocket Dynamo").id));
+    const afterDynamo = play(state, [
+      free("Red", handCard(state, "Red", "Pocket Dynamo").id),
+      drawing("Red", 1),
+    ]);
     expect(afterDynamo.state.thisTurn.poolBonus).toEqual({ oomph: 0, scramble: 0 });
 
     const [gray1, gray2] = state.Gray.hand;
@@ -699,7 +743,10 @@ describe("Pocket Dynamo — 'Play: Draw 1 card. If both you and your partner pla
         hand: [card("Duck Under"), card("Duck Under"), card("Duck Under"), card("Duck Under")],
       }),
     });
-    const afterDynamo = must(state, free("Red", handCard(state, "Red", "Pocket Dynamo").id));
+    const afterDynamo = play(state, [
+      free("Red", handCard(state, "Red", "Pocket Dynamo").id),
+      noDraw,
+    ]);
     const [g1, g2, g3, g4] = state.Gray.hand;
     if (!g1 || !g2 || !g3 || !g4) throw new Error("Gray is not holding four Duck Unders");
     const step1 = must(afterDynamo.state, {
@@ -719,10 +766,64 @@ describe("Pocket Dynamo — 'Play: Draw 1 card. If both you and your partner pla
   });
 });
 
-describe("Salvaged Blueprint — 'Play: Draw 2 cards, then place 1 card from your hand on top of your deck.'", () => {
-  it("draws 2, then places the chosen card on top of the deck", () => {
+describe("Salvaged Blueprint — 'Play: You may draw up to 2 cards, then place 1 card from your hand on top of your deck.'", () => {
+  const blueprint = () => {
     const state = playing({
       Red: player({ deck: pile("Shove", 5), hand: [card("Salvaged Blueprint"), card("Pry Bar")] }),
+    });
+    return must(state, {
+      type: "PLAY_CARD",
+      character: "Red",
+      cardId: handCard(state, "Red", "Salvaged Blueprint").id,
+      payWith: [handCard(state, "Red", "Pry Bar").id],
+    });
+  };
+
+  it("draws 2, then places the chosen card on top of the deck", () => {
+    const asked = blueprint();
+    expect(asked.state.pending).toMatchObject({
+      kind: "ChooseDraw",
+      options: [
+        { character: "Red", count: 1 },
+        { character: "Red", count: 2 },
+      ],
+    });
+    const drawn = must(asked.state, drawing("Red", 2));
+    expect(drawn.state.Red.hand).toHaveLength(2);
+    const pending = drawn.state.pending;
+    if (pending?.kind !== "ChooseCards") throw new Error("expected a card choice");
+    expect(pending.count).toBe(1);
+    expect(pending.options).toHaveLength(2);
+
+    const chosen = pending.options[0];
+    if (!chosen) throw new Error("rig");
+    const { state: next, events } = must(drawn.state, { type: "CHOOSE_CARDS", cardIds: [chosen.id] });
+    expect(eventTypes(events)).toContain("CARD_MOVED");
+    expect(next.Red.hand).toHaveLength(1);
+    expect(next.Red.hand.some((c) => c.id === chosen.id)).toBe(false);
+    expect(next.Red.deck[0]?.id).toBe(chosen.id);
+    expect(next.Red.deck).toHaveLength(4);
+  });
+
+  it("can draw 1, or none", () => {
+    const asked = blueprint();
+    const one = must(asked.state, drawing("Red", 1));
+    expect(one.state.Red.hand).toHaveLength(1);
+    expect(one.state.pending?.kind).toBe("ChooseCards");
+
+    // Nothing drawn and nothing in hand: nothing to place.
+    const none = must(asked.state, noDraw);
+    expect(none.state.Red.hand).toHaveLength(0);
+    expect(none.state.pending).toBeNull();
+    expect(none.state.Red.deck).toHaveLength(5);
+  });
+
+  it("still places a card from hand when none was drawn", () => {
+    const state = playing({
+      Red: player({
+        deck: pile("Shove", 5),
+        hand: [card("Salvaged Blueprint"), card("Pry Bar"), card("Rust")],
+      }),
     });
     const asked = must(state, {
       type: "PLAY_CARD",
@@ -730,25 +831,15 @@ describe("Salvaged Blueprint — 'Play: Draw 2 cards, then place 1 card from you
       cardId: handCard(state, "Red", "Salvaged Blueprint").id,
       payWith: [handCard(state, "Red", "Pry Bar").id],
     });
-    expect(asked.state.Red.hand).toHaveLength(2);
-    const pending = asked.state.pending;
+    const declined = must(asked.state, noDraw);
+    const pending = declined.state.pending;
     if (pending?.kind !== "ChooseCards") throw new Error("expected a card choice");
-    expect(pending.count).toBe(1);
-    expect(pending.options).toHaveLength(2);
-
-    const chosen = pending.options[0];
-    if (!chosen) throw new Error("rig");
-    const { state: next, events } = must(asked.state, { type: "CHOOSE_CARDS", cardIds: [chosen.id] });
-    expect(eventTypes(events)).toContain("CARD_MOVED");
-    expect(next.Red.hand).toHaveLength(1);
-    expect(next.Red.hand.some((c) => c.id === chosen.id)).toBe(false);
-    expect(next.Red.deck[0]?.id).toBe(chosen.id);
-    expect(next.Red.deck).toHaveLength(4);
+    expect(pending.options.map((c) => c.name)).toEqual(["Rust"]);
   });
 });
 
-describe("Emergency Breaker — 'Play: Scrap 1 card from your hand. Your partner draws 1 card.'", () => {
-  it("asks which card to Scrap, then draws the partner a card", () => {
+describe("Emergency Breaker — 'Play: Scrap 1 card from your hand. Your partner may draw 1 card.'", () => {
+  it("asks which card to Scrap, then asks whether the partner draws", () => {
     const state = playing({
       Red: player({
         deck: pile("Shove", 3),
@@ -768,26 +859,60 @@ describe("Emergency Breaker — 'Play: Scrap 1 card from your hand. Your partner
     const rust = pending.options[0];
     if (!rust) throw new Error("rig");
 
-    const { state: next, events } = must(asked.state, { type: "CHOOSE_CARDS", cardIds: [rust.id] });
-    expect(eventTypes(events)).toContain("CARD_SCRAPPED");
-    expect(next.scrapyard.some((c) => c.name === "Rust")).toBe(true);
+    const scrapped = must(asked.state, { type: "CHOOSE_CARDS", cardIds: [rust.id] });
+    expect(eventTypes(scrapped.events)).toContain("CARD_SCRAPPED");
+    expect(scrapped.state.scrapyard.some((c) => c.name === "Rust")).toBe(true);
+    // The partner's draw, not Red's.
+    expect(scrapped.state.pending).toMatchObject({
+      kind: "ChooseDraw",
+      options: [{ character: "Gray", count: 1 }],
+    });
+    expect(eventTypes(scrapped.events)).not.toContain("CARD_DRAWN");
+
+    const { state: next, events } = must(scrapped.state, drawing("Gray", 1));
     expect(eventTypes(events)).toContain("CARD_DRAWN");
     expect(next.Gray.hand).toHaveLength(1);
+    expect(next.Red.hand).toHaveLength(0);
   });
 
-  it("still draws the partner a card when the hand is already empty", () => {
+  it("Scraps the card and draws nothing when the partner declines", () => {
     const state = playing({
-      Red: player({ deck: pile("Shove", 3), hand: [card("Emergency Breaker"), card("Pry Bar")] }),
+      Red: player({
+        deck: pile("Shove", 3),
+        hand: [card("Emergency Breaker"), card("Pry Bar"), card("Rust")],
+      }),
       Gray: player({ deck: pile("Duck Under", 3) }),
     });
-    const { state: next, events } = must(state, {
+    const asked = must(state, {
       type: "PLAY_CARD",
       character: "Red",
       cardId: handCard(state, "Red", "Emergency Breaker").id,
       payWith: [handCard(state, "Red", "Pry Bar").id],
     });
+    const rust = handCard(asked.state, "Red", "Rust");
+    const scrapped = must(asked.state, { type: "CHOOSE_CARDS", cardIds: [rust.id] });
+    const { state: next, events } = must(scrapped.state, noDraw);
+    expect(eventTypes(events)).not.toContain("CARD_DRAWN");
+    expect(next.scrapyard.some((c) => c.name === "Rust")).toBe(true);
+    expect(next.Gray.hand).toHaveLength(0);
+    expect(next.Gray.deck).toHaveLength(3);
     expect(next.pending).toBeNull();
-    expect(eventTypes(events)).not.toContain("CARD_SCRAPPED");
+  });
+
+  it("still asks whether the partner draws when the hand is already empty", () => {
+    const state = playing({
+      Red: player({ deck: pile("Shove", 3), hand: [card("Emergency Breaker"), card("Pry Bar")] }),
+      Gray: player({ deck: pile("Duck Under", 3) }),
+    });
+    const asked = must(state, {
+      type: "PLAY_CARD",
+      character: "Red",
+      cardId: handCard(state, "Red", "Emergency Breaker").id,
+      payWith: [handCard(state, "Red", "Pry Bar").id],
+    });
+    expect(asked.state.pending?.kind).toBe("ChooseDraw");
+    expect(eventTypes(asked.events)).not.toContain("CARD_SCRAPPED");
+    const { state: next, events } = must(asked.state, drawing("Gray", 1));
     expect(eventTypes(events)).toContain("CARD_DRAWN");
     expect(next.Gray.hand).toHaveLength(1);
   });
@@ -1045,8 +1170,8 @@ describe("Panic — 'Holding: every room threshold requires +2 Scramble to be me
       activeRoom: room("The Sentry Drone"),
       Gray: player({ hand: [card("Panic")] }),
       playZone: [
-        { owner: "Red", card: card("Charge In") },
-        { owner: "Red", card: card("Charge In") },
+        { owner: "Red", card: card("Charge") },
+        { owner: "Red", card: card("Charge") },
       ],
     });
     const line = state.activeRoom?.challenges[0]?.thresholds[0];
@@ -1065,8 +1190,8 @@ describe("Panic — 'Holding: every room threshold requires +2 Scramble to be me
     const state = playing({
       activeRoom: room("The Sentry Drone"),
       playZone: [
-        { owner: "Red", card: card("Charge In") },
-        { owner: "Red", card: card("Charge In") },
+        { owner: "Red", card: card("Charge") },
+        { owner: "Red", card: card("Charge") },
       ],
     });
     const line = state.activeRoom?.challenges[0]?.thresholds[0];
@@ -1133,11 +1258,8 @@ describe("My Head Is Quantum Spinning — 'Holding: whenever your partner draws 
       payWith: shoves,
     });
     const pending = asked.state.pending;
-    if (pending?.kind !== "ChooseCharacter") throw new Error("expected a character choice");
-    const { state: next, events } = must(asked.state, {
-      type: "CHOOSE_CHARACTER",
-      character: "Gray",
-    });
+    if (pending?.kind !== "ChooseDraw") throw new Error("expected a draw choice");
+    const { state: next, events } = must(asked.state, drawing("Gray", 1));
     expect(next.Gray.hand).toHaveLength(1);
     expect(next.Red.deck).toHaveLength(3);
     expect(eventTypes(events)).toContain("CARD_EXHAUSTED");
@@ -1164,10 +1286,7 @@ describe("My Head Is Quantum Spinning — 'Holding: whenever your partner draws 
       cardId: grav.id,
       payWith: shoves,
     });
-    const { state: next, events } = must(asked.state, {
-      type: "CHOOSE_CHARACTER",
-      character: "Red",
-    });
+    const { state: next, events } = must(asked.state, drawing("Red", 1));
     expect(next.Red.deck).toHaveLength(3);
     expect(eventTypes(events)).not.toContain("CARD_EXHAUSTED");
   });
@@ -1263,7 +1382,7 @@ describe("System Feedback — 'Holding: Whenever you play a card with Cost 0, lo
     const state = playing({
       Red: player({
         deck: pile("Shove", 4),
-        hand: [card("System Feedback"), card("Charge In"), card("Shove"), card("Shove")],
+        hand: [card("System Feedback"), card("Charge"), card("Shove"), card("Shove")],
       }),
     });
     const r = ids(state, "Red");

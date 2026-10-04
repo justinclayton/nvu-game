@@ -6,7 +6,7 @@ var NVU_BACKS = (function () {
 
 
 /* Centre glyphs, drawn in a 24x24 box; the builder centres them.
-   The tower: the stepped pyramid tower, ten tiers, the band's own floors lit. */
+   The tower: the stepped pyramid tower, ten tiers, the tier's own floors lit. */
 function tower(lo, hi) {
   var out = "";
   for (var f = 1; f <= 10; f++) {
@@ -46,11 +46,11 @@ var BACKS = [
   { id: "bad", label: "BAD STUFF", ink: "#5a3a6e", glyph: "burst",
     caption: "Bad Stuff pool." },
   { id: "room-1", label: "ROOM", ink: "#2d6a4f", glyph: "tower1", tag: "FLOORS 1\u20133",
-    caption: "Floors 1\u20133 band: its Rooms and Stairwells. One back per band so a Stairwell hides among Rooms." },
+    caption: "Floors 1\u20133 tier: its Rooms and Stairwells. One back per tier so a Stairwell hides among Rooms." },
   { id: "room-2", label: "ROOM", ink: "#1d4e89", glyph: "tower2", tag: "FLOORS 4\u20136",
-    caption: "Floors 4\u20136 band." },
+    caption: "Floors 4\u20136 tier." },
   { id: "room-3", label: "ROOM", ink: "#7c2d12", glyph: "tower3", tag: "FLOORS 7\u20139",
-    caption: "Floors 7\u20139 band." },
+    caption: "Floors 7\u20139 tier." },
   { id: "room-4", label: "ROOM", ink: "#b8860b", glyph: "tower4", tag: "FLOOR 10",
     caption: "Floor 10: the one fixed Stairwell." }
 ];
@@ -82,7 +82,7 @@ function backSVG(b) {
 
 /* Which back a face gets. */
 function backFor(c) {
-  if (c.kind === "room" || c.kind === "stairwell") return c.band === null ? "room-4" : "room-" + c.band;
+  if (c.kind === "room" || c.kind === "stairwell") return c.tier === null ? "room-4" : "room-" + c.tier;
   if (c.kind === "good_stuff") return "good";
   if (c.kind === "bad_stuff") return "bad";
   return c.owner === "Red" ? "red" : "gray";

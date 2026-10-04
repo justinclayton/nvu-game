@@ -6,7 +6,7 @@
  * card are never ambiguous — any copy answers.
  *
  * Lives in content, not cli, so the initials-collision report can be a
- * content test read against design/cards.yaml (app/src/content/initials.test.ts)
+ * content test read against cards.yaml (app/src/content/initials.test.ts)
  * without cli importing content importing cli back.
  */
 

@@ -19,6 +19,8 @@ build commands are in [`app/README.md`](app/README.md).
   the bot chooses, `report.ts` for the numbers.
 - **The table.** `app/src/ui/placements.ts` for where a card is,
   `CardLayer.tsx` for how it is drawn, `Table.tsx` for clicks.
+- **The pipeline.** `design/loop/spec.md`: how a source change becomes code,
+  a playtest and a report, and what a kit revision is.
 
 ## Leave closed unless the task names them
 

@@ -1,0 +1,109 @@
+<svg viewBox="0 0 1180 480" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Design loop: designer edits sources and commits, the hook bumps R and C and regenerates, the push opens a draft outer PR and starts a review agent on the Mac mini, questions go to the designer as needs-human issues, implementation lands as inner PRs reviewed by agents and merged into the outer branch, an agent playtest posts a report issue, the designer reads it and edits again or merges the outer PR.">
+  <style>
+    text { font-family: -apple-system, "Helvetica Neue", Arial, sans-serif; fill: #1f1d1a; }
+    .lane-label { font-size: 12px; fill: #6b665e; letter-spacing: .04em; text-transform: uppercase; }
+    .box text { font-size: 12.5px; }
+    .box .title { font-weight: 600; font-size: 13px; }
+    .edge { fill: none; stroke: #1f1d1a; stroke-width: 1.6; marker-end: url(#arrow); }
+    .edge.soft { stroke: #6b665e; stroke-dasharray: 5 4; }
+    .edge-label { font-size: 11.5px; fill: #6b665e; }
+  </style>
+  <rect x="0" y="0" width="1180" height="480" fill="#fbfaf7"/>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#1f1d1a"/>
+    </marker>
+  </defs>
+
+  <g>
+    <rect x="0" y="22" width="1180" height="150" fill="#f3eddc" opacity=".45"/>
+    <rect x="0" y="172" width="1180" height="128" fill="#e4eee9" opacity=".45"/>
+    <rect x="0" y="300" width="1180" height="160" fill="#e6e7f2" opacity=".45"/>
+    <text class="lane-label" x="10" y="42">Designer</text>
+    <text class="lane-label" x="10" y="192">Hooks, GitHub CI</text>
+    <text class="lane-label" x="10" y="320">Agents, on the Mac mini</text>
+  </g>
+
+  <!-- 1 edit sources -->
+  <g class="box">
+    <rect x="30" y="78" width="165" height="88" rx="8" fill="#e8d9b5" stroke="#5a4610" stroke-width="1.6"/>
+    <text x="42" y="100" class="title">1. Edit the sources</text>
+    <text x="42" y="120">rulebook.md, cards.yaml</text>
+    <text x="42" y="138">on a branch</text>
+    <text x="42" y="156">commit, push</text>
+  </g>
+
+  <!-- 2 hook + push -->
+  <g class="box">
+    <rect x="205" y="200" width="180" height="92" rx="8" fill="#cfe0d8" stroke="#214a3a" stroke-width="1.6" stroke-dasharray="6 4"/>
+    <text x="217" y="222" class="title">2. Stamp &amp; open the PR</text>
+    <text x="217" y="242">pre-commit: bump R, C,</text>
+    <text x="217" y="260">regenerate, check</text>
+    <text x="217" y="278">push: draft outer PR, CI</text>
+  </g>
+  <text x="205" y="193" class="edge-label" font-style="italic">kit revision = R133.C24-v2, printed on the cards</text>
+
+  <!-- 3 review agent -->
+  <g class="box">
+    <rect x="400" y="330" width="178" height="96" rx="8" fill="#d7d9ea" stroke="#2c3160" stroke-width="1.6" stroke-dasharray="6 4"/>
+    <text x="412" y="352" class="title">3. Review the diff</text>
+    <text x="412" y="372">are code changes needed?</text>
+    <text x="412" y="390">→ work issues</text>
+    <text x="412" y="408">→ ruling questions</text>
+  </g>
+
+  <!-- 4 ruling gate -->
+  <g class="box">
+    <rect x="555" y="78" width="160" height="88" rx="8" fill="#e8d9b5" stroke="#5a4610" stroke-width="1.6"/>
+    <text x="567" y="100" class="title">4. Rule</text>
+    <text x="567" y="120">needs-human issue</text>
+    <text x="567" y="138">blocks the work issues</text>
+    <text x="567" y="156">until answered</text>
+  </g>
+
+  <!-- 5 implement -->
+  <g class="box">
+    <rect x="720" y="330" width="175" height="114" rx="8" fill="#d7d9ea" stroke="#2c3160" stroke-width="1.6" stroke-dasharray="6 4"/>
+    <text x="732" y="352" class="title">5. Implement</text>
+    <text x="732" y="372">inner PRs, stacked,</text>
+    <text x="732" y="390">onto the outer branch</text>
+    <text x="732" y="408">reviewer agents + CI</text>
+    <text x="732" y="426">→ merge into outer</text>
+  </g>
+
+  <!-- 6 playtest -->
+  <g class="box">
+    <rect x="905" y="330" width="180" height="114" rx="8" fill="#d7d9ea" stroke="#2c3160" stroke-width="1.6" stroke-dasharray="6 4"/>
+    <text x="917" y="352" class="title">6. Agent playtest</text>
+    <text x="917" y="372">outer branch at R133.C24-v2</text>
+    <text x="917" y="390">note + run file → outer PR</text>
+    <text x="917" y="408">report issue → assigned</text>
+    <text x="917" y="426">to you</text>
+  </g>
+
+  <!-- 7 read & decide -->
+  <g class="box">
+    <rect x="985" y="78" width="165" height="88" rx="8" fill="#e8d9b5" stroke="#5a4610" stroke-width="1.6"/>
+    <text x="997" y="100" class="title">7. Read, decide</text>
+    <text x="997" y="120">edit again on the branch,</text>
+    <text x="997" y="138">or merge the outer PR</text>
+    <text x="997" y="156">to main</text>
+  </g>
+
+  <!-- edges -->
+  <path class="edge" d="M195,150 C 205,230 190,246 205,246"/>
+  <path class="edge" d="M385,246 C 400,246 390,378 400,378"/>
+  <path class="edge" d="M578,350 C 590,300 600,250 620,166"/>
+  <text class="edge-label" x="540" y="262">questions</text>
+  <path class="edge" d="M680,166 C 700,250 700,300 735,330"/>
+  <text class="edge-label" x="705" y="262">rulings unblock</text>
+  <path class="edge soft" d="M578,408 L 720,408"/>
+  <text class="edge-label" x="588" y="424">work needing no ruling</text>
+  <path class="edge soft" d="M578,384 C 650,300 760,260 1000,166"/>
+  <text class="edge-label" x="760" y="214">no changes needed</text>
+  <path class="edge" d="M895,386 L 905,386"/>
+  <path class="edge" d="M1080,352 C 1105,300 1075,200 1070,166"/>
+  <text class="edge-label" x="1094" y="262">report</text>
+  <path class="edge" d="M1067,78 L 1067,52 L 115,52 L 115,78"/>
+  <text class="edge-label" x="470" y="46">edit again: same branch, same outer PR, R or C bumps</text>
+</svg>

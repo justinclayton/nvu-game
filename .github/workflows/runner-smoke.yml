@@ -1,0 +1,25 @@
+name: Runner smoke test
+
+# Checks the self-hosted runner on the designer's Mac is up and has the tools
+# agent jobs need. Run it by hand from the Actions tab.
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [claude/github-self-hosted-runner-65e807]
+
+jobs:
+  smoke:
+    runs-on: self-hosted
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Tools on PATH
+        run: |
+          set -e
+          uname -a
+          for t in git gh node npm make claude; do
+            printf '%s: ' "$t"; command -v "$t"
+          done
+          node --version
+          claude --version

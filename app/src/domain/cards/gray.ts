@@ -1,7 +1,15 @@
 /* Gray's cards. Keyed by the name cards.yaml makes unique. */
 
 import { playedBy } from "../queries";
-import { PILES, type Character, type DomainEvent, type Pending, type Pile } from "../types";
+import {
+  PILES,
+  type Card,
+  type Character,
+  type DomainEvent,
+  type GameState,
+  type Pile,
+  type Room,
+} from "../types";
 import {
   discard,
   grantPlayDiscount,
@@ -26,19 +34,79 @@ import {
   type Registry,
 } from "./behaviour";
 
-/** Two questions: which pile, then what order. Depth 1 has no order to choose. */
+/** The character whose discard pile a Peek at this pile can discard to; the other piles have none. */
+function deckOwner(pile: Pile): Character | null {
+  if (pile === "Red deck") return "Red";
+  if (pile === "Gray deck") return "Gray";
+  return null;
+}
+
+/**
+ * Rulebook, Keywords: `Peek X` — reveal the top X of any face-down pile,
+ * discard any number of them, then put the rest back in any order.
+ *
+ * Up to three questions: which pile, what to discard, what order. The discard
+ * question is asked one card at a time until the player keeps the rest, since
+ * a question offers an exact count. Only a character deck has a discard pile
+ * to discard to, so the other piles go straight to the order. A short pile
+ * shows what is there; nothing reshuffles (Peek is not a draw).
+ */
 function peek(depth: number): CardBehaviour {
-  const orderPrompt =
-    depth === 1
-      ? "Put it back on top."
-      : `Put those ${String(depth)} back on top, in the order you choose.`;
+  const order = (
+    state: GameState,
+    ctx: BehaviourContext,
+    pile: Pile,
+    shown: readonly (Card | Room)[],
+    events: DomainEvent[],
+  ) => {
+    if (shown.length < 2) return done(state, events);
+    return ask(
+      state,
+      {
+        kind: "OrderCards",
+        prompt: `${pile}. Put those ${String(shown.length)} back on top, in the order you choose.`,
+        pile,
+        cards: shown,
+        source: source(ctx, `order:${pile}`),
+      },
+      events,
+    );
+  };
+  const offerDiscard = (
+    state: GameState,
+    ctx: BehaviourContext,
+    pile: Pile,
+    owner: Character,
+    showing: number,
+    events: DomainEvent[],
+  ) => {
+    const shown = playerOf(state, owner).deck.slice(0, showing);
+    if (shown.length === 0) return done(state, events);
+    const prompt =
+      shown.length === 1
+        ? `${pile}: discard ${shown[0]?.name ?? "it"}, or leave it on top?`
+        : `${pile}: discard one of these, or choose none to keep the rest?`;
+    return ask(
+      state,
+      {
+        kind: "ChooseCards",
+        prompt,
+        character: ctx.character,
+        options: shown,
+        count: 1,
+        optional: true,
+        source: source(ctx, `discard:${pile}:${String(shown.length)}`),
+      },
+      events,
+    );
+  };
   return {
     onPlay(state, ctx) {
       const options = PILES.filter((p) => pileCards(state, p).length > 0);
       if (options.length === 0) return nothing(state);
       return ask(state, {
         kind: "ChoosePile",
-        prompt: `Look at the top ${String(depth)} of any deck.`,
+        prompt: `Peek ${String(depth)}: reveal the top ${String(depth)} of which deck?`,
         options,
         source: source(ctx, "peek"),
       });
@@ -49,61 +117,30 @@ function peek(depth: number): CardBehaviour {
         const events: DomainEvent[] = [
           { type: "CARDS_PEEKED", character: ctx.character, pile: answer.pile, cards: top },
         ];
-        if (top.length < 2) return done(state, events);
-        const pending: Pending = {
-          kind: "OrderCards",
-          prompt: `${answer.pile}. ${orderPrompt}`,
-          pile: answer.pile,
-          cards: top,
-          source: source(ctx, `order:${answer.pile}`),
-        };
-        return ask(state, pending, events);
+        const owner = deckOwner(answer.pile);
+        if (owner === null) return order(state, ctx, answer.pile, top, events);
+        return offerDiscard(state, ctx, answer.pile, owner, top.length, events);
+      }
+      if (answer.kind === "cards") {
+        const [, pileName, count] = answer.tag.split(":");
+        const pile = pileName as Pile;
+        const owner = deckOwner(pile);
+        if (owner === null) return nothing(state);
+        const showing = Number(count);
+        if (answer.cards.length === 0) {
+          return order(state, ctx, pile, playerOf(state, owner).deck.slice(0, showing), []);
+        }
+        const events: DomainEvent[] = [];
+        const p = playerOf(state, owner);
+        const gone = new Set(answer.cards.map((c) => c.id));
+        let next = withPlayer(state, owner, { ...p, deck: p.deck.filter((c) => !gone.has(c.id)) });
+        for (const card of answer.cards) next = discard(next, owner, card, "deck", events);
+        return offerDiscard(next, ctx, pile, owner, showing - answer.cards.length, events);
       }
       if (answer.kind !== "order") return nothing(state);
       const pile = answer.tag.split(":")[1] as Pile;
       const rest = pileCards(state, pile).slice(answer.cards.length);
       return done(withPile(state, pile, [...answer.cards, ...rest]));
-    },
-  };
-}
-
-/**
- * Rulebook, Keywords: `Scry X` — look at the top X cards of your own deck,
- * discard any number of them, put the rest back in the same order. Every
- * printed Scry is Scry 1, so the choice is the one card or none. A short or
- * empty deck looks at what is there; nothing reshuffles (Scry is not a draw).
- */
-function scry(): CardBehaviour {
-  return {
-    onPlay(state, ctx) {
-      const top = playerOf(state, ctx.character).deck.slice(0, 1);
-      if (top.length === 0) return nothing(state);
-      return ask(
-        state,
-        {
-          kind: "ChooseCards",
-          prompt: `Scry 1: discard ${top[0]?.name ?? "it"}, or leave it on top?`,
-          character: ctx.character,
-          options: top,
-          count: 1,
-          optional: true,
-          source: source(ctx, "scry"),
-        },
-        [{ type: "CARDS_SCRIED", character: ctx.character, cards: top }],
-      );
-    },
-    onChoice(answer, state, ctx) {
-      if (answer.kind !== "cards") return nothing(state);
-      const events: DomainEvent[] = [];
-      const p = playerOf(state, ctx.character);
-      const gone = new Set(answer.cards.map((c) => c.id));
-      const lifted = withPlayer(state, ctx.character, {
-        ...p,
-        deck: p.deck.filter((c) => !gone.has(c.id)),
-      });
-      let next = lifted;
-      for (const card of answer.cards) next = discard(next, ctx.character, card, "deck", events);
-      return done(next, events);
     },
   };
 }
@@ -136,13 +173,13 @@ function shuffleStuffFromHand(whose: (ctx: BehaviourContext) => Character): Card
 }
 
 export const GRAY: Registry = {
-  /* "Scry 1." */
-  "Peek Around Corner": scry(),
+  /* "Peek 1." */
+  "Peek Around Corner": peek(1),
 
-  /* "Look at top 2 cards of any deck. Put them back in either order." */
-  "Catch Your Breath": peek(2),
+  /* "Peek 3." */
+  "Catch Your Breath": peek(3),
 
-  /* "Look at top 3 cards of any deck, put back in any order." */
+  /* "Peek 3" */
   "Hack the Doors": peek(3),
 
   /* "Scramble equal to 2 times the number of cards Red has played this turn." */
@@ -242,7 +279,7 @@ export const GRAY: Registry = {
   },
 
   /* "The next card Red plays this turn costs 1 fewer card to play." */
-  "Distract & Pivot": {
+  Pivot: {
     onPlay(state) {
       return done(grantPlayDiscount(state, "Red"));
     },

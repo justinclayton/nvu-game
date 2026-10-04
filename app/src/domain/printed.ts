@@ -22,10 +22,10 @@ export type CardKind = "player" | "good_stuff" | "bad_stuff";
 /** The type line of a room card (rulebook, Card anatomy: Room Cards). */
 export type RoomKind = "room" | "stairwell";
 
-/** Rooms and Stairwells pool by band: floors 1–3, 4–6, 7–9 (rulebook Setup, "Floor deck"). */
+/** Rooms and Stairwells pool by tier: floors 1–3, 4–6, 7–9 (rulebook Setup, "Floor deck"). */
 export type Band = 1 | 2 | 3;
 
-/** A room's band, or `null` for the one fixed Floor 10 Stairwell (cards.yaml, "Rooms"). */
+/** A room's tier, or `null` for the one fixed Floor 10 Stairwell (cards.yaml, "Rooms"). */
 export type RoomBand = Band | null;
 
 /** Whether a card is ratified or still a proposal. Only official cards gate the build. */
@@ -128,7 +128,7 @@ export interface RoomFace {
   readonly set: CardSet;
   readonly kind: RoomKind;
   /** Which floors' pool the card is drawn from; `null` for the one fixed Floor 10 Stairwell. */
-  readonly band: RoomBand;
+  readonly tier: RoomBand;
   /** The printed flavor line. Empty until a card is given one. */
   readonly flavor: string;
   /** A room's own printed rule, beyond its thresholds and Flee line (e.g. Bio-Hazard Containment Vault). */

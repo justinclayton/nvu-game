@@ -23,7 +23,7 @@ import type { CardId, GameState } from "../types";
 
 beforeEach(resetRig);
 
-describe("Reckless Swing — 'Exhaust 1'", () => {
+describe("Reckless Swing — 'Exhaust 1 from the top of your deck'", () => {
   it("takes one off the top of your own deck, into the Exhaust pile", () => {
     const state = playing({
       Red: player({ deck: pile("Shove", 4), hand: [card("Reckless Swing"), card("Shove")] }),
@@ -41,8 +41,8 @@ describe("Reckless Swing — 'Exhaust 1'", () => {
   });
 });
 
-describe("Reckless — 'Exhaust 3'", () => {
-  it("takes three off the top", () => {
+describe("Reckless — 'Exhaust 2'", () => {
+  it("takes two off the top", () => {
     const state = playing({
       Red: player({ deck: pile("Shove", 5), hand: [card("Reckless"), card("Shove")] }),
     });
@@ -52,7 +52,7 @@ describe("Reckless — 'Exhaust 3'", () => {
       cardId: handCard(state, "Red", "Reckless").id,
       payWith: [handCard(state, "Red", "Shove").id],
     });
-    expect(next.Red.deck).toHaveLength(2);
+    expect(next.Red.deck).toHaveLength(3);
   });
 });
 
@@ -163,7 +163,7 @@ describe("Second Wind — 'Shuffle a Red card from your Exhaust pile into your d
       Red: player({
         deck: pile("Shove", 3),
         hand: [card("Second Wind"), card("Shove"), card("Shove")],
-        exhaust: [card("Charge In"), card("Pry Bar")],
+        exhaust: [card("Charge"), card("Pry Bar")],
       }),
     });
     const secondWind = handCard(state, "Red", "Second Wind");
@@ -179,11 +179,11 @@ describe("Second Wind — 'Shuffle a Red card from your Exhaust pile into your d
     if (pending?.kind !== "ChooseCards") throw new Error("expected a card choice");
     // The Pry Bar is Stuff, not a Red card.
     const offered = pending.options.map((c) => c.name);
-    expect(offered).toContain("Charge In");
+    expect(offered).toContain("Charge");
     expect(offered).not.toContain("Pry Bar");
 
-    const chosen = pending.options.find((c) => c.name === "Charge In");
-    if (!chosen) throw new Error("Charge In not offered");
+    const chosen = pending.options.find((c) => c.name === "Charge");
+    if (!chosen) throw new Error("Charge not offered");
     const { state: next, events } = must(asked.state, {
       type: "CHOOSE_CARDS",
       cardIds: [chosen.id],
@@ -349,14 +349,14 @@ describe("Break Through — 'Scrap 1 card from your hand'", () => {
     const state = playing({
       Red: player({
         deck: pile("Shove", 3),
-        hand: [card("Break Through"), card("Shove"), card("Charge In"), card("Lean In")],
+        hand: [card("Break Through"), card("Shove"), card("Charge"), card("Lean In")],
       }),
     });
     const asked = cast(state, "Red", "Break Through");
     const pending = pendingCards(asked.state);
     expect(pending.optional).toBe(false);
     expect(pending.options).toHaveLength(2);
-    const target = pending.options.find((c) => c.name === "Charge In") ?? pending.options[0];
+    const target = pending.options.find((c) => c.name === "Charge") ?? pending.options[0];
     if (!target) throw new Error("no options");
     const { state: next, events } = must(asked.state, { type: "CHOOSE_CARDS", cardIds: [target.id] });
     expect(next.scrapyard.map((c) => c.id)).toEqual([target.id]);
@@ -374,7 +374,7 @@ describe("Break Through — 'Scrap 1 card from your hand'", () => {
   });
 });
 
-describe("Set 'Em Up — 'The next card Gray plays this turn gains +2 Scramble'", () => {
+describe("Set 'Em Up — '+2 Scramble if Gray also plays a card this turn'", () => {
   const armed = () => {
     const state = playing({
       Red: player({ deck: pile("Shove", 3), hand: [card("Set 'Em Up"), card("Shove")] }),
@@ -386,25 +386,21 @@ describe("Set 'Em Up — 'The next card Gray plays this turn gains +2 Scramble'"
     return cast(state, "Red", "Set 'Em Up").state;
   };
 
-  it("gives the first card Gray plays +2 Scramble, and only that card", () => {
+  it("counts only its printed Scramble while Gray has played nothing", () => {
+    expect(statPool(armed()).scramble).toBe(1);
+  });
+
+  it("gains +2 once Gray plays a card, and nothing more for a second", () => {
     const state = armed();
     const [a, b] = state.Gray.hand;
     if (!a || !b) throw new Error("rig");
-    const base = statPool(state).scramble;
     const first = must(state, { type: "PLAY_CARD", character: "Gray", cardId: a.id, payWith: [] });
-    const printed = a.scramble;
-    expect(statPool(first.state).scramble).toBe(base + printed + 2);
+    expect(statPool(first.state).scramble).toBe(1 + 2 + a.scramble);
     const second = must(first.state, { type: "PLAY_CARD", character: "Gray", cardId: b.id, payWith: [] });
-    expect(statPool(second.state).scramble).toBe(base + printed + 2 + b.scramble);
+    expect(statPool(second.state).scramble).toBe(1 + 2 + a.scramble + b.scramble);
   });
 
-  it("is lost when Gray plays nothing more, and gone by the next turn", () => {
-    const state = armed();
-    // Nothing in the pool yet beyond Set 'Em Up's own Scramble: the bonus waits for a card.
-    expect(statPool(state).scramble).toBe(1);
-  });
-
-  it("does not boost Red's own next card", () => {
+  it("does not count Red's own plays", () => {
     const state = playing({
       Red: player({
         deck: pile("Shove", 3),
@@ -424,12 +420,12 @@ describe("Brute Recycle — 'Scrap 1 starter card from your hand or discard pile
       Red: player({
         deck: pile("Shove", 3),
         hand: [card("Brute Recycle"), card("Shove"), card("Cross Punch")],
-        discard: [card("Charge In"), card("Pry Bar")],
+        discard: [card("Charge"), card("Pry Bar")],
       }),
     });
     const asked = cast(state, "Red", "Brute Recycle");
     const offered = pendingCards(asked.state).options.map((c) => c.name);
-    expect(offered).toEqual(expect.arrayContaining(["Charge In"]));
+    expect(offered).toEqual(expect.arrayContaining(["Charge"]));
     expect(offered).not.toContain("Cross Punch");
     expect(offered).not.toContain("Pry Bar");
   });
@@ -439,13 +435,13 @@ describe("Brute Recycle — 'Scrap 1 starter card from your hand or discard pile
       Red: player({
         deck: pile("Lean In", 3),
         hand: [card("Brute Recycle"), card("Cross Punch")],
-        discard: [card("Charge In")],
+        discard: [card("Charge")],
       }),
     });
     const asked = cast(state, "Red", "Brute Recycle");
     const target = pendingCards(asked.state).options[0];
     if (!target) throw new Error("no options");
-    expect(target.name).toBe("Charge In");
+    expect(target.name).toBe("Charge");
     const scrapped = must(asked.state, { type: "CHOOSE_CARDS", cardIds: [target.id] });
     expect(scrapped.state.pending?.kind).toBe("ChooseDraw");
     const { state: next, events } = must(scrapped.state, drawing("Red", 1));

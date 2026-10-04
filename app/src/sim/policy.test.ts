@@ -49,7 +49,7 @@ describe("greedy", () => {
 
   it("plays the card that clears the room over one that does not", () => {
     resetRig();
-    const chargeIn = card("Charge In"); // cost 2, oomph 4 — clears a 4-Oomph threshold alone
+    const chargeIn = card("Charge"); // cost 2, oomph 4 — clears a 4-Oomph threshold alone
     const shove = card("Shove"); // cost 1, oomph 2 — does not
     const payerA = card("Shove");
     const payerB = card("Shove");
@@ -74,7 +74,7 @@ describe("greedy", () => {
 
   it("prefers a play that clears the room without Exhausting over one that also clears but costs an Exhaust", () => {
     resetRig();
-    const chargeIn = card("Charge In"); // cost 2, oomph 4, no Exhaust
+    const chargeIn = card("Charge"); // cost 2, oomph 4, no Exhaust
     const recklessSwing = card("Reckless Swing"); // cost 1, oomph 4, Exhaust 1 — clears just as well
     const payerA = card("Shove");
     const payerB = card("Shove");
@@ -186,7 +186,7 @@ describe("greedy", () => {
 
   it("pays with the cards worth least: Bad Stuff first, then a card that adds nothing toward the line", () => {
     resetRig();
-    const chargeIn = card("Charge In"); // cost 2, oomph 4 — clears a 4-Oomph line alone
+    const chargeIn = card("Charge"); // cost 2, oomph 4 — clears a 4-Oomph line alone
     const slime = card("Faceful Of Slime"); // Bad Stuff: worth less than nothing in hand
     const shove = card("Shove"); // oomph 2 — the next-best Oomph card, worth keeping
     const leanIn = card("Lean In"); // oomph 1, scramble 1 — least Oomph of the three
@@ -212,7 +212,7 @@ describe("greedy", () => {
 
   it("does not throw away a free Oomph card as payment when the line still needs it", () => {
     resetRig();
-    const chargeIn = card("Charge In"); // cost 2, oomph 4
+    const chargeIn = card("Charge"); // cost 2, oomph 4
     const overdrive = card("Overdrive"); // cost 0, oomph 2 — printed cost says "cheapest", but it is the card that gets to 6
     const shoveA = card("Shove");
     const shoveB = card("Shove");
@@ -246,7 +246,7 @@ describe("greedy", () => {
   it("stacks both hands on one stat of a Stairwell instead of splitting 4 Oomph and 4 Scramble across its two lines", () => {
     resetRig();
     // A Stairwell with only Oomph 8 → Ascend and Scramble 8 → Ascend; no line
-    // pays for a 4-and-4 split. Red can reach 8 alone (Charge In 4, Overdrive
+    // pays for a 4-and-4 split. Red can reach 8 alone (Charge 4, Overdrive
     // 2, Overdrive 2); Gray tops out at 6.
     const ascend = (oomph: number, scramble: number): Threshold => ({
       requires: { oomph, scramble },
@@ -260,7 +260,7 @@ describe("greedy", () => {
       ...room("The Sentry Drone"),
       challenges: [{ thresholds: [ascend(8, 0)] }, { thresholds: [ascend(0, 8)] }],
     };
-    const red = [card("Charge In"), card("Overdrive"), card("Overdrive"), card("Shove"), card("Shove")];
+    const red = [card("Charge"), card("Overdrive"), card("Overdrive"), card("Shove"), card("Shove")];
     const gray = [card("Pick The Lock"), card("Duck Under"), card("Duck Under"), card("Peek Around Corner"), card("Peek Around Corner")];
     const state: GameState = rig({
       phase: "Play",
@@ -280,7 +280,7 @@ describe("greedy", () => {
     // Flooded Ventilation Shaft: Scramble 4 → Clear; Oomph 3 and Scramble 3 →
     // Clear, and Gray gets Good Stuff. Gray's Pick The Lock alone meets the
     // first; the second needs Red too, and is worth a card.
-    const chargeIn = card("Charge In");
+    const chargeIn = card("Charge");
     const state: GameState = rig({
       phase: "Play",
       activeRoom: room("Flooded Ventilation Shaft"),
@@ -297,12 +297,12 @@ describe("greedy", () => {
   it("Flees rather than Clears when the only reachable line would cost more Exhaust than the Flee line", () => {
     resetRig();
     // Security Turnstile's Oomph 5 line Clears but Exhausts both 1; its Flee
-    // line Exhausts both 1 too. Reaching 5 here takes Overdrive (Exhaust 2)
+    // line Exhausts both 1 too. Reaching 5 here takes Reckless (Exhaust 2)
     // on top, so Clearing loses 4 cards for good against Fleeing's 2.
     const state: GameState = rig({
       phase: "Play",
       activeRoom: room("Security Turnstile"),
-      Red: player({ hand: [card("Charge In"), card("Overdrive"), card("Shove"), card("Shove")] }),
+      Red: player({ hand: [card("Reckless"), card("Shove"), card("Shove")] }),
       Gray: player({ hand: [card("Peek Around Corner")] }), // Scramble 1: the Scramble 3 line is out of reach
     });
     const [chosen] = greedyPolicy.choose(state, legalCommands(state), policySeed(1));
@@ -313,7 +313,7 @@ describe("greedy", () => {
     const clean: GameState = rig({
       phase: "Play",
       activeRoom: room("Security Turnstile"),
-      Red: player({ hand: [card("Charge In"), card("Shove"), card("Shove"), card("Shove"), card("Shove")] }),
+      Red: player({ hand: [card("Charge"), card("Shove"), card("Shove"), card("Shove"), card("Shove")] }),
       Gray: player({ hand: [card("Peek Around Corner")] }),
     });
     const [first] = greedyPolicy.choose(clean, legalCommands(clean), policySeed(1));
@@ -328,8 +328,8 @@ describe("greedy", () => {
 
   it("ends the Play phase once the room is already Cleared, instead of spending more stamina", () => {
     resetRig();
-    const chargeIn = card("Charge In");
-    const alreadyPlayed = card("Charge In");
+    const chargeIn = card("Charge");
+    const alreadyPlayed = card("Charge");
     const state: GameState = rig({
       phase: "Play",
       activeRoom: roomWith({}),

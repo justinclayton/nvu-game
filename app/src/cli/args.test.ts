@@ -38,9 +38,9 @@ describe("parseRequest", () => {
       action: { kind: "card", character: "Red", name: "CI", pay: [] },
       run: null,
     });
-    expect(parseRequest(["play", "card", "Red", "Charge In", "pay", "Rope", "Flare"])).toEqual({
+    expect(parseRequest(["play", "card", "Red", "Reckless Swing", "pay", "Rope", "Flare"])).toEqual({
       command: "play",
-      action: { kind: "card", character: "Red", name: "Charge In", pay: ["Rope", "Flare"] },
+      action: { kind: "card", character: "Red", name: "Reckless Swing", pay: ["Rope", "Flare"] },
       run: null,
     });
   });
@@ -165,7 +165,7 @@ describe("parseRequest", () => {
   });
 
   it("prints a card's face with no run needed", () => {
-    expect(parseRequest(["card", "Charge In"])).toEqual({ command: "card", name: "Charge In" });
+    expect(parseRequest(["card", "Reckless Swing"])).toEqual({ command: "card", name: "Reckless Swing" });
     expect(() => parseRequest(["card"])).toThrow(UsageError);
   });
 

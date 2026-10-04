@@ -107,7 +107,7 @@ export function contributionOf(state: GameState, played: PlayedCard): StatTotals
   const stuffDelta = card.kind === "good_stuff" ? m.stuffPowerDelta : 0;
   return {
     oomph: Math.max(0, base.oomph + m.playedPowerDelta + stuffDelta),
-    scramble: Math.max(0, base.scramble + stuffDelta + (state.thisTurn.cardScramble[card.id] ?? 0)),
+    scramble: Math.max(0, base.scramble + stuffDelta),
   };
 }
 
@@ -273,7 +273,7 @@ export function costOverrideFor(state: GameState, c: Character, card: Card): Cos
 export function printedCostOf(state: GameState, c: Character, card: Card): number {
   const behaviour = behaviourOf(card.name);
   const base = behaviour?.cost ? behaviour.cost(state, c, card) : card.cost;
-  // Distract & Pivot: a banked charge takes 1 off this character's very next play.
+  // Pivot: a banked charge takes 1 off this character's very next play.
   const discount = state.thisTurn.playDiscount[c] > 0 ? 1 : 0;
   return Math.max(0, base + heldModifiers(state, c).costDelta - discount);
 }
@@ -341,7 +341,6 @@ const REVEALING: ReadonlySet<DomainEvent["type"]> = new Set([
   "CARD_EXHAUSTED",
   "STUFF_TAKEN",
   "CARDS_PEEKED",
-  "CARDS_SCRIED",
   "REWARD_REVEALED",
   "GOOD_STUFF_REVEALED",
   "REWARD_TAKEN",

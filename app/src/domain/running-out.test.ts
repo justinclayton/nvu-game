@@ -40,13 +40,13 @@ describe("Keywords: Empty deck", () => {
       Red: player({ deck: [], discard: pile("Shove", 5), hand: [card("Overdrive")] }),
       Gray: player({ deck: pile("Duck Under", 4) }),
     });
-    // Overdrive: "Exhaust 2."
+    // Overdrive: "Exhaust 1."
     const { state: next, events } = must(
       state,
       free("Red", handCard(state, "Red", "Overdrive").id),
     );
-    expect(next.Red.exhaust).toHaveLength(2);
-    expect(next.Red.deck).toHaveLength(3);
+    expect(next.Red.exhaust).toHaveLength(1);
+    expect(next.Red.deck).toHaveLength(4);
     expect(next.Red.discard).toEqual([]);
     expect(eventTypes(events)).toContain("DISCARD_RESHUFFLED");
   });
@@ -85,7 +85,7 @@ describe("Keywords: Empty deck", () => {
       Red: player({ deck: [], discard: [], hand: [card("Overdrive")] }),
       Gray: player({ deck: pile("Duck Under", 4) }),
     });
-    // Overdrive: "Exhaust 2."
+    // Overdrive: "Exhaust 1."
     const { state: next, events } = must(
       state,
       free("Red", handCard(state, "Red", "Overdrive").id),

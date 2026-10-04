@@ -175,7 +175,7 @@ describe("ascendChoices", () => {
     const state = rig({
       phase: "Ascend",
       roomSupply: [room("Security Turnstile")],
-      Red: player({ deck: pile("Shove", 2), discard: pile("Charge In", 2) }),
+      Red: player({ deck: pile("Shove", 2), discard: pile("Charge", 2) }),
       Gray: player({ deck: pile("Duck Under", 2) }),
     });
     const offered = { Red: state.pools.Red.slice(0, 3), Gray: state.pools.Gray.slice(0, 3) };

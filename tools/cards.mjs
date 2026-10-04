@@ -237,7 +237,7 @@ export function parseCardsYaml(text) {
 const FIELD_ORDER = [
   "name", "set", "kind", "owner", "starter", "rarity",
   "rarity_status", "cost", "oomph", "scramble", "conditional_stat",
-  "band", "flavor", "challenges", "flee", "text", "note", "flagged",
+  "tier", "flavor", "challenges", "flee", "text", "note", "flagged",
 ];
 
 function ordered(card) {
@@ -436,17 +436,17 @@ function challenge(raw, where) {
 function roomFace(c) {
   const challenges = (c.challenges ?? []).map((ch) => challenge(ch, c.name));
   if (challenges.length === 0) throw new Error(`${c.name}: a room prints at least one challenge`);
-  if (c.band !== 1 && c.band !== 2 && c.band !== 3 && c.band !== null) {
-    throw new Error(`${c.name}: a room needs a band of 1, 2, 3, or null for the fixed Floor 10 Stairwell`);
+  if (c.tier !== 1 && c.tier !== 2 && c.tier !== 3 && c.tier !== null) {
+    throw new Error(`${c.name}: a room needs a tier of 1, 2, 3, or null for the fixed Floor 10 Stairwell`);
   }
-  if (c.band === null && c.kind !== "stairwell") {
-    throw new Error(`${c.name}: only a Stairwell may print band: null`);
+  if (c.tier === null && c.kind !== "stairwell") {
+    throw new Error(`${c.name}: only a Stairwell may print tier: null`);
   }
   return {
     name: c.name,
     set: c.set,
     kind: c.kind,
-    band: c.band,
+    tier: c.tier,
     flavor: c.flavor ?? "",
     text: c.text ?? "",
     count: c.count ?? 1,
@@ -464,10 +464,10 @@ export function structure(doc) {
     else if (ROOM_KINDS.has(c.kind)) rooms.push(roomFace(c));
     else throw new Error(`${c.name}: unknown kind ${JSON.stringify(c.kind)}`);
   }
-  const fixedStairwells = rooms.filter((r) => r.band === null);
+  const fixedStairwells = rooms.filter((r) => r.tier === null);
   if (fixedStairwells.length !== 1) {
     throw new Error(
-      `expected exactly one Floor 10 Stairwell (band: null), found ${fixedStairwells.length}`,
+      `expected exactly one Floor 10 Stairwell (tier: null), found ${fixedStairwells.length}`,
     );
   }
   return { meta: { updated: String(doc.meta.updated ?? "") }, cards, rooms };

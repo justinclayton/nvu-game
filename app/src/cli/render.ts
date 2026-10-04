@@ -80,8 +80,8 @@ const requirementText = (requires: StatRequirement): string => {
 
 /** A Room's printed face, with no run to check thresholds against — `bin/nvu card NAME`. */
 export function printedRoomLines(room: RoomFace): string[] {
-  const band = room.band === null ? "no band" : `band ${String(room.band)}`;
-  const lines = [`${room.name} [${room.kind}; ${band}]`];
+  const tier = room.tier === null ? "no tier" : `tier ${String(room.tier)}`;
+  const lines = [`${room.name} [${room.kind}; ${tier}]`];
   if (room.text.trim() !== "") lines.push(`  ${room.text.trim()}`);
   for (const challenge of room.challenges) {
     for (const threshold of challenge.thresholds) {

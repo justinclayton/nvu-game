@@ -12,7 +12,7 @@ cd "$tmp/r"
 cp "$root"/tools/bump-revision.sh "$root"/tools/kit-revision.sh tools/
 cp "$root"/rulebook.md "$root"/cards.yaml .
 git config user.email t@t; git config user.name t
-git add -A; git commit -qm base --no-verify
+git add -A; git commit -qm base --no-verify --allow-empty
 git branch -f main HEAD
 git remote remove origin
 

@@ -1,4 +1,4 @@
-<svg viewBox="0 0 1180 480" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Design loop: designer edits sources and commits, the hook bumps R and C and regenerates, the push opens a draft outer PR and starts a review agent on the Mac mini, questions go to the designer as needs-human issues, implementation lands as inner PRs reviewed by agents and merged into the outer branch, an agent playtest posts a report issue, the designer reads it and edits again or merges the outer PR.">
+<svg viewBox="0 0 1180 480" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Design loop: designer edits sources and commits, the hook bumps R and C and regenerates, the push opens a draft PR for the source layer and starts a review agent on the Mac mini, questions go to the designer as needs-human issues, implementation lands as code layers stacked on the source layer and approved by reviewer agents, an agent playtest on the top layer posts a report issue, the designer reads it and edits the source layer again or merges the whole stack.">
   <style>
     text { font-family: -apple-system, "Helvetica Neue", Arial, sans-serif; fill: #1f1d1a; }
     .lane-label { font-size: 12px; fill: #6b665e; letter-spacing: .04em; text-transform: uppercase; }
@@ -39,7 +39,7 @@
     <text x="217" y="222" class="title">2. Stamp &amp; open the PR</text>
     <text x="217" y="242">pre-commit: bump R, C,</text>
     <text x="217" y="260">regenerate, check</text>
-    <text x="217" y="278">push: draft outer PR, CI</text>
+    <text x="217" y="278">push: draft PR, CI</text>
   </g>
   <text x="205" y="193" class="edge-label" font-style="italic">kit revision = R133.C24-v2, printed on the cards</text>
 
@@ -65,18 +65,18 @@
   <g class="box">
     <rect x="720" y="330" width="175" height="114" rx="8" fill="#d7d9ea" stroke="#2c3160" stroke-width="1.6" stroke-dasharray="6 4"/>
     <text x="732" y="352" class="title">5. Implement</text>
-    <text x="732" y="372">inner PRs, stacked,</text>
-    <text x="732" y="390">onto the outer branch</text>
+    <text x="732" y="372">code layers, stacked</text>
+    <text x="732" y="390">on the source layer</text>
     <text x="732" y="408">reviewer agents + CI</text>
-    <text x="732" y="426">→ merge into outer</text>
+    <text x="732" y="426">→ approve each layer</text>
   </g>
 
   <!-- 6 playtest -->
   <g class="box">
     <rect x="905" y="330" width="180" height="114" rx="8" fill="#d7d9ea" stroke="#2c3160" stroke-width="1.6" stroke-dasharray="6 4"/>
     <text x="917" y="352" class="title">6. Agent playtest</text>
-    <text x="917" y="372">outer branch at R133.C24-v2</text>
-    <text x="917" y="390">note + run file → outer PR</text>
+    <text x="917" y="372">top layer at R133.C24-v2</text>
+    <text x="917" y="390">note + run file → top layer</text>
     <text x="917" y="408">report issue → assigned</text>
     <text x="917" y="426">to you</text>
   </g>
@@ -85,8 +85,8 @@
   <g class="box">
     <rect x="985" y="78" width="165" height="88" rx="8" fill="#e8d9b5" stroke="#5a4610" stroke-width="1.6"/>
     <text x="997" y="100" class="title">7. Read, decide</text>
-    <text x="997" y="120">edit again on the branch,</text>
-    <text x="997" y="138">or merge the outer PR</text>
+    <text x="997" y="120">edit the source layer,</text>
+    <text x="997" y="138">or merge the whole stack</text>
     <text x="997" y="156">to main</text>
   </g>
 
@@ -105,5 +105,5 @@
   <path class="edge" d="M1080,352 C 1105,300 1075,200 1070,166"/>
   <text class="edge-label" x="1094" y="262">report</text>
   <path class="edge" d="M1067,78 L 1067,52 L 115,52 L 115,78"/>
-  <text class="edge-label" x="470" y="46">edit again: same branch, same outer PR, R or C bumps</text>
+  <text class="edge-label" x="470" y="46">edit again: same source layer, same stack, R or C bumps</text>
 </svg>

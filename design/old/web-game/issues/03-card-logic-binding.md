@@ -6,7 +6,7 @@ Blocked by: 02
 
 ## Question
 
-A card's printed data lives in `design/cards.yaml`. Some cards also have behaviour: Overdrive's
+A card's printed data lives in `cards.yaml`. Some cards also have behaviour: Overdrive's
 "Exhaust 2", conditional stats, Hold effects that run while in hand. Where does that behaviour live
 in code, how is it bound to the card (by name, by id, by an effect keyword in the YAML), and what
 happens when a YAML card has text but no binding? Build a small prototype of the registry with two

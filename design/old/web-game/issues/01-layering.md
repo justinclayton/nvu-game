@@ -24,7 +24,7 @@ app/
   src/
     domain/          rules: GameState, Card, Room, Command, Event, execute(), pure queries,
                      card-specific behaviour
-    content/         the generated card module from design/cards.yaml; data, not rules
+    content/         the generated card module from cards.yaml; data, not rules
     application/     session: the store, command log, replay, undo
     infrastructure/  adapters: localStorage, seed source, clock
     ui/              React components and hooks

@@ -1,8 +1,8 @@
 # North vs Up — the web game
 
-The official web version. Architecture: [`design/web-game/spec.md`](../design/web-game/spec.md).
-The rules are [`design/rulebook.md`](../design/rulebook.md); the vocabulary is
-[`design/GLOSSARY.md`](../design/GLOSSARY.md); every card is written down once in
+The official web version. The original architecture notes are archived at
+[`design/old/web-game/spec.md`](../design/old/web-game/spec.md).
+The rules are [`design/rulebook.md`](../design/rulebook.md); every card is written down once in
 [`design/cards.yaml`](../design/cards.yaml).
 
 ```

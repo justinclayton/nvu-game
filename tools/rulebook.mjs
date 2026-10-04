@@ -4,7 +4,7 @@
  *   node tools/rulebook.mjs [out.html]    render rulebook.md to HTML
  *
  * The default output is print/rulebook-<rules version>.html, such as
- * rulebook-R29.html; `make rulebook` names it for the kit instead and prints
+ * rulebook-R29.html; `make rulebook` names it for the kit instead and renders
  * it to a PDF beside it.  rulebook.md stays the one place the
  * rules are written down, so this only renders the Markdown it already uses:
  * headings, paragraphs, bullet and numbered lists, block quotes, rules, and

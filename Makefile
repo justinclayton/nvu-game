@@ -11,8 +11,8 @@
 #   bin/nvu         the CLI: bin/nvu play, bin/nvu replay, bin/nvu fuzz, bin/nvu help
 #   make sheet      open the print-and-cut card sheet
 #   make revision   print the kit revision, R29.C43-v1 (tools/kit-revision.sh)
-#   make pdf        print the sheet, fronts and backs, to print/card-sheet-R29.C43.pdf
-#   make rulebook   print the rulebook to print/rulebook-R29.C43.pdf
+#   make pdf        create the card sheet PDF, fronts and backs, print/card-sheet-R29.C43.pdf
+#   make rulebook   create the rulebook PDF, print/rulebook-R29.C43.pdf
 
 .PHONY: help build check bump-revision bump-rules-version revision app app-check app-install sheet pdf rulebook all
 default: build
@@ -25,8 +25,8 @@ help:
 	@echo "bin/nvu         the CLI: bin/nvu play, bin/nvu replay, bin/nvu fuzz, bin/nvu help"
 	@echo "make revision   print the kit revision, R29.C43-v1"
 	@echo "make sheet   open the print-and-cut card sheet in a browser"
-	@echo "make pdf     print the sheet, fronts and backs, to print/card-sheet-R29.C43.pdf"
-	@echo "make rulebook  print the rulebook to print/rulebook-R29.C43.pdf"
+	@echo "make pdf     create the card sheet PDF, fronts and backs, print/card-sheet-R29.C43.pdf"
+	@echo "make rulebook  create the rulebook PDF, print/rulebook-R29.C43.pdf"
 	@echo ""
 	@echo "Change a card in cards.yaml, then: make build check"
 
@@ -85,11 +85,11 @@ app-check: app/node_modules build
 sheet: build
 	open tools/card-sheet.html
 
-# PDFs, named for the physical kit: R and C, the counters printed on the cards.
-# The engine count is left off because nothing printed depends on the engine.
-# On a merge to main that changes either source, .github/workflows/print-kit.yml
+# The printable kit's PDFs, named for R and C, the counters printed on the
+# cards. The engine count is left off because nothing printed depends on it.
+# On a merge to main that changes either source, .github/workflows/printable-kit.yml
 # runs these on the self-hosted runner and publishes them as a release.
-# tools/find-chrome.sh finds the headless Chrome that prints them, fetching one
+# tools/find-chrome.sh finds the headless Chrome that renders them, fetching one
 # into a cache if none is installed; CHROME=/path/to/chrome overrides it.
 KIT = $(shell sh tools/kit-revision.sh --sources)
 PDF = print/card-sheet-$(KIT).pdf

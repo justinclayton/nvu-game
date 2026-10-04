@@ -1,6 +1,6 @@
 ---
 name: rulebook-voice
-description: Voice for design/rulebook.md. Load before writing or revising any rulebook section, including tidying prose already there.
+description: Voice for rulebook.md. Load before writing or revising any rulebook section, including tidying prose already there.
 ---
 
 # Rulebook voice

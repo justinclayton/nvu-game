@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-/* Checks design/rulebook.md's "Rules version" line two ways:
+/* Checks rulebook.md's "Rules version" line two ways:
  *
  *   - it agrees with RULES_VERSION in app/src/domain/setup.ts, so the engine
  *     can't silently drift from the rulebook it implements (issue #83);
@@ -15,7 +15,7 @@ import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
-const RULEBOOK = "design/rulebook.md";
+const RULEBOOK = "rulebook.md";
 const SETUP_TS = "app/src/domain/setup.ts";
 
 function git(...args) {

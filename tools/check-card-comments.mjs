@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /* Checks that every card behaviour registry entry in app/src/domain/cards/
- * {red,gray,stuff}.ts carries a comment quoting that card's design/cards.yaml
+ * {red,gray,stuff}.ts carries a comment quoting that card's cards.yaml
  * `text` exactly (whitespace normalised), so the quotes don't silently rot.
  *
  * Comment shape expected directly above each entry: a block comment whose
@@ -14,7 +14,7 @@ import { dirname, join } from "node:path";
 import { parseCardsYaml } from "./cards.mjs";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
-const YAML = join(ROOT, "design/cards.yaml");
+const YAML = join(ROOT, "cards.yaml");
 const FILES = [
   "app/src/domain/cards/red.ts",
   "app/src/domain/cards/gray.ts",
@@ -86,7 +86,7 @@ function checkFile(path, textByName) {
     }
     const want = textByName.get(name);
     if (want === undefined) {
-      problems.push(`${path}: "${name}" is not a card in design/cards.yaml`);
+      problems.push(`${path}: "${name}" is not a card in cards.yaml`);
       continue;
     }
     if (norm(want) !== norm(quote)) {
@@ -115,5 +115,5 @@ if (fileURLToPath(import.meta.url) === process.argv[1]) {
     for (const p of problems) console.error("  " + p);
     process.exit(1);
   }
-  console.log("card comment quotes agree with design/cards.yaml");
+  console.log("card comment quotes agree with cards.yaml");
 }

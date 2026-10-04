@@ -28,7 +28,7 @@ beforeEach(resetRig);
 const playFree = free;
 
 /**
- * A room built by hand rather than looked up from design/cards.yaml, for a
+ * A room built by hand rather than looked up from cards.yaml, for a
  * rule that must hold regardless of which rooms the printed list carries.
  */
 let fixtureRoomCount = 0;

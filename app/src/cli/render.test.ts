@@ -74,7 +74,7 @@ describe("cardLine — a conditional stat", () => {
 
   it('still prints "(conditional)" for a printed face, with no game state to compute from', () => {
     const face = CARD_CONTENT.cards.find((c) => c.name === "In Step");
-    if (!face) throw new Error("rig: no In Step in design/cards.yaml");
+    if (!face) throw new Error("rig: no In Step in cards.yaml");
     expect(printedFaceLine(face)).toBe(
       "In Step [cost 2; (conditional)] — Scramble equal to 2 times the number of cards Red has played this turn.",
     );

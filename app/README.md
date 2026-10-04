@@ -2,8 +2,8 @@
 
 The official web version. The original architecture notes are archived at
 [`design/old/web-game/spec.md`](../design/old/web-game/spec.md).
-The rules are [`design/rulebook.md`](../design/rulebook.md); every card is written down once in
-[`design/cards.yaml`](../design/cards.yaml).
+The rules are [`rulebook.md`](../rulebook.md); every card is written down once in
+[`cards.yaml`](../cards.yaml).
 
 ```
 make app        the dev server (an alias for bin/nvu web)
@@ -18,7 +18,7 @@ Dependencies point inward, and `eslint.config.js` enforces the table.
 | Layer                | What is in it                                                           | May import                                        |
 | -------------------- | ----------------------------------------------------------------------- | ------------------------------------------------- |
 | `src/domain`         | the rules: state, commands, events, `execute`, queries, card behaviours | domain only                                       |
-| `src/content`        | `cards.generated.ts`, emitted from `design/cards.yaml`; data, not rules | domain                                            |
+| `src/content`        | `cards.generated.ts`, emitted from `cards.yaml`; data, not rules | domain                                            |
 | `src/application`    | the session: store, command log, event log, undo, replay                | domain, content                                   |
 | `src/infrastructure` | adapters: seed source, storage                                          | domain, application                               |
 | `src/ui`             | React components and hooks                                              | domain, application, content                      |

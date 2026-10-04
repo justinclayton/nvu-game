@@ -1,6 +1,6 @@
 /* GENERATED FILE — DO NOT EDIT.
  *
- * Source: design/cards.yaml       Regenerate: node tools/cards.mjs build
+ * Source: cards.yaml       Regenerate: node tools/cards.mjs build
  * Check:  node tools/cards.mjs check
  *
  * Every card in North vs Up, as printed.  EVERY NUMBER IS A PLACEHOLDER —

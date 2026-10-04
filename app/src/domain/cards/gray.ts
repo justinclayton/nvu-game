@@ -1,4 +1,4 @@
-/* Gray's cards. Keyed by the name design/cards.yaml makes unique. */
+/* Gray's cards. Keyed by the name cards.yaml makes unique. */
 
 import { playedBy } from "../queries";
 import { PILES, type Character, type DomainEvent, type Pending, type Pile } from "../types";

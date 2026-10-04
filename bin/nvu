@@ -14,7 +14,7 @@
 #   bin/nvu help                        the full grammar
 #
 # Installs app/node_modules on first use and regenerates the card modules if
-# design/cards.yaml has changed, so a fresh clone can run it straight away.
+# cards.yaml has changed, so a fresh clone can run it straight away.
 set -e
 root=$(cd "$(dirname "$0")/.." && pwd)
 tsx="$root/app/node_modules/.bin/tsx"

@@ -1,6 +1,6 @@
 /* Rigging a state by hand, for the rules tests.
  *
- * Test scaffolding, not content: every card here comes from design/cards.yaml
+ * Test scaffolding, not content: every card here comes from cards.yaml
  * through the generated module. Nothing invents a card.
  */
 
@@ -42,7 +42,7 @@ export const resetRig = (): void => {
 /** One physical copy of a printed card, by name. Throws rather than guess. */
 export function card(name: string): Card {
   const face = CONTENT.cards.find((c) => c.name === name);
-  if (!face) throw new Error(`No card named "${name}" in design/cards.yaml`);
+  if (!face) throw new Error(`No card named "${name}" in cards.yaml`);
   counter += 1;
   return mintCard(face, counter);
 }
@@ -52,7 +52,7 @@ export const pile = (name: string, n: number): Card[] =>
 
 export function room(name: string): Room {
   const face = CONTENT.rooms.find((r) => r.name === name);
-  if (!face) throw new Error(`No room named "${name}" in design/cards.yaml`);
+  if (!face) throw new Error(`No room named "${name}" in cards.yaml`);
   counter += 1;
   return mintRoom(face, counter);
 }

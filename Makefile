@@ -1,10 +1,10 @@
 # North vs Up
 #
-# design/cards.yaml is the one place a card is written down. Everything that
+# cards.yaml is the one place a card is written down. Everything that
 # shows a card is generated from it or checked against it.
 #
 #   make            what each target does
-#   make build      regenerate the generated card modules from design/cards.yaml
+#   make build      regenerate the generated card modules from cards.yaml
 #   make check      fail if anything has drifted from the card list
 #   make app        run the web game's dev server (an alias for bin/nvu web)
 #   make app-check  lint, typecheck and test the web game, the sim and the CLI
@@ -17,7 +17,7 @@
 default: build
 
 help:
-	@echo "make build   regenerate the generated card modules from design/cards.yaml"
+	@echo "make build   regenerate the generated card modules from cards.yaml"
 	@echo "make check   fail if a generated card module is stale or the card sheet stops printing it"
 	@echo "make app        run the web game's dev server (an alias for bin/nvu web)"
 	@echo "make app-check  lint, typecheck and test the web game, the sim and the CLI"
@@ -26,13 +26,13 @@ help:
 	@echo "make pdf     print the sheet to print/card-sheet-v<rules version>.pdf (needs Chrome)"
 	@echo "make rulebook  print the rulebook to print/rulebook-v<rules version>.pdf (needs Chrome)"
 	@echo ""
-	@echo "Change a card in design/cards.yaml, then: make build check"
+	@echo "Change a card in cards.yaml, then: make build check"
 
 build: tools/cards.js
 
 # Regenerating is cheap, so cards.js is rebuilt whenever a source is newer.
 # The rulebook is one: its rules version is stamped on every printed card.
-tools/cards.js: design/cards.yaml design/rulebook.md tools/cards.mjs
+tools/cards.js: cards.yaml rulebook.md tools/cards.mjs
 	node tools/cards.mjs build
 
 # `make check` also runs the app's content drift test when app/ is installed;
@@ -74,7 +74,7 @@ sheet: build
 
 # PDFs, named for the rules version they were printed under.  Headless Chrome
 # does the printing; CHROME=/path/to/chrome overrides the search.
-RULES_VERSION = $(shell sed -n 's/^Rules version:[[:space:]]*//p' design/rulebook.md)
+RULES_VERSION = $(shell sed -n 's/^Rules version:[[:space:]]*//p' rulebook.md)
 PDF = print/card-sheet-v$(RULES_VERSION).pdf
 RULEBOOK_HTML = print/rulebook-v$(RULES_VERSION).html
 RULEBOOK_PDF = print/rulebook-v$(RULES_VERSION).pdf
@@ -99,7 +99,7 @@ endef
 pdf: build
 	@$(call print_pdf,tools/card-sheet.html,$(PDF))
 
-# The rulebook (design/rulebook.md), laid out by tools/rulebook.mjs.
+# The rulebook (rulebook.md), laid out by tools/rulebook.mjs.
 rulebook:
 	@node tools/rulebook.mjs $(RULEBOOK_HTML)
 	@$(call print_pdf,$(RULEBOOK_HTML),$(RULEBOOK_PDF))

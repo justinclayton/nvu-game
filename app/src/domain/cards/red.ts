@@ -1,4 +1,4 @@
-/* Red's cards. Keyed by the name design/cards.yaml makes unique. */
+/* Red's cards. Keyed by the name cards.yaml makes unique. */
 
 import type { DomainEvent } from "../types";
 import { playedBy } from "../queries";

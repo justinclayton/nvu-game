@@ -2,7 +2,7 @@
  *
  * Every name here is a term from the rulebook, spelled the same way: discard pile,
  * Exhaust pile, Fled, Cleared, Scrapyard, Down, stat pool, play zone. Section
- * numbers in the comments point at design/rulebook.md, rules version 0.2.10.
+ * numbers in the comments point at rulebook.md, rules version 0.2.10.
  *
  * Everything is readonly. The engine never mutates; it returns a new state.
  */

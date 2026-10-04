@@ -11,7 +11,7 @@ import type { Band, CardContent, CardFace, Character, RoomFace } from "./printed
 import { shuffle } from "./rng";
 import type { Card, DomainEvent, GameState, PlayerState, Room, TurnRecord } from "./types";
 
-/** The rulebook this engine implements (design/rulebook.md). See #83. */
+/** The rulebook this engine implements (rulebook.md). See #83. */
 export const RULES_VERSION = "0.2.10";
 
 /** The tenth floor is the roof: clearing it wins the run (rulebook, Winning and losing). */
@@ -32,7 +32,7 @@ export const roomsOnFloor = (floor: number): number => TOP_FLOOR + 1 - floor;
 /**
  * Rooms and Stairwells pool by band: floors 1–3, 4–6, 7–9 (rulebook Setup,
  * "Floor deck"). Floor 10 draws from no band — it prints one fixed Stairwell
- * instead (design/cards.yaml, The Monolith Core; issue #66).
+ * instead (cards.yaml, The Monolith Core; issue #66).
  */
 export function bandOf(floor: number): Band | null {
   if (floor <= 3) return 1;

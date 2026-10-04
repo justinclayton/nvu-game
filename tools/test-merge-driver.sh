@@ -18,7 +18,7 @@ base=$(git rev-parse --abbrev-ref HEAD)
 
 # a card flavor line, to edit in two ways
 edit() { # $1 = nth flavor line, $2 = suffix
-  awk -v n="$1" -v s="$2" '/^ *flavor:/ { if (++c == n) $0 = $0 s } { print }' design/cards.yaml > y.tmp && mv y.tmp design/cards.yaml
+  awk -v n="$1" -v s="$2" '/^ *flavor:/ { if (++c == n) $0 = $0 s } { print }' cards.yaml > y.tmp && mv y.tmp cards.yaml
 }
 
 echo "== case 1: two branches edit different cards =="
@@ -33,6 +33,6 @@ node tools/cards.mjs check >/dev/null && echo "PASS: merged result passes cards 
 echo "== case 2: both branches edit the same card =="
 git checkout -qb c "$base"; edit 3 " C"; node tools/cards.mjs build >/dev/null; git add -A; git commit -qm c
 if git merge -q a -m "merge a into c"; then echo "FAIL: merge should have stopped"; exit 1; fi
-echo "merge stopped for a person (conflict in design/cards.yaml)"
+echo "merge stopped for a person (conflict in cards.yaml)"
 if git commit -qm "merge" 2>/dev/null; then echo "FAIL: commit allowed with conflict"; exit 1; fi
-echo "PASS: no commit while design/cards.yaml is conflicted"
+echo "PASS: no commit while cards.yaml is conflicted"

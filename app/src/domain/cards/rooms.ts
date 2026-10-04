@@ -1,5 +1,5 @@
 /* A room's own printed rule, beyond its thresholds and Flee line. Keyed by
- * the name design/cards.yaml makes unique, same convention as the behaviour
+ * the name cards.yaml makes unique, same convention as the behaviour
  * registries in this directory.
  */
 

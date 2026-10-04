@@ -1,6 +1,6 @@
 /* GENERATED FILE — DO NOT EDIT.
  *
- * Source: design/cards.yaml       Regenerate: node tools/cards.mjs build
+ * Source: cards.yaml       Regenerate: node tools/cards.mjs build
  * Check:  node tools/cards.mjs check
  *
  * Every card in North vs Up, as printed, with each room's threshold outcomes and
@@ -8,7 +8,7 @@
  * what a card says and nothing about what the engine does with it.
  *
  * EVERY NUMBER IS A PLACEHOLDER — costs, stats and thresholds are still open
- * design (design/rulebook.md, "NOT YET RULED").
+ * design (rulebook.md, "NOT YET RULED").
  */
 
 import type { CardContent } from "../domain/printed";

@@ -6,11 +6,11 @@ import { CARD_CONTENT, CARD_SOURCE } from "./index";
 const REPO = fileURLToPath(new URL("../../..", import.meta.url));
 
 describe("content", () => {
-  it("names design/cards.yaml as the one place a card is written down", () => {
-    expect(CARD_SOURCE).toBe("design/cards.yaml");
+  it("names cards.yaml as the one place a card is written down", () => {
+    expect(CARD_SOURCE).toBe("cards.yaml");
   });
 
-  it("is fresh against design/cards.yaml", () => {
+  it("is fresh against cards.yaml", () => {
     // The generator is the only thing that reads the YAML, so freshness is its
     // own question to answer. A failure here means: run `make build`.
     execFileSync("node", ["tools/cards.mjs", "check"], { cwd: REPO, stdio: "pipe" });

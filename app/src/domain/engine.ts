@@ -5,7 +5,7 @@
  * here reads a clock, a network or Math.random — randomness is the seed carried
  * in the state, so a run replays exactly from its seed and its command log.
  *
- * Section numbers point at design/rulebook.md, rules version
+ * Section numbers point at rulebook.md, rules version
  * 0.2.10, which is the authority.
  */
 

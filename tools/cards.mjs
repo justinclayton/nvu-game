@@ -1,10 +1,10 @@
 #!/usr/bin/env node
 /* North vs Up — card list tooling.
  *
- *   node tools/cards.mjs build    regenerate the generated card modules from design/cards.yaml
+ *   node tools/cards.mjs build    regenerate the generated card modules from cards.yaml
  *   node tools/cards.mjs check    fail if either is stale or the card sheet stops rendering
  *
- * design/cards.yaml is the source of truth for every card.  Nothing else in the
+ * cards.yaml is the source of truth for every card.  Nothing else in the
  * repo may hold a card's name, cost, stats, rarity, or rules text except
  * as a generated copy.  There are two:
  *
@@ -26,14 +26,14 @@ import { createHash } from "node:crypto";
 import { checkCardComments } from "./check-card-comments.mjs";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
-const YAML = join(ROOT, "design/cards.yaml");
+const YAML = join(ROOT, "cards.yaml");
 const OUT = join(ROOT, "tools/cards.js");
 const OUT_TS = join(ROOT, "app/src/content/cards.generated.ts");
-const RULEBOOK = join(ROOT, "design/rulebook.md");
+const RULEBOOK = join(ROOT, "rulebook.md");
 const SETS = new Set(["official", "proposed"]);
 
 /* ------------------------------------------------------------------ parser
-   Handles exactly the subset design/cards.yaml uses: a top-level map, one list
+   Handles exactly the subset cards.yaml uses: a top-level map, one list
    of maps under `cards:`, scalars, `>-` folded blocks, and lists of block maps
    nested to whatever depth a card needs (a room's `challenges:`, each holding
    its own `thresholds:`).  Anything outside that subset is an error, not a
@@ -250,7 +250,7 @@ function ordered(card) {
 /* The rulebook's "Rules version:" line; the printed sheet stamps it on every card. */
 function rulesVersion() {
   const m = readFileSync(RULEBOOK, "utf8").match(/^Rules version:\s*(\S+)/m);
-  if (!m) throw new Error('design/rulebook.md has no "Rules version:" line');
+  if (!m) throw new Error('rulebook.md has no "Rules version:" line');
   return m[1];
 }
 
@@ -258,7 +258,7 @@ function generate(doc) {
   const body = doc.cards.map((c) => "    " + JSON.stringify(ordered(c))).join(",\n");
   return `/* GENERATED FILE — DO NOT EDIT.
  *
- * Source: design/cards.yaml       Regenerate: node tools/cards.mjs build
+ * Source: cards.yaml       Regenerate: node tools/cards.mjs build
  * Check:  node tools/cards.mjs check
  *
  * Every card in North vs Up, as printed.  EVERY NUMBER IS A PLACEHOLDER —
@@ -487,7 +487,7 @@ export function generateTs(doc) {
   const roomsBody = content.rooms.map((r) => "    " + JSON.stringify(r)).join(",\n");
   return `/* GENERATED FILE — DO NOT EDIT.
  *
- * Source: design/cards.yaml       Regenerate: node tools/cards.mjs build
+ * Source: cards.yaml       Regenerate: node tools/cards.mjs build
  * Check:  node tools/cards.mjs check
  *
  * Every card in North vs Up, as printed, with each room's threshold outcomes and
@@ -495,7 +495,7 @@ export function generateTs(doc) {
  * what a card says and nothing about what the engine does with it.
  *
  * EVERY NUMBER IS A PLACEHOLDER — costs, stats and thresholds are still open
- * design (design/rulebook.md, "NOT YET RULED").
+ * design (rulebook.md, "NOT YET RULED").
  */
 
 import type { CardContent } from "../domain/printed";

@@ -153,7 +153,7 @@ function thresholdScrambleDelta(state: GameState): number {
 /**
  * What a printed threshold actually asks of the pool right now: Panic (and
  * anything like it) only ever raises the Scramble side, whether a line
- * already carried one or not (design/cards.yaml, Panic).
+ * already carried one or not (cards.yaml, Panic).
  */
 export function thresholdRequirement(state: GameState, threshold: Threshold): StatTotals {
   return {
@@ -164,7 +164,7 @@ export function thresholdRequirement(state: GameState, threshold: Threshold): St
 
 /**
  * Is this line's threshold met? A threshold that prints both stats is met
- * only when the pool meets or exceeds both (design/rulebook.md).
+ * only when the pool meets or exceeds both (rulebook.md).
  */
 export function thresholdIsMet(state: GameState, threshold: Threshold): boolean {
   const pool = statPool(state);

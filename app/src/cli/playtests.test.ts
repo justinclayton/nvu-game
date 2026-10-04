@@ -12,10 +12,9 @@
 import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
-import { CARD_CONTENT, CARD_LIST_ID } from "@content/index";
+import { CARD_CONTENT, CARD_LIST_ID, RULES_VERSION } from "@content/index";
 import { loadSession } from "@application/session";
 import { mismatchedField, type RunFile } from "@application/exportRun";
-import { RULES_VERSION } from "@domain/setup";
 
 const dir = join(process.cwd(), "..", "design", "playtests");
 const names = existsSync(dir) ? readdirSync(dir).filter((name) => name.endsWith(".json")) : [];

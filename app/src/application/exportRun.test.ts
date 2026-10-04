@@ -1,10 +1,9 @@
 import { describe, expect, it } from "vitest";
 
-import { CARD_CONTENT, CARD_LIST_ID } from "@content/index";
+import { CARD_CONTENT, CARD_LIST_ID, RULES_VERSION } from "@content/index";
 import { FULL_CONTENT } from "@domain/__fixtures__/rig";
 import { costOf, payOptions, playableCards } from "@domain/queries";
 import type { CardContent } from "@domain/printed";
-import { RULES_VERSION } from "@domain/setup";
 import type { AscendChoice, Character, Command, GameState } from "@domain/types";
 import { EXPORTS, runData, runTranscript, runTurns, turnRows, type RunFile } from "./exportRun";
 import { createSession, loadSession, type Session } from "./session";

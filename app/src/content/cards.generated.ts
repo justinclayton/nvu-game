@@ -97,3 +97,6 @@ export const CARD_CONTENT = {
 
 /** The first 12 hex of sha256 over the JSON of CARD_CONTENT above — identifies this card list. */
 export const CARD_LIST_ID = "94c5043ae88e";
+
+/** The rulebook's "Rules version:" line, which the print sheet stamps on every card. The engine and recorded runs read it from here. Kept out of CARD_CONTENT so a rules bump does not change CARD_LIST_ID. */
+export const RULES_VERSION = "0.2.11";

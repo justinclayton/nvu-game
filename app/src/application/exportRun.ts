@@ -16,8 +16,7 @@
  * application layer stays as pure as the domain under it.
  */
 
-import { CARD_LIST_ID } from "@content/index";
-import { RULES_VERSION } from "@domain/setup";
+import { CARD_LIST_ID, RULES_VERSION } from "@content/index";
 import type { Character, Command, DomainEvent } from "@domain/types";
 import { describeEvent } from "./narrate";
 import { saveOf, type Note, type SessionState } from "./session";

@@ -13,7 +13,7 @@
 #   make pdf        print the sheet to print/card-sheet-v<rules version>.pdf
 #   make rulebook   print the rulebook to print/rulebook-v<rules version>.pdf
 
-.PHONY: help build check app app-check app-install sheet pdf rulebook all
+.PHONY: help build check bump-rules-version app app-check app-install sheet pdf rulebook all
 default: build
 
 help:
@@ -35,11 +35,17 @@ build: tools/cards.js
 tools/cards.js: cards.yaml rulebook.md tools/cards.mjs
 	node tools/cards.mjs build
 
+# Raise the Rules version if the rulebook changed without one, then rebuild the
+# generated card modules that stamp it. The pre-commit hook and CI run it too;
+# run it yourself after a merge that touched the rulebook.
+bump-rules-version:
+	sh tools/bump-rules-version.sh
+	node tools/cards.mjs build
+
 # `make check` also runs the app's content drift test when app/ is installed;
 # on a fresh clone the generator's own check still stands on its own.
 check: build
 	node tools/cards.mjs check
-	node tools/check-rules-version.mjs
 	@if [ -d app/node_modules ]; then \
 		cd app && npx vitest run src/content; \
 	else \

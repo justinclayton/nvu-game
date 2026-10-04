@@ -1,8 +1,7 @@
 import { describe, expect, it } from "vitest";
-import { CARD_LIST_ID } from "@content/index";
+import { CARD_LIST_ID, RULES_VERSION } from "@content/index";
 import { FULL_CONTENT as CARD_CONTENT } from "@domain/__fixtures__/rig";
 import { costOf, payOptions, playableCards } from "@domain/queries";
-import { RULES_VERSION } from "@domain/setup";
 import type { AscendChoice, Character, Command, GameState } from "@domain/types";
 import { runData } from "./exportRun";
 import { createReplay, openRunFile } from "./replay";

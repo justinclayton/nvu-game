@@ -13,6 +13,8 @@ describe("initials collisions", () => {
     expect(pairs.sort()).toEqual(
       [
         "Brute Recycle / Bull Rush",
+        "Charge / Crowbar",
+        "Panic / Pivot",
         "Reckless Swing / Riot Shield",
         "Reckless / Rust",
         "Shove / Sluggish",

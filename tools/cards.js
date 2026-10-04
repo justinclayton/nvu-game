@@ -13,7 +13,7 @@
 var NVU_CARDS = {
   meta: {"updated":"2026-10-03"},
   rulesVersion: "0.2.11",
-  cardListId: "94c5043ae88e",
+  cardListId: "38dc1a9df10e",
   cards: [
     {"name":"Shove","set":"official","kind":"player","owner":"Red","starter":true,"cost":1,"oomph":2,"flavor":"'Oomph!', he shouted.","count":4},
     {"name":"Charge","set":"official","kind":"player","owner":"Red","starter":true,"cost":2,"oomph":4,"flavor":"I am bolder, so I lower my shoulder.","count":4},
@@ -49,8 +49,8 @@ var NVU_CARDS = {
     {"name":"Covering Fire","set":"proposed","kind":"player","owner":"Gray","rarity":"Cool","cost":1,"flavor":"Keep their eyes on you so Red can maneuver freely.","text":"Every time Red plays a card this turn, you may draw 1 card.","count":2},
     {"name":"Pivot","set":"proposed","kind":"player","owner":"Gray","rarity":"Cool","cost":2,"oomph":2,"scramble":3,"flavor":"Pronounced \"Piv-aaahhht\".","text":"The next card Red plays this turn costs 1 fewer card to play.","count":2},
     {"name":"Synergy Link","set":"official","kind":"player","owner":"Gray","rarity":"Cool","cost":1,"scramble":2,"flavor":"I understand it now.","text":"Play: You may draw 1 card. If Red has played a card this turn, you may draw 1 more.","count":2},
-    {"name":"Sharing Is Caring","set":"official","kind":"player","owner":"Gray","rarity":"Woah","cost":0,"flavor":"My casa is your casa. Casa means case, right?","text":"Play: both players may pay for cards from the other player's hand.","count":1},
-    {"name":"I Know Kung Fu","set":"official","kind":"player","owner":"Gray","rarity":"Cool","cost":1,"oomph":5,"flavor":"Master the art of combat with precision and grace.","text":"Play: every time a Scramble card is played this turn, you may draw a card.","count":2},
+    {"name":"Sharing Is Caring","set":"proposed","kind":"player","owner":"Gray","rarity":"Woah","cost":0,"flavor":"My casa is your casa. Casa means case, right?","text":"Play: both players may pay for cards from the other player's hand.","count":1},
+    {"name":"I Know Kung Fu","set":"proposed","kind":"player","owner":"Gray","rarity":"Cool","cost":1,"oomph":5,"flavor":"Master the art of combat with precision and grace.","text":"Play: every time a Scramble card is played this turn, you may draw a card.","count":2},
     {"name":"Pry Bar","set":"proposed","kind":"good_stuff","rarity":"Fine","cost":0,"oomph":3,"flavor":"Good for prying open grates or smashing things like grapes.","count":5},
     {"name":"Coil Of Cable","set":"proposed","kind":"good_stuff","rarity":"Fine","cost":0,"scramble":3,"flavor":"High-tensile wire. Essential for rigging quick bypasses.","count":5},
     {"name":"Crowbar","set":"proposed","kind":"good_stuff","rarity":"Fine","cost":0,"oomph":1,"scramble":1,"flavor":"Versatile tool that helps pop open supply crates.","text":"Play: If you get any Good Stuff this turn, get 1 additional Good Stuff.","count":5},

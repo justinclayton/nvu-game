@@ -50,8 +50,8 @@ export const CARD_CONTENT = {
     {"name":"Covering Fire","set":"proposed","kind":"player","owner":"Gray","rarity":"Cool","starter":false,"count":2,"cost":1,"oomph":0,"scramble":0,"conditionalStat":false,"text":"Every time Red plays a card this turn, you may draw 1 card.","flavor":"Keep their eyes on you so Red can maneuver freely."},
     {"name":"Pivot","set":"proposed","kind":"player","owner":"Gray","rarity":"Cool","starter":false,"count":2,"cost":2,"oomph":2,"scramble":3,"conditionalStat":false,"text":"The next card Red plays this turn costs 1 fewer card to play.","flavor":"Pronounced \"Piv-aaahhht\"."},
     {"name":"Synergy Link","set":"official","kind":"player","owner":"Gray","rarity":"Cool","starter":false,"count":2,"cost":1,"oomph":0,"scramble":2,"conditionalStat":false,"text":"Play: You may draw 1 card. If Red has played a card this turn, you may draw 1 more.","flavor":"I understand it now."},
-    {"name":"Sharing Is Caring","set":"official","kind":"player","owner":"Gray","rarity":"Woah","starter":false,"count":1,"cost":0,"oomph":0,"scramble":0,"conditionalStat":false,"text":"Play: both players may pay for cards from the other player's hand.","flavor":"My casa is your casa. Casa means case, right?"},
-    {"name":"I Know Kung Fu","set":"official","kind":"player","owner":"Gray","rarity":"Cool","starter":false,"count":2,"cost":1,"oomph":5,"scramble":0,"conditionalStat":false,"text":"Play: every time a Scramble card is played this turn, you may draw a card.","flavor":"Master the art of combat with precision and grace."},
+    {"name":"Sharing Is Caring","set":"proposed","kind":"player","owner":"Gray","rarity":"Woah","starter":false,"count":1,"cost":0,"oomph":0,"scramble":0,"conditionalStat":false,"text":"Play: both players may pay for cards from the other player's hand.","flavor":"My casa is your casa. Casa means case, right?"},
+    {"name":"I Know Kung Fu","set":"proposed","kind":"player","owner":"Gray","rarity":"Cool","starter":false,"count":2,"cost":1,"oomph":5,"scramble":0,"conditionalStat":false,"text":"Play: every time a Scramble card is played this turn, you may draw a card.","flavor":"Master the art of combat with precision and grace."},
     {"name":"Pry Bar","set":"proposed","kind":"good_stuff","owner":null,"rarity":"Fine","starter":false,"count":5,"cost":0,"oomph":3,"scramble":0,"conditionalStat":false,"text":"","flavor":"Good for prying open grates or smashing things like grapes."},
     {"name":"Coil Of Cable","set":"proposed","kind":"good_stuff","owner":null,"rarity":"Fine","starter":false,"count":5,"cost":0,"oomph":0,"scramble":3,"conditionalStat":false,"text":"","flavor":"High-tensile wire. Essential for rigging quick bypasses."},
     {"name":"Crowbar","set":"proposed","kind":"good_stuff","owner":null,"rarity":"Fine","starter":false,"count":5,"cost":0,"oomph":1,"scramble":1,"conditionalStat":false,"text":"Play: If you get any Good Stuff this turn, get 1 additional Good Stuff.","flavor":"Versatile tool that helps pop open supply crates."},
@@ -96,7 +96,7 @@ export const CARD_CONTENT = {
 } as const satisfies CardContent;
 
 /** The first 12 hex of sha256 over the JSON of CARD_CONTENT above — identifies this card list. */
-export const CARD_LIST_ID = "94c5043ae88e";
+export const CARD_LIST_ID = "38dc1a9df10e";
 
 /** The rulebook's "Rules version:" line, which the print sheet stamps on every card. The engine and recorded runs read it from here. Kept out of CARD_CONTENT so a rules bump does not change CARD_LIST_ID. */
 export const RULES_VERSION = "0.2.11";

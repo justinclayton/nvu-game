@@ -426,7 +426,7 @@ cards:
 
   - name: Sharing Is Caring
     count: 1
-    set: official
+    set: proposed
     kind: player
     owner: Gray
     cost: 0
@@ -436,7 +436,7 @@ cards:
 
   - name: I Know Kung Fu
     count: 2
-    set: official
+    set: proposed
     kind: player
     owner: Gray
     rarity: Cool

@@ -1,0 +1,215 @@
+# Step 3 of the design loop (design/loop/spec.md): the planner. A push to a
+# source layer, a branch with an open PR to main whose rulebook.md or
+# cards.yaml differ from main, runs an agent that reads what changed in the
+# sources and files work issues and ruling questions. It reads from the commit
+# in its last plan marker on the PR, or from main the first time.
+#
+# The first push to a source layer has no PR yet: source-pr.yml opens it, and
+# that PR's opened event starts the first plan here. If both events find the
+# PR, the concurrency group runs them one after the other and the second finds
+# the first one's marker and posts nothing.
+#
+# The agent writes as the nvu-agent GitHub App (variable NVU_AGENT_APP_ID,
+# secret NVU_AGENT_PRIVATE_KEY). Its tools are allowlisted below: reading,
+# git's read commands, gh's issue and PR comment commands, and
+# .github/loop/block.sh for dependencies. It has no file-writing tool and no
+# git credentials, and the job fails if the checkout changed anyway.
+name: Plan
+
+on:
+  push:
+    branches-ignore:
+      - main
+      - pr-media
+  pull_request:
+    types: [opened]
+    branches: [main]
+
+permissions:
+  contents: read
+  pull-requests: read
+
+concurrency:
+  group: plan-${{ github.head_ref || github.ref_name }}
+  cancel-in-progress: false
+
+jobs:
+  gate:
+    # The fork guard: a pull_request from a fork never reaches the runner.
+    if: github.event_name == 'push' || github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    outputs:
+      pr: ${{ steps.pr.outputs.pr }}
+      sha: ${{ steps.pr.outputs.sha }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 0
+
+      - name: Is this a source layer with an open PR?
+        id: pr
+        env:
+          GH_TOKEN: ${{ github.token }}
+          BRANCH: ${{ github.head_ref || github.ref_name }}
+          SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: |
+          pr=$(gh api "repos/$GITHUB_REPOSITORY/pulls?state=open&base=main&head=$GITHUB_REPOSITORY_OWNER:$BRANCH" --jq '.[0].number // empty')
+          if [ -z "$pr" ]; then
+            echo "$BRANCH has no open PR to main: nothing to plan."
+            exit 0
+          fi
+          if git diff --quiet origin/main..."$SHA" -- rulebook.md cards.yaml; then
+            echo "rulebook.md and cards.yaml match main: nothing to plan."
+            exit 0
+          fi
+          echo "pr=$pr" >> "$GITHUB_OUTPUT"
+          echo "sha=$SHA" >> "$GITHUB_OUTPUT"
+
+  plan:
+    needs: gate
+    if: needs.gate.outputs.pr != ''
+    runs-on: self-hosted
+    timeout-minutes: 45
+    env:
+      PR: ${{ needs.gate.outputs.pr }}
+      SHA: ${{ needs.gate.outputs.sha }}
+      DESIGNER: ${{ github.repository_owner }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.gate.outputs.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Mint the nvu-agent token
+        id: app-token
+        uses: actions/create-github-app-token@v1
+        with:
+          app-id: ${{ vars.NVU_AGENT_APP_ID }}
+          private-key: ${{ secrets.NVU_AGENT_PRIVATE_KEY }}
+
+      - name: Find what to read since the last plan
+        id: range
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+          BOT: ${{ steps.app-token.outputs.app-slug }}[bot]
+        run: |
+          set -eu
+          echo "bot=$BOT" >> "$GITHUB_OUTPUT"
+          last=$(gh api --paginate "repos/$GITHUB_REPOSITORY/issues/$PR/comments" \
+              --jq ".[] | select(.user.login == \"$BOT\") | .body" \
+            | grep -o '<!-- nvu-loop: plan [0-9a-f]\{40\} -->' | tail -1 | awk '{print $4}' || true)
+          if [ "$last" = "$SHA" ]; then
+            echo "$SHA is planned already: posting nothing."
+            exit 0
+          fi
+          if [ -n "$last" ] && git merge-base --is-ancestor "$last" "$SHA" 2>/dev/null; then
+            from=$last
+          else
+            from=$(git merge-base origin/main "$SHA")
+          fi
+          if git diff --quiet "$from" "$SHA" -- rulebook.md cards.yaml; then
+            echo "The sources have not changed since the last plan at $from: posting nothing."
+            exit 0
+          fi
+          echo "Planning $from..$SHA"
+          echo "from=$from" >> "$GITHUB_OUTPUT"
+          [ -n "$last" ] && echo "first=false" >> "$GITHUB_OUTPUT" || echo "first=true" >> "$GITHUB_OUTPUT"
+
+      - name: Write the prompt
+        if: steps.range.outputs.from != ''
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+          BOT: ${{ steps.range.outputs.bot }}
+          FROM: ${{ steps.range.outputs.from }}
+          FIRST: ${{ steps.range.outputs.first }}
+        run: |
+          set -eu
+          gh api --paginate "repos/$GITHUB_REPOSITORY/issues?state=all&per_page=100" \
+            --jq ".[] | select(.pull_request | not) | select(.user.login == \"$BOT\")
+                 | select((.body // \"\") | test(\"(?m)^Source PR: #$PR\\\\s*$\"))
+                 | \"- #\(.number) [\(.state)] \(.title) (labels: \([.labels[].name] | join(\", \")))\"" \
+            > "$RUNNER_TEMP/stack-issues.md"
+          {
+            cat .github/loop/plan.md
+            echo
+            echo "## This run"
+            echo
+            echo "- Repository: \`$GITHUB_REPOSITORY\`"
+            echo "- The branch's PR: #$PR"
+            echo "- Read the sources from \`$FROM\` to \`$SHA\`$( [ "$FIRST" = true ] && echo ' (where the branch left main: this is the first plan)' || echo ' (the commit the last plan read)')."
+            echo "- The designer: \`$DESIGNER\`"
+            echo "- This stack's issues so far:"
+            echo
+            if [ -s "$RUNNER_TEMP/stack-issues.md" ]; then cat "$RUNNER_TEMP/stack-issues.md"; else echo "  (none)"; fi
+          } > "$RUNNER_TEMP/prompt.md"
+          cat "$RUNNER_TEMP/prompt.md"
+
+      - name: Plan
+        if: steps.range.outputs.from != ''
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          set -o pipefail
+          claude -p \
+            --model opus \
+            --restricted \
+            --strict-mcp-config \
+            --permission-mode dontAsk \
+            --tools Bash,Read,Grep,Glob \
+            --allowedTools \
+              Read Grep Glob \
+              'Bash(git diff:*)' 'Bash(git log:*)' 'Bash(git show:*)' \
+              'Bash(gh issue view:*)' 'Bash(gh issue list:*)' \
+              'Bash(gh issue create:*)' 'Bash(gh issue comment:*)' \
+              'Bash(gh issue close:*)' 'Bash(gh issue edit:*)' \
+              'Bash(gh pr view:*)' 'Bash(gh pr list:*)' 'Bash(gh pr comment:*)' \
+              'Bash(.github/loop/block.sh:*)' \
+            --disallowedTools 'Read(design/loop/**)' 'Grep(design/loop/**)' 'Glob(design/loop/**)' \
+            --output-format stream-json \
+            --verbose \
+            < "$RUNNER_TEMP/prompt.md" \
+            > "$RUNNER_TEMP/transcript.jsonl"
+
+      - name: Check the agent changed nothing in the checkout
+        if: steps.range.outputs.from != ''
+        run: |
+          set -eu
+          if [ "$(git rev-parse HEAD)" != "$SHA" ] || [ -n "$(git status --porcelain)" ]; then
+            git status
+            echo "The planner changed the checkout; it may only write issues and comments."
+            exit 1
+          fi
+
+      - name: Post the plan on the source layer's PR
+        if: steps.range.outputs.from != ''
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+          BOT: ${{ steps.range.outputs.bot }}
+        run: |
+          set -eu
+          result=$(jq -r 'select(.type == "result") | select(.subtype == "success" and (.is_error | not)) | .result' "$RUNNER_TEMP/transcript.jsonl")
+          if [ -z "$result" ]; then
+            echo "The planner did not finish; posting nothing. The transcript is on the run."
+            exit 1
+          fi
+          marker="<!-- nvu-loop: plan $SHA -->"
+          if gh api --paginate "repos/$GITHUB_REPOSITORY/issues/$PR/comments" \
+              --jq ".[] | select(.user.login == \"$BOT\") | .body" | grep -qF "$marker"; then
+            echo "$SHA is planned already: posting nothing."
+            exit 0
+          fi
+          printf '%s\n\n%s\n' "$result" "$marker" > "$RUNNER_TEMP/plan-comment.md"
+          gh api -X POST "repos/$GITHUB_REPOSITORY/issues/$PR/comments" \
+            -F body=@"$RUNNER_TEMP/plan-comment.md" --jq '"posted \(.html_url)"'
+
+      - name: Keep the transcript on the run
+        if: always() && steps.range.outputs.from != ''
+        uses: actions/upload-artifact@v4
+        with:
+          name: plan-transcript-${{ needs.gate.outputs.sha }}
+          path: ${{ runner.temp }}/transcript.jsonl
+          retention-days: 30
+          if-no-files-found: ignore

@@ -9,6 +9,11 @@ Agent jobs run on the [self-hosted runner](runner.md).
 for a pushed branch whose `rulebook.md` or `cards.yaml` differ from `main`,
 unless the branch is built on another open branch.
 
+CI (`.github/workflows/ci.yml`) runs `make check` on it but skips
+`make app-check` when the PR changes nothing but `rulebook.md`, `cards.yaml`
+and the generated card modules, since the app's tests are expected to fail
+until the code layers land. Any other PR to `main` runs both.
+
 ## Step 3: the planner
 
 `.github/workflows/plan.yml` runs the planner. The prompt is

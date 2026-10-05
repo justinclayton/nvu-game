@@ -12,14 +12,20 @@ How a change to the sources of truth becomes code, gets playtested, and comes ba
 
 **2. Stamp and open the PR.** The pre-commit hook bumps the counter for whichever source changed, regenerates the card modules and checks them. The push opens a draft PR from the branch to `main` if none is open, and CI runs `make check` and `make app-check`. `[you]` The PR is opened on push rather than at commit time because a hook runs before anything exists on GitHub. `[agent-proposed]` This branch is the *source layer*, the bottom of the loop's stack (step 5). A branch built on another open branch is a layer of that stack and gets no PR from this step. `[agent-proposed]`
 
-**3. Review the diff.** The push starts an agent that reads what changed in the sources, since `main` on the first push and since its last review after that, and decides whether code changes are needed. It writes work issues, labelled `ready-for-agent`, and ruling questions, labelled `needs-human`, with the questions blocking the work through native issue dependencies. If no change is needed it says so on the source layer's PR. `[you]` for the trigger; issues as the output and reading only what changed since the last review `[agent-proposed]`.
+**3. Plan the work.** The push starts the *planner*, an agent that reads what changed in the sources, since `main` on the first push and since its last plan after that, and decides whether code changes are needed. `[you]`
 
-**4. Rule.** A question is a `needs-human` issue assigned to the designer. Agents never claim it. The answer goes on the issue; the label swap unblocks the work. `[you]`
+- It writes work issues, labelled `ready-for-agent`, and ruling questions, labelled `needs-human` and assigned to the designer, with the questions blocking the work through native issue dependencies. Each issue's body names the source layer's PR as `Source PR: #n` and ends with an "Acceptance criteria" checklist. The issues carry no label for the loop and no parent issue: a stack's issues are the ones `nvu-agent` wrote that name its PR, found with `author:app/nvu-agent "Source PR: #n"`. `[you]`
+- A question asks one thing, offers the choices the planner sees and recommends one. It carries no background, consequences or links unless the designer asks. `[you]`
+- Every plan posts one comment on the source layer's PR, listing what it filed or saying no change is needed, with the marker `<!-- nvu-loop: plan <sha> -->` naming the commit it read. The next plan reads from that commit, and a retry that finds the marker posts nothing. `[you]`
+- On a later push it lists the stack's open issues, files only what is new, and closes with a comment any issue the edit made moot. Work a source edit drops that is already built is reverted on the layer that owns it (step 5). Until code layers exist, built work is a PR to `main`: if that PR is open, the planner comments on it and closes the work issue; if it is merged, the planner files a work issue to revert it that names the PR. `[you]`
+- It reads the sources, the engine, the tests and the stack's issues. It writes issues, labels, dependencies and its PR comment, never code and never the sources, and the job holds it to that with a tool allowlist, not only the prompt. It runs on Opus. `[you]`
 
-**5. Implement.** The loop is a gh-stack with the source layer at the bottom. Each work issue becomes a *code layer* above it, a branch with its own PR based on the layer below, so its PR shows only that issue's diff. Reviewer agents review each layer and CI checks it. A clean layer is approved, not merged: nothing reaches `main` until step 7. Agents report status as PR and issue comments. `[you]`
+**4. Rule.** A question is a `needs-human` issue assigned to the designer. Agents never claim it. The designer answers on the issue and closes it, which unblocks the work. An answer that changes what the rulebook or cards say goes into the source layer, and the next plan picks it up; any other answer the work issue quotes. `[you]`
+
+**5. Implement.** The loop is a gh-stack with the source layer at the bottom. Each work issue becomes a *code layer* above it, a branch with its own PR based on the layer below, so its PR shows only that issue's diff. Reviewer agents review each layer's code and CI checks it. A *reviewer* is only this code review; the step 3 agent is the planner. A clean layer is approved, not merged: nothing reaches `main` until step 7. Agents report status as PR and issue comments. `[you]`
 
 - A change goes in the layer that owns it. The designer owns the source layer, and every source edit goes there. Each work issue owns its code layer: a bug found later in that code is fixed on that layer, and work a source edit drops is reverted on that layer. After a commit to a lower layer, `gh stack rebase --upstack` carries it into the layers above. `[agent-proposed]`
-- Agents never rewrite a commit once it is pushed: no amend, squash or force-push, except the rebase `gh stack rebase` does to carry a lower layer's change upward. A pushed commit may already be named by a kit revision, a review or a comment marker, and v counts commits, so a rewrite could give a different engine a kit revision already used. This holds on every layer, the playtest's commits and an agent's source edits included. `[you]`
+- Agents never rewrite a commit once it is pushed: no amend, squash or force-push, except the rebase `gh stack rebase` does to carry a lower layer's change upward. A pushed commit may already be named by a kit revision, a plan or a comment marker, and v counts commits, so a rewrite could give a different engine a kit revision already used. This holds on every layer, the playtest's commits and an agent's source edits included. `[you]`
 - Independent work issues still stack one above the other, because a stack is linear. The runner takes one job per stack at a time, so this costs no parallelism. `[agent-proposed]`
 
 **6. Agent playtest.** Runs on the top layer once every code layer is approved, source-blind, through `bin/nvu play`. The note and run file commit to the top layer. A report issue assigned to the designer carries the summary and links to the note. `[you]` The playtest runs inside the stack, before merge, with one report issue per stack and one comment per run, each naming the top layer's kit revision. A bug the playtest finds becomes a work issue for the layer that owns the code. `[agent-proposed]`
@@ -44,7 +50,7 @@ The repo is public, so a self-hosted runner is reachable from forks. Fork PR wor
 Three identities write to the repo. `[you]`
 
 - `nvu-bot`, a GitHub App, writes from workflows that run no agent, such as `source-pr.yml` opening the draft PR. It has Pull requests read/write, Contents read and Metadata read.
-- `nvu-agent`, a GitHub App, writes from Claude jobs on the self-hosted runner: review issues, code layers and playtest reports. It has Contents, Issues and Pull requests read/write, Actions read and Metadata read, and no Workflows write.
+- `nvu-agent`, a GitHub App, writes from Claude jobs on the self-hosted runner: the planner's issues, code layers and playtest reports. It has Contents, Issues and Pull requests read/write, Actions read and Metadata read, and no Workflows write.
 - The designer writes as themselves.
 
 Both apps are installed only on this repo and have their webhook off. Each job mints a token from its app with `actions/create-github-app-token`, using the variables `NVU_BOT_APP_ID` and `NVU_AGENT_APP_ID` and the secrets `NVU_BOT_PRIVATE_KEY` and `NVU_AGENT_PRIVATE_KEY`. There is no fallback to `GITHUB_TOKEN`, because a write made with it starts no other workflow: a job whose app is not configured fails. `[you]`
@@ -58,7 +64,7 @@ What GitHub provides, so nothing is built for it: dispatch by `push`, `pull_requ
 Close the loop with the designer in the middle first, then take the designer out of the parts agents can do. `[agent-proposed]`
 
 1. Step 2: the R and C counters printed on the cards, the engine count, a workflow that opens the source layer's draft PR on push, the runner.
-2. Step 3: the review agent, writing issues.
+2. Step 3: the planner, writing issues.
 3. Step 6: the playtest as a job, with the report issue. The loop now closes end to end, with step 5 done by hand through `/take-issue`.
 4. Step 5: code layers in a stack, reviewer agents, the stack merged as one.
 

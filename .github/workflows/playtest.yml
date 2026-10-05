@@ -6,16 +6,16 @@
 #
 # The top layer is found by following open PRs whose base is the source
 # branch, then the PRs based on those. The job, not the agent, commits the note
-# and its run file to the top layer as nvu-bot (NVU_BOT_APP_ID,
-# NVU_BOT_PRIVATE_KEY), after the replay check passes. The agent writes as
-# nvu-agent (NVU_AGENT_APP_ID, NVU_AGENT_PRIVATE_KEY) but has only Bash for
+# and its run file to the top layer after the replay check passes. Every
+# write is nvu-agent's (NVU_AGENT_APP_ID, NVU_AGENT_PRIVATE_KEY); nvu-bot has
+# no Contents write. The agent itself has no token, only Bash for
 # bin/nvu, reading, and Write under design/playtests/. It has no git
 # credentials, and the job fails if it changed anything else.
 #
 # One report issue per stack, found by `Report for PR: #n` in an issue
 # nvu-agent wrote. The first run opens it; each later run is a comment. Every
 # post carries <!-- nvu-loop: playtest <sha> -->, naming the note's commit. A
-# run that finds the newest nvu-bot `Playtest:` commit on the top layer
+# run that finds the newest nvu-agent `Playtest:` commit on the top layer
 # unreported plays nothing and posts that commit's report, so a retry neither
 # plays twice nor posts twice. Each App token is minted just before its use,
 # because a token lasts an hour and a run can last longer.
@@ -136,7 +136,7 @@ jobs:
               | grep -c '<!-- nvu-loop: playtest [0-9a-f]\{40\} -->' || true)
           fi
           seed=$((PR * 100 + runs + 1))
-          resume=$(git log -1 --author=nvu-bot --grep='^Playtest: ' --format=%H origin/main..HEAD)
+          resume=$(git log -1 --author=nvu-agent --grep='^Playtest: ' --format=%H origin/main..HEAD)
           if [ -n "$resume" ] && [ -n "$issue" ] && { gh api "repos/$GITHUB_REPOSITORY/issues/$issue" --jq '.body // ""'
               gh api --paginate "repos/$GITHUB_REPOSITORY/issues/$issue/comments" --jq '.[].body'; } | grep -qF "<!-- nvu-loop: playtest $resume -->"; then
             resume=
@@ -239,22 +239,22 @@ jobs:
         working-directory: app
         run: npx vitest run src/cli/playtests.test.ts
 
-      - name: Mint the nvu-bot token
-        id: bot-token
+      - name: Mint the nvu-agent token for the commit
+        id: commit-token
         if: steps.report.outputs.resume == ''
         uses: actions/create-github-app-token@v1
         with:
-          app-id: ${{ vars.NVU_BOT_APP_ID }}
-          private-key: ${{ secrets.NVU_BOT_PRIVATE_KEY }}
+          app-id: ${{ vars.NVU_AGENT_APP_ID }}
+          private-key: ${{ secrets.NVU_AGENT_PRIVATE_KEY }}
 
       - name: Commit the note to the top layer
         id: commit
         if: steps.report.outputs.resume == ''
         env:
-          TOKEN: ${{ steps.bot-token.outputs.token }}
-          BOT_SLUG: ${{ steps.bot-token.outputs.app-slug }}[bot]
+          TOKEN: ${{ steps.commit-token.outputs.token }}
+          BOT_SLUG: ${{ steps.commit-token.outputs.app-slug }}[bot]
           MD: ${{ steps.note.outputs.md }}
-          GH_TOKEN: ${{ steps.bot-token.outputs.token }}
+          GH_TOKEN: ${{ steps.commit-token.outputs.token }}
         run: |
           set -eu
           id=$(gh api "users/$BOT_SLUG" --jq .id)

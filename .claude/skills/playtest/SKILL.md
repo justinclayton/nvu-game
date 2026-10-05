@@ -36,7 +36,7 @@ The cards are not yet balanced for 0.2. Weight your notes this way, in order:
 ## Playing
 
 Work on a branch named `claude/playtest-NN-<slug>`, where NN is the next playtest number, based on
-`main` or, while rules 0.2 is unmerged, the integration branch (check with the designer if unsure).
+`main` or, in the loop, the stack's top layer (check with the designer if unsure).
 The seed is the one you were given; if none was, say so and stop.
 
 ```
@@ -89,8 +89,8 @@ express, something you wished it printed, an error you hit.
 3. Write plainly. Short sentences. No em-dashes. State what is true now; the story of how you got
    there belongs only in How the run went.
 4. Run `make app-check` so the saved run passes the replay check.
-5. Commit, push, and open a PR titled `Playtest NN: <slug>`. While rules 0.2 is unmerged, target the
-   integration branch, not `main`; check which branch is current with the designer if unsure. The
+5. Commit, push, and open a PR titled `Playtest NN: <slug>`. In the loop, target the
+   stack's top layer, not `main`; check which branch that is with the designer if unsure. The
    body is two or three sentences plus the outcome. Do not merge.
 
 ## Reporting back

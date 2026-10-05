@@ -61,3 +61,45 @@ A stack's issues are the ones `nvu-agent` wrote naming its PR:
 **Recovery.** Re-run the failed run from the Actions tab. If the agent filed
 issues and then failed before the comment was posted, the re-run sees them in
 the stack's issues and files them again only if they are missing.
+
+## Step 6: the playtest
+
+`.github/workflows/playtest.yml` runs one agent playtest on the stack's top
+layer. The prompt is [`.github/loop/playtest.md`](../../.github/loop/playtest.md);
+the agent follows the [`/playtest` skill](../../.claude/skills/playtest/SKILL.md).
+
+- **When it runs.** The designer puts the `playtest` label on the source
+  layer's PR. The `gate` job, on a GitHub-hosted runner, finds the top layer by
+  following open PRs based on the source branch, then those based on them,
+  until none is left. With no layers above, the source branch is the top. A
+  pull request from a fork never runs it. The job takes the label off when it
+  ends, so adding it again asks for another run.
+- **The seed.** The source PR's number times 100, plus the run number. The run
+  number is the count of earlier reports on the stack plus one.
+- **What the agent may do.** `claude -p --restricted` with Bash, Read, Grep,
+  Glob and Write. Bash is `bin/nvu` only, and Write is `design/playtests/**`
+  only. Reading `app/src` and `design/loop` is denied, so it plays blind.
+  The job fails if the agent wrote anything but one new note, or moved HEAD.
+- **What the job does.** It copies `runs/<seed>.json` next to the note, runs
+  the replay check (`app/src/cli/playtests.test.ts`), and commits both to the
+  top layer as `nvu-bot`. It then posts the report as `nvu-agent`.
+- **The report issue.** One per stack: an issue `nvu-agent` wrote with
+  `Report for PR: #n` in the body, labelled `loop` and assigned to the
+  designer. The first run opens it with the note's "What the run showed" and
+  "Candidate issues" and a link to the note at its commit. Each later run is a
+  comment in the same shape. Every post carries
+  `<!-- nvu-loop: playtest <sha> -->`, the top layer's commit with the note,
+  and the job posts nothing if it finds that marker.
+- **Status comments.** The job comments on the source layer's PR when the
+  playtest starts, with a link to the run, when it finishes, with a link to
+  the report, and when it fails.
+- **One at a time.** The concurrency group `playtest-<source branch>` queues
+  runs for a stack.
+- **The record.** The transcript is the run's artifact
+  `playtest-transcript-<sha>` for 30 days.
+- **Setup.** `NVU_AGENT_APP_ID`, `NVU_AGENT_PRIVATE_KEY`, `NVU_BOT_APP_ID` and
+  `NVU_BOT_PRIVATE_KEY`. Without them the job fails.
+
+**Recovery.** Add the label again. A run that failed before committing the
+note leaves nothing behind. One that failed after the push but before the
+report leaves the note on the top layer, and the next run starts from it.

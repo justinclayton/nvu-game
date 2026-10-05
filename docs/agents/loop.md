@@ -90,6 +90,10 @@ the agent follows the [`/playtest` skill](../../.claude/skills/playtest/SKILL.md
   comment in the same shape. Every post carries
   `<!-- nvu-loop: playtest <sha> -->`, the top layer's commit with the note,
   and the job posts nothing if it finds that marker.
+- **Closing it.** Merging the stack approves the playtest.
+  `.github/workflows/playtest-close.yml` closes the report issue, as
+  `nvu-agent`, when the source layer's PR merges (completed, with a comment
+  naming the merge) or closes without merging (not planned).
 - **Status comments.** The job comments on the source layer's PR when the
   playtest starts, with a link to the run, when it finishes, with a link to
   the report, and when it fails.

@@ -11,10 +11,10 @@
  * and no server.
  */
 var NVU_CARDS = {
-  meta: {"version":"C43","updated":"2026-10-03"},
+  meta: {"version":"C44","updated":"2026-10-03"},
   rulesVersion: "R29",
-  cardsVersion: "C43",
-  cardListId: "38dc1a9df10e",
+  cardsVersion: "C44",
+  cardListId: "dd6b468b399c",
   cards: [
     {"name":"Shove","set":"official","kind":"player","owner":"Red","starter":true,"cost":1,"oomph":2,"flavor":"'Oomph!', he shouted.","count":4},
     {"name":"Charge","set":"official","kind":"player","owner":"Red","starter":true,"cost":2,"oomph":4,"flavor":"I am bolder, so I lower my shoulder.","count":4},
@@ -30,7 +30,7 @@ var NVU_CARDS = {
     {"name":"Bull Rush","set":"proposed","kind":"player","owner":"Red","rarity":"Fine","cost":1,"oomph":2,"scramble":1,"flavor":"Charge ahead while keeping your footing on loose debris.","count":2},
     {"name":"Cross Punch","set":"proposed","kind":"player","owner":"Red","rarity":"Fine","cost":2,"oomph":4,"scramble":2,"flavor":"A heavy two-part combination attack.","text":"Exhaust 1.","count":2},
     {"name":"Break Through","set":"proposed","kind":"player","owner":"Red","rarity":"Fine","cost":1,"oomph":2,"flavor":"Smash through the obstacle and leave the broken starter gear behind.","text":"Play: Scrap 1 card from your hand.","count":2},
-    {"name":"Set 'Em Up","set":"proposed","kind":"player","owner":"Red","rarity":"Fine","cost":1,"oomph":2,"scramble":1,"conditional_stat":true,"flavor":"Clear the heavy debris so Gray can maneuver effortlessly.","text":"+2 Scramble if Gray also plays a card this turn.","count":2},
+    {"name":"Set 'Em Up","set":"proposed","kind":"player","owner":"Red","rarity":"Fine","cost":1,"conditional_stat":true,"flavor":"Clear the heavy debris so Gray can maneuver effortlessly.","text":"Has 1 Scramble for each card Gray has played this turn.","count":2},
     {"name":"Second Wind","set":"proposed","kind":"player","owner":"Red","rarity":"Cool","cost":2,"oomph":4,"flavor":"Catch your breath and shake off the fatigue.","text":"Shuffle a Red card from your Exhaust pile into your deck.","count":2},
     {"name":"Junk Launcher","set":"proposed","kind":"player","owner":"Red","rarity":"Cool","cost":2,"conditional_stat":true,"flavor":"Hurl whatever scrap isn't nailed down.","text":"Oomph equal to the total printed cost of all cards in the play zone.","count":2},
     {"name":"Heavy Pockets","set":"proposed","kind":"player","owner":"Red","rarity":"Cool","cost":1,"oomph":2,"scramble":1,"flavor":"The potion problem, now in card form.","text":"Shuffle 1 Stuff from your hand into your deck.","count":2},

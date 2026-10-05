@@ -146,6 +146,18 @@ jobs:
           } > "$RUNNER_TEMP/prompt.md"
           cat "$RUNNER_TEMP/prompt.md"
 
+      - name: Say the plan has started
+        if: steps.range.outputs.from != ''
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+          FROM: ${{ steps.range.outputs.from }}
+          RUN: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          printf 'Planning started: reading the sources from `%s` to `%s`. [Run](%s)\n' "${FROM:0:7}" "${SHA:0:7}" "$RUN" \
+            > "$RUNNER_TEMP/plan-start.md"
+          gh api -X POST "repos/$GITHUB_REPOSITORY/issues/$PR/comments" \
+            -F body=@"$RUNNER_TEMP/plan-start.md" --jq '"posted \(.html_url)"'
+
       - name: Plan
         if: steps.range.outputs.from != ''
         env:
@@ -204,6 +216,17 @@ jobs:
           printf '%s\n\n%s\n' "$result" "$marker" > "$RUNNER_TEMP/plan-comment.md"
           gh api -X POST "repos/$GITHUB_REPOSITORY/issues/$PR/comments" \
             -F body=@"$RUNNER_TEMP/plan-comment.md" --jq '"posted \(.html_url)"'
+
+      - name: Say the plan failed
+        if: failure() && steps.range.outputs.from != ''
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+          RUN: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          printf 'Planning `%s` failed before the plan was posted. Re-run it from the [run](%s); the transcript is on the run.\n' "${SHA:0:7}" "$RUN" \
+            > "$RUNNER_TEMP/plan-failed.md"
+          gh api -X POST "repos/$GITHUB_REPOSITORY/issues/$PR/comments" \
+            -F body=@"$RUNNER_TEMP/plan-failed.md" --jq '"posted \(.html_url)"'
 
       - name: Keep the transcript on the run
         if: always() && steps.range.outputs.from != ''

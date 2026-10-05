@@ -55,6 +55,8 @@ Three identities write to the repo. `[you]`
 
 Both apps are installed only on this repo and have their webhook off. Each job mints a token from its app with `actions/create-github-app-token`, using the variables `NVU_BOT_APP_ID` and `NVU_AGENT_APP_ID` and the secrets `NVU_BOT_PRIVATE_KEY` and `NVU_AGENT_PRIVATE_KEY`. There is no fallback to `GITHUB_TOKEN`, because a write made with it starts no other workflow: a job whose app is not configured fails. `[you]`
 
+Every agent comments on the issue or PR its work belongs to when it begins and when it ends, so the record of what ran is on GitHub, not only in the runs. `[you]`
+
 The contract that keeps the runner replaceable: every step starts on a GitHub event and ends in GitHub writes, meaning comments, labels, issues, PRs and commits. Nothing downstream reads the runner's own state. Claude Code Routines on a webhook, or a controller, could take the runner's place without changing the loop. `[agent-proposed]`
 
 What GitHub provides, so nothing is built for it: dispatch by `push`, `pull_request` and `issues.labeled` events; one worker at a time by a concurrency group per stack; the workflow run as the record of an attempt, with the agent transcript uploaded as a run artifact; cancel and re-run for recovery; a marker in posted comments so a retry does not post twice. `[agent-proposed]`

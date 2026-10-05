@@ -304,7 +304,7 @@ jobs:
           } > "$RUNNER_TEMP/report.md"
           if [ -z "$ISSUE" ]; then
             url=$(gh api -X POST "repos/$GITHUB_REPOSITORY/issues" \
-              -f title="Playtest report: $PR_TITLE" \
+              -f title="Playtest report: #$PR ${PR_TITLE#Kit *: }" \
               -f 'labels[]=loop' -f "assignees[]=$DESIGNER" \
               -F body=@"$RUNNER_TEMP/report.md" --jq .html_url)
           else

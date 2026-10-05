@@ -80,6 +80,9 @@ the agent follows the [`/playtest` skill](../../.claude/skills/playtest/SKILL.md
   Glob and Write. Bash is `bin/nvu` only, and Write is `design/playtests/**`
   only. Reading `app/src` and `design/loop` is denied, so it plays blind.
   The job fails if the agent wrote anything but one new note, or moved HEAD.
+  Its read allows are scoped to the checkout (`./**`), with denies for
+  `app/src` and `design/loop` by relative and absolute path, so another copy of
+  the repo on the runner is closed too.
 - **What the job does.** It copies `runs/<seed>.json` next to the note, runs
   the replay check (`app/src/cli/playtests.test.ts`), and commits both to the
   top layer as `nvu-bot`. It then posts the report as `nvu-agent`.
@@ -100,10 +103,12 @@ the agent follows the [`/playtest` skill](../../.claude/skills/playtest/SKILL.md
 - **One at a time.** The concurrency group `playtest-<source branch>` queues
   runs for a stack.
 - **The record.** The transcript is the run's artifact
-  `playtest-transcript-<sha>` for 30 days.
+  `playtest-transcript-<run id>-<attempt>` for 30 days.
 - **Setup.** `NVU_AGENT_APP_ID`, `NVU_AGENT_PRIVATE_KEY`, `NVU_BOT_APP_ID` and
   `NVU_BOT_PRIVATE_KEY`. Without them the job fails.
 
-**Recovery.** Add the label again. A run that failed before committing the
-note leaves nothing behind. One that failed after the push but before the
-report leaves the note on the top layer, and the next run starts from it.
+**Recovery.** Add the label again. If the newest `nvu-bot` `Playtest:`
+commit on the top layer has no report marker, the run plays nothing and posts
+that commit's report. Each App token is minted just before its use, so a long
+run does not outlive one. A gate or mint failure comments on the source PR and
+takes the label off.

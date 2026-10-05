@@ -1,0 +1,52 @@
+# Closes a stack's playtest report issue (playtest.yml) when the source layer's
+# PR closes. Merging the stack approves the playtest, so a merged PR closes the
+# issue as completed; a PR closed without merging closes it as not planned. A
+# PR with no report issue does nothing. Nothing here runs an agent, so it runs
+# on a GitHub-hosted runner, writing as nvu-agent (NVU_AGENT_APP_ID,
+# NVU_AGENT_PRIVATE_KEY).
+name: Close the playtest report
+
+on:
+  pull_request:
+    types: [closed]
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  close:
+    if: github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    steps:
+      - name: Mint the nvu-agent token
+        id: app-token
+        uses: actions/create-github-app-token@v1
+        with:
+          app-id: ${{ vars.NVU_AGENT_APP_ID }}
+          private-key: ${{ secrets.NVU_AGENT_PRIVATE_KEY }}
+
+      - name: Close the report issue
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+          BOT: ${{ steps.app-token.outputs.app-slug }}[bot]
+          PR: ${{ github.event.pull_request.number }}
+          MERGED: ${{ github.event.pull_request.merged }}
+        run: |
+          set -eu
+          issue=$(gh api --paginate "repos/$GITHUB_REPOSITORY/issues?state=open&per_page=100" \
+            --jq ".[] | select(.pull_request | not) | select(.user.login == \"$BOT\")
+                 | select((.body // \"\") | test(\"(?m)^Report for PR: #$PR\\\\s*$\")) | .number" | head -1)
+          if [ -z "$issue" ]; then
+            echo "PR #$PR has no open report issue."
+            exit 0
+          fi
+          if [ "$MERGED" = true ]; then
+            reason=completed
+            body="Merged: PR #$PR merged, which approves the playtest. Closing the report."
+          else
+            reason=not_planned
+            body="PR #$PR was closed without merging. Closing the report."
+          fi
+          gh api -X POST "repos/$GITHUB_REPOSITORY/issues/$issue/comments" -f body="$body" --jq '"posted \(.html_url)"'
+          gh api -X PATCH "repos/$GITHUB_REPOSITORY/issues/$issue" -f state=closed -f state_reason="$reason" --jq '"closed \(.html_url)"'

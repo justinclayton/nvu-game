@@ -136,7 +136,7 @@ jobs:
               | grep -c '<!-- nvu-loop: playtest [0-9a-f]\{40\} -->' || true)
           fi
           seed=$((PR * 100 + runs + 1))
-          resume=$(git log -1 --author=nvu-bot --grep='^Playtest: ' --format=%H HEAD)
+          resume=$(git log -1 --author=nvu-bot --grep='^Playtest: ' --format=%H origin/main..HEAD)
           if [ -n "$resume" ] && [ -n "$issue" ] && { gh api "repos/$GITHUB_REPOSITORY/issues/$issue" --jq '.body // ""'
               gh api --paginate "repos/$GITHUB_REPOSITORY/issues/$issue/comments" --jq '.[].body'; } | grep -qF "<!-- nvu-loop: playtest $resume -->"; then
             resume=

@@ -68,8 +68,6 @@ Then make every work issue that waits on the answer blocked by the question:
 `.github/loop/block.sh <work issue> <question>`. File the question first so
 you have its number.
 
-Never add the `loop` label and never add a parent issue. The `Source PR:`
-line is how the stack's issues are found.
 
 Create issues with the body on standard input through a quoted heredoc, the
 only way your tools allow a body with `##` lines:

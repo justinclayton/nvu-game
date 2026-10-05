@@ -35,8 +35,6 @@ The cards are not yet balanced for 0.2. Weight your notes this way, in order:
 
 ## Playing
 
-Work on a branch named `claude/playtest-NN-<slug>`, where NN is the next playtest number, based on
-`main` or, in the loop, the stack's top layer (check with the designer if unsure).
 The seed is the one you were given; if none was, say so and stop.
 
 ```
@@ -69,8 +67,11 @@ express, something you wished it printed, an error you hit.
 
 ## Writing it up
 
-1. Copy the run file: `cp runs/N.json design/playtests/NN-<slug>.json`.
-2. Write `design/playtests/NN-<slug>.md` in the shape of the latest note there:
+Write one file, `design/playtests/NN-<slug>.md`, where NN is the next playtest number, in the shape
+of the latest note there. The job that runs you copies the run file next to it as
+`design/playtests/NN-<slug>.json`, commits both and checks the replay.
+
+1. The note:
    - A header: when, the kit revision as `bin/nvu revision` prints it (`R29.C43-v1`), how, seed,
      and the outcome in a sentence. State that the notes are the agent's, tagged `[agent]`, that
      nothing in the note is a ruling, and that suspected bugs were checked against the rulebook
@@ -84,17 +85,13 @@ express, something you wished it printed, an error you hit.
    - **Candidate issues.** A list, not filed issues: engine mismatches first, then rulebook
      questions, then tuning-independent shape, then card observations for a later re-tune. The
      designer files what they want from this list.
-   - **Appendix.** The output of `bin/nvu replay design/playtests/NN-<slug>.json`, verbatim, in a
-     code block.
-3. Write plainly. Short sentences. No em-dashes. State what is true now; the story of how you got
+   - **Appendix.** The output of `bin/nvu replay runs/N.json`, verbatim, in a code block, naming
+     the run file as `design/playtests/NN-<slug>.json`.
+2. Write plainly. Short sentences. No em-dashes. State what is true now; the story of how you got
    there belongs only in How the run went.
-4. Run `make app-check` so the saved run passes the replay check.
-5. Commit, push, and open a PR titled `Playtest NN: <slug>`. In the loop, target the
-   stack's top layer, not `main`; check which branch that is with the designer if unsure. The
-   body is two or three sentences plus the outcome. Do not merge.
 
 ## Reporting back
 
-The PR URL, the outcome in one line, the three findings about the game that matter most, and the
-three worst friction points with the CLI. Findings you could not settle from the rulebook and the
-card list are questions, and you say so.
+The outcome in one line, the three findings about the game that matter most, and the three worst
+friction points with the CLI. Findings you could not settle from the rulebook and the card list are
+questions, and you say so.

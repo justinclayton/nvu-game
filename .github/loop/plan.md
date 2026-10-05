@@ -23,8 +23,6 @@ already has.
 4. The stack's existing issues, listed in "This run". Open any with
    `gh issue view <n> --comments` when you need its history.
 
-Do not read `design/loop/`. It describes how this job is built, not the
-game.
 
 Decide, for each part of the diff, whether the engine, the CLI, the sim or
 the web table now does something the sources no longer say. A change that

@@ -41,7 +41,7 @@ jobs:
           git fetch --quiet origin main
           if git diff --quiet origin/main...HEAD -- rulebook.md cards.yaml; then
             echo "changed=false" >> "$GITHUB_OUTPUT"
-            echo "rulebook.md and cards.yaml match main: not a loop branch."
+            echo "rulebook.md and cards.yaml match main"
           else
             echo "changed=true" >> "$GITHUB_OUTPUT"
           fi
@@ -62,7 +62,7 @@ jobs:
           done
           if [ -n "$below" ]; then
             echo "layer=true" >> "$GITHUB_OUTPUT"
-            echo "$BRANCH is built on ${below#origin/}: a layer of a stack, not a source layer."
+            echo "$BRANCH is built on ${below#origin/}"
           else
             echo "layer=false" >> "$GITHUB_OUTPUT"
           fi
@@ -90,7 +90,7 @@ jobs:
           subject=$(git log -1 --format=%s origin/main..HEAD -- rulebook.md cards.yaml)
           {
             echo "<!-- nvu-loop: source-pr -->"
-            echo "Draft PR for the source layer \`$BRANCH\`, opened by the design loop (design/loop/spec.md, step 2)."
+            echo "Draft PR for \`$BRANCH\`."
             echo
             echo "Kit revision at opening: \`$kit\`."
             echo
@@ -100,7 +100,6 @@ jobs:
             git diff --stat origin/main...HEAD -- rulebook.md cards.yaml
             echo '```'
             echo
-            echo "This branch is the bottom of the loop's stack: the planner reads the source diff and files work issues and ruling questions, each work issue becomes a code layer stacked above this one, and an agent playtest on the top layer reports as an issue. Edit the sources again on this branch to run it again, or merge the whole stack with \`gh stack merge <top PR> --merge\` to close the loop."
           } > pr-body.md
           gh api -X POST "repos/$GITHUB_REPOSITORY/pulls" \
             -f title="Kit $kit: $subject" \

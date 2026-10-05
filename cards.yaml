@@ -204,10 +204,8 @@ cards:
     owner: Red
     rarity: Fine
     cost: 1
-    oomph: 2
-    scramble: 1
     conditional_stat: true
-    text: "+2 Scramble if Gray also plays a card this turn."
+    text: "Has 1 Scramble for each card Gray has played this turn."
     flavor: "Clear the heavy debris so Gray can maneuver effortlessly."
 
   - name: Second Wind

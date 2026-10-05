@@ -29,7 +29,7 @@
 #   flee    string               room and stairwell only: the printed Flee line
 
 meta:
-  version: C43
+  version: C44
   updated: 2026-10-03
 
 cards:

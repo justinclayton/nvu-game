@@ -78,7 +78,8 @@ the agent follows the [`/playtest` skill](../../.claude/skills/playtest/SKILL.md
   number is the count of earlier reports on the stack plus one.
 - **What the agent may do.** `claude -p --restricted` with Bash, Read, Grep,
   Glob and Write. Bash is `bin/nvu` only, and Write is `design/playtests/**`
-  only. Reading `app/src` and `design/loop` is denied, so it plays blind.
+  only, through the rule `Edit(design/playtests/**)`: a `Write(...)` rule
+  does not match, and Claude Code refuses the write. Reading `app/src` and `design/loop` is denied, so it plays blind.
   The job fails if the agent wrote anything but one new note, or moved HEAD.
   Its read allows are scoped to the checkout (`./**`), with denies for
   `app/src` and `design/loop` by relative and absolute path, so another copy of

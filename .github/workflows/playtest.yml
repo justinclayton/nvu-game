@@ -191,7 +191,7 @@ jobs:
             --permission-mode dontAsk \
             --tools Bash,Read,Grep,Glob,Write \
             --allowedTools \
-              'Read(./**)' 'Grep(./**)' 'Glob(./**)' 'Write(design/playtests/**)' \
+              'Read(./**)' 'Grep(./**)' 'Glob(./**)' 'Edit(design/playtests/**)' \
               'Bash(bin/nvu:*)' \
             --disallowedTools \
               'Read(design/loop/**)' 'Grep(design/loop/**)' 'Glob(design/loop/**)' \

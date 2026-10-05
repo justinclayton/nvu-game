@@ -1,6 +1,6 @@
 # *North vs Up*: Rulebook
 
-Rules version: R29
+Rules version: R30
 
 ---
 
@@ -202,4 +202,5 @@ When a resolved outcome says `Ascend`, you escape the current floor! You are saf
 ---
 
 ## Appendix
+
 

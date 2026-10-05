@@ -43,7 +43,11 @@ and what the code does instead, naming the files>
 ## Acceptance criteria
 
 - [ ] <one checkable line per thing that must hold when the work is done>
+- [ ] `make check` and `make app-check` pass.
 ```
+
+End every work issue's criteria with that last line as written. It names the
+checks the coder and the reviewer run.
 
 **Questions.** When the sources can be read two ways and the reading changes
 the work, ask the designer instead of guessing. Label it `needs-human` and

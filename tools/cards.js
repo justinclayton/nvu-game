@@ -11,10 +11,10 @@
  * and no server.
  */
 var NVU_CARDS = {
-  meta: {"version":"C44","updated":"2026-10-03"},
+  meta: {"version":"C45","updated":"2026-10-03"},
   rulesVersion: "R29",
-  cardsVersion: "C44",
-  cardListId: "dd6b468b399c",
+  cardsVersion: "C45",
+  cardListId: "cb1b37e39caf",
   cards: [
     {"name":"Shove","set":"official","kind":"player","owner":"Red","starter":true,"cost":1,"oomph":2,"flavor":"'Oomph!', he shouted.","count":4},
     {"name":"Charge","set":"official","kind":"player","owner":"Red","starter":true,"cost":2,"oomph":4,"flavor":"I am bolder, so I lower my shoulder.","count":4},
@@ -39,7 +39,7 @@ var NVU_CARDS = {
     {"name":"Rhythm & Bruise","set":"proposed","kind":"player","owner":"Red","rarity":"Cool","cost":1,"conditional_stat":true,"flavor":"Let's get it on...leeeettt's get it on...","text":"Oomph equal to 2 times the number of cards Gray has played this turn. Play: If Gray has played 2 or more cards, you may draw 1 card.","count":2},
     {"name":"Momentum Shift","set":"proposed","kind":"player","owner":"Red","rarity":"Cool","cost":1,"oomph":4,"flavor":"Keep charging forward without looking back.","text":"Play: You may draw up to 2 cards, then Exhaust 1 card from your hand.","count":2},
     {"name":"Zen Mode","set":"proposed","kind":"player","owner":"Gray","rarity":"Woah","cost":1,"flavor":"Sorry, I can't hear you over the sound of how friggin calm I am","text":"While this is in play, you don't exhaust cards.","count":1},
-    {"name":"Catch Your Breath","set":"proposed","kind":"player","owner":"Gray","rarity":"Fine","cost":1,"scramble":2,"flavor":"Pause for a second to read the room.","text":"Peek 3.","count":2},
+    {"name":"Catch Your Breath","set":"proposed","kind":"player","owner":"Gray","rarity":"Fine","cost":2,"scramble":2,"flavor":"Pause for a second to read the room.","text":"Peek 3.","count":2},
     {"name":"Here, Catch","set":"proposed","kind":"player","owner":"Gray","rarity":"Fine","cost":1,"scramble":3,"flavor":"Toss a heavy tool over before it bogs you down.","text":"Move 1 Stuff from your hand to Red's hand.","count":2},
     {"name":"Hit 'n Run","set":"proposed","kind":"player","owner":"Gray","rarity":"Fine","cost":1,"oomph":1,"scramble":2,"flavor":"Strike fast and disappear into the shadows.","text":"Shuffle a Gray card from your Exhaust pile into your deck.","count":2},
     {"name":"I'll Take That","set":"proposed","kind":"player","owner":"Gray","rarity":"Fine","cost":1,"scramble":3,"flavor":"Relieve Red of that cumbersome pack.","text":"Shuffle 1 Stuff from Red's hand into Red's deck.","count":2},

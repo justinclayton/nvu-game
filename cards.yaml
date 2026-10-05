@@ -29,7 +29,7 @@
 #   flee    string               room and stairwell only: the printed Flee line
 
 meta:
-  version: C44
+  version: C45
   updated: 2026-10-03
 
 cards:
@@ -305,7 +305,7 @@ cards:
     kind: player
     owner: Gray
     rarity: Fine
-    cost: 1
+    cost: 2
     scramble: 2
     text: Peek 3.
     flavor: Pause for a second to read the room.

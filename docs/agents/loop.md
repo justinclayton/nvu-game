@@ -78,14 +78,17 @@ the agent follows the [`/playtest` skill](../../.claude/skills/playtest/SKILL.md
   number is the count of earlier reports on the stack plus one.
 - **What the agent may do.** `claude -p --restricted` with Bash, Read, Grep,
   Glob and Write. Bash is `bin/nvu` only, and Write is `design/playtests/**`
-  only. Reading `app/src` and `design/loop` is denied, so it plays blind.
+  only, through the rule `Edit(design/playtests/**)`: a `Write(...)` rule
+  does not match, and Claude Code refuses the write. Reading `app/src` and `design/loop` is denied, so it plays blind.
+  It runs on Sonnet: a run is several hundred `bin/nvu` calls, one move each.
   The job fails if the agent wrote anything but one new note, or moved HEAD.
   Its read allows are scoped to the checkout (`./**`), with denies for
   `app/src` and `design/loop` by relative and absolute path, so another copy of
   the repo on the runner is closed too.
 - **What the job does.** It copies `runs/<seed>.json` next to the note, runs
   the replay check (`app/src/cli/playtests.test.ts`), and commits both to the
-  top layer as `nvu-bot`. It then posts the report as `nvu-agent`.
+  top layer, then posts the report, both as `nvu-agent`. `nvu-bot` has no
+  Contents write.
 - **The report issue.** One per stack: an issue `nvu-agent` wrote with
   `Report for PR: #n` in the body, labelled `loop` and assigned to the
   designer. The first run opens it with the note's "What the run showed" and
@@ -104,10 +107,10 @@ the agent follows the [`/playtest` skill](../../.claude/skills/playtest/SKILL.md
   runs for a stack.
 - **The record.** The transcript is the run's artifact
   `playtest-transcript-<run id>-<attempt>` for 30 days.
-- **Setup.** `NVU_AGENT_APP_ID`, `NVU_AGENT_PRIVATE_KEY`, `NVU_BOT_APP_ID` and
-  `NVU_BOT_PRIVATE_KEY`. Without them the job fails.
+- **Setup.** `NVU_AGENT_APP_ID` and `NVU_AGENT_PRIVATE_KEY`. Without them the
+  job fails.
 
-**Recovery.** Add the label again. If the newest `nvu-bot` `Playtest:`
+**Recovery.** Add the label again. If the newest `nvu-agent` `Playtest:`
 commit on the top layer has no report marker, the run plays nothing and posts
 that commit's report. Each App token is minted just before its use, so a long
 run does not outlive one. A gate or mint failure comments on the source PR and

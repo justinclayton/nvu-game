@@ -112,8 +112,7 @@ export const RED: Registry = {
 
   "Set 'Em Up": {
     stats(state, _owner, card) {
-      const bonus = playedBy(state, "Gray") > 0 ? 2 : 0;
-      return { oomph: card.oomph, scramble: card.scramble + bonus };
+      return { oomph: card.oomph, scramble: card.scramble + playedBy(state, "Gray") };
     },
   },
 

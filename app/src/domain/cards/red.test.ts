@@ -374,7 +374,7 @@ describe("Break Through — 'Scrap 1 card from your hand'", () => {
   });
 });
 
-describe("Set 'Em Up — '+2 Scramble if Gray also plays a card this turn'", () => {
+describe("Set 'Em Up — 'Has 1 Scramble for each card Gray has played this turn'", () => {
   const armed = () => {
     const state = playing({
       Red: player({ deck: pile("Shove", 3), hand: [card("Set 'Em Up"), card("Shove")] }),
@@ -386,18 +386,20 @@ describe("Set 'Em Up — '+2 Scramble if Gray also plays a card this turn'", () 
     return cast(state, "Red", "Set 'Em Up").state;
   };
 
-  it("counts only its printed Scramble while Gray has played nothing", () => {
-    expect(statPool(armed()).scramble).toBe(1);
+  it("adds no Scramble or Oomph while Gray has played nothing", () => {
+    const pool = statPool(armed());
+    expect(pool.scramble).toBe(0);
+    expect(pool.oomph).toBe(0);
   });
 
-  it("gains +2 once Gray plays a card, and nothing more for a second", () => {
+  it("gains 1 Scramble for each card Gray plays", () => {
     const state = armed();
     const [a, b] = state.Gray.hand;
     if (!a || !b) throw new Error("rig");
     const first = must(state, { type: "PLAY_CARD", character: "Gray", cardId: a.id, payWith: [] });
-    expect(statPool(first.state).scramble).toBe(1 + 2 + a.scramble);
+    expect(statPool(first.state).scramble).toBe(1 + a.scramble);
     const second = must(first.state, { type: "PLAY_CARD", character: "Gray", cardId: b.id, payWith: [] });
-    expect(statPool(second.state).scramble).toBe(1 + 2 + a.scramble + b.scramble);
+    expect(statPool(second.state).scramble).toBe(2 + a.scramble + b.scramble);
   });
 
   it("does not count Red's own plays", () => {
@@ -410,7 +412,7 @@ describe("Set 'Em Up — '+2 Scramble if Gray also plays a card this turn'", () 
     const after = cast(state, "Red", "Set 'Em Up").state;
     const cable = handCard(after, "Red", "Coil Of Cable");
     const next = must(after, { type: "PLAY_CARD", character: "Red", cardId: cable.id, payWith: [] });
-    expect(statPool(next.state).scramble).toBe(1 + cable.scramble);
+    expect(statPool(next.state).scramble).toBe(cable.scramble);
   });
 });
 

@@ -35,6 +35,12 @@ behaviour there, in a PR, like code.
   closes on issues, and comments on PRs. The job, not the agent, posts the
   agent's final message on the source layer's PR with
   `<!-- nvu-loop: plan <sha> -->`.
+- **Status comments.** When the agent starts, the job comments on the
+  source layer's PR with the range it reads and a link to the run. The plan
+  comment is the end comment; a run that fails before posting it comments
+  that it failed instead. A run that stops before the agent starts, because
+  the commit is planned already or the sources did not change, posts
+  nothing.
 - **What holds it to that.** `claude -p --restricted` with only Bash, Read,
   Grep and Glob, and `--permission-mode dontAsk` with an allowlist of
   `git diff/log/show`, `gh issue` and `gh pr` read and comment commands, and

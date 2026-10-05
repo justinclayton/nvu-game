@@ -6,9 +6,11 @@
 # Nothing here runs an agent; it is a GitHub write, so the self-hosted runner
 # is not needed.
 #
-# Opened with LOOP_TOKEN when the repo has that secret, because a PR opened
-# with the workflow's own GITHUB_TOKEN does not start the pull_request
-# workflows (CI, Kit revision) until the next push.
+# Opened as the nvu-bot GitHub App (variable NVU_BOT_APP_ID, secret
+# NVU_BOT_PRIVATE_KEY), because a PR opened with the workflow's own
+# GITHUB_TOKEN does not start the pull_request workflows (CI, Kit revision)
+# until the next push. There is no fallback: a job whose app is not
+# configured fails.
 name: Source layer PR
 
 on:
@@ -65,10 +67,18 @@ jobs:
             echo "layer=false" >> "$GITHUB_OUTPUT"
           fi
 
+      - name: Mint the nvu-bot token
+        id: app-token
+        if: steps.sources.outputs.changed == 'true' && steps.layer.outputs.layer == 'false'
+        uses: actions/create-github-app-token@v1
+        with:
+          app-id: ${{ vars.NVU_BOT_APP_ID }}
+          private-key: ${{ secrets.NVU_BOT_PRIVATE_KEY }}
+
       - name: Open the source layer's draft PR if none is open
         if: steps.sources.outputs.changed == 'true' && steps.layer.outputs.layer == 'false'
         env:
-          GH_TOKEN: ${{ secrets.LOOP_TOKEN || github.token }}
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
           BRANCH: ${{ github.ref_name }}
         run: |
           open=$(gh api "repos/$GITHUB_REPOSITORY/pulls?state=open&head=$GITHUB_REPOSITORY_OWNER:$BRANCH" --jq 'length')
@@ -92,15 +102,10 @@ jobs:
             echo
             echo "This branch is the bottom of the loop's stack: a review of the diff files work issues and ruling questions, each work issue becomes a code layer stacked above this one, and an agent playtest on the top layer reports as an issue. Edit the sources again on this branch to run it again, or merge the whole stack with \`gh stack merge <top PR> --merge\` to close the loop."
           } > pr-body.md
-          if ! gh api -X POST "repos/$GITHUB_REPOSITORY/pulls" \
+          gh api -X POST "repos/$GITHUB_REPOSITORY/pulls" \
             -f title="Kit $kit: $subject" \
             -f head="$BRANCH" \
             -f base=main \
             -F draft=true \
             -F body=@pr-body.md \
-            --jq '"opened draft PR #\(.number): \(.html_url)"'; then
-            echo "::error::Could not open the source layer PR. With GITHUB_TOKEN this needs the repo setting" \
-              "'Allow GitHub Actions to create and approve pull requests' (Settings > Actions > General);" \
-              "with a LOOP_TOKEN secret it does not. See the loop's identity ruling issue."
-            exit 1
-          fi
+            --jq '"opened draft PR #\(.number): \(.html_url)"'

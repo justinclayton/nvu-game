@@ -37,7 +37,17 @@ A kit revision names one playable state of the game: `R133.C24-v2`. It replaces 
 
 ## Where it runs
 
-Deterministic CI runs on GitHub-hosted runners. Agents run as jobs on a self-hosted GitHub Actions runner on the designer's always-on desktop Mac, installed as a launchd service. The repo is private, which a self-hosted runner requires. `[you]`
+Deterministic CI runs on GitHub-hosted runners. Agents run as jobs on a self-hosted GitHub Actions runner on the designer's always-on desktop Mac, installed as a launchd service. `[you]`
+
+The repo is public, so a self-hosted runner is reachable from forks. Fork PR workflows require approval for all external contributors, and every `runs-on: self-hosted` job checks that its event came from this repo and not a fork, for example `github.event.pull_request.head.repo.full_name == github.repository`. `[you]`
+
+Three identities write to the repo. `[you]`
+
+- `nvu-bot`, a GitHub App, writes from workflows that run no agent, such as `source-pr.yml` opening the draft PR. It has Pull requests read/write, Contents read and Metadata read.
+- `nvu-agent`, a GitHub App, writes from Claude jobs on the self-hosted runner: review issues, code layers and playtest reports. It has Contents, Issues and Pull requests read/write, Actions read and Metadata read, and no Workflows write.
+- The designer writes as themselves.
+
+Both apps are installed only on this repo and have their webhook off. Each job mints a token from its app with `actions/create-github-app-token`, using the variables `NVU_BOT_APP_ID` and `NVU_AGENT_APP_ID` and the secrets `NVU_BOT_PRIVATE_KEY` and `NVU_AGENT_PRIVATE_KEY`. There is no fallback to `GITHUB_TOKEN`, because a write made with it starts no other workflow: a job whose app is not configured fails. `[you]`
 
 The contract that keeps the runner replaceable: every step starts on a GitHub event and ends in GitHub writes, meaning comments, labels, issues, PRs and commits. Nothing downstream reads the runner's own state. Claude Code Routines on a webhook, or a controller, could take the runner's place without changing the loop. `[agent-proposed]`
 

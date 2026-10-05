@@ -33,6 +33,8 @@ gh api -X POST repos/{owner}/{repo}/issues/<n>/labels -f 'labels[]=in-progress'
 gh api -X DELETE repos/{owner}/{repo}/issues/<n>/labels/ready-for-agent
 ```
 
+The design loop's planner (`docs/agents/loop.md`) files `ready-for-agent` work issues and `needs-human` questions as `nvu-agent`, each naming its source layer's PR as `Source PR: #n`; they are claimed the same way.
+
 An issue that says "design first" or asks for `/grilling` carries `needs-human` instead of `ready-for-agent`: the designer settles the design in a session, records the outcome on the issue, and swaps the label. Agents never claim `needs-human` issues.
 
 Name the working branch `claude/issue-<n>` after the issue number. Open the PR with `Closes #<n>` in the body; the merge closes the issue, but closing does not remove labels, so the coordinator clears `in-progress` and `ready-for-review` after merging.

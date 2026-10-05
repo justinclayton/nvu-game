@@ -30,7 +30,7 @@ export const CARD_CONTENT = {
     {"name":"Bull Rush","set":"proposed","kind":"player","owner":"Red","rarity":"Fine","starter":false,"count":2,"cost":1,"oomph":2,"scramble":1,"conditionalStat":false,"text":"","flavor":"Charge ahead while keeping your footing on loose debris."},
     {"name":"Cross Punch","set":"proposed","kind":"player","owner":"Red","rarity":"Fine","starter":false,"count":2,"cost":2,"oomph":4,"scramble":2,"conditionalStat":false,"text":"Exhaust 1.","flavor":"A heavy two-part combination attack."},
     {"name":"Break Through","set":"proposed","kind":"player","owner":"Red","rarity":"Fine","starter":false,"count":2,"cost":1,"oomph":2,"scramble":0,"conditionalStat":false,"text":"Play: Scrap 1 card from your hand.","flavor":"Smash through the obstacle and leave the broken starter gear behind."},
-    {"name":"Set 'Em Up","set":"proposed","kind":"player","owner":"Red","rarity":"Fine","starter":false,"count":2,"cost":1,"oomph":2,"scramble":1,"conditionalStat":true,"text":"+2 Scramble if Gray also plays a card this turn.","flavor":"Clear the heavy debris so Gray can maneuver effortlessly."},
+    {"name":"Set 'Em Up","set":"proposed","kind":"player","owner":"Red","rarity":"Fine","starter":false,"count":2,"cost":1,"oomph":0,"scramble":0,"conditionalStat":true,"text":"Has 1 Scramble for each card Gray has played this turn.","flavor":"Clear the heavy debris so Gray can maneuver effortlessly."},
     {"name":"Second Wind","set":"proposed","kind":"player","owner":"Red","rarity":"Cool","starter":false,"count":2,"cost":2,"oomph":4,"scramble":0,"conditionalStat":false,"text":"Shuffle a Red card from your Exhaust pile into your deck.","flavor":"Catch your breath and shake off the fatigue."},
     {"name":"Junk Launcher","set":"proposed","kind":"player","owner":"Red","rarity":"Cool","starter":false,"count":2,"cost":2,"oomph":0,"scramble":0,"conditionalStat":true,"text":"Oomph equal to the total printed cost of all cards in the play zone.","flavor":"Hurl whatever scrap isn't nailed down."},
     {"name":"Heavy Pockets","set":"proposed","kind":"player","owner":"Red","rarity":"Cool","starter":false,"count":2,"cost":1,"oomph":2,"scramble":1,"conditionalStat":false,"text":"Shuffle 1 Stuff from your hand into your deck.","flavor":"The potion problem, now in card form."},
@@ -96,10 +96,10 @@ export const CARD_CONTENT = {
 } as const satisfies CardContent;
 
 /** The first 12 hex of sha256 over the JSON of CARD_CONTENT above — identifies this card list. */
-export const CARD_LIST_ID = "38dc1a9df10e";
+export const CARD_LIST_ID = "dd6b468b399c";
 
 /** R of the kit revision: the rulebook's "Rules version:" line. Recorded runs refuse to replay across a change to it. Kept out of CARD_CONTENT so a rules bump does not change CARD_LIST_ID. */
 export const RULES_VERSION = "R29";
 
 /** C of the kit revision: the "version:" line under meta in cards.yaml, bumped when the card list changes. The print sheet stamps RULES_VERSION.CARDS_VERSION on every card; tools/kit-revision.sh adds the engine count. */
-export const CARDS_VERSION = "C43";
+export const CARDS_VERSION = "C44";

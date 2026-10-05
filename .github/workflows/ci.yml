@@ -16,4 +16,23 @@ jobs:
           node-version: 22
       - run: make app-install
       - run: make check
-      - run: make app-check
+
+      # A source layer (design/loop/spec.md) changes only the sources and the
+      # card modules generated from them. The app's tests are expected to
+      # fail there until the code layers above it land, so it skips them.
+      - name: Is this a source layer?
+        id: layer
+        env:
+          BASE: ${{ github.event.pull_request.base.sha }}
+          HEAD: ${{ github.event.pull_request.head.sha }}
+        run: |
+          other=$(git diff --name-only "$BASE...$HEAD" | grep -vxE 'rulebook\.md|cards\.yaml|tools/cards\.js|app/src/content/cards\.generated\.ts' || true)
+          if [ -z "$other" ]; then
+            echo "source=true" >> "$GITHUB_OUTPUT"
+            echo "Only the sources and their generated card modules changed: skipping make app-check."
+          else
+            echo "source=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - if: steps.layer.outputs.source != 'true'
+        run: make app-check

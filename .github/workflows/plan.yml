@@ -137,7 +137,7 @@ jobs:
             echo "## This run"
             echo
             echo "- Repository: \`$GITHUB_REPOSITORY\`"
-            echo "- Source layer PR: #$PR"
+            echo "- The branch's PR: #$PR"
             echo "- Read the sources from \`$FROM\` to \`$SHA\`$( [ "$FIRST" = true ] && echo ' (where the branch left main: this is the first plan)' || echo ' (the commit the last plan read)')."
             echo "- The designer: \`$DESIGNER\`"
             echo "- This stack's issues so far:"
@@ -167,6 +167,7 @@ jobs:
               'Bash(gh issue close:*)' 'Bash(gh issue edit:*)' \
               'Bash(gh pr view:*)' 'Bash(gh pr list:*)' 'Bash(gh pr comment:*)' \
               'Bash(.github/loop/block.sh:*)' \
+            --disallowedTools 'Read(design/loop/**)' 'Grep(design/loop/**)' 'Glob(design/loop/**)' \
             --output-format stream-json \
             --verbose \
             < "$RUNNER_TEMP/prompt.md" \

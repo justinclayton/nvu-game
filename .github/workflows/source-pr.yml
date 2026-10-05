@@ -100,7 +100,7 @@ jobs:
             git diff --stat origin/main...HEAD -- rulebook.md cards.yaml
             echo '```'
             echo
-            echo "This branch is the bottom of the loop's stack: a review of the diff files work issues and ruling questions, each work issue becomes a code layer stacked above this one, and an agent playtest on the top layer reports as an issue. Edit the sources again on this branch to run it again, or merge the whole stack with \`gh stack merge <top PR> --merge\` to close the loop."
+            echo "This branch is the bottom of the loop's stack: the planner reads the source diff and files work issues and ruling questions, each work issue becomes a code layer stacked above this one, and an agent playtest on the top layer reports as an issue. Edit the sources again on this branch to run it again, or merge the whole stack with \`gh stack merge <top PR> --merge\` to close the loop."
           } > pr-body.md
           gh api -X POST "repos/$GITHUB_REPOSITORY/pulls" \
             -f title="Kit $kit: $subject" \

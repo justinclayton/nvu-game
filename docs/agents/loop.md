@@ -87,7 +87,8 @@ the agent follows the [`/playtest` skill](../../.claude/skills/playtest/SKILL.md
   the repo on the runner is closed too.
 - **What the job does.** It copies `runs/<seed>.json` next to the note, runs
   the replay check (`app/src/cli/playtests.test.ts`), and commits both to the
-  top layer as `nvu-bot`. It then posts the report as `nvu-agent`.
+  top layer, then posts the report, both as `nvu-agent`. `nvu-bot` has no
+  Contents write.
 - **The report issue.** One per stack: an issue `nvu-agent` wrote with
   `Report for PR: #n` in the body, labelled `loop` and assigned to the
   designer. The first run opens it with the note's "What the run showed" and
@@ -106,10 +107,10 @@ the agent follows the [`/playtest` skill](../../.claude/skills/playtest/SKILL.md
   runs for a stack.
 - **The record.** The transcript is the run's artifact
   `playtest-transcript-<run id>-<attempt>` for 30 days.
-- **Setup.** `NVU_AGENT_APP_ID`, `NVU_AGENT_PRIVATE_KEY`, `NVU_BOT_APP_ID` and
-  `NVU_BOT_PRIVATE_KEY`. Without them the job fails.
+- **Setup.** `NVU_AGENT_APP_ID` and `NVU_AGENT_PRIVATE_KEY`. Without them the
+  job fails.
 
-**Recovery.** Add the label again. If the newest `nvu-bot` `Playtest:`
+**Recovery.** Add the label again. If the newest `nvu-agent` `Playtest:`
 commit on the top layer has no report marker, the run plays nothing and posts
 that commit's report. Each App token is minted just before its use, so a long
 run does not outlive one. A gate or mint failure comments on the source PR and

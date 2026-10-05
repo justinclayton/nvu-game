@@ -23,12 +23,12 @@ import type { CardId } from "../types";
 
 beforeEach(resetRig);
 
-/** Play a Peek card from Gray's hand, paying with a Duck Under, up to the pile question. */
-function playPeek(name: string, over: Parameters<typeof playing>[0] = {}) {
+/** Play a Peek card from Gray's hand, paying `cost` Duck Unders, up to the pile question. */
+function playPeek(name: string, cost = 1, over: Parameters<typeof playing>[0] = {}) {
   const state = playing({
     Gray: player({
       deck: pile("Duck Under", 4),
-      hand: [card(name), card("Duck Under")],
+      hand: [card(name), ...pile("Duck Under", cost)],
     }),
     ...over,
   });
@@ -36,7 +36,7 @@ function playPeek(name: string, over: Parameters<typeof playing>[0] = {}) {
     type: "PLAY_CARD",
     character: "Gray",
     cardId: handCard(state, "Gray", name).id,
-    payWith: [handCard(state, "Gray", "Duck Under").id],
+    payWith: state.Gray.hand.filter((c) => c.name === "Duck Under").map((c) => c.id),
   });
   return { state, asked };
 }
@@ -78,7 +78,7 @@ describe("Peek Around Corner — 'Peek 1'", () => {
   });
 
   it("does not offer an empty deck, and never reshuffles its discard pile", () => {
-    const { asked } = playPeek("Peek Around Corner", {
+    const { asked } = playPeek("Peek Around Corner", 1, {
       Gray: player({
         deck: [],
         discard: pile("Duck Under", 3),
@@ -95,7 +95,7 @@ describe("Peek Around Corner — 'Peek 1'", () => {
 
 describe("Catch Your Breath — 'Peek 3'", () => {
   it("shows three and, with nothing discarded, lets the player order them", () => {
-    const { asked } = playPeek("Catch Your Breath");
+    const { asked } = playPeek("Catch Your Breath", 2);
     const looked = must(asked.state, { type: "CHOOSE_PILE", pile: "Red deck" });
     expect(eventTypes(looked.events)).toContain("CARDS_PEEKED");
     const offered = looked.state.pending;
@@ -115,7 +115,7 @@ describe("Catch Your Breath — 'Peek 3'", () => {
   });
 
   it("discards one card at a time, then orders what is left", () => {
-    const { asked } = playPeek("Catch Your Breath");
+    const { asked } = playPeek("Catch Your Breath", 2);
     const looked = must(asked.state, { type: "CHOOSE_PILE", pile: "Gray deck" });
     const [first, second, third] = looked.state.Gray.deck;
     if (!first || !second || !third) throw new Error("rig");
@@ -137,7 +137,7 @@ describe("Catch Your Breath — 'Peek 3'", () => {
   });
 
   it("stops asking once every card shown is discarded", () => {
-    const { asked } = playPeek("Catch Your Breath");
+    const { asked } = playPeek("Catch Your Breath", 2);
     const looked = must(asked.state, { type: "CHOOSE_PILE", pile: "Gray deck" });
     let s = looked.state;
     for (let i = 0; i < 3; i++) {
@@ -148,6 +148,25 @@ describe("Catch Your Breath — 'Peek 3'", () => {
     expect(s.pending).toBeNull();
     expect(s.Gray.deck).toHaveLength(1);
     expect(s.Gray.discard).toHaveLength(3);
+  });
+});
+
+describe("Catch Your Breath — payment", () => {
+  it("is turned down when paid with one card", () => {
+    const state = playing({
+      Gray: player({
+        deck: pile("Duck Under", 4),
+        hand: [card("Catch Your Breath"), ...pile("Duck Under", 2)],
+      }),
+    });
+    const rejected = execute(state, {
+      type: "PLAY_CARD",
+      character: "Gray",
+      cardId: handCard(state, "Gray", "Catch Your Breath").id,
+      payWith: [handCard(state, "Gray", "Duck Under").id],
+    });
+    expect(rejected.ok).toBe(false);
+    if (!rejected.ok) expect(rejected.reason.code).toBe("WrongPayment");
   });
 });
 

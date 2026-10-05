@@ -80,6 +80,7 @@ the agent follows the [`/playtest` skill](../../.claude/skills/playtest/SKILL.md
   Glob and Write. Bash is `bin/nvu` only, and Write is `design/playtests/**`
   only, through the rule `Edit(design/playtests/**)`: a `Write(...)` rule
   does not match, and Claude Code refuses the write. Reading `app/src` and `design/loop` is denied, so it plays blind.
+  It runs on Sonnet: a run is several hundred `bin/nvu` calls, one move each.
   The job fails if the agent wrote anything but one new note, or moved HEAD.
   Its read allows are scoped to the checkout (`./**`), with denies for
   `app/src` and `design/loop` by relative and absolute path, so another copy of

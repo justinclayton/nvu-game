@@ -173,25 +173,19 @@ function shuffleStuffFromHand(whose: (ctx: BehaviourContext) => Character): Card
 }
 
 export const GRAY: Registry = {
-  /* "Peek 1." */
   "Peek Around Corner": peek(1),
 
-  /* "Peek 3." */
   "Catch Your Breath": peek(3),
 
-  /* "Peek 3" */
   "Hack the Doors": peek(3),
 
-  /* "Scramble equal to 2 times the number of cards Red has played this turn." */
   "In Step": {
     stats(state, _owner, card) {
       return { oomph: card.oomph, scramble: 2 * playedBy(state, "Red") };
     },
   },
 
-  /* "If any Bad Stuff is played this turn, gain Oomph +1 and Scramble +1."
-   *
-   * Bad Stuff itself contributes no stats; this card is what makes playing
+  /* Bad Stuff itself contributes no stats; this card is what makes playing
    * a piece of it worth anything. */
   "One Man's Junk": {
     stats(state, _owner, card) {
@@ -202,9 +196,7 @@ export const GRAY: Registry = {
     },
   },
 
-  /* "Move 1 Stuff from your hand to Red's hand."
-   *
-   * Rulebook §9, Going Down: no card may be put into a Down character's hand. */
+  /* Rulebook §9, Going Down: no card may be put into a Down character's hand. */
   "Here, Catch": {
     onPlay(state, ctx) {
       const options = playerOf(state, ctx.character).hand.filter((c) => c.kind !== "player");
@@ -228,7 +220,6 @@ export const GRAY: Registry = {
     },
   },
 
-  /* "Shuffle a Gray card from your Exhaust pile into your deck." */
   "Hit 'n Run": {
     onPlay(state, ctx) {
       const options = playerOf(state, ctx.character).exhaust.filter((c) => c.owner === "Gray");
@@ -251,12 +242,9 @@ export const GRAY: Registry = {
     },
   },
 
-  /* "Shuffle 1 Stuff from Red's hand into Red's deck." */
   "I'll Take That": shuffleStuffFromHand(() => "Red"),
 
-  /* "Every time Red plays a card this turn, you may draw 1 card."
-   *
-   * A card-driven exception to Play's no-draw rule. A reaction cannot suspend, so each Red play
+  /* A card-driven exception to Play's no-draw rule. A reaction cannot suspend, so each Red play
    * queues the question and the engine asks it once the play is done (`TurnRecord.questions`). */
   "Covering Fire": {
     onEvent(event, state, ctx) {
@@ -278,16 +266,13 @@ export const GRAY: Registry = {
     onChoice: (answer, state) => drawnAs(answer, state),
   },
 
-  /* "The next card Red plays this turn costs 1 fewer card to play." */
   Pivot: {
     onPlay(state) {
       return done(grantPlayDiscount(state, "Red"));
     },
   },
 
-  /* "Play: You may draw 1 card. If Red has played a card this turn, you may draw 1 more."
-   *
-   * One question: with Red's play behind it, the two optional draws come to "up to 2". */
+  /* One question: with Red's play behind it, the two optional draws come to "up to 2". */
   "Synergy Link": {
     onPlay(state, ctx) {
       const max = playedBy(state, "Red") > 0 ? 2 : 1;

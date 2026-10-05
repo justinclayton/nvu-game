@@ -62,9 +62,7 @@ function partnerDraw(ctx: BehaviourContext): Pending {
 export const STUFF: Registry = {
   /* ------------------------------------------------------------ Good Stuff */
 
-  /* "Play: If you get any Good Stuff this turn, get 1 additional Good Stuff."
-   *
-   * Two hooks share one `fired` marker per copy so the bonus pays out exactly
+  /* Two hooks share one `fired` marker per copy so the bonus pays out exactly
    * once, whether the Good Stuff arrives before or after Crowbar is played. */
   Crowbar: {
     onPlay(state, ctx) {
@@ -82,10 +80,7 @@ export const STUFF: Registry = {
     },
   },
 
-  /* "Choose a character. Move 2 cards from that character's Exhaust pile to
-   * the bottom of their deck."
-   *
-   * Skips the character choice when only one side has an Exhaust pile to draw
+  /* Skips the character choice when only one side has an Exhaust pile to draw
    * from, and moves fewer than 2 if that pile is that short (validation's own
    * `Math.min(count, options.length)` already covers it). */
   "A Pair Of Stitch-Em-Ups": {
@@ -116,9 +111,7 @@ export const STUFF: Registry = {
     },
   },
 
-  /* "One of you may draw 1 card."
-   *
-   * One question: Red draws 1, Gray draws 1, or neither. A Down character is not offered —
+  /* One question: Red draws 1, Gray draws 1, or neither. A Down character is not offered —
    * a card cannot put anything in a Down character's hand. Drawing from an empty deck and
    * discard pile is on offer like any other draw: it puts that character Down, and the team
    * may decline (rulebook, Keywords: Empty deck). */
@@ -139,7 +132,6 @@ export const STUFF: Registry = {
     onChoice: (answer, state) => drawnAs(answer, state),
   },
 
-  /* "If the room is Cleared, return this card to your hand at the end of the Outcome phase." */
   "Riot Shield": {
     onPlayEnd(state, ctx) {
       if (state.resolution?.roomEnded !== "Cleared") return nothing(state);
@@ -148,16 +140,13 @@ export const STUFF: Registry = {
     },
   },
 
-  /* "The next card played this turn is played for free."
-   *
-   * The next card either character plays, and gone when the Play phase ends. */
+  /* The next card either character plays, and gone when the Play phase ends. */
   "Overcharged Battery": {
     onPlay(state) {
       return done(grantFreePlay(state));
     },
   },
 
-  /* "Play: You may draw 1 card." */
   "Stim Pack": {
     onPlay(state, ctx) {
       return ask(state, drawQuestion(ctx, "stim-pack", "Draw 1 card?", ctx.character));
@@ -165,7 +154,6 @@ export const STUFF: Registry = {
     onChoice: (answer, state) => drawnAs(answer, state),
   },
 
-  /* "Play: Look at the top 3 cards of the Floor deck." */
   "High-Frequency Scanner": {
     onPlay(state, ctx) {
       const top = state.floorDeck.slice(0, 3);
@@ -175,10 +163,7 @@ export const STUFF: Registry = {
     },
   },
 
-  /* "Play: Scrap 1 Bad Stuff card from your hand. If you do, gain 2 Oomph or
-   * 2 Scramble."
-   *
-   * No Bad Stuff in hand: no Scrap, no stat question, no prompt at all. */
+  /* No Bad Stuff in hand: no Scrap, no stat question, no prompt at all. */
   "Scrap Magnet": {
     onPlay(state, ctx) {
       const options = playerOf(state, ctx.character).hand.filter((c) => c.kind === "bad_stuff");
@@ -217,10 +202,7 @@ export const STUFF: Registry = {
     },
   },
 
-  /* "Play: You may draw 1 card. If both you and your partner played a card this
-   * turn, gain 1 Oomph and 1 Scramble."
-   *
-   * The bonus does not depend on the draw, so it is banked before the question.
+  /* The bonus does not depend on the draw, so it is banked before the question.
    *
    * Pocket Dynamo counts as the card "you" played, so this fires off the
    * partner's play whether it landed before this card or lands afterwards —
@@ -247,10 +229,7 @@ export const STUFF: Registry = {
     },
   },
 
-  /* "Play: You may draw up to 2 cards, then place 1 card from your hand on top of your
-   * deck."
-   *
-   * Only the draw is optional: the card goes back on top whether or not any was drawn. */
+  /* Only the draw is optional: the card goes back on top whether or not any was drawn. */
   "Salvaged Blueprint": {
     onPlay(state, ctx) {
       return ask(
@@ -292,9 +271,7 @@ export const STUFF: Registry = {
     },
   },
 
-  /* "Play: Scrap 1 card from your hand. Your partner may draw 1 card."
-   *
-   * The Scrap is required whenever the hand isn't empty; the partner's draw is the
+  /* The Scrap is required whenever the hand isn't empty; the partner's draw is the
    * partner's to take or leave, either way. */
   "Emergency Breaker": {
     onPlay(state, ctx) {
@@ -329,7 +306,6 @@ export const STUFF: Registry = {
     },
   },
 
-  /* "Play: Scrap 1 Bad Stuff card from your hand or discard pile." */
   "Automated Salvage Kit": {
     onPlay(state, ctx) {
       const p = playerOf(state, ctx.character);
@@ -360,32 +336,24 @@ export const STUFF: Registry = {
     },
   },
 
-  /* "Exhaust 2." */
   "Emergency Power Core": { exhaustX: 2 },
 
   /* ------------------------------------------------------------- Bad Stuff */
 
-  /* "Holding: At Turn Start, draw 1 fewer card." */
   "Faceful Of Slime": {
     whileHeld: { drawTargetDelta: 1 },
   },
 
-  /* "Holding: Cards you play cost +1 card to play."
-   *
-   * Bites its holder only: Red never pays for Gray (rulebook §7, Play). */
+  /* Bites its holder only: Red never pays for Gray (rulebook §7, Play). */
   Sluggish: {
     whileHeld: { costDelta: 1 },
   },
 
-  /* "Holding: Stuff cards you play have -1 Oomph and -1 Scramble." */
   Rust: {
     whileHeld: { stuffPowerDelta: -1 },
   },
 
-  /* "Holding: At Cleanup, discard cards other than this one until you hold
-   * 3."
-   *
-   * The holder's own choice, from every OTHER card in hand — Spore Cloud
+  /* The holder's own choice, from every OTHER card in hand — Spore Cloud
    * itself (any copy) is not an option, but still counts toward the 3. A
    * no-op once the hand is already 3 or fewer. */
   "Spore Cloud": {
@@ -412,15 +380,12 @@ export const STUFF: Registry = {
     },
   },
 
-  /* "Holding: Every room threshold requires +2 Scramble to be met. Play: Exhaust 2." */
   Panic: {
     whileHeld: { thresholdScrambleDelta: 2 },
     exhaustX: 2,
   },
 
-  /* "Holding: Whenever your partner draws a card during Play, Exhaust 1."
-   *
-   * Only the partner's draws, and only ones a card's text causes during
+  /* Only the partner's draws, and only ones a card's text causes during
    * Play — Turn Start's own automatic draw does not trigger it (`drawOne`'s
    * `turnStart` flag). A bare `Exhaust 1` line, so Zen Mode can stop it. */
   "My Head Is Quantum Spinning": {
@@ -438,7 +403,6 @@ export const STUFF: Registry = {
     },
   },
 
-  /* "Holding: At Turn Start, Exhaust 1. Play: Scrap 1 Good Stuff card from your hand." */
   "Corrosive Acid": {
     onTurnStart(state, ctx) {
       const events: DomainEvent[] = [];
@@ -472,7 +436,6 @@ export const STUFF: Registry = {
     },
   },
 
-  /* "Holding: Whenever you play a card with Cost 0, lose 1 Oomph and 1 Scramble from the Stat pool this turn." */
   "System Feedback": {
     onEvent(event, state, ctx) {
       if (ctx.zone !== "hand") return nothing(state);

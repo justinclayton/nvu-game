@@ -13,7 +13,6 @@ export interface RoomBehaviour {
 export type RoomRegistry = Readonly<Record<string, RoomBehaviour>>;
 
 export const ROOMS: RoomRegistry = {
-  /* "Players may Scrap Good Stuff cards from their hand during Play to add +3 Oomph or +3 Scramble per card." */
   "Bio-Hazard Containment Vault": { scrapForStats: true },
 };
 

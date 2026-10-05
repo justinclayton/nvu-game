@@ -13,26 +13,20 @@ import {
 import { ask, done, drawnAs, drawQuestion, nothing, source, type Registry } from "./behaviour";
 
 export const RED: Registry = {
-  /* "Exhaust 1." */
   Overdrive: { exhaustX: 1 },
 
-  /* "Exhaust 1 from the top of your deck." */
   "Reckless Swing": { exhaustX: 1 },
 
-  /* "Exhaust 2." */
   Reckless: { exhaustX: 2 },
 
-  /* "Exhaust 1." */
   "Cross Punch": { exhaustX: 1 },
 
-  /* "If Gray played a card this turn, play this card for free." */
   "Fast Follow": {
     freeIf(state) {
       return playedBy(state, "Gray") > 0;
     },
   },
 
-  /* "If Gray played a card this turn, you may draw 1 card." */
   "Tag Team": {
     onPlay(state, ctx) {
       if (playedBy(state, "Gray") === 0) return nothing(state);
@@ -41,9 +35,7 @@ export const RED: Registry = {
     onChoice: (answer, state) => drawnAs(answer, state),
   },
 
-  /* "Shuffle a Red card from your Exhaust pile into your deck."
-   *
-   * Red's own cards only: Stuff in the Exhaust pile is not a Red card. */
+  /* Red's own cards only: Stuff in the Exhaust pile is not a Red card. */
   "Second Wind": {
     onPlay(state, ctx) {
       const options = playerOf(state, ctx.character).exhaust.filter((c) => c.owner === "Red");
@@ -66,7 +58,6 @@ export const RED: Registry = {
     },
   },
 
-  /* "Oomph equal to the total printed cost of all cards in the play zone." */
   "Junk Launcher": {
     stats(state, _owner, card) {
       const total = state.playZone.reduce((sum, p) => sum + p.card.cost, 0);
@@ -74,7 +65,6 @@ export const RED: Registry = {
     },
   },
 
-  /* "Shuffle 1 Stuff from your hand into your deck." */
   "Heavy Pockets": {
     onPlay(state, ctx) {
       const options = playerOf(state, ctx.character).hand.filter((c) => c.kind !== "player");
@@ -97,7 +87,6 @@ export const RED: Registry = {
     },
   },
 
-  /* "Play: Scrap 1 card from your hand." */
   "Break Through": {
     onPlay(state, ctx) {
       const options = playerOf(state, ctx.character).hand;
@@ -121,7 +110,6 @@ export const RED: Registry = {
     },
   },
 
-  /* "+2 Scramble if Gray also plays a card this turn." */
   "Set 'Em Up": {
     stats(state, _owner, card) {
       const bonus = playedBy(state, "Gray") > 0 ? 2 : 0;
@@ -129,7 +117,6 @@ export const RED: Registry = {
     },
   },
 
-  /* "Play: Scrap 1 starter card from your hand or discard pile. If you do, you may draw 1 card." */
   "Brute Recycle": {
     onPlay(state, ctx) {
       const p = playerOf(state, ctx.character);
@@ -163,8 +150,6 @@ export const RED: Registry = {
     },
   },
 
-  /* "Oomph equal to 2 times the number of cards Gray has played this turn. Play: If Gray has
-   * played 2 or more cards, you may draw 1 card." */
   "Rhythm & Bruise": {
     stats(state, _owner, card) {
       return { oomph: card.oomph + 2 * playedBy(state, "Gray"), scramble: card.scramble };
@@ -176,9 +161,7 @@ export const RED: Registry = {
     onChoice: (answer, state) => drawnAs(answer, state),
   },
 
-  /* "Play: You may draw up to 2 cards, then Exhaust 1 card from your hand."
-   *
-   * Only the draw is optional: the Exhaust happens whether or not any card was drawn. */
+  /* Only the draw is optional: the Exhaust happens whether or not any card was drawn. */
   "Momentum Shift": {
     onPlay(state, ctx) {
       return ask(

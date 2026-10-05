@@ -185,7 +185,7 @@ jobs:
         run: |
           set -o pipefail
           claude -p \
-            --model opus \
+            --model sonnet \
             --restricted \
             --strict-mcp-config \
             --permission-mode dontAsk \

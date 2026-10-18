@@ -201,7 +201,8 @@ jobs:
             --output-format stream-json \
             --verbose \
             < "$RUNNER_TEMP/prompt.md" \
-            > "$RUNNER_TEMP/transcript.jsonl"
+            | tee "$RUNNER_TEMP/transcript.jsonl" \
+            | jq -R -r --unbuffered -f .github/loop/progress.jq
 
       - name: Check the agent wrote only the note
         if: steps.report.outputs.resume == ''

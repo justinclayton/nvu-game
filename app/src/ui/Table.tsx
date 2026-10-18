@@ -10,6 +10,7 @@ import { createStore } from "zustand/vanilla";
 
 import type { Replay } from "@application/replay";
 import { canUndo, type SessionState } from "@application/session";
+import { plural } from "@domain/plural";
 import { costOf, payOptions } from "@domain/queries";
 import type { Card, Character, Command, GameState } from "@domain/types";
 import { type Inspected, type Paying } from "./CardLayer";
@@ -109,10 +110,11 @@ export function Table({ onNewRun, onOpenRun, replay }: Props) {
 
   const payingHint =
     paying && state[paying.character].hand.some((c) => c.id === paying.cardId)
-      ? `${paying.character}: choose ${String(
+      ? `${paying.character}: choose ${plural(
           costOf(state, paying.character, cardById(state, paying.character, paying.cardId)) -
             paying.chosen.length,
-        )} more card(s) to discard, or click the card again to cancel.`
+          "more card",
+        )} to discard, or click the card again to cancel.`
       : null;
 
   return (

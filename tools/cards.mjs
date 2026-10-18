@@ -322,7 +322,7 @@ const NO_FLEE_PRINTED = "Leave empty-handed.";
 function who(word) {
   const w = word.trim().toLowerCase();
   if (w === "both players" || w === "both") return "both";
-  if (w === "one of you" || w === "one") return "one";
+  if (w === "one player" || w === "one") return "one";
   if (w === "red") return "Red";
   if (w === "gray") return "Gray";
   throw new Error(`unrecognised target: "${word}"`);
@@ -337,23 +337,23 @@ const CLAUSES = [
   [/^(?:and )?flee this room for free$/i, () => ({ fleeFree: true })],
   [/^(?:and )?leave empty-handed$/i, () => ({})],
   [
-    /^(both players|one of you|red|gray) exhausts? (\d+)$/i,
+    /^(both players|one player|red|gray) exhausts? (\d+)$/i,
     (m) => ({ effect: { type: "ExhaustFromDeck", who: who(m[1]), amount: Number(m[2]) } }),
   ],
   [
-    /^(both players|one of you|red|gray) (?:gets?|takes?) (?:(\d+) )?bad stuff$/i,
+    /^(both players|one player|red|gray) (?:gets?|takes?) (?:(\d+) )?bad stuff$/i,
     (m) => ({ effect: { type: "DealBadStuff", who: who(m[1]), count: Number(m[2] ?? 1) } }),
   ],
   [
-    /^(both players|one of you|red|gray) (?:gets?|takes?) (?:(\d+) )?good stuff$/i,
+    /^(both players|one player|red|gray) (?:gets?|takes?) (?:(\d+) )?good stuff$/i,
     (m) => ({ effect: { type: "TakeGoodStuff", who: who(m[1]), count: Number(m[2] ?? 1) } }),
   ],
   [
-    /^(both players|one of you|red|gray) reveals? (?:a |the )?(?:card )?reward$/i,
+    /^(both players|one player|red|gray) reveals? (?:a |the )?(?:card )?reward$/i,
     (m) => ({ effect: { type: "RevealReward", who: who(m[1]) } }),
   ],
   [
-    /^(both players|one of you|red|gray) may scrap a bad stuff card from (?:your|their) hand$/i,
+    /^(both players|one player|red|gray) may scrap a bad stuff card from (?:your|their) hand$/i,
     (m) => ({ effect: { type: "ScrapBadStuffFromHand", who: who(m[1]), optional: true } }),
   ],
 ];
@@ -543,6 +543,9 @@ function checkSchema(doc) {
       problems.push(`${c.name || "?"}: set must be official|proposed, got ${JSON.stringify(c.set)}`);
     }
     if (!c.kind) problems.push(`${c.name || "?"}: missing kind`);
+    if (/\b(?:one|both) of you\b/i.test(JSON.stringify(c))) {
+      problems.push(`${c.name || "?"}: printed text says "of you"; write "one player" or "both players"`);
+    }
   }
   return problems;
 }

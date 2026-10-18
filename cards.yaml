@@ -29,7 +29,7 @@
 #   flee    string               room and stairwell only: the printed Flee line
 
 meta:
-  version: C46
+  version: C48
   updated: 2026-10-03
 
 cards:
@@ -591,7 +591,7 @@ cards:
     cost: 2
     oomph: 3
     scramble: 3
-    text: One of you may draw 1 card.
+    text: One player may draw 1 card.
     flavor: Defies local gravity to make heavy obstacles weightless.
 
   - name: Automated Salvage Kit
@@ -765,7 +765,7 @@ cards:
       - thresholds:
           - stat: Oomph
             value: 10
-            outcome: Clear, and one of you may Scrap a Bad Stuff card from your hand.
+            outcome: Clear, and one player may Scrap a Bad Stuff card from their hand.
     flee: Both players Exhaust 2, and both players get Bad Stuff.
 
   - name: Pressurized Maintenance Hub
@@ -814,7 +814,7 @@ cards:
             outcome: Ascend, and both players reveal a card reward.
       - thresholds:
           - stats: { Oomph: 7, Scramble: 7 }
-            outcome: Ascend, and one of you reveals a card reward.
+            outcome: Ascend, and one player reveals a card reward.
     flee: Both players Exhaust 3, and Red gets Bad Stuff.
 
   ## Band 3 (floors 7–9)
@@ -847,11 +847,11 @@ cards:
       - thresholds:
           - stat: Oomph
             value: 15
-            outcome: Clear, and one of you reveals a card reward.
+            outcome: Clear, and one player reveals a card reward.
       - thresholds:
           - stat: Scramble
             value: 15
-            outcome: Clear, and one of you reveals a card reward.
+            outcome: Clear, and one player reveals a card reward.
     flee: Both players get 2 Bad Stuff, and both players Exhaust 2.
 
   - name: Smoldering Armory

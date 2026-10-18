@@ -63,6 +63,22 @@ describe("tailEvents", () => {
 describe("describeEvent", () => {
   const crowbar = { id: "c1", name: "Crowbar", kind: "stuff" } as unknown as Card;
 
+  it("pluralises the shuffled-back count", () => {
+    const shuffled = (n: number): DomainEvent => ({
+      type: "CARDS_SHUFFLED_IN",
+      character: "Red",
+      cards: Array.from({ length: n }, (_, i) => ({ id: `c${String(i)}`, name: "Crowbar", kind: "stuff" }) as unknown as Card),
+    });
+    expect(describeEvent(shuffled(1))).toBe("Red shuffles 1 card back in.");
+    expect(describeEvent(shuffled(3))).toBe("Red shuffles 3 cards back in.");
+  });
+
+  it("pluralises the reshuffled discard count", () => {
+    const reshuffled = (n: number): DomainEvent => ({ type: "DISCARD_RESHUFFLED", character: "Gray", cards: n });
+    expect(describeEvent(reshuffled(1))).toContain("(1 card).");
+    expect(describeEvent(reshuffled(4))).toContain("(4 cards).");
+  });
+
   it("names the card whose text caused an effect", () => {
     const event: DomainEvent = {
       type: "CARD_EXHAUSTED",

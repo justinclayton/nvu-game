@@ -119,6 +119,8 @@ export interface TurnRecord {
    * turns what is owed into spreads of 3 as soon as nothing else is waiting.
    */
   readonly goodStuffOwed: Readonly<Record<Character, number>>;
+  /** Whose text earned each piece owed, oldest first: one entry per piece in `goodStuffOwed`. */
+  readonly goodStuffSources: Readonly<Record<Character, readonly (string | undefined)[]>>;
   /**
    * Questions a this-turn trigger (Covering Fire) raised in the middle of
    * something else. A trigger cannot suspend, so it queues its question here

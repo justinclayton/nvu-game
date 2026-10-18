@@ -89,6 +89,16 @@ describe("describeEvent", () => {
     );
   });
 
+  it("names the cause of a Good Stuff reveal", () => {
+    const event: DomainEvent = {
+      type: "GOOD_STUFF_REVEALED",
+      character: "Red",
+      cards: [crowbar],
+      source: "Security Turnstile",
+    };
+    expect(describeEvent(event)).toBe("Security Turnstile triggers: Red reveals Good Stuff: Crowbar.");
+  });
+
   it("marks where each phase starts and ends", () => {
     const phases = ["Turn Start", "Play", "Outcome", "Cleanup"] as const;
     expect(

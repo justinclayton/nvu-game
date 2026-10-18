@@ -32,6 +32,7 @@ import type {
   DomainEvent,
   GameState,
   GoodStuffSpread,
+  LoggedPhase,
   Pending,
   Pile,
   Rejection,
@@ -302,6 +303,9 @@ interface Run {
 const causedBy = (events: readonly DomainEvent[], source: string): DomainEvent[] =>
   events.map((e) => (e.source === undefined ? { ...e, source } : e));
 
+const fromSource = (source: string | undefined): { source?: string } =>
+  source === undefined ? {} : { source };
+
 /** Mark everything pushed since `from` as caused by `source`. */
 function attribute(run: Run, from: number, source: string): void {
   for (let i = from; i < run.events.length; i++) {
@@ -318,7 +322,21 @@ export function execute(state: GameState, command: Command): Result {
   // A card played during Play can earn Good Stuff (Crowbar); its spread is
   // revealed once the play has finished. Outcome's own drain does the same.
   if (next.phase === "Play") next = offerQueuedQuestion(offerGoodStuff(next, run));
+  if (next.phase === "GameOver") closeOpenPhase(state, run);
   return { ok: true, state: next, events: run.events };
+}
+
+/** A run that ends mid-phase still closes that phase, just before the game-over line. */
+function closeOpenPhase(before: GameState, run: Run): void {
+  let open: LoggedPhase | null = before.phase === "GameOver" ? null : before.phase;
+  for (const e of run.events) {
+    if (e.type === "PHASE_STARTED") open = e.phase;
+    else if (e.type === "CLEANUP_BEGAN") open = "Cleanup";
+    else if (e.type === "PHASE_ENDED") open = null;
+  }
+  const over = run.events.findIndex((e) => e.type === "GAME_OVER");
+  if (open === null || over < 0) return;
+  run.events.splice(over, 0, { type: "PHASE_ENDED", phase: open });
 }
 
 function apply(state: GameState, command: Command, run: Run): GameState {
@@ -785,7 +803,7 @@ function applyEffect(state: GameState, effect: RoomEffect, who: Character, run: 
     case "DealBadStuff":
       return dealBadStuff(state, who, effect.count, run.events);
     case "TakeGoodStuff":
-      return earnGoodStuff(state, who, effect.count);
+      return earnGoodStuff(state, who, effect.count, state.resolution?.room.name);
     case "RevealReward":
       throw new CorruptStateError("A reward reveal is a pending choice, not an effect.");
     case "ScrapBadStuffFromHand":
@@ -816,7 +834,7 @@ function drain(state: GameState, run: Run): GameState {
     if (head.type === "TakeGoodStuff" && head.who === "both") {
       // Rulebook, Keywords: `Get Good Stuff` — when both players get it from
       // the same outcome, both spreads are revealed before either chooses.
-      for (const c of CHARACTERS) s = earnGoodStuff(s, c, head.count);
+      for (const c of CHARACTERS) s = earnGoodStuff(s, c, head.count, resolution.room.name);
       s = withEffects(s, rest);
       continue;
     }
@@ -1231,20 +1249,26 @@ function offerGoodStuff(state: GameState, run: Run): GameState {
   if (owing.length === 0) return state;
 
   const owed = { ...state.thisTurn.goodStuffOwed };
+  const sources = { ...state.thisTurn.goodStuffSources };
   const spreads: GoodStuffSpread[] = [];
   let pool = state.pools.goodStuff;
   for (const c of owing) {
     owed[c] -= 1;
+    const [source, ...later] = sources[c];
+    sources[c] = later;
     const cards = pool.slice(0, REVEALED);
     pool = pool.slice(cards.length);
     if (cards.length === 0) {
-      run.events.push({ type: "STUFF_POOL_EMPTY", character: c, pool: "good_stuff" });
+      run.events.push({ type: "STUFF_POOL_EMPTY", character: c, pool: "good_stuff", ...fromSource(source) });
       continue;
     }
-    run.events.push({ type: "GOOD_STUFF_REVEALED", character: c, cards });
+    run.events.push({ type: "GOOD_STUFF_REVEALED", character: c, cards, ...fromSource(source) });
     spreads.push({ character: c, cards });
   }
-  const s: GameState = { ...state, thisTurn: { ...state.thisTurn, goodStuffOwed: owed } };
+  const s: GameState = {
+    ...state,
+    thisTurn: { ...state.thisTurn, goodStuffOwed: owed, goodStuffSources: sources },
+  };
   if (spreads.length === 0) return offerGoodStuff(s, run);
   return askGoodStuff(s, spreads, [], run);
 }

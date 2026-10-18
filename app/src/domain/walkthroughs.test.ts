@@ -75,6 +75,9 @@ describe("walkthrough 2 — Down when the deck and discard are both empty ends t
     expect(types).toContain("WENT_DOWN");
     expect(types).toContain("GAME_OVER");
     expect(types.indexOf("WENT_DOWN")).toBeLessThan(types.indexOf("GAME_OVER"));
+    const ended = events.findIndex((e) => e.type === "PHASE_ENDED" && e.phase === "Outcome");
+    expect(ended).toBeGreaterThan(types.indexOf("WENT_DOWN"));
+    expect(ended).toBeLessThan(types.indexOf("GAME_OVER"));
     // Cleanup, the turn ending, and everything after never ran.
     expect(types).not.toContain("CLEANUP_BEGAN");
     expect(types).not.toContain("TURN_ENDED");

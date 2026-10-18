@@ -653,6 +653,23 @@ describe("Room kinds: Room and Stairwell", () => {
     expect(next.Red.hand.some((c) => c.kind === "good_stuff")).toBe(true);
   });
 
+  it("names the room whose line earned a Good Stuff reveal", () => {
+    const state = rig({
+      phase: "Play",
+      activeRoom: room("Security Turnstile"),
+      Red: player({ deck: pile("Shove", 5), hand: [card("Charge"), card("Shove"), card("Shove")] }),
+      Gray: player({ deck: pile("Duck Under", 5), hand: [card("Pry Bar")] }),
+    });
+    const r = ids(state, "Red");
+    const { events } = play(state, [
+      { type: "PLAY_CARD", character: "Red", cardId: r[0] as CardId, payWith: [r[1] as CardId, r[2] as CardId] },
+      playFree("Gray", ids(state, "Gray")[0] as CardId),
+      { type: "END_PLAY" },
+    ]);
+    const revealed = events.find((e) => e.type === "GOOD_STUFF_REVEALED");
+    expect(revealed?.source).toBe("Security Turnstile");
+  });
+
   it("a met threshold against an empty Good Stuff pool pays nothing and says so", () => {
     // Security Turnstile's Oomph 5 line owes Red a Good Stuff, but the pool is dry.
     const state = rig({
@@ -681,6 +698,7 @@ describe("Room kinds: Room and Stairwell", () => {
       type: "STUFF_POOL_EMPTY",
       character: "Red",
       pool: "good_stuff",
+      source: "Security Turnstile",
     });
     expect(next.Red.hand).toHaveLength(0);
   });

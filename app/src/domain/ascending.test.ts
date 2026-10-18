@@ -1,4 +1,4 @@
-/* Rulebook, Ascending — shuffle the hand into the deck, the reward, building
+/* Rulebook, Ascending — shuffle everything into the deck, the reward, building
  * the next floor. Stuff a character holds stays in their deck until it is
  * Scrapped or Exhausted; nothing returns it to a pool. */
 
@@ -40,7 +40,7 @@ function atAscension(over: Partial<GameState> = {}): GameState {
   };
 }
 
-describe("Ascending, shuffle your hand into your deck", () => {
+describe("Ascending, Heal and Reset", () => {
   it("'Shuffle your hand into your deck' — the hand's cards join the deck, not lost", () => {
     const held = card("Shove");
     const state = atAscension({
@@ -50,6 +50,25 @@ describe("Ascending, shuffle your hand into your deck", () => {
     expect(next.Red.hand).toEqual([]);
     expect(next.Red.deck.some((c) => c.id === held.id)).toBe(true);
     expect(eventTypes(events)).toContain("CARDS_SHUFFLED_IN");
+  });
+
+  it("hand, discard pile and Exhaust pile all go into the deck", () => {
+    const inHand = card("Shove");
+    const inDiscard = [card("Charge"), card("Charge")];
+    const inExhaust = [card("Duck Under")];
+    const state = atAscension({
+      Red: player({ deck: pile("Shove", 2), hand: [inHand], discard: inDiscard, exhaust: inExhaust }),
+    });
+    const before = state.Red.deck.length;
+    const { state: next, events } = must(state, { type: "ASCEND", Red: NOTHING, Gray: NOTHING });
+    const moved = [inHand, ...inDiscard, ...inExhaust];
+    expect(next.Red.hand).toEqual([]);
+    expect(next.Red.discard).toEqual([]);
+    expect(next.Red.exhaust).toEqual([]);
+    expect(next.Red.deck).toHaveLength(before + moved.length);
+    for (const m of moved) expect(next.Red.deck.some((c) => c.id === m.id)).toBe(true);
+    const shuffled = events.find((e) => e.type === "CARDS_SHUFFLED_IN" && e.character === "Red");
+    expect(shuffled?.type === "CARDS_SHUFFLED_IN" && shuffled.cards).toHaveLength(moved.length);
   });
 });
 
@@ -78,24 +97,24 @@ describe("Ascending, Stuff stays until Scrapped or Exhausted", () => {
     expect(next.pools.badStuff).toHaveLength(before);
   });
 
-  it("Stuff sitting in the discard pile stays there too", () => {
+  it("Stuff sitting in the discard pile goes into the deck with the rest", () => {
     const inDiscard = card("Coil Of Cable");
     const state = atAscension({
       Red: player({ deck: pile("Shove", 2), discard: [inDiscard, ...pile("Charge", 2)] }),
     });
     const before = state.pools.goodStuff.length;
     const { state: next } = must(state, { type: "ASCEND", Red: NOTHING, Gray: NOTHING });
-    expect(next.Red.discard.some((c) => c.id === inDiscard.id)).toBe(true);
+    expect(next.Red.deck.some((c) => c.id === inDiscard.id)).toBe(true);
     expect(next.pools.goodStuff).toHaveLength(before);
   });
 
-  it("'no heal' — the discard pile is untouched", () => {
+  it("the discard pile is emptied into the deck", () => {
     const state = atAscension({
       Red: player({ deck: pile("Shove", 2), discard: pile("Charge", 4) }),
     });
     const { state: next } = must(state, { type: "ASCEND", Red: NOTHING, Gray: NOTHING });
-    expect(next.Red.discard).toHaveLength(4);
-    expect(next.Red.deck).toHaveLength(2);
+    expect(next.Red.discard).toHaveLength(0);
+    expect(next.Red.deck).toHaveLength(6);
   });
 
   it("'nothing ever leaves the Scrapyard'", () => {

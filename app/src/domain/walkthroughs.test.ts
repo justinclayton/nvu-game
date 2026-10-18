@@ -125,9 +125,7 @@ describe("walkthrough 4 — Stuff stays in the deck across an Ascend, until Scra
     const { state: next, events } = must(state, { type: "ASCEND", Red: NOTHING, Gray: NOTHING });
 
     expect(next.Red.deck.some((c) => c.id === inDeck.id)).toBe(true);
-    expect(next.Red.discard.some((c) => c.id === inDiscard.id)).toBe(true);
-    // The hand shuffles into the deck first, so Stuff that started there is
-    // in the deck now too, exactly like the rest of the hand.
+    expect(next.Red.deck.some((c) => c.id === inDiscard.id)).toBe(true);
     expect(next.Red.hand).toEqual([]);
     expect(next.Red.deck.some((c) => c.id === inHand.id)).toBe(true);
     expect(next.pools.goodStuff).toHaveLength(beforeGood);
@@ -235,8 +233,8 @@ describe("walkthrough 7 — one Down ends the run immediately, mid multi-effect 
   });
 });
 
-describe("walkthrough 8 — ascending end to end: shuffle the hand in, then the reward, no heal", () => {
-  it("clears the floor, takes a reward, and starts the next floor with the old discard pile intact", () => {
+describe("walkthrough 8 — ascending end to end: shuffle everything in, then the reward", () => {
+  it("clears the floor, takes a reward, and starts the next floor with a rebuilt deck", () => {
     const state = rig({
       phase: "Play",
       floor: 1,
@@ -276,15 +274,11 @@ describe("walkthrough 8 — ascending end to end: shuffle the hand in, then the 
 
     expect(next.floor).toBe(2);
     expect(next.phase).toBe("Turn Start");
-    // No heal: the 3 Charges from before this floor are still there, plus
-    // the Charge itself and the two Pry Bars played alongside it — all
-    // discarded at Cleanup, and none of it swept anywhere: Stuff stays until
-    // it is Scrapped or Exhausted. The 2 Shoves that paid for Charge were
-    // Exhausted. The reward joins the discards: it goes into the discard
-    // pile, not the deck.
-    expect(next.Red.discard).toHaveLength(7);
-    expect(next.Red.exhaust.filter((c) => c.name === "Shove")).toHaveLength(2);
-    expect(next.Red.discard.some((c) => c.id === offer.id)).toBe(true);
+    expect(next.Red.deck).toHaveLength(13);
+    expect(next.Red.deck.filter((c) => c.name === "Shove")).toHaveLength(7);
+    expect(next.Red.deck.filter((c) => c.name === "Charge")).toHaveLength(4);
+    expect(next.Red.exhaust).toEqual([]);
+    expect(next.Red.discard.map((c) => c.id)).toEqual([offer.id]);
     expect(next.Red.deck.some((c) => c.id === offer.id)).toBe(false);
   });
 });

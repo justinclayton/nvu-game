@@ -60,6 +60,19 @@ function gravHarnessDraw(): GameState {
   return asked;
 }
 
+/** Sharing Is Caring in play: Red can pay for Charge from Gray's hand. */
+function sharingIsCaring(): GameState {
+  const state = rig({
+    phase: "Play",
+    activeRoom: room(CLEARED_ROOM),
+    Red: player({ deck: pile("Shove", 4), hand: [card("Charge"), card("Shove")] }),
+    Gray: player({ deck: pile("Duck Under", 4), hand: [card("Sharing Is Caring"), ...pile("Duck Under", 3)] }),
+  });
+  const sharing = state.Gray.hand[0];
+  if (!sharing) throw new Error("rig");
+  return must(state, { type: "PLAY_CARD", character: "Gray", cardId: sharing.id, payWith: [] }).state;
+}
+
 /** A pending `ChooseDraw` for one: Stim Pack's "you may draw 1 card". */
 function stimPackDraw(): GameState {
   const state = rig({
@@ -332,6 +345,11 @@ export const FIXTURES: readonly Fixture[] = [
     name: "grav-harness-draw",
     description: "Grav Harness pending a ChooseDraw answer: Red, Gray or neither.",
     build: stable(gravHarnessDraw),
+  },
+  {
+    name: "sharing-is-caring",
+    description: "Sharing Is Caring in play: Red pays for Charge with Gray's cards.",
+    build: stable(sharingIsCaring),
   },
   {
     name: "stim-pack-draw",

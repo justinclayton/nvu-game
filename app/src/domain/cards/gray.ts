@@ -287,6 +287,14 @@ export const GRAY: Registry = {
     onChoice: (answer, state) => drawnAs(answer, state),
   },
 
+  "Sharing Is Caring": {
+    whileInPlay: { sharesHands: true },
+  },
+
+  "Zen Mode": {
+    whileInPlay: { preventsExhaust: true },
+  },
+
   Pivot: {
     onPlay(state) {
       return done(grantPlayDiscount(state, "Red"));

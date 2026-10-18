@@ -1,8 +1,9 @@
 name: CI
 
+# Every PR, not only those to main: a code layer is based on the layer below
+# (design/loop/spec.md, step 5).
 on:
   pull_request:
-    branches: [main]
 
 jobs:
   checks:

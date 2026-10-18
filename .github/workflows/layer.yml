@@ -1,0 +1,439 @@
+# Step 5 of the design loop (design/loop/spec.md): code layers in a stack. A
+# `ready-for-agent` label on a loop issue, one whose body has a
+# `Source PR: #n` line, builds the issue as a new layer on top of the stack
+# whose bottom is the source layer's PR #n. The layer is a branch
+# `claude/issue-<n>` with its own PR based on the layer below, opened with
+# `gh stack submit --auto`, so its diff is that issue's alone.
+#
+# A loop issue that also has a `Layer PR: #m` line is a fix or revert for the
+# layer owning that PR. The job commits it as a new commit on that layer's
+# branch, pushes it without force, and carries it up with
+# `gh stack rebase --upstack`. Nothing here amends or squashes a commit, and
+# nothing here merges: the designer merges the whole stack (step 7).
+#
+# Every write is nvu-agent's (NVU_AGENT_APP_ID, NVU_AGENT_PRIVATE_KEY). The
+# agent has no token and no git write access: it edits files and runs the make
+# checks, and the job commits. Each App token is minted just before its use,
+# because a token lasts an hour and a run can last longer.
+#
+# A labeled event comes only from someone with write access to this repo, so a
+# fork cannot start it. The fork guard is still checked on the source PR.
+#
+# Retries: a re-run (attempt 2 and up) resumes on an issue it already
+# claimed, and a layer whose commit already exists on its branch skips the
+# agent. Each comment carries a marker and is not posted twice.
+name: Layer
+
+on:
+  issues:
+    types: [labeled]
+
+permissions:
+  contents: read
+  pull-requests: read
+  issues: read
+
+jobs:
+  gate:
+    if: github.event.label.name == 'ready-for-agent' && github.event.issue.pull_request == null
+    runs-on: ubuntu-latest
+    outputs:
+      source: ${{ steps.stack.outputs.source }}
+      layer: ${{ steps.stack.outputs.layer }}
+      target: ${{ steps.stack.outputs.target }}
+      branches: ${{ steps.stack.outputs.branches }}
+    steps:
+      - name: Is this a loop issue with a stack to build on?
+        id: stack
+        env:
+          GH_TOKEN: ${{ github.token }}
+          N: ${{ github.event.issue.number }}
+        run: |
+          set -eu
+          gh api "repos/$GITHUB_REPOSITORY/issues/$N" --jq '.body // ""' > body.md
+          source=$(sed -n 's/^Source PR: #\([0-9][0-9]*\)[[:space:]]*$/\1/p' body.md | head -1)
+          layer=$(sed -n 's/^Layer PR: #\([0-9][0-9]*\)[[:space:]]*$/\1/p' body.md | head -1)
+          target=
+          if [ -z "$source" ]; then
+            echo "No 'Source PR: #n' line: not a loop issue."
+            exit 0
+          fi
+          open=$(gh api "repos/$GITHUB_REPOSITORY/issues/$N/dependencies/blocked_by" --jq '[.[] | select(.state == "open")] | length')
+          if [ "$open" != 0 ]; then
+            echo "#$N is blocked by $open open issue(s). Close them, then remove and add ready-for-agent again."
+            exit 0
+          fi
+          read -r base head fork state < <(gh api "repos/$GITHUB_REPOSITORY/pulls/$source" \
+            --jq '[.base.ref, .head.ref, (.head.repo.full_name != "'"$GITHUB_REPOSITORY"'"), .state] | @tsv')
+          if [ "$state" != open ] || [ "$base" != main ] || [ "$fork" = true ]; then
+            echo "PR #$source is not an open PR to main from this repo: nothing to build on."
+            exit 0
+          fi
+          # The stack, bottom to top: follow open PRs based on each branch.
+          branches=$head
+          top=$head
+          for _ in $(seq 50); do
+            above=$(gh api --paginate "repos/$GITHUB_REPOSITORY/pulls?state=open&base=$top" \
+              --jq ".[] | select(.head.repo.full_name == \"$GITHUB_REPOSITORY\") | .head.ref")
+            [ -z "$above" ] && break
+            if [ "$(echo "$above" | wc -l)" -gt 1 ]; then
+              echo "More than one open PR is based on $top; a stack is linear:"
+              echo "$above"
+              exit 1
+            fi
+            top=$above
+            branches="$branches $above"
+          done
+          if [ -n "$layer" ]; then
+            target=$(gh api "repos/$GITHUB_REPOSITORY/pulls/$layer" --jq .head.ref)
+            case " $branches " in
+              *" $target "*) ;;
+              *) echo "PR #$layer is not a layer of PR #$source's stack ($branches)."; exit 1 ;;
+            esac
+          fi
+          echo "The stack is: $branches"
+          {
+            echo "source=$source"
+            echo "layer=$layer"
+            echo "target=$target"
+            echo "branches=$branches"
+          } >> "$GITHUB_OUTPUT"
+
+  gate-failed:
+    needs: gate
+    if: always() && needs.gate.result == 'failure'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Mint the nvu-agent token
+        id: app-token
+        uses: actions/create-github-app-token@v1
+        with:
+          app-id: ${{ vars.NVU_AGENT_APP_ID }}
+          private-key: ${{ secrets.NVU_AGENT_PRIVATE_KEY }}
+
+      - name: Say the issue could not be placed in a stack
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+          N: ${{ github.event.issue.number }}
+          RUN: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          # shellcheck disable=SC2016
+          printf 'No code layer was started: the issue could not be placed in a stack. See the [run](%s), fix it, and add `ready-for-agent` again.\n' "$RUN" \
+            > "$RUNNER_TEMP/gate-failed.md"
+          gh api -X POST "repos/$GITHUB_REPOSITORY/issues/$N/comments" \
+            -F body=@"$RUNNER_TEMP/gate-failed.md" --jq '"posted \(.html_url)"'
+
+  layer:
+    needs: gate
+    if: needs.gate.outputs.source != ''
+    runs-on: self-hosted
+    timeout-minutes: 90
+    # One job per stack at a time. GitHub keeps one pending run per group, so
+    # a job that finishes wakes the stack's next ready issue (the last step).
+    concurrency:
+      group: layer-${{ needs.gate.outputs.source }}
+      cancel-in-progress: false
+    env:
+      N: ${{ github.event.issue.number }}
+      SOURCE: ${{ needs.gate.outputs.source }}
+      LAYER: ${{ needs.gate.outputs.layer }}
+      TARGET: ${{ needs.gate.outputs.target }}
+      BRANCHES: ${{ needs.gate.outputs.branches }}
+      RUN: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+    steps:
+      - name: Work out the target branch
+        id: target
+        run: |
+          set -eu
+          top=${BRANCHES##* }
+          if [ -n "$LAYER" ]; then
+            echo "mode=fix" >> "$GITHUB_OUTPUT"
+          else
+            echo "mode=add" >> "$GITHUB_OUTPUT"
+          fi
+          echo "top=$top" >> "$GITHUB_OUTPUT"
+
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ steps.target.outputs.top }}
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Mint the nvu-agent token
+        id: app-token
+        uses: actions/create-github-app-token@v1
+        with:
+          app-id: ${{ vars.NVU_AGENT_APP_ID }}
+          private-key: ${{ secrets.NVU_AGENT_PRIVATE_KEY }}
+
+      - name: Claim the issue
+        id: claim
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+          BOT: ${{ steps.app-token.outputs.app-slug }}[bot]
+          ATTEMPT: ${{ github.run_attempt }}
+        run: |
+          set -eu
+          labels=$(gh api "repos/$GITHUB_REPOSITORY/issues/$N" --jq '[.labels[].name] | join(" ")')
+          case " $labels " in
+            *" ready-for-agent "*) ;;
+            *" in-progress "*)
+              if [ "$ATTEMPT" = 1 ]; then
+                echo "#$N is in progress already: another run has it."
+                exit 0
+              fi ;;
+            *) echo "#$N is not ready-for-agent any more: another run took it."; exit 0 ;;
+          esac
+          gh api -X POST "repos/$GITHUB_REPOSITORY/issues/$N/labels" -f 'labels[]=in-progress' --silent
+          gh api -X DELETE "repos/$GITHUB_REPOSITORY/issues/$N/labels/ready-for-agent" --silent || true
+          echo "bot=$BOT" >> "$GITHUB_OUTPUT"
+          echo "go=true" >> "$GITHUB_OUTPUT"
+
+      - name: Say the layer has started
+        if: steps.claim.outputs.go == 'true'
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+          BOT: ${{ steps.claim.outputs.bot }}
+        run: |
+          marker="<!-- nvu-loop: layer-start $GITHUB_RUN_ID -->"
+          if gh api --paginate "repos/$GITHUB_REPOSITORY/issues/$N/comments" \
+              --jq ".[] | select(.user.login == \"$BOT\") | .body" | grep -qF "$marker"; then
+            echo "The start is posted already."
+            exit 0
+          fi
+          if [ -n "$LAYER" ]; then what="a fix on the layer for PR #$LAYER"; else what="a new layer above \`${BRANCHES##* }\`"; fi
+          printf 'Building %s. [Run](%s)\n\n%s\n' "$what" "$RUN" "$marker" > "$RUNNER_TEMP/start.md"
+          gh api -X POST "repos/$GITHUB_REPOSITORY/issues/$N/comments" \
+            -F body=@"$RUNNER_TEMP/start.md" --jq '"posted \(.html_url)"'
+
+      - name: Set up the stack's branches and see if the layer is built already
+        id: branch
+        if: steps.claim.outputs.go == 'true'
+        run: |
+          set -eu
+          git switch --detach -q
+          for b in $BRANCHES; do git branch -f "$b" "origin/$b"; done
+          title=$(jq -r '.issue.title' "$GITHUB_EVENT_PATH")
+          echo "title=$title" >> "$GITHUB_OUTPUT"
+          if [ -n "$LAYER" ]; then
+            work=$TARGET
+            git switch -q "$work"
+            if git log --format=%s "origin/main..origin/$work" | grep -q "^Issue #$N: "; then built=true; else built=false; fi
+          else
+            work=claude/issue-$N
+            if git rev-parse --verify -q "origin/$work" >/dev/null; then
+              git branch -f "$work" "origin/$work"
+              built=true
+            else
+              git switch -q "${BRANCHES##* }"
+              built=false
+            fi
+          fi
+          echo "work=$work" >> "$GITHUB_OUTPUT"
+          echo "built=$built" >> "$GITHUB_OUTPUT"
+          echo "work branch $work, built already: $built"
+
+      - name: Install the app's dependencies
+        if: steps.branch.outputs.built == 'false'
+        run: make app-install
+
+      - name: Write the prompt
+        if: steps.branch.outputs.built == 'false'
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+        run: |
+          set -eu
+          {
+            cat .github/loop/layer.md
+            echo
+            echo "## This run"
+            echo
+            echo "- Repository: \`$GITHUB_REPOSITORY\`"
+            echo "- Issue: #$N"
+            if [ -n "$LAYER" ]; then
+              echo "- A fix on the layer for PR #$LAYER: build it on top of that layer's code, as it stands in the checkout."
+            else
+              echo "- A new layer, on top of the stack's code, as it stands in the checkout."
+            fi
+            echo
+            echo "### The issue"
+            echo
+            gh api "repos/$GITHUB_REPOSITORY/issues/$N" --jq '.title, "", .body'
+          } > "$RUNNER_TEMP/prompt.md"
+
+      - name: Build
+        if: steps.branch.outputs.built == 'false'
+        env:
+          GH_TOKEN: ""
+        run: |
+          set -o pipefail
+          claude -p \
+            --model sonnet \
+            --restricted \
+            --strict-mcp-config \
+            --permission-mode dontAsk \
+            --tools Bash,Read,Grep,Glob,Edit,Write \
+            --allowedTools \
+              Read Grep Glob Edit \
+              'Bash(make check)' 'Bash(make app-check)' \
+              'Bash(git status:*)' 'Bash(git diff:*)' 'Bash(git log:*)' 'Bash(git show:*)' \
+            --disallowedTools \
+              'Edit(rulebook.md)' 'Edit(cards.yaml)' 'Edit(tools/cards.js)' \
+              'Edit(app/src/content/cards.generated.ts)' 'Edit(.github/**)' 'Edit(.githooks/**)' \
+            --output-format stream-json \
+            --verbose \
+            < "$RUNNER_TEMP/prompt.md" \
+            > "$RUNNER_TEMP/transcript.jsonl"
+
+      - name: Check the agent stayed in bounds, then run the checks myself
+        if: steps.branch.outputs.built == 'false'
+        run: |
+          set -eu
+          bad=$(git status --porcelain | awk '{print $NF}' \
+            | grep -E '^(rulebook\.md|cards\.yaml|tools/cards\.js|app/src/content/cards\.generated\.ts|\.github/|\.githooks/)' || true)
+          if [ -n "$bad" ]; then
+            echo "The coder changed files that are not its to change:"
+            echo "$bad"
+            exit 1
+          fi
+          if [ -z "$(git status --porcelain)" ]; then
+            echo "The coder changed nothing."
+            exit 1
+          fi
+          make check
+          make app-check
+
+      - name: Mint the nvu-agent token to push
+        id: push-token
+        if: steps.claim.outputs.go == 'true'
+        uses: actions/create-github-app-token@v1
+        with:
+          app-id: ${{ vars.NVU_AGENT_APP_ID }}
+          private-key: ${{ secrets.NVU_AGENT_PRIVATE_KEY }}
+
+      - name: Commit and push as nvu-agent
+        id: commit
+        if: steps.claim.outputs.go == 'true'
+        env:
+          GH_TOKEN: ${{ steps.push-token.outputs.token }}
+          BOT_SLUG: ${{ steps.push-token.outputs.app-slug }}[bot]
+          BUILT: ${{ steps.branch.outputs.built }}
+          WORK: ${{ steps.branch.outputs.work }}
+          TITLE: ${{ steps.branch.outputs.title }}
+        run: |
+          set -eu
+          id=$(gh api "users/$BOT_SLUG" --jq .id)
+          git config user.name "$BOT_SLUG"
+          git config user.email "$id+$BOT_SLUG@users.noreply.github.com"
+          git config credential.https://github.com.helper '!gh auth git-credential'
+          read -ra stack <<< "$BRANCHES"
+          withwork=("${stack[@]}" "$WORK")
+          if [ "$BUILT" = false ]; then
+            if [ -n "$LAYER" ]; then
+              gh stack init "${stack[@]}"
+              git switch -q "$WORK"
+              git add -A
+              git commit -q -m "Issue #$N: $TITLE"
+              git push origin "$WORK"
+              gh stack rebase --upstack
+              gh stack push
+            else
+              gh stack init "${stack[@]}"
+              gh stack add -Am "Issue #$N: $TITLE" "$WORK"
+            fi
+          elif [ -z "$LAYER" ]; then
+            gh stack init "${withwork[@]}"
+          fi
+          echo "final=$(git rev-parse "$WORK")" >> "$GITHUB_OUTPUT"
+
+      - name: Open the layer's PR and mark it ready for review
+        id: pr
+        if: steps.claim.outputs.go == 'true'
+        env:
+          GH_TOKEN: ${{ steps.push-token.outputs.token }}
+          WORK: ${{ steps.branch.outputs.work }}
+          TITLE: ${{ steps.branch.outputs.title }}
+        run: |
+          set -eu
+          if [ -z "$LAYER" ]; then
+            gh stack submit --auto
+            pr=$(gh api "repos/$GITHUB_REPOSITORY/pulls?state=open&head=$GITHUB_REPOSITORY_OWNER:$WORK" --jq '.[0].number')
+            # The Source PR line is what the reviewer job keys on.
+            printf 'Source PR: #%s\n\nCloses #%s\n' "$SOURCE" "$N" > "$RUNNER_TEMP/pr.md"
+            gh api -X PATCH "repos/$GITHUB_REPOSITORY/pulls/$pr" -f title="$TITLE" -F body=@"$RUNNER_TEMP/pr.md" --silent
+            if [ "$(gh api "repos/$GITHUB_REPOSITORY/pulls/$pr" --jq .draft)" = true ]; then
+              gh pr ready "$pr"
+            fi
+          else
+            pr=$LAYER
+          fi
+          echo "pr=$pr" >> "$GITHUB_OUTPUT"
+
+      - name: Say the layer is done
+        if: steps.claim.outputs.go == 'true'
+        env:
+          GH_TOKEN: ${{ steps.push-token.outputs.token }}
+          BOT: ${{ steps.claim.outputs.bot }}
+          FINAL: ${{ steps.commit.outputs.final }}
+          PR: ${{ steps.pr.outputs.pr }}
+        run: |
+          set -eu
+          marker="<!-- nvu-loop: layer $FINAL -->"
+          if [ -n "$LAYER" ]; then
+            # shellcheck disable=SC2016
+            printf 'Fix `%s` for #%s is committed on this layer, and the layers above are rebased onto it.\n\n%s\n' "${FINAL:0:7}" "$N" "$marker" > "$RUNNER_TEMP/done-pr.md"
+            if ! gh api --paginate "repos/$GITHUB_REPOSITORY/issues/$PR/comments" --jq ".[] | select(.user.login == \"$BOT\") | .body" | grep -qF "$marker"; then
+              gh api -X POST "repos/$GITHUB_REPOSITORY/issues/$PR/comments" -F body=@"$RUNNER_TEMP/done-pr.md" --jq '"posted \(.html_url)"'
+            fi
+          fi
+          # shellcheck disable=SC2016
+          printf 'Built as `%s` in PR #%s. It stays open and in progress until the stack merges to `main`.\n\n%s\n' "${FINAL:0:7}" "$PR" "$marker" > "$RUNNER_TEMP/done.md"
+          if gh api --paginate "repos/$GITHUB_REPOSITORY/issues/$N/comments" --jq ".[] | select(.user.login == \"$BOT\") | .body" | grep -qF "$marker"; then
+            echo "The end is posted already."
+            exit 0
+          fi
+          gh api -X POST "repos/$GITHUB_REPOSITORY/issues/$N/comments" -F body=@"$RUNNER_TEMP/done.md" --jq '"posted \(.html_url)"'
+
+      - name: Wake the stack's next ready issue
+        if: success() && steps.claim.outputs.go == 'true'
+        env:
+          GH_TOKEN: ${{ steps.push-token.outputs.token }}
+        run: |
+          set -eu
+          next=$(gh api --paginate "repos/$GITHUB_REPOSITORY/issues?state=open&labels=ready-for-agent&per_page=100" \
+            --jq ".[] | select(.pull_request | not) | select((.body // \"\") | test(\"(?m)^Source PR: #$SOURCE\\\\s*$\")) | .number" | sort -n | head -1)
+          [ -n "$next" ] || { echo "No other issue is waiting."; exit 0; }
+          open=$(gh api "repos/$GITHUB_REPOSITORY/issues/$next/dependencies/blocked_by" --jq '[.[] | select(.state == "open")] | length')
+          [ "$open" = 0 ] || { echo "#$next is blocked."; exit 0; }
+          # Removing and adding the label starts the next run, which waits in this stack's group.
+          gh api -X DELETE "repos/$GITHUB_REPOSITORY/issues/$next/labels/ready-for-agent" --silent
+          gh api -X POST "repos/$GITHUB_REPOSITORY/issues/$next/labels" -f 'labels[]=ready-for-agent' --silent
+          echo "Woke #$next."
+
+      - name: Mint the nvu-agent token to close out
+        id: final-token
+        if: always() && steps.claim.outputs.go == 'true'
+        uses: actions/create-github-app-token@v1
+        with:
+          app-id: ${{ vars.NVU_AGENT_APP_ID }}
+          private-key: ${{ secrets.NVU_AGENT_PRIVATE_KEY }}
+
+      - name: Say the layer failed
+        if: failure() && steps.claim.outputs.go == 'true'
+        env:
+          GH_TOKEN: ${{ steps.final-token.outputs.token }}
+        run: |
+          # shellcheck disable=SC2016
+          printf 'The layer for #%s failed before it was finished. Re-run it from the [run](%s); the transcript is on the run.\n' "$N" "$RUN" \
+            > "$RUNNER_TEMP/layer-failed.md"
+          gh api -X POST "repos/$GITHUB_REPOSITORY/issues/$N/comments" \
+            -F body=@"$RUNNER_TEMP/layer-failed.md" --jq '"posted \(.html_url)"'
+
+      - name: Keep the transcript on the run
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: layer-transcript-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/transcript.jsonl
+          retention-days: 30
+          if-no-files-found: ignore

@@ -115,3 +115,82 @@ commit on the top layer has no report marker, the run plays nothing and posts
 that commit's report. Each App token is minted just before its use, so a long
 run does not outlive one. A gate or mint failure comments on the source PR and
 takes the label off.
+
+## Step 5: code layers, reviewers and the stack
+
+Two workflows build and review the layers of a stack whose bottom is the source
+layer's PR. Nothing in either merges: the designer merges the whole stack with
+`gh stack merge <top PR> --merge` (step 7).
+
+### The coder: `.github/workflows/layer.yml`
+
+The prompt is [`.github/loop/layer.md`](../../.github/loop/layer.md).
+
+- **What starts it.** The label `ready-for-agent` on an issue whose body has a
+  `Source PR: #n` line. The planner writes that line. The `gate` job, on a
+  GitHub-hosted runner, stops unless the issue has no open blocker and PR `#n`
+  is an open PR to `main` from this repo, then finds the stack by following
+  open PRs based on each branch. A blocked issue is skipped: once its blockers
+  close, remove and add `ready-for-agent` to start it. A labeled event needs
+  write access, so a fork cannot start it.
+- **A new layer.** The job claims the issue (`in-progress` on, `ready-for-agent`
+  off), comments on it, and runs the coder on Sonnet in a checkout of the
+  stack's top. The coder edits files and runs `make check` and `make app-check`.
+  It has no git write access, and it may not edit `rulebook.md`, `cards.yaml`,
+  the generated card modules or `.github/`. The job runs both make targets
+  itself, then, as `nvu-agent`, adds the branch `claude/issue-<n>` on top with
+  `gh stack add`, opens its PR with `gh stack submit --auto`, titles it with
+  the issue and puts `Source PR: #n` and `Closes #<n>` in the body, and marks it
+  ready for review. The issue stays open, with `in-progress`, until the stack
+  merges: the PR's base is the layer below, so `Closes` takes effect only then.
+- **A fix or revert.** An issue that also has a `Layer PR: #m` line is committed
+  on the branch of PR `#m` as a new commit with a plain push, then
+  `gh stack rebase --upstack` and `gh stack push` carry it into the layers
+  above. That rebase is the one allowed rewrite. No job amends, squashes or
+  force-pushes anything else.
+- **Status.** The job comments on the issue when it starts and when it ends,
+  and on the layer's PR for a fix. A failure comments on the issue. Every
+  comment carries a marker, and the transcript is the run's artifact
+  `layer-transcript-<run id>-<attempt>` for 30 days.
+- **One at a time.** The concurrency group `layer-<source PR>` runs one layer
+  per stack at a time. GitHub keeps only one pending run per group, so a
+  finished job removes and adds `ready-for-agent` on the stack's next ready
+  issue to start it.
+- **Retries.** Re-running a failed run resumes on the claimed issue. If the
+  layer's commit is on its branch already, the agent is skipped and the job
+  carries on from the push.
+- **Setup.** `NVU_AGENT_APP_ID` and `NVU_AGENT_PRIVATE_KEY`. The runner needs
+  `gh stack` installed.
+
+### The reviewer: `.github/workflows/review.yml`
+
+The prompt is [`.github/loop/review.md`](../../.github/loop/review.md).
+
+- **When it runs.** A PR from this repo that is not a draft, is based on a
+  branch other than `main` and has `Source PR: #` in its body, when it opens,
+  becomes ready or gets a push. One review per head commit.
+- **What it does.** A read-only agent on Sonnet reviews the diff against the
+  issue's acceptance criteria and the repo's standards, and runs `make check`
+  and `make app-check`. Its final message is the review body. The job posts it
+  as `nvu-bot`, because the coder writes as `nvu-agent` and GitHub does not let
+  an author approve their own PR: an approval for `# ✅ Clean`, a change
+  request for `# ❌ Changes needed`. The body ends with
+  `<!-- nvu-loop: review <sha> -->`, and a run that finds it posts nothing.
+- **Clean.** CI green plus the reviewer's approval `[agent-proposed]`. The
+  approval is all a layer gets. The coder never merges, and `nvu-bot` and
+  `nvu-agent` are not used to merge.
+- **Changes needed.** The review stays on the PR. The designer decides: file a
+  fix issue with `Layer PR: #m`, or say so on the PR.
+- **CI.** `ci.yml` runs on every PR, not only those to `main`, so a layer is
+  checked against the layer below.
+- **Setup.** `NVU_BOT_APP_ID` and `NVU_BOT_PRIVATE_KEY`.
+
+### Open details
+
+- A layer whose diff a revert empties: whether GitHub merges it is not known.
+  If it does not, rebuild the stack without that layer (`gh stack unstack`,
+  then `init`).
+- A bug the playtest finds reaches its layer as an issue with `Layer PR: #m`,
+  filed by the designer. Nothing files it automatically yet.
+- `gh stack` has not run on the runner with an App token. Run a first stack by
+  hand and watch it before relying on it.

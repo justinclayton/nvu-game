@@ -15,6 +15,7 @@ import { logLines, tailEvents } from "@application/narrate";
 import { createSession, loadSession, type Note, type SavedRun, type Session } from "@application/session";
 import { CARD_CONTENT, CARD_LIST_ID, CARDS_VERSION, RULES_VERSION } from "@content/index";
 import { resolveCardName } from "@content/names";
+import { plural } from "@domain/plural";
 import { costOf, payOptions, playableCards } from "@domain/queries";
 import type { Card, CardId, Character, Command, GameState, RoomId, Stat } from "@domain/types";
 import { CHARACTERS, playerOf } from "@domain/verbs";
@@ -536,7 +537,7 @@ function replayRun(request: ReplayRequest): number {
     out("");
   }
   const kit = file.kit === undefined ? "" : `, recorded on ${file.kit}`;
-  out(`seed ${String(file.run.seed)}, ${String(file.run.commands.length)} command(s) replayed${kit}, ${now}.`);
+  out(`seed ${String(file.run.seed)}, ${plural(file.run.commands.length, "command")} replayed${kit}, ${now}.`);
   if (recorded !== now) {
     out(`The file recorded ${recorded}; the rules now reach ${now}. The rules have changed since it was played.`);
     return 2;
@@ -573,7 +574,7 @@ function fuzz(request: FuzzRequest): number {
   }
 
   if (failures.length === 0) {
-    out(`${String(request.seeds)} seed(s) from ${String(request.from)}: no failures.`);
+    out(`${plural(request.seeds, "seed")} from ${String(request.from)}: no failures.`);
     return 0;
   }
   for (const line of failures) out(line);
@@ -588,7 +589,7 @@ function pct(n: number): string {
 
 function renderReport(report: BalanceReport): string {
   const lines: string[] = [];
-  lines.push(`Policy: ${report.policy}. Seeds ${String(report.from)}-${String(report.from + report.seeds - 1)}, ${String(report.runs)} run(s).`);
+  lines.push(`Policy: ${report.policy}. Seeds ${String(report.from)}-${String(report.from + report.seeds - 1)}, ${plural(report.runs, "run")}.`);
   lines.push(`Win rate: ${pct(report.winRate)} (${String(report.wins)}/${String(report.runs)}).`);
   lines.push("");
   lines.push("Floor reached:");
@@ -601,7 +602,7 @@ function renderReport(report: BalanceReport): string {
   for (const c of CHARACTERS) {
     const s = report.characters[c];
     lines.push(
-      `  ${c}: ${String(s.ascends)} Ascend(s), deck ${s.meanDeckSize.toFixed(1)}, live ${s.meanLiveSize.toFixed(1)}, exhaust ${s.meanExhaustSize.toFixed(1)}`,
+      `  ${c}: ${plural(s.ascends, "Ascend")}, deck ${s.meanDeckSize.toFixed(1)}, live ${s.meanLiveSize.toFixed(1)}, exhaust ${s.meanExhaustSize.toFixed(1)}`,
     );
   }
   lines.push("");

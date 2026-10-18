@@ -17,6 +17,7 @@
  */
 
 import { CARD_LIST_ID, RULES_VERSION } from "@content/index";
+import { plural } from "@domain/plural";
 import type { Character, Command, DomainEvent } from "@domain/types";
 import { describeEvent } from "./narrate";
 import { saveOf, type Note, type SessionState } from "./session";
@@ -80,7 +81,7 @@ export function runTranscript(session: SessionState, at: Date): ExportFile {
     "",
     `floor ${String(head.floor)} · turn ${String(head.turn)} · ${head.outcome}`,
     `seed ${head.seed}`,
-    `${String(head.commands)} command(s), ${String(head.notes)} note(s)`,
+    `${plural(head.commands, "command")}, ${plural(head.notes, "note")}`,
     `exported ${head.exportedAt}`,
     "",
     "The .json export of this run carries the seed and the command log, and replays it exactly.",

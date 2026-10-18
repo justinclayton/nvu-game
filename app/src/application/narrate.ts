@@ -7,6 +7,7 @@
  * nothing about notes.
  */
 
+import { plural } from "@domain/plural";
 import { printedThresholdLines } from "@domain/queries";
 import type { DomainEvent } from "@domain/types";
 import type { Note } from "./session";
@@ -43,9 +44,9 @@ function describeWhat(event: DomainEvent): string {
     case "EXHAUST_PREVENTED":
       return `${event.by.name} stops it: ${event.character} Exhausts nothing.`;
     case "CARDS_SHUFFLED_IN":
-      return `${event.character} shuffles ${String(event.cards.length)} card(s) back in.`;
+      return `${event.character} shuffles ${plural(event.cards.length, "card")} back in.`;
     case "DISCARD_RESHUFFLED":
-      return `${event.character}'s deck is empty — the discard pile shuffles in to make a new one (${String(event.cards)} cards).`;
+      return `${event.character}'s deck is empty — the discard pile shuffles in to make a new one (${plural(event.cards, "card")}).`;
     case "CARD_TO_HAND":
       return `${event.character} takes ${event.card.name} into hand.`;
     case "CARD_MOVED":

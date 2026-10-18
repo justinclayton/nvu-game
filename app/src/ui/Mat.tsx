@@ -12,6 +12,7 @@
 
 import { useRef, type CSSProperties } from "react";
 
+import { plural } from "@domain/plural";
 import type { Card, Character, GameState } from "@domain/types";
 import { CardLayer, type Inspected, type Paying } from "./CardLayer";
 import type { Metrics } from "./metrics";
@@ -52,7 +53,7 @@ function Slot({ id, label, count, row, tone, onOpenPile }: SlotProps) {
     <div className={classes}>
       <span className="slot__label">{label}</span>
       {count !== undefined ? (
-        <span className="slot__count" aria-label={`${label}: ${String(count)} cards`}>
+        <span className="slot__count" aria-label={`${label}: ${plural(count, "card")}`}>
           {count}
         </span>
       ) : null}

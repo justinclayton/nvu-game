@@ -56,7 +56,7 @@ The repo is public, so a self-hosted runner is reachable from forks. Fork PR wor
 
 Three identities write to the repo. `[you]`
 
-- `nvu-bot`, a GitHub App, writes from workflows that run no agent, such as `source-pr.yml` opening the draft PR. It has Pull requests read/write, Contents read and Metadata read.
+- `nvu-bot`, a GitHub App, writes from workflows that run no agent, such as `source-pr.yml` opening the draft PR, and posts the code reviewer's review, since the coder writes as `nvu-agent` and an author cannot approve their own PR. It has Pull requests read/write, Contents read and Metadata read. `[agent-proposed]`
 - `nvu-agent`, a GitHub App, writes from Claude jobs on the self-hosted runner: the planner's issues, code layers and playtest reports. It has Contents, Issues and Pull requests read/write, Actions read and Metadata read, and no Workflows write.
 - The designer writes as themselves.
 

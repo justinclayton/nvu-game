@@ -153,6 +153,7 @@ jobs:
           FROM: ${{ steps.range.outputs.from }}
           RUN: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         run: |
+          # shellcheck disable=SC2016
           printf 'Planning started: reading the sources from `%s` to `%s`. [Run](%s)\n' "${FROM:0:7}" "${SHA:0:7}" "$RUN" \
             > "$RUNNER_TEMP/plan-start.md"
           gh api -X POST "repos/$GITHUB_REPOSITORY/issues/$PR/comments" \
@@ -183,7 +184,8 @@ jobs:
             --output-format stream-json \
             --verbose \
             < "$RUNNER_TEMP/prompt.md" \
-            > "$RUNNER_TEMP/transcript.jsonl"
+            | tee "$RUNNER_TEMP/transcript.jsonl" \
+            | jq -R -r --unbuffered -f .github/loop/progress.jq
 
       - name: Check the agent changed nothing in the checkout
         if: steps.range.outputs.from != ''
@@ -223,6 +225,7 @@ jobs:
           GH_TOKEN: ${{ steps.app-token.outputs.token }}
           RUN: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         run: |
+          # shellcheck disable=SC2016
           printf 'Planning `%s` failed before the plan was posted. Re-run it from the [run](%s); the transcript is on the run.\n' "${SHA:0:7}" "$RUN" \
             > "$RUNNER_TEMP/plan-failed.md"
           gh api -X POST "repos/$GITHUB_REPOSITORY/issues/$PR/comments" \

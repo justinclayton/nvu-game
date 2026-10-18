@@ -1,0 +1,222 @@
+# Step 5 of the design loop (design/loop/spec.md): the code reviewer. A code
+# layer's PR (based on another branch, not main, with a `Source PR: #n` line in
+# its body) that is ready for review gets one reviewer agent run per head
+# commit. The agent reads the layer's diff against the issue's acceptance
+# criteria and the repo's standards, runs `make check` and `make app-check`,
+# and its final message becomes the review body. The job posts it as an
+# approval or a change request.
+#
+# The review is the nvu-bot GitHub App's (NVU_BOT_APP_ID, NVU_BOT_PRIVATE_KEY),
+# because GitHub does not let a PR's author approve it and the coder writes as
+# nvu-agent. nvu-bot has Pull requests write and Contents read: it can approve
+# but has no way to merge, and nothing in this workflow calls a merge. A clean
+# layer is approved, not merged. The agent has no token, no git credentials and
+# no tool that writes.
+#
+# Retries: the review carries <!-- nvu-loop: review <head sha> -->, and a run
+# that finds the marker for its commit posts nothing. A newer push cancels a
+# review still running for the older commit.
+name: Review
+
+on:
+  pull_request:
+    types: [opened, ready_for_review, synchronize]
+
+permissions:
+  contents: read
+  pull-requests: read
+  issues: read
+
+concurrency:
+  group: review-${{ github.head_ref }}
+  cancel-in-progress: true
+
+jobs:
+  gate:
+    # The fork guard: a pull_request from a fork never reaches the runner.
+    # A layer is based on the layer below, never on main.
+    if: >-
+      github.event.pull_request.head.repo.full_name == github.repository
+      && github.event.pull_request.base.ref != 'main'
+      && !github.event.pull_request.draft
+      && contains(github.event.pull_request.body, 'Source PR: #')
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "PR ${{ github.event.pull_request.number }} is a code layer ready for review."
+
+  review:
+    needs: gate
+    runs-on: self-hosted
+    timeout-minutes: 45
+    env:
+      PR: ${{ github.event.pull_request.number }}
+      SHA: ${{ github.event.pull_request.head.sha }}
+      BASE: ${{ github.event.pull_request.base.ref }}
+      RUN: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Mint the nvu-bot token
+        id: app-token
+        uses: actions/create-github-app-token@v1
+        with:
+          app-id: ${{ vars.NVU_BOT_APP_ID }}
+          private-key: ${{ secrets.NVU_BOT_PRIVATE_KEY }}
+
+      - name: Has this commit been reviewed?
+        id: seen
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+          BOT: ${{ steps.app-token.outputs.app-slug }}[bot]
+        run: |
+          set -eu
+          echo "bot=$BOT" >> "$GITHUB_OUTPUT"
+          if gh api --paginate "repos/$GITHUB_REPOSITORY/pulls/$PR/reviews" \
+              --jq ".[] | select(.user.login == \"$BOT\") | .body" | grep -qF "<!-- nvu-loop: review $SHA -->"; then
+            echo "$SHA is reviewed already: posting nothing."
+            echo "reviewed=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Say the review has started
+        if: steps.seen.outputs.reviewed != 'true'
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+          BOT: ${{ steps.seen.outputs.bot }}
+        run: |
+          marker="<!-- nvu-loop: review-start $SHA -->"
+          if gh api --paginate "repos/$GITHUB_REPOSITORY/issues/$PR/comments" \
+              --jq ".[] | select(.user.login == \"$BOT\") | .body" | grep -qF "$marker"; then
+            echo "The start is posted already."
+            exit 0
+          fi
+          # shellcheck disable=SC2016
+          printf 'Reviewing `%s`. [Run](%s)\n\n%s\n' "${SHA:0:7}" "$RUN" "$marker" > "$RUNNER_TEMP/review-start.md"
+          gh api -X POST "repos/$GITHUB_REPOSITORY/issues/$PR/comments" \
+            -F body=@"$RUNNER_TEMP/review-start.md" --jq '"posted \(.html_url)"'
+
+      - name: Install the app's dependencies
+        if: steps.seen.outputs.reviewed != 'true'
+        run: make app-install
+
+      - name: Write the prompt
+        if: steps.seen.outputs.reviewed != 'true'
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+        run: |
+          set -eu
+          issue=$(gh api "repos/$GITHUB_REPOSITORY/pulls/$PR" --jq '.body // ""' | sed -n 's/^Closes #\([0-9][0-9]*\).*/\1/p' | head -1)
+          {
+            cat .github/loop/review.md
+            echo
+            echo "## This run"
+            echo
+            echo "- Repository: \`$GITHUB_REPOSITORY\`"
+            echo "- The layer's PR: #$PR, based on \`$BASE\`"
+            echo "- Review \`git diff origin/$BASE...$SHA\`"
+            echo
+            if [ -n "$issue" ]; then
+              echo "### The issue the layer builds (#$issue)"
+              echo
+              gh api "repos/$GITHUB_REPOSITORY/issues/$issue" --jq '.title, "", .body'
+            else
+              echo "The PR names no issue with a \`Closes #n\` line. Say so under Spec."
+            fi
+          } > "$RUNNER_TEMP/prompt.md"
+
+      - name: Review
+        if: steps.seen.outputs.reviewed != 'true'
+        env:
+          GH_TOKEN: ""
+        run: |
+          set -o pipefail
+          claude -p \
+            --model sonnet \
+            --restricted \
+            --strict-mcp-config \
+            --permission-mode dontAsk \
+            --tools Bash,Read,Grep,Glob \
+            --allowedTools \
+              Read Grep Glob \
+              'Bash(make check)' 'Bash(make app-check)' \
+              'Bash(git diff:*)' 'Bash(git log:*)' 'Bash(git show:*)' 'Bash(git status:*)' \
+            --output-format stream-json \
+            --verbose \
+            < "$RUNNER_TEMP/prompt.md" \
+            > "$RUNNER_TEMP/transcript.jsonl"
+
+      - name: Check the reviewer changed nothing in the checkout
+        if: steps.seen.outputs.reviewed != 'true'
+        run: |
+          set -eu
+          if [ "$(git rev-parse HEAD)" != "$SHA" ] || [ -n "$(git status --porcelain)" ]; then
+            git status
+            echo "The reviewer changed the checkout; it may only read."
+            exit 1
+          fi
+
+      - name: Mint the nvu-bot token to post
+        id: post-token
+        if: steps.seen.outputs.reviewed != 'true'
+        uses: actions/create-github-app-token@v1
+        with:
+          app-id: ${{ vars.NVU_BOT_APP_ID }}
+          private-key: ${{ secrets.NVU_BOT_PRIVATE_KEY }}
+
+      - name: Post the review
+        if: steps.seen.outputs.reviewed != 'true'
+        env:
+          GH_TOKEN: ${{ steps.post-token.outputs.token }}
+          BOT: ${{ steps.seen.outputs.bot }}
+        run: |
+          set -eu
+          result=$(jq -r 'select(.type == "result") | select(.subtype == "success" and (.is_error | not)) | .result' "$RUNNER_TEMP/transcript.jsonl")
+          if [ -z "$result" ]; then
+            echo "The reviewer did not finish; posting nothing. The transcript is on the run."
+            exit 1
+          fi
+          case "$(printf '%s\n' "$result" | head -1)" in
+            '# ✅ Clean') event=APPROVE ;;
+            '# ❌ Changes needed') event=REQUEST_CHANGES ;;
+            *) echo "The review does not start with a verdict heading; posting nothing."; exit 1 ;;
+          esac
+          marker="<!-- nvu-loop: review $SHA -->"
+          if gh api --paginate "repos/$GITHUB_REPOSITORY/pulls/$PR/reviews" \
+              --jq ".[] | select(.user.login == \"$BOT\") | .body" | grep -qF "$marker"; then
+            echo "$SHA is reviewed already: posting nothing."
+            exit 0
+          fi
+          printf '%s\n\n%s\n' "$result" "$marker" > "$RUNNER_TEMP/review.md"
+          gh api -X POST "repos/$GITHUB_REPOSITORY/pulls/$PR/reviews" \
+            -f commit_id="$SHA" -f event="$event" -F body=@"$RUNNER_TEMP/review.md" --jq '"posted \(.html_url)"'
+
+      - name: Mint the nvu-bot token to close out
+        id: final-token
+        if: failure()
+        uses: actions/create-github-app-token@v1
+        with:
+          app-id: ${{ vars.NVU_BOT_APP_ID }}
+          private-key: ${{ secrets.NVU_BOT_PRIVATE_KEY }}
+
+      - name: Say the review failed
+        if: failure()
+        env:
+          GH_TOKEN: ${{ steps.final-token.outputs.token }}
+        run: |
+          # shellcheck disable=SC2016
+          printf 'The review of `%s` failed before it was posted. Re-run it from the [run](%s); the transcript is on the run.\n' "${SHA:0:7}" "$RUN" \
+            > "$RUNNER_TEMP/review-failed.md"
+          gh api -X POST "repos/$GITHUB_REPOSITORY/issues/$PR/comments" \
+            -F body=@"$RUNNER_TEMP/review-failed.md" --jq '"posted \(.html_url)"'
+
+      - name: Keep the transcript on the run
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: review-transcript-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/transcript.jsonl
+          retention-days: 30
+          if-no-files-found: ignore

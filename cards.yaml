@@ -29,7 +29,7 @@
 #   flee    string               room and stairwell only: the printed Flee line
 
 meta:
-  version: C45
+  version: C46
   updated: 2026-10-03
 
 cards:
@@ -739,14 +739,14 @@ cards:
       - thresholds:
           - stat: Oomph
             value: 6
-            outcome: Ascend.
+            outcome: Ascend, and both players reveal a card reward.
       - thresholds:
           - stat: Scramble
             value: 6
-            outcome: Ascend.
+            outcome: Ascend, and both players reveal a card reward.
       - thresholds:
           - stats: { Oomph: 4, Scramble: 4 }
-            outcome: Ascend, and both players get 2 Good Stuff!
+            outcome: Ascend; both players reveal a card reward, and both players get 2 Good Stuff!
     flee: Both players Exhaust 1, and both players get Bad Stuff.
 
   ## Band 2 (floors 4–6)
@@ -811,7 +811,7 @@ cards:
       - thresholds:
           - stat: Oomph
             value: 12
-            outcome: Ascend.
+            outcome: Ascend, and both players reveal a card reward.
       - thresholds:
           - stats: { Oomph: 7, Scramble: 7 }
             outcome: Ascend, and one of you reveals a card reward.
@@ -883,7 +883,7 @@ cards:
       - thresholds:
           - stat: Oomph
             value: 18
-            outcome: Ascend, but both players Exhaust 3.
+            outcome: Ascend; both players reveal a card reward, but both players Exhaust 3.
     flee: Both players Exhaust 4, and both players get Bad Stuff.
 
   ## Floor 10 (the roof)

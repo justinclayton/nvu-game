@@ -25,7 +25,6 @@ interface Props {
   readonly delays: ReadonlyMap<string, number>;
   readonly paying: Paying | null;
   readonly onPickCard: (character: Character, card: Card) => void;
-  readonly reward?: Readonly<Record<Character, Card["id"] | null>> | undefined;
   readonly onPickReward?: ((character: Character, card: Card) => void) | undefined;
   readonly onInspect: (item: Inspected | null) => void;
   /** Debug mode: every pile is face up, and a stacked one can be opened for a full read. */
@@ -101,7 +100,7 @@ function HandSlot({
       </header>
       <div className="well well--hand" data-slot={`${tone}-hand`} />
       {/* The band over this character's side of the play zone, where the cards
-          they are offered on ascending are held up for a look. Measured only. */}
+          they are offered a card reward are held up for a look. Measured only. */}
       <div className="float" data-slot={`${tone}-offer`} aria-hidden="true" />
     </section>
   );
@@ -113,7 +112,6 @@ export function Mat({
   delays,
   paying,
   onPickCard,
-  reward,
   onPickReward,
   onInspect,
   debug,
@@ -239,7 +237,6 @@ export function Mat({
         delays={delays}
         paying={paying}
         onPickCard={onPickCard}
-        reward={reward}
         onPickReward={onPickReward}
         onInspect={onInspect}
         debug={debug}

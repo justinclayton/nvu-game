@@ -20,7 +20,7 @@ export type PlayAction =
   | { readonly kind: "order"; readonly names: readonly string[] }
   | { readonly kind: "take" }
   | { readonly kind: "skip" }
-  | { readonly kind: "takeAscend"; readonly name: string | null }
+  | { readonly kind: "takeNamed"; readonly name: string | null }
   | { readonly kind: "undo" }
   | { readonly kind: "note"; readonly text: string }
   | {
@@ -86,7 +86,7 @@ export const USAGE = `North vs Up — the CLI. The same rules engine as the web 
   bin/nvu play choose Rope Flare | play choose none     CHOOSE_CARDS
   bin/nvu play choose 2 | play choose Red 1 | play choose none   CHOOSE_DRAW: a "you may draw" (none declines)
   bin/nvu play order Rope Flare Shove                  ORDER_CARDS, top first
-  bin/nvu play take Zen Mode | play take none          a card reward, room or Ascend
+  bin/nvu play take Zen Mode | play take none          a revealed card reward
   bin/nvu play skip                                    a room's card reward: take none
   bin/nvu play undo           [--run FILE]
   bin/nvu play note "text"    [--run FILE]
@@ -196,7 +196,7 @@ function parseMove(action: string, actionRest: readonly string[]): PlayAction {
       }
       if (actionRest.length === 0) return { kind: "take" };
       const name = oneName(actionRest, "play take");
-      return { kind: "takeAscend", name: name.toLowerCase() === "none" ? null : name };
+      return { kind: "takeNamed", name: name.toLowerCase() === "none" ? null : name };
     }
 
     default:

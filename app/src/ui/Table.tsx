@@ -11,8 +11,7 @@ import { createStore } from "zustand/vanilla";
 import type { Replay } from "@application/replay";
 import { canUndo, type SessionState } from "@application/session";
 import { costOf, payOptions } from "@domain/queries";
-import type { AscendChoice, Card, Character, Command, GameState } from "@domain/types";
-import { AscendPanel, NO_CHOICES, type AscendChoices } from "./AscendPanel";
+import type { Card, Character, Command, GameState } from "@domain/types";
 import { type Inspected, type Paying } from "./CardLayer";
 import { CardView, RoomCardView } from "./CardView";
 import { Controls } from "./Controls";
@@ -49,14 +48,6 @@ export function Table({ onNewRun, onOpenRun, replay }: Props) {
    * back to the card layer. */
   const [debug, setDebug] = useState(false);
   const [openPile, setOpenPile] = useState<ZoneId | null>(null);
-  /* Rulebook, Ascending: what each character is taking, decided together and
-   * sent as one command. The cards on offer float above the mat, so the
-   * choice lives here where both the mat and the panel can read it. */
-  const [ascend, setAscend] = useState<AscendChoices>(NO_CHOICES);
-  const choose = useCallback((c: Character, patch: Partial<AscendChoice>) => {
-    setAscend((current) => ({ ...current, [c]: { ...current[c], ...patch } }));
-  }, []);
-
   /* The events the last command produced, and only on the render that shows
    * them, so the cards it moved can leave one after another. */
   const seenEvents = useRef(events.length);
@@ -71,7 +62,6 @@ export function Table({ onNewRun, onOpenRun, replay }: Props) {
       if (replaying) return;
       session.getState().dispatch(command);
       setPaying(null);
-      if (command.type === "ASCEND") setAscend(NO_CHOICES);
     },
     [session, replaying],
   );
@@ -189,14 +179,11 @@ export function Table({ onNewRun, onOpenRun, replay }: Props) {
         delays={delays}
         paying={paying}
         onPickCard={pickCard}
-        reward={{ Red: ascend.Red.takeRewardId, Gray: ascend.Gray.takeRewardId }}
-        onPickReward={(c, card) => {
+        onPickReward={(_c, card) => {
           if (state.pending?.kind === "TakeReward") {
             dispatch({ type: "TAKE_REWARD", cardId: card.id });
           } else if (state.pending?.kind === "ChooseGoodStuff") {
             dispatch({ type: "CHOOSE_CARDS", cardIds: [card.id] });
-          } else {
-            choose(c, { takeRewardId: ascend[c].takeRewardId === card.id ? null : card.id });
           }
         }}
         onInspect={setInspected}
@@ -206,8 +193,6 @@ export function Table({ onNewRun, onOpenRun, replay }: Props) {
 
       {replaying && replay ? (
         <ReplayBar replay={replay} />
-      ) : state.phase === "Ascend" ? (
-        <AscendPanel state={state} dispatch={dispatch} choices={ascend} onChoose={choose} />
       ) : state.phase === "GameOver" ? (
         <section className="over">
           <h2>

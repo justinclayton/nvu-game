@@ -151,6 +151,28 @@ function cardReward(): GameState {
   return asked;
 }
 
+/** A pending `TakeReward` printed by a Stairwell: The Sentry Drone's Oomph 6 line, Red first. */
+function stairwellReward(): GameState {
+  const state = rig({
+    phase: "Play",
+    floor: 1,
+    activeRoom: room("The Sentry Drone"),
+    Red: player({
+      deck: pile("Shove", 5),
+      hand: [card("Charge"), card("Shove"), card("Shove"), card("Pry Bar"), card("Pry Bar")],
+    }),
+    Gray: player({ deck: pile("Duck Under", 5) }),
+  });
+  const r = state.Red.hand;
+  const { state: asked } = play(state, [
+    { type: "PLAY_CARD", character: "Red", cardId: r[0]!.id, payWith: [r[1]!.id, r[2]!.id] },
+    { type: "PLAY_CARD", character: "Red", cardId: r[3]!.id, payWith: [] },
+    { type: "PLAY_CARD", character: "Red", cardId: r[4]!.id, payWith: [] },
+    { type: "END_PLAY" },
+  ]);
+  return asked;
+}
+
 /** A pending `ChooseCharacter` raised at Outcome: The Sentry Drone's Scramble line asks who gets Good Stuff. */
 function outcomeChoice(): GameState {
   const state = rig({
@@ -253,28 +275,6 @@ function playZoneFull(): GameState {
   };
 }
 
-/** The Ascend phase, both reward pools revealing three cards each. */
-function ascending(): GameState {
-  const base = rig({
-    phase: "Ascend",
-    floor: 1,
-    roomSupply: [
-      room("The Sentry Drone"),
-      room("Flooded Ventilation Shaft"),
-      room("Flooded Ventilation Shaft"),
-      room("Overgrown Hydroponics Bay"),
-      ...Array.from({ length: 8 }, () => room("Security Turnstile")),
-    ],
-    cleared: [room(CLEARED_ROOM)],
-    Red: player({ deck: pile("Shove", 2), discard: [...pile("Charge", 3), card("Pry Bar")] }),
-    Gray: player({ deck: pile("Duck Under", 2), discard: pile("Pick The Lock", 3) }),
-  });
-  return {
-    ...base,
-    offer: { Red: base.pools.Red.slice(0, 3), Gray: base.pools.Gray.slice(0, 3) },
-  };
-}
-
 /**
  * Play phase: Sorting Room's Oomph 2 line owes Red a Good Stuff, but the pool
  * is dry. The reward line still prints, followed by the pool-empty line
@@ -364,6 +364,11 @@ export const FIXTURES: readonly Fixture[] = [
     build: stable(cardReward),
   },
   {
+    name: "stairwell-reward",
+    description: "A Stairwell's printed card reward: the top 3 of Red's reward pool, before Ascending.",
+    build: stable(stairwellReward),
+  },
+  {
     name: "cleanup-choice",
     description: "Spore Cloud's own ChooseCards pending at Cleanup.",
     build: stable(cleanupChoice),
@@ -377,11 +382,6 @@ export const FIXTURES: readonly Fixture[] = [
     name: "game-over",
     description: "Red went Down, which ended the run on the spot.",
     build: stable(gameOver),
-  },
-  {
-    name: "ascend",
-    description: "The Ascend phase, both reward offers revealed.",
-    build: stable(ascending),
   },
   {
     name: "longest-text",

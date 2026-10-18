@@ -102,7 +102,6 @@ export function rig(over: Partial<GameState> = {}): GameState {
       goodStuff: poolOf("good_stuff"),
       badStuff: poolOf("bad_stuff"),
     },
-    offer: null,
     pending: null,
     unfinishedPlay: null,
     resolution: null,

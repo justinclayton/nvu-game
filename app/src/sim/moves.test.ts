@@ -3,11 +3,11 @@
 import { describe, expect, it } from "vitest";
 import { CARD_CONTENT } from "@content/index";
 import { execute, validate } from "@domain/engine";
-import { card, pile, player, resetRig, rig, room } from "@domain/__fixtures__/rig";
+import { card, resetRig, rig, room } from "@domain/__fixtures__/rig";
 import { createInitialState } from "@domain/setup";
 import type { Command, GameState } from "@domain/types";
 import { CHARACTERS } from "@domain/verbs";
-import { ascendChoices, combinations, legalCommands, permutations } from "./moves";
+import { combinations, legalCommands, permutations } from "./moves";
 import { randomPolicy } from "./policy";
 import { policySeed } from "./rng";
 
@@ -68,7 +68,7 @@ describe("legalCommands", () => {
   it("lists every legal phase command and every legal single play", () => {
     for (const seed of SEEDS) {
       for (const state of statesAlong(seed)) {
-        if (state.pending || state.phase === "Ascend") continue;
+        if (state.pending) continue;
         const listed = new Set(legalCommands(state).map((c) => JSON.stringify(c)));
         const candidates: Command[] = [{ type: "FLIP_ROOM" }, { type: "END_PLAY" }];
         for (const c of CHARACTERS) {
@@ -166,29 +166,5 @@ describe("a ChooseDraw", () => {
       { type: "CHOOSE_DRAW", character: "Red", count: 2 },
       { type: "CHOOSE_DRAW", character: null, count: 0 },
     ]);
-  });
-});
-
-describe("ascendChoices", () => {
-  it("lists each offered reward, or none, and crosses both characters' choices in full", () => {
-    resetRig();
-    const state = rig({
-      phase: "Ascend",
-      roomSupply: [room("Security Turnstile")],
-      Red: player({ deck: pile("Shove", 2), discard: pile("Charge", 2) }),
-      Gray: player({ deck: pile("Duck Under", 2) }),
-    });
-    const offered = { Red: state.pools.Red.slice(0, 3), Gray: state.pools.Gray.slice(0, 3) };
-    const ready = { ...state, offer: offered };
-
-    // Each side: decline + 3 rewards = 4. Crossed: 16.
-    const red = ascendChoices(ready, "Red");
-    const gray = ascendChoices(ready, "Gray");
-    expect(red).toHaveLength(4);
-    expect(gray).toHaveLength(4);
-    for (const choice of red) {
-      expect(validate(ready, { type: "ASCEND", Red: choice, Gray: gray[0]! })).toBeNull();
-    }
-    expect(legalCommands(ready)).toHaveLength(16);
   });
 });

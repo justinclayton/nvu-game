@@ -329,37 +329,13 @@ describe("Room kinds: Room and Stairwell", () => {
       free("Red", pryBar.id),
       free("Red", state.Red.hand.filter((c) => c.name === "Pry Bar")[1]?.id as CardId),
       { type: "END_PLAY" },
+      { type: "TAKE_REWARD", cardId: null },
+      { type: "TAKE_REWARD", cardId: null },
     ]);
     expect(eventTypes(events)).toContain("ROOM_CLEARED");
     expect(eventTypes(events)).toContain("FLOOR_CLEARED");
-    expect(next.phase).toBe("Ascend");
-  });
-
-  it("aborts the run instead of Ascending when a reward pool holds fewer than 3", () => {
-    // Same Stairwell clear as above, but Red's own reward pool is down to 2 —
-    // too short for Ascending's "each of you is offered three cards" (rulebook).
-    const state = rig({
-      phase: "Play",
-      activeRoom: room("The Sentry Drone"),
-      Red: player({
-        deck: pile("Shove", 5),
-        hand: [card("Charge"), card("Shove"), card("Shove"), card("Pry Bar"), card("Pry Bar")],
-      }),
-      Gray: player({ deck: pile("Duck Under", 5) }),
-      pools: { Red: pile("Grav Harness", 2), Gray: pile("Grav Harness", 3), goodStuff: [], badStuff: [] },
-    });
-    const h = ids(state, "Red");
-    const { state: next, events } = play(state, [
-      { type: "PLAY_CARD", character: "Red", cardId: h[0] as CardId, payWith: [h[1] as CardId, h[2] as CardId] },
-      playFree("Red", h[3] as CardId),
-      playFree("Red", h[4] as CardId),
-      { type: "END_PLAY" },
-    ]);
-    expect(next.phase).toBe("GameOver");
-    expect(next.outcome).toBe("Aborted");
-    const aborted = events.find((e) => e.type === "RUN_ABORTED");
-    if (aborted?.type !== "RUN_ABORTED") throw new Error("expected a RUN_ABORTED event");
-    expect(aborted.reason).toBe("Red's reward pool holds 2 cards; Ascending reveals 3.");
+    expect(next.floor).toBe(2);
+    expect(next.phase).toBe("Turn Start");
   });
 
   it("'if more than one threshold within a challenge is met, only the lowest-printed one resolves'", () => {
@@ -1041,17 +1017,23 @@ describe("Rules 0.2.5: Good Stuff and card rewards come as a spread of 3", () =>
       pools: { Red: pile("Fast Follow", 3), Gray: pile("Quick Vault", 3), goodStuff: [...goodStuff(), ...goodStuff()], badStuff: [] },
     });
     const h = ids(state, "Red");
-    const { state: asked, events } = play(state, [
+    const played = play(state, [
       { type: "PLAY_CARD", character: "Red", cardId: h[0] as CardId, payWith: [h[1] as CardId, h[2] as CardId] },
       playFree("Red", h[3] as CardId),
       { type: "PLAY_CARD", character: "Red", cardId: h[4] as CardId, payWith: [h[5] as CardId] },
       { type: "END_PLAY" },
     ]);
+    let answered = played;
+    while (answered.state.pending?.kind === "TakeReward") {
+      const next = must(answered.state, { type: "TAKE_REWARD", cardId: null });
+      answered = { state: next.state, events: [...answered.events, ...next.events] };
+    }
+    const { state: asked, events } = answered;
     expect(eventTypes(events).filter((t) => t === "GOOD_STUFF_REVEALED")).toHaveLength(2);
     const { state: next, events: rest } = keepFirstGoodStuff({ state: asked, events: [] });
     expect(eventTypes(rest).filter((t) => t === "GOOD_STUFF_REVEALED")).toHaveLength(2);
     expect(eventTypes(rest).filter((t) => t === "STUFF_TAKEN")).toHaveLength(4);
-    expect(next.phase).toBe("Ascend");
+    expect(next.floor).toBe(2);
   });
 
   it("a room's card reward reveals 3; taking none sends all 3 to the bottom of the pool", () => {

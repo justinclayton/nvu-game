@@ -127,7 +127,7 @@ class Accumulator {
     return t;
   }
 
-  onStep(before: GameState, command: Command, after: GameState, events: readonly DomainEvent[]): void {
+  onStep(before: GameState, _command: Command, after: GameState, events: readonly DomainEvent[]): void {
     for (const event of events) {
       if (event.type === "CARD_PLAYED") this.tally(event.card.name).played += 1;
       if (event.type === "REWARD_TAKEN" || event.type === "STUFF_TAKEN") this.tally(event.card.name).taken += 1;
@@ -143,7 +143,7 @@ class Accumulator {
         this.lossTally(before.floor, event.character).paidAsCost += event.cards.length;
       }
     }
-    if (command.type === "ASCEND") {
+    if (after.floor > before.floor) {
       for (const character of CHARACTERS) {
         this.ascendCounts[character] += 1;
         const p = playerOf(after, character);

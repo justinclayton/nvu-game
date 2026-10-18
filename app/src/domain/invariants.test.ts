@@ -9,13 +9,12 @@ import { CARD_CONTENT } from "../content";
 import { execute } from "./engine";
 import { costOf, payOptions, playableCards } from "./queries";
 import { createInitialState } from "./setup";
-import type { AscendChoice, Card, CardId, Command, GameState } from "./types";
+import type { Card, CardId, Command, GameState } from "./types";
 import { CHARACTERS } from "./verbs";
 
 const SEEDS = [1, 2, 3, 7, 11, 42, 99, 12345];
 const MAX_COMMANDS = 4000;
 
-const DECLINE: AscendChoice = { takeRewardId: null };
 
 function nextCommand(state: GameState): Command | null {
   const pending = state.pending;
@@ -68,8 +67,6 @@ function nextCommand(state: GameState): Command | null {
       }
       return { type: "END_PLAY" };
     }
-    case "Ascend":
-      return { type: "ASCEND", Red: DECLINE, Gray: DECLINE };
     case "Outcome":
     case "Cleanup":
       throw new Error(`${state.phase} is automatic and should never rest without a pending choice`);
@@ -174,7 +171,6 @@ describe("seeded-run invariants", () => {
     const [start] = createInitialState(1, CARD_CONTENT);
     const illegal: Command[] = [
       { type: "END_PLAY" },
-      { type: "ASCEND", Red: DECLINE, Gray: DECLINE },
       { type: "TAKE_REWARD", cardId: null },
       { type: "CHOOSE_CHARACTER", character: "Gray" },
     ];

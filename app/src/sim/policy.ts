@@ -9,7 +9,6 @@
  */
 
 import { behaviourOf } from "@domain/cards/behaviours";
-import { validate } from "@domain/engine";
 import {
   allThresholds,
   contributionOf,
@@ -23,7 +22,6 @@ import {
   type StatTotals,
 } from "@domain/queries";
 import type {
-  AscendChoice,
   Card,
   CardId,
   Character,
@@ -335,22 +333,6 @@ function chooseReward(state: GameState, character: Character, offered: readonly 
   return best.id;
 }
 
-/** One character's whole Ascend, decided independently of the other's: take the reward that best fits the deck. */
-function composeChoice(state: GameState, character: Character): AscendChoice {
-  return { takeRewardId: chooseReward(state, character, state.offer?.[character] ?? []) };
-}
-
-function chooseAscend(state: GameState): Command {
-  const composed: Command = {
-    type: "ASCEND",
-    Red: composeChoice(state, "Red"),
-    Gray: composeChoice(state, "Gray"),
-  };
-  const rejection = validate(state, composed);
-  if (rejection !== null) throw new Error(`greedy: composed Ascend command rejected: ${rejection.message}`);
-  return composed;
-}
-
 function cardsDeepEqual(a: readonly (CardId | RoomId)[], b: readonly (CardId | RoomId)[]): boolean {
   return a.length === b.length && a.every((id, i) => id === b[i]);
 }
@@ -436,10 +418,7 @@ function choosePending(state: GameState, legal: readonly Command[]): Command {
  * play toward that one line, pay with the cards worth least, Flee when
  * Clearing would cost more, and take the reward. It never draws on `rng` —
  * ties are broken by card id — so the same seed always plays the same game.
- * Everywhere but Ascend it only answers from the move generator's own legal
- * list; at Ascend it composes its own `ASCEND` command (see `composeChoice`)
- * and validates it against the engine, because the generator's own list caps
- * out well before two independent characters' choices fit in it.
+ * It only answers from the move generator's own legal list.
  */
 export const greedyPolicy: Policy = {
   name: "greedy",
@@ -453,8 +432,6 @@ export const greedyPolicy: Policy = {
       }
       case "Play":
         return [choosePlay(state, legal), rng];
-      case "Ascend":
-        return [chooseAscend(state), rng];
       case "Outcome":
       case "Cleanup":
         throw new Error(`greedy: asked to choose during automatic ${state.phase} with nothing pending`);

@@ -11,7 +11,6 @@ const PHASE_BLURB: Record<GameState["phase"], string> = {
   Play: "Play into your own side. Nothing resolves until you both stop.",
   Outcome: "Checking the room against what you played.",
   Cleanup: "Discarding the play zone and settling what's left of the turn.",
-  Ascend: "The Stairwell is clear. Pack up the floor.",
   GameOver: "The run is over.",
 };
 

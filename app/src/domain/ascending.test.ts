@@ -1,6 +1,6 @@
-/* Rulebook, Ascending — shuffle everything into the deck, the reward, building
- * the next floor. Stuff a character holds stays in their deck until it is
- * Scrapped or Exhausted; nothing returns it to a pool. */
+/* Rulebook, Ascending — shuffle everything into the deck, the rewards the Stairwell
+ * printed, building the next floor. Stuff a character holds stays in their deck until
+ * it is Scrapped or Exhausted; nothing returns it to a pool. */
 
 import { beforeEach, describe, expect, it } from "vitest";
 import {
@@ -13,150 +13,217 @@ import {
   resetRig,
   rig,
   room,
+  type Ran,
 } from "./__fixtures__/rig";
-import type { AscendChoice, GameState } from "./types";
+import type { GameState, Room } from "./types";
 
 beforeEach(resetRig);
 
-const NOTHING: AscendChoice = { takeRewardId: null };
+const SUPPLY: readonly Room[] = [
+  room("The Sentry Drone"),
+  ...Array.from({ length: 8 }, () => room("Security Turnstile")),
+];
 
-/** A state parked on the Ascend phase, with the piles a test wants. */
-function atAscension(over: Partial<GameState> = {}): GameState {
-  const base = rig({
-    phase: "Ascend",
-    floor: 1,
-    roomSupply: [
-      room("The Sentry Drone"),
-      ...Array.from({ length: 8 }, () => room("Security Turnstile")),
-    ],
-    cleared: [room("The Sentry Drone")],
-    Red: player({ deck: pile("Shove", 2), discard: pile("Charge", 3) }),
-    Gray: player({ deck: pile("Duck Under", 2), discard: pile("Pick The Lock", 3) }),
-    ...over,
-  });
+/** The Sentry Drone with its Oomph line printed as a plain "Ascend.", no reward. */
+function bareStairwell(): Room {
+  const printed = room("The Sentry Drone");
   return {
-    ...base,
-    offer: { Red: base.pools.Red.slice(0, 3), Gray: base.pools.Gray.slice(0, 3) },
+    ...printed,
+    challenges: [
+      {
+        thresholds: [
+          {
+            requires: { oomph: 6, scramble: 0 },
+            outcome: "Ascend.",
+            clears: true,
+            fleeFree: false,
+            ascends: true,
+            effects: [],
+          },
+        ],
+      },
+    ],
   };
 }
 
-describe("Ascending, Heal and Reset", () => {
-  it("'Shuffle your hand into your deck' — the hand's cards join the deck, not lost", () => {
-    const held = card("Shove");
-    const state = atAscension({
-      Red: player({ deck: pile("Shove", 2), hand: [held], discard: pile("Charge", 3) }),
-    });
-    const { state: next, events } = must(state, { type: "ASCEND", Red: NOTHING, Gray: NOTHING });
-    expect(next.Red.hand).toEqual([]);
-    expect(next.Red.deck.some((c) => c.id === held.id)).toBe(true);
-    expect(eventTypes(events)).toContain("CARDS_SHUFFLED_IN");
+/** A Play state facing `stairwell` with Oomph 6 in hand and the given piles. */
+function atStairwell(stairwell: Room, over: Partial<GameState> = {}): GameState {
+  return rig({
+    phase: "Play",
+    floor: 1,
+    activeRoom: stairwell,
+    roomSupply: SUPPLY,
+    cleared: [room("The Sentry Drone")],
+    Red: player({
+      deck: pile("Shove", 4),
+      hand: [card("Charge"), card("Shove"), card("Shove"), card("Pry Bar"), card("Pry Bar")],
+      discard: pile("Charge", 3),
+    }),
+    Gray: player({ deck: pile("Duck Under", 4), discard: pile("Pick The Lock", 3) }),
+    ...over,
+  });
+}
+
+/** Play the Oomph 6 line and end Play. */
+function clearIt(state: GameState): Ran {
+  const [charge, payA, payB, pryA, pryB] = state.Red.hand;
+  if (!charge || !payA || !payB || !pryA || !pryB) throw new Error("rig");
+  return play(state, [
+    { type: "PLAY_CARD", character: "Red", cardId: charge.id, payWith: [payA.id, payB.id] },
+    { type: "PLAY_CARD", character: "Red", cardId: pryA.id, payWith: [] },
+    { type: "PLAY_CARD", character: "Red", cardId: pryB.id, payWith: [] },
+    { type: "END_PLAY" },
+  ]);
+}
+
+/** Answer each revealed card reward by taking its first card. */
+function takeEvery(ran: Ran): Ran {
+  let s = ran.state;
+  const events = [...ran.events];
+  while (s.pending?.kind === "TakeReward") {
+    const first = s.pending.cards[0];
+    if (!first) throw new Error("rig: an empty reward reveal");
+    const next = must(s, { type: "TAKE_REWARD", cardId: first.id });
+    s = next.state;
+    events.push(...next.events);
+  }
+  return { state: s, events };
+}
+
+/** Answer each revealed card reward by taking none. */
+function declineEvery(ran: Ran): Ran {
+  let s = ran.state;
+  const events = [...ran.events];
+  while (s.pending?.kind === "TakeReward") {
+    const next = must(s, { type: "TAKE_REWARD", cardId: null });
+    s = next.state;
+    events.push(...next.events);
+  }
+  return { state: s, events };
+}
+
+const liveCount = (state: GameState, c: "Red" | "Gray"): number =>
+  state[c].deck.length + state[c].hand.length + state[c].discard.length + state[c].exhaust.length;
+
+describe("Ascending, the reward comes from the outcome", () => {
+  it("a Stairwell outcome that prints a card reward reveals it, and the card taken joins the deck", () => {
+    const state = atStairwell(room("The Sentry Drone"));
+    const asked = clearIt(state);
+    expect(asked.state.phase).toBe("Outcome");
+    expect(asked.state.pending?.kind).toBe("TakeReward");
+
+    const first = asked.state.pending;
+    if (first?.kind !== "TakeReward") throw new Error("expected a reward");
+    const taken = first.cards[0];
+    if (!taken) throw new Error("no reward revealed");
+    const { state: next, events } = takeEvery(asked);
+
+    expect(next.floor).toBe(2);
+    expect(next.phase).toBe("Turn Start");
+    expect(eventTypes(events).filter((t) => t === "REWARD_REVEALED")).toHaveLength(2);
+    expect(eventTypes(events)).toContain("REWARD_TAKEN");
+    const owner = first.character;
+    expect(next[owner].deck.some((c) => c.id === taken.id)).toBe(true);
+    expect(next.pools[owner].some((c) => c.id === taken.id)).toBe(false);
   });
 
+  it("the revealed reward names the Stairwell that printed it", () => {
+    const { events } = clearIt(atStairwell(room("The Sentry Drone")));
+    const revealed = events.filter((e) => e.type === "REWARD_REVEALED");
+    expect(revealed.length).toBeGreaterThan(0);
+    for (const e of revealed) expect(e.source).toBe("The Sentry Drone");
+  });
+
+  it("declining the printed reward leaves the revealed cards in the pool", () => {
+    const asked = clearIt(atStairwell(room("The Sentry Drone")));
+    const { state: next, events } = declineEvery(asked);
+    expect(next.floor).toBe(2);
+    expect(eventTypes(events)).toContain("REWARD_DECLINED");
+    expect(eventTypes(events)).not.toContain("REWARD_TAKEN");
+  });
+
+  it("a Stairwell outcome that prints no reward gives none", () => {
+    const state = atStairwell(bareStairwell());
+    const before = { Red: state.pools.Red, Gray: state.pools.Gray };
+    const { state: next, events } = clearIt(state);
+
+    expect(next.floor).toBe(2);
+    expect(next.phase).toBe("Turn Start");
+    expect(next.pending).toBeNull();
+    expect(eventTypes(events)).not.toContain("REWARD_REVEALED");
+    expect(eventTypes(events)).not.toContain("REWARD_TAKEN");
+    expect(next.pools.Red).toEqual(before.Red);
+    expect(next.pools.Gray).toEqual(before.Gray);
+  });
+});
+
+describe("Ascending, Heal and Reset", () => {
   it("hand, discard pile and Exhaust pile all go into the deck", () => {
-    const inHand = card("Shove");
-    const inDiscard = [card("Charge"), card("Charge")];
     const inExhaust = [card("Duck Under")];
-    const state = atAscension({
-      Red: player({ deck: pile("Shove", 2), hand: [inHand], discard: inDiscard, exhaust: inExhaust }),
+    const state = atStairwell(bareStairwell(), {
+      Red: player({
+        deck: pile("Shove", 4),
+        hand: [card("Charge"), card("Shove"), card("Shove"), card("Pry Bar"), card("Pry Bar")],
+        discard: pile("Charge", 3),
+        exhaust: inExhaust,
+      }),
     });
-    const before = state.Red.deck.length;
-    const { state: next, events } = must(state, { type: "ASCEND", Red: NOTHING, Gray: NOTHING });
-    const moved = [inHand, ...inDiscard, ...inExhaust];
+    const total = liveCount(state, "Red");
+    const { state: next, events } = clearIt(state);
     expect(next.Red.hand).toEqual([]);
     expect(next.Red.discard).toEqual([]);
     expect(next.Red.exhaust).toEqual([]);
-    expect(next.Red.deck).toHaveLength(before + moved.length);
-    for (const m of moved) expect(next.Red.deck.some((c) => c.id === m.id)).toBe(true);
-    const shuffled = events.find((e) => e.type === "CARDS_SHUFFLED_IN" && e.character === "Red");
-    expect(shuffled?.type === "CARDS_SHUFFLED_IN" && shuffled.cards).toHaveLength(moved.length);
+    expect(next.Red.deck).toHaveLength(total);
+    expect(next.Red.deck.some((c) => c.id === inExhaust[0]?.id)).toBe(true);
+    expect(eventTypes(events)).toContain("CARDS_SHUFFLED_IN");
+  });
+
+  it("Cleanup runs first: the play zone is discarded, then shuffled in with the rest", () => {
+    const { state: next, events } = clearIt(atStairwell(bareStairwell()));
+    const types = eventTypes(events);
+    expect(types.indexOf("CLEANUP_BEGAN")).toBeLessThan(types.indexOf("FLOOR_CLEARED"));
+    expect(next.playZone).toEqual([]);
   });
 });
 
 describe("Ascending, Stuff stays until Scrapped or Exhausted", () => {
-  it("a Good Stuff card gained in hand stays in the deck, not the Good Stuff pool", () => {
-    const gained = card("Pry Bar");
-    const state = atAscension({
-      Red: player({ deck: pile("Shove", 2), hand: [gained], discard: [] }),
+  it("a Good Stuff card in hand and Bad Stuff in the deck both stay with their character", () => {
+    const good = card("Coil Of Cable");
+    const bad = card("Sluggish");
+    const state = atStairwell(bareStairwell(), {
+      Red: player({
+        deck: [bad, ...pile("Shove", 3)],
+        hand: [
+          card("Charge"),
+          card("Shove"),
+          card("Shove"),
+          card("Pry Bar"),
+          card("Pry Bar"),
+          good,
+        ],
+        discard: pile("Charge", 2),
+      }),
     });
-    const before = state.pools.goodStuff.length;
-    const { state: next, events } = must(state, { type: "ASCEND", Red: NOTHING, Gray: NOTHING });
-    expect(next.Red.hand).toEqual([]);
-    expect(next.Red.deck.some((c) => c.id === gained.id)).toBe(true);
-    expect(next.pools.goodStuff).toHaveLength(before);
+    const goodBefore = state.pools.goodStuff.length;
+    const badBefore = state.pools.badStuff.length;
+    const { state: next, events } = clearIt(state);
+    expect(next.Red.deck.some((c) => c.id === good.id)).toBe(true);
+    expect(next.Red.deck.some((c) => c.id === bad.id)).toBe(true);
+    expect(next.pools.goodStuff).toHaveLength(goodBefore);
+    expect(next.pools.badStuff).toHaveLength(badBefore);
     expect(eventTypes(events)).not.toContain("CARD_SCRAPPED");
   });
 
-  it("Bad Stuff found in the deck also stays, not shed to its pool", () => {
-    const badStuff = card("Sluggish");
-    const state = atAscension({
-      Red: player({ deck: [badStuff, ...pile("Shove", 2)], discard: pile("Charge", 2) }),
-    });
-    const before = state.pools.badStuff.length;
-    const { state: next } = must(state, { type: "ASCEND", Red: NOTHING, Gray: NOTHING });
-    expect(next.Red.deck.some((c) => c.id === badStuff.id)).toBe(true);
-    expect(next.pools.badStuff).toHaveLength(before);
-  });
-
-  it("Stuff sitting in the discard pile goes into the deck with the rest", () => {
-    const inDiscard = card("Coil Of Cable");
-    const state = atAscension({
-      Red: player({ deck: pile("Shove", 2), discard: [inDiscard, ...pile("Charge", 2)] }),
-    });
-    const before = state.pools.goodStuff.length;
-    const { state: next } = must(state, { type: "ASCEND", Red: NOTHING, Gray: NOTHING });
-    expect(next.Red.deck.some((c) => c.id === inDiscard.id)).toBe(true);
-    expect(next.pools.goodStuff).toHaveLength(before);
-  });
-
-  it("the discard pile is emptied into the deck", () => {
-    const state = atAscension({
-      Red: player({ deck: pile("Shove", 2), discard: pile("Charge", 4) }),
-    });
-    const { state: next } = must(state, { type: "ASCEND", Red: NOTHING, Gray: NOTHING });
-    expect(next.Red.discard).toHaveLength(0);
-    expect(next.Red.deck).toHaveLength(6);
-  });
-
   it("'nothing ever leaves the Scrapyard'", () => {
-    const state = atAscension({ scrapyard: [card("Coil Of Cable")] });
-    const { state: next } = must(state, { type: "ASCEND", Red: NOTHING, Gray: NOTHING });
+    const state = atStairwell(bareStairwell(), { scrapyard: [card("Coil Of Cable")] });
+    const { state: next } = clearIt(state);
     expect(next.scrapyard.map((c) => c.name)).toContain("Coil Of Cable");
-  });
-});
-
-describe("Ascending, the reward", () => {
-  it("'you may put one into your discard pile'", () => {
-    const state = atAscension();
-    const offered = state.offer?.Red ?? [];
-    const taken = offered[0];
-    if (!taken) throw new Error("Red has no reward offered");
-    const { state: next, events } = must(state, {
-      type: "ASCEND",
-      Red: { takeRewardId: taken.id },
-      Gray: NOTHING,
-    });
-    expect(next.Red.discard.some((c) => c.id === taken.id)).toBe(true);
-    expect(next.Red.deck.some((c) => c.id === taken.id)).toBe(false);
-    expect(next.pools.Red.some((c) => c.id === taken.id)).toBe(false);
-    // The two not taken go back to the bottom of the pool.
-    const bottom = next.pools.Red.slice(-2).map((c) => c.id);
-    expect(bottom).toEqual(offered.slice(1).map((c) => c.id));
-    expect(eventTypes(events)).toContain("REWARD_TAKEN");
-  });
-
-  it("'put the cards you did not take on the bottom of your reward pool' — declining is a real play", () => {
-    const state = atAscension();
-    const offered = state.offer?.Gray ?? [];
-    const { state: next, events } = must(state, { type: "ASCEND", Red: NOTHING, Gray: NOTHING });
-    expect(next.pools.Gray.slice(-3).map((c) => c.id)).toEqual(offered.map((c) => c.id));
-    expect(eventTypes(events)).toContain("REWARD_DECLINED");
   });
 });
 
 describe("Ascending, build the next floor", () => {
   it("'Setup, Floor deck' — one fewer room than last time", () => {
-    const state = atAscension();
-    const { state: next, events } = must(state, { type: "ASCEND", Red: NOTHING, Gray: NOTHING });
+    const { state: next, events } = clearIt(atStairwell(bareStairwell()));
     expect(next.floor).toBe(2);
     expect(next.phase).toBe("Turn Start");
     const kinds = next.floorDeck.map((r) => r.kind);
@@ -171,7 +238,7 @@ describe("Winning and losing", () => {
     const state = rig({
       phase: "Play",
       floor: 10,
-      activeRoom: room("The Sentry Drone"),
+      activeRoom: bareStairwell(),
       Red: player({
         deck: pile("Shove", 4),
         hand: [card("Charge"), card("Shove"), card("Shove"), card("Pry Bar"), card("Pry Bar")],

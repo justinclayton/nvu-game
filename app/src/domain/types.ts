@@ -67,12 +67,6 @@ export interface PlayedCard {
   readonly card: Card;
 }
 
-/** Three cards from a character's own reward pool, offered on ascending (rulebook, Ascending). */
-export interface RewardOffer {
-  readonly Red: readonly Card[];
-  readonly Gray: readonly Card[];
-}
-
 /** The four piles at the side of the table (rulebook, Setup). */
 export interface Pools {
   readonly Red: readonly Card[];
@@ -153,9 +147,9 @@ export interface TurnRecord {
  * after it. `END_PLAY` moves the state into `Outcome`, and once the room's
  * effects are drained, into `Cleanup`. Both rest there only while a card or
  * the room has raised a `pending` choice — otherwise the transition runs
- * straight through to `Turn Start` or `Ascend`.
+ * straight through to `Turn Start`, or to the next floor's `Turn Start` on an Ascend.
  */
-export type Phase = "Turn Start" | "Play" | "Outcome" | "Cleanup" | "Ascend" | "GameOver";
+export type Phase = "Turn Start" | "Play" | "Outcome" | "Cleanup" | "GameOver";
 
 export type Outcome = "Victory" | "Defeat" | "Aborted";
 
@@ -326,8 +320,6 @@ export interface GameState {
   /** One shared heap. Nothing ever leaves it (rulebook, Setup). */
   readonly scrapyard: readonly Card[];
   readonly pools: Pools;
-  /** Populated while the phase is Ascend. */
-  readonly offer: RewardOffer | null;
 
   readonly pending: Pending | null;
   readonly unfinishedPlay: UnfinishedPlay | null;
@@ -337,12 +329,6 @@ export interface GameState {
 }
 
 /* ------------------------------------------------------------- commands */
-
-/** The reward chosen at the moment of ascending (rulebook, Ascending). */
-export interface AscendChoice {
-  /** One of the three offered, or null to decline. */
-  readonly takeRewardId: CardId | null;
-}
 
 export type Command =
   | { readonly type: "FLIP_ROOM" }
@@ -375,8 +361,7 @@ export type Command =
       /** One of the revealed card rewards, or null to take none. */
       readonly type: "TAKE_REWARD";
       readonly cardId: CardId | null;
-    }
-  | { readonly type: "ASCEND"; readonly Red: AscendChoice; readonly Gray: AscendChoice };
+    };
 
 export type CommandType = Command["type"];
 

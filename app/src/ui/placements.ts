@@ -89,6 +89,26 @@ const zoneOf = (
   part: "deck" | "hand" | "play" | "discard" | "exhaust" | "rewards" | "offer",
 ): ZoneId => `${c.toLowerCase() as "red" | "gray"}-${part}`;
 
+/** The cards held up in front of a character: an Ascending offer, a card reward, or a Good Stuff spread still to be answered. */
+function offeredTo(state: GameState, c: Character): readonly Card[] {
+  if (state.phase === "Ascend") return state.offer?.[c] ?? [];
+  const pending = state.pending;
+  if (pending?.kind === "TakeReward") return pending.character === c ? pending.cards : [];
+  if (pending?.kind === "ChooseGoodStuff") {
+    return pending.spreads.slice(pending.picked.length).find((s) => s.character === c)?.cards ?? [];
+  }
+  return [];
+}
+
+/** The character who may click the cards floating in front of `c` now: the one choosing, or either on ascending. */
+export function canChooseOffer(state: GameState, c: Character): boolean {
+  const pending = state.pending;
+  if (!pending) return state.phase === "Ascend";
+  return (
+    (pending.kind === "TakeReward" || pending.kind === "ChooseGoodStuff") && pending.character === c
+  );
+}
+
 /**
  * `debug` is a view-only override: every card and room comes back face up,
  * regardless of what the rules would show a player. Nothing under `execute`
@@ -141,6 +161,10 @@ export function placements(state: GameState, debug = false): readonly Placement[
     });
   };
 
+  const offeredIds = new Set(
+    (["Red", "Gray"] as const).flatMap((c) => offeredTo(state, c).map((x) => x.id)),
+  );
+
   rooms(state.floorDeck, "floor", true, false);
   if (state.activeRoom) rooms([state.activeRoom], "room", true, true);
   rooms(state.cleared, "cleared", false, true);
@@ -156,33 +180,29 @@ export function placements(state: GameState, debug = false): readonly Placement[
       zoneOf(c, "play"),
       { topFirst: false, faceUp: true, owner: c },
     );
-    // Rulebook, Ascending: on ascending, the top three of the pool are offered. They stay in the
-    // pool until the choice is made, but they are picked up off the table and
-    // held face up while the character looks them over.
-    const offered = state.phase === "Ascend" ? (state.offer?.[c] ?? []) : [];
-    const offeredIds = new Set(offered.map((x) => x.id));
+    // The cards a character is choosing from are picked up off the table and held face up
+    // while they look them over: the Ascending reward offer, a revealed card reward (the top
+    // 3 of the pool), or their Good Stuff spread. They stay in their pool until chosen.
+    const offered = offeredTo(state, c);
     cards(offered, zoneOf(c, "offer"), { topFirst: false, faceUp: true, owner: c });
-    // A revealed card reward is the top 3 of the pool, turned face up while
-    // the character decides.
-    const revealed = new Set(
-      state.pending?.kind === "TakeReward" && state.pending.character === c
-        ? state.pending.cards.map((x) => x.id)
-        : [],
-    );
     cards(
       state.pools[c].filter((x) => !offeredIds.has(x.id)),
       zoneOf(c, "rewards"),
-      { topFirst: true, faceUp: (card) => revealed.has(card.id), owner: c },
+      { topFirst: true, faceUp: false, owner: c },
     );
   }
 
-  // Stuff pools stay face down, except a Good Stuff spread being chosen from.
-  const spread = new Set(
+  // Stuff pools stay face down, except the spreads already answered in a Good Stuff choice.
+  const answered = new Set(
     state.pending?.kind === "ChooseGoodStuff"
       ? state.pending.spreads.flatMap((s) => s.cards.map((x) => x.id))
       : [],
   );
-  cards(state.pools.goodStuff, "good", { topFirst: true, faceUp: (card) => spread.has(card.id) });
+  cards(
+    state.pools.goodStuff.filter((x) => !offeredIds.has(x.id)),
+    "good",
+    { topFirst: true, faceUp: (card) => answered.has(card.id) },
+  );
   cards(state.pools.badStuff, "bad", { topFirst: true, faceUp: false });
   cards(state.scrapyard, "scrap", { topFirst: false, faceUp: true });
 

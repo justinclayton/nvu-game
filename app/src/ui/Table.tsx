@@ -191,7 +191,13 @@ export function Table({ onNewRun, onOpenRun, replay }: Props) {
         onPickCard={pickCard}
         reward={{ Red: ascend.Red.takeRewardId, Gray: ascend.Gray.takeRewardId }}
         onPickReward={(c, card) => {
-          choose(c, { takeRewardId: ascend[c].takeRewardId === card.id ? null : card.id });
+          if (state.pending?.kind === "TakeReward") {
+            dispatch({ type: "TAKE_REWARD", cardId: card.id });
+          } else if (state.pending?.kind === "ChooseGoodStuff") {
+            dispatch({ type: "CHOOSE_CARDS", cardIds: [card.id] });
+          } else {
+            choose(c, { takeRewardId: ascend[c].takeRewardId === card.id ? null : card.id });
+          }
         }}
         onInspect={setInspected}
         debug={debug}
@@ -205,7 +211,7 @@ export function Table({ onNewRun, onOpenRun, replay }: Props) {
       ) : state.phase === "GameOver" ? (
         <section className="over">
           <h2>
-            {state.outcome === "Victory" ? "You reach the rooftop." : "Both players are Down."}
+            {state.outcome === "Victory" ? "You reach the rooftop." : "You lose"}
           </h2>
           <button type="button" className="button button--primary" onClick={onNewRun}>
             Go again

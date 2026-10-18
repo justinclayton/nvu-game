@@ -13,7 +13,7 @@ import { costOf, playableCards } from "@domain/queries";
 import type { Card, Character, GameState, Room } from "@domain/types";
 import { CardBack, CardFace, RoomFace, toneOf } from "./CardFace";
 import { FLOAT_SCALE, STACK_STEP_MAX, STACK_STEP_X, STACK_STEP_Y, type Metrics } from "./metrics";
-import { LOOSE_ZONES, ZONE_SHAPE, placements, type Placement, type ZoneId } from "./placements";
+import { LOOSE_ZONES, canChooseOffer, ZONE_SHAPE, placements, type Placement, type ZoneId } from "./placements";
 import type { Rect, SlotRects } from "./useSlotRects";
 
 export interface Paying {
@@ -175,7 +175,7 @@ export function CardLayer({
         const clickable =
           p.kind === "card" &&
           ((hand !== null && canClick(hand, p.card)) ||
-            (offer !== null && !state.pending && onPickReward !== undefined));
+            (offer !== null && onPickReward !== undefined && canChooseOffer(state, offer)));
         const dimmed =
           p.kind === "card" && hand !== null && state.phase === "Play" && !state[hand].down
             ? payingHere
@@ -241,9 +241,11 @@ export function CardLayer({
         if (clickable && p.kind === "card" && (hand || offer)) {
           const card = p.card;
           const title = offer
-            ? selected
-              ? `Taking ${card.name}. Click again to decline.`
-              : `Take ${card.name} into ${offer}'s deck`
+            ? state.pending
+              ? `Take ${card.name}`
+              : selected
+                ? `Taking ${card.name}. Click again to decline.`
+                : `Take ${card.name} into ${offer}'s deck`
             : payingHere
               ? payingHere.cardId === card.id
                 ? "Click again to cancel"

@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import { createSession } from "@application/session";
 import { CARD_CONTENT } from "@content/index";
 import type { DomainEvent } from "@domain/types";
+import { buildFixture } from "@domain/__fixtures__/scenarios";
 import { moveDelays, pileOf, placements } from "./placements";
 
 /* The card layer draws one sprite per placement, so the placements have to
@@ -126,5 +127,28 @@ describe("the reward offer", () => {
     // Outside the Ascend phase the offer is not picked up, even if one is set.
     const notYet = placements({ ...state, phase: "Turn Start" });
     expect(notYet.filter((p) => p.zone === "red-offer")).toHaveLength(0);
+  });
+});
+
+describe("card reward choices", () => {
+  it("float a revealed card reward in front of the character taking it", () => {
+    const state = buildFixture("card-reward");
+    if (state?.pending?.kind !== "TakeReward") throw new Error("fixture lost its reward");
+    const zone = `${state.pending.character.toLowerCase()}-offer`;
+    const floating = placements(state).filter((p) => p.zone === zone);
+    expect(floating.map((p) => p.id)).toEqual(state.pending.cards.map((c) => c.id));
+    expect(floating.every((p) => p.faceUp)).toBe(true);
+  });
+
+  it("float each character's Good Stuff spread", () => {
+    const state = buildFixture("good-stuff-spread");
+    if (state?.pending?.kind !== "ChooseGoodStuff") throw new Error("fixture lost its spread");
+    const placed = placements(state);
+    for (const spread of state.pending.spreads) {
+      const zone = `${spread.character.toLowerCase()}-offer`;
+      expect(placed.filter((p) => p.zone === zone).map((p) => p.id)).toEqual(
+        spread.cards.map((c) => c.id),
+      );
+    }
   });
 });

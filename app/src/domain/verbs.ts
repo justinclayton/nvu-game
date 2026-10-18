@@ -441,10 +441,23 @@ export function topDeck(state: GameState, c: Character, card: Card): GameState {
  * earns it mid-effect (Crowbar) never has to suspend. A Down character earns
  * nothing.
  */
-export function earnGoodStuff(state: GameState, c: Character, count: number): GameState {
+export function earnGoodStuff(
+  state: GameState,
+  c: Character,
+  count: number,
+  source?: string,
+): GameState {
   if (count <= 0 || playerOf(state, c).down) return state;
-  const owed = state.thisTurn.goodStuffOwed;
-  return { ...state, thisTurn: { ...state.thisTurn, goodStuffOwed: { ...owed, [c]: owed[c] + count } } };
+  const { goodStuffOwed: owed, goodStuffSources: sources } = state.thisTurn;
+  const earned = Array.from({ length: count }, () => source);
+  return {
+    ...state,
+    thisTurn: {
+      ...state.thisTurn,
+      goodStuffOwed: { ...owed, [c]: owed[c] + count },
+      goodStuffSources: { ...sources, [c]: [...sources[c], ...earned] },
+    },
+  };
 }
 
 /**

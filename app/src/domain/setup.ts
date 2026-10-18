@@ -165,6 +165,7 @@ export const emptyTurnRecord = (): TurnRecord => ({
   freePlays: 0,
   goodStuffTaken: { Red: 0, Gray: 0 },
   goodStuffOwed: { Red: 0, Gray: 0 },
+  goodStuffSources: { Red: [], Gray: [] },
   questions: [],
   fired: [],
   playDiscount: { Red: 0, Gray: 0 },

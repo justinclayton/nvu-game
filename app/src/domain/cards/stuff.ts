@@ -68,7 +68,7 @@ export const STUFF: Registry = {
     onPlay(state, ctx) {
       if (state.thisTurn.goodStuffTaken[ctx.character] === 0) return nothing(state);
       const key = `${ctx.card.id}:crowbar`;
-      return done(earnGoodStuff(markFired(state, key), ctx.character, 1));
+      return done(earnGoodStuff(markFired(state, key), ctx.character, 1, ctx.card.name));
     },
     onEvent(event, state, ctx) {
       if (ctx.zone !== "playZone") return nothing(state);
@@ -76,7 +76,7 @@ export const STUFF: Registry = {
       if (event.card.kind !== "good_stuff") return nothing(state);
       const key = `${ctx.card.id}:crowbar`;
       if (hasFired(state, key)) return nothing(state);
-      return done(earnGoodStuff(markFired(state, key), ctx.character, 1));
+      return done(earnGoodStuff(markFired(state, key), ctx.character, 1, ctx.card.name));
     },
   },
 

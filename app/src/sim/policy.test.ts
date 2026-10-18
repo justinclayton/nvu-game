@@ -294,21 +294,7 @@ describe("greedy", () => {
     expect(after.Gray.hand.some((c) => c.kind === "good_stuff")).toBe(true);
   });
 
-  it("Flees rather than Clears when the only reachable line would cost more Exhaust than the Flee line", () => {
-    resetRig();
-    // Security Turnstile's Oomph 5 line Clears but Exhausts both 1; its Flee
-    // line Exhausts both 1 too. Reaching 5 here takes Reckless (Exhaust 2)
-    // on top, so Clearing loses 4 cards for good against Fleeing's 2.
-    const state: GameState = rig({
-      phase: "Play",
-      activeRoom: room("Security Turnstile"),
-      Red: player({ hand: [card("Reckless"), card("Shove"), card("Shove")] }),
-      Gray: player({ hand: [card("Peek Around Corner")] }), // Scramble 1: the Scramble 3 line is out of reach
-    });
-    const [chosen] = greedyPolicy.choose(state, legalCommands(state), policySeed(1));
-    expect(chosen).toEqual({ type: "END_PLAY" });
-
-    // The same line for the same printed cost as Fleeing is worth taking: the room is gone for good.
+  it("Clears rather than Flees when the Oomph line is reachable for free", () => {
     resetRig();
     const clean: GameState = rig({
       phase: "Play",

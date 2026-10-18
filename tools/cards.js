@@ -11,10 +11,10 @@
  * and no server.
  */
 var NVU_CARDS = {
-  meta: {"version":"C44","updated":"2026-10-03"},
+  meta: {"version":"C45","updated":"2026-10-03"},
   rulesVersion: "R29",
-  cardsVersion: "C44",
-  cardListId: "dd6b468b399c",
+  cardsVersion: "C45",
+  cardListId: "f93ece3a9c77",
   cards: [
     {"name":"Shove","set":"official","kind":"player","owner":"Red","starter":true,"cost":1,"oomph":2,"flavor":"'Oomph!', he shouted.","count":4},
     {"name":"Charge","set":"official","kind":"player","owner":"Red","starter":true,"cost":2,"oomph":4,"flavor":"I am bolder, so I lower my shoulder.","count":4},
@@ -78,7 +78,7 @@ var NVU_CARDS = {
     {"name":"Panic","set":"proposed","kind":"bad_stuff","cost":2,"flavor":"Blinding fear raises room difficulty and drains team stamina.","text":"Holding: Every room threshold requires +2 Scramble to be met. Play: Exhaust 2.","count":2},
     {"name":"Corrosive Acid","set":"proposed","kind":"bad_stuff","cost":3,"flavor":"Caustic fluid eats away at your deck stamina and gear.","text":"Holding: At Turn Start, Exhaust 1. Play: Scrap 1 Good Stuff card from your hand.","count":2},
     {"name":"System Feedback","set":"proposed","kind":"bad_stuff","cost":2,"flavor":"Electrical backlash dampens cheap card plays.","text":"Holding: Whenever you play a card with Cost 0, lose 1 Oomph and 1 Scramble from the Stat pool this turn.","count":2},
-    {"name":"Security Turnstile","set":"proposed","kind":"room","tier":1,"flavor":"A rusted barrier blocks the thoroughfare. You can slip through quietly or tear it off its hinges.","challenges":[{"thresholds":[{"stat":"Scramble","value":3,"outcome":"Clear."}]},{"thresholds":[{"stat":"Oomph","value":5,"outcome":"Clear, and Red gets Good Stuff, but both players Exhaust 1."}]}],"flee":"Both players Exhaust 1.","count":14},
+    {"name":"Security Turnstile","set":"proposed","kind":"room","tier":1,"flavor":"A rusted barrier blocks the thoroughfare. You can slip through quietly or tear it off its hinges.","challenges":[{"thresholds":[{"stat":"Scramble","value":3,"outcome":"Clear."}]},{"thresholds":[{"stat":"Oomph","value":5,"outcome":"Clear, and Red gets Good Stuff."}]}],"flee":"Both players Exhaust 1.","count":14},
     {"name":"Flooded Ventilation Shaft","set":"proposed","kind":"room","tier":1,"flavor":"A narrow duct dripping with murky condensation. Red can force the grate while Gray navigates the wiring.","challenges":[{"thresholds":[{"stat":"Scramble","value":4,"outcome":"Clear."}]},{"thresholds":[{"stats":{"Oomph":3,"Scramble":3},"outcome":"Clear, and both players get Good Stuff."}]}],"flee":"Gray Exhausts 2.","count":10},
     {"name":"The Sentry Drone","set":"proposed","kind":"stairwell","tier":1,"flavor":"An automated defense unit guarding the stairwell. Destroy its chassis or cut its power harness.","challenges":[{"thresholds":[{"stat":"Oomph","value":6,"outcome":"Ascend."}]},{"thresholds":[{"stat":"Scramble","value":6,"outcome":"Ascend."}]},{"thresholds":[{"stats":{"Oomph":4,"Scramble":4},"outcome":"Ascend, and both players get 2 Good Stuff!"}]}],"flee":"Both players Exhaust 1, and both players get Bad Stuff.","count":3},
     {"name":"Automated Defense Turret","set":"proposed","kind":"room","tier":2,"flavor":"A heavy turretted cannon sweeps the corridor. Deactivating its targeting sensors requires precision; smashing it requires brute force.","challenges":[{"thresholds":[{"stat":"Scramble","value":8,"outcome":"Clear, and Gray gets Good Stuff."}]},{"thresholds":[{"stat":"Oomph","value":10,"outcome":"Clear, and one of you may Scrap a Bad Stuff card from your hand."}]}],"flee":"Both players Exhaust 2, and both players get Bad Stuff.","count":7},

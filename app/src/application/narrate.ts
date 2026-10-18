@@ -12,7 +12,16 @@ import type { DomainEvent } from "@domain/types";
 import type { Note } from "./session";
 
 export function describeEvent(event: DomainEvent): string {
+  const what = describeWhat(event);
+  return event.source === undefined ? what : `${event.source} triggers: ${what}`;
+}
+
+function describeWhat(event: DomainEvent): string {
   switch (event.type) {
+    case "PHASE_STARTED":
+      return `${event.phase} phase starts.`;
+    case "PHASE_ENDED":
+      return `${event.phase} phase ends.`;
     case "FLOOR_BUILT":
       return `Floor ${String(event.floor)} is built: ${String(event.rooms)} rooms.`;
     case "ROOM_FLIPPED":
@@ -72,7 +81,7 @@ export function describeEvent(event: DomainEvent): string {
     case "REWARD_DECLINED":
       return `${event.character} declines the reward.`;
     case "CLEANUP_BEGAN":
-      return "Cleanup.";
+      return "Cleanup phase starts.";
     case "TURN_ENDED":
       return `— end of turn ${String(event.turn)} —`;
     case "FLOOR_CLEARED":

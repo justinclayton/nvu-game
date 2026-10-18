@@ -9,10 +9,11 @@ trap 'rm -rf "$tmp"' EXIT
 git clone -q "$root" "$tmp/r"
 cd "$tmp/r"
 # carry over the working tree's version of the files under test
-cp "$root"/tools/bump-revision.sh "$root"/tools/kit-revision.sh tools/
+cp "$root"/tools/bump-revision.sh "$root"/tools/kit-revision.sh "$root"/tools/stale-kit.sh tools/
 cp "$root"/rulebook.md "$root"/cards.yaml .
 git config user.email t@t; git config user.name t
-git add -A; git commit -qm base --no-verify --allow-empty
+git checkout -q --orphan base
+git add -A; git commit -qm base --no-verify
 git branch -f main HEAD
 git remote remove origin
 
@@ -83,5 +84,49 @@ git merge -q main -m "merge main" --no-verify >/dev/null 2>&1 || {
 }
 sh tools/bump-revision.sh | grep -q "R$((r0 + 1)) -> R$((r0 + 2))" || fail "R not raised past main after the merge"
 echo "ok   R raised past main after merging"
+
+echo "== pushes that skipped the hooks are stale, the fix and hooked pushes are not =="
+gen="tools/cards.js app/src/content/cards.generated.ts"
+git reset -q --hard; git checkout -q main
+node tools/cards.mjs build >/dev/null; git commit -qam "main rebuilt" --no-verify || true
+cmain=$(sed -n 's/^  version:[[:space:]]*C\([0-9]*\).*/\1/p' cards.yaml)
+c_now() { sed -n 's/^  version:[[:space:]]*C\([0-9]*\).*/\1/p' cards.yaml; }
+edit_card() { awk -v t="$1" '/^ *flavor:/ && !done { $0 = $0 " " t; done = 1 } { print }' cards.yaml > y.tmp && mv y.tmp cards.yaml; }
+git checkout -qb web main
+edit_card "(web one)"; git commit -qam "web edit one" --no-verify
+sh tools/stale-kit.sh 0000000000000000000000000000000000000000 >/dev/null && fail "a new branch's web edit was not stale"
+expect "$((cmain + 1))" "$(c_now)" "a web edit raises C past main"
+git diff --quiet -- $gen && fail "the card modules were not rebuilt"
+git commit -qam "fix" --no-verify
+before=$(git rev-parse HEAD~1)
+sh tools/stale-kit.sh "$before" >/dev/null || fail "the fix commit was judged stale"
+echo "ok   the fix commit is not stale"
+before=$(git rev-parse HEAD)
+edit_card "(web two)"; git commit -qam "web edit two" --no-verify
+sh tools/stale-kit.sh "$before" >/dev/null && fail "a second web edit was not stale"
+expect "$((cmain + 2))" "$(c_now)" "a second web edit raises C again"
+git commit -qam "fix two" --no-verify
+before=$(git rev-parse HEAD)
+edit_card "(hooked)"; sh tools/bump-revision.sh >/dev/null; node tools/cards.mjs build >/dev/null
+git commit -qam "hooked edit" --no-verify
+sh tools/stale-kit.sh "$before" >/dev/null || fail "a hooked push was judged stale"
+echo "ok   a hooked push is not stale"
+git checkout -q main
+echo "Main rule." >> rulebook.md; sh tools/bump-revision.sh >/dev/null; node tools/cards.mjs build >/dev/null
+git commit -qam "main rules edit" --no-verify
+git checkout -q web
+before=$(git rev-parse HEAD)
+git merge -q --no-commit main >/dev/null 2>&1 || true
+git checkout HEAD -- $gen; git commit -qm "Update branch" --no-verify
+sh tools/stale-kit.sh "$before" >/dev/null && fail "an Update branch merge with stale modules was not stale"
+expect "app/src/content/cards.generated.ts tools/cards.js" "$(git diff --name-only | tr '\n' ' ' | sed 's/ $//')" "the merge gets only the card modules rebuilt"
+git commit -qam "fix merge" --no-verify
+before=$(git rev-parse HEAD)
+rnow=$(sed -n 's/^Rules version:[[:space:]]*R\([0-9]*\).*/\1/p' rulebook.md)
+echo "Web rule." >> rulebook.md; git commit -qam "web rules edit" --no-verify
+sh tools/stale-kit.sh "$before" >/dev/null && fail "a web rulebook edit was not stale"
+grep -q "^Rules version: R$((rnow + 1))" rulebook.md || fail "a web rulebook edit did not raise R"
+echo "ok   a web rulebook edit raises R"
+git commit -qam "fix rules" --no-verify
 
 echo "PASS"

@@ -19,6 +19,10 @@
 # the staged copy too, leaving unstaged edits unstaged. Rebuilding the
 # generated card modules, which stamp the counters, is the caller's job.
 #
+# KIT_LAST names the commit that counts as the last one, HEAD by default.
+# tools/stale-kit.sh sets it to the branch tip before a push, to judge a push
+# that skipped the hook as the hook would have judged it.
+#
 # POSIX sh and no GNU-only flags, so it runs the same on macOS and Linux.
 set -eu
 cd "$(dirname "$0")/.."
@@ -27,6 +31,7 @@ main=
 for ref in origin/main main; do
   if git rev-parse --verify --quiet "$ref" >/dev/null; then main=$ref; break; fi
 done
+last_commit=${KIT_LAST:-HEAD}
 base=$([ -n "$main" ] && git merge-base HEAD "$main" || true)
 [ -n "$base" ] || { echo "no main to compare the sources against"; exit 0; }
 
@@ -52,8 +57,8 @@ bump_counter() {
   before=$(git show "$base:$file" | value_of)
   before=${before:-0}
   after=${after:-0}
-  head_id=$(git rev-parse --verify --quiet "HEAD:$file" || true)
-  last=$(git show "HEAD:$file" 2>/dev/null | value_of || true)
+  head_id=$(git rev-parse --verify --quiet "$last_commit:$file" || true)
+  last=$(git show "$last_commit:$file" 2>/dev/null | value_of || true)
   last=${last:-0}
 
   short=

@@ -14,6 +14,18 @@ CI (`.github/workflows/ci.yml`) runs `make check` on it but skips
 and the generated card modules, since the app's tests are expected to fail
 until the code layers land. Any other PR to `main` runs both.
 
+`.github/workflows/kit-fix.yml` catches a push whose newest commit skipped the
+hooks: a commit from the GitHub web editor, or a merge from the "Update
+branch" button. `tools/stale-kit.sh` judges the commit stale when a source
+changed without R or C raised above the branch tip before the push (merge
+commits skip this rule) or above `main`, or when the card modules are stale.
+On a stale commit the workflow raises R or C, rebuilds the card modules and
+pushes the result as one new commit, as `nvu-bot`, so CI, the Kit revision
+check and the planner run on it. It never amends or force-pushes; if the
+branch moved meanwhile it gives up, and the newer push gets its own run.
+`source-pr.yml` and `plan.yml` run the same check first and do nothing on a
+stale commit.
+
 ## Step 3: the planner
 
 `.github/workflows/plan.yml` runs the planner. The prompt is
@@ -87,8 +99,7 @@ the agent follows the [`/playtest` skill](../../.claude/skills/playtest/SKILL.md
   the repo on the runner is closed too.
 - **What the job does.** It copies `runs/<seed>.json` next to the note, runs
   the replay check (`app/src/cli/playtests.test.ts`), and commits both to the
-  top layer, then posts the report, both as `nvu-agent`. `nvu-bot` has no
-  Contents write.
+  top layer, then posts the report, both as `nvu-agent`.
 - **The report issue.** One per stack: an issue `nvu-agent` wrote with
   `Report for PR: #n` in the body, labelled `loop` and assigned to the
   designer. The first run opens it with the note's "What the run showed" and

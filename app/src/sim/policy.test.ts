@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { CARD_CONTENT } from "@content/index";
 import { card, must, pile, player, resetRig, rig, room } from "@domain/__fixtures__/rig";
-import type { Command, GameState, Room, Threshold } from "@domain/types";
+import type { Card, Command, GameState, PlayedCard, Room, Threshold } from "@domain/types";
 import { legalCommands } from "./moves";
 import { greedyPolicy, randomPolicy } from "./policy";
 import { policySeed } from "./rng";
@@ -360,6 +360,61 @@ describe("greedy", () => {
     ];
     const [chosen] = greedyPolicy.choose(state, legal, policySeed(1));
     expect(chosen).toEqual({ type: "TAKE_REWARD", cardId: best.id });
+  });
+
+  /** A TakeReward prompt for Red over `cards`, Red's deck being `deck`. */
+  function rewardChoice(deck: ReturnType<typeof pile>, cards: readonly Card[], playZone: GameState["playZone"] = []) {
+    const state: GameState = rig({
+      phase: "Play",
+      Red: player({ deck }),
+      playZone,
+      pending: { kind: "TakeReward", prompt: "Take one?", character: "Red", cards, source: null },
+    });
+    const legal: readonly Command[] = [
+      ...cards.map((c): Command => ({ type: "TAKE_REWARD", cardId: c.id })),
+      { type: "TAKE_REWARD", cardId: null },
+    ];
+    return greedyPolicy.choose(state, legal, policySeed(1))[0];
+  }
+
+  it("takes the cheaper of two rewards that are otherwise equal", () => {
+    resetRig();
+    // The dearer card is made first, so it wins the id tie-break if cost is ignored.
+    const dear: Card = { ...card("Shove"), cost: 2 };
+    const cheap = card("Shove");
+    expect(rewardChoice(pile("Shove", 6), [dear, cheap])).toEqual({ type: "TAKE_REWARD", cardId: cheap.id });
+  });
+
+  it("scores a conditional-stat reward by what it contributes", () => {
+    resetRig();
+    const setEmUp = card("Set 'Em Up"); // Scramble 0 + 1 per card Gray has played
+    const shove = card("Shove");
+    const gray = (): PlayedCard => ({ owner: "Gray", card: card("Shove") });
+    const deck = pile("Shove", 6); // Red is weak on Scramble
+    expect(rewardChoice(deck, [shove, setEmUp])).toEqual({ type: "TAKE_REWARD", cardId: shove.id });
+    expect(rewardChoice(deck, [shove, setEmUp], [gray(), gray(), gray()])).toEqual({
+      type: "TAKE_REWARD",
+      cardId: setEmUp.id,
+    });
+  });
+
+  it("takes nothing when every card offered scores below the deck's average", () => {
+    resetRig();
+    const offered = [card("Shove"), card("Shove")];
+    expect(rewardChoice(pile("Charge", 6), offered)).toEqual({ type: "TAKE_REWARD", cardId: null });
+  });
+
+  it("takes nothing at Ascend when every card offered scores below the deck's average", () => {
+    resetRig();
+    const state: GameState = rig({
+      phase: "Ascend",
+      Red: player({ deck: pile("Charge", 6) }),
+      Gray: player(),
+      offer: { Red: [card("Shove"), card("Shove")], Gray: [] },
+    });
+    const [chosen] = greedyPolicy.choose(state, legalCommands(state), policySeed(1));
+    if (chosen.type !== "ASCEND") throw new Error("expected an ASCEND command");
+    expect(chosen.Red.takeRewardId).toBeNull();
   });
 
   it("picks the reward that fits the character's weaker stat over the first one offered", () => {

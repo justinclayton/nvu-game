@@ -281,38 +281,63 @@ function weakerStat(state: GameState, character: Character): Stat {
 const printedExhaustCost = (card: Card): number => behaviourOf(card.name)?.exhaustX ?? 0;
 
 /**
- * Favor the character's weaker stat, then raw power as a tie-break, docked
- * for a printed `Exhaust X` — Reckless's 5 Oomph is not worth taking over a
- * clean 4 if it also taxes the deck 3 cards every time it gets played.
+ * What a card offered as a reward is worth to this character: its stats as
+ * `contributionOf` reads them (so a conditional stat counts as it would
+ * played), favoring the weaker stat, less its play cost and less the
+ * permanent loss of a printed `Exhaust X`. Reckless's 5 Oomph is not worth
+ * taking over a clean 4 if it also taxes the deck 3 cards every time it
+ * gets played, and a card that costs a payer more is worth less.
  */
-function rewardScore(card: Card, weak: Stat): number {
-  const raw = statValue({ oomph: card.oomph, scramble: card.scramble }, weak) * 2 + card.oomph + card.scramble;
-  return raw - 2 * printedExhaustCost(card);
+function rewardScore(state: GameState, character: Character, card: Card, weak: Stat): number {
+  const gain = contributionOf(state, { owner: character, card });
+  const raw = statValue(gain, weak) * 2 + gain.oomph + gain.scramble;
+  return raw - costOf(state, character, card) - 2 * printedExhaustCost(card);
 }
 
-function chooseReward(state: GameState, character: Character): CardId | null {
-  return bestReward(state.offer?.[character] ?? [], weakerStat(state, character));
+/**
+ * The score an offered card has to reach to be worth a place in the deck: the
+ * mean of what the character's own non-Stuff cards score, by the same
+ * measure. A first guess, to be tuned from the sim's take counts.
+ */
+function rewardCutoff(state: GameState, character: Character, weak: Stat): number {
+  const owned = ownedPlayerCards(state, character);
+  if (owned.length === 0) return -Infinity;
+  const total = owned.reduce((sum, card) => sum + rewardScore(state, character, card, weak), 0);
+  return total / owned.length;
 }
 
-/** The revealed card that best fits a deck short on `weak`, ties broken toward the lower card id. */
-function bestReward(offered: readonly Card[], weak: Stat): CardId | null {
+/** The offered card that scores highest, ties broken toward the lower card id, with its score. */
+function bestOffered(
+  state: GameState,
+  character: Character,
+  offered: readonly Card[],
+  weak: Stat,
+): { readonly id: CardId; readonly score: number } | null {
   const first = offered[0];
   if (!first) return null;
   let best = first;
-  let bestScore = rewardScore(first, weak);
+  let bestScore = rewardScore(state, character, first, weak);
   for (const card of offered.slice(1)) {
-    const score = rewardScore(card, weak);
+    const score = rewardScore(state, character, card, weak);
     if (score > bestScore || (score === bestScore && card.id < best.id)) {
       best = card;
       bestScore = score;
     }
   }
+  return { id: best.id, score: bestScore };
+}
+
+/** The revealed card that best fits a deck short on `weak`, or null (take nothing) when none reaches the deck's own average. */
+function chooseReward(state: GameState, character: Character, offered: readonly Card[]): CardId | null {
+  const weak = weakerStat(state, character);
+  const best = bestOffered(state, character, offered, weak);
+  if (!best || best.score < rewardCutoff(state, character, weak)) return null;
   return best.id;
 }
 
 /** One character's whole Ascend, decided independently of the other's: take the reward that best fits the deck. */
 function composeChoice(state: GameState, character: Character): AscendChoice {
-  return { takeRewardId: chooseReward(state, character) };
+  return { takeRewardId: chooseReward(state, character, state.offer?.[character] ?? []) };
 }
 
 function chooseAscend(state: GameState): Command {
@@ -336,14 +361,14 @@ function choosePending(state: GameState, legal: readonly Command[]): Command {
   if (!pending) throw new Error("greedy: no pending choice to answer");
 
   if (pending.kind === "TakeReward") {
-    // The same fit as the Ascend reward: always take the best one.
-    const wanted = bestReward(pending.cards, weakerStat(state, pending.character));
+    // The same fit as the Ascend reward, including taking nothing.
+    const wanted = chooseReward(state, pending.character, pending.cards);
     const take = legal.find((c) => c.type === "TAKE_REWARD" && c.cardId === wanted);
     if (take) return take;
   }
 
   if (pending.kind === "ChooseGoodStuff") {
-    const wanted = bestReward(pending.options, weakerStat(state, pending.character));
+    const wanted = bestOffered(state, pending.character, pending.options, weakerStat(state, pending.character))?.id;
     const keep = legal.find((c) => c.type === "CHOOSE_CARDS" && c.cardIds[0] === wanted);
     if (keep) return keep;
   }

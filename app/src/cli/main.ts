@@ -22,15 +22,6 @@ import { POLICIES, randomPolicy } from "@sim/policy";
 import { buildReport, type BalanceReport } from "@sim/report";
 import { seedsFrom, simulate, type RunResult, type StopReason } from "@sim/run";
 import {
-  ascendComplete,
-  composeAscend,
-  currentQuestion,
-  describeStagedAnswer,
-  parseAnswers,
-  serializeAnswers,
-  type StagedAnswer,
-} from "./ascend";
-import {
   parseRequest,
   USAGE,
   UsageError,
@@ -134,21 +125,6 @@ function openRun(
   const file = readRunFile(path);
   if (!file.run) throw new UsageError(`${path} was not played from a seed and cannot continue.`);
   return { path, session: loadRun(file.run, file.notes) };
-}
-
-const ascendSidecarPath = (runPath: string): string => `${runPath}.ascend.json`;
-
-function readAscendSidecar(path: string): StagedAnswer[] {
-  if (!existsSync(path)) return [];
-  return parseAnswers(readFileSync(path, "utf8"));
-}
-
-function writeAscendSidecar(path: string, answers: readonly StagedAnswer[]): void {
-  writeFileSync(path, serializeAnswers(answers));
-}
-
-function deleteAscendSidecar(path: string): void {
-  if (existsSync(path)) unlinkSync(path);
 }
 
 /* ------------------------------------------------------ naming a character */
@@ -329,21 +305,6 @@ function buildOrder(state: GameState, action: Extract<PlayAction, { kind: "order
   return { type: "ORDER_CARDS", cardIds };
 }
 
-/**
- * One Ascend question's answer, staged (not yet dispatched). Refuses naming
- * a card that was not offered (design/cli-sim/spec.md, "Ascending, one
- * question at a time").
- */
-type AscendAction = Extract<PlayAction, { kind: "takeAscend" }>;
-
-function buildAscendAnswer(state: GameState, character: Character, action: AscendAction): StagedAnswer {
-  if (action.name === null) return { character, takeRewardId: null };
-  const offered = state.offer?.[character] ?? [];
-  const named = resolveCardName(action.name, offered);
-  if (!named.ok) throw new MoveRefused(named.reason);
-  return { character, takeRewardId: named.card.id };
-}
-
 /** A one-line account of a dispatched action that produced no narrated event. */
 function describeAction(action: PlayAction): string {
   switch (action.kind) {
@@ -380,21 +341,20 @@ function dispatchOrThrow(session: Session, command: Command): void {
 function showPlay(run: string | null, action: Extract<PlayAction, { kind: "show" }>): number {
   const { path, session } = openRun("show", run);
   const { state, events, notes } = session.getState();
-  const staged = readAscendSidecar(ascendSidecarPath(path));
 
   const wantsPart = action.events !== null || action.table || action.moves;
   if (!wantsPart) {
-    out(renderTable(state, staged));
+    out(renderTable(state));
     out("");
-    out(moveHint(state, staged));
+    out(moveHint(state));
     return 0;
   }
   if (action.events !== null) {
     const lines = tailEvents(logLines(events, notes), action.events);
     for (const line of lines) out(line.kind === "note" ? `NOTE — ${line.text}` : line.text);
   }
-  if (action.table) out(renderTable(state, staged));
-  if (action.moves) out(moveHint(state, staged));
+  if (action.table) out(renderTable(state));
+  if (action.moves) out(moveHint(state));
   return 0;
 }
 
@@ -457,26 +417,17 @@ function play(request: PlayRequest): number {
     return 0;
   }
 
-  const ascendPath = ascendSidecarPath(path);
-  let staged = readAscendSidecar(ascendPath);
   let manualNote: string | null = null;
 
   try {
     switch (action.kind) {
       case "new":
         break;
-      case "undo": {
-        if (staged.length > 0) {
-          staged = staged.slice(0, -1);
-          writeAscendSidecar(ascendPath, staged);
-          manualNote = "Undid the last staged Ascend answer.";
-        } else if (session.getState().undo()) {
-          manualNote = "Undid the last move.";
-        } else {
-          manualNote = "Nothing to undo: the last move revealed a card.";
-        }
+      case "undo":
+        manualNote = session.getState().undo()
+          ? "Undid the last move."
+          : "Nothing to undo: the last move revealed a card.";
         break;
-      }
       case "flip":
         dispatchOrThrow(session, { type: "FLIP_ROOM" });
         break;
@@ -501,35 +452,15 @@ function play(request: PlayRequest): number {
       case "skip":
         dispatchOrThrow(session, { type: "TAKE_REWARD", cardId: null });
         break;
-      case "takeAscend": {
-        const state = session.getState().state;
-        if (state.pending?.kind === "TakeReward") {
-          dispatchOrThrow(session, buildTakeReward(state, action.name, false));
-          break;
-        }
-        if (state.phase !== "Ascend") {
-          throw new MoveRefused(`Cannot answer Ascend outside the Ascend phase (currently ${state.phase}).`);
-        }
-        const question = currentQuestion(state, staged);
-        if (!question) throw new MoveRefused("Every Ascend question is already staged.");
-        const answer = buildAscendAnswer(state, question, action);
-        staged = [...staged, answer];
-        manualNote = describeStagedAnswer(state, answer);
-        if (ascendComplete(state, staged)) {
-          dispatchOrThrow(session, composeAscend(staged));
-          deleteAscendSidecar(ascendPath);
-          staged = [];
-        } else {
-          writeAscendSidecar(ascendPath, staged);
-        }
+      case "takeNamed":
+        dispatchOrThrow(session, buildTakeReward(session.getState().state, action.name, false));
         break;
-      }
     }
   } catch (error) {
     if (error instanceof MoveRefused) {
       out(`Refused: ${error.message}`);
       out("");
-      out(moveHint(session.getState().state, staged));
+      out(moveHint(session.getState().state));
       return 1;
     }
     throw error;
@@ -547,12 +478,12 @@ function play(request: PlayRequest): number {
   }
   out("");
   if (FULL_TABLE_MOVES.has(action.kind)) {
-    out(renderTable(state, staged));
+    out(renderTable(state));
   } else {
     for (const line of shortStatusLines(state)) out(line);
   }
   out("");
-  out(moveHint(state, staged));
+  out(moveHint(state));
 
   writeRunFile(path, session);
   return 0;

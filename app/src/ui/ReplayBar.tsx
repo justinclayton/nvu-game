@@ -23,8 +23,6 @@ function describe(state: ReplayState): string {
       return "Next: flip the room";
     case "END_PLAY":
       return "Next: check the room";
-    case "ASCEND":
-      return "Next: ascend";
     default:
       return `Next: ${next.type.toLowerCase().replaceAll("_", " ")}`;
   }

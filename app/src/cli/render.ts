@@ -14,7 +14,6 @@ import {
 import type { Card, Character, GameState, Room } from "@domain/types";
 import type { CardFace, RoomFace, StatRequirement } from "@domain/printed";
 import { CHARACTERS, playerOf } from "@domain/verbs";
-import { currentQuestion, describeStagedAnswer, type StagedAnswer } from "./ascend";
 
 /**
  * `now` is the value a conditional stat has right now (`contributionOf`, the
@@ -146,27 +145,7 @@ export function shortStatusLines(state: GameState): string[] {
   return lines;
 }
 
-function ascendStatusLines(state: GameState, staged: readonly StagedAnswer[]): string[] {
-  const lines: string[] = ["Ascending."];
-  const asking = currentQuestion(state, staged);
-  lines.push(
-    asking ? `Asking: ${asking} — the reward` : "Every question is staged; composing ASCEND.",
-  );
-  lines.push("Offered:");
-  for (const c of CHARACTERS) {
-    const offer = state.offer?.[c] ?? [];
-    lines.push(
-      `  ${c}: ${offer.length > 0 ? offer.map((card) => cardLine(state, c, card)).join(" | ") : "nothing"}`,
-    );
-  }
-  if (staged.length > 0) {
-    lines.push("Staged so far:");
-    for (const a of staged) lines.push(`  ${describeStagedAnswer(state, a)}`);
-  }
-  return lines;
-}
-
-export function renderTable(state: GameState, staged: readonly StagedAnswer[] = []): string {
+export function renderTable(state: GameState): string {
   const lines: string[] = [];
   // Turn Start sits between turns with the just-ended turn's number still on
   // the state (the engine bumps it at the next flip, not here) — show the
@@ -183,7 +162,6 @@ export function renderTable(state: GameState, staged: readonly StagedAnswer[] = 
     lines.push(`Stat pool: Oomph ${String(pool.oomph)}, Scramble ${String(pool.scramble)}`);
   }
   for (const c of CHARACTERS) lines.push(...playerLines(state, c));
-  if (state.phase === "Ascend") lines.push(...ascendStatusLines(state, staged));
   if (state.pending) lines.push(`Waiting on: ${state.pending.prompt}`);
   if (state.outcome) lines.push(`Outcome: ${state.outcome}`);
   return lines.join("\n");
@@ -195,7 +173,7 @@ export function renderTable(state: GameState, staged: readonly StagedAnswer[] = 
  * printed after each call ... lists the verbs open in this phase with the
  * cards eligible for each, not every combination").
  */
-export function moveHint(state: GameState, staged: readonly StagedAnswer[] = []): string {
+export function moveHint(state: GameState): string {
   if (state.phase === "GameOver") return "No legal moves — the run is over.";
 
   const lines: string[] = [];
@@ -272,18 +250,6 @@ export function moveHint(state: GameState, staged: readonly StagedAnswer[] = [])
       break;
     }
 
-    case "Ascend": {
-      const asking = currentQuestion(state, staged);
-      if (!asking) {
-        lines.push("Every question is staged; composing ASCEND.");
-        break;
-      }
-      const offered = state.offer?.[asking] ?? [];
-      const names = offered.map((c) => c.name).join(", ") || "nothing";
-      lines.push(`${asking}: the reward. take <Name> — one of: ${names} — or take none`);
-      lines.push("undo — step back one staged question");
-      break;
-    }
   }
   return lines.join("\n");
 }

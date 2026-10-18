@@ -143,7 +143,7 @@ class Accumulator {
         this.lossTally(before.floor, event.character).paidAsCost += event.cards.length;
       }
     }
-    if (command.type === "ASCEND") {
+    if (after.floor > before.floor) {
       for (const character of CHARACTERS) {
         this.ascendCounts[character] += 1;
         const p = playerOf(after, character);

@@ -227,7 +227,6 @@ export function createInitialState(
       goodStuff,
       badStuff,
     },
-    offer: null,
     pending: null,
     unfinishedPlay: null,
     resolution: null,

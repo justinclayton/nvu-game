@@ -23,7 +23,6 @@ import {
 import { shuffle } from "./rng";
 import { buildFloor, emptyTurnRecord, returnRoomsToSupply, TOP_FLOOR } from "./setup";
 import type {
-  AscendChoice,
   Card,
   CardId,
   Challenge,
@@ -170,15 +169,6 @@ export function validate(state: GameState, command: Command): Rejection | null {
       return null;
     }
 
-    case "ASCEND": {
-      if (state.phase !== "Ascend") return wrongPhase(state, "ascend");
-      for (const c of CHARACTERS) {
-        const problem = validateAscendChoice(state, c, command[c]);
-        if (problem) return problem;
-      }
-      return null;
-    }
-
     default:
       return assertNever(command);
   }
@@ -266,22 +256,6 @@ function validateAnswer(pending: Pending, command: Command): Rejection | null {
   }
 }
 
-/* --------------------------------------------------------- Rulebook, Ascending */
-
-function validateAscendChoice(
-  state: GameState,
-  c: Character,
-  choice: AscendChoice,
-): Rejection | null {
-  if (choice.takeRewardId !== null) {
-    const offered = state.offer?.[c] ?? [];
-    if (!offered.some((x) => x.id === choice.takeRewardId)) {
-      return reject("NotOffered", `That card was not offered to ${c}.`);
-    }
-  }
-  return null;
-}
-
 /* ==========================================================================
    The engine
    ========================================================================== */
@@ -333,8 +307,6 @@ function apply(state: GameState, command: Command, run: Run): GameState {
       return answerCards(state, command.cardIds, "order", run);
     case "TAKE_REWARD":
       return answerReward(state, command.cardId, run);
-    case "ASCEND":
-      return ascend(state, command.Red, command.Gray, run);
     default:
       return assertNever(command);
   }
@@ -954,22 +926,7 @@ function finishCleanup(state: GameState, run: Run): GameState {
       run.events.push({ type: "GAME_OVER", outcome: "Victory" });
       return { ...s, phase: "GameOver", outcome: "Victory", playZone: [] };
     }
-    // Rulebook, Ascending: each character is offered three cards from their own pool.
-    // Pools are sized so this always holds; if either falls short, the run is
-    // void rather than offering fewer cards than the rule promises.
-    for (const c of CHARACTERS) {
-      if (s.pools[c].length < 3) {
-        const reason = `${c}'s reward pool holds ${String(s.pools[c].length)} cards; Ascending reveals 3.`;
-        run.events.push({ type: "RUN_ABORTED", reason });
-        return { ...s, phase: "GameOver", outcome: "Aborted", playZone: [] };
-      }
-    }
-    return {
-      ...s,
-      phase: "Ascend",
-      playZone: [],
-      offer: { Red: s.pools.Red.slice(0, 3), Gray: s.pools.Gray.slice(0, 3) },
-    };
+    return ascend(s, run);
   }
   return { ...s, phase: "Turn Start", playZone: [] };
 }
@@ -1268,14 +1225,13 @@ const setPool = (state: GameState, c: Character, cards: readonly Card[]): GameSt
 
 /* ------------------------------------------------------------ Rulebook, Ascending */
 
-function ascend(state: GameState, red: AscendChoice, gray: AscendChoice, run: Run): GameState {
+function ascend(state: GameState, run: Run): GameState {
   let s = state;
-  s = ascendOne(s, "Red", red, run);
-  s = ascendOne(s, "Gray", gray, run);
+  for (const c of CHARACTERS) s = shuffleAllIntoDeck(s, c, run);
 
   // Setup: build the next floor's deck, one card smaller than this one's.
   s = returnRoomsToSupply(s);
-  s = buildFloor({ ...s, floor: s.floor + 1, offer: null }, run.events);
+  s = buildFloor({ ...s, floor: s.floor + 1 }, run.events);
   return { ...s, phase: "Turn Start", playZone: [], thisTurn: emptyTurnRecord() };
 }
 
@@ -1284,23 +1240,4 @@ function shuffleAllIntoDeck(state: GameState, c: Character, run: Run): GameState
   const p = playerOf(state, c);
   const s = shuffleIntoDeck(state, c, [...p.hand, ...p.discard, ...p.exhaust], run.events);
   return withPlayer(s, c, { ...playerOf(s, c), hand: [], discard: [], exhaust: [] });
-}
-
-function ascendOne(state: GameState, c: Character, choice: AscendChoice, run: Run): GameState {
-  let s = shuffleAllIntoDeck(state, c, run);
-
-  // Rulebook, Ascending, step 2: Choose a reward, by `Reveal a card reward`.
-  // Three cards from their own pool; take one into the discard pile, or
-  // decline. The cards not taken go to the bottom of the pool.
-  const offered = state.offer?.[c] ?? [];
-  const taken = offered.find((x) => x.id === choice.takeRewardId) ?? null;
-  const returned = offered.filter((x) => x.id !== taken?.id);
-  s = setPool(s, c, [...s.pools[c].slice(offered.length), ...returned]);
-  if (taken) {
-    run.events.push({ type: "REWARD_TAKEN", character: c, card: taken });
-    s = gainToDiscard(s, c, taken);
-  } else {
-    run.events.push({ type: "REWARD_DECLINED", character: c });
-  }
-  return s;
 }

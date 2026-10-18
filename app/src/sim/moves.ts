@@ -16,7 +16,6 @@
 
 import { costOf, payOptions, playableCards, scrapForStatsCards } from "@domain/queries";
 import type {
-  AscendChoice,
   Card,
   CardId,
   Character,
@@ -132,24 +131,6 @@ export function scrapsOf(state: GameState, c: Character): readonly Command[] {
   );
 }
 
-/* ---------------------------------------------------------------- Ascend */
-
-/** Everything one character may decide at ascension: each offered reward, or none. */
-export function ascendChoices(state: GameState, c: Character): readonly AscendChoice[] {
-  const offered = state.offer?.[c] ?? [];
-  const rewards: (CardId | null)[] = [null, ...ids(offered)];
-  return rewards.map((takeRewardId) => ({ takeRewardId }));
-}
-
-/** The cross product of both characters' reward choices — at most 4×4, so nothing here is capped. */
-function ascends(state: GameState): readonly Command[] {
-  const red = ascendChoices(state, "Red");
-  const gray = ascendChoices(state, "Gray");
-  const out: Command[] = [];
-  for (const r of red) for (const g of gray) out.push({ type: "ASCEND", Red: r, Gray: g });
-  return out;
-}
-
 /* ------------------------------------------------------------- the list */
 
 export function legalCommands(state: GameState): readonly Command[] {
@@ -169,9 +150,6 @@ export function legalCommands(state: GameState): readonly Command[] {
       out.push({ type: "END_PLAY" });
       return out;
     }
-
-    case "Ascend":
-      return ascends(state);
 
     case "Outcome":
     case "Cleanup":

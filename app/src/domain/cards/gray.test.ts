@@ -543,3 +543,43 @@ describe("Synergy Link — 'You may draw 1 card. If Red has played a card this t
     expect(drawnBy(asked, noDraw)).toBe(0);
   });
 });
+
+describe("I Know Kung Fu — 'Play: every time a Scramble card is played this turn, you may draw a card'", () => {
+  const armedState = () => {
+    const state = playing({
+      Red: player({ deck: pile("Shove", 4), hand: [card("Crowbar"), card("Pry Bar")] }),
+      Gray: player({
+        deck: pile("Duck Under", 4),
+        hand: [card("I Know Kung Fu"), card("Duck Under"), card("Coil Of Cable")],
+      }),
+    });
+    return must(state, {
+      type: "PLAY_CARD",
+      character: "Gray",
+      cardId: handCard(state, "Gray", "I Know Kung Fu").id,
+      payWith: [handCard(state, "Gray", "Duck Under").id],
+    }).state;
+  };
+
+  it("asks Gray whether to draw when Red plays Crowbar", () => {
+    const armed = armedState();
+    const next = must(armed, free("Red", handCard(armed, "Red", "Crowbar").id));
+    expect(next.state.pending).toMatchObject({
+      kind: "ChooseDraw",
+      options: [{ character: "Gray", count: 1 }],
+    });
+    expect(must(next.state, drawing("Gray", 1)).state.Gray.hand).toHaveLength(2);
+  });
+
+  it("asks when Gray plays a Scramble card too", () => {
+    const armed = armedState();
+    const next = must(armed, free("Gray", handCard(armed, "Gray", "Coil Of Cable").id));
+    expect(next.state.pending?.kind).toBe("ChooseDraw");
+  });
+
+  it("asks nothing for a card with no Scramble", () => {
+    const armed = armedState();
+    const next = must(armed, free("Red", handCard(armed, "Red", "Pry Bar").id));
+    expect(next.state.pending).toBeNull();
+  });
+});

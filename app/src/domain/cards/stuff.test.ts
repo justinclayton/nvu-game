@@ -1305,6 +1305,8 @@ describe("Corrosive Acid — 'Holding: At Turn Start, Exhaust 1. Play: Scrap 1 G
     expect(next.Red.deck).toHaveLength(1);
     expect(next.Red.exhaust).toHaveLength(1);
     expect(eventTypes(events)).toContain("CARD_EXHAUSTED");
+    const exhausted = events.find((e) => e.type === "CARD_EXHAUSTED");
+    expect(exhausted?.source).toBe("Corrosive Acid");
   });
 
   it("Scraps a chosen Good Stuff card from hand when played", () => {

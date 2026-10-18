@@ -41,6 +41,7 @@ describe("walkthrough 1 — the deck runs dry mid-draw and the discard pile beco
     expect(next.Red.discard).toEqual([]);
     // Red: 2 off the original deck, the reshuffle, then 3 more. Gray: a plain 5.
     expect(eventTypes(events)).toEqual([
+      "PHASE_STARTED",
       "ROOM_FLIPPED",
       "CARD_DRAWN",
       "CARD_DRAWN",
@@ -53,6 +54,8 @@ describe("walkthrough 1 — the deck runs dry mid-draw and the discard pile beco
       "CARD_DRAWN",
       "CARD_DRAWN",
       "CARD_DRAWN",
+      "PHASE_ENDED",
+      "PHASE_STARTED",
     ]);
   });
 });

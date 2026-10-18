@@ -298,6 +298,18 @@ interface Run {
   readonly enteredAt: Map<CardId, number>;
 }
 
+/** The events a card or room produced, each marked with whose text made it happen. */
+const causedBy = (events: readonly DomainEvent[], source: string): DomainEvent[] =>
+  events.map((e) => (e.source === undefined ? { ...e, source } : e));
+
+/** Mark everything pushed since `from` as caused by `source`. */
+function attribute(run: Run, from: number, source: string): void {
+  for (let i = from; i < run.events.length; i++) {
+    const e = run.events[i];
+    if (e) run.events[i] = causedBy([e], source)[0] ?? e;
+  }
+}
+
 export function execute(state: GameState, command: Command): Result {
   const reason = validate(state, command);
   if (reason) return { ok: false, reason };
@@ -389,7 +401,7 @@ function hear(
     const onEvent = behaviourOf(ctx.card.name)?.onEvent;
     if (!onEvent) continue;
     const step = onEvent(event, s, ctx);
-    run.events.push(...step.events);
+    run.events.push(...causedBy(step.events, ctx.card.name));
     if (run.events.length > TRIGGER_LIMIT) {
       throw new CorruptStateError("A card trigger is feeding itself.");
     }
@@ -460,6 +472,7 @@ function flipRoom(state: GameState, run: Run): GameState {
   const room = state.floorDeck[0];
   if (!room) throw new CorruptStateError("Flipped an empty floor deck.");
 
+  run.events.push({ type: "PHASE_STARTED", phase: "Turn Start" });
   // Step 1, Flip the room: you always see what you are facing before you spend anything.
   run.events.push({ type: "ROOM_FLIPPED", room });
   const flipped: GameState = {
@@ -476,7 +489,11 @@ function flipRoom(state: GameState, run: Run): GameState {
   if (faced.phase === "GameOver") return faced;
   const drawn = settle(drawPhase(faced, run), run);
   if (drawn.phase === "GameOver") return drawn;
-  return turnStartHands(drawn, run);
+  const held = turnStartHands(drawn, run);
+  if (held.phase === "GameOver") return held;
+  run.events.push({ type: "PHASE_ENDED", phase: "Turn Start" });
+  run.events.push({ type: "PHASE_STARTED", phase: "Play" });
+  return held;
 }
 
 /** A held card's own Turn Start line (Corrosive Acid), once the draw is done. */
@@ -487,7 +504,7 @@ function turnStartHands(state: GameState, run: Run): GameState {
       const onTurnStart = behaviourOf(card.name)?.onTurnStart;
       if (!onTurnStart) continue;
       const step = onTurnStart(s, { card, character: c, zone: "hand" });
-      run.events.push(...step.events);
+      run.events.push(...causedBy(step.events, card.name));
       s = settle(step.state, run);
       if (s.phase === "GameOver") return s;
     }
@@ -566,12 +583,15 @@ function playCard(
 
   const behaviour = behaviourOf(card.name);
   if (behaviour?.exhaustX !== undefined) {
-    s = settle(printedExhaust(s, c, behaviour.exhaustX, card.name, run), run);
+    const at = run.events.length;
+    const exhausted = printedExhaust(s, c, behaviour.exhaustX, card.name, run);
+    attribute(run, at, card.name);
+    s = settle(exhausted, run);
   }
   const onPlay = behaviour?.onPlay;
   if (onPlay && s.phase !== "GameOver") {
     const step = onPlay(s, { card, character: c, zone: "playZone" });
-    run.events.push(...step.events);
+    run.events.push(...causedBy(step.events, card.name));
     s = settle(step.state, run);
   }
   return finishPlay(s, run, {
@@ -676,6 +696,8 @@ function endPlay(state: GameState, run: Run): GameState {
   const room = state.activeRoom;
   if (!room) throw new CorruptStateError("Ended a play phase with no room in the zone.");
 
+  run.events.push({ type: "PHASE_ENDED", phase: "Play" });
+  run.events.push({ type: "PHASE_STARTED", phase: "Outcome" });
   const outcome = roomOutcome(state, room);
   for (const threshold of outcome.met) {
     run.events.push({ type: "THRESHOLD_MET", room, threshold });
@@ -716,7 +738,7 @@ function playEndEffects(state: GameState, run: Run): GameState {
     const onPlayEnd = behaviourOf(played.card.name)?.onPlayEnd;
     if (!onPlayEnd) continue;
     const step = onPlayEnd(s, { card: played.card, character: played.owner, zone: "playZone" });
-    run.events.push(...step.events);
+    run.events.push(...causedBy(step.events, played.card.name));
     s = settle(step.state, run);
     if (s.phase === "GameOver") return s;
   }
@@ -834,10 +856,19 @@ function drain(state: GameState, run: Run): GameState {
       const cards = s.pools[head.who].slice(0, REVEALED);
       s = withEffects(s, rest);
       if (cards.length === 0) {
-        run.events.push({ type: "REWARD_POOL_EMPTY", character: head.who });
+        run.events.push({
+          type: "REWARD_POOL_EMPTY",
+          character: head.who,
+          source: resolution.room.name,
+        });
         continue;
       }
-      run.events.push({ type: "REWARD_REVEALED", character: head.who, cards });
+      run.events.push({
+        type: "REWARD_REVEALED",
+        character: head.who,
+        cards,
+        source: resolution.room.name,
+      });
       s = settle(s, run);
       if (s.phase === "GameOver") return s;
       return {
@@ -874,7 +905,10 @@ function drain(state: GameState, run: Run): GameState {
       };
     }
 
-    s = settle(applyEffect(s, head, head.who, run), run);
+    const at = run.events.length;
+    const applied = applyEffect(s, head, head.who, run);
+    attribute(run, at, resolution.room.name);
+    s = settle(applied, run);
     if (s.phase === "GameOver") return s;
     s = withEffects(s, rest);
   }
@@ -900,6 +934,7 @@ function finishTurn(state: GameState, run: Run): GameState {
     s = clearFreePlays(s);
     s = clearPlayDiscount(s);
 
+    run.events.push({ type: "PHASE_ENDED", phase: "Outcome" });
     run.events.push({ type: "CLEANUP_BEGAN" });
     s = settle(s, run);
     if (s.phase === "GameOver") return s;
@@ -920,7 +955,7 @@ function cleanupHands(state: GameState, run: Run): GameState {
       const onCleanup = behaviourOf(card.name)?.onCleanup;
       if (!onCleanup) continue;
       const step = onCleanup(s, { card, character: c, zone: "hand" });
-      run.events.push(...step.events);
+      run.events.push(...causedBy(step.events, card.name));
       s = settle(step.state, run);
       if (s.phase === "GameOver") return s;
       if (s.pending) return s;
@@ -944,6 +979,7 @@ function finishCleanup(state: GameState, run: Run): GameState {
   }
 
   s = { ...s, resolution: null };
+  run.events.push({ type: "PHASE_ENDED", phase: "Cleanup" });
   run.events.push({ type: "TURN_ENDED", turn: s.turn });
 
   // Each Turn, Outcome: an outcome that says Ascend runs Cleanup as normal first, then ends
@@ -964,6 +1000,7 @@ function finishCleanup(state: GameState, run: Run): GameState {
         return { ...s, phase: "GameOver", outcome: "Aborted", playZone: [] };
       }
     }
+    run.events.push({ type: "PHASE_STARTED", phase: "Ascend" });
     return {
       ...s,
       phase: "Ascend",
@@ -989,7 +1026,7 @@ function cleanupPiles(state: GameState, run: Run): GameState {
       character: played.owner,
       zone: "playZone",
     });
-    run.events.push(...step.events);
+    run.events.push(...causedBy(step.events, played.card.name));
     s = settle(step.state, run);
     if (s.phase === "GameOver") return s;
   }
@@ -1022,7 +1059,7 @@ function runChoice(state: GameState, answer: ChoiceAnswer, run: Run): GameState 
   const onChoice = behaviourOf(ctx.card.name)?.onChoice;
   if (!onChoice) throw new CorruptStateError(`${ctx.card.name} asked a question it cannot answer.`);
   const step = onChoice(answer, cleared, ctx);
-  run.events.push(...step.events);
+  run.events.push(...causedBy(step.events, ctx.card.name));
   let s = settle(step.state, run);
   if (play) {
     const stayed = new Set(presentSince(s, run, 0));
@@ -1276,6 +1313,7 @@ function ascend(state: GameState, red: AscendChoice, gray: AscendChoice, run: Ru
   // Setup: build the next floor's deck, one card smaller than this one's.
   s = returnRoomsToSupply(s);
   s = buildFloor({ ...s, floor: s.floor + 1, offer: null }, run.events);
+  run.events.push({ type: "PHASE_ENDED", phase: "Ascend" });
   return { ...s, phase: "Turn Start", playZone: [], thisTurn: emptyTurnRecord() };
 }
 

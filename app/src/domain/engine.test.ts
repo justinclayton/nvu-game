@@ -62,7 +62,13 @@ describe("Turn Start", () => {
     expect(next.phase).toBe("Play");
     expect(next.Red.hand).toHaveLength(5);
     expect(next.Gray.hand).toHaveLength(5);
-    expect(eventTypes(events)).toEqual(["ROOM_FLIPPED", ...Array<string>(10).fill("CARD_DRAWN")]);
+    expect(eventTypes(events)).toEqual([
+      "PHASE_STARTED",
+      "ROOM_FLIPPED",
+      ...Array<string>(10).fill("CARD_DRAWN"),
+      "PHASE_ENDED",
+      "PHASE_STARTED",
+    ]);
   });
 
   it("step 2, Draw up to five: 'draw cards from your deck until you hold 5' — all at once, no decision", () => {
@@ -704,11 +710,13 @@ describe("Room kinds: Room and Stairwell", () => {
       type: "STUFF_POOL_EMPTY",
       character: "Red",
       pool: "bad_stuff",
+      source: "Overgrown Hydroponics Bay",
     });
     expect(events).toContainEqual({
       type: "STUFF_POOL_EMPTY",
       character: "Gray",
       pool: "bad_stuff",
+      source: "Overgrown Hydroponics Bay",
     });
     expect(next.Red.hand).toHaveLength(0);
     expect(next.Gray.hand).toHaveLength(0);

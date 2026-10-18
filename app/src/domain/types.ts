@@ -383,7 +383,18 @@ export type CommandType = Command["type"];
 /** Where a card was when it was discarded (rulebook, Card anatomy: Keywords). */
 export type DiscardedFrom = "hand" | "playZone" | "deck";
 
-export type DomainEvent =
+/**
+ * An event, and the card or room whose text made it happen when one did.
+ * A player's own action (playing a card, paying its cost) has no source.
+ */
+export type DomainEvent = DomainEventBody & { readonly source?: string };
+
+/** The phases that open and close in the log. */
+export type LoggedPhase = Exclude<Phase, "GameOver">;
+
+type DomainEventBody =
+  | { readonly type: "PHASE_STARTED"; readonly phase: LoggedPhase }
+  | { readonly type: "PHASE_ENDED"; readonly phase: LoggedPhase }
   | { readonly type: "FLOOR_BUILT"; readonly floor: number; readonly rooms: number }
   | { readonly type: "ROOM_FLIPPED"; readonly room: Room }
   | {

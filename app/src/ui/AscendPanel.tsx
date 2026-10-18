@@ -1,4 +1,4 @@
-/* Rulebook, Ascending: shuffle the hand into the deck, then the card reward,
+/* Rulebook, Ascending: shuffle everything into the deck, then the card reward,
  * decided for both characters at once.
  *
  * The three cards each character is offered float above the mat and are

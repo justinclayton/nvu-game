@@ -1279,15 +1279,15 @@ function ascend(state: GameState, red: AscendChoice, gray: AscendChoice, run: Ru
   return { ...s, phase: "Turn Start", playZone: [], thisTurn: emptyTurnRecord() };
 }
 
-/** Rulebook, Ascending, step 1: Shuffle your hand into your deck. */
-function shuffleHandIntoDeck(state: GameState, c: Character, run: Run): GameState {
-  const hand = playerOf(state, c).hand;
-  const s = shuffleIntoDeck(state, c, hand, run.events);
-  return withPlayer(s, c, { ...playerOf(s, c), hand: [] });
+/** Rulebook, Ascending, step 1: Heal and Reset. */
+function shuffleAllIntoDeck(state: GameState, c: Character, run: Run): GameState {
+  const p = playerOf(state, c);
+  const s = shuffleIntoDeck(state, c, [...p.hand, ...p.discard, ...p.exhaust], run.events);
+  return withPlayer(s, c, { ...playerOf(s, c), hand: [], discard: [], exhaust: [] });
 }
 
 function ascendOne(state: GameState, c: Character, choice: AscendChoice, run: Run): GameState {
-  let s = shuffleHandIntoDeck(state, c, run);
+  let s = shuffleAllIntoDeck(state, c, run);
 
   // Rulebook, Ascending, step 2: Choose a reward, by `Reveal a card reward`.
   // Three cards from their own pool; take one into the discard pile, or

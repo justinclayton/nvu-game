@@ -29,7 +29,7 @@
 #   flee    string               room and stairwell only: the printed Flee line
 
 meta:
-  version: C47
+  version: C48
   updated: 2026-10-03
 
 cards:
@@ -765,7 +765,7 @@ cards:
       - thresholds:
           - stat: Oomph
             value: 10
-            outcome: Clear, and one player may Scrap a Bad Stuff card from your hand.
+            outcome: Clear, and one player may Scrap a Bad Stuff card from their hand.
     flee: Both players Exhaust 2, and both players get Bad Stuff.
 
   - name: Pressurized Maintenance Hub

@@ -11,10 +11,10 @@
  * and no server.
  */
 var NVU_CARDS = {
-  meta: {"version":"C47","updated":"2026-10-03"},
+  meta: {"version":"C48","updated":"2026-10-03"},
   rulesVersion: "R30",
-  cardsVersion: "C47",
-  cardListId: "d78503cfb1ad",
+  cardsVersion: "C48",
+  cardListId: "4897a8c1c384",
   cards: [
     {"name":"Shove","set":"official","kind":"player","owner":"Red","starter":true,"cost":1,"oomph":2,"flavor":"'Oomph!', he shouted.","count":4},
     {"name":"Charge","set":"official","kind":"player","owner":"Red","starter":true,"cost":2,"oomph":4,"flavor":"I am bolder, so I lower my shoulder.","count":4},
@@ -81,7 +81,7 @@ var NVU_CARDS = {
     {"name":"Security Turnstile","set":"proposed","kind":"room","tier":1,"flavor":"A rusted barrier blocks the thoroughfare. You can slip through quietly or tear it off its hinges.","challenges":[{"thresholds":[{"stat":"Scramble","value":3,"outcome":"Clear."}]},{"thresholds":[{"stat":"Oomph","value":5,"outcome":"Clear, and Red gets Good Stuff."}]}],"flee":"Both players Exhaust 1.","count":14},
     {"name":"Flooded Ventilation Shaft","set":"proposed","kind":"room","tier":1,"flavor":"A narrow duct dripping with murky condensation. Red can force the grate while Gray navigates the wiring.","challenges":[{"thresholds":[{"stat":"Scramble","value":4,"outcome":"Clear."}]},{"thresholds":[{"stats":{"Oomph":3,"Scramble":3},"outcome":"Clear, and both players get Good Stuff."}]}],"flee":"Gray Exhausts 2.","count":10},
     {"name":"The Sentry Drone","set":"proposed","kind":"stairwell","tier":1,"flavor":"An automated defense unit guarding the stairwell. Destroy its chassis or cut its power harness.","challenges":[{"thresholds":[{"stat":"Oomph","value":6,"outcome":"Ascend, and both players reveal a card reward."}]},{"thresholds":[{"stat":"Scramble","value":6,"outcome":"Ascend, and both players reveal a card reward."}]},{"thresholds":[{"stats":{"Oomph":4,"Scramble":4},"outcome":"Ascend; both players reveal a card reward, and both players get 2 Good Stuff!"}]}],"flee":"Both players Exhaust 1, and both players get Bad Stuff.","count":3},
-    {"name":"Automated Defense Turret","set":"proposed","kind":"room","tier":2,"flavor":"A heavy turretted cannon sweeps the corridor. Deactivating its targeting sensors requires precision; smashing it requires brute force.","challenges":[{"thresholds":[{"stat":"Scramble","value":8,"outcome":"Clear, and Gray gets Good Stuff."}]},{"thresholds":[{"stat":"Oomph","value":10,"outcome":"Clear, and one player may Scrap a Bad Stuff card from your hand."}]}],"flee":"Both players Exhaust 2, and both players get Bad Stuff.","count":7},
+    {"name":"Automated Defense Turret","set":"proposed","kind":"room","tier":2,"flavor":"A heavy turretted cannon sweeps the corridor. Deactivating its targeting sensors requires precision; smashing it requires brute force.","challenges":[{"thresholds":[{"stat":"Scramble","value":8,"outcome":"Clear, and Gray gets Good Stuff."}]},{"thresholds":[{"stat":"Oomph","value":10,"outcome":"Clear, and one player may Scrap a Bad Stuff card from their hand."}]}],"flee":"Both players Exhaust 2, and both players get Bad Stuff.","count":7},
     {"name":"Pressurized Maintenance Hub","set":"proposed","kind":"room","tier":2,"flavor":"High-pressure steam pipes obstruct the gangway. Red must brace the valves while Gray hacks the overrides.","challenges":[{"thresholds":[{"stat":"Oomph","value":7,"outcome":"Clear, and Red reveals a card reward."}]},{"thresholds":[{"stat":"Scramble","value":7,"outcome":"Clear, and Gray reveals a card reward."}]}],"flee":"Both players Exhaust 2.","count":4},
     {"name":"Overgrown Hydroponics Bay","set":"proposed","kind":"room","tier":2,"flavor":"Mutated flora fills the chamber, emitting dense spore clouds.","challenges":[{"thresholds":[{"stat":"Scramble","value":6,"outcome":"Clear, but both players get Bad Stuff."},{"stat":"Scramble","value":11,"outcome":"Clear, and both players get Good Stuff."}]}],"flee":"Both players Exhaust 2, and Gray gets Bad Stuff.","count":4},
     {"name":"Gears & Glitch","set":"proposed","kind":"stairwell","tier":2,"flavor":"A pair of rogue maintenance constructs blocking the stairwell door.","challenges":[{"thresholds":[{"stat":"Oomph","value":12,"outcome":"Ascend, and both players reveal a card reward."}]},{"thresholds":[{"stats":{"Oomph":7,"Scramble":7},"outcome":"Ascend, and one player reveals a card reward."}]}],"flee":"Both players Exhaust 3, and Red gets Bad Stuff.","count":3},

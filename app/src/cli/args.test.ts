@@ -97,15 +97,15 @@ describe("parseRequest", () => {
     });
   });
 
-  it("reads take with a name or none as the Ascend reward answer", () => {
+  it("reads take with a name or none as a card reward answer", () => {
     expect(parseRequest(["play", "take", "Zen Mode"])).toEqual({
       command: "play",
-      action: { kind: "takeAscend", name: "Zen Mode" },
+      action: { kind: "takeNamed", name: "Zen Mode" },
       run: null,
     });
     expect(parseRequest(["play", "take", "none"])).toEqual({
       command: "play",
-      action: { kind: "takeAscend", name: null },
+      action: { kind: "takeNamed", name: null },
       run: null,
     });
   });

@@ -151,6 +151,28 @@ function cardReward(): GameState {
   return asked;
 }
 
+/** A pending `TakeReward` printed by a Stairwell: The Sentry Drone's Oomph 6 line, Red first. */
+function stairwellReward(): GameState {
+  const state = rig({
+    phase: "Play",
+    floor: 1,
+    activeRoom: room("The Sentry Drone"),
+    Red: player({
+      deck: pile("Shove", 5),
+      hand: [card("Charge"), card("Shove"), card("Shove"), card("Pry Bar"), card("Pry Bar")],
+    }),
+    Gray: player({ deck: pile("Duck Under", 5) }),
+  });
+  const r = state.Red.hand;
+  const { state: asked } = play(state, [
+    { type: "PLAY_CARD", character: "Red", cardId: r[0]!.id, payWith: [r[1]!.id, r[2]!.id] },
+    { type: "PLAY_CARD", character: "Red", cardId: r[3]!.id, payWith: [] },
+    { type: "PLAY_CARD", character: "Red", cardId: r[4]!.id, payWith: [] },
+    { type: "END_PLAY" },
+  ]);
+  return asked;
+}
+
 /** A pending `ChooseCharacter` raised at Outcome: The Sentry Drone's Scramble line asks who gets Good Stuff. */
 function outcomeChoice(): GameState {
   const state = rig({
@@ -340,6 +362,11 @@ export const FIXTURES: readonly Fixture[] = [
     name: "card-reward",
     description: "A room's card reward: the top 3 of Red's reward pool, one to take or none.",
     build: stable(cardReward),
+  },
+  {
+    name: "stairwell-reward",
+    description: "A Stairwell's printed card reward: the top 3 of Red's reward pool, before Ascending.",
+    build: stable(stairwellReward),
   },
   {
     name: "cleanup-choice",

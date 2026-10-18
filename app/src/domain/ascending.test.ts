@@ -127,6 +127,13 @@ describe("Ascending, the reward comes from the outcome", () => {
     expect(next.pools[owner].some((c) => c.id === taken.id)).toBe(false);
   });
 
+  it("the revealed reward names the Stairwell that printed it", () => {
+    const { events } = clearIt(atStairwell(room("The Sentry Drone")));
+    const revealed = events.filter((e) => e.type === "REWARD_REVEALED");
+    expect(revealed.length).toBeGreaterThan(0);
+    for (const e of revealed) expect(e.source).toBe("The Sentry Drone");
+  });
+
   it("declining the printed reward leaves the revealed cards in the pool", () => {
     const asked = clearIt(atStairwell(room("The Sentry Drone")));
     const { state: next, events } = declineEvery(asked);

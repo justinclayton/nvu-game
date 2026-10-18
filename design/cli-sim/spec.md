@@ -102,8 +102,7 @@ The moves, one per engine command: `[agent, accepted]`
 | `play choose Rope Flare`, `play choose none` | `CHOOSE_CARDS`; also which piece of a Good Stuff spread to keep |
 | `play choose 2`, `play choose Red 1`, `play choose none` | `CHOOSE_DRAW`: a card's "you may draw", with who and how many left out when only one answer is on offer; `none` draws nothing `[agent]` rules 0.2.10 |
 | `play order Rope Flare Shove` | `ORDER_CARDS`, top first |
-| `play take Zen Mode`, `play take none`, `play skip` | a room's card reward: `TAKE_REWARD`, one of the 3 revealed or none. A bare `play take` works when only one was revealed. `[agent]` rules 0.2.5 |
-| `play take Zen Mode`, `play take none` | one character's Ascend answer, composed into `ASCEND`, see below |
+| `play take Zen Mode`, `play take none`, `play skip` | a card reward, from a Room or a Stairwell: `TAKE_REWARD`, one of the 3 revealed or none. A bare `play take` works when only one was revealed. `[agent]` rules 0.2.5 |
 
 There is no Draw phase and no draw move. `[agent]` Rulebook 0.2 folded Draw up to five into Turn
 Start as an automatic second step with no decision in it (rulebook, Each Turn): `play flip` resolves
@@ -122,22 +121,6 @@ same card, any copy is taken. A content test in `app/src/content` reports every 
 `cards.yaml` that share initials, so the designer sees a new collision when it lands. Today
 those are Reckless Swing and Riot Shield, Reckless and Rust, Shove and Sluggish.
 
-**Ascending, one question at a time.** `[you]` The engine takes one `ASCEND` command holding both
-characters' choices, `Red` and `Gray`, each an `AscendChoice`: just a `takeRewardId`
-(`app/src/domain/types.ts`). The CLI does not ask for a character's whole Ascend in one line; it
-asks about the reward one character at a time, and every call prints the next one. `[agent]`
-
-`Red` is asked first, then `Gray`; either order is equally valid and this one was picked for being
-simpler to implement and to read in a transcript. The answer is `play take Zen Mode`, one of the
-three offered, or `play take none`. An answer must name the card being asked about; naming any
-other card is refused with the engine-style reason, naming the card that was actually asked about.
-`[agent]`
-
-The answers are staged in a sidecar file next to the run file, one question at a time, and composed
-into the single `ASCEND` command once both characters have answered; the sidecar is then removed.
-`undo` during staging steps back one question and clears its staged answer. `show` during Ascend
-prints the offered cards as full faces and what is staged so far. `[agent, accepted]`
-
 ### What each call prints `[you]`
 
 After a move, in this order:
@@ -150,7 +133,7 @@ After a move, in this order:
    thresholds, each character's live-card count (deck, discard and hand added together; Exhaust is
    not counted) with the piles it sums, and the hand with each card's cost, stats and text. The
    room stays on the table while a prompt about it is open. Anywhere a card is offered, in a reward
-   reveal as in the Ascend offer, the full face is printed. The table printed after `end` shows the
+   reveal, the full face is printed. The table printed after `end` shows the
    turn that comes next. Every other move — `card`, `scrap` and answering a prompt — prints only
    what changed: the stat pool line, any prompt now waiting, and each character's live-card
    count. `[agent, accepted]` (issue #213)
@@ -185,9 +168,6 @@ One place caps the list where the full set is large, recorded here as debt the s
 before it can claim completeness. It does not touch `play`, which enumerates nothing:
 
 - An `OrderCards` answer over more than four cards offers only the order shown and its reverse.
-
-An `ASCEND` is the cross product of the two characters' reward choices, four by four at most, and
-is crossed in full. `[agent]`
 
 The web game's ADR ruled a generator out for the UI, which has a better source in `pending` and
 targeted queries. That ruling stands; this generator lives in `sim`, not `domain`.
@@ -226,15 +206,11 @@ Flees rather than spend an Exhaust to Clear; an unreachable room is Fled without
 something. Payment goes to Bad Stuff first (paying is the cheapest way to be rid of a `Holding:`
 line), then to the cards adding least toward the chosen line, so a free Oomph card is never
 discarded to pay for a lesser one (issue #190). A card asking an optional choice it has no opinion
-on (e.g. Level Up's "Scrap a card?") is declined rather than answered with the cheapest option. At Ascend
-(issue #97) it takes whichever offered reward best fits the deck: the character's weaker stat,
+on (e.g. Level Up's "Scrap a card?") is declined rather than answered with the cheapest option. It takes whichever revealed reward best fits the deck: the character's weaker stat,
 doubled, plus the reward's own total stats, docked for twice any printed `Exhaust X` the reward
 itself carries, ties broken toward the lower card id. Under rules 0.2.5 a room's card reward and a Good Stuff
-spread are picked by the same fit, and a room's card reward is always taken. `[agent]` Everywhere but Ascend it answers only from
-the move generator's own list (`sim/moves.ts`), never a command it invents. At Ascend it composes
-each character's choice directly, the same shape the CLI's staging builds (`cli/ascend.ts`,
-`composeAscend`), and validates the composed command against the engine; a composed command the
-engine refuses is a bug in the policy, same as any other `greedy:` throw. It never draws on its own
+spread are picked by the same fit. `[agent]` It answers only from
+the move generator's own list (`sim/moves.ts`), never a command it invents. It never draws on its own
 randomness, so a seed always plays the same game. It is not a playtester and does not read the rulebook; the
 agent playtest is still the check for fidelity and rulebook gaps.
 

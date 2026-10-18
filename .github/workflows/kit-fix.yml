@@ -1,0 +1,83 @@
+# A commit made in the GitHub web editor skips the pre-commit hook, and a merge
+# made with the "Update branch" button skips the pre-merge-commit hook. On a
+# push whose newest commit is stale by tools/stale-kit.sh, this raises R or C,
+# rebuilds the card modules and pushes the result as one new commit. It never
+# amends or force-pushes; if the branch moved meanwhile, the newer push starts
+# its own run and this one gives up.
+#
+# Pushed as the nvu-bot GitHub App (variable NVU_BOT_APP_ID, secret
+# NVU_BOT_PRIVATE_KEY), because a commit pushed with GITHUB_TOKEN starts no
+# other workflow: CI, the Kit revision check and the planner would not run on
+# the fix. The fix's own push runs this again, finds nothing stale, and stops.
+name: Kit revision fix
+
+on:
+  push:
+    branches-ignore:
+      - main
+      - pr-media
+
+permissions:
+  contents: read
+
+concurrency:
+  group: kit-fix-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  fix:
+    if: ${{ !github.event.deleted }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Mint the nvu-bot token
+        id: app-token
+        uses: actions/create-github-app-token@v1
+        with:
+          app-id: ${{ vars.NVU_BOT_APP_ID }}
+          private-key: ${{ secrets.NVU_BOT_PRIVATE_KEY }}
+
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+          token: ${{ steps.app-token.outputs.token }}
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Is the pushed commit stale?
+        id: stale
+        env:
+          BEFORE: ${{ github.event.before }}
+        run: |
+          if sh tools/stale-kit.sh "$BEFORE"; then
+            echo "stale=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "stale=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Commit and push the fix
+        if: steps.stale.outputs.stale == 'true'
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+          BOT: ${{ steps.app-token.outputs.app-slug }}[bot]
+          BRANCH: ${{ github.ref_name }}
+        run: |
+          set -eu
+          id=$(gh api "users/$BOT" --jq .id)
+          git config user.name "$BOT"
+          git config user.email "$id+$BOT@users.noreply.github.com"
+          git commit -qam "Raise the kit revision and rebuild the card modules
+
+          $(sh tools/kit-revision.sh --sources), for $(git rev-parse --short "$GITHUB_SHA"), which skipped the hooks."
+          if git push origin "HEAD:refs/heads/$BRANCH"; then
+            echo "pushed $(git rev-parse --short HEAD) to $BRANCH"
+            exit 0
+          fi
+          tip=$(git ls-remote origin "refs/heads/$BRANCH" | awk '{ print $1 }')
+          if [ "$tip" != "$GITHUB_SHA" ]; then
+            echo "$BRANCH moved to ${tip:-nothing} since this push: its own run judges it."
+            exit 0
+          fi
+          exit 1

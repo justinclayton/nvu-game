@@ -9,6 +9,9 @@
 # PR, the concurrency group runs them one after the other and the second finds
 # the first one's marker and posts nothing.
 #
+# A commit that skipped the hooks (tools/stale-kit.sh) is not planned:
+# kit-fix.yml pushes a fixed commit after it, and that push is.
+#
 # The agent writes as the nvu-agent GitHub App (variable NVU_AGENT_APP_ID,
 # secret NVU_AGENT_PRIVATE_KEY). Its tools are allowlisted below: reading,
 # git's read commands, gh's issue and PR comment commands, and
@@ -47,13 +50,22 @@ jobs:
           ref: ${{ github.event.pull_request.head.sha || github.sha }}
           fetch-depth: 0
 
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
       - name: Is this a source layer with an open PR?
         id: pr
         env:
           GH_TOKEN: ${{ github.token }}
           BRANCH: ${{ github.head_ref || github.ref_name }}
           SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+          BEFORE: ${{ github.event.before }}
         run: |
+          if ! sh tools/stale-kit.sh "$BEFORE"; then
+            echo "$SHA skipped the hooks: kit-fix.yml pushes the fix, and that push is planned."
+            exit 0
+          fi
           pr=$(gh api "repos/$GITHUB_REPOSITORY/pulls?state=open&base=main&head=$GITHUB_REPOSITORY_OWNER:$BRANCH" --jq '.[0].number // empty')
           if [ -z "$pr" ]; then
             echo "$BRANCH has no open PR to main: nothing to plan."

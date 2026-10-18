@@ -10,7 +10,7 @@ How a change to the sources of truth becomes code, gets playtested, and comes ba
 
 **1. Edit the sources.** The designer, or an agent the designer directs, edits `rulebook.md` or `cards.yaml` on a branch and commits. `[you]`
 
-**2. Stamp and open the PR.** The pre-commit hook bumps the counter for whichever source changed, regenerates the card modules and checks them. The push opens a draft PR from the branch to `main` if none is open, and CI runs `make check` and `make app-check`. `[you]` On a source layer, a PR that changes only the sources and the card modules generated from them, CI skips `make app-check`: the app's tests are expected to fail there until the code layers above it land. `[you]` The PR is opened on push rather than at commit time because a hook runs before anything exists on GitHub. `[agent-proposed]` This branch is the *source layer*, the bottom of the loop's stack (step 5). A branch built on another open branch is a layer of that stack and gets no PR from this step. `[agent-proposed]`
+**2. Stamp and open the PR.** The pre-commit hook bumps the counter for whichever source changed, regenerates the card modules and checks them. The push opens a draft PR from the branch to `main` if none is open, and CI runs `make check` and `make app-check`. `[you]` On a source layer, a PR that changes only the sources and the card modules generated from them, CI skips `make app-check`: the app's tests are expected to fail there until the code layers above it land. `[you]` The PR is opened on push rather than at commit time because a hook runs before anything exists on GitHub. `[agent-proposed]` A push whose newest commit skipped the hooks, from the GitHub web editor or the "Update branch" button, gets one more commit from `nvu-bot` that raises R or C and regenerates the card modules. The PR and the plan wait for that commit. `[agent-proposed]` This branch is the *source layer*, the bottom of the loop's stack (step 5). A branch built on another open branch is a layer of that stack and gets no PR from this step. `[agent-proposed]`
 
 **3. Plan the work.** The push starts the *planner*, an agent that reads what changed in the sources, since `main` on the first push and since its last plan after that, and decides whether code changes are needed. `[you]`
 
@@ -56,7 +56,7 @@ The repo is public, so a self-hosted runner is reachable from forks. Fork PR wor
 
 Three identities write to the repo. `[you]`
 
-- `nvu-bot`, a GitHub App, writes from workflows that run no agent, such as `source-pr.yml` opening the draft PR, and posts the code reviewer's review, since the coder writes as `nvu-agent` and an author cannot approve their own PR. It has Pull requests read/write, Contents read and Metadata read. `[agent-proposed]`
+- `nvu-bot`, a GitHub App, writes from workflows that run no agent, such as `source-pr.yml` opening the draft PR and `kit-fix.yml` committing a raised R or C, and posts the code reviewer's review, since the coder writes as `nvu-agent` and an author cannot approve their own PR. It has Contents and Pull requests read/write and Metadata read. `[agent-proposed]`
 - `nvu-agent`, a GitHub App, writes from Claude jobs on the self-hosted runner: the planner's issues, code layers and playtest reports. It has Contents, Issues and Pull requests read/write, Actions read and Metadata read, and no Workflows write.
 - The designer writes as themselves.
 

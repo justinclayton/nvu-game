@@ -3,8 +3,10 @@
 # open for the branch. That branch is the source layer, the bottom of the
 # loop's stack. A branch built on another open branch is a layer above it,
 # whose PR gh stack opens against the layer below, so it gets none here.
-# Nothing here runs an agent; it is a GitHub write, so the self-hosted runner
-# is not needed.
+# A commit that skipped the hooks (tools/stale-kit.sh) gets no PR: kit-fix.yml
+# pushes a fixed commit after it, and that push opens the PR, so the PR's
+# title never names a stale kit revision. Nothing here runs an agent; it is a
+# GitHub write, so the self-hosted runner is not needed.
 #
 # Opened as the nvu-bot GitHub App (variable NVU_BOT_APP_ID, secret
 # NVU_BOT_PRIVATE_KEY), because a PR opened with the workflow's own
@@ -35,9 +37,20 @@ jobs:
         with:
           fetch-depth: 0
 
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
       - name: Did a source change since main?
         id: sources
+        env:
+          BEFORE: ${{ github.event.before }}
         run: |
+          if ! sh tools/stale-kit.sh "$BEFORE"; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+            echo "This commit skipped the hooks: kit-fix.yml pushes the fix, and that push opens the PR."
+            exit 0
+          fi
           git fetch --quiet origin main
           if git diff --quiet origin/main...HEAD -- rulebook.md cards.yaml; then
             echo "changed=false" >> "$GITHUB_OUTPUT"

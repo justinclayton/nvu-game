@@ -6,7 +6,7 @@
  * writes the file back (design/cli-sim/spec.md, play).
  */
 
-import { existsSync, mkdirSync, readFileSync, unlinkSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { stdout } from "node:process";
 
@@ -339,7 +339,7 @@ function dispatchOrThrow(session: Session, command: Command): void {
 /* ----------------------------------------------------------------- play */
 
 function showPlay(run: string | null, action: Extract<PlayAction, { kind: "show" }>): number {
-  const { path, session } = openRun("show", run);
+  const { session } = openRun("show", run);
   const { state, events, notes } = session.getState();
 
   const wantsPart = action.events !== null || action.table || action.moves;

@@ -1,6 +1,6 @@
 # *North vs Up*: Rulebook
 
-Rules version: R29
+Rules version: R30
 
 ---
 
@@ -188,8 +188,7 @@ If one player has no cards in their hand, deck, or discard pile, you go `Down`, 
 When a resolved outcome says `Ascend`, you escape the current floor! You are safe, for now. To move on to the next floor, after receiving your rewards and completing the Cleanup phase as normal, do the following:
 
 1. **Heal and Reset:** Shuffle ALL your cards into your deck, including your hand, discard pile, AND exhaust pile.
-
-3. **Build the next floor:** Assemble the new floor deck *(see Setup -> Floor deck*). All Rooms you cleared stay in the Rooms pile.
+2. **Build the next floor:** Assemble the new floor deck *(see Setup -> Floor deck*). All Rooms you cleared stay in the Rooms pile.
 
 ---
 

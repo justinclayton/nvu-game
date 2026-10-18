@@ -18,13 +18,13 @@ describe("buildReport", () => {
     let ascendCommands = 0;
     for (let seed = FROM; seed < FROM + SEEDS; seed++) {
       simulate(seed, greedyPolicy, CARD_CONTENT, {
-        onStep: (_before, command, _after, events) => {
+        onStep: (before, _command, after, events) => {
           for (const event of events) {
             if (event.type === "CARD_PLAYED") playedTotal += 1;
             if (event.type === "REWARD_TAKEN" || event.type === "STUFF_TAKEN") takenTotal += 1;
             if (event.type === "COST_PAID") paidTotal += event.cards.length;
           }
-          if (command.type === "ASCEND") ascendCommands += 1;
+          if (after.floor > before.floor) ascendCommands += 1;
         },
       });
     }

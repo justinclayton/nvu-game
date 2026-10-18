@@ -253,28 +253,6 @@ function playZoneFull(): GameState {
   };
 }
 
-/** The Ascend phase, both reward pools revealing three cards each. */
-function ascending(): GameState {
-  const base = rig({
-    phase: "Ascend",
-    floor: 1,
-    roomSupply: [
-      room("The Sentry Drone"),
-      room("Flooded Ventilation Shaft"),
-      room("Flooded Ventilation Shaft"),
-      room("Overgrown Hydroponics Bay"),
-      ...Array.from({ length: 8 }, () => room("Security Turnstile")),
-    ],
-    cleared: [room(CLEARED_ROOM)],
-    Red: player({ deck: pile("Shove", 2), discard: [...pile("Charge", 3), card("Pry Bar")] }),
-    Gray: player({ deck: pile("Duck Under", 2), discard: pile("Pick The Lock", 3) }),
-  });
-  return {
-    ...base,
-    offer: { Red: base.pools.Red.slice(0, 3), Gray: base.pools.Gray.slice(0, 3) },
-  };
-}
-
 /**
  * Play phase: Sorting Room's Oomph 2 line owes Red a Good Stuff, but the pool
  * is dry. The reward line still prints, followed by the pool-empty line
@@ -377,11 +355,6 @@ export const FIXTURES: readonly Fixture[] = [
     name: "game-over",
     description: "Red went Down, which ended the run on the spot.",
     build: stable(gameOver),
-  },
-  {
-    name: "ascend",
-    description: "The Ascend phase, both reward offers revealed.",
-    build: stable(ascending),
   },
   {
     name: "longest-text",

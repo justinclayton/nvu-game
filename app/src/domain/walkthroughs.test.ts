@@ -20,7 +20,7 @@ import {
   rig,
   room,
 } from "./__fixtures__/rig";
-import type { AscendChoice, CardId, GameState } from "./types";
+import type { CardId, GameState } from "./types";
 
 beforeEach(resetRig);
 
@@ -96,46 +96,8 @@ describe("walkthrough 3 — Exhaust is permanent; only the discard pile recycles
   });
 });
 
-describe("walkthrough 4 — Stuff stays in the deck across an Ascend, until Scrapped or Exhausted", () => {
-  it("Good Stuff and Bad Stuff found anywhere in a character's cards ride through unchanged", () => {
-    const inDeck = card("Pry Bar");
-    const inDiscard = card("Coil Of Cable");
-    const inHand = card("Sluggish");
-    const state = rig({
-      phase: "Ascend",
-      floor: 1,
-      roomSupply: [
-        room("The Sentry Drone"),
-        room("Flooded Ventilation Shaft"),
-        room("Flooded Ventilation Shaft"),
-        room("Overgrown Hydroponics Bay"),
-        ...Array.from({ length: 8 }, () => room("Security Turnstile")),
-      ],
-      cleared: [room("The Sentry Drone")],
-      Red: player({
-        deck: [inDeck, ...pile("Shove", 2)],
-        hand: [inHand],
-        discard: [inDiscard, ...pile("Charge", 2)],
-      }),
-      Gray: player({ deck: pile("Duck Under", 2) }),
-    });
-    const beforeGood = state.pools.goodStuff.length;
-    const beforeBad = state.pools.badStuff.length;
-    const NOTHING: AscendChoice = { takeRewardId: null };
-    const { state: next, events } = must(state, { type: "ASCEND", Red: NOTHING, Gray: NOTHING });
-
-    expect(next.Red.deck.some((c) => c.id === inDeck.id)).toBe(true);
-    expect(next.Red.deck.some((c) => c.id === inDiscard.id)).toBe(true);
-    expect(next.Red.hand).toEqual([]);
-    expect(next.Red.deck.some((c) => c.id === inHand.id)).toBe(true);
-    expect(next.pools.goodStuff).toHaveLength(beforeGood);
-    expect(next.pools.badStuff).toHaveLength(beforeBad);
-    expect(eventTypes(events)).not.toContain("CARD_SCRAPPED");
-  });
-});
-
 describe("walkthrough 5 — Cleanup runs before Ascending", () => {
-  it("discards the play zone, then clears the floor and offers the reward", () => {
+  it("discards the play zone, then clears the floor and starts the next one", () => {
     const state = rig({
       phase: "Play",
       activeRoom: room("The Sentry Drone"),
@@ -153,6 +115,8 @@ describe("walkthrough 5 — Cleanup runs before Ascending", () => {
       { type: "PLAY_CARD", character: "Red", cardId: pryBar, payWith: [] },
       { type: "PLAY_CARD", character: "Red", cardId: pryBar2, payWith: [] },
       { type: "END_PLAY" },
+      { type: "TAKE_REWARD", cardId: null },
+      { type: "TAKE_REWARD", cardId: null },
     ]);
     const types = eventTypes(events);
     expect(types.indexOf("CLEANUP_BEGAN")).toBeLessThan(types.indexOf("FLOOR_CLEARED"));
@@ -162,8 +126,8 @@ describe("walkthrough 5 — Cleanup runs before Ascending", () => {
     );
     expect(playZoneDiscards).toHaveLength(3);
     expect(next.playZone).toEqual([]);
-    expect(next.phase).toBe("Ascend");
-    expect(next.offer?.Red).toHaveLength(3);
+    expect(next.phase).toBe("Turn Start");
+    expect(next.floor).toBe(2);
   });
 });
 
@@ -233,7 +197,7 @@ describe("walkthrough 7 — one Down ends the run immediately, mid multi-effect 
   });
 });
 
-describe("walkthrough 8 — ascending end to end: shuffle everything in, then the reward", () => {
+describe("walkthrough 8 — ascending end to end: the printed reward, then shuffle everything in", () => {
   it("clears the floor, takes a reward, and starts the next floor with a rebuilt deck", () => {
     const state = rig({
       phase: "Play",
@@ -256,29 +220,28 @@ describe("walkthrough 8 — ascending end to end: shuffle everything in, then th
     const h = hand(state, "Red");
     const [chargeIn, payA, payB, pryBar, pryBar2] = h;
     if (!chargeIn || !payA || !payB || !pryBar || !pryBar2) throw new Error("rig");
-    const cleared = play(state, [
+    const asked = play(state, [
       { type: "PLAY_CARD", character: "Red", cardId: chargeIn, payWith: [payA, payB] },
       { type: "PLAY_CARD", character: "Red", cardId: pryBar, payWith: [] },
       { type: "PLAY_CARD", character: "Red", cardId: pryBar2, payWith: [] },
       { type: "END_PLAY" },
     ]);
-    expect(cleared.state.phase).toBe("Ascend");
-
-    const offer = cleared.state.offer?.Red[0];
+    const pending = asked.state.pending;
+    if (pending?.kind !== "TakeReward" || pending.character !== "Red") {
+      throw new Error("Red should be asked for the printed reward first");
+    }
+    const offer = pending.cards[0];
     if (!offer) throw new Error("Red has no reward offered");
-    const { state: next } = must(cleared.state, {
-      type: "ASCEND",
-      Red: { takeRewardId: offer.id },
-      Gray: { takeRewardId: null },
-    });
+    const takenRed = must(asked.state, { type: "TAKE_REWARD", cardId: offer.id });
+    const { state: next } = must(takenRed.state, { type: "TAKE_REWARD", cardId: null });
 
     expect(next.floor).toBe(2);
     expect(next.phase).toBe("Turn Start");
-    expect(next.Red.deck).toHaveLength(13);
+    expect(next.Red.deck).toHaveLength(14);
     expect(next.Red.deck.filter((c) => c.name === "Shove")).toHaveLength(7);
     expect(next.Red.deck.filter((c) => c.name === "Charge")).toHaveLength(4);
     expect(next.Red.exhaust).toEqual([]);
-    expect(next.Red.discard.map((c) => c.id)).toEqual([offer.id]);
-    expect(next.Red.deck.some((c) => c.id === offer.id)).toBe(false);
+    expect(next.Red.discard).toEqual([]);
+    expect(next.Red.deck.some((c) => c.id === offer.id)).toBe(true);
   });
 });

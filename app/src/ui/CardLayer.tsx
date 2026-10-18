@@ -34,8 +34,6 @@ interface Props {
   readonly delays: ReadonlyMap<string, number>;
   readonly paying: Paying | null;
   readonly onPickCard: (character: Character, card: Card) => void;
-  /** Rulebook, Ascending: the reward each character has chosen from the cards floating above the mat. */
-  readonly reward?: Readonly<Record<Character, Card["id"] | null>> | undefined;
   readonly onPickReward?: ((character: Character, card: Card) => void) | undefined;
   readonly onInspect: (item: Inspected | null) => void;
   /** Debug mode: every card and room comes back face up. View-only. */
@@ -106,7 +104,6 @@ export function CardLayer({
   delays,
   paying,
   onPickCard,
-  reward,
   onPickReward,
   onInspect,
   debug,
@@ -168,9 +165,7 @@ export function CardLayer({
         const hand = p.kind === "card" ? handOf(p.zone) : null;
         const offer = p.kind === "card" ? offerOf(p.zone) : null;
         const payingHere = hand && paying?.character === hand ? paying : null;
-        const selected =
-          p.kind === "card" &&
-          (payingHere?.cardId === p.id || (offer !== null && reward?.[offer] === p.card.id));
+        const selected = p.kind === "card" && payingHere?.cardId === p.id;
         const chosen = p.kind === "card" && (payingHere?.chosen.includes(p.card.id) ?? false);
         const clickable =
           p.kind === "card" &&
@@ -241,11 +236,7 @@ export function CardLayer({
         if (clickable && p.kind === "card" && (hand || offer)) {
           const card = p.card;
           const title = offer
-            ? state.pending
-              ? `Take ${card.name}`
-              : selected
-                ? `Taking ${card.name}. Click again to decline.`
-                : `Take ${card.name} into ${offer}'s deck`
+            ? `Take ${card.name}`
             : payingHere
               ? payingHere.cardId === card.id
                 ? "Click again to cancel"

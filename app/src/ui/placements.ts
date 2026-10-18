@@ -89,9 +89,8 @@ const zoneOf = (
   part: "deck" | "hand" | "play" | "discard" | "exhaust" | "rewards" | "offer",
 ): ZoneId => `${c.toLowerCase() as "red" | "gray"}-${part}`;
 
-/** The cards held up in front of a character: an Ascending offer, a card reward, or a Good Stuff spread still to be answered. */
+/** The cards held up in front of a character: a card reward, or a Good Stuff spread still to be answered. */
 function offeredTo(state: GameState, c: Character): readonly Card[] {
-  if (state.phase === "Ascend") return state.offer?.[c] ?? [];
   const pending = state.pending;
   if (pending?.kind === "TakeReward") return pending.character === c ? pending.cards : [];
   if (pending?.kind === "ChooseGoodStuff") {
@@ -100,12 +99,12 @@ function offeredTo(state: GameState, c: Character): readonly Card[] {
   return [];
 }
 
-/** The character who may click the cards floating in front of `c` now: the one choosing, or either on ascending. */
+/** The character who may click the cards floating in front of `c` now: the one choosing. */
 export function canChooseOffer(state: GameState, c: Character): boolean {
   const pending = state.pending;
-  if (!pending) return state.phase === "Ascend";
   return (
-    (pending.kind === "TakeReward" || pending.kind === "ChooseGoodStuff") && pending.character === c
+    (pending?.kind === "TakeReward" || pending?.kind === "ChooseGoodStuff") &&
+    pending.character === c
   );
 }
 
@@ -181,7 +180,7 @@ export function placements(state: GameState, debug = false): readonly Placement[
       { topFirst: false, faceUp: true, owner: c },
     );
     // The cards a character is choosing from are picked up off the table and held face up
-    // while they look them over: the Ascending reward offer, a revealed card reward (the top
+    // while they look them over: a revealed card reward (the top
     // 3 of the pool), or their Good Stuff spread. They stay in their pool until chosen.
     const offered = offeredTo(state, c);
     cards(offered, zoneOf(c, "offer"), { topFirst: false, faceUp: true, owner: c });

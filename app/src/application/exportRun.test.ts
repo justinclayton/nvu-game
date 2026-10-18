@@ -4,7 +4,7 @@ import { CARD_CONTENT, CARD_LIST_ID, RULES_VERSION } from "@content/index";
 import { FULL_CONTENT } from "@domain/__fixtures__/rig";
 import { costOf, payOptions, playableCards } from "@domain/queries";
 import type { CardContent } from "@domain/printed";
-import type { AscendChoice, Character, Command, GameState } from "@domain/types";
+import type { Character, Command, GameState } from "@domain/types";
 import { EXPORTS, mismatchedField, runData, runTranscript, runTurns, turnRows, type RunFile } from "./exportRun";
 import { createSession, loadSession, type Session } from "./session";
 
@@ -74,8 +74,6 @@ function nextCommand(state: GameState): Command {
       }
       return { type: "END_PLAY" };
     }
-    case "Ascend":
-      return { type: "ASCEND", Red: ascendChoice(state, "Red"), Gray: ascendChoice(state, "Gray") };
     case "Outcome":
     case "Cleanup":
       throw new Error(`${state.phase} is automatic and should never rest without a pending choice`);
@@ -99,9 +97,6 @@ function affordablePlay(state: GameState, character: Character) {
   return null;
 }
 
-const ascendChoice = (state: GameState, character: Character): AscendChoice => ({
-  takeRewardId: state.offer?.[character][0]?.id ?? null,
-});
 
 /** A run with notes typed into it at three different points. */
 function playedAndNoted(seed = SEED, withContent: CardContent = content): Session {

@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { CARD_LIST_ID, RULES_VERSION } from "@content/index";
 import { FULL_CONTENT as CARD_CONTENT } from "@domain/__fixtures__/rig";
 import { costOf, payOptions, playableCards } from "@domain/queries";
-import type { AscendChoice, Character, Command, GameState } from "@domain/types";
+import type { Character, Command, GameState } from "@domain/types";
 import { runData } from "./exportRun";
 import { createReplay, openRunFile } from "./replay";
 import { createSession } from "./session";
@@ -59,8 +59,6 @@ function nextCommand(state: GameState): Command {
         if (play) return play;
       }
       return { type: "END_PLAY" };
-    case "Ascend":
-      return { type: "ASCEND", Red: ascendChoice(state, "Red"), Gray: ascendChoice(state, "Gray") };
     case "Outcome":
     case "Cleanup":
       throw new Error(`${state.phase} is automatic and should never rest without a pending choice`);
@@ -84,9 +82,6 @@ function affordablePlay(state: GameState, character: Character): Command | null 
   return null;
 }
 
-const ascendChoice = (state: GameState, character: Character): AscendChoice => ({
-  takeRewardId: state.offer?.[character][0]?.id ?? null,
-});
 
 describe("stepping", () => {
   it("starts at the seed with nothing taken", () => {

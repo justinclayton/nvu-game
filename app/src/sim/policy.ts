@@ -9,7 +9,6 @@
  */
 
 import { behaviourOf } from "@domain/cards/behaviours";
-import { validate } from "@domain/engine";
 import {
   allThresholds,
   contributionOf,

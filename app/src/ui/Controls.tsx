@@ -5,11 +5,11 @@
  * the phase's commands, each greyed unless `validate` says it would be legal.
  */
 
-import { useEffect, useState } from "react";
+import { useEffect, useId, useState } from "react";
 
 import { scrapForStatsCards } from "@domain/queries";
 import type { CardId, Command, GameState, Stat } from "@domain/types";
-import { isLegal, whyNot } from "./legal";
+import { whyNot } from "./legal";
 import { CardView, RoomCardView } from "./CardView";
 import type { Inspected } from "./Inspector";
 
@@ -39,6 +39,7 @@ interface Props {
 }
 
 export function Controls({ state, dispatch, hint, inspected, onInspect }: Props) {
+  const whyId = useId();
   if (state.pending) {
     return (
       <PendingChoice
@@ -60,29 +61,41 @@ export function Controls({ state, dispatch, hint, inspected, onInspect }: Props)
           ]
         : [];
 
+  /* Why each greyed button is greyed, printed once per reason: a tooltip never
+   * shows on touch, and many browsers suppress it on a disabled button. */
+  const reasons = [
+    ...new Set(buttons.map(({ command }) => whyNot(state, command)).filter((why) => why !== null)),
+  ];
+  const reasonId = (why: string) => `${whyId}-${String(reasons.indexOf(why))}`;
+
   return (
     <div className="controls">
-      {buttons.map(({ label, command }) => (
-        <button
-          key={label}
-          type="button"
-          className="button button--primary"
-          disabled={!isLegal(state, command)}
-          title={whyNot(state, command) ?? ""}
-          onClick={() => {
-            dispatch(command);
-          }}
-        >
-          {label}
-        </button>
-      ))}
+      {buttons.map(({ label, command }) => {
+        const why = whyNot(state, command);
+        return (
+          <button
+            key={label}
+            type="button"
+            className="button button--primary"
+            disabled={why !== null}
+            aria-describedby={why === null || hint ? undefined : reasonId(why)}
+            onClick={() => {
+              dispatch(command);
+            }}
+          >
+            {label}
+          </button>
+        );
+      })}
       {hint ? (
         <span className="controls__hint">{hint}</span>
-      ) : buttons.length > 0 ? (
-        <span className="controls__why">
-          {whyNot(state, buttons[buttons.length - 1]?.command ?? { type: "END_PLAY" })}
-        </span>
-      ) : null}
+      ) : (
+        reasons.map((why) => (
+          <span key={why} id={reasonId(why)} className="controls__why">
+            {why}
+          </span>
+        ))
+      )}
     </div>
   );
 }

@@ -54,13 +54,29 @@ function leanOf(id: string): number {
   return ((Math.abs(h) % 9) - 4) * 1.1;
 }
 
+/** How far apart the cards in a row sit: a gap between them while they fit, closer once they don't. */
+function rowSpacing(count: number, slot: Rect, m: Metrics): number {
+  if (count <= 1) return 0;
+  const usable = slot.w - 2 * m.slotPad;
+  return Math.min(m.cardW + m.rowGap, (usable - m.cardW) / (count - 1));
+}
+
+/** The share of a card's width the next card in a row can cover before the cost circle,
+ * printed at the top-right, can no longer be read. */
+const COST_COVER_LIMIT = 0.2;
+
+/** A card in a row with the next card laid over its cost. */
+function isCostCovered(p: Placement, slot: Rect, m: Metrics): boolean {
+  if (ZONE_SHAPE[p.zone] !== "row" || p.index === p.count - 1) return false;
+  const covered = m.cardW - rowSpacing(p.count, slot, m);
+  return covered > m.cardW * COST_COVER_LIMIT;
+}
+
 function poseOf(p: Placement, slot: Rect, m: Metrics): Pose {
   const { cardW: CARD_W, cardH: CARD_H, slotPad: SLOT_PAD, rowGap: ROW_GAP } = m;
   const shape = ZONE_SHAPE[p.zone];
   if (shape === "row") {
-    const usable = slot.w - 2 * SLOT_PAD;
-    const spacing =
-      p.count <= 1 ? 0 : Math.min(CARD_W + ROW_GAP, (usable - CARD_W) / (p.count - 1));
+    const spacing = rowSpacing(p.count, slot, m);
     return {
       x: slot.x + SLOT_PAD + p.index * spacing,
       y: slot.y + SLOT_PAD,
@@ -196,6 +212,7 @@ export function CardLayer({
           chosen ? "is-chosen" : "",
           dimmed && !selected ? "is-dimmed" : "",
           clickable ? "is-clickable" : "",
+          isCostCovered(p, slot, metrics) ? "is-cost-covered" : "",
         ]
           .filter(Boolean)
           .join(" ");

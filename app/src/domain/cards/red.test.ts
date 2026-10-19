@@ -56,21 +56,70 @@ describe("Reckless — 'Exhaust 2'", () => {
   });
 });
 
-describe("Cross Punch — 'Exhaust 1'", () => {
-  it("takes one off the top of your own deck, into the Exhaust pile", () => {
-    const state = playing({
-      Red: player({ deck: pile("Shove", 4), hand: [card("Cross Punch"), card("Shove"), card("Shove")] }),
+describe("Cross Punch — 'Exhaust 1. If a Scramble card was already played this turn, +4 Oomph'", () => {
+  const punchHand = (): GameState =>
+    playing({
+      Red: player({
+        deck: pile("Shove", 4),
+        hand: [card("Cross Punch"), card("Shove"), card("Shove"), card("Coil Of Cable")],
+      }),
+      Gray: player({
+        deck: pile("Duck Under", 4),
+        hand: [card("Coil Of Cable"), card("In Step"), card("Duck Under"), card("Duck Under")],
+      }),
     });
-    const hand = ids(state, "Red");
-    const { state: next } = must(state, {
+
+  const punch = (state: GameState) => {
+    const hand = state.Red.hand.filter((c) => c.name === "Shove");
+    return must(state, {
       type: "PLAY_CARD",
       character: "Red",
-      cardId: hand[0] as CardId,
-      payWith: [hand[1] as CardId, hand[2] as CardId],
+      cardId: handCard(state, "Red", "Cross Punch").id,
+      payWith: hand.map((c) => c.id),
     });
+  };
+
+  it("has no printed Scramble", () => {
+    expect(card("Cross Punch").scramble).toBe(0);
+  });
+
+  it("takes one off the top of your own deck, into the Exhaust pile", () => {
+    const { state: next } = punch(punchHand());
     expect(next.Red.deck).toHaveLength(3);
-    // Two Shoves paid from hand, plus the one off the deck.
     expect(next.Red.exhaust).toHaveLength(3);
+  });
+
+  it("adds nothing when no Scramble card was played", () => {
+    const { state: next } = punch(punchHand());
+    expect(statPool(next).oomph).toBe(4);
+  });
+
+  it("adds 4 Oomph after Gray played a card with printed Scramble", () => {
+    const state = punchHand();
+    const played = play(state, [free("Gray", handCard(state, "Gray", "Coil Of Cable").id)]);
+    const { state: next } = punch(played.state);
+    expect(statPool(next).oomph).toBe(8);
+  });
+
+  it("adds 4 Oomph after Red played a card with printed Scramble", () => {
+    const state = punchHand();
+    const played = play(state, [free("Red", handCard(state, "Red", "Coil Of Cable").id)]);
+    const { state: next } = punch(played.state);
+    expect(statPool(next).oomph).toBe(8);
+  });
+
+  it("does not count a card whose Scramble is conditional", () => {
+    const state = punchHand();
+    const played = cast(state, "Gray", "In Step");
+    const { state: next } = punch(played.state);
+    expect(statPool(next).oomph).toBe(4);
+  });
+
+  it("is not triggered by a Scramble card played after it", () => {
+    const state = punchHand();
+    const { state: afterPunch } = punch(state);
+    const played = play(afterPunch, [free("Gray", handCard(afterPunch, "Gray", "Coil Of Cable").id)]);
+    expect(statPool(played.state).oomph).toBe(4);
   });
 });
 

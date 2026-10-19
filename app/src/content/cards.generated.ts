@@ -28,7 +28,7 @@ export const CARD_CONTENT = {
     {"name":"Fast Follow","set":"official","kind":"player","owner":"Red","rarity":"Fine","starter":false,"count":3,"cost":1,"oomph":3,"scramble":0,"conditionalStat":false,"text":"If Gray played a card this turn, play this card for free.","flavor":"The old one-two!"},
     {"name":"Reckless","set":"official","kind":"player","owner":"Red","rarity":"Fine","starter":false,"count":2,"cost":1,"oomph":5,"scramble":0,"conditionalStat":false,"text":"Exhaust 2.","flavor":"GYAHHHHHHHOUCH"},
     {"name":"Bull Rush","set":"proposed","kind":"player","owner":"Red","rarity":"Fine","starter":false,"count":2,"cost":1,"oomph":2,"scramble":1,"conditionalStat":false,"text":"","flavor":"Charge ahead while keeping your footing on loose debris."},
-    {"name":"Cross Punch","set":"proposed","kind":"player","owner":"Red","rarity":"Fine","starter":false,"count":2,"cost":2,"oomph":4,"scramble":2,"conditionalStat":false,"text":"Exhaust 1.","flavor":"A heavy two-part combination attack."},
+    {"name":"Cross Punch","set":"proposed","kind":"player","owner":"Red","rarity":"Fine","starter":false,"count":2,"cost":2,"oomph":4,"scramble":0,"conditionalStat":false,"text":"Exhaust 1. If a Scramble card was already played this turn, +4 Oomph.","flavor":"A heavy two-part combination attack."},
     {"name":"Break Through","set":"proposed","kind":"player","owner":"Red","rarity":"Fine","starter":false,"count":2,"cost":1,"oomph":2,"scramble":0,"conditionalStat":false,"text":"Play: Scrap 1 card from your hand.","flavor":"Smash through the obstacle and leave the broken starter gear behind."},
     {"name":"Set 'Em Up","set":"proposed","kind":"player","owner":"Red","rarity":"Cool","starter":false,"count":2,"cost":1,"oomph":0,"scramble":0,"conditionalStat":false,"text":"Every time you play a card this turn (including this one), Gray may draw a card.","flavor":"Clear the heavy debris so Gray can maneuver effortlessly."},
     {"name":"Second Wind","set":"proposed","kind":"player","owner":"Red","rarity":"Cool","starter":false,"count":2,"cost":2,"oomph":4,"scramble":0,"conditionalStat":false,"text":"Shuffle a Red card from your Exhaust pile into your deck.","flavor":"Catch your breath and shake off the fatigue."},
@@ -96,10 +96,10 @@ export const CARD_CONTENT = {
 } as const satisfies CardContent;
 
 /** The first 12 hex of sha256 over the JSON of CARD_CONTENT above — identifies this card list. */
-export const CARD_LIST_ID = "a5f010bf901f";
+export const CARD_LIST_ID = "c756e6226afc";
 
 /** R of the kit revision: the rulebook's "Rules version:" line. Recorded runs refuse to replay across a change to it. Kept out of CARD_CONTENT so a rules bump does not change CARD_LIST_ID. */
 export const RULES_VERSION = "R30";
 
 /** C of the kit revision: the "version:" line under meta in cards.yaml, bumped when the card list changes. The print sheet stamps RULES_VERSION.CARDS_VERSION on every card; tools/kit-revision.sh adds the engine count. */
-export const CARDS_VERSION = "C49";
+export const CARDS_VERSION = "C50";

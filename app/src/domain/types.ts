@@ -153,10 +153,10 @@ export interface TurnRecord {
 /* ------------------------------------------------------------ the phases */
 
 /**
- * Rulebook, Each Turn, Turn Start: bundles both its steps, Flip the room and Draw up
- * to five, into `FLIP_ROOM` — there is no decision between them, so the state
- * rests at `Turn Start` before that command and moves straight to `Play`
- * after it. `END_PLAY` moves the state into `Outcome`, and once the room's
+ * Rulebook, Each Turn, Turn Start: `FLIP_ROOM` reveals the top rooms of the
+ * floor deck and rests at `Turn Start` on a `ChooseRoom` pending; `CHOOSE_ROOM`
+ * enters one and draws up to five, moving straight to `Play`. With one room
+ * left there is no choice, and `FLIP_ROOM` runs straight through to `Play`. `END_PLAY` moves the state into `Outcome`, and once the room's
  * effects are drained, into `Cleanup`. Both rest there only while a card or
  * the room has raised a `pending` choice — otherwise the transition runs
  * straight through to `Turn Start`, or to the next floor's `Turn Start` on an Ascend.
@@ -259,6 +259,17 @@ export type Pending =
       readonly source: PendingSource | null;
     }
   | {
+      /**
+       * Rulebook, Each Turn, Turn Start: the top 3 rooms of the floor deck,
+       * still in the floor deck. The players enter one, answered with
+       * `CHOOSE_ROOM`; the rest go to the bottom in the order they name.
+       */
+      readonly kind: "ChooseRoom";
+      readonly prompt: string;
+      readonly options: readonly Room[];
+      readonly source: null;
+    }
+  | {
       /** Rulebook, Keywords: `Reveal a card reward` — the top 3 of the character's reward pool, still in the pool. */
       readonly kind: "TakeReward";
       readonly prompt: string;
@@ -291,7 +302,7 @@ export interface Resolution {
   readonly effects: readonly RoomEffect[];
   /** How the room ended. */
   readonly roomEnded: "Cleared" | "Fled";
-  /** The room that ended, so Cleanup can shuffle a Fled one back into the Floor deck. */
+  /** The room that ended, so Cleanup can put a Fled one on the bottom of the Floor deck. */
   readonly room: Room;
   /** A met challenge said `Ascend`: Cleanup runs, then the Ascending steps (rulebook, Outcome). */
   readonly ascends: boolean;
@@ -344,6 +355,8 @@ export interface GameState {
 
 export type Command =
   | { readonly type: "FLIP_ROOM" }
+  /** Enter `roomId`; `bottom` is every other revealed room, in the order they go under the floor deck. */
+  | { readonly type: "CHOOSE_ROOM"; readonly roomId: RoomId; readonly bottom: readonly RoomId[] }
   | {
       readonly type: "PLAY_CARD";
       readonly character: Character;
@@ -388,7 +401,9 @@ type DomainEventBody =
   | { readonly type: "PHASE_STARTED"; readonly phase: LoggedPhase }
   | { readonly type: "PHASE_ENDED"; readonly phase: LoggedPhase }
   | { readonly type: "FLOOR_BUILT"; readonly floor: number; readonly rooms: number }
+  | { readonly type: "ROOMS_REVEALED"; readonly rooms: readonly Room[] }
   | { readonly type: "ROOM_FLIPPED"; readonly room: Room }
+  | { readonly type: "ROOMS_TO_BOTTOM"; readonly rooms: readonly Room[] }
   | {
       readonly type: "CARD_DRAWN";
       readonly character: Character;
@@ -451,7 +466,8 @@ type DomainEventBody =
     }
   | { readonly type: "ROOM_CLEARED"; readonly room: Room }
   | { readonly type: "ROOM_FLED"; readonly room: Room }
-  | { readonly type: "FLED_RESHUFFLED"; readonly room: Room }
+  | { readonly type: "FLED_TO_BOTTOM"; readonly room: Room }
+  | { readonly type: "FLED_TO_TOP"; readonly room: Room }
   | { readonly type: "WENT_DOWN"; readonly character: Character; readonly cause: string }
   | { readonly type: "REWARD_REVEALED"; readonly character: Character; readonly cards: readonly Card[] }
   | {

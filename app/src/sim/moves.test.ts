@@ -164,6 +164,49 @@ describe("legalCommands", () => {
   });
 });
 
+describe("a ChooseRoom", () => {
+  it("is answered by entering each revealed room, with the rest in every order", () => {
+    resetRig();
+    const revealed = rig({
+      phase: "Turn Start",
+      floorDeck: [
+        room("Security Turnstile"),
+        room("Ventilation Shaft"),
+        room("The Sentry Drone"),
+      ],
+      Red: player({ deck: [card("Shove")] }),
+      Gray: player({ deck: [card("Duck Under")] }),
+    });
+    const result = execute(revealed, { type: "FLIP_ROOM" });
+    if (!result.ok) throw new Error(result.reason.message);
+    const legal = legalCommands(result.state);
+    expect(legal).toHaveLength(6);
+    for (const command of legal) {
+      expect(command.type).toBe("CHOOSE_ROOM");
+      expect(validate(result.state, command)).toBeNull();
+    }
+  });
+
+  it("enters only an Ambush room when one is revealed, with the rest in every order", () => {
+    resetRig();
+    const ambush = room("Regular Monster 2");
+    const revealed = rig({
+      phase: "Turn Start",
+      floorDeck: [room("Security Turnstile"), ambush, room("Puzzle Room")],
+      Red: player({ deck: [card("Shove")] }),
+      Gray: player({ deck: [card("Duck Under")] }),
+    });
+    const result = execute(revealed, { type: "FLIP_ROOM" });
+    if (!result.ok) throw new Error(result.reason.message);
+    const legal = legalCommands(result.state);
+    expect(legal).toHaveLength(2);
+    for (const command of legal) {
+      expect(command.type === "CHOOSE_ROOM" ? command.roomId : null).toBe(ambush.id);
+      expect(validate(result.state, command)).toBeNull();
+    }
+  });
+});
+
 describe("a ChooseDraw", () => {
   it("is answered with each draw on offer, and with none", () => {
     const asked = rig({

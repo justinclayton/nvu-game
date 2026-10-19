@@ -16,7 +16,7 @@ import { createSession, loadSession, type Note, type SavedRun, type Session } fr
 import { CARD_CONTENT, CARD_LIST_ID, CARDS_VERSION, RULES_VERSION } from "@content/index";
 import { resolveCardName } from "@content/names";
 import { plural } from "@domain/plural";
-import { costOf, payOptions, playableCards } from "@domain/queries";
+import { costOf, enterInShownOrder, enterableRooms, payOptions, playableCards } from "@domain/queries";
 import type { Card, CardId, Character, Command, GameState, RoomId, Stat } from "@domain/types";
 import { CHARACTERS, playerOf } from "@domain/verbs";
 import { POLICIES, randomPolicy } from "@sim/policy";
@@ -249,6 +249,15 @@ function buildChoose(state: GameState, action: Extract<PlayAction, { kind: "choo
     return answer.command;
   }
 
+  if (pending.kind === "ChooseRoom") {
+    const [entered, ...bottom] = resolveEach(action.names, pending.options);
+    if (!entered) {
+      throw new MoveRefused(`Enter one of: ${enterableRooms(pending).map((r) => r.name).join(", ")}.`);
+    }
+    if (bottom.length === 0) return enterInShownOrder(pending, entered.id);
+    return { type: "CHOOSE_ROOM", roomId: entered.id, bottom: bottom.map((r) => r.id) };
+  }
+
   if (pending.kind === "ChooseGoodStuff") {
     if (action.names.length !== 1) {
       throw new MoveRefused(`Keep 1 of: ${pending.options.map((c) => c.name).join(", ")}.`);
@@ -296,7 +305,7 @@ function buildOrder(state: GameState, action: Extract<PlayAction, { kind: "order
 function describeAction(action: PlayAction): string {
   switch (action.kind) {
     case "flip":
-      return "Flipped the room.";
+      return "Revealed the top rooms.";
     case "end":
       return "Ended the Play phase.";
     case "card":
@@ -459,7 +468,9 @@ function play(request: PlayRequest): number {
     out(manualNote ?? describeAction(action));
   }
   out("");
-  if (FULL_TABLE_MOVES.has(action.kind)) {
+  const enteredRoom =
+    session.getState().commands.at(-1)?.type === "CHOOSE_ROOM" && action.kind === "choose";
+  if (FULL_TABLE_MOVES.has(action.kind) || enteredRoom) {
     out(renderTable(state));
   } else {
     for (const line of shortStatusLines(state)) out(line);

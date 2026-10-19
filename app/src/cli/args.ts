@@ -76,9 +76,10 @@ export class UsageError extends Error {}
 export const USAGE = `North vs Up — the CLI. The same rules engine as the web game, one shell call at a time.
 
   bin/nvu play new  --seed N [--run FILE]
-  bin/nvu play flip                                  FLIP_ROOM (Turn Start: flip and draw)
+  bin/nvu play flip                                  FLIP_ROOM (Turn Start: reveal the top 3 rooms)
   bin/nvu play end                                    END_PLAY
   bin/nvu play card Red Charge [pay Rope Flare]     PLAY_CARD
+  bin/nvu play choose Turret [Shaft Drone]             CHOOSE_ROOM: enter one, the rest to the bottom in this order
   bin/nvu play choose Red                              CHOOSE_CHARACTER
   bin/nvu play choose Floor deck                       CHOOSE_PILE
   bin/nvu play choose Rope Flare | play choose none     CHOOSE_CARDS
@@ -160,7 +161,7 @@ function parseMove(action: string, actionRest: readonly string[]): PlayAction {
 
     case "choose": {
       if (actionRest.length === 0) {
-        throw new UsageError("play choose wants a name (a character or a card) or 'none'.");
+        throw new UsageError("play choose wants a name (a room, a character or a card) or 'none'.");
       }
       if (actionRest.length === 1 && actionRest[0]?.toLowerCase() === "none") {
         return { kind: "choose", names: [] };

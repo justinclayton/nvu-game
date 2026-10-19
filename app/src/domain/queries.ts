@@ -10,10 +10,13 @@ import type {
   Card,
   CardId,
   Character,
+  Command,
   DomainEvent,
   GameState,
+  Pending,
   PlayedCard,
   Room,
+  RoomId,
   Stat,
   Threshold,
 } from "./types";
@@ -373,10 +376,31 @@ export function ownedPlayerCards(state: GameState, c: Character): readonly Card[
   return [...p.deck, ...p.hand, ...p.discard].filter((x) => x.kind === "player");
 }
 
+/* ------------------------------------------------------------ room choice */
+
+export type ChooseRoomPending = Extract<Pending, { kind: "ChooseRoom" }>;
+
+/**
+ * The revealed rooms the players may enter. Ambush ("When revealed, you must
+ * enter this room") takes the choice away: with one Ambush room revealed it is
+ * the only entry, and with more, the players pick among them.
+ */
+export function enterableRooms(pending: ChooseRoomPending): readonly Room[] {
+  const ambush = pending.options.filter((r) => r.keywords.includes("Ambush"));
+  return ambush.length > 0 ? ambush : pending.options;
+}
+
+/** Enter `roomId`, putting the other revealed rooms on the bottom in the order they were revealed. */
+export function enterInShownOrder(pending: ChooseRoomPending, roomId: RoomId): Command {
+  const bottom = pending.options.filter((r) => r.id !== roomId).map((r) => r.id);
+  return { type: "CHOOSE_ROOM", roomId, bottom };
+}
+
 /* -------------------------------------------------------------------- undo */
 
 const REVEALING: ReadonlySet<DomainEvent["type"]> = new Set([
   "FLOOR_BUILT",
+  "ROOMS_REVEALED",
   "ROOM_FLIPPED",
   "CARD_DRAWN",
   "CARD_EXHAUSTED",

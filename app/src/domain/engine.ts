@@ -15,6 +15,7 @@ import {
   costOf,
   costOverrideSpentBy,
   drawTargetFor,
+  enterableRooms,
   exhaustPreventedBy,
   exhaustXPreventedBy,
   lockedOut,
@@ -23,7 +24,6 @@ import {
   statPool,
   thresholdIsMet,
 } from "./queries";
-import { shuffle } from "./rng";
 import { buildFloor, emptyTurnRecord, returnRoomsToSupply, TOP_FLOOR } from "./setup";
 import type {
   Card,
@@ -110,6 +110,7 @@ export function validate(state: GameState, command: Command): Rejection | null {
     case "CHOOSE_DRAW":
     case "ORDER_CARDS":
     case "TAKE_REWARD":
+    case "CHOOSE_ROOM":
       return reject("NoPendingChoice", "Nothing is waiting to be answered.");
 
     case "FLIP_ROOM": {
@@ -235,6 +236,26 @@ function validateAnswer(pending: Pending, command: Command): Rejection | null {
       return same ? null : reject("NotAnOption", "Order every card that was shown, once each.");
     }
 
+    case "CHOOSE_ROOM": {
+      if (pending.kind !== "ChooseRoom") return waiting;
+      if (!pending.options.some((r) => r.id === command.roomId)) {
+        return reject("NotAnOption", "That room was not revealed.");
+      }
+      const enterable = enterableRooms(pending);
+      if (!enterable.some((r) => r.id === command.roomId)) {
+        return reject("NotAnOption", `Ambush: enter ${enterable.map((r) => r.name).join(" or ")}.`);
+      }
+      const want = pending.options
+        .filter((r) => r.id !== command.roomId)
+        .map((r) => r.id)
+        .sort();
+      const got = [...command.bottom].sort();
+      const same = want.length === got.length && want.every((id, i) => id === got[i]);
+      return same
+        ? null
+        : reject("NotAnOption", "Put every other revealed room on the bottom, once each.");
+    }
+
     case "TAKE_REWARD":
       if (pending.kind !== "TakeReward") return waiting;
       if (command.cardId === null) return null;
@@ -325,6 +346,8 @@ function apply(state: GameState, command: Command, run: Run): GameState {
       return answerCards(state, command.cardIds, "order", run);
     case "TAKE_REWARD":
       return answerReward(state, command.cardId, run);
+    case "CHOOSE_ROOM":
+      return enterRoom(state, command.roomId, command.bottom, run);
     default:
       return assertNever(command);
   }
@@ -442,28 +465,67 @@ function printedExhaust(
 
 /* ------------------------------------------------------------ Turn Start */
 
+/** Rulebook, Each Turn, Turn Start: how many rooms are revealed to choose from. */
+const ROOMS_REVEALED = 3;
+
 /**
- * Rulebook, Each Turn, Turn Start: one phase, two steps, both run by `FLIP_ROOM` with no
- * decision in between — flip the room, then draw both hands to 5.
+ * Rulebook, Each Turn, Turn Start, step 1: reveal the top 3 rooms of the floor
+ * deck, or all that remain. With one left there is nothing to choose, so it is
+ * entered at once; this is how a Stairwell left alone must be fought.
  */
 function flipRoom(state: GameState, run: Run): GameState {
-  const room = state.floorDeck[0];
-  if (!room) throw new CorruptStateError("Flipped an empty floor deck.");
+  const revealed = state.floorDeck.slice(0, ROOMS_REVEALED);
+  const [only] = revealed;
+  if (!only) throw new CorruptStateError("Flipped an empty floor deck.");
 
   run.events.push({ type: "PHASE_STARTED", phase: "Turn Start" });
-  // Step 1, Flip the room: you always see what you are facing before you spend anything.
-  run.events.push({ type: "ROOM_FLIPPED", room });
-  const flipped: GameState = {
+  const started: GameState = {
     ...state,
     turn: state.turn + 1,
-    floorDeck: state.floorDeck.slice(1),
-    activeRoom: room,
-    phase: "Play",
     Red: { ...state.Red, drewThisTurn: 0 },
     Gray: { ...state.Gray, drewThisTurn: 0 },
     thisTurn: emptyTurnRecord(),
   };
-  const faced = settle(flipped, run);
+  if (revealed.length === 1) return enterRoom(started, only.id, [], run);
+
+  run.events.push({ type: "ROOMS_REVEALED", rooms: revealed });
+  return {
+    ...started,
+    pending: { kind: "ChooseRoom", prompt: "Enter which room?", options: revealed, source: null },
+  };
+}
+
+/**
+ * Rulebook, Each Turn, Turn Start, steps 2 and 3: enter the chosen room, put
+ * the other revealed rooms on the bottom of the floor deck in the order
+ * given, then draw both hands to 5.
+ */
+function enterRoom(
+  state: GameState,
+  roomId: RoomId,
+  bottom: readonly RoomId[],
+  run: Run,
+): GameState {
+  const revealedCount = Math.min(ROOMS_REVEALED, state.floorDeck.length);
+  const revealed = state.floorDeck.slice(0, revealedCount);
+  const room = revealed.find((r) => r.id === roomId);
+  if (!room) throw new CorruptStateError("Entered a room that was not revealed.");
+  const toBottom = bottom.map((id) => {
+    const r = revealed.find((x) => x.id === id);
+    if (!r) throw new CorruptStateError("Put a room on the bottom that was not revealed.");
+    return r;
+  });
+
+  run.events.push({ type: "ROOM_FLIPPED", room });
+  if (toBottom.length > 0) run.events.push({ type: "ROOMS_TO_BOTTOM", rooms: toBottom });
+  const entered: GameState = {
+    ...state,
+    pending: null,
+    floorDeck: [...state.floorDeck.slice(revealedCount), ...toBottom],
+    activeRoom: room,
+    phase: "Play",
+  };
+  const faced = settle(entered, run);
   if (faced.phase === "GameOver") return faced;
   const toxic = settle(enterToxic(faced, room, run), run);
   if (toxic.phase === "GameOver") return toxic;
@@ -477,8 +539,8 @@ function flipRoom(state: GameState, run: Run): GameState {
 }
 
 /**
- * Toxic (On Enter: Both players get Bad Stuff.): a room is entered when it is flipped as the
- * Active Room, so this lands in step 1, before the draw, and each Bad Stuff counts toward the hand.
+ * Toxic (On Enter: Both players get Bad Stuff.): a room is entered when it is chosen as the
+ * Active Room, so this lands in step 2, before the draw, and each Bad Stuff counts toward the hand.
  */
 function enterToxic(state: GameState, room: Room, run: Run): GameState {
   if (!room.keywords.includes("Toxic")) return state;
@@ -1044,15 +1106,15 @@ function finishCleanup(state: GameState, run: Run): GameState {
   let s = cleanupPiles(state, run);
   if (s.phase === "GameOver") return s;
 
-  // Outcome: "then shuffle the room card back into the Floor deck."
+  // Outcome: "then put the room card on the bottom of the Floor deck."
   if (resolution?.roomEnded === "Fled") {
-    run.events.push({ type: "FLED_RESHUFFLED", room: resolution.room });
     if (resolution.room.keywords.includes("Relentless")) {
-      // Relentless: a fled room goes on top of the Floor deck, not shuffled in.
+      // Relentless: a fled room goes on top of the Floor deck, not to the bottom.
+      run.events.push({ type: "FLED_TO_TOP", room: resolution.room });
       s = { ...s, floorDeck: [resolution.room, ...s.floorDeck] };
     } else {
-      const [deck, seed] = shuffle([...s.floorDeck, resolution.room], s.seed);
-      s = { ...s, floorDeck: deck, seed };
+      run.events.push({ type: "FLED_TO_BOTTOM", room: resolution.room });
+      s = { ...s, floorDeck: [...s.floorDeck, resolution.room] };
     }
   }
 

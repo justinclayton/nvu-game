@@ -1,6 +1,6 @@
 # *North vs Up*: Rulebook
 
-Rules version: R34
+Rules version: R35
 
 ---
 
@@ -67,8 +67,10 @@ In the middle of the table:
 
 ### 1. Start of Turn
 
-1. **Flip the room:** Turn the top card of the Floor deck face up onto the Rooms pile. This is the new Active Room.
-2. **Draw up to five:** Each player draws cards from their deck into their hand until they hold **5**. If you already hold 5 or more, do not draw. Resolve effects triggered by these draws after both players have drawn.
+1. **Reveal the rooms:** Turn the top **3** cards of the Floor deck face up. If fewer than 3 remain, turn up all of them.
+2. **Enter a room:** Choose **one** revealed card and put it on the Rooms pile. This is the new Active Room. If only one card is revealed, you must enter it.
+3. **Pass the rest:** Put the other revealed cards on the bottom of the Floor deck, in any order you choose.
+4. **Draw up to five:** Each player draws cards from their deck into their hand until they hold **5**. If you already hold 5 or more, do not draw. Resolve effects triggered by these draws after both players have drawn.
 
 >  **Empty Deck**: Whenever your deck is empty and you need to draw, reshuffle your discard pile to form a new deck first.
 
@@ -91,7 +93,7 @@ Players add their combined stats they accumulated this turn and check to see if 
 
 > If a resolved outcome says to `Ascend`, the entire Floor is cleared. Perform the Cleanup phase as normal, then perform the steps in section 10: *Ascending*.
 
-**Flee**: If *no challenges* have been met, the players must Flee the room. Resolve the `Flee:` outcome according to the text on the card, then **shuffle the room card back into the Floor deck**.
+**Flee**: If *no challenges* have been met, the players must Flee the room. Resolve the `Flee:` outcome according to the text on the card, then **put the room card on the bottom of the Floor deck**.
 
 ### 4. Cleanup (end of turn)
 

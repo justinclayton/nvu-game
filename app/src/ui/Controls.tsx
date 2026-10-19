@@ -7,6 +7,7 @@
 
 import { useEffect, useState } from "react";
 
+import { enterableRooms } from "@domain/queries";
 import type { CardId, Command, GameState } from "@domain/types";
 import { isLegal, whyNot } from "./legal";
 import { CardView, RoomCardView } from "./CardView";
@@ -20,9 +21,48 @@ interface Props {
   /** The zoomed card, and where to send a card the player points at. */
   readonly inspected: Inspected | null;
   readonly onInspect: (item: Inspected | null) => void;
+  /** At a room choice: whether the rooms passed over go to the bottom right one first. */
+  readonly bottomReversed?: boolean | undefined;
+  readonly onSwapBottom?: (() => void) | undefined;
 }
 
-export function Controls({ state, dispatch, hint, inspected, onInspect }: Props) {
+export function Controls({
+  state,
+  dispatch,
+  hint,
+  inspected,
+  onInspect,
+  bottomReversed,
+  onSwapBottom,
+}: Props) {
+  if (state.pending?.kind === "ChooseRoom") {
+    const passing = state.pending.options.length - 1;
+    const enterable = enterableRooms(state.pending);
+    const ambush = enterable.length < state.pending.options.length;
+    return (
+      <div className="controls controls--pending">
+        <p className="controls__prompt">
+          {state.pending.prompt} Click a revealed room to enter it.
+        </p>
+        {ambush ? (
+          <p className="controls__hint">
+            Ambush: you must enter {enterable.map((r) => r.name).join(" or ")}.
+          </p>
+        ) : null}
+        {passing > 1 ? (
+          <>
+            <p className="controls__hint">
+              The other two go to the bottom of the floor deck, {bottomReversed ? "right" : "left"}{" "}
+              one first.
+            </p>
+            <button type="button" className="button" onClick={onSwapBottom}>
+              Swap the order
+            </button>
+          </>
+        ) : null}
+      </div>
+    );
+  }
   if (state.pending) {
     return (
       <PendingChoice
@@ -36,7 +76,7 @@ export function Controls({ state, dispatch, hint, inspected, onInspect }: Props)
 
   const buttons: readonly { label: string; command: Command }[] =
     state.phase === "Turn Start"
-      ? [{ label: "Flip the next room", command: { type: "FLIP_ROOM" } }]
+      ? [{ label: "Reveal the top rooms", command: { type: "FLIP_ROOM" } }]
       : state.phase === "Play"
         ? [
             { label: "Both of us have stopped — check the room", command: { type: "END_PLAY" } },

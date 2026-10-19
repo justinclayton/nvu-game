@@ -1173,8 +1173,8 @@ body {
   pointer-events: auto;
   cursor: pointer;
 }
-/* Compact: centred on the screen, in the band the hands row leaves clear.
- * `top` and the card size are set from script, as the hands move with scroll. */
+/* Compact: centred on the screen, in the part the source hand leaves clear.
+ * `top`, `left` and the card size are set from script, as the hands move with scroll. */
 .inspector--overlay {
   --inspect-w: 150px;
   --inspect-h: 210px;

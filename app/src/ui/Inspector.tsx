@@ -6,8 +6,8 @@
  * first tap on a card that is clickable zooms it, the second acts on it.
  *
  * Where it draws: on the full table, on the empty felt at the foot of the
- * pools rail. On the compact table, a centred overlay in whichever band of
- * the screen the hands row leaves clear.
+ * pools rail. On the compact table, a centred overlay in the largest part of
+ * the screen the hand it came from leaves clear.
  */
 
 import {
@@ -16,7 +16,6 @@ import {
   useSyncExternalStore,
   type CSSProperties,
   type FocusEvent,
-  type RefObject,
 } from "react";
 
 import type { Card, Character, GameState, Room } from "@domain/types";
@@ -99,32 +98,64 @@ export function inspectHandlers(
 
 const OVERLAY_MARGIN = 8;
 const OVERLAY_HEIGHT = 210;
+/** Least height worth showing when no clear region of the screen is any larger. */
 const OVERLAY_MIN_HEIGHT = 110;
 /** A card face is 5 wide to 7 tall. */
 const CARD_RATIO = 5 / 7;
 
-/** Where the compact overlay goes: the larger band of the screen above or below `avoid`, centred in it.
- * `avoid` is the vertical extent of what must stay visible, in viewport coordinates, and
- * `viewportHeight` is the height of the screen the overlay may use (down to the dock). */
+interface Box {
+  readonly left: number;
+  readonly top: number;
+  readonly right: number;
+  readonly bottom: number;
+}
+
+/** Where the compact overlay goes, in viewport coordinates, and how tall the card is drawn.
+ *
+ * `avoid` is the source hand's slot, or null when there is nothing to keep
+ * clear, which centres the card. Otherwise the card goes in the largest clear
+ * region of the screen: above, below, or to either side of the slot. A hand
+ * fills only its half of the row, so a card that cannot fit above or below it
+ * still fits in the other half. `screen` is the area the overlay may use,
+ * which stops above the dock. */
 export function overlayBox(
-  avoid: { readonly top: number; readonly bottom: number } | null,
-  viewportHeight: number,
-): { readonly top: number; readonly height: number } {
+  avoid: Box | null,
+  screen: { readonly width: number; readonly height: number },
+): { readonly top: number; readonly left: number; readonly height: number } {
   const m = OVERLAY_MARGIN;
-  const place = (from: number, to: number) => {
-    const height = Math.min(OVERLAY_HEIGHT, Math.max(OVERLAY_MIN_HEIGHT, to - from));
-    return { top: Math.round(from + (to - from - height) / 2), height };
+  const whole: Box = { left: m, top: m, right: screen.width - m, bottom: screen.height - m };
+  const regions: Box[] = avoid
+    ? [
+        { ...whole, bottom: avoid.top - m },
+        { ...whole, top: avoid.bottom + m },
+        { ...whole, left: avoid.right + m },
+        { ...whole, right: avoid.left - m },
+      ]
+    : [whole];
+  const fit = (r: Box) =>
+    Math.min(OVERLAY_HEIGHT, r.bottom - r.top, (r.right - r.left) / CARD_RATIO);
+  let best = regions[0] as Box;
+  for (const r of regions) if (fit(r) > fit(best)) best = r;
+  const height = Math.max(OVERLAY_MIN_HEIGHT, Math.floor(fit(best)));
+  return {
+    top: Math.round((best.top + best.bottom - height) / 2),
+    left: Math.round((best.left + best.right) / 2),
+    height,
   };
-  if (!avoid || avoid.bottom <= 0 || avoid.top >= viewportHeight) return place(m, viewportHeight - m);
-  const above = avoid.top - m;
-  const below = viewportHeight - avoid.bottom - m;
-  return above >= below ? place(m, avoid.top - m) : place(avoid.bottom + m, viewportHeight - m);
+}
+
+/** The slot of the hand `item` was zoomed from, if it is a card in a hand. */
+function sourceHand(item: Inspected | null, state: GameState): HTMLElement | null {
+  if (item?.kind !== "card" || item.owner === null) return null;
+  const { card, owner } = item;
+  if (!state[owner].hand.some((c) => c.id === card.id)) return null;
+  return document.querySelector<HTMLElement>(`[data-slot="${owner.toLowerCase()}-hand"]`);
 }
 
 function useOverlayStyle(
   active: boolean,
-  avoid: RefObject<HTMLElement | null>,
   item: Inspected | null,
+  state: GameState,
 ): CSSProperties | undefined {
   const [style, setStyle] = useState<CSSProperties | undefined>(undefined);
   useLayoutEffect(() => {
@@ -132,10 +163,12 @@ function useOverlayStyle(
     const measure = () => {
       /* The dock holds the bottom edge of the window; the overlay stays above it. */
       const dock = document.querySelector(".dock")?.getBoundingClientRect();
-      const bottom = dock ? Math.min(window.innerHeight, dock.top) : window.innerHeight;
-      const box = overlayBox(avoid.current?.getBoundingClientRect() ?? null, bottom);
+      const height = dock ? Math.min(window.innerHeight, dock.top) : window.innerHeight;
+      const slot = sourceHand(item, state)?.getBoundingClientRect() ?? null;
+      const box = overlayBox(slot, { width: window.innerWidth, height });
       setStyle({
         top: box.top,
+        left: box.left,
         "--inspect-h": `${String(box.height)}px`,
         "--inspect-w": `${String(Math.round(box.height * CARD_RATIO))}px`,
       } as CSSProperties);
@@ -147,7 +180,7 @@ function useOverlayStyle(
       window.removeEventListener("scroll", measure);
       window.removeEventListener("resize", measure);
     };
-  }, [active, avoid, item]);
+  }, [active, item, state]);
   return active ? style : undefined;
 }
 
@@ -158,12 +191,10 @@ interface Props {
   readonly overlay: boolean;
   /** Opened by tapping: the zoom takes taps itself, and a tap on it closes it (the table clears the zoom on any tap that is not on a card). */
   readonly touch: boolean;
-  /** The element the overlay keeps clear of: the hands row. */
-  readonly avoid: RefObject<HTMLElement | null>;
 }
 
-export function Inspector({ inspected, state, overlay, touch, avoid }: Props) {
-  const style = useOverlayStyle(overlay, avoid, inspected);
+export function Inspector({ inspected, state, overlay, touch }: Props) {
+  const style = useOverlayStyle(overlay, inspected, state);
   if (!inspected) return null;
   const classes = [
     "inspector",

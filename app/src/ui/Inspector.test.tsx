@@ -103,15 +103,41 @@ describe("on touch", () => {
 });
 
 describe("the compact overlay", () => {
-  it("sits in the larger band the hands row leaves clear", () => {
-    expect(overlayBox({ top: 500, bottom: 620 }, 800)).toEqual({ top: 145, height: 210 });
-    expect(overlayBox({ top: 40, bottom: 160 }, 800)).toEqual({ top: 375, height: 210 });
+  const CARD_W = (h: number) => (h * 5) / 7;
+  const clear = (
+    box: { top: number; left: number; height: number },
+    slot: { left: number; top: number; right: number; bottom: number },
+  ) => {
+    const w = CARD_W(box.height);
+    const r = { left: box.left - w / 2, right: box.left + w / 2, top: box.top, bottom: box.top + box.height };
+    return r.right <= slot.left || r.left >= slot.right || r.bottom <= slot.top || r.top >= slot.bottom;
+  };
+
+  it("centres a card that has no hand to avoid", () => {
+    expect(overlayBox(null, { width: 844, height: 290 })).toEqual({ top: 40, left: 422, height: 210 });
   });
 
-  it("shrinks to the band when the screen is short, and centres when the hands are out of view", () => {
-    const short = overlayBox({ top: 200, bottom: 323 }, 390);
-    expect(short.height).toBeLessThan(210);
-    expect(short.top + short.height).toBeLessThanOrEqual(200);
-    expect(overlayBox(null, 390)).toEqual({ top: 90, height: 210 });
+  it("stays at least 180 tall and clear of a half-width hand wherever the hand is on a 844x390 phone", () => {
+    // 844 wide, 290 left above the dock; Gray's hand is the right half, 123 tall.
+    const screen = { width: 844, height: 290 };
+    for (let top = -100; top <= 290; top += 10) {
+      const slot = { left: 436, right: 824, top, bottom: top + 123 };
+      const box = overlayBox(slot, screen);
+      expect(box.height).toBeGreaterThanOrEqual(180);
+      expect(clear(box, slot)).toBe(true);
+    }
+  });
+
+  it("uses the band above or below a hand that spans the screen", () => {
+    const screen = { width: 390, height: 800 };
+    const above = overlayBox({ left: 8, right: 382, top: 600, bottom: 720 }, screen);
+    expect(above).toEqual({ top: 195, left: 195, height: 210 });
+    const below = overlayBox({ left: 8, right: 382, top: 40, bottom: 160 }, screen);
+    expect(below.top).toBeGreaterThanOrEqual(168);
+  });
+
+  it("shrinks, rather than vanish, when nothing clear is tall enough", () => {
+    const box = overlayBox({ left: 0, right: 844, top: 100, bottom: 200 }, { width: 844, height: 290 });
+    expect(box.height).toBeGreaterThanOrEqual(110);
   });
 });

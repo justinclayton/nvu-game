@@ -133,7 +133,6 @@ export function Mat({
   onOpenPile,
 }: Props) {
   const matRef = useRef<HTMLDivElement>(null);
-  const handsRef = useRef<HTMLDivElement>(null);
   const touch = useTouchInspect();
   const rects = useSlotRects(matRef, state, metrics);
   // Only offered in debug mode, and only for piles that stack more than one
@@ -220,7 +219,7 @@ export function Mat({
           </div>
         </div>
 
-        <div className="mat-row mat-row--hands" ref={handsRef}>
+        <div className="mat-row mat-row--hands">
           <HandSlot
             state={state}
             character="Red"
@@ -273,7 +272,6 @@ export function Mat({
         state={state}
         overlay={metrics === COMPACT}
         touch={touch}
-        avoid={handsRef}
       />
     </div>
   );

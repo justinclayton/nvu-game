@@ -173,7 +173,7 @@ cards:
     oomph: 2
     scramble: 2
     conditional_stat: true
-    text: If a card was Exhausted from your deck this turn, +3 Oomph.
+    text: Play: If a card was Exhausted from your deck this turn, +3 Oomph.
     flavor: Charge ahead while keeping your footing on loose debris.
 
   - name: Cross Punch

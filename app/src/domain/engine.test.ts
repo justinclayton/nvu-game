@@ -154,13 +154,27 @@ describe("Play", () => {
       return { next, payers, charge };
     };
 
-    it.each([["Shove"], ["Torn Seal"], ["Crowbar"]])("Exhausts %s paid as a cost", (payer) => {
+    it.each([["Shove"], ["Crowbar"]])("Exhausts %s paid as a cost", (payer) => {
       const { next, payers, charge } = paidWith(payer);
       expect(next.Red.exhaust.map((c) => c.id)).toEqual(payers.map((c) => c.id));
       expect(next.Red.discard).toHaveLength(0);
       expect(next.Red.hand).toHaveLength(0);
       expect(next.playZone.map((z) => z.card.id)).toEqual([charge.id]);
     });
+  });
+
+  it("refuses Bad Stuff as a payer", () => {
+    const state = playState({
+      Red: player({ deck: pile("Shove", 5), hand: [card("Charge"), card("Torn Seal"), card("Shove")] }),
+    });
+    const rejected = execute(state, {
+      type: "PLAY_CARD",
+      character: "Red",
+      cardId: handCard(state, "Red", "Charge").id,
+      payWith: [handCard(state, "Red", "Torn Seal").id, handCard(state, "Red", "Shove").id],
+    });
+    expect(rejected.ok).toBe(false);
+    if (!rejected.ok) expect(rejected.reason.code).toBe("CannotPayWithThat");
   });
 
   it("'you pay in other cards from your own hand' — never with the card itself", () => {

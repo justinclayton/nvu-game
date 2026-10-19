@@ -209,10 +209,10 @@ describe("greedy", () => {
     });
   });
 
-  it("pays with the cards worth least: Bad Stuff first, then a card that adds nothing toward the line", () => {
+  it("pays with the card worth least: one that adds nothing toward the line", () => {
     resetRig();
     const chargeIn = card("Charge"); // cost 2, oomph 4 — clears a 4-Oomph line alone
-    const slime = card("Faceful Of Slime"); // Bad Stuff: worth less than nothing in hand
+    const slime = card("Faceful Of Slime"); // Bad Stuff: cannot pay
     const shove = card("Shove"); // oomph 2 — the next-best Oomph card, worth keeping
     const leanIn = card("Lean In"); // oomph 1, scramble 1 — least Oomph of the three
     const state: GameState = rig({
@@ -220,18 +220,12 @@ describe("greedy", () => {
       activeRoom: roomWith({ requires: { oomph: 4, scramble: 0 } }),
       Red: player({ hand: [chargeIn, slime, shove, leanIn] }),
     });
-    const legal: readonly Command[] = [
-      { type: "PLAY_CARD", character: "Red", cardId: chargeIn.id, payWith: [shove.id, leanIn.id] },
-      { type: "PLAY_CARD", character: "Red", cardId: chargeIn.id, payWith: [slime.id, shove.id] },
-      { type: "PLAY_CARD", character: "Red", cardId: chargeIn.id, payWith: [slime.id, leanIn.id] },
-      { type: "END_PLAY" },
-    ];
-    const [chosen] = greedyPolicy.choose(state, legal, policySeed(1));
+    const [chosen] = greedyPolicy.choose(state, legalCommands(state), policySeed(1));
     expect(chosen).toEqual({
       type: "PLAY_CARD",
       character: "Red",
       cardId: chargeIn.id,
-      payWith: [slime.id, leanIn.id],
+      payWith: [shove.id, leanIn.id],
     });
   });
 

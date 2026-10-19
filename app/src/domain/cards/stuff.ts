@@ -380,6 +380,8 @@ export const STUFF: Registry = {
     },
   },
 
+  "Torn Seal": {},
+
   Panic: {
     whileHeld: { thresholdScrambleDelta: 2 },
     exhaustX: 2,

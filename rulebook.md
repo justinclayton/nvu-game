@@ -1,6 +1,6 @@
 # *North vs Up*: Rulebook
 
-Rules version: R31
+Rules version: R32
 
 ---
 
@@ -85,7 +85,7 @@ In the middle of the table:
 
 Players take turns playing a card. Either player may start. 
 
-- **Play**: Move a card from your hand into your play zone and pay for it: look at its `Cost`, then move that number of cards from your hand to your Exhaust pile (NOT your discard pile). Unless otherwise specified, you can only pay for a card with other cards from your own hand. If a card's cost is 0 or less, simply play the card. Resolve effects triggered by playing or paying for a card after that card's own text.
+- **Play**: Move a card from your hand into your play zone and pay for it: look at its `Cost`, then move that number of cards from your hand to your Exhaust pile (NOT your discard pile). Unless otherwise specified, you can only pay for a card with other cards from your own hand, and never with `Bad Stuff`. If a card's cost is 0 or less, simply play the card. Resolve effects triggered by playing or paying for a card after that card's own text.
 - **Add up stats**: Stats on played cards add together across both sides of the play zone into one team pool.
 
 > *Example: `Red` plays a card with `Oomph 2`. `Gray` plays two cards, which read `Oomph 1`, and `Scramble 2`. Together, they have `Oomph 3` and `Scramble 2`.*
@@ -106,7 +106,7 @@ Players add their combined stats they accumulated this turn and check to see if 
 
 Each player does the following:
 
-1. **Discard your play zone:** Move every card on your side of the play zone to your discard pile.
+1. **Discard your play zone:** Move every card on your side of the play zone to your discard pile, except `Bad Stuff`: `Scrap` it.
 
 ---
 ## Cards
@@ -140,7 +140,7 @@ A Character card shows:
 
 - **Name**
 - **Type:** `Red` or `Gray`. The type of card. May also print `(starter)`.
-- **`Cost`**: the number of cards you Exhaust from your hand to play it. Good Stuff and Bad Stuff pay like any other card.
+- **`Cost`**: the number of cards you Exhaust from your hand to play it. Bad Stuff cannot pay for other cards.
 - **Stats**: `Oomph` and/or `Scramble`.
 - **Effect text**: keywords and card-specific rules.
 - **Rarity border:** `Fine`, `Cool`, or `Woah`. Has no in-game effect.
@@ -149,7 +149,7 @@ A Character card shows:
 
 `Stuff` is `Good Stuff` or `Bad Stuff`. Unless a card says otherwise, Stuff you gain goes into your hand. If its pool is empty when you would gain Stuff, you gain nothing.
 
-Play and pay with Stuff cards as with Character cards. Either player may gain and use any Stuff card.
+Play Stuff cards as you play Character cards. Pay for them with Character cards or Good Stuff; `Bad Stuff` cannot pay for other cards. Either player may gain and use any Stuff card.
 
 
 A `Stuff` card looks similar to a character card:

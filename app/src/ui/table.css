@@ -914,6 +914,129 @@ body {
   line-height: 1.1;
 }
 
+/* ---------------------------------------------------------- the text floor
+ *
+ * A face is sized in em from its card's width, so at table scale its text is
+ * small: 1em is 5.6px on a 62px card, 8px on 88px and 10px on 110px. No text
+ * on a card at table scale should print under 9px. The short labels (the type
+ * line, the stat names, the rarity, a room's name) are lifted to 9px where the
+ * card is wide enough to hold them. The body text cannot be lifted, so it is
+ * dropped instead and a mark takes its place: the zoom is where it is read.
+ * The zoomed copy is `.card--large`, which is never a container, so it always
+ * prints everything.
+ *
+ * A sprite or a panel card is a container, and the rules ask how wide it is.
+ * Body text prints at 1.02em, and at 0.88, 0.84 and 0.76em for text tiers m, l
+ * and xl, so a card has to be 97px wide for tier s to reach 9px and 131px for
+ * tier xl. No table tier lies between the two (62, 88, 110). A room's lines
+ * and Flee line print at 0.6 to 0.85em, so under 125px even the largest is
+ * under 9px.
+ *
+ * Under 80px (the compact table) nothing can be lifted: the labels would not
+ * fit the card. */
+.sprite,
+.card:not(.card--large) {
+  container-type: inline-size;
+}
+
+/* Not text: it says there is text. */
+.face__more {
+  display: none;
+  font: 700 max(1.5em, 10px) / 1 var(--display);
+  color: var(--ink-soft);
+}
+
+/* A dropped body is still in the page, for a screen reader, and takes no room. */
+@container (width < 98px) {
+  .face--text-s:not(.face--room) .face__text {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+  .face--text-s:not(.face--room) .face__art {
+    flex: 1 1 auto;
+    min-height: 3.2em;
+    height: auto;
+  }
+  .face--text-s:not(.face--room) .face__more {
+    display: block;
+  }
+}
+@container (width < 131px) {
+  :is(.face--text-m, .face--text-l, .face--text-xl):not(.face--room) .face__text {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+  :is(.face--text-m, .face--text-l, .face--text-xl):not(.face--room) .face__art {
+    flex: 1 1 auto;
+    min-height: 3.2em;
+    height: auto;
+  }
+  :is(.face--text-m, .face--text-l, .face--text-xl):not(.face--room) .face__more {
+    display: block;
+  }
+}
+@container (width < 125px) {
+  .face.face--room .lines,
+  .face.face--room .flee {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    padding: 0;
+    border: 0;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+  .face--room:is(.face--text-s, .face--text-m, .face--text-l, .face--text-xl) .face__art {
+    flex: 1 1 auto;
+    min-height: 3.2em;
+  }
+  .face--room .face__more {
+    display: block;
+    align-self: flex-end;
+    margin-top: auto;
+  }
+}
+
+@container (width >= 80px) {
+  .face__type,
+  .stat i {
+    font-size: max(0.95em, 9px);
+  }
+  .face__stats--pair .stat i {
+    font-size: max(0.8em, 9px);
+  }
+  .face__foot {
+    font-size: max(0.9em, 9px);
+  }
+  .face--room .name {
+    font-size: max(1.1em, 9px);
+  }
+  .face--room.face--text-xl .name {
+    font-size: max(1em, 9px);
+  }
+  .card__badge {
+    font-size: max(1em, 9px);
+  }
+  /* Two stat names side by side are wider than the card. */
+  .face__stats--pair {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.15em;
+  }
+}
+
 .back {
   background: repeating-linear-gradient(135deg, #2c2a27 0 3px, #34312d 3px 6px);
   border: 0.18em solid #111;

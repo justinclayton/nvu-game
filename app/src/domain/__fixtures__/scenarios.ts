@@ -125,6 +125,20 @@ function choosingCards(): GameState {
   return afterPlay;
 }
 
+/** A pending `OrderCards`: Hack the Doors has peeked the top three rooms of the Floor deck. */
+function orderingCards(): GameState {
+  const state = rig({
+    phase: "Play",
+    activeRoom: room(CLEARED_ROOM),
+    Gray: player({ deck: pile("Duck Under", 4), hand: [card("Hack the Doors"), card("Duck Under")] }),
+    floorDeck: [room(SORTING_ROOM), room("Flooded Ventilation Shaft"), room("The Sentry Drone")],
+  });
+  const [hack, pay] = state.Gray.hand;
+  if (!hack || !pay) throw new Error("rig");
+  const asked = must(state, { type: "PLAY_CARD", character: "Gray", cardId: hack.id, payWith: [pay.id] });
+  return must(asked.state, { type: "CHOOSE_PILE", pile: "Floor deck" }).state;
+}
+
 /** A pending `ChooseGoodStuff`: a Flooded Ventilation Shaft that pays both players Good Stuff, and both spreads are face up. */
 function goodStuffSpread(): GameState {
   const state = rig({
@@ -362,6 +376,11 @@ export const FIXTURES: readonly Fixture[] = [
     name: "choose-cards",
     description: "Automated Defense Turret's Scrap offer to Gray pending a ChooseCards answer.",
     build: stable(choosingCards),
+  },
+  {
+    name: "order-cards",
+    description: "Hack the Doors' OrderCards pending: the top three rooms of the Floor deck to put back.",
+    build: stable(orderingCards),
   },
   {
     name: "outcome-choice",

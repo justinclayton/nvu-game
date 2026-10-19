@@ -106,10 +106,11 @@ export function Table({ onNewRun, onOpenRun, replay }: Props) {
   );
 
   /* The zoomed card follows the pointer's hover; a card that moves out from
-   * under the pointer fires no leave event, so a state change clears it. */
+   * under the pointer fires no leave event, so a state change clears it, and
+   * so does a pile panel opening or closing. */
   useEffect(() => {
     setInspected(null);
-  }, [state]);
+  }, [state, openPile]);
 
   /* What a payment in progress still needs, said where the player is looking:
    * next to the paying hand, and in the bar with the way out. */
@@ -134,7 +135,10 @@ export function Table({ onNewRun, onOpenRun, replay }: Props) {
       }}
       onClick={(e) => {
         /* Touch: a tap anywhere but on a card puts the zoom away. */
-        if (touch && !(e.target instanceof Element && e.target.closest(".sprite"))) {
+        if (
+          touch &&
+          !(e.target instanceof Element && e.target.closest(".sprite, .is-inspectable"))
+        ) {
           setInspected(null);
         }
       }}
@@ -205,7 +209,7 @@ export function Table({ onNewRun, onOpenRun, replay }: Props) {
               dispatch({ type: "CHOOSE_CARDS", cardIds: [card.id] });
             }
           }}
-          inspected={inspected}
+          inspected={openPile ? null : inspected}
           onInspect={setInspected}
           debug={debug}
           onOpenPile={setOpenPile}
@@ -229,7 +233,13 @@ export function Table({ onNewRun, onOpenRun, replay }: Props) {
               </button>
             </section>
           ) : (
-            <Controls state={state} dispatch={dispatch} hint={payingHint} />
+            <Controls
+              state={state}
+              dispatch={dispatch}
+              hint={payingHint}
+              inspected={inspected}
+              onInspect={setInspected}
+            />
           )}
         </div>
       </div>
@@ -238,6 +248,8 @@ export function Table({ onNewRun, onOpenRun, replay }: Props) {
         <PilePanel
           state={state}
           zone={openPile}
+          inspected={inspected}
+          onInspect={setInspected}
           onClose={() => {
             setOpenPile(null);
           }}

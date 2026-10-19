@@ -64,6 +64,19 @@ function roomTextTierOf(room: Room): TextTier {
   return "s";
 }
 
+/**
+ * Shown in place of the body text when the face is too small to print it at a
+ * readable size (see "the text floor" in `table.css`): there is text, and the
+ * zoom is where to read it.
+ */
+function TextMark() {
+  return (
+    <span className="face__more" aria-hidden="true">
+      …
+    </span>
+  );
+}
+
 interface CardFaceProps {
   readonly card: Card;
   /** With a state and owner, the corner shows what the card costs right now. */
@@ -119,6 +132,7 @@ export function CardFace({ card, state, owner }: CardFaceProps) {
       {card.text ? <p className="face__text">{card.text}</p> : null}
       <div className="face__foot">
         <span className="rarity">{card.rarity ?? ""}</span>
+        {card.text ? <TextMark /> : null}
       </div>
     </div>
   );
@@ -153,6 +167,7 @@ export function RoomFace({ room, state }: RoomFaceProps) {
       <div className="flee">
         <b>Flee</b> {room.flee.text}
       </div>
+      <TextMark />
     </div>
   );
 }

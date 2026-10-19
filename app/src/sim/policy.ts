@@ -27,6 +27,7 @@ import type {
   Character,
   Command,
   GameState,
+  Room,
   RoomEffect,
   RoomId,
   Stat,
@@ -337,6 +338,31 @@ function cardsDeepEqual(a: readonly (CardId | RoomId)[], b: readonly (CardId | R
   return a.length === b.length && a.every((id, i) => id === b[i]);
 }
 
+/** The stats a room's cheapest Clearing line asks for, added together. */
+function easiestLine(room: Room): number {
+  const totals = allThresholds(room)
+    .filter((t) => t.clears)
+    .map((t) => t.requires.oomph + t.requires.scramble);
+  return Math.min(...totals);
+}
+
+/**
+ * Enter the revealed room with the cheapest Clearing line, a Room before a
+ * Stairwell on a tie; the rest go to the bottom in the order shown. The hand
+ * is drawn after the choice, so the printed numbers are all there is to go on.
+ */
+function easiestRoom(options: readonly Room[]): Room {
+  const ranked = [...options].sort(
+    (a, b) =>
+      easiestLine(a) - easiestLine(b) ||
+      Number(a.kind === "stairwell") - Number(b.kind === "stairwell") ||
+      a.id.localeCompare(b.id),
+  );
+  const [first] = ranked;
+  if (!first) throw new Error("greedy: a room choice with nothing revealed");
+  return first;
+}
+
 /** Cards not asked about have no greedy opinion: sacrifice the cheapest, decline what is optional. */
 function choosePending(state: GameState, legal: readonly Command[]): Command {
   const pending = state.pending;
@@ -403,6 +429,19 @@ function choosePending(state: GameState, legal: readonly Command[]): Command {
         : c.type === "CHOOSE_DRAW" && c.character === null,
     );
     if (found) return found;
+  }
+
+  if (pending.kind === "ChooseRoom") {
+    const wanted = easiestRoom(pending.options);
+    const enter = legal.find(
+      (c) =>
+        c.type === "CHOOSE_ROOM" &&
+        cardsDeepEqual(
+          [c.roomId, ...c.bottom],
+          [wanted.id, ...pending.options.filter((r) => r.id !== wanted.id).map((r) => r.id)],
+        ),
+    );
+    if (enter) return enter;
   }
 
   if (pending.kind === "OrderCards") {

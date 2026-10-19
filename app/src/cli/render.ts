@@ -79,8 +79,8 @@ const requirementText = (requires: StatRequirement): string => {
 
 /** A Room's printed face, with no run to check thresholds against — `bin/nvu card NAME`. */
 export function printedRoomLines(room: RoomFace): string[] {
-  const tier = room.tier === null ? "no tier" : `tier ${String(room.tier)}`;
-  const lines = [`${room.name} [${room.kind}; ${tier}]`];
+  const floors = room.floors.length === 0 ? "no floors" : `floors ${room.floors.join(", ")}`;
+  const lines = [`${room.name} [${room.kind}; ${floors}]`];
   if (room.text.trim() !== "") lines.push(`  ${room.text.trim()}`);
   for (const challenge of room.challenges) {
     for (const threshold of challenge.thresholds) {
@@ -91,9 +91,9 @@ export function printedRoomLines(room: RoomFace): string[] {
   return lines;
 }
 
-function roomLines(state: GameState, room: Room): string[] {
+function roomLines(state: GameState, room: Room, label = "Room"): string[] {
   const met = new Set(metThresholds(state));
-  const lines = [`Room: ${room.name} (${room.kind})`];
+  const lines = [`${label}: ${room.name} (${room.kind})`];
   for (const t of allThresholds(room)) {
     const mark = met.has(t) ? "✔" : " ";
     const need = thresholdLines(state, t)
@@ -149,14 +149,19 @@ export function renderTable(state: GameState): string {
   const lines: string[] = [];
   // Turn Start sits between turns with the just-ended turn's number still on
   // the state (the engine bumps it at the next flip, not here) — show the
-  // turn it is about to start instead.
-  const turn = state.phase === "Turn Start" ? state.turn + 1 : state.turn;
+  // turn it is about to start instead. Once the flip has revealed the rooms,
+  // the number is already the new turn's.
+  const beforeFlip = state.phase === "Turn Start" && state.pending?.kind !== "ChooseRoom";
+  const turn = beforeFlip ? state.turn + 1 : state.turn;
   lines.push(
     `Floor ${String(state.floor)} · turn ${String(turn)} · ${state.phase}` +
       `   floor deck ${String(state.floorDeck.length)}, cleared ${String(state.cleared.length)}` +
       `   Good Stuff ${String(state.pools.goodStuff.length)}, Bad Stuff ${String(state.pools.badStuff.length)}`,
   );
   if (state.activeRoom) lines.push(...roomLines(state, state.activeRoom));
+  if (state.pending?.kind === "ChooseRoom") {
+    for (const room of state.pending.options) lines.push(...roomLines(state, room, "Revealed"));
+  }
   const pool = state.resolution?.pool ?? statPool(state);
   if (state.phase === "Play" || state.playZone.length > 0 || state.resolution?.pool) {
     lines.push(`Stat pool: Oomph ${String(pool.oomph)}, Scramble ${String(pool.scramble)}`);
@@ -219,6 +224,12 @@ export function moveHint(state: GameState): string {
       case "ChooseGoodStuff":
         lines.push(`choose <Name> — keep 1 of: ${pending.options.map((c) => c.name).join(", ")}`);
         break;
+      case "ChooseRoom":
+        lines.push(
+          `choose <Room> [<Room>...] — enter one of: ${pending.options.map((r) => r.name).join(", ")}; ` +
+            "name the rest to set the order they go to the bottom (default: as shown)",
+        );
+        break;
     }
     lines.push("undo — step back to the last checkpoint");
     return lines.join("\n");
@@ -228,7 +239,7 @@ export function moveHint(state: GameState): string {
     case "Turn Start":
       lines.push(
         state.floorDeck.length > 0
-          ? "flip — flip the next room and draw"
+          ? "flip — reveal the top 3 rooms of the floor deck"
           : "No legal moves — the run is over.",
       );
       break;

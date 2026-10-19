@@ -5,7 +5,6 @@ import { beforeEach, describe, expect, it } from "vitest";
 import { execute } from "./engine";
 import { roomId } from "./ids";
 import { costOf, statPool, thresholdIsMet } from "./queries";
-import { shuffle } from "./rng";
 import {
   card,
   eventTypes,
@@ -29,6 +28,8 @@ beforeEach(resetRig);
 
 const playFree = free;
 
+const roomIds = (rooms: readonly Room[]): readonly string[] => rooms.map((r) => r.id);
+
 /**
  * A room built by hand rather than looked up from cards.yaml, for a
  * rule that must hold regardless of which rooms the printed list carries.
@@ -41,6 +42,7 @@ function fixtureRoom(challenges: readonly Challenge[]): Room {
     name: "Fixture Room",
     kind: "room",
     tier: 1,
+    floors: [1, 2],
     flavor: "",
     challenges,
     flee: { text: "Leave empty-handed.", clears: false, effects: [] },
@@ -48,29 +50,121 @@ function fixtureRoom(challenges: readonly Challenge[]): Room {
 }
 
 describe("Turn Start", () => {
-  it("step 1, Flip the room: turns the top card of the floor deck face up before anything is spent", () => {
-    const first = room("Security Turnstile");
+  it("step 1, Reveal: shows the top 3 rooms of the floor deck before anything is drawn", () => {
+    const top = [
+      room("Security Turnstile"),
+      room("Flooded Ventilation Shaft"),
+      room("The Sentry Drone"),
+    ];
     const state = rig({
       phase: "Turn Start",
-      floorDeck: [first, room("Flooded Ventilation Shaft")],
+      floorDeck: [...top, room("Security Turnstile")],
       Red: player({ deck: pile("Shove", 5) }),
       Gray: player({ deck: pile("Duck Under", 5) }),
     });
     const { state: next, events } = must(state, { type: "FLIP_ROOM" });
-    expect(next.activeRoom?.id).toBe(first.id);
-    expect(next.floorDeck).toHaveLength(1);
-    // Both steps run together with no decision between them, so the state
-    // moves straight from Turn Start to Play.
+    expect(next.phase).toBe("Turn Start");
+    const pending = next.pending;
+    expect(pending?.kind === "ChooseRoom" ? roomIds(pending.options) : null).toEqual(roomIds(top));
+    expect(next.floorDeck).toHaveLength(4);
+    expect(next.Red.hand).toEqual([]);
+    expect(eventTypes(events)).toEqual(["PHASE_STARTED", "ROOMS_REVEALED"]);
+  });
+
+  it("step 2, Enter a room: the rest go to the bottom of the floor deck in the order chosen, then both draw", () => {
+    const a = room("Security Turnstile");
+    const b = room("Flooded Ventilation Shaft");
+    const c = room("The Sentry Drone");
+    const under = room("Security Turnstile");
+    const state = rig({
+      phase: "Turn Start",
+      floorDeck: [a, b, c, under],
+      Red: player({ deck: pile("Shove", 5) }),
+      Gray: player({ deck: pile("Duck Under", 5) }),
+    });
+    const { state: next, events } = play(state, [
+      { type: "FLIP_ROOM" },
+      { type: "CHOOSE_ROOM", roomId: b.id, bottom: [c.id, a.id] },
+    ]);
+    expect(next.activeRoom?.id).toBe(b.id);
+    expect(roomIds(next.floorDeck)).toEqual(roomIds([under, c, a]));
     expect(next.phase).toBe("Play");
     expect(next.Red.hand).toHaveLength(5);
     expect(next.Gray.hand).toHaveLength(5);
     expect(eventTypes(events)).toEqual([
       "PHASE_STARTED",
+      "ROOMS_REVEALED",
       "ROOM_FLIPPED",
+      "ROOMS_TO_BOTTOM",
       ...Array<string>(10).fill("CARD_DRAWN"),
       "PHASE_ENDED",
       "PHASE_STARTED",
     ]);
+  });
+
+  it("step 1, Reveal: 'or all that remain' — with two rooms left, both are revealed", () => {
+    const state = rig({
+      phase: "Turn Start",
+      floorDeck: [room("Security Turnstile"), room("The Sentry Drone")],
+      Red: player({ deck: pile("Shove", 5) }),
+      Gray: player({ deck: pile("Duck Under", 5) }),
+    });
+    const { state: next } = must(state, { type: "FLIP_ROOM" });
+    const pending = next.pending;
+    expect(pending?.kind === "ChooseRoom" ? pending.options : []).toHaveLength(2);
+  });
+
+  it("the Stairwell may be deferred: enter another room and the Stairwell goes to the bottom", () => {
+    const stairwell = room("The Sentry Drone");
+    const other = room("Security Turnstile");
+    const state = rig({
+      phase: "Turn Start",
+      floorDeck: [stairwell, other],
+      Red: player({ deck: pile("Shove", 5) }),
+      Gray: player({ deck: pile("Duck Under", 5) }),
+    });
+    const { state: next } = play(state, [
+      { type: "FLIP_ROOM" },
+      { type: "CHOOSE_ROOM", roomId: other.id, bottom: [stairwell.id] },
+    ]);
+    expect(next.activeRoom?.id).toBe(other.id);
+    expect(roomIds(next.floorDeck)).toEqual([stairwell.id]);
+  });
+
+  it("the Stairwell alone in the floor deck must be fought: it is entered with no choice", () => {
+    const stairwell = room("The Sentry Drone");
+    const state = rig({
+      phase: "Turn Start",
+      floorDeck: [stairwell],
+      Red: player({ deck: pile("Shove", 5) }),
+      Gray: player({ deck: pile("Duck Under", 5) }),
+    });
+    const { state: next, events } = must(state, { type: "FLIP_ROOM" });
+    expect(next.pending).toBeNull();
+    expect(next.activeRoom?.id).toBe(stairwell.id);
+    expect(next.phase).toBe("Play");
+    expect(eventTypes(events)).not.toContain("ROOMS_REVEALED");
+  });
+
+  it("refuses an entry that does not put every other revealed room on the bottom, once each", () => {
+    const a = room("Security Turnstile");
+    const b = room("Flooded Ventilation Shaft");
+    const c = room("The Sentry Drone");
+    const state = rig({
+      phase: "Turn Start",
+      floorDeck: [a, b, c],
+      Red: player({ deck: pile("Shove", 5) }),
+      Gray: player({ deck: pile("Duck Under", 5) }),
+    });
+    const { state: revealed } = must(state, { type: "FLIP_ROOM" });
+    expect(execute(revealed, { type: "CHOOSE_ROOM", roomId: a.id, bottom: [b.id] }).ok).toBe(false);
+    expect(execute(revealed, { type: "CHOOSE_ROOM", roomId: a.id, bottom: [b.id, b.id] }).ok).toBe(
+      false,
+    );
+    expect(
+      execute(revealed, { type: "CHOOSE_ROOM", roomId: roomId("nowhere#1"), bottom: [b.id, c.id] })
+        .ok,
+    ).toBe(false);
   });
 
   it("step 2, Draw up to five: 'draw cards from your deck until you hold 5' — all at once, no decision", () => {
@@ -302,10 +396,9 @@ describe("Cleanup", () => {
     expect(next.Red.hand.map((c) => c.name)).toEqual(["Pry Bar", "Shove"]);
   });
 
-  it("Outcome: 'shuffle the room card back into the Floor deck' — the same turn it Flees", () => {
+  it("Outcome: 'put the room card on the bottom of the Floor deck' — the same turn it Flees", () => {
     const rest = room("Flooded Ventilation Shaft");
     const state = rig({
-      seed: 4242,
       phase: "Play",
       activeRoom: room("Security Turnstile"),
       floorDeck: [rest],
@@ -313,14 +406,9 @@ describe("Cleanup", () => {
       Gray: player({ deck: pile("Duck Under", 5) }),
     });
     const fledRoom = state.activeRoom as Room;
-    // Security Turnstile's Flee line, Both players Exhaust 1, needs no choice
-    // and pulls from a deck of 5, so it never touches the discard pile or the
-    // RNG — the only shuffle left to check is the one at Cleanup.
     const { state: next, events } = play(state, [{ type: "END_PLAY" }]);
-    expect(eventTypes(events)).toContain("FLED_RESHUFFLED");
-    const [expectedDeck, expectedSeed] = shuffle([rest, fledRoom], state.seed);
-    expect(next.floorDeck).toEqual(expectedDeck);
-    expect(next.seed).toBe(expectedSeed);
+    expect(eventTypes(events)).toContain("FLED_TO_BOTTOM");
+    expect(roomIds(next.floorDeck)).toEqual(roomIds([rest, fledRoom]));
   });
 });
 

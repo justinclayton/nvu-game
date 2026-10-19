@@ -344,8 +344,30 @@ describe("greedy", () => {
     expect(first.type).toBe("PLAY_CARD");
   });
 
+  it("enters the revealed room with the cheapest Clearing line, the rest to the bottom as shown", () => {
+    resetRig();
+    const turnstile = room("Security Turnstile"); // Oomph 5 or Scramble 5
+    const shaft = room("Flooded Ventilation Shaft"); // Oomph 3 and Scramble 3
+    const drone = room("The Sentry Drone"); // Oomph 8 or Scramble 8
+    const state = must(
+      rig({
+        phase: "Turn Start",
+        floorDeck: [drone, turnstile, shaft],
+        Red: player({ deck: pile("Shove", 5) }),
+        Gray: player({ deck: pile("Duck Under", 5) }),
+      }),
+      { type: "FLIP_ROOM" },
+    ).state;
+    const [chosen] = greedyPolicy.choose(state, legalCommands(state), policySeed(1));
+    expect(chosen).toEqual({
+      type: "CHOOSE_ROOM",
+      roomId: turnstile.id,
+      bottom: [drone.id, shaft.id],
+    });
+  });
+
   it("clears floor 1 and Ascends on a fixed seed", () => {
-    const run = simulate(4, greedyPolicy, CARD_CONTENT);
+    const run = simulate(5, greedyPolicy, CARD_CONTENT);
     expect(run.floor).toBeGreaterThan(1);
   });
 

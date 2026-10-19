@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { CARD_LIST_ID, RULES_VERSION } from "@content/index";
 import { FULL_CONTENT as CARD_CONTENT } from "@domain/__fixtures__/rig";
-import { costOf, payOptions, playableCards } from "@domain/queries";
+import { costOf, enterInShownOrder, payOptions, playableCards } from "@domain/queries";
 import type { Character, Command, GameState } from "@domain/types";
 import { runData } from "./exportRun";
 import { createReplay, openRunFile } from "./replay";
@@ -48,6 +48,11 @@ function nextCommand(state: GameState): Command {
         return { type: "TAKE_REWARD", cardId: pending.cards[0]?.id ?? null };
       case "ChooseGoodStuff":
         return { type: "CHOOSE_CARDS", cardIds: pending.options.slice(0, 1).map((c) => c.id) };
+      case "ChooseRoom": {
+        const first = pending.options[0];
+        if (!first) throw new Error("a room choice with nothing revealed");
+        return enterInShownOrder(pending, first.id);
+      }
     }
   }
   switch (state.phase) {
@@ -173,7 +178,7 @@ describe("taking over", () => {
     expect(replay.getState().stepBack()).toBe(false);
     const session = replay.getState().session;
     expect(session.getState().commands).toHaveLength(1);
-    expect(session.getState().state.phase).not.toBe("Turn Start");
+    expect(session.getState().state.pending?.kind).toBe("ChooseRoom");
   });
 });
 

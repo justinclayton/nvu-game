@@ -164,6 +164,30 @@ describe("legalCommands", () => {
   });
 });
 
+describe("a ChooseRoom", () => {
+  it("is answered by entering each revealed room, with the rest in every order", () => {
+    resetRig();
+    const revealed = rig({
+      phase: "Turn Start",
+      floorDeck: [
+        room("Security Turnstile"),
+        room("Flooded Ventilation Shaft"),
+        room("The Sentry Drone"),
+      ],
+      Red: player({ deck: [card("Shove")] }),
+      Gray: player({ deck: [card("Duck Under")] }),
+    });
+    const result = execute(revealed, { type: "FLIP_ROOM" });
+    if (!result.ok) throw new Error(result.reason.message);
+    const legal = legalCommands(result.state);
+    expect(legal).toHaveLength(6);
+    for (const command of legal) {
+      expect(command.type).toBe("CHOOSE_ROOM");
+      expect(validate(result.state, command)).toBeNull();
+    }
+  });
+});
+
 describe("a ChooseDraw", () => {
   it("is answered with each draw on offer, and with none", () => {
     const asked = rig({

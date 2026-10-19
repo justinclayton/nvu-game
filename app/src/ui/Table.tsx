@@ -12,7 +12,7 @@ import type { Replay } from "@application/replay";
 import { canUndo, type SessionState } from "@application/session";
 import { plural } from "@domain/plural";
 import { costOf, payOptions } from "@domain/queries";
-import type { Card, Character, Command, GameState } from "@domain/types";
+import type { Card, Character, Command, GameState, Room } from "@domain/types";
 import { type Paying } from "./CardLayer";
 import { Controls } from "./Controls";
 import { EventLog } from "./EventLog";
@@ -50,6 +50,14 @@ export function Table({ onNewRun, onOpenRun, replay }: Props) {
    * back to the card layer. */
   const [debug, setDebug] = useState(false);
   const [openPile, setOpenPile] = useState<ZoneId | null>(null);
+  /* Which way the rooms passed over at Turn Start go under the floor deck: in
+   * the order revealed, or reversed. Back to revealed order for each new reveal. */
+  const [bottomReversed, setBottomReversed] = useState(false);
+  const revealed = state.pending?.kind === "ChooseRoom" ? state.pending.options : [];
+  const revealedKey = revealed.map((r) => r.id).join(",");
+  useEffect(() => {
+    setBottomReversed(false);
+  }, [revealedKey]);
   /* The events the last command produced, and only on the render that shows
    * them, so the cards it moved can leave one after another. */
   const seenEvents = useRef(events.length);
@@ -67,6 +75,15 @@ export function Table({ onNewRun, onOpenRun, replay }: Props) {
     },
     [session, replaying],
   );
+
+  const enterRoom = (room: Room) => {
+    const passed = revealed.filter((r) => r.id !== room.id).map((r) => r.id);
+    dispatch({
+      type: "CHOOSE_ROOM",
+      roomId: room.id,
+      bottom: bottomReversed ? passed.reverse() : passed,
+    });
+  };
 
   /* Picking a card in hand: a free card is played at once, and a card with a
    * cost starts a payment. The set of legal payments is `payOptions`. */
@@ -209,6 +226,7 @@ export function Table({ onNewRun, onOpenRun, replay }: Props) {
               dispatch({ type: "CHOOSE_CARDS", cardIds: [card.id] });
             }
           }}
+          onPickRoom={enterRoom}
           inspected={openPile ? null : inspected}
           onInspect={setInspected}
           debug={debug}
@@ -239,6 +257,10 @@ export function Table({ onNewRun, onOpenRun, replay }: Props) {
               hint={payingHint}
               inspected={inspected}
               onInspect={setInspected}
+              bottomReversed={bottomReversed}
+              onSwapBottom={() => {
+                setBottomReversed((reversed) => !reversed);
+              }}
             />
           )}
         </div>

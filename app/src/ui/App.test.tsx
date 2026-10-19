@@ -23,6 +23,13 @@ beforeEach(() => {
   render(<App session={session} onNewRun={noop} onOpenRun={noop} />);
 });
 
+/** The first room revealed at Turn Start, as the button that enters it. */
+const firstRevealedRoom = (): HTMLElement => {
+  const [first] = screen.getAllByTitle(/^Enter /);
+  if (!first) throw new Error("no room revealed");
+  return first;
+};
+
 describe("the table", () => {
   it("shows both characters and the floor", () => {
     expect(screen.getByRole("heading", { name: "North vs Up" })).toBeDefined();
@@ -32,12 +39,13 @@ describe("the table", () => {
   });
 
   it("offers the flip, and nothing else, at the start of a turn", () => {
-    expect(screen.getByRole("button", { name: /Flip the next room/ })).toBeDefined();
+    expect(screen.getByRole("button", { name: /Reveal the top rooms/ })).toBeDefined();
     expect(screen.queryByRole("button", { name: /check the room/ })).toBeNull();
   });
 
-  it("names the room once it is flipped, and draws both hands to 5", () => {
-    fireEvent.click(screen.getByRole("button", { name: /Flip the next room/ }));
+  it("reveals 3 rooms, names the one entered, and draws both hands to 5", () => {
+    fireEvent.click(screen.getByRole("button", { name: /Reveal the top rooms/ }));
+    fireEvent.click(firstRevealedRoom());
     const room = session.getState().state.activeRoom;
     expect(room).not.toBeNull();
     expect(screen.getAllByText(room?.name ?? "").length).toBeGreaterThan(0);
@@ -46,7 +54,8 @@ describe("the table", () => {
   });
 
   it("offers the room check once the flip has drawn both hands — there is no Draw phase to wait in", () => {
-    fireEvent.click(screen.getByRole("button", { name: /Flip the next room/ }));
+    fireEvent.click(screen.getByRole("button", { name: /Reveal the top rooms/ }));
+    fireEvent.click(firstRevealedRoom());
     expect(screen.getByRole("button", { name: /check the room/ }).hasAttribute("disabled")).toBe(
       false,
     );
@@ -75,7 +84,16 @@ describe("the table", () => {
     expect(sprites()).toHaveLength(onTable);
     expect(sprites().every((s) => s.classList.contains("is-down"))).toBe(true);
 
-    fireEvent.click(screen.getByRole("button", { name: /Flip the next room/ }));
+    fireEvent.click(screen.getByRole("button", { name: /Reveal the top rooms/ }));
+    expect(sprites()).toHaveLength(onTable);
+    const revealedUp = sprites().filter((s) => !s.classList.contains("is-down"));
+    expect(revealedUp.map((s) => s.getAttribute("data-zone"))).toEqual([
+      "revealed",
+      "revealed",
+      "revealed",
+    ]);
+
+    fireEvent.click(firstRevealedRoom());
     expect(sprites()).toHaveLength(onTable);
     const faceUp = sprites().filter((s) => !s.classList.contains("is-down"));
     const { state: next } = session.getState();
@@ -88,7 +106,8 @@ describe("the table", () => {
   });
 
   it("writes the log outside React", () => {
-    fireEvent.click(screen.getByRole("button", { name: /Flip the next room/ }));
+    fireEvent.click(screen.getByRole("button", { name: /Reveal the top rooms/ }));
+    fireEvent.click(firstRevealedRoom());
     const log = screen.getByLabelText("Log");
     expect(log.textContent).toContain("You are in:");
   });
@@ -174,7 +193,7 @@ describe("the playtester's notes", () => {
   const log = () => document.querySelector(".log__lines") as HTMLElement;
 
   it("lands a typed note in the log, at the point it was typed", () => {
-    fireEvent.click(screen.getByRole("button", { name: /Flip the next room/ }));
+    fireEvent.click(screen.getByRole("button", { name: /Reveal the top rooms/ }));
     const before = log().textContent ?? "";
 
     const field = screen.getByLabelText("Note");

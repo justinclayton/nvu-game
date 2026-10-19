@@ -8,14 +8,21 @@
  * sit off to the right, as the rulebook keeps them off to one side. Every
  * slot here is an empty, measured box; the card layer draws the cards over
  * it.
+ *
+ * On a phone the CSS rearranges these same elements rather than rendering a
+ * second mat: held upright, Red's side and hand stack above Gray's; held
+ * sideways, the brief takes a column beside the play zones and hands, and the
+ * piles move under them. The card layer follows, since it only reads where
+ * each `data-slot` ended up.
  */
 
 import { useRef, type CSSProperties } from "react";
 
 import { plural } from "@domain/plural";
 import type { Card, Character, GameState } from "@domain/types";
-import { CardLayer, type Inspected, type Paying } from "./CardLayer";
-import type { Metrics } from "./metrics";
+import { CardLayer, type Paying } from "./CardLayer";
+import { Inspector, useTouchInspect, type Inspected } from "./Inspector";
+import { COMPACT, type Metrics } from "./metrics";
 import type { ZoneId } from "./placements";
 import { RoomBrief } from "./RoomBrief";
 import { useSlotRects } from "./useSlotRects";
@@ -25,8 +32,11 @@ interface Props {
   readonly metrics: Metrics;
   readonly delays: ReadonlyMap<string, number>;
   readonly paying: Paying | null;
+  /** What the payment in progress still needs, shown beside the paying hand. */
+  readonly payingNeed?: string | null | undefined;
   readonly onPickCard: (character: Character, card: Card) => void;
   readonly onPickReward?: ((character: Character, card: Card) => void) | undefined;
+  readonly inspected: Inspected | null;
   readonly onInspect: (item: Inspected | null) => void;
   /** Debug mode: every pile is face up, and a stacked one can be opened for a full read. */
   readonly debug?: boolean | undefined;
@@ -81,9 +91,12 @@ function statusOf(state: GameState, c: Character): string {
 function HandSlot({
   state,
   character,
+  need,
 }: {
   readonly state: GameState;
   readonly character: Character;
+  /** What this hand's payment in progress still needs, if it is the one paying. */
+  readonly need?: string | null | undefined;
 }) {
   const status = statusOf(state, character);
   const tone = character.toLowerCase();
@@ -98,6 +111,11 @@ function HandSlot({
         <span className="slot__label slot__label--inline">
           hand · {state[character].hand.length}
         </span>
+        {need ? (
+          <span className="slot__pay" role="status">
+            {need}
+          </span>
+        ) : null}
       </header>
       <div className="well well--hand" data-slot={`${tone}-hand`} />
       {/* The band over this character's side of the play zone, where the cards
@@ -112,13 +130,16 @@ export function Mat({
   metrics,
   delays,
   paying,
+  payingNeed,
   onPickCard,
   onPickReward,
+  inspected,
   onInspect,
   debug,
   onOpenPile,
 }: Props) {
   const matRef = useRef<HTMLDivElement>(null);
+  const touch = useTouchInspect();
   const rects = useSlotRects(matRef, state, metrics);
   // Only offered in debug mode, and only for piles that stack more than one
   // card deep — a row already shows everything, and the active room is a
@@ -142,14 +163,16 @@ export function Mat({
     >
       <div className="mat__main">
         <div className="mat-row mat-row--floor">
-          <Slot id="floor" label="Floor deck" count={state.floorDeck.length} onOpenPile={openPile} />
-          <Slot id="cleared" label="Cleared" count={state.cleared.length} onOpenPile={openPile} />
-          <Slot id="room" label="Active room" />
+          <div className="mat-floor__piles">
+            <Slot id="floor" label="Floor deck" count={state.floorDeck.length} onOpenPile={openPile} />
+            <Slot id="cleared" label="Cleared" count={state.cleared.length} onOpenPile={openPile} />
+            <Slot id="room" label="Active room" />
+          </div>
           <RoomBrief state={state} />
         </div>
 
         <div className="mat-row mat-row--table">
-          <div className="mat-side">
+          <div className="mat-side mat-side--red">
             <div className="mat-side__piles">
               <Slot
                 id="red-deck"
@@ -176,7 +199,7 @@ export function Mat({
             <Slot id="red-play" label="Play zone" row tone="red" />
           </div>
           <div className="mat__divider" />
-          <div className="mat-side">
+          <div className="mat-side mat-side--gray">
             <div className="mat-side__piles">
               <Slot
                 id="gray-deck"
@@ -205,9 +228,17 @@ export function Mat({
         </div>
 
         <div className="mat-row mat-row--hands">
-          <HandSlot state={state} character="Red" />
+          <HandSlot
+            state={state}
+            character="Red"
+            need={paying?.character === "Red" ? payingNeed : null}
+          />
           <div className="mat__divider" />
-          <HandSlot state={state} character="Gray" />
+          <HandSlot
+            state={state}
+            character="Gray"
+            need={paying?.character === "Gray" ? payingNeed : null}
+          />
         </div>
       </div>
 
@@ -239,8 +270,16 @@ export function Mat({
         paying={paying}
         onPickCard={onPickCard}
         onPickReward={onPickReward}
+        inspected={inspected}
         onInspect={onInspect}
         debug={debug}
+      />
+
+      <Inspector
+        inspected={inspected}
+        state={state}
+        overlay={metrics === COMPACT}
+        touch={touch}
       />
     </div>
   );

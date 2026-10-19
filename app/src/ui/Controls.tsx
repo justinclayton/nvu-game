@@ -11,6 +11,7 @@ import { scrapForStatsCards } from "@domain/queries";
 import type { CardId, Command, GameState, Stat } from "@domain/types";
 import { isLegal, whyNot } from "./legal";
 import { CardView, RoomCardView } from "./CardView";
+import type { Inspected } from "./Inspector";
 
 const STATS: readonly Stat[] = ["Oomph", "Scramble"];
 
@@ -32,10 +33,22 @@ interface Props {
   readonly dispatch: (command: Command) => void;
   /** A payment in progress, described for the player. */
   readonly hint?: string | null | undefined;
+  /** The zoomed card, and where to send a card the player points at. */
+  readonly inspected: Inspected | null;
+  readonly onInspect: (item: Inspected | null) => void;
 }
 
-export function Controls({ state, dispatch, hint }: Props) {
-  if (state.pending) return <PendingChoice state={state} dispatch={dispatch} />;
+export function Controls({ state, dispatch, hint, inspected, onInspect }: Props) {
+  if (state.pending) {
+    return (
+      <PendingChoice
+        state={state}
+        dispatch={dispatch}
+        inspected={inspected}
+        onInspect={onInspect}
+      />
+    );
+  }
 
   const buttons: readonly { label: string; command: Command }[] =
     state.phase === "Turn Start"
@@ -74,7 +87,7 @@ export function Controls({ state, dispatch, hint }: Props) {
   );
 }
 
-function PendingChoice({ state, dispatch }: Props) {
+function PendingChoice({ state, dispatch, inspected, onInspect }: Props) {
   const pending = state.pending;
   if (!pending) return null;
 
@@ -197,9 +210,9 @@ function PendingChoice({ state, dispatch }: Props) {
           <div className="zone">
             {pending.cards.map((card) =>
               "challenges" in card ? (
-                <RoomCardView key={card.id} room={card} />
+                <RoomCardView key={card.id} room={card} inspect={{ inspected, onInspect }} />
               ) : (
-                <CardView key={card.id} card={card} />
+                <CardView key={card.id} card={card} inspect={{ inspected, onInspect }} />
               ),
             )}
           </div>
@@ -216,11 +229,13 @@ function PendingChoice({ state, dispatch }: Props) {
       );
 
     case "ChooseCards":
-      return <ChooseCards state={state} dispatch={dispatch} />;
+      return (
+        <ChooseCards state={state} dispatch={dispatch} inspected={inspected} onInspect={onInspect} />
+      );
   }
 }
 
-function ChooseCards({ state, dispatch }: Props) {
+function ChooseCards({ state, dispatch, inspected, onInspect }: Props) {
   const pending = state.pending;
   const [picked, setPicked] = useState<readonly CardId[]>([]);
   const prompt = pending?.kind === "ChooseCards" ? pending.prompt : "";
@@ -252,6 +267,7 @@ function ChooseCards({ state, dispatch }: Props) {
             key={card.id}
             card={card}
             selected={picked.includes(card.id)}
+            inspect={{ inspected, onInspect }}
             onClick={() => {
               toggle(card.id);
             }}

@@ -8,6 +8,7 @@
 
 import type { GameState } from "@domain/types";
 import { CardView, RoomCardView } from "./CardView";
+import { Inspector, useTouchInspect, type Inspected } from "./Inspector";
 import { pileOf, type ZoneId } from "./placements";
 
 const PILE_LABEL: Partial<Record<ZoneId, string>> = {
@@ -30,9 +31,13 @@ interface Props {
   readonly state: GameState;
   readonly zone: ZoneId;
   readonly onClose: () => void;
+  readonly inspected: Inspected | null;
+  readonly onInspect: (item: Inspected | null) => void;
 }
 
-export function PilePanel({ state, zone, onClose }: Props) {
+export function PilePanel({ state, zone, onClose, inspected, onInspect }: Props) {
+  const touch = useTouchInspect();
+  const inspect = { inspected, onInspect };
   const label = PILE_LABEL[zone] ?? zone;
   const items = pileOf(state, zone);
 
@@ -44,6 +49,10 @@ export function PilePanel({ state, zone, onClose }: Props) {
         aria-label={`${label}, full contents`}
         onClick={(e) => {
           e.stopPropagation();
+          /* Touch: a tap in the panel but off a card puts the zoom away. */
+          if (touch && !(e.target instanceof Element && e.target.closest(".is-inspectable"))) {
+            onInspect(null);
+          }
         }}
       >
         <header className="pile-panel__head">
@@ -63,14 +72,16 @@ export function PilePanel({ state, zone, onClose }: Props) {
               <div className="pile-panel__item" key={p.id}>
                 <span className="pile-panel__pos">{i === 0 ? "Top" : `#${String(i + 1)}`}</span>
                 {p.kind === "card" ? (
-                  <CardView card={p.card} state={state} owner={p.owner} />
+                  <CardView card={p.card} state={state} owner={p.owner} inspect={inspect} />
                 ) : (
-                  <RoomCardView room={p.room} state={state} />
+                  <RoomCardView room={p.room} state={state} inspect={inspect} />
                 )}
               </div>
             ))
           )}
         </div>
+        {/* The panel covers the mat's own zoom, so it draws one of its own, beside the panel. */}
+        <Inspector inspected={inspected} state={state} overlay touch={touch} clear=".pile-panel" />
       </div>
     </div>
   );

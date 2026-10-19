@@ -45,7 +45,9 @@ taken card then travels into the discard pile and the others settle back onto th
 is owned by `Table.tsx`, so the floating cards and the ascension panel read the same one.
 
 Card faces (`CardFace.tsx`) are sized in em from the card's width, so the same face prints at
-table scale, in a panel, and zoomed under the pointer. The type colours and rarity edges are the
+table scale, in a panel, and zoomed under the pointer. At table scale a card's body text would print under 9px, so the face drops it and shows a
+"…" mark instead; the zoom, which every card on the table and in a choice panel opens, prints it (the
+"text floor" in `table.css`). The type colours and rarity edges are the
 ones `tools/card-sheet.html` prints.
 
 ## The log, notes and exports

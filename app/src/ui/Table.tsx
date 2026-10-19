@@ -13,10 +13,10 @@ import { canUndo, type SessionState } from "@application/session";
 import { plural } from "@domain/plural";
 import { costOf, payOptions } from "@domain/queries";
 import type { Card, Character, Command, GameState } from "@domain/types";
-import { type Inspected, type Paying } from "./CardLayer";
-import { CardView, RoomCardView } from "./CardView";
+import { type Paying } from "./CardLayer";
 import { Controls } from "./Controls";
 import { EventLog } from "./EventLog";
+import { useTouchInspect, type Inspected } from "./Inspector";
 import { Mat } from "./Mat";
 import { moveDelays, type ZoneId } from "./placements";
 import { OpenRun } from "./OpenRun";
@@ -42,6 +42,7 @@ export function Table({ onNewRun, onOpenRun, replay }: Props) {
   const rejection = useSessionState((s: SessionState) => s.lastRejection);
   const undoable = useSessionState(canUndo);
   const metrics = useMetrics();
+  const touch = useTouchInspect();
   const [paying, setPaying] = useState<Paying | null>(null);
   const [inspected, setInspected] = useState<Inspected | null>(null);
   /* Debug mode: a playtester's view, not a rule. Off by default, and nothing
@@ -105,25 +106,41 @@ export function Table({ onNewRun, onOpenRun, replay }: Props) {
   );
 
   /* The zoomed card follows the pointer's hover; a card that moves out from
-   * under the pointer fires no leave event, so a state change clears it. */
+   * under the pointer fires no leave event, so a state change clears it, and
+   * so does a pile panel opening or closing. */
   useEffect(() => {
     setInspected(null);
-  }, [state]);
+  }, [state, openPile]);
 
-  const payingHint =
+  /* What a payment in progress still needs, said where the player is looking:
+   * next to the paying hand, and in the bar with the way out. */
+  const payingNeed =
     paying && state[paying.character].hand.some((c) => c.id === paying.cardId)
-      ? `${paying.character}: choose ${plural(
+      ? `choose ${plural(
           costOf(state, paying.character, cardById(state, paying.character, paying.cardId)) -
             paying.chosen.length,
           "more card",
-        )} to discard, or click the card again to cancel.`
+        )} to discard`
+      : null;
+  const payingHint =
+    paying && payingNeed
+      ? `${paying.character}: ${payingNeed}, or click the card again to cancel.`
       : null;
 
   return (
     <div
-      className={`table${replaying ? " table--replaying" : ""}`}
+      className={`table-page${replaying ? " table--replaying" : ""}`}
       onDragOver={(e) => {
         e.preventDefault();
+      }}
+      onClick={(e) => {
+        /* Touch: a tap anywhere but on a card puts the zoom away. */
+        if (
+          touch &&
+          !(e.target instanceof Element && e.target.closest(".sprite, .is-inspectable"))
+        ) {
+          setInspected(null);
+        }
       }}
       onDrop={(e) => {
         e.preventDefault();
@@ -131,102 +148,108 @@ export function Table({ onNewRun, onOpenRun, replay }: Props) {
         if (file) void file.text().then(onOpenRun);
       }}
     >
-      <header className="table__head">
-        <h1>North vs Up</h1>
-        <div className="table__meta">
-          <span>Floor {state.floor}</span>
-          <span>Turn {state.turn}</span>
-          <span className="table__phase">{state.phase}</span>
-          {KIT_REVISION === undefined ? null : (
-            <span className="table__kit" title="Kit revision: rules, card list, engine build.">
-              {KIT_REVISION}
-            </span>
-          )}
-        </div>
-        <div className="table__actions">
-          <label
-            className="debug-toggle"
-            title="Turn every pile face up, for inspecting the table."
-          >
-            <input
-              type="checkbox"
-              checked={debug}
-              onChange={(e) => {
-                setDebug(e.target.checked);
-                if (!e.target.checked) setOpenPile(null);
+      <div className="table">
+        <header className="table__head">
+          <h1>North vs Up</h1>
+          <div className="table__meta">
+            <span>Floor {state.floor}</span>
+            <span>Turn {state.turn}</span>
+            <span className="table__phase">{state.phase}</span>
+            {KIT_REVISION === undefined ? null : (
+              <span className="table__kit" title="Kit revision: rules, card list, engine build.">
+                {KIT_REVISION}
+              </span>
+            )}
+          </div>
+          <div className="table__actions">
+            <label
+              className="debug-toggle"
+              title="Turn every pile face up, for inspecting the table."
+            >
+              <input
+                type="checkbox"
+                checked={debug}
+                onChange={(e) => {
+                  setDebug(e.target.checked);
+                  if (!e.target.checked) setOpenPile(null);
+                }}
+              />
+              Debug
+            </label>
+            <OpenRun onOpen={onOpenRun} />
+            <button
+              type="button"
+              className="button"
+              disabled={!undoable || replaying}
+              title="Undo reaches back to the last thing that showed you a card."
+              onClick={() => {
+                session.getState().undo();
+                setPaying(null);
               }}
-            />
-            Debug
-          </label>
-          <OpenRun onOpen={onOpenRun} />
-          <button
-            type="button"
-            className="button"
-            disabled={!undoable || replaying}
-            title="Undo reaches back to the last thing that showed you a card."
-            onClick={() => {
-              session.getState().undo();
-              setPaying(null);
-            }}
-          >
-            Undo
-          </button>
-          <button type="button" className="button" onClick={onNewRun}>
-            New run
-          </button>
-        </div>
-      </header>
+            >
+              Undo
+            </button>
+            <button type="button" className="button" onClick={onNewRun}>
+              New run
+            </button>
+          </div>
+        </header>
 
-      <Mat
-        state={state}
-        metrics={metrics}
-        delays={delays}
-        paying={paying}
-        onPickCard={pickCard}
-        onPickReward={(_c, card) => {
-          if (state.pending?.kind === "TakeReward") {
-            dispatch({ type: "TAKE_REWARD", cardId: card.id });
-          } else if (state.pending?.kind === "ChooseGoodStuff") {
-            dispatch({ type: "CHOOSE_CARDS", cardIds: [card.id] });
-          }
-        }}
-        onInspect={setInspected}
-        debug={debug}
-        onOpenPile={setOpenPile}
-      />
+        <Mat
+          state={state}
+          metrics={metrics}
+          delays={delays}
+          paying={paying}
+          payingNeed={payingNeed}
+          onPickCard={pickCard}
+          onPickReward={(_c, card) => {
+            if (state.pending?.kind === "TakeReward") {
+              dispatch({ type: "TAKE_REWARD", cardId: card.id });
+            } else if (state.pending?.kind === "ChooseGoodStuff") {
+              dispatch({ type: "CHOOSE_CARDS", cardIds: [card.id] });
+            }
+          }}
+          inspected={openPile ? null : inspected}
+          onInspect={setInspected}
+          debug={debug}
+          onOpenPile={setOpenPile}
+        />
 
-      {replaying && replay ? (
-        <ReplayBar replay={replay} />
-      ) : state.phase === "GameOver" ? (
-        <section className="over">
-          <h2>
-            {state.outcome === "Victory" ? "You reach the rooftop." : "You lose"}
-          </h2>
-          <button type="button" className="button button--primary" onClick={onNewRun}>
-            Go again
-          </button>
-        </section>
-      ) : (
-        <Controls state={state} dispatch={dispatch} hint={payingHint} />
-      )}
+        <EventLog />
+      </div>
 
-      {rejection ? <p className="rejection">{rejection.message}</p> : null}
-      <EventLog />
-
-      {inspected ? (
-        <div className="inspector" aria-hidden="true">
-          {inspected.kind === "card" ? (
-            <CardView card={inspected.card} state={state} owner={inspected.owner} size="large" />
+      {/* Whatever the game is waiting for stays on screen at the bottom of the
+          window while the mat scrolls beneath it. */}
+      <div className="dock">
+        <div className="dock__inner">
+          {rejection ? <p className="rejection">{rejection.message}</p> : null}
+          {replaying && replay ? (
+            <ReplayBar replay={replay} />
+          ) : state.phase === "GameOver" ? (
+            <section className="over">
+              <h2>{state.outcome === "Victory" ? "You reach the rooftop." : "You lose"}</h2>
+              <button type="button" className="button button--primary" onClick={onNewRun}>
+                Go again
+              </button>
+            </section>
           ) : (
-            <RoomCardView room={inspected.room} state={state} size="large" />
+            <Controls
+              state={state}
+              dispatch={dispatch}
+              hint={payingHint}
+              inspected={inspected}
+              onInspect={setInspected}
+            />
           )}
         </div>
-      ) : null}
+      </div>
 
       {openPile ? (
         <PilePanel
           state={state}
           zone={openPile}
+          inspected={inspected}
+          onInspect={setInspected}
           onClose={() => {
             setOpenPile(null);
           }}

@@ -3,6 +3,7 @@
 import type { DomainEvent } from "../types";
 import { playedBy } from "../queries";
 import {
+  applyPoolBonus,
   drawCards,
   exhaustFromHand,
   playerOf,
@@ -19,7 +20,13 @@ export const RED: Registry = {
 
   Reckless: { exhaustX: 2 },
 
-  "Cross Punch": { exhaustX: 1 },
+  "Cross Punch": {
+    exhaustX: 1,
+    onPlay(state, ctx) {
+      const earlier = state.playZone.some((p) => p.card.id !== ctx.card.id && p.card.scramble > 0);
+      return earlier ? done(applyPoolBonus(state, "Oomph", 4)) : nothing(state);
+    },
+  },
 
   "Fast Follow": {
     freeIf(state) {

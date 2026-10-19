@@ -11,10 +11,10 @@
  * and no server.
  */
 var NVU_CARDS = {
-  meta: {"version":"C49","updated":"2026-10-03"},
+  meta: {"version":"C50","updated":"2026-10-03"},
   rulesVersion: "R30",
-  cardsVersion: "C49",
-  cardListId: "a5f010bf901f",
+  cardsVersion: "C50",
+  cardListId: "c756e6226afc",
   cards: [
     {"name":"Shove","set":"official","kind":"player","owner":"Red","starter":true,"cost":1,"oomph":2,"flavor":"'Oomph!', he shouted.","count":4},
     {"name":"Charge","set":"official","kind":"player","owner":"Red","starter":true,"cost":2,"oomph":4,"flavor":"I am bolder, so I lower my shoulder.","count":4},
@@ -28,7 +28,7 @@ var NVU_CARDS = {
     {"name":"Fast Follow","set":"official","kind":"player","owner":"Red","rarity":"Fine","cost":1,"oomph":3,"flavor":"The old one-two!","text":"If Gray played a card this turn, play this card for free.","count":3},
     {"name":"Reckless","set":"official","kind":"player","owner":"Red","rarity":"Fine","cost":1,"oomph":5,"flavor":"GYAHHHHHHHOUCH","text":"Exhaust 2.","count":2},
     {"name":"Bull Rush","set":"proposed","kind":"player","owner":"Red","rarity":"Fine","cost":1,"oomph":2,"scramble":1,"flavor":"Charge ahead while keeping your footing on loose debris.","count":2},
-    {"name":"Cross Punch","set":"proposed","kind":"player","owner":"Red","rarity":"Fine","cost":2,"oomph":4,"scramble":2,"flavor":"A heavy two-part combination attack.","text":"Exhaust 1.","count":2},
+    {"name":"Cross Punch","set":"proposed","kind":"player","owner":"Red","rarity":"Fine","cost":2,"oomph":4,"flavor":"A heavy two-part combination attack.","text":"Exhaust 1. If a Scramble card was already played this turn, +4 Oomph.","count":2},
     {"name":"Break Through","set":"proposed","kind":"player","owner":"Red","rarity":"Fine","cost":1,"oomph":2,"flavor":"Smash through the obstacle and leave the broken starter gear behind.","text":"Play: Scrap 1 card from your hand.","count":2},
     {"name":"Set 'Em Up","set":"proposed","kind":"player","owner":"Red","rarity":"Cool","cost":1,"flavor":"Clear the heavy debris so Gray can maneuver effortlessly.","text":"Every time you play a card this turn (including this one), Gray may draw a card.","count":2},
     {"name":"Second Wind","set":"proposed","kind":"player","owner":"Red","rarity":"Cool","cost":2,"oomph":4,"flavor":"Catch your breath and shake off the fatigue.","text":"Shuffle a Red card from your Exhaust pile into your deck.","count":2},

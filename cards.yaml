@@ -29,7 +29,7 @@
 #   flee    string               room and stairwell only: the printed Flee line
 
 meta:
-  version: C49
+  version: C50
   updated: 2026-10-03
 
 cards:
@@ -182,8 +182,7 @@ cards:
     rarity: Fine
     cost: 2
     oomph: 4
-    scramble: 2
-    text: Exhaust 1.
+    text: Exhaust 1. If a Scramble card was already played this turn, +4 Oomph.
     flavor: A heavy two-part combination attack.
 
   - name: Break Through

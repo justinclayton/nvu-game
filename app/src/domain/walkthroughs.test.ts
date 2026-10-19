@@ -63,7 +63,7 @@ describe("walkthrough 1 — the deck runs dry mid-draw and the discard pile beco
 describe("walkthrough 2 — Down when the deck and discard are both empty ends the run on the spot", () => {
   it("stops a room's own punishment from finishing, and everything after it", () => {
     const state = goingDown([card("Shove")]);
-    // Smoldering Armory's Flee line: "Red Exhausts 5." Nobody played
+    // Smoldering Armory's Flee line: "Both players Exhaust 3." Nobody played
     // anything, so no threshold is met and the room Flees.
     const { state: next, events } = play(state, [{ type: "END_PLAY" }]);
     expect(next.phase).toBe("GameOver");

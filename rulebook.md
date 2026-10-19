@@ -1,6 +1,6 @@
 # *North vs Up*: Rulebook
 
-Rules version: R30
+Rules version: R31
 
 ---
 
@@ -96,7 +96,7 @@ The phase ends when both players pass.
 
 Players add their combined stats they accumulated this turn and check to see if they met one or more challenges, or if they must Flee.
 
-**Clear**: A challenge is met when the players' stats meet or exceed any of its thresholds. A threshold that prints both stats is met only when the players' stats meet or exceed both. If one or more challenges are met, the players `Clear` the room. For each met challenge, resolve the outcome of **one** threshold: of the thresholds met in that challenge, the one printed furthest down the card. If more than one challenge is met, their outcomes may be resolved in any order.
+**Clear**: A challenge is met when the players' stats meet or exceed any of its thresholds. A threshold that prints both stats is met only when the players' stats meet or exceed both. If one or more challenges are met, the players `Clear` the room, whether or not an outcome says so. For each met challenge, resolve the outcome of **one** threshold: of the thresholds met in that challenge, the one printed furthest down the card. If more than one challenge is met, their outcomes may be resolved in any order.
 
 > If a resolved outcome says to `Ascend`, the entire Floor is cleared. Perform the Cleanup phase as normal, then perform the steps in section 10: *Ascending*.
 
@@ -127,7 +127,7 @@ There are two kinds: `Room` and `Stairwell`. `Stairwell` cards are essentially f
 - **Name.**
 - **Type line:** `Room` or `Stairwell`, and the tier of floors it belongs to (`Room · Middle Floors`).
 - **Flavor text.**
-- **Challenges:** one or more, each listing one or more `threshold: outcome` lines. A threshold consists of one or more stats (`Oomph 7 and Scramble 7`).
+- **Challenges:** one or more, each listing one or more `threshold: outcome` lines. A threshold consists of one or more stats (`Oomph 7 and Scramble 7`). An outcome prints its own reward, and prints `Ascend` when it ends the Floor. It never prints `Clear`.
 - **`Flee`**: what happens when no challenges are met.
 
 ### Character cards
@@ -175,6 +175,7 @@ A `Stuff` card looks similar to a character card:
 - `you may draw X cards`: Draw any number of cards from none up to **X**.
 - `any deck`: any face-down pile on the table: a character deck, a reward pool, the Floor deck, or a Stuff pool.
 - `Scrap`: Move the card to the Scrapyard. It is removed from play for the rest of the game.
+- `may Scrap a card from your hand or discard pile`: Choose **one** card from your hand or your discard pile and `Scrap` it, or choose none. When an outcome says *the other* player, it means the player who did not take the outcome's previous line.
 
 ---
 ## 9. Going Down

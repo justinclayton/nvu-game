@@ -20,6 +20,8 @@ import {
   resetRig,
   rig,
   room,
+  goodStuffTurnstile,
+  plainTurnstile,
 } from "../__fixtures__/rig";
 import { dealBadStuff } from "../verbs";
 import type { CardId } from "../types";
@@ -61,7 +63,7 @@ describe("Crowbar — 'Play: if you get any Good Stuff this turn, get an additio
     // the room's own payout once Outcome hands it over — rigged through a
     // real Sorting Room clear, not by setting turn-record fields by hand.
     const state = playing({
-      activeRoom: room("Security Turnstile"),
+      activeRoom: goodStuffTurnstile(),
       Red: player({
         deck: pile("Shove", 4),
         hand: [card("Crowbar"), card("Shove"), card("Shove"), card("Pry Bar")],
@@ -87,7 +89,7 @@ describe("Crowbar — 'Play: if you get any Good Stuff this turn, get an additio
     // Once-per-copy: whichever
     // hook pays first uses up this copy's only bonus for the turn.
     const rigged = playing({
-      activeRoom: room("Security Turnstile"),
+      activeRoom: goodStuffTurnstile(),
       Red: player({
         deck: pile("Shove", 4),
         hand: [card("Crowbar"), card("Shove"), card("Shove"), card("Pry Bar")],
@@ -115,7 +117,7 @@ describe("Crowbar — 'Play: if you get any Good Stuff this turn, get an additio
 
   it("two Crowbars played by the same controller pay two extra pieces", () => {
     const state = playing({
-      activeRoom: room("Security Turnstile"),
+      activeRoom: goodStuffTurnstile(),
       Red: player({
         deck: pile("Shove", 4),
         hand: [card("Crowbar"), card("Crowbar"), card("Shove"), card("Shove"), card("Pry Bar")],
@@ -142,7 +144,7 @@ describe("Crowbar — 'Play: if you get any Good Stuff this turn, get an additio
     // Crowbar's own bonus spread then finds it
     // empty, the same as any other draw would.
     const rigged = playing({
-      activeRoom: room("Security Turnstile"),
+      activeRoom: goodStuffTurnstile(),
       Red: player({
         deck: pile("Shove", 4),
         hand: [card("Crowbar"), card("Shove"), card("Shove"), card("Pry Bar")],
@@ -171,7 +173,7 @@ describe("Crowbar — 'Play: if you get any Good Stuff this turn, get an additio
     // pool; rig that draw to be Crowbar itself. Crowbar arriving unplayed is
     // not Crowbar being played, so its own bonus never fires.
     const rigged = playing({
-      activeRoom: room("Security Turnstile"),
+      activeRoom: goodStuffTurnstile(),
       Red: player({
         deck: pile("Shove", 4),
         hand: [card("Charge"), card("Shove"), card("Shove"), card("Pry Bar")],
@@ -367,7 +369,7 @@ describe("Riot Shield — 'If the room is Cleared, return this to your hand at t
     // every Challenge reads the shared pool, so it does not matter that Red
     // is the one playing it while the line pays Gray.
     const state = playing({
-      activeRoom: room("Security Turnstile"),
+      activeRoom: plainTurnstile(),
       Red: player({
         deck: pile("Shove", 1),
         hand: [card("Riot Shield"), card("Shove")],
@@ -407,7 +409,7 @@ describe("Riot Shield — 'If the room is Cleared, return this to your hand at t
 
   it("is back in hand in time for Spore Cloud's Cleanup discard to count and offer it", () => {
     const state = playing({
-      activeRoom: room("Security Turnstile"),
+      activeRoom: plainTurnstile(),
       Red: player({
         deck: pile("Shove", 3),
         hand: [
@@ -1123,11 +1125,11 @@ describe("Panic — 'Holding: every room threshold requires +2 Scramble to be me
       activeRoom: room("The Sentry Drone"),
       Gray: player({ deck: pile("Duck Under", 4), hand: [card("Panic")] }),
     });
-    // Challenge 1: Scramble 6.
+    // Challenge 1: Scramble 8.
     const line = state.activeRoom?.challenges[1]?.thresholds[0];
     if (!line) throw new Error("rig");
-    expect(line.requires).toEqual({ oomph: 0, scramble: 6 });
-    expect(thresholdRequirement(state, line)).toEqual({ oomph: 0, scramble: 8 });
+    expect(line.requires).toEqual({ oomph: 0, scramble: 8 });
+    expect(thresholdRequirement(state, line)).toEqual({ oomph: 0, scramble: 10 });
   });
 
   it("adds a Scramble 2 requirement to an Oomph-only line", () => {
@@ -1135,11 +1137,11 @@ describe("Panic — 'Holding: every room threshold requires +2 Scramble to be me
       activeRoom: room("The Sentry Drone"),
       Gray: player({ deck: pile("Duck Under", 4), hand: [card("Panic")] }),
     });
-    // Challenge 0: Oomph 6, no printed Scramble.
+    // Challenge 0: Oomph 8, no printed Scramble.
     const line = state.activeRoom?.challenges[0]?.thresholds[0];
     if (!line) throw new Error("rig");
-    expect(line.requires).toEqual({ oomph: 6, scramble: 0 });
-    expect(thresholdRequirement(state, line)).toEqual({ oomph: 6, scramble: 2 });
+    expect(line.requires).toEqual({ oomph: 8, scramble: 0 });
+    expect(thresholdRequirement(state, line)).toEqual({ oomph: 8, scramble: 2 });
   });
 
   it("adds to a dual threshold's own printed Scramble, not a second floor", () => {
@@ -1147,8 +1149,8 @@ describe("Panic — 'Holding: every room threshold requires +2 Scramble to be me
       activeRoom: room("Flooded Ventilation Shaft"),
       Gray: player({ deck: pile("Duck Under", 4), hand: [card("Panic")] }),
     });
-    // Challenge 1: Oomph 3 and Scramble 3 together.
-    const line = state.activeRoom?.challenges[1]?.thresholds[0];
+    // Challenge 0: Oomph 3 and Scramble 3 together.
+    const line = state.activeRoom?.challenges[0]?.thresholds[0];
     if (!line) throw new Error("rig");
     expect(line.requires).toEqual({ oomph: 3, scramble: 3 });
     expect(thresholdRequirement(state, line)).toEqual({ oomph: 3, scramble: 5 });
@@ -1162,7 +1164,7 @@ describe("Panic — 'Holding: every room threshold requires +2 Scramble to be me
     });
     const line = state.activeRoom?.challenges[0]?.thresholds[0];
     if (!line) throw new Error("rig");
-    expect(thresholdRequirement(state, line)).toEqual({ oomph: 6, scramble: 4 });
+    expect(thresholdRequirement(state, line)).toEqual({ oomph: 8, scramble: 4 });
   });
 
   it("blocks an Oomph line from clearing on Oomph alone while Panic is held", () => {
@@ -1196,7 +1198,7 @@ describe("Panic — 'Holding: every room threshold requires +2 Scramble to be me
     });
     const line = state.activeRoom?.challenges[0]?.thresholds[0];
     if (!line) throw new Error("rig");
-    expect(thresholdRequirement(state, line)).toEqual({ oomph: 6, scramble: 0 });
+    expect(thresholdRequirement(state, line)).toEqual({ oomph: 8, scramble: 0 });
     expect(thresholdIsMet(state, line)).toBe(true);
   });
 

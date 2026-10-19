@@ -20,8 +20,8 @@ describe("bin/nvu card", () => {
     const { status, output } = runCard("Automated Defense Turret");
     expect(status).toBe(0);
     expect(output).toContain("Automated Defense Turret [room; tier 2]");
-    expect(output).toContain("Scramble 8: Clear, and Gray gets Good Stuff.");
-    expect(output).toContain("Oomph 10: Clear, and one player may Scrap a Bad Stuff card from their hand.");
+    expect(output).toContain("Scramble 8: Both players get Good Stuff.");
+    expect(output).toContain("Oomph 10: Both players may Scrap a card from their hand or discard pile.");
     expect(output).toContain("Flee: Both players Exhaust 2, and both players get Bad Stuff.");
   });
 

@@ -20,8 +20,10 @@ import {
   resetRig,
   rig,
   room,
+  goodStuffShaft,
+  goodStuffTurnstile,
 } from "./__fixtures__/rig";
-import type { CardId, Challenge, Command, GameState, Room, Threshold } from "./types";
+import type { CardId, Challenge, Command, GameState, PlayerState, Room, Threshold } from "./types";
 
 beforeEach(resetRig);
 
@@ -565,7 +567,7 @@ describe("Room kinds: Room and Stairwell", () => {
   });
 
   it("a dual threshold is met only when the pool meets both stats", () => {
-    // Flooded Ventilation Shaft's second line needs Oomph 3 and Scramble 3
+    // Flooded Ventilation Shaft's line needs Oomph 3 and Scramble 3
     // together. Scramble alone, even well past 3, does not meet it.
     const state = rig({
       phase: "Play",
@@ -574,7 +576,7 @@ describe("Room kinds: Room and Stairwell", () => {
       Gray: player({ deck: pile("Duck Under", 5) }),
     });
     const r = ids(state, "Red");
-    const dualLine = state.activeRoom?.challenges[1]?.thresholds[0];
+    const dualLine = state.activeRoom?.challenges[0]?.thresholds[0];
     if (!dualLine) throw new Error("rig");
     const { state: scrambleOnly } = play(state, [
       playFree("Red", r[0] as CardId),
@@ -613,7 +615,7 @@ describe("Room kinds: Room and Stairwell", () => {
     // from Red's own cards alone.
     const state = rig({
       phase: "Play",
-      activeRoom: room("Security Turnstile"),
+      activeRoom: goodStuffTurnstile(),
       Red: player({ deck: pile("Shove", 5), hand: [card("Charge"), card("Shove"), card("Shove")] }),
       Gray: player({ deck: pile("Duck Under", 5), hand: [card("Pry Bar")] }),
     });
@@ -632,7 +634,7 @@ describe("Room kinds: Room and Stairwell", () => {
   it("names the room whose line earned a Good Stuff reveal", () => {
     const state = rig({
       phase: "Play",
-      activeRoom: room("Security Turnstile"),
+      activeRoom: goodStuffTurnstile(),
       Red: player({ deck: pile("Shove", 5), hand: [card("Charge"), card("Shove"), card("Shove")] }),
       Gray: player({ deck: pile("Duck Under", 5), hand: [card("Pry Bar")] }),
     });
@@ -650,7 +652,7 @@ describe("Room kinds: Room and Stairwell", () => {
     // Security Turnstile's Oomph 5 line owes Red a Good Stuff, but the pool is dry.
     const state = rig({
       phase: "Play",
-      activeRoom: room("Security Turnstile"),
+      activeRoom: goodStuffTurnstile(),
       Red: player({
         deck: pile("Shove", 5),
         hand: [card("Charge"), card("Shove"), card("Shove"), card("Pry Bar")],
@@ -679,26 +681,16 @@ describe("Room kinds: Room and Stairwell", () => {
     expect(next.Red.hand).toHaveLength(0);
   });
 
-  it("a met threshold against an empty Bad Stuff pool deals nothing and says so", () => {
-    // Overgrown Hydroponics Bay's Scramble 6 line owes both players Bad Stuff,
-    // but the pool is dry.
+  it("a Flee line against an empty Bad Stuff pool deals nothing and says so", () => {
+    // Overgrown Hydroponics Bay's Flee line owes both players Bad Stuff, but the pool is dry.
     const state = rig({
       phase: "Play",
       activeRoom: room("Overgrown Hydroponics Bay"),
       Red: player({ deck: pile("Shove", 5) }),
-      Gray: player({
-        deck: pile("Duck Under", 5),
-        hand: [card("Coil Of Cable"), card("Coil Of Cable")],
-      }),
+      Gray: player({ deck: pile("Duck Under", 5) }),
     });
     const empty = { ...state, pools: { ...state.pools, badStuff: [] } };
-    const [firstCoil, secondCoil] = empty.Gray.hand.filter((c) => c.name === "Coil Of Cable");
-    if (!firstCoil || !secondCoil) throw new Error("Gray is not holding two Coil Of Cables");
-    const { state: next, events } = play(empty, [
-      free("Gray", firstCoil.id),
-      free("Gray", secondCoil.id),
-      { type: "END_PLAY" },
-    ]);
+    const { state: next, events } = must(empty, { type: "END_PLAY" });
     expect(eventTypes(events)).not.toContain("STUFF_TAKEN");
     expect(events).toContainEqual({
       type: "STUFF_POOL_EMPTY",
@@ -729,24 +721,24 @@ describe("Room kinds: Room and Stairwell", () => {
     expect(next.Gray.hand.filter((c) => c.kind === "bad_stuff")).toHaveLength(2);
   });
 
-  describe("'one of you may Scrap a Bad Stuff card from your hand' — Automated Defense Turret", () => {
-    const meetsScrapLine = () =>
+  describe("'both players may Scrap a card from their hand or discard pile' — Automated Defense Turret", () => {
+    const meetsScrapLine = (over: { Red?: Partial<PlayerState>; Gray?: Partial<PlayerState> } = {}) =>
       rig({
         phase: "Play",
         activeRoom: room("Automated Defense Turret"),
         Red: player({
           deck: pile("Shove", 4),
           hand: [card("Charge"), card("Charge"), card("Pry Bar"), ...pile("Shove", 4)],
+          ...over.Red,
         }),
         // Rust, not Panic: a held Panic would itself raise the very
         // threshold this rig means to meet.
-        Gray: player({ deck: pile("Duck Under", 5), hand: [card("Rust")] }),
+        Gray: player({ deck: pile("Duck Under", 5), hand: [card("Rust")], ...over.Gray }),
       });
 
-    const toScrapChoice = () => {
-      const state = meetsScrapLine();
+    const meetIt = (state: GameState) => {
       const r = ids(state, "Red");
-      const { state: afterPlay, events } = play(state, [
+      return play(state, [
         {
           type: "PLAY_CARD",
           character: "Red",
@@ -762,65 +754,110 @@ describe("Room kinds: Room and Stairwell", () => {
         playFree("Red", r[2] as CardId),
         { type: "END_PLAY" },
       ]);
-      expect(events.filter((e) => e.type === "THRESHOLD_MET")).toHaveLength(1);
-      expect(afterPlay.pending?.kind).toBe("ChooseCharacter");
-      const { state: afterChoice } = must(afterPlay, {
-        type: "CHOOSE_CHARACTER",
-        character: "Gray",
-      });
-      expect(afterChoice.pending?.kind).toBe("ChooseCards");
-      return afterChoice;
     };
 
-    it("may Scrap the offered Bad Stuff card", () => {
-      const state = toScrapChoice();
-      const pending = state.pending;
-      if (pending?.kind !== "ChooseCards") throw new Error("rig");
+    it("asks Gray, the only player holding a card, and may Scrap it from hand", () => {
+      const { state: asked, events } = meetIt(meetsScrapLine());
+      expect(events.filter((e) => e.type === "THRESHOLD_MET")).toHaveLength(1);
+      const pending = asked.pending;
+      if (pending?.kind !== "ChooseCards") throw new Error("expected a Scrap offer");
+      expect(pending.character).toBe("Gray");
+      expect(pending.optional).toBe(true);
       const rust = pending.options[0];
       if (!rust) throw new Error("rig");
-      const { state: next, events } = must(state, { type: "CHOOSE_CARDS", cardIds: [rust.id] });
-      expect(eventTypes(events)).toContain("CARD_SCRAPPED");
+      const { state: next, events: after } = must(asked, { type: "CHOOSE_CARDS", cardIds: [rust.id] });
+      expect(eventTypes(after)).toContain("CARD_SCRAPPED");
       expect(next.Gray.hand.some((c) => c.name === "Rust")).toBe(false);
       expect(next.scrapyard.some((c) => c.name === "Rust")).toBe(true);
     });
 
     it("or decline, keeping the card", () => {
-      const state = toScrapChoice();
-      const { state: next, events } = must(state, { type: "CHOOSE_CARDS", cardIds: [] });
+      const { state: asked } = meetIt(meetsScrapLine());
+      const { state: next, events } = must(asked, { type: "CHOOSE_CARDS", cardIds: [] });
       expect(eventTypes(events)).not.toContain("CARD_SCRAPPED");
       expect(next.Gray.hand.some((c) => c.name === "Rust")).toBe(true);
     });
 
-    it("resolves as declined with no prompt when neither hand holds a Bad Stuff card", () => {
-      const state = rig({
-        phase: "Play",
-        activeRoom: room("Automated Defense Turret"),
-        Red: player({
-          deck: pile("Shove", 4),
-          hand: [card("Charge"), card("Charge"), card("Pry Bar"), ...pile("Shove", 4)],
-        }),
-        Gray: player({ deck: pile("Duck Under", 5) }),
-      });
-      const r = ids(state, "Red");
-      const { state: next, events } = play(state, [
-        {
-          type: "PLAY_CARD",
-          character: "Red",
-          cardId: r[0] as CardId,
-          payWith: [r[3] as CardId, r[4] as CardId],
-        },
-        {
-          type: "PLAY_CARD",
-          character: "Red",
-          cardId: r[1] as CardId,
-          payWith: [r[5] as CardId, r[6] as CardId],
-        },
-        playFree("Red", r[2] as CardId),
-        { type: "END_PLAY" },
-      ]);
+    it("offers a card from the discard pile as well as the hand, Red first and then Gray", () => {
+      const state = meetsScrapLine({ Red: { discard: [card("Shove")] }, Gray: { discard: [card("Duck Under")] } });
+      const { state: askedRed } = meetIt(state);
+      const redOffer = askedRed.pending;
+      if (redOffer?.kind !== "ChooseCards") throw new Error("expected a Scrap offer");
+      expect(redOffer.character).toBe("Red");
+      expect(redOffer.options.map((c) => c.name)).toEqual(["Shove"]);
+      const fromDiscard = redOffer.options[0];
+      if (!fromDiscard) throw new Error("rig");
+
+      const { state: askedGray } = must(askedRed, { type: "CHOOSE_CARDS", cardIds: [fromDiscard.id] });
+      expect(askedGray.scrapyard.map((c) => c.id)).toEqual([fromDiscard.id]);
+      expect(askedGray.Red.discard.some((c) => c.id === fromDiscard.id)).toBe(false);
+      const grayOffer = askedGray.pending;
+      if (grayOffer?.kind !== "ChooseCards") throw new Error("expected a Scrap offer");
+      expect(grayOffer.character).toBe("Gray");
+      expect(grayOffer.options.map((c) => c.name).sort()).toEqual(["Duck Under", "Rust"]);
+    });
+
+    it("resolves as declined with no prompt when neither player holds a card to Scrap", () => {
+      const { state: next, events } = meetIt(meetsScrapLine({ Gray: { hand: [] } }));
       expect(events.filter((e) => e.type === "THRESHOLD_MET")).toHaveLength(1);
       expect(eventTypes(events)).toContain("ROOM_CLEARED");
       expect(next.pending).toBeNull();
+    });
+  });
+
+  describe("an outcome with no 'Clear' word still Clears the room", () => {
+    it("Security Turnstile's Scramble line prints only a reward", () => {
+      const state = rig({
+        phase: "Play",
+        activeRoom: room("Security Turnstile"),
+        Red: player({ deck: pile("Shove", 5), hand: pile("Coil Of Cable", 2) }),
+        Gray: player({ deck: pile("Duck Under", 5) }),
+      });
+      const r = ids(state, "Red");
+      const { state: asked, events } = play(state, [
+        playFree("Red", r[0] as CardId),
+        playFree("Red", r[1] as CardId),
+        { type: "END_PLAY" },
+      ]);
+      expect(eventTypes(events)).toContain("ROOM_CLEARED");
+      expect(asked.pending?.kind === "TakeReward" && asked.pending.character).toBe("Gray");
+    });
+  });
+
+  describe("'one player reveals a card reward, and the other may Scrap…' — Gears & Glitch", () => {
+    const meetsBoth = () =>
+      rig({
+        phase: "Play",
+        floor: 1,
+        activeRoom: room("Gears & Glitch"),
+        roomSupply: [room("Gears & Glitch"), ...Array.from({ length: 8 }, () => room("Security Turnstile"))],
+        Red: player({
+          deck: pile("Shove", 5),
+          hand: [...pile("Pry Bar", 3), ...pile("Coil Of Cable", 3)],
+        }),
+        Gray: player({ deck: pile("Duck Under", 5), hand: [card("Rust")] }),
+        pools: { Red: pile("Fast Follow", 3), Gray: pile("Quick Vault", 3), goodStuff: [], badStuff: [] },
+      });
+
+    it("the team picks who reveals, and the other player is the one asked to Scrap", () => {
+      const state = meetsBoth();
+      const r = ids(state, "Red");
+      const { state: whoReveals } = play(state, [
+        playFree("Red", r[0] as CardId),
+        playFree("Red", r[1] as CardId),
+        playFree("Red", r[2] as CardId),
+        playFree("Red", r[3] as CardId),
+        playFree("Red", r[4] as CardId),
+        playFree("Red", r[5] as CardId),
+        { type: "END_PLAY" },
+      ]);
+      expect(whoReveals.pending?.kind).toBe("ChooseCharacter");
+      const { state: reveal } = must(whoReveals, { type: "CHOOSE_CHARACTER", character: "Red" });
+      expect(reveal.pending?.kind === "TakeReward" && reveal.pending.character).toBe("Red");
+      const { state: scrapOffer } = must(reveal, { type: "TAKE_REWARD", cardId: null });
+      const pending = scrapOffer.pending;
+      if (pending?.kind !== "ChooseCards") throw new Error("expected a Scrap offer");
+      expect(pending.character).toBe("Gray");
     });
   });
 });
@@ -943,11 +980,11 @@ describe("Rules 0.2.5: Good Stuff and card rewards come as a spread of 3", () =>
   ];
   const idsOf = (cards: readonly { readonly id: CardId }[]) => cards.map((c) => c.id);
 
-  /** Flooded Ventilation Shaft's Oomph 3 and Scramble 3 line: "both players get Good Stuff". */
+  /** A Flooded Ventilation Shaft whose Oomph 3 and Scramble 3 line reads "Both players get Good Stuff." */
   function bothEarn(pool: ReturnType<typeof goodStuff>) {
     const state = rig({
       phase: "Play",
-      activeRoom: room("Flooded Ventilation Shaft"),
+      activeRoom: goodStuffShaft(),
       Red: player({ deck: pile("Shove", 5), hand: [card("Pry Bar"), card("Coil Of Cable")] }),
       Gray: player({ deck: pile("Duck Under", 5) }),
       pools: { Red: [], Gray: [], goodStuff: pool, badStuff: [] },
@@ -1006,9 +1043,30 @@ describe("Rules 0.2.5: Good Stuff and card rewards come as a spread of 3", () =>
   });
 
   it("'get 2 Good Stuff' is two spreads each, one after the other", () => {
+    const printed = room("The Sentry Drone");
+    const drone: Room = {
+      ...printed,
+      challenges: [
+        {
+          thresholds: [
+            {
+              requires: { oomph: 4, scramble: 4 },
+              outcome: "Ascend; both players reveal a card reward, and both players get 2 Good Stuff!",
+              clears: true,
+              fleeFree: false,
+              ascends: true,
+              effects: [
+                { type: "RevealReward", who: "both" },
+                { type: "TakeGoodStuff", who: "both", count: 2 },
+              ],
+            },
+          ],
+        },
+      ],
+    };
     const state = rig({
       phase: "Play",
-      activeRoom: room("The Sentry Drone"),
+      activeRoom: drone,
       Red: player({
         deck: pile("Shove", 5),
         hand: [card("Charge"), card("Shove"), card("Shove"), card("Coil Of Cable"), card("Riot Shield"), card("Shove")],

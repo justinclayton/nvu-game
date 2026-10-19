@@ -748,10 +748,24 @@ function retarget(effect: RoomEffect, who: Character): RoomEffect {
       return { type: "TakeGoodStuff", who, count: effect.count };
     case "RevealReward":
       return { type: "RevealReward", who };
-    case "ScrapBadStuffFromHand":
-      return { type: "ScrapBadStuffFromHand", who, optional: effect.optional };
+    case "ScrapFromHandOrDiscard":
+      return { type: "ScrapFromHandOrDiscard", who };
   }
 }
+
+/** Where "one" lands on a character, the effect printed as "the other" lands on the opposite one. */
+function chosenOne(effects: readonly RoomEffect[], who: Character): readonly RoomEffect[] {
+  const [head, next, ...rest] = effects;
+  if (!head) return effects;
+  const other = CHARACTERS.find((c) => c !== who);
+  const after = next && next.who === "other" && other ? [retarget(next, other)] : next ? [next] : [];
+  return [retarget(head, who), ...after, ...rest];
+}
+
+const scrapOptions = (state: GameState, c: Character): readonly Card[] => {
+  const p = playerOf(state, c);
+  return [...p.hand, ...p.discard];
+};
 
 const promptFor = (effect: RoomEffect): string => {
   switch (effect.type) {
@@ -763,8 +777,8 @@ const promptFor = (effect: RoomEffect): string => {
       return "Who takes the Good Stuff?";
     case "RevealReward":
       return "Whose reward pool is revealed?";
-    case "ScrapBadStuffFromHand":
-      return "Who may Scrap a Bad Stuff card from their hand?";
+    case "ScrapFromHandOrDiscard":
+      return "Who may Scrap a card from their hand or discard pile?";
   }
 };
 
@@ -778,7 +792,7 @@ function applyEffect(state: GameState, effect: RoomEffect, who: Character, run: 
       return earnGoodStuff(state, who, effect.count, state.resolution?.room.name);
     case "RevealReward":
       throw new CorruptStateError("A reward reveal is a pending choice, not an effect.");
-    case "ScrapBadStuffFromHand":
+    case "ScrapFromHandOrDiscard":
       throw new CorruptStateError("A Scrap offer is a pending choice, not an effect.");
   }
 }
@@ -815,6 +829,10 @@ function drain(state: GameState, run: Run): GameState {
       s = withEffects(s, [...CHARACTERS.map((c) => retarget(head, c)), ...rest]);
       continue;
     }
+    if (head.who === "other") {
+      s = withEffects(s, rest);
+      continue;
+    }
     if (head.who === "one") {
       const options = standing(s);
       const only = options[0];
@@ -824,18 +842,18 @@ function drain(state: GameState, run: Run): GameState {
       }
       // Asking "who" is pointless when either answer reveals or offers
       // nothing: every standing character's reward pool is already empty,
-      // or nobody standing holds a Bad Stuff card to Scrap.
+      // or nobody standing holds a card to Scrap.
       const moot =
         (head.type === "RevealReward" && options.every((c) => s.pools[c].length === 0)) ||
-        (head.type === "ScrapBadStuffFromHand" &&
-          options.every((c) => playerOf(s, c).hand.every((card) => card.kind !== "bad_stuff")));
+        (head.type === "ScrapFromHandOrDiscard" &&
+          options.every((c) => scrapOptions(s, c).length === 0));
       if (options.length > 1 && !moot) {
         return {
           ...s,
           pending: { kind: "ChooseCharacter", prompt: promptFor(head), options, source: null },
         };
       }
-      s = withEffects(s, [retarget(head, only), ...rest]);
+      s = withEffects(s, chosenOne(resolution.effects, only));
       continue;
     }
 
@@ -873,19 +891,16 @@ function drain(state: GameState, run: Run): GameState {
       };
     }
 
-    if (head.type === "ScrapBadStuffFromHand") {
-      // The chosen character may Scrap one Bad Stuff card from their own
-      // hand — a room-asked question, so it answers through `choose <Name>`
-      // or `choose none` the same way any other optional ChooseCards does.
+    if (head.type === "ScrapFromHandOrDiscard") {
       const character = head.who;
-      const options = playerOf(s, character).hand.filter((c) => c.kind === "bad_stuff");
+      const options = playerOf(s, character).down ? [] : scrapOptions(s, character);
       s = withEffects(s, rest);
       if (options.length === 0) continue;
       return {
         ...s,
         pending: {
           kind: "ChooseCards",
-          prompt: `${character} may Scrap a Bad Stuff card from hand?`,
+          prompt: `${character} may Scrap a card from hand or discard pile?`,
           character,
           options,
           count: 1,
@@ -1060,7 +1075,7 @@ function answerCharacter(state: GameState, character: Character, run: Run): Game
       pending: null,
       resolution: {
         ...resolution,
-        effects: [retarget(head, character), ...resolution.effects.slice(1)],
+        effects: chosenOne(resolution.effects, character),
       },
     },
     run,
@@ -1115,6 +1130,7 @@ function answerRoomCards(
   let s: GameState = { ...state, pending: null };
   if (chosen.length > 0) {
     s = takeFrom(s, pending.character, "hand", chosen);
+    s = takeFrom(s, pending.character, "discard", chosen);
     for (const c of chosen) s = scrap(s, pending.character, c, run.events);
   }
   return drain(s, run);

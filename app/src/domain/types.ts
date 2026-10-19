@@ -136,6 +136,10 @@ export interface TurnRecord {
   readonly poolPenalty: { readonly oomph: number; readonly scramble: number };
   /** Bio-Hazard Containment Vault: banked onto the shared pool this turn by Scrapping Good Stuff. */
   readonly poolBonus: { readonly oomph: number; readonly scramble: number };
+  /** It Pays To Be Reckless: cards each character put in their Exhaust pile this turn, from any pile. */
+  readonly exhausted: Readonly<Record<Character, number>>;
+  /** Bull Rush: of those, the ones Exhausted off the top of the deck. */
+  readonly exhaustedFromDeck: Readonly<Record<Character, number>>;
 }
 
 /* ------------------------------------------------------------ the phases */

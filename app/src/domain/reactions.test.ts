@@ -214,16 +214,16 @@ describe("Turn Start: 'Resolve effects triggered by these draws after both playe
 });
 
 describe("playing a card is heard after the card's own effect", () => {
-  it("Covering Fire, Red plays Reckless: Red Exhausts 2, then Gray draws", () => {
+  it("Covering Fire, Red plays Reckless Swing: Red Exhausts 1, then Gray draws", () => {
     const state = rig({
       phase: "Play",
       activeRoom: room("Security Turnstile"),
       playZone: [coveringFire()],
-      Red: player({ deck: pile("Shove", 5), hand: [card("Reckless"), card("Shove")] }),
+      Red: player({ deck: pile("Shove", 5), hand: [card("Reckless Swing"), card("Shove")] }),
       Gray: player({ deck: pile("Duck Under", 3) }),
     });
-    const { events } = takingEveryDraw(must(state, playPaying(state, "Red", "Reckless", ["Shove"])));
-    expect(drawsAndLosses(events)).toEqual(["Red: exhaust", "Red: exhaust", "Gray: draw"]);
+    const { events } = takingEveryDraw(must(state, playPaying(state, "Red", "Reckless Swing", ["Shove"])));
+    expect(drawsAndLosses(events)).toEqual(["Red: exhaust", "Gray: draw"]);
   });
 
   const playedHeard = () => probe.heard.filter((h) => h.event.type === "CARD_PLAYED");
@@ -251,16 +251,16 @@ describe("playing a card is heard after the card's own effect", () => {
     const state = rig({
       phase: "Play",
       activeRoom: room("Security Turnstile"),
-      Red: player({ deck: pile("Shove", 3) }),
+      Red: player({ deck: pile("Shove", 3), hand: [card(probe.name)] }),
       Gray: player({
         deck: pile("Duck Under", 3),
-        hand: [card("Here, Catch"), card(probe.name), card("Duck Under")],
+        hand: [card("Pack Mule"), card("Duck Under")],
       }),
     });
-    const asking = must(state, playPaying(state, "Gray", "Here, Catch", ["Duck Under"])).state;
-    const pryBar = handCard(asking, "Gray", probe.name);
+    const asking = must(state, playPaying(state, "Gray", "Pack Mule", ["Duck Under"])).state;
+    const pryBar = handCard(asking, "Red", probe.name);
     const { state: next } = must(asking, { type: "CHOOSE_CARDS", cardIds: [pryBar.id] });
-    expect(names(next.Red.hand)).toEqual([probe.name]);
+    expect(names(next.Gray.hand)).toEqual([probe.name]);
     expect(playedHeard()).toEqual([]);
   });
 

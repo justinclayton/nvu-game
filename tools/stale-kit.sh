@@ -13,7 +13,7 @@
 #
 # Exits 0 when nothing is stale. Exits 1 when something is, leaving the fix
 # (R or C raised, the card modules rebuilt) in the working tree. kit-fix.yml
-# commits that fix; plan.yml and source-pr.yml stop on it.
+# commits that fix; loop.yml and source-pr.yml stop on it.
 set -eu
 cd "$(dirname "$0")/.."
 

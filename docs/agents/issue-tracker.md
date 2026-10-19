@@ -33,8 +33,6 @@ gh api -X POST repos/{owner}/{repo}/issues/<n>/labels -f 'labels[]=in-progress'
 gh api -X DELETE repos/{owner}/{repo}/issues/<n>/labels/ready-for-agent
 ```
 
-The design loop's planner (`docs/agents/loop.md`) files `ready-for-agent` work issues and `needs-human` questions as `nvu-agent`, each naming its source layer's PR as `Source PR: #n`; they are claimed the same way.
-
 An issue that says "design first" or asks for `/grilling` carries `needs-human` instead of `ready-for-agent`: the designer settles the design in a session, records the outcome on the issue, and swaps the label. Agents never claim `needs-human` issues.
 
 Name the working branch `claude/issue-<n>` after the issue number. Open the PR with `Closes #<n>` in the body; the merge closes the issue, but closing does not remove labels, so the coordinator clears `in-progress` and `ready-for-review` after merging.
@@ -75,7 +73,7 @@ git -C /tmp/pr-media-<n> push origin HEAD:pr-media   # rejected? pull --rebase o
 git worktree remove /tmp/pr-media-<n>
 ```
 
-Reference each file as `![caption](https://github.com/justinclayton/nvu-game/raw/pr-media/issue-<n>/<file>)`, with a one-line caption saying what to look at. This repo is private, so use that `github.com/.../raw/...` form: it loads for anyone signed in with access, while a `raw.githubusercontent.com` URL does not render. Keep files small: downscale screenshots to about 800px wide (`sips --resampleWidth 800 in.png --out out.png`), and keep GIFs under a few megabytes.
+Reference each file as `![caption](https://github.com/justinclayton/nvu-game/raw/pr-media/issue-<n>/<file>)`, with a one-line caption saying what to look at. Use that `github.com/.../raw/...` form: it renders in a PR body, while a `raw.githubusercontent.com` URL does not. Keep files small: downscale screenshots to about 800px wide (`sips --resampleWidth 800 in.png --out out.png`), and keep GIFs under a few megabytes.
 
 **Opening a mid-game screen.** The web game always starts from a fresh run, and reaching a given
 prompt can take several turns of play. Under the dev server (`make app`), `?fixture=<name>` opens

@@ -94,61 +94,54 @@ describe("Peek Around Corner — 'Peek 1'", () => {
   });
 });
 
-describe("Catch Your Breath — 'Peek 3'", () => {
-  it("shows three and, with nothing discarded, lets the player order them", () => {
-    const { asked } = playPeek("Catch Your Breath");
-    const looked = must(asked.state, { type: "CHOOSE_PILE", pile: "Red deck" });
-    expect(eventTypes(looked.events)).toContain("CARDS_PEEKED");
-    const offered = looked.state.pending;
-    if (offered?.kind !== "ChooseCards") throw new Error("expected a card choice");
-    expect(offered.options).toHaveLength(3);
+describe("Catch Your Breath — 'If this is the only card you play this turn, move 3 cards from your Exhaust pile to the bottom of your deck'", () => {
+  const breather = (hand: Card[], exhaust: Card[]) =>
+    playing({
+      Gray: player({ deck: pile("Duck Under", 10), hand: [card("Catch Your Breath"), ...hand], exhaust }),
+    });
 
-    const kept = must(looked.state, { type: "CHOOSE_CARDS", cardIds: [] });
-    const pending = kept.state.pending;
-    if (pending?.kind !== "OrderCards") throw new Error("expected an ordering");
-    expect(pending.pile).toBe("Red deck");
-    expect(pending.cards).toHaveLength(3);
-
-    const reversed = [...pending.cards].reverse().map((c) => c.id);
-    const { state: next } = must(kept.state, { type: "ORDER_CARDS", cardIds: reversed });
-    expect(next.Red.deck.slice(0, 3).map((c) => c.id)).toEqual(reversed);
-    expect(next.Red.deck).toHaveLength(6);
+  it("asks for 3 of a longer Exhaust pile once Play ends, and moves them to the bottom", () => {
+    const exhaust = [card("Pick The Lock"), card("Duck Under"), card("Coil Of Cable"), card("Quick Vault")];
+    const state = breather([], exhaust);
+    const ended = play(state, [free("Gray", handCard(state, "Gray", "Catch Your Breath").id), { type: "END_PLAY" }]);
+    const pending = ended.state.pending;
+    if (pending?.kind !== "ChooseCards") throw new Error("expected a card choice");
+    expect(pending.count).toBe(3);
+    const chosen = exhaust.slice(0, 3).map((c) => c.id);
+    const { state: next } = must(ended.state, { type: "CHOOSE_CARDS", cardIds: chosen });
+    const kept = [...next.Gray.deck, ...next.Gray.hand].map((c) => c.id);
+    for (const id of chosen) expect(kept).toContain(id);
+    expect(next.Gray.exhaust.map((c) => c.id)).toContain(exhaust[3]?.id);
   });
 
-  it("discards one card at a time, then orders what is left", () => {
-    const { asked } = playPeek("Catch Your Breath");
-    const looked = must(asked.state, { type: "CHOOSE_PILE", pile: "Gray deck" });
-    const [first, second, third] = looked.state.Gray.deck;
-    if (!first || !second || !third) throw new Error("rig");
-
-    const one = must(looked.state, { type: "CHOOSE_CARDS", cardIds: [first.id] });
-    const again = one.state.pending;
-    if (again?.kind !== "ChooseCards") throw new Error("expected another card choice");
-    expect(again.options.map((c) => c.id)).toEqual([second.id, third.id]);
-
-    const kept = must(one.state, { type: "CHOOSE_CARDS", cardIds: [] });
-    const pending = kept.state.pending;
-    if (pending?.kind !== "OrderCards") throw new Error("expected an ordering");
-    expect(pending.cards.map((c) => c.id)).toEqual([second.id, third.id]);
-
-    const { state: next } = must(kept.state, { type: "ORDER_CARDS", cardIds: [third.id, second.id] });
-    expect(next.Gray.deck.map((c) => c.id).slice(0, 2)).toEqual([third.id, second.id]);
-    expect(next.Gray.deck).toHaveLength(3);
-    expect(next.Gray.discard.map((c) => c.id)).toEqual([first.id]);
+  it("moves a short Exhaust pile without asking", () => {
+    const exhaust = [card("Pick The Lock"), card("Coil Of Cable")];
+    const state = breather([], exhaust);
+    const ended = play(state, [free("Gray", handCard(state, "Gray", "Catch Your Breath").id), { type: "END_PLAY" }]);
+    const kept = [...ended.state.Gray.deck, ...ended.state.Gray.hand].map((c) => c.id);
+    for (const c of exhaust) expect(kept).toContain(c.id);
   });
 
-  it("stops asking once every card shown is discarded", () => {
-    const { asked } = playPeek("Catch Your Breath");
-    const looked = must(asked.state, { type: "CHOOSE_PILE", pile: "Gray deck" });
-    let s = looked.state;
-    for (let i = 0; i < 3; i++) {
-      const pending = s.pending;
-      if (pending?.kind !== "ChooseCards") throw new Error("expected a card choice");
-      s = must(s, { type: "CHOOSE_CARDS", cardIds: [pending.options[0]?.id as CardId] }).state;
-    }
-    expect(s.pending).toBeNull();
-    expect(s.Gray.deck).toHaveLength(1);
-    expect(s.Gray.discard).toHaveLength(3);
+  it("does nothing if Gray plays another card", () => {
+    const exhaust = [card("Pick The Lock"), card("Coil Of Cable")];
+    const state = breather([card("Coil Of Cable")], exhaust);
+    const ended = play(state, [
+      free("Gray", handCard(state, "Gray", "Catch Your Breath").id),
+      free("Gray", handCard(state, "Gray", "Coil Of Cable").id),
+      { type: "END_PLAY" },
+    ]);
+    const left = ended.state.Gray.exhaust.map((x) => x.id);
+    for (const c of exhaust) expect(left).toContain(c.id);
+  });
+});
+
+describe("Quick Vault — 'You may draw 2 cards'", () => {
+  it("draws up to 2", () => {
+    const state = playing({ Gray: player({ deck: pile("Duck Under", 4), hand: [card("Quick Vault")] }) });
+    const asked = must(state, free("Gray", handCard(state, "Gray", "Quick Vault").id));
+    const { state: next } = must(asked.state, drawing("Gray", 2));
+    expect(next.Gray.deck).toHaveLength(2);
+    expect(next.Gray.hand).toHaveLength(2);
   });
 });
 
@@ -296,36 +289,49 @@ describe("One Man's Junk — '+3 Oomph and +3 Scramble for each Bad Stuff you're
   });
 });
 
-describe("Here, Catch — 'Move 1 Stuff from your hand to Red's hand'", () => {
-  it("hands the Stuff over", () => {
+describe("Here, Catch — 'Move any number of Stuff cards from Red's hand to yours'", () => {
+  const catching = () => {
     const state = playing({
-      Gray: player({
-        deck: pile("Duck Under", 4),
-        hand: [card("Here, Catch"), card("Duck Under"), card("Pry Bar")],
-      }),
+      Red: player({ deck: pile("Shove", 4), hand: [card("Pry Bar"), card("Torn Seal"), card("Shove")] }),
+      Gray: player({ deck: pile("Duck Under", 4), hand: [card("Here, Catch"), card("Duck Under")] }),
     });
-    const asked = must(state, {
+    return must(state, {
       type: "PLAY_CARD",
       character: "Gray",
       cardId: handCard(state, "Gray", "Here, Catch").id,
       payWith: [handCard(state, "Gray", "Duck Under").id],
-    });
-    const pending = asked.state.pending;
+    }).state;
+  };
+  const offered = (state: ReturnType<typeof catching>) => {
+    const pending = state.pending;
     if (pending?.kind !== "ChooseCards") throw new Error("expected a card choice");
-    const pryBar = pending.options[0];
-    if (!pryBar) throw new Error("Pry Bar not offered");
-    const { state: next } = must(asked.state, { type: "CHOOSE_CARDS", cardIds: [pryBar.id] });
-    expect(next.Red.hand.map((c) => c.id)).toEqual([pryBar.id]);
-    expect(next.Gray.hand).toEqual([]);
+    return pending.options;
+  };
+
+  it("takes Stuff from Red one card at a time until none is left", () => {
+    let state = catching();
+    expect([...names(offered(state))].sort()).toEqual(["Pry Bar", "Torn Seal"]);
+    const first = offered(state)[0];
+    if (!first) throw new Error("nothing offered");
+    state = must(state, { type: "CHOOSE_CARDS", cardIds: [first.id] }).state;
+    const second = offered(state)[0];
+    if (!second) throw new Error("nothing offered");
+    state = must(state, { type: "CHOOSE_CARDS", cardIds: [second.id] }).state;
+    expect(state.pending).toBeNull();
+    expect(names(state.Red.hand)).toEqual(["Shove"]);
+    expect([...names(state.Gray.hand)].sort()).toEqual(["Pry Bar", "Torn Seal"]);
   });
 
-  it("does nothing when Red is Down", () => {
+  it("stops when Gray takes no more", () => {
+    let state = catching();
+    state = must(state, { type: "CHOOSE_CARDS", cardIds: [] }).state;
+    expect(state.pending).toBeNull();
+    expect(state.Red.hand).toHaveLength(3);
+  });
+
+  it("does nothing when Red holds no Stuff", () => {
     const state = playing({
-      Red: player({ deck: [], hand: [], down: true }),
-      Gray: player({
-        deck: pile("Duck Under", 4),
-        hand: [card("Here, Catch"), card("Duck Under"), card("Pry Bar")],
-      }),
+      Gray: player({ deck: pile("Duck Under", 4), hand: [card("Here, Catch"), card("Duck Under")] }),
     });
     const played = must(state, {
       type: "PLAY_CARD",
@@ -334,12 +340,11 @@ describe("Here, Catch — 'Move 1 Stuff from your hand to Red's hand'", () => {
       payWith: [handCard(state, "Gray", "Duck Under").id],
     });
     expect(played.state.pending).toBeNull();
-    expect(played.state.Gray.hand.map((c) => c.name)).toEqual(["Pry Bar"]);
   });
 });
 
-describe("Hit 'n Run — 'Shuffle a Gray card from your Exhaust pile into your deck'", () => {
-  it("offers only Gray's own cards", () => {
+describe("Hit 'n Run — 'Shuffle a card from your Exhaust pile into your deck'", () => {
+  it("offers every card in the Exhaust pile, Stuff too", () => {
     const state = playing({
       Gray: player({
         deck: pile("Duck Under", 3),
@@ -355,7 +360,7 @@ describe("Hit 'n Run — 'Shuffle a Gray card from your Exhaust pile into your d
     });
     const pending = asked.state.pending;
     if (pending?.kind !== "ChooseCards") throw new Error("expected a card choice");
-    expect(pending.options.map((c) => c.name)).not.toContain("Coil Of Cable");
+    expect(pending.options.map((c) => c.name)).toContain("Coil Of Cable");
   });
 });
 

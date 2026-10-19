@@ -13,6 +13,7 @@ import {
 import {
   discard,
   grantPlayDiscount,
+  moveToBottomOfDeck,
   moveToHand,
   pileCards,
   playerOf,
@@ -172,10 +173,65 @@ function shuffleStuffFromHand(whose: (ctx: BehaviourContext) => Character): Card
   };
 }
 
+/** Here, Catch: offer the next piece of Stuff in Red's hand, or stop when none is left. */
+function hereCatch(state: GameState, ctx: BehaviourContext, events: readonly DomainEvent[]) {
+  const options = playerOf(state, "Red").hand.filter((c) => c.kind !== "player");
+  if (options.length === 0) return done(state, events);
+  return ask(
+    state,
+    {
+      kind: "ChooseCards",
+      prompt: "Take which piece of Stuff from Red's hand? Choose none to stop.",
+      character: ctx.character,
+      options,
+      count: 1,
+      optional: true,
+      source: source(ctx, "here-catch"),
+    },
+    events,
+  );
+}
+
 export const GRAY: Registry = {
   "Peek Around Corner": peek(1),
 
-  "Catch Your Breath": peek(3),
+  /* Decided once Play ends, when it is known whether Gray played anything else. */
+  "Catch Your Breath": {
+    onPlayEnd(state, ctx) {
+      if (playedBy(state, ctx.character) !== 1) return nothing(state);
+      const exhaust = playerOf(state, ctx.character).exhaust;
+      if (exhaust.length === 0) return nothing(state);
+      if (exhaust.length <= 3) {
+        const events: DomainEvent[] = [];
+        const lifted = takeFrom(state, ctx.character, "exhaust", exhaust);
+        return done(moveToBottomOfDeck(lifted, ctx.character, exhaust, events), events);
+      }
+      return done(
+        askLater(state, {
+          kind: "ChooseCards",
+          prompt: "Move which 3 cards from your Exhaust pile to the bottom of your deck?",
+          character: ctx.character,
+          options: exhaust,
+          count: 3,
+          optional: false,
+          source: source(ctx, "catch-your-breath"),
+        }),
+      );
+    },
+    onChoice(answer, state, ctx) {
+      if (answer.kind !== "cards") return nothing(state);
+      const events: DomainEvent[] = [];
+      const lifted = takeFrom(state, ctx.character, "exhaust", answer.cards);
+      return done(moveToBottomOfDeck(lifted, ctx.character, answer.cards, events), events);
+    },
+  },
+
+  "Quick Vault": {
+    onPlay(state, ctx) {
+      return ask(state, drawQuestion(ctx, "quick-vault", "Draw up to 2 cards?", ctx.character, 2));
+    },
+    onChoice: (answer, state) => drawnAs(answer, state),
+  },
 
   "Hack the Doors": peek(3),
 
@@ -192,37 +248,27 @@ export const GRAY: Registry = {
     },
   },
 
-  /* Rulebook §9, Going Down: no card may be put into a Down character's hand. */
+  /* One card at a time until Gray takes no more, since a question offers an exact count. */
   "Here, Catch": {
     onPlay(state, ctx) {
-      const options = playerOf(state, ctx.character).hand.filter((c) => c.kind !== "player");
-      if (options.length === 0 || state.Red.down) return nothing(state);
-      return ask(state, {
-        kind: "ChooseCards",
-        prompt: "Which piece of Stuff goes to Red?",
-        character: ctx.character,
-        options,
-        count: 1,
-        optional: false,
-        source: source(ctx, "here-catch"),
-      });
+      return hereCatch(state, ctx, []);
     },
     onChoice(answer, state, ctx) {
-      if (answer.kind !== "cards" || state.Red.down) return nothing(state);
+      if (answer.kind !== "cards" || answer.cards.length === 0) return nothing(state);
       const events: DomainEvent[] = [];
-      let s = takeFrom(state, ctx.character, "hand", answer.cards);
-      for (const card of answer.cards) s = moveToHand(s, "Red", card, events);
-      return done(s, events);
+      let s = takeFrom(state, "Red", "hand", answer.cards);
+      for (const card of answer.cards) s = moveToHand(s, ctx.character, card, events);
+      return hereCatch(s, ctx, events);
     },
   },
 
   "Hit 'n Run": {
     onPlay(state, ctx) {
-      const options = playerOf(state, ctx.character).exhaust.filter((c) => c.owner === "Gray");
+      const options = playerOf(state, ctx.character).exhaust;
       if (options.length === 0) return nothing(state);
       return ask(state, {
         kind: "ChooseCards",
-        prompt: "Shuffle which Gray card from your Exhaust pile into your deck?",
+        prompt: "Shuffle which card from your Exhaust pile into your deck?",
         character: ctx.character,
         options,
         count: 1,

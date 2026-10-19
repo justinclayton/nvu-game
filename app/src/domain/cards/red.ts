@@ -3,6 +3,7 @@
 import type { DomainEvent } from "../types";
 import { playedBy } from "../queries";
 import {
+  CHARACTERS,
   applyPoolBonus,
   drawCards,
   exhaustFromHand,
@@ -18,7 +19,20 @@ export const RED: Registry = {
 
   "Reckless Swing": { exhaustX: 1 },
 
-  Reckless: { exhaustX: 2 },
+  "It Pays To Be Reckless": {
+    exhaustX: 1,
+    stats(state, owner) {
+      const bonus = 2 * state.thisTurn.exhausted[owner];
+      return { oomph: bonus, scramble: bonus };
+    },
+  },
+
+  "Bull Rush": {
+    stats(state, owner, card) {
+      const bonus = state.thisTurn.exhaustedFromDeck[owner] > 0 ? 3 : 0;
+      return { oomph: card.oomph + bonus, scramble: card.scramble };
+    },
+  },
 
   "Cross Punch": {
     exhaustX: 1,
@@ -37,19 +51,23 @@ export const RED: Registry = {
   "Tag Team": {
     onPlay(state, ctx) {
       if (playedBy(state, "Gray") === 0) return nothing(state);
-      return ask(state, drawQuestion(ctx, "tag-team", "Draw 1 card?", ctx.character));
+      const drawers = CHARACTERS.filter((c) => !playerOf(state, c).down);
+      const [first, ...rest] = drawers.map((c) =>
+        drawQuestion(ctx, `tag-team:${c}`, `Tag Team: ${c} draws 1 card?`, c),
+      );
+      if (!first) return nothing(state);
+      return ask(rest.reduce(askLater, state), first);
     },
     onChoice: (answer, state) => drawnAs(answer, state),
   },
 
-  /* Red's own cards only: Stuff in the Exhaust pile is not a Red card. */
   "Second Wind": {
     onPlay(state, ctx) {
-      const options = playerOf(state, ctx.character).exhaust.filter((c) => c.owner === "Red");
+      const options = playerOf(state, ctx.character).exhaust;
       if (options.length === 0) return nothing(state);
       return ask(state, {
         kind: "ChooseCards",
-        prompt: "Shuffle which Red card from your Exhaust pile into your deck?",
+        prompt: "Shuffle which card from your Exhaust pile into your deck?",
         character: ctx.character,
         options,
         count: 1,

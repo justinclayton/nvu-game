@@ -744,7 +744,7 @@ function endPlay(state: GameState, run: Run): GameState {
 }
 
 /**
- * A played card's own end-of-Play-phase line (Riot Shield): resolved once the
+ * A played card's own end-of-Play-phase line (Riot Shield, Catch Your Breath): resolved once the
  * room's Clear/Flee is known, before Outcome's own effects and well before
  * Cleanup — see `onPlayEnd`.
  */
@@ -758,7 +758,7 @@ function playEndEffects(state: GameState, run: Run): GameState {
     s = settle(step.state, run);
     if (s.phase === "GameOver") return s;
   }
-  return s;
+  return offerQueuedQuestion(s);
 }
 
 const withEffects = (state: GameState, effects: readonly RoomEffect[]): GameState =>

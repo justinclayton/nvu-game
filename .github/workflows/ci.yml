@@ -1,7 +1,6 @@
 name: CI
 
-# Every PR, not only those to main: a code layer is based on the layer below
-# (design/loop/spec.md, step 5).
+# Every PR (design/loop/spec.md, step 2).
 on:
   pull_request:
 
@@ -18,10 +17,10 @@ jobs:
       - run: make app-install
       - run: make check
 
-      # A source layer (design/loop/spec.md) changes only the sources and the
-      # card modules generated from them. The app's tests are expected to
-      # fail there until the code layers above it land, so it skips them.
-      - name: Is this a source layer?
+      # A PR that so far changes only the sources and the card modules
+      # generated from them (design/loop/spec.md, step 2): the app's tests are
+      # expected to fail until the loop's code commits land, so it skips them.
+      - name: Does this PR change only the sources?
         id: layer
         env:
           BASE: ${{ github.event.pull_request.base.sha }}

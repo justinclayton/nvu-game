@@ -1,24 +1,14 @@
 # Step 6 of the design loop (design/loop/spec.md): the agent playtest. A
-# `playtest` label on a source layer's PR runs an agent that plays one run
-# through bin/nvu on the stack's top layer, source-blind, and writes a note.
-# The label is removed when the job ends, so adding it again asks for another
-# run.
-#
-# The top layer is found by following open PRs whose base is the source
-# branch, then the PRs based on those. The job, not the agent, commits the note
-# and its run file to the top layer after the replay check passes. Every
-# write is nvu-agent's (NVU_AGENT_APP_ID, NVU_AGENT_PRIVATE_KEY); nvu-bot has
-# no Contents write. The agent itself has no token, only Bash for
-# bin/nvu, reading, and Write under design/playtests/. It has no git
-# credentials, and the job fails if it changed anything else.
-#
-# One report issue per stack, found by `Report for PR: #n` in an issue
-# nvu-agent wrote. The first run opens it; each later run is a comment. Every
-# post carries <!-- nvu-loop: playtest <sha> -->, naming the note's commit. A
-# run that finds the newest nvu-agent `Playtest:` commit on the top layer
-# unreported plays nothing and posts that commit's report, so a retry neither
-# plays twice nor posts twice. Each App token is minted just before its use,
-# because a token lasts an hour and a run can last longer.
+# `playtest` label on a source PR runs an agent that plays one run through
+# bin/nvu on the PR's branch, source-blind, and writes a note. The job commits
+# the note and its run file to the branch and posts the report as a comment on
+# the PR, all as nvu-agent (NVU_AGENT_APP_ID, NVU_AGENT_PRIVATE_KEY). The label
+# comes off when the job ends, so adding it again asks for another run. The
+# agent has no token: Bash for bin/nvu, reading, and Write under
+# design/playtests/. Every report carries <!-- nvu-loop: playtest <sha> -->,
+# naming the note's commit, and the run number is one more than the reports
+# already on the PR. A fresh App token is minted before each write, because a
+# token lasts an hour and a run can last longer.
 name: Playtest
 
 on:
@@ -36,80 +26,23 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  gate:
-    # The fork guard: a pull_request from a fork never reaches the runner.
-    if: github.event.label.name == 'playtest' && github.event.pull_request.head.repo.full_name == github.repository
-    runs-on: ubuntu-latest
-    outputs:
-      top: ${{ steps.top.outputs.top }}
-      sha: ${{ steps.top.outputs.sha }}
-    steps:
-      - name: Find the stack's top layer
-        id: top
-        env:
-          GH_TOKEN: ${{ github.token }}
-          BRANCH: ${{ github.head_ref }}
-        run: |
-          set -eu
-          top=$BRANCH
-          for _ in $(seq 50); do
-            above=$(gh api --paginate "repos/$GITHUB_REPOSITORY/pulls?state=open&base=$top" \
-              --jq ".[] | select(.head.repo.full_name == \"$GITHUB_REPOSITORY\") | .head.ref")
-            [ -z "$above" ] && break
-            if [ "$(echo "$above" | wc -l)" -gt 1 ]; then
-              echo "More than one open PR is based on $top; a stack is linear:"
-              echo "$above"
-              exit 1
-            fi
-            top=$above
-          done
-          sha=$(gh api "repos/$GITHUB_REPOSITORY/branches/$top" --jq .commit.sha)
-          echo "The top layer is $top at $sha"
-          echo "top=$top" >> "$GITHUB_OUTPUT"
-          echo "sha=$sha" >> "$GITHUB_OUTPUT"
-
-  gate-failed:
-    needs: gate
-    if: always() && needs.gate.result == 'failure'
-    runs-on: ubuntu-latest
-    steps:
-      - name: Mint the nvu-agent token
-        id: app-token
-        uses: actions/create-github-app-token@v1
-        with:
-          app-id: ${{ vars.NVU_AGENT_APP_ID }}
-          private-key: ${{ secrets.NVU_AGENT_PRIVATE_KEY }}
-
-      - name: Say the gate failed and take the label off
-        env:
-          GH_TOKEN: ${{ steps.app-token.outputs.token }}
-          PR: ${{ github.event.pull_request.number }}
-          RUN: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
-        run: |
-          # shellcheck disable=SC2016
-          printf 'The playtest could not find the stack'"'"'s top layer. See the [run](%s), fix it, and add the `playtest` label again.\n' "$RUN" \
-            > "$RUNNER_TEMP/gate-failed.md"
-          gh api -X POST "repos/$GITHUB_REPOSITORY/issues/$PR/comments" \
-            -F body=@"$RUNNER_TEMP/gate-failed.md" --jq '"posted \(.html_url)"'
-          gh api -X DELETE "repos/$GITHUB_REPOSITORY/issues/$PR/labels/playtest" --silent
-
   playtest:
-    needs: gate
+    # The fork guard: a pull request from a fork never reaches the runner.
+    if: github.event.label.name == 'playtest' && github.event.pull_request.head.repo.full_name == github.repository
     runs-on: self-hosted
     timeout-minutes: 90
     env:
       PR: ${{ github.event.pull_request.number }}
-      TOP: ${{ needs.gate.outputs.top }}
-      DESIGNER: ${{ github.repository_owner }}
+      BRANCH: ${{ github.head_ref }}
       RUN: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: ${{ needs.gate.outputs.top }}
+          ref: ${{ github.head_ref }}
           fetch-depth: 0
           persist-credentials: false
 
-      - name: Take the top layer's head as it is now
+      - name: Take the branch's head as it is now
         run: echo "SHA=$(git rev-parse HEAD)" >> "$GITHUB_ENV"
 
       - name: Mint the nvu-agent token
@@ -119,44 +52,21 @@ jobs:
           app-id: ${{ vars.NVU_AGENT_APP_ID }}
           private-key: ${{ secrets.NVU_AGENT_PRIVATE_KEY }}
 
-      - name: Find the report issue and the seed
-        id: report
+      - name: Find the run number and the seed
+        id: seed
         env:
           GH_TOKEN: ${{ steps.agent-token.outputs.token }}
-          BOT: ${{ steps.agent-token.outputs.app-slug }}[bot]
         run: |
           set -eu
-          issue=$(gh api --paginate "repos/$GITHUB_REPOSITORY/issues?state=all&per_page=100" \
-            --jq ".[] | select(.pull_request | not) | select(.user.login == \"$BOT\")
-                 | select((.body // \"\") | test(\"(?m)^Report for PR: #$PR\\\\s*$\")) | .number" | head -1)
-          runs=0
-          if [ -n "$issue" ]; then
-            runs=$({ gh api "repos/$GITHUB_REPOSITORY/issues/$issue" --jq '.body // ""'
-                     gh api --paginate "repos/$GITHUB_REPOSITORY/issues/$issue/comments" --jq '.[].body'; } \
-              | grep -c '<!-- nvu-loop: playtest [0-9a-f]\{40\} -->' || true)
-          fi
-          seed=$((PR * 100 + runs + 1))
-          resume=$(git log -1 --author=nvu-agent --grep='^Playtest: ' --format=%H origin/main..HEAD)
-          if [ -n "$resume" ] && [ -n "$issue" ] && { gh api "repos/$GITHUB_REPOSITORY/issues/$issue" --jq '.body // ""'
-              gh api --paginate "repos/$GITHUB_REPOSITORY/issues/$issue/comments" --jq '.[].body'; } | grep -qF "<!-- nvu-loop: playtest $resume -->"; then
-            resume=
-          fi
-          if [ -n "$resume" ]; then
-            echo "The note in ${resume:0:7} is unreported: posting its report, playing nothing."
-            echo "md=$(git show --name-only --format= "$resume" | grep -E '\.md$')" >> "$GITHUB_OUTPUT"
-          fi
-          echo "Report issue: ${issue:-none yet}. Run $((runs + 1)), seed $seed."
-          {
-            echo "issue=$issue"
-            echo "run=$((runs + 1))"
-            echo "seed=$seed"
-            echo "resume=$resume"
-          } >> "$GITHUB_OUTPUT"
+          runs=$(gh api --paginate "repos/$GITHUB_REPOSITORY/issues/$PR/comments" --jq '.[].body' \
+            | grep -c '<!-- nvu-loop: playtest [0-9a-f]\{40\} -->' || true)
+          echo "run=$((runs + 1))" >> "$GITHUB_OUTPUT"
+          echo "seed=$((PR * 100 + runs + 1))" >> "$GITHUB_OUTPUT"
+          echo "Run $((runs + 1)), seed $((PR * 100 + runs + 1))."
 
       - name: Write the prompt
-        if: steps.report.outputs.resume == ''
         env:
-          SEED: ${{ steps.report.outputs.seed }}
+          SEED: ${{ steps.seed.outputs.seed }}
         run: |
           {
             cat .github/loop/playtest.md
@@ -164,24 +74,22 @@ jobs:
             echo "## This run"
             echo
             echo "- The seed: $SEED"
-            echo "- The branch is the stack's top layer, \`$TOP\`, at \`$SHA\`."
+            echo "- The branch is \`$BRANCH\`, at \`$SHA\`."
             echo "- Write the note under \`design/playtests/\`."
           } > "$RUNNER_TEMP/prompt.md"
 
       - name: Say the playtest has started
-        if: steps.report.outputs.resume == ''
         env:
           GH_TOKEN: ${{ steps.agent-token.outputs.token }}
-          SEED: ${{ steps.report.outputs.seed }}
+          SEED: ${{ steps.seed.outputs.seed }}
         run: |
           # shellcheck disable=SC2016
-          printf 'Playtest started on the top layer `%s` at `%s`, seed %s. [Run](%s)\n' "$TOP" "${SHA:0:7}" "$SEED" "$RUN" \
-            > "$RUNNER_TEMP/playtest-start.md"
+          printf 'Playtest started on `%s` at `%s`, seed %s. [Run](%s)\n\n<!-- nvu-loop: playtest-start %s -->\n' \
+            "$BRANCH" "${SHA:0:7}" "$SEED" "$RUN" "$SHA" > "$RUNNER_TEMP/playtest-start.md"
           gh api -X POST "repos/$GITHUB_REPOSITORY/issues/$PR/comments" \
             -F body=@"$RUNNER_TEMP/playtest-start.md" --jq '"posted \(.html_url)"'
 
       - name: Playtest
-        if: steps.report.outputs.resume == ''
         run: |
           set -o pipefail
           claude -p \
@@ -205,10 +113,9 @@ jobs:
             | jq -R -r --unbuffered -f .github/loop/progress.jq
 
       - name: Check the agent wrote only the note
-        if: steps.report.outputs.resume == ''
         id: note
         env:
-          SEED: ${{ steps.report.outputs.seed }}
+          SEED: ${{ steps.seed.outputs.seed }}
         run: |
           set -eu
           result=$(jq -r 'select(.type == "result") | select(.subtype == "success" and (.is_error | not)) | .result' "$RUNNER_TEMP/transcript.jsonl")
@@ -236,21 +143,18 @@ jobs:
           echo "md=$md" >> "$GITHUB_OUTPUT"
 
       - name: Replay the new run
-        if: steps.report.outputs.resume == ''
         working-directory: app
         run: npx vitest run src/cli/playtests.test.ts
 
       - name: Mint the nvu-agent token for the commit
         id: commit-token
-        if: steps.report.outputs.resume == ''
         uses: actions/create-github-app-token@v1
         with:
           app-id: ${{ vars.NVU_AGENT_APP_ID }}
           private-key: ${{ secrets.NVU_AGENT_PRIVATE_KEY }}
 
-      - name: Commit the note to the top layer
+      - name: Commit the note to the branch
         id: commit
-        if: steps.report.outputs.resume == ''
         env:
           TOKEN: ${{ steps.commit-token.outputs.token }}
           BOT_SLUG: ${{ steps.commit-token.outputs.app-slug }}[bot]
@@ -263,7 +167,7 @@ jobs:
           git config user.email "$id+$BOT_SLUG@users.noreply.github.com"
           git add "$MD" "${MD%.md}.json"
           git commit -q -m "Playtest: $(basename "$MD" .md)"
-          git push "https://x-access-token:$TOKEN@github.com/$GITHUB_REPOSITORY" "HEAD:refs/heads/$TOP"
+          git push "https://x-access-token:$TOKEN@github.com/$GITHUB_REPOSITORY" "HEAD:refs/heads/$BRANCH"
           echo "final=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
 
       - name: Mint the nvu-agent token for the report
@@ -273,51 +177,28 @@ jobs:
           app-id: ${{ vars.NVU_AGENT_APP_ID }}
           private-key: ${{ secrets.NVU_AGENT_PRIVATE_KEY }}
 
-      - name: Post the report
+      - name: Post the report on the PR
         env:
           GH_TOKEN: ${{ steps.report-token.outputs.token }}
-          ISSUE: ${{ steps.report.outputs.issue }}
-          RUN_COUNT: ${{ steps.report.outputs.run }}
-          SEED: ${{ steps.report.outputs.seed }}
-          MD: ${{ steps.report.outputs.md || steps.note.outputs.md }}
-          FINAL: ${{ steps.report.outputs.resume || steps.commit.outputs.final }}
-          PR_TITLE: ${{ github.event.pull_request.title }}
+          RUN_COUNT: ${{ steps.seed.outputs.run }}
+          SEED: ${{ steps.seed.outputs.seed }}
+          MD: ${{ steps.note.outputs.md }}
+          FINAL: ${{ steps.commit.outputs.final }}
         run: |
           set -eu
-          marker="<!-- nvu-loop: playtest $FINAL -->"
-          if [ -n "$ISSUE" ] && { gh api "repos/$GITHUB_REPOSITORY/issues/$ISSUE" --jq '.body // ""'
-              gh api --paginate "repos/$GITHUB_REPOSITORY/issues/$ISSUE/comments" --jq '.[].body'; } | grep -qF "$marker"; then
-            echo "$FINAL is reported already: posting nothing."
-            exit 0
-          fi
           kit=$(sh tools/kit-revision.sh)
-          outcome=$(git show "$FINAL:${MD%.md}.json" | jq -r .outcome)
-          sections=$(git show "$FINAL:$MD" | awk '/^## (What the run showed|Candidate issues)$/ {p=1; sub(/^## /, "### "); print; next} /^## / {p=0} p')
+          outcome=$(jq -r .outcome "${MD%.md}.json")
+          sections=$(awk '/^## (What the run showed|Candidate issues)$/ {p=1; sub(/^## /, "### "); print; next} /^## / {p=0} p' "$MD")
           if [ -z "$sections" ]; then
             echo "$MD has no What the run showed or Candidate issues section."
             exit 1
           fi
           # shellcheck disable=SC2016
-          {
-            [ -z "$ISSUE" ] && printf 'Report for PR: #%s\n\n' "$PR"
-            printf 'Run %s: kit revision `%s`, seed %s, outcome %s. [Note](%s/%s/blob/%s/%s)\n\n%s\n\n%s\n' \
-              "$RUN_COUNT" "$kit" "$SEED" "$outcome" "$GITHUB_SERVER_URL" "$GITHUB_REPOSITORY" "$FINAL" "$MD" "$sections" "$marker"
-          } > "$RUNNER_TEMP/report.md"
-          if [ -z "$ISSUE" ]; then
-            url=$(gh api -X POST "repos/$GITHUB_REPOSITORY/issues" \
-              -f title="Playtest report: #$PR ${PR_TITLE#Kit *: }" \
-              -f 'labels[]=loop' -f "assignees[]=$DESIGNER" \
-              -F body=@"$RUNNER_TEMP/report.md" --jq .html_url)
-          else
-            url=$(gh api -X POST "repos/$GITHUB_REPOSITORY/issues/$ISSUE/comments" \
-              -F body=@"$RUNNER_TEMP/report.md" --jq .html_url)
-          fi
-          echo "posted $url"
-          # shellcheck disable=SC2016
-          printf 'Playtest done: seed %s, outcome %s. The report is at %s.\n' "$SEED" "$outcome" "$url" \
-            > "$RUNNER_TEMP/playtest-done.md"
+          printf 'Playtest run %s: kit revision `%s`, seed %s, outcome %s. [Note](%s/%s/blob/%s/%s)\n\n%s\n\n<!-- nvu-loop: playtest %s -->\n' \
+            "$RUN_COUNT" "$kit" "$SEED" "$outcome" "$GITHUB_SERVER_URL" "$GITHUB_REPOSITORY" "$FINAL" "$MD" "$sections" "$FINAL" \
+            > "$RUNNER_TEMP/report.md"
           gh api -X POST "repos/$GITHUB_REPOSITORY/issues/$PR/comments" \
-            -F body=@"$RUNNER_TEMP/playtest-done.md" --jq '"posted \(.html_url)"'
+            -F body=@"$RUNNER_TEMP/report.md" --jq '"posted \(.html_url)"'
 
       - name: Mint the nvu-agent token to close out
         id: final-token

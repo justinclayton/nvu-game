@@ -1297,14 +1297,20 @@ body {
 
 /* --------------------------------------------------------------- wide table
  *
- * From `WIDE_ABOVE` in metrics.ts (1700px), there is room to spare: the mat
+ * From `WIDE_ABOVE` in metrics.ts (1910px), there is room to spare: the mat
  * draws at the `WIDE` metrics tier — bigger cards, not more empty felt around
  * the same ones — and the log moves to a column of its own beside the mat
  * instead of stacking underneath it, since it is the thing a playtester reads
  * most. `.table` becomes the grid; everything below the mat row still spans
  * both columns, in DOM order. Capped rather than filling ever-wider screens,
- * so the same "empty felt" problem doesn't just reappear at a larger scale. */
-@media (min-width: 1700px) {
+ * so the same "empty felt" problem doesn't just reappear at a larger scale.
+ *
+ * 1910px is the first width where the mat's `min-width` (1425px), the column
+ * gap (24px), the log column (340px) and the table's 20px side padding fit in
+ * 96vw: (1789 + 40) / 0.96 = 1905px, rounded up. Change any of those
+ * numbers and `WIDE_ABOVE` together; metrics.test.ts checks them against
+ * metrics.ts. */
+@media (min-width: 1910px) {
   .table {
     max-width: min(96vw, 2000px);
     display: grid;

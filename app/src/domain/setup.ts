@@ -171,6 +171,8 @@ export const emptyTurnRecord = (): TurnRecord => ({
   playDiscount: { Red: 0, Gray: 0 },
   poolPenalty: { oomph: 0, scramble: 0 },
   poolBonus: { oomph: 0, scramble: 0 },
+  exhausted: { Red: 0, Gray: 0 },
+  exhaustedFromDeck: { Red: 0, Gray: 0 },
 });
 
 const freshPlayer = (deck: readonly Card[]): PlayerState => ({

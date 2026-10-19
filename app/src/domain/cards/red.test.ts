@@ -41,18 +41,52 @@ describe("Reckless Swing — 'Exhaust 1 from the top of your deck'", () => {
   });
 });
 
-describe("Reckless — 'Exhaust 2'", () => {
-  it("takes two off the top", () => {
+describe("It Pays To Be Reckless — '+2 Scramble and +2 Oomph for every card you exhaust this turn. Exhaust 1 from the top of the deck'", () => {
+  it("counts cards paid for costs and its own Exhaust 1, before and after it", () => {
     const state = playing({
-      Red: player({ deck: pile("Shove", 5), hand: [card("Reckless"), card("Shove")] }),
+      Red: player({
+        deck: pile("Shove", 5),
+        hand: [card("Shove"), card("Shove"), card("It Pays To Be Reckless"), card("Charge"), card("Shove"), card("Shove")],
+      }),
     });
-    const { state: next } = must(state, {
-      type: "PLAY_CARD",
-      character: "Red",
-      cardId: handCard(state, "Red", "Reckless").id,
-      payWith: [handCard(state, "Red", "Shove").id],
+    const first = cast(state, "Red", "Shove").state;
+    const reckless = cast(first, "Red", "It Pays To Be Reckless").state;
+    const card1 = reckless.playZone.find((p) => p.card.name === "It Pays To Be Reckless");
+    if (!card1) throw new Error("not in play");
+    // Shove's 1 payment and its own Exhaust 1.
+    expect(contributionOf(reckless, card1)).toEqual({ oomph: 4, scramble: 4 });
+    const after = cast(reckless, "Red", "Charge").state;
+    // Charge's 2 payments count too.
+    expect(contributionOf(after, card1)).toEqual({ oomph: 8, scramble: 8 });
+  });
+});
+
+describe("Bull Rush — 'Play: If a card was Exhausted from your deck this turn, +3 Oomph'", () => {
+  const rushHand = (): GameState =>
+    playing({
+      Red: player({
+        deck: pile("Shove", 4),
+        hand: [card("Bull Rush"), card("Shove"), card("Overdrive"), card("Shove")],
+      }),
     });
-    expect(next.Red.deck).toHaveLength(3);
+
+  it("adds nothing when nothing came off the deck, even after paying", () => {
+    const next = cast(rushHand(), "Red", "Bull Rush").state;
+    expect(statPool(next).oomph).toBe(2);
+  });
+
+  it("adds 3 Oomph when a card was Exhausted from the deck before it was played", () => {
+    const overdriven = cast(rushHand(), "Red", "Overdrive").state;
+    const next = cast(overdriven, "Red", "Bull Rush").state;
+    expect(statPool(next).oomph - statPool(overdriven).oomph).toBe(5);
+  });
+
+  it("is not triggered by a deck Exhaust after it", () => {
+    const rushed = cast(rushHand(), "Red", "Bull Rush").state;
+    const next = cast(rushed, "Red", "Overdrive").state;
+    const overdrive = next.playZone.find((p) => p.card.name === "Overdrive");
+    if (!overdrive) throw new Error("not in play");
+    expect(statPool(next).oomph).toBe(2 + contributionOf(next, overdrive).oomph);
   });
 });
 
@@ -123,7 +157,7 @@ describe("Cross Punch — 'Exhaust 1. If a Scramble card was already played this
   });
 });
 
-describe("Tag Team — 'If Gray played a card this turn, you may draw 1 card'", () => {
+describe("Tag Team — 'If Gray played a card this turn, both players may draw 1 card'", () => {
   it("draws nothing while Gray has played nothing", () => {
     const state = playing({
       Red: player({ deck: pile("Shove", 4), hand: [card("Tag Team"), card("Shove")] }),
@@ -158,6 +192,14 @@ describe("Tag Team — 'If Gray played a card this turn, you may draw 1 card'", 
     const { state: next, events } = must(asked.state, drawing("Red", 1));
     expect(eventTypes(events)).toContain("CARD_DRAWN");
     expect(next.Red.deck).toHaveLength(3);
+    // Gray is asked next.
+    const pending = next.pending;
+    expect(pending?.kind).toBe("ChooseDraw");
+    if (pending?.kind !== "ChooseDraw") throw new Error("expected a draw question");
+    expect(pending.options[0]?.character).toBe("Gray");
+    const { state: done } = must(next, drawing("Gray", 1));
+    expect(done.Gray.deck).toHaveLength(3);
+    expect(done.pending).toBeNull();
   });
 
   it("draws nothing if you decline", () => {
@@ -167,10 +209,12 @@ describe("Tag Team — 'If Gray played a card this turn, you may draw 1 card'", 
     });
     const played = play(state, [free("Gray", ids(state, "Gray")[0] as CardId)]);
     const asked = cast(played.state, "Red", "Tag Team");
-    const { state: next, events } = must(asked.state, noDraw);
+    const { state: grayAsked } = must(asked.state, noDraw);
+    const { state: next, events } = must(grayAsked, noDraw);
     expect(eventTypes(events)).not.toContain("CARD_DRAWN");
     expect(next.pending).toBeNull();
     expect(next.Red.deck).toHaveLength(4);
+    expect(next.Gray.deck).toHaveLength(4);
   });
 });
 
@@ -206,8 +250,8 @@ describe("Fast Follow — 'If Gray played a card this turn, play this card for f
   });
 });
 
-describe("Second Wind — 'Shuffle a Red card from your Exhaust pile into your deck'", () => {
-  it("offers Red's own Exhausted cards, and nothing else", () => {
+describe("Second Wind — 'Shuffle a card from your Exhaust pile into your deck'", () => {
+  it("offers every card in your Exhaust pile, Stuff too", () => {
     const state = playing({
       Red: player({
         deck: pile("Shove", 3),
@@ -226,10 +270,9 @@ describe("Second Wind — 'Shuffle a Red card from your Exhaust pile into your d
     const pending = asked.state.pending;
     expect(pending?.kind).toBe("ChooseCards");
     if (pending?.kind !== "ChooseCards") throw new Error("expected a card choice");
-    // The Pry Bar is Stuff, not a Red card.
     const offered = pending.options.map((c) => c.name);
     expect(offered).toContain("Charge");
-    expect(offered).not.toContain("Pry Bar");
+    expect(offered).toContain("Pry Bar");
 
     const chosen = pending.options.find((c) => c.name === "Charge");
     if (!chosen) throw new Error("Charge not offered");

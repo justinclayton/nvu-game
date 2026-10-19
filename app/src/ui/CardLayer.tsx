@@ -10,8 +10,9 @@
 import { useLayoutEffect, useRef, useState, type CSSProperties } from "react";
 
 import { costOf, handsShared, playableCards } from "@domain/queries";
-import type { Card, Character, GameState, Room } from "@domain/types";
+import type { Card, Character, GameState } from "@domain/types";
 import { CardBack, CardFace, RoomFace, toneOf } from "./CardFace";
+import { inspectHandlers, isInspected, useTouchInspect, type Inspected } from "./Inspector";
 import { FLOAT_SCALE, STACK_STEP_MAX, STACK_STEP_X, STACK_STEP_Y, type Metrics } from "./metrics";
 import { LOOSE_ZONES, canChooseOffer, ZONE_SHAPE, placements, type Placement, type ZoneId } from "./placements";
 import type { Rect, SlotRects } from "./useSlotRects";
@@ -22,10 +23,6 @@ export interface Paying {
   readonly chosen: readonly Card["id"][];
 }
 
-export type Inspected =
-  | { readonly kind: "card"; readonly card: Card; readonly owner: Character | null }
-  | { readonly kind: "room"; readonly room: Room };
-
 interface Props {
   readonly state: GameState;
   readonly metrics: Metrics;
@@ -35,6 +32,8 @@ interface Props {
   readonly paying: Paying | null;
   readonly onPickCard: (character: Character, card: Card) => void;
   readonly onPickReward?: ((character: Character, card: Card) => void) | undefined;
+  /** What is zoomed now. On touch, the second tap on it is the one that acts. */
+  readonly inspected: Inspected | null;
   readonly onInspect: (item: Inspected | null) => void;
   /** Debug mode: every card and room comes back face up. View-only. */
   readonly debug?: boolean | undefined;
@@ -105,9 +104,11 @@ export function CardLayer({
   paying,
   onPickCard,
   onPickReward,
+  inspected,
   onInspect,
   debug,
 }: Props) {
+  const touch = useTouchInspect();
   const placed = placements(state, debug ?? false);
 
   /* A card that just changed zone is lifted above everything while it travels,
@@ -208,18 +209,12 @@ export function CardLayer({
           "--bob-delay": `${String(p.index * 0.6)}s`,
         };
 
-        const inspect = p.faceUp
-          ? () => {
-              onInspect(
-                p.kind === "card"
-                  ? { kind: "card", card: p.card, owner: p.owner }
-                  : { kind: "room", room: p.room },
-              );
-            }
-          : undefined;
-        const uninspect = () => {
-          onInspect(null);
-        };
+        const item: Inspected | null = p.faceUp
+          ? p.kind === "card"
+            ? { kind: "card", card: p.card, owner: p.owner }
+            : { kind: "room", room: p.room }
+          : null;
+        const hover = item ? inspectHandlers(onInspect, item, touch) : {};
 
         const inner = (
           <div className="sprite__in">
@@ -255,13 +250,15 @@ export function CardLayer({
               data-zone={p.zone}
               title={title}
               onClick={() => {
+                /* Touch: the first tap reads the card, the second one plays it. */
+                if (touch && item && !isInspected(inspected, item)) {
+                  onInspect(item);
+                  return;
+                }
                 if (offer) onPickReward?.(offer, card);
                 else if (hand) onPickCard(hand, card);
               }}
-              onMouseEnter={inspect}
-              onMouseLeave={uninspect}
-              onFocus={inspect}
-              onBlur={uninspect}
+              {...hover}
             >
               <span className="sprite__pose">{inner}</span>
             </button>
@@ -274,8 +271,20 @@ export function CardLayer({
             className={classes}
             style={style}
             data-zone={p.zone}
-            onMouseEnter={inspect}
-            onMouseLeave={inspect ? uninspect : undefined}
+            {...(item
+              ? {
+                  ...hover,
+                  /* A row is all reachable; a pile only by its top card. */
+                  tabIndex: ZONE_SHAPE[p.zone] === "row" || p.index === p.count - 1 ? 0 : undefined,
+                  role: "group",
+                  "aria-label": p.kind === "card" ? p.card.name : p.room.name,
+                  onClick: touch
+                    ? () => {
+                        onInspect(item);
+                      }
+                    : undefined,
+                }
+              : {})}
           >
             <span className="sprite__pose">{inner}</span>
           </div>

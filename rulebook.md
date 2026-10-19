@@ -1,6 +1,6 @@
 # *North vs Up*: Rulebook
 
-Rules version: R32
+Rules version: R33
 
 ---
 
@@ -106,7 +106,7 @@ Players add their combined stats they accumulated this turn and check to see if 
 
 Each player does the following:
 
-1. **Discard your play zone:** Move every card on your side of the play zone to your discard pile, except `Bad Stuff`: `Scrap` it.
+1. **Discard your play zone:** Move every card on your side of the play zone to your discard pile.
 
 ---
 ## Cards

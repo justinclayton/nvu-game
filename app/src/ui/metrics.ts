@@ -3,8 +3,8 @@
  * two can never disagree.
  *
  * There are three sets: a compact table for a screen too narrow for the full
- * one — a phone held sideways — the full table, and a wide table for a screen
- * with room to spare. Which one is in force is decided by `useMetrics`, from
+ * one — a phone held sideways, a tablet, a small laptop — the full table, and
+ * a wide table for a screen with room to spare. Which one is in force is decided by `useMetrics`, from
  * the viewport, and handed to the mat and the card layer together. Every face
  * is sized in em off the card's own width, so a bigger tier draws bigger cards
  * with bigger, more legible text — nothing on the face itself has to change. */
@@ -21,7 +21,8 @@ export interface Metrics {
 
 export const FULL: Metrics = { cardW: 88, cardH: 123, slotPad: 8, rowGap: 12 };
 
-/** Small enough that the whole table fits an iPhone held sideways, ~870px across. */
+/** Small enough that the whole table fits an iPhone held sideways, ~870px across,
+ * and so it also fits every width the full table cannot (up to `COMPACT_BELOW`). */
 export const COMPACT: Metrics = { cardW: 62, cardH: 87, slotPad: 6, rowGap: 8 };
 
 /** A screen with room to spare draws bigger cards instead of more empty felt
@@ -30,7 +31,7 @@ export const COMPACT: Metrics = { cardW: 62, cardH: 87, slotPad: 6, rowGap: 8 };
 export const WIDE: Metrics = { cardW: 110, cardH: 154, slotPad: 10, rowGap: 15 };
 
 /** The viewport width below which the compact table is used. Matches table.css. */
-export const COMPACT_BELOW = 960;
+export const COMPACT_BELOW = 1180;
 export const COMPACT_QUERY = `(max-width: ${String(COMPACT_BELOW - 1)}px)`;
 
 /** The viewport width at and above which the wide table is used. Matches table.css.

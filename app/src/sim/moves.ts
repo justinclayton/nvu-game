@@ -107,6 +107,14 @@ function answers(pending: Pending): readonly Command[] {
       ];
     case "ChooseGoodStuff":
       return pending.options.map((card): Command => ({ type: "CHOOSE_CARDS", cardIds: [card.id] }));
+    case "ChooseRoom":
+      return pending.options.flatMap((room) =>
+        permutations(pending.options.filter((r) => r.id !== room.id)).map((rest): Command => ({
+          type: "CHOOSE_ROOM",
+          roomId: room.id,
+          bottom: rest.map((r) => r.id),
+        })),
+      );
   }
 }
 

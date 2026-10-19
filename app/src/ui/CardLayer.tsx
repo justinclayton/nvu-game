@@ -10,7 +10,7 @@
 import { useLayoutEffect, useRef, useState, type CSSProperties } from "react";
 
 import { costOf, handsShared, playableCards } from "@domain/queries";
-import type { Card, Character, GameState } from "@domain/types";
+import type { Card, Character, GameState, Room } from "@domain/types";
 import { CardBack, CardFace, RoomFace, toneOf } from "./CardFace";
 import { inspectHandlers, isInspected, useTouchInspect, type Inspected } from "./Inspector";
 import { FLOAT_SCALE, STACK_STEP_MAX, STACK_STEP_X, STACK_STEP_Y, type Metrics } from "./metrics";
@@ -32,6 +32,8 @@ interface Props {
   readonly paying: Paying | null;
   readonly onPickCard: (character: Character, card: Card) => void;
   readonly onPickReward?: ((character: Character, card: Card) => void) | undefined;
+  /** Enter one of the rooms revealed at Turn Start. */
+  readonly onPickRoom?: ((room: Room) => void) | undefined;
   /** What is zoomed now. On touch, the second tap on it is the one that acts. */
   readonly inspected: Inspected | null;
   readonly onInspect: (item: Inspected | null) => void;
@@ -104,6 +106,7 @@ export function CardLayer({
   paying,
   onPickCard,
   onPickReward,
+  onPickRoom,
   inspected,
   onInspect,
   debug,
@@ -172,10 +175,12 @@ export function CardLayer({
         const payingHere = hand ? payingFrom(hand) : null;
         const selected = p.kind === "card" && payingHere?.cardId === p.id;
         const chosen = p.kind === "card" && (payingHere?.chosen.includes(p.card.id) ?? false);
+        const revealedRoom = p.kind === "room" && p.zone === "revealed" && onPickRoom !== undefined;
         const clickable =
-          p.kind === "card" &&
-          ((hand !== null && canClick(hand, p.card)) ||
-            (offer !== null && onPickReward !== undefined && canChooseOffer(state, offer)));
+          revealedRoom ||
+          (p.kind === "card" &&
+            ((hand !== null && canClick(hand, p.card)) ||
+              (offer !== null && onPickReward !== undefined && canChooseOffer(state, offer))));
         const dimmed =
           p.kind === "card" && hand !== null && state.phase === "Play" && !state[hand].down
             ? payingHere
@@ -189,7 +194,7 @@ export function CardLayer({
           p.kind === "card" && p.card.rarity ? `rarity--${p.card.rarity.toLowerCase()}` : "",
           p.kind === "room" ? "sprite--room" : "",
           hand ? "sprite--hand" : "",
-          offer ? "sprite--float" : "",
+          offer || p.zone === "revealed" ? "sprite--float" : "",
           p.faceUp ? "" : "is-down",
           isMoving ? "is-moving" : "",
           selected ? "is-selected" : "",
@@ -231,6 +236,31 @@ export function CardLayer({
             {chosen ? <span className="card__badge">paying</span> : null}
           </div>
         );
+
+        if (clickable && p.kind === "room") {
+          const room = p.room;
+          return (
+            <button
+              key={p.id}
+              type="button"
+              className={classes}
+              style={style}
+              data-zone={p.zone}
+              title={`Enter ${room.name}`}
+              onClick={() => {
+                /* Touch: the first tap reads the room, the second one enters it. */
+                if (touch && item && !isInspected(inspected, item)) {
+                  onInspect(item);
+                  return;
+                }
+                onPickRoom?.(room);
+              }}
+              {...hover}
+            >
+              <span className="sprite__pose">{inner}</span>
+            </button>
+          );
+        }
 
         if (clickable && p.kind === "card" && (hand || offer)) {
           const card = p.card;

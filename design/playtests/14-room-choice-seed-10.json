@@ -1,0 +1,2507 @@
+{
+  "format": "nvu-run/1",
+  "exportedAt": "2026-10-19T21:47:02.189Z",
+  "cards": "b9b917ecd96e",
+  "rules": "R35",
+  "kit": "R35.C58-v1",
+  "floor": 5,
+  "turn": 23,
+  "phase": "GameOver",
+  "outcome": "Victory",
+  "run": {
+    "seed": 10,
+    "commands": [
+      {
+        "type": "FLIP_ROOM"
+      },
+      {
+        "type": "CHOOSE_ROOM",
+        "roomId": "Flooded Ventilation Shaft#6",
+        "bottom": [
+          "Security Turnstile#7",
+          "Security Turnstile#1"
+        ]
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Red",
+        "cardId": "Overdrive#1",
+        "payWith": []
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Gray",
+        "cardId": "Pick The Lock#5",
+        "payWith": [
+          "Peek Around Corner#2",
+          "Duck Under#1"
+        ]
+      },
+      {
+        "type": "END_PLAY"
+      },
+      {
+        "type": "TAKE_REWARD",
+        "cardId": "Momentum Shift#2"
+      },
+      {
+        "type": "TAKE_REWARD",
+        "cardId": "Hit 'n Run#2"
+      },
+      {
+        "type": "FLIP_ROOM"
+      },
+      {
+        "type": "CHOOSE_ROOM",
+        "roomId": "Flooded Ventilation Shaft#1",
+        "bottom": [
+          "Security Turnstile#12",
+          "The Sentry Drone#1"
+        ]
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Gray",
+        "cardId": "Duck Under#3",
+        "payWith": [
+          "Peek Around Corner#1"
+        ]
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Red",
+        "cardId": "Lean In#1",
+        "payWith": [
+          "Shove#3"
+        ]
+      },
+      {
+        "type": "END_PLAY"
+      },
+      {
+        "type": "FLIP_ROOM"
+      },
+      {
+        "type": "CHOOSE_ROOM",
+        "roomId": "Security Turnstile#7",
+        "bottom": [
+          "Security Turnstile#1",
+          "Security Turnstile#12"
+        ]
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Red",
+        "cardId": "Charge#2",
+        "payWith": [
+          "Shove#1",
+          "Charge#1"
+        ]
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Red",
+        "cardId": "Shove#4",
+        "payWith": [
+          "Charge#4"
+        ]
+      },
+      {
+        "type": "END_PLAY"
+      },
+      {
+        "type": "TAKE_REWARD",
+        "cardId": "Cross Punch#2"
+      },
+      {
+        "type": "FLIP_ROOM"
+      },
+      {
+        "type": "CHOOSE_ROOM",
+        "roomId": "The Sentry Drone#1",
+        "bottom": [
+          "Flooded Ventilation Shaft#1",
+          "Security Turnstile#1"
+        ]
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Red",
+        "cardId": "Overdrive#3",
+        "payWith": []
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Red",
+        "cardId": "Overdrive#2",
+        "payWith": []
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Red",
+        "cardId": "Shove#4",
+        "payWith": [
+          "Charge#3"
+        ]
+      },
+      {
+        "type": "END_PLAY"
+      },
+      {
+        "type": "TAKE_REWARD",
+        "cardId": "Fast Follow#2"
+      },
+      {
+        "type": "TAKE_REWARD",
+        "cardId": "Quick Vault#1"
+      },
+      {
+        "type": "FLIP_ROOM"
+      },
+      {
+        "type": "CHOOSE_ROOM",
+        "roomId": "Flooded Ventilation Shaft#5",
+        "bottom": [
+          "Security Turnstile#2",
+          "Security Turnstile#12"
+        ]
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Gray",
+        "cardId": "Duck Under#1",
+        "payWith": [
+          "Duck Under#4"
+        ]
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Red",
+        "cardId": "Fast Follow#2",
+        "payWith": []
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Red",
+        "cardId": "Lean In#1",
+        "payWith": [
+          "Shove#1"
+        ]
+      },
+      {
+        "type": "END_PLAY"
+      },
+      {
+        "type": "TAKE_REWARD",
+        "cardId": "Second Wind#2"
+      },
+      {
+        "type": "TAKE_REWARD",
+        "cardId": "I Know Kung Fu#2"
+      },
+      {
+        "type": "FLIP_ROOM"
+      },
+      {
+        "type": "CHOOSE_ROOM",
+        "roomId": "Flooded Ventilation Shaft#3",
+        "bottom": [
+          "Security Turnstile#5",
+          "The Sentry Drone#2"
+        ]
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Gray",
+        "cardId": "Peek Around Corner#2",
+        "payWith": [
+          "Pick The Lock#4"
+        ]
+      },
+      {
+        "type": "CHOOSE_PILE",
+        "pile": "Floor deck"
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Gray",
+        "cardId": "Hit 'n Run#2",
+        "payWith": [
+          "Pick The Lock#1"
+        ]
+      },
+      {
+        "type": "CHOOSE_CARDS",
+        "cardIds": [
+          "Pick The Lock#4"
+        ]
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Red",
+        "cardId": "Shove#2",
+        "payWith": [
+          "Charge#1"
+        ]
+      },
+      {
+        "type": "END_PLAY"
+      },
+      {
+        "type": "TAKE_REWARD",
+        "cardId": "Fast Follow#3"
+      },
+      {
+        "type": "TAKE_REWARD",
+        "cardId": "Quick Vault#2"
+      },
+      {
+        "type": "FLIP_ROOM"
+      },
+      {
+        "type": "CHOOSE_ROOM",
+        "roomId": "Security Turnstile#2",
+        "bottom": [
+          "Security Turnstile#12",
+          "Security Turnstile#5"
+        ]
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Gray",
+        "cardId": "Pick The Lock#3",
+        "payWith": [
+          "Pick The Lock#5",
+          "Duck Under#3"
+        ]
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Gray",
+        "cardId": "Duck Under#2",
+        "payWith": [
+          "Pick The Lock#4"
+        ]
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Red",
+        "cardId": "Momentum Shift#2",
+        "payWith": [
+          "Charge#4"
+        ]
+      },
+      {
+        "type": "CHOOSE_DRAW",
+        "character": "Red",
+        "count": 2
+      },
+      {
+        "type": "CHOOSE_CARDS",
+        "cardIds": [
+          "Charge#3"
+        ]
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Red",
+        "cardId": "Overdrive#1",
+        "payWith": []
+      },
+      {
+        "type": "END_PLAY"
+      },
+      {
+        "type": "TAKE_REWARD",
+        "cardId": "I Know Kung Fu#1"
+      },
+      {
+        "type": "TAKE_REWARD",
+        "cardId": "Reckless Swing#3"
+      },
+      {
+        "type": "FLIP_ROOM"
+      },
+      {
+        "type": "CHOOSE_ROOM",
+        "roomId": "Security Turnstile#12",
+        "bottom": [
+          "The Sentry Drone#2",
+          "Security Turnstile#5"
+        ]
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Gray",
+        "cardId": "Quick Vault#1",
+        "payWith": []
+      },
+      {
+        "type": "CHOOSE_DRAW",
+        "character": "Gray",
+        "count": 2
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Gray",
+        "cardId": "I Know Kung Fu#1",
+        "payWith": [
+          "Peek Around Corner#1"
+        ]
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Gray",
+        "cardId": "Duck Under#2",
+        "payWith": [
+          "Work The Angles#1"
+        ]
+      },
+      {
+        "type": "CHOOSE_DRAW",
+        "character": "Gray",
+        "count": 1
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Gray",
+        "cardId": "Pick The Lock#2",
+        "payWith": [
+          "Pick The Lock#3",
+          "I Know Kung Fu#2"
+        ]
+      },
+      {
+        "type": "CHOOSE_DRAW",
+        "character": "Gray",
+        "count": 1
+      },
+      {
+        "type": "END_PLAY"
+      },
+      {
+        "type": "TAKE_REWARD",
+        "cardId": "Hit 'n Run#1"
+      },
+      {
+        "type": "TAKE_REWARD",
+        "cardId": "Reckless Swing#1"
+      },
+      {
+        "type": "FLIP_ROOM"
+      },
+      {
+        "type": "CHOOSE_ROOM",
+        "roomId": "Security Turnstile#5",
+        "bottom": [
+          "The Sentry Drone#2"
+        ]
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Gray",
+        "cardId": "Quick Vault#2",
+        "payWith": []
+      },
+      {
+        "type": "CHOOSE_DRAW",
+        "character": "Gray",
+        "count": 2
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Gray",
+        "cardId": "Quick Vault#1",
+        "payWith": []
+      },
+      {
+        "type": "CHOOSE_DRAW",
+        "character": "Gray",
+        "count": 2
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Gray",
+        "cardId": "I Know Kung Fu#1",
+        "payWith": [
+          "Hit 'n Run#2"
+        ]
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Gray",
+        "cardId": "Pick The Lock#2",
+        "payWith": [
+          "Duck Under#1",
+          "Duck Under#2"
+        ]
+      },
+      {
+        "type": "CHOOSE_DRAW",
+        "character": null,
+        "count": 0
+      },
+      {
+        "type": "END_PLAY"
+      },
+      {
+        "type": "TAKE_REWARD",
+        "cardId": "Reckless Swing#2"
+      },
+      {
+        "type": "FLIP_ROOM"
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Gray",
+        "cardId": "I Know Kung Fu#1",
+        "payWith": [
+          "Quick Vault#1"
+        ]
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Red",
+        "cardId": "Overdrive#2",
+        "payWith": []
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Red",
+        "cardId": "Overdrive#3",
+        "payWith": []
+      },
+      {
+        "type": "END_PLAY"
+      },
+      {
+        "type": "TAKE_REWARD",
+        "cardId": "Bull Rush#2"
+      },
+      {
+        "type": "TAKE_REWARD",
+        "cardId": "I'll Take That#1"
+      },
+      {
+        "type": "FLIP_ROOM"
+      },
+      {
+        "type": "CHOOSE_ROOM",
+        "roomId": "Automated Defense Turret#5",
+        "bottom": [
+          "Overgrown Hydroponics Bay#4",
+          "Overgrown Hydroponics Bay#2"
+        ]
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Gray",
+        "cardId": "Quick Vault#2",
+        "payWith": []
+      },
+      {
+        "type": "CHOOSE_DRAW",
+        "character": "Gray",
+        "count": 2
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Gray",
+        "cardId": "Quick Vault#1",
+        "payWith": []
+      },
+      {
+        "type": "CHOOSE_DRAW",
+        "character": "Gray",
+        "count": 2
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Gray",
+        "cardId": "Pick The Lock#2",
+        "payWith": [
+          "Peek Around Corner#2",
+          "Work The Angles#1"
+        ]
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Gray",
+        "cardId": "Hit 'n Run#1",
+        "payWith": [
+          "Duck Under#1"
+        ]
+      },
+      {
+        "type": "CHOOSE_CARDS",
+        "cardIds": [
+          "Duck Under#1"
+        ]
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Gray",
+        "cardId": "Hit 'n Run#2",
+        "payWith": [
+          "Pick The Lock#5"
+        ]
+      },
+      {
+        "type": "CHOOSE_CARDS",
+        "cardIds": [
+          "Pick The Lock#5"
+        ]
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Red",
+        "cardId": "Overdrive#1",
+        "payWith": []
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Red",
+        "cardId": "Reckless Swing#1",
+        "payWith": [
+          "Shove#2"
+        ]
+      },
+      {
+        "type": "END_PLAY"
+      },
+      {
+        "type": "CHOOSE_CARDS",
+        "cardIds": [
+          "Coil Of Cable#1"
+        ]
+      },
+      {
+        "type": "CHOOSE_CARDS",
+        "cardIds": [
+          "Pry Bar#2"
+        ]
+      },
+      {
+        "type": "CHOOSE_CARDS",
+        "cardIds": [
+          "Shove#3"
+        ]
+      },
+      {
+        "type": "CHOOSE_CARDS",
+        "cardIds": []
+      },
+      {
+        "type": "FLIP_ROOM"
+      },
+      {
+        "type": "CHOOSE_ROOM",
+        "roomId": "Automated Defense Turret#4",
+        "bottom": [
+          "Gears & Glitch#3",
+          "Overgrown Hydroponics Bay#3"
+        ]
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Red",
+        "cardId": "Coil Of Cable#1",
+        "payWith": []
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Gray",
+        "cardId": "Pick The Lock#5",
+        "payWith": [
+          "Pry Bar#2",
+          "Peek Around Corner#1"
+        ]
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Gray",
+        "cardId": "Duck Under#1",
+        "payWith": [
+          "Pick The Lock#4"
+        ]
+      },
+      {
+        "type": "END_PLAY"
+      },
+      {
+        "type": "CHOOSE_CARDS",
+        "cardIds": [
+          "Overcharged Battery#1"
+        ]
+      },
+      {
+        "type": "CHOOSE_CARDS",
+        "cardIds": [
+          "Pry Bar#3"
+        ]
+      },
+      {
+        "type": "FLIP_ROOM"
+      },
+      {
+        "type": "CHOOSE_ROOM",
+        "roomId": "Gears & Glitch#3",
+        "bottom": [
+          "Overgrown Hydroponics Bay#4",
+          "Overgrown Hydroponics Bay#2"
+        ]
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Gray",
+        "cardId": "Duck Under#4",
+        "payWith": [
+          "Duck Under#2"
+        ]
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Gray",
+        "cardId": "Pick The Lock#3",
+        "payWith": [
+          "I Know Kung Fu#2",
+          "Pry Bar#3"
+        ]
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Red",
+        "cardId": "Fast Follow#3",
+        "payWith": []
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Red",
+        "cardId": "Fast Follow#2",
+        "payWith": []
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Red",
+        "cardId": "Overcharged Battery#1",
+        "payWith": [
+          "Overdrive#3"
+        ]
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Red",
+        "cardId": "Charge#3",
+        "payWith": []
+      },
+      {
+        "type": "END_PLAY"
+      },
+      {
+        "type": "TAKE_REWARD",
+        "cardId": "Second Wind#1"
+      },
+      {
+        "type": "TAKE_REWARD",
+        "cardId": "Hack the Doors#2"
+      },
+      {
+        "type": "CHOOSE_CHARACTER",
+        "character": "Red"
+      },
+      {
+        "type": "TAKE_REWARD",
+        "cardId": "Momentum Shift#1"
+      },
+      {
+        "type": "CHOOSE_CARDS",
+        "cardIds": [
+          "Duck Under#1"
+        ]
+      },
+      {
+        "type": "FLIP_ROOM"
+      },
+      {
+        "type": "CHOOSE_ROOM",
+        "roomId": "Automated Defense Turret#2",
+        "bottom": [
+          "Automated Defense Turret#7",
+          "Gears & Glitch#1"
+        ]
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Gray",
+        "cardId": "Quick Vault#1",
+        "payWith": []
+      },
+      {
+        "type": "CHOOSE_DRAW",
+        "character": "Gray",
+        "count": 2
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Gray",
+        "cardId": "Pick The Lock#5",
+        "payWith": [
+          "Peek Around Corner#1",
+          "I Know Kung Fu#2"
+        ]
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Gray",
+        "cardId": "Pick The Lock#4",
+        "payWith": [
+          "I Know Kung Fu#1",
+          "Duck Under#2"
+        ]
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Red",
+        "cardId": "Overdrive#1",
+        "payWith": []
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Red",
+        "cardId": "Reckless Swing#3",
+        "payWith": [
+          "Charge#3"
+        ]
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Red",
+        "cardId": "Momentum Shift#2",
+        "payWith": [
+          "Charge#4"
+        ]
+      },
+      {
+        "type": "CHOOSE_DRAW",
+        "character": "Red",
+        "count": 2
+      },
+      {
+        "type": "CHOOSE_CARDS",
+        "cardIds": [
+          "Reckless Swing#1"
+        ]
+      },
+      {
+        "type": "END_PLAY"
+      },
+      {
+        "type": "CHOOSE_CARDS",
+        "cardIds": [
+          "Overcharged Battery#2"
+        ]
+      },
+      {
+        "type": "CHOOSE_CARDS",
+        "cardIds": [
+          "Pry Bar#5"
+        ]
+      },
+      {
+        "type": "CHOOSE_CARDS",
+        "cardIds": []
+      },
+      {
+        "type": "CHOOSE_CARDS",
+        "cardIds": []
+      },
+      {
+        "type": "FLIP_ROOM"
+      },
+      {
+        "type": "CHOOSE_ROOM",
+        "roomId": "Pressurized Maintenance Hub#1",
+        "bottom": [
+          "Pressurized Maintenance Hub#2",
+          "Automated Defense Turret#3"
+        ]
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Gray",
+        "cardId": "Hack the Doors#2",
+        "payWith": [
+          "Duck Under#4"
+        ]
+      },
+      {
+        "type": "CHOOSE_PILE",
+        "pile": "Floor deck"
+      },
+      {
+        "type": "ORDER_CARDS",
+        "cardIds": [
+          "Pressurized Maintenance Hub#2",
+          "Automated Defense Turret#7",
+          "Gears & Glitch#1"
+        ]
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Gray",
+        "cardId": "Pick The Lock#3",
+        "payWith": [
+          "Pry Bar#5",
+          "Pick The Lock#1"
+        ]
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Red",
+        "cardId": "Overcharged Battery#2",
+        "payWith": [
+          "Shove#1"
+        ]
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Red",
+        "cardId": "Cross Punch#2",
+        "payWith": []
+      },
+      {
+        "type": "END_PLAY"
+      },
+      {
+        "type": "TAKE_REWARD",
+        "cardId": "Brute Recycle#2"
+      },
+      {
+        "type": "TAKE_REWARD",
+        "cardId": "Zen Mode#1"
+      },
+      {
+        "type": "FLIP_ROOM"
+      },
+      {
+        "type": "CHOOSE_ROOM",
+        "roomId": "Pressurized Maintenance Hub#2",
+        "bottom": [
+          "Automated Defense Turret#7",
+          "Gears & Glitch#1"
+        ]
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Gray",
+        "cardId": "Pry Bar#3",
+        "payWith": []
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Red",
+        "cardId": "Fast Follow#2",
+        "payWith": []
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Red",
+        "cardId": "Fast Follow#3",
+        "payWith": []
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Red",
+        "cardId": "Coil Of Cable#1",
+        "payWith": []
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Gray",
+        "cardId": "Hit 'n Run#2",
+        "payWith": [
+          "Work The Angles#1"
+        ]
+      },
+      {
+        "type": "CHOOSE_CARDS",
+        "cardIds": [
+          "I Know Kung Fu#2"
+        ]
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Gray",
+        "cardId": "I'll Take That#1",
+        "payWith": [
+          "Pick The Lock#2"
+        ]
+      },
+      {
+        "type": "CHOOSE_CARDS",
+        "cardIds": [
+          "Overcharged Battery#1"
+        ]
+      },
+      {
+        "type": "END_PLAY"
+      },
+      {
+        "type": "TAKE_REWARD",
+        "cardId": "Tag Team#1"
+      },
+      {
+        "type": "TAKE_REWARD",
+        "cardId": "Synergy Link#1"
+      },
+      {
+        "type": "FLIP_ROOM"
+      },
+      {
+        "type": "CHOOSE_ROOM",
+        "roomId": "Automated Defense Turret#3",
+        "bottom": [
+          "Gears & Glitch#1",
+          "Automated Defense Turret#7"
+        ]
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Gray",
+        "cardId": "Quick Vault#2",
+        "payWith": []
+      },
+      {
+        "type": "CHOOSE_DRAW",
+        "character": "Gray",
+        "count": 2
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Gray",
+        "cardId": "I Know Kung Fu#2",
+        "payWith": [
+          "Pry Bar#2"
+        ]
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Gray",
+        "cardId": "Hit 'n Run#1",
+        "payWith": [
+          "Pry Bar#3"
+        ]
+      },
+      {
+        "type": "CHOOSE_CARDS",
+        "cardIds": [
+          "Pick The Lock#1"
+        ]
+      },
+      {
+        "type": "CHOOSE_DRAW",
+        "character": "Gray",
+        "count": 1
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Red",
+        "cardId": "Overdrive#3",
+        "payWith": []
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Red",
+        "cardId": "Lean In#1",
+        "payWith": [
+          "Shove#4"
+        ]
+      },
+      {
+        "type": "CHOOSE_DRAW",
+        "character": "Gray",
+        "count": 1
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Gray",
+        "cardId": "Quick Vault#1",
+        "payWith": []
+      },
+      {
+        "type": "CHOOSE_DRAW",
+        "character": "Gray",
+        "count": 2
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Gray",
+        "cardId": "Synergy Link#1",
+        "payWith": [
+          "Peek Around Corner#2"
+        ]
+      },
+      {
+        "type": "CHOOSE_DRAW",
+        "character": "Gray",
+        "count": 2
+      },
+      {
+        "type": "CHOOSE_DRAW",
+        "character": "Gray",
+        "count": 1
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Gray",
+        "cardId": "Hack the Doors#2",
+        "payWith": [
+          "Duck Under#3"
+        ]
+      },
+      {
+        "type": "CHOOSE_PILE",
+        "pile": "Good Stuff pool"
+      },
+      {
+        "type": "ORDER_CARDS",
+        "cardIds": [
+          "Pocket Dynamo#1",
+          "Duct Tape & Wire#2",
+          "Pocket Dynamo#2"
+        ]
+      },
+      {
+        "type": "CHOOSE_DRAW",
+        "character": "Gray",
+        "count": 1
+      },
+      {
+        "type": "END_PLAY"
+      },
+      {
+        "type": "CHOOSE_CARDS",
+        "cardIds": [
+          "Duct Tape & Wire#2"
+        ]
+      },
+      {
+        "type": "CHOOSE_CARDS",
+        "cardIds": [
+          "Duct Tape & Wire#5"
+        ]
+      },
+      {
+        "type": "CHOOSE_CARDS",
+        "cardIds": []
+      },
+      {
+        "type": "CHOOSE_CARDS",
+        "cardIds": []
+      },
+      {
+        "type": "FLIP_ROOM"
+      },
+      {
+        "type": "CHOOSE_ROOM",
+        "roomId": "Gears & Glitch#1",
+        "bottom": [
+          "Automated Defense Turret#7"
+        ]
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Gray",
+        "cardId": "Pick The Lock#5",
+        "payWith": [
+          "Pick The Lock#3",
+          "Zen Mode#1"
+        ]
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Gray",
+        "cardId": "Hit 'n Run#2",
+        "payWith": [
+          "Duct Tape & Wire#5"
+        ]
+      },
+      {
+        "type": "CHOOSE_CARDS",
+        "cardIds": [
+          "Zen Mode#1"
+        ]
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Red",
+        "cardId": "Duct Tape & Wire#2",
+        "payWith": [
+          "Charge#2"
+        ]
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Red",
+        "cardId": "Reckless Swing#2",
+        "payWith": [
+          "Second Wind#1"
+        ]
+      },
+      {
+        "type": "END_PLAY"
+      },
+      {
+        "type": "CHOOSE_CHARACTER",
+        "character": "Gray"
+      },
+      {
+        "type": "TAKE_REWARD",
+        "cardId": "Pivot#1"
+      },
+      {
+        "type": "CHOOSE_CARDS",
+        "cardIds": [
+          "Lean In#1"
+        ]
+      },
+      {
+        "type": "FLIP_ROOM"
+      },
+      {
+        "type": "CHOOSE_ROOM",
+        "roomId": "Smoldering Armory#2",
+        "bottom": [
+          "The Monolith Core#1",
+          "Bio-Hazard Containment Vault#2"
+        ]
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Gray",
+        "cardId": "Pry Bar#3",
+        "payWith": []
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Gray",
+        "cardId": "Duct Tape & Wire#5",
+        "payWith": [
+          "Work The Angles#1"
+        ]
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Red",
+        "cardId": "Overdrive#2",
+        "payWith": []
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Red",
+        "cardId": "Momentum Shift#2",
+        "payWith": [
+          "Second Wind#1"
+        ]
+      },
+      {
+        "type": "CHOOSE_DRAW",
+        "character": "Red",
+        "count": 2
+      },
+      {
+        "type": "CHOOSE_CARDS",
+        "cardIds": [
+          "Brute Recycle#2"
+        ]
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Red",
+        "cardId": "Overcharged Battery#2",
+        "payWith": [
+          "Reckless Swing#3"
+        ]
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Red",
+        "cardId": "Bull Rush#2",
+        "payWith": []
+      },
+      {
+        "type": "END_PLAY"
+      },
+      {
+        "type": "TAKE_REWARD",
+        "cardId": "Fast Follow#1"
+      },
+      {
+        "type": "TAKE_REWARD",
+        "cardId": "Pack Mule#2"
+      },
+      {
+        "type": "CHOOSE_CARDS",
+        "cardIds": [
+          "Automated Salvage Kit#1"
+        ]
+      },
+      {
+        "type": "CHOOSE_CARDS",
+        "cardIds": [
+          "Duct Tape & Wire#4"
+        ]
+      },
+      {
+        "type": "FLIP_ROOM"
+      },
+      {
+        "type": "CHOOSE_ROOM",
+        "roomId": "Smoldering Armory#1",
+        "bottom": [
+          "Laser Grid Security Hall#1",
+          "Laser Grid Security Hall#2"
+        ]
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Gray",
+        "cardId": "Pry Bar#2",
+        "payWith": []
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Gray",
+        "cardId": "Duct Tape & Wire#4",
+        "payWith": [
+          "Duck Under#4"
+        ]
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Red",
+        "cardId": "Tag Team#1",
+        "payWith": [
+          "Charge#2"
+        ]
+      },
+      {
+        "type": "CHOOSE_DRAW",
+        "character": "Red",
+        "count": 1
+      },
+      {
+        "type": "CHOOSE_DRAW",
+        "character": "Gray",
+        "count": 1
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Gray",
+        "cardId": "Quick Vault#1",
+        "payWith": []
+      },
+      {
+        "type": "CHOOSE_DRAW",
+        "character": "Gray",
+        "count": 2
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Gray",
+        "cardId": "Pivot#1",
+        "payWith": [
+          "I'll Take That#1",
+          "Pick The Lock#3"
+        ]
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Red",
+        "cardId": "Reckless Swing#2",
+        "payWith": []
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Red",
+        "cardId": "Overdrive#1",
+        "payWith": []
+      },
+      {
+        "type": "END_PLAY"
+      },
+      {
+        "type": "TAKE_REWARD",
+        "cardId": "Tag Team#2"
+      },
+      {
+        "type": "TAKE_REWARD",
+        "cardId": "In Step#2"
+      },
+      {
+        "type": "CHOOSE_CARDS",
+        "cardIds": [
+          "Coil Of Cable#3"
+        ]
+      },
+      {
+        "type": "CHOOSE_CARDS",
+        "cardIds": [
+          "Duct Tape & Wire#3"
+        ]
+      },
+      {
+        "type": "FLIP_ROOM"
+      },
+      {
+        "type": "CHOOSE_ROOM",
+        "roomId": "The Monolith Core#1",
+        "bottom": [
+          "Laser Grid Security Hall#1",
+          "Bio-Hazard Containment Vault#2"
+        ]
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Red",
+        "cardId": "Automated Salvage Kit#1",
+        "payWith": [
+          "Second Wind#2"
+        ]
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Gray",
+        "cardId": "Pick The Lock#2",
+        "payWith": [
+          "Pick The Lock#1",
+          "Peek Around Corner#1"
+        ]
+      },
+      {
+        "type": "END_PLAY"
+      },
+      {
+        "type": "FLIP_ROOM"
+      },
+      {
+        "type": "CHOOSE_ROOM",
+        "roomId": "Laser Grid Security Hall#2",
+        "bottom": [
+          "Laser Grid Security Hall#1",
+          "Bio-Hazard Containment Vault#2"
+        ]
+      },
+      {
+        "type": "END_PLAY"
+      },
+      {
+        "type": "FLIP_ROOM"
+      },
+      {
+        "type": "CHOOSE_ROOM",
+        "roomId": "The Monolith Core#1",
+        "bottom": [
+          "Laser Grid Security Hall#1",
+          "Bio-Hazard Containment Vault#2"
+        ]
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Gray",
+        "cardId": "Quick Vault#2",
+        "payWith": []
+      },
+      {
+        "type": "CHOOSE_DRAW",
+        "character": "Gray",
+        "count": 2
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Gray",
+        "cardId": "I Know Kung Fu#2",
+        "payWith": [
+          "Hit 'n Run#2"
+        ]
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Gray",
+        "cardId": "Pry Bar#5",
+        "payWith": []
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Gray",
+        "cardId": "Pick The Lock#4",
+        "payWith": [
+          "Pivot#1",
+          "Duct Tape & Wire#3"
+        ]
+      },
+      {
+        "type": "CHOOSE_DRAW",
+        "character": null,
+        "count": 0
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Red",
+        "cardId": "Coil Of Cable#3",
+        "payWith": []
+      },
+      {
+        "type": "CHOOSE_DRAW",
+        "character": null,
+        "count": 0
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Red",
+        "cardId": "Coil Of Cable#1",
+        "payWith": []
+      },
+      {
+        "type": "CHOOSE_DRAW",
+        "character": null,
+        "count": 0
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Red",
+        "cardId": "Cross Punch#2",
+        "payWith": [
+          "Charge#3",
+          "Overdrive#3"
+        ]
+      },
+      {
+        "type": "END_PLAY"
+      }
+    ]
+  },
+  "notes": [
+    {
+      "at": 26,
+      "text": "Reward reveal lists names only. Had to run bin/nvu card for each to see cost and text. Taking Momentum Shift: cost 1 Oomph 4 beats Charge."
+    },
+    {
+      "at": 37,
+      "text": "Room choice: Sentry Drone (Oomph 8 or Scramble 8) showed on turn 2. Passing it: no card can reach 8 alone yet, and exhaust resets on Ascend, so farming rewards on this floor first looks right. Entering the second Flooded Ventilation Shaft (cheapest double reward)."
+    },
+    {
+      "at": 61,
+      "text": "My error: I chained moves and 'card Red Shove pay Shove' was refused (only one Shove left after Lean In paid with the other). The chained 'end' then Fled the room with Oomph 1 Scramble 3. undo refused: 'the last move revealed a card'. Wish: end should warn when no challenge is met, since Flee is costly. Gray now at exhaust 5, live 8."
+    },
+    {
+      "at": 75,
+      "text": "Spending 3 Red exhaust on Turnstile Oomph 5 for a Red reward, Gray holds. Red's remaining deck must be Charge, Overdrive, Overdrive, so next turn the Sentry Drone at Oomph 8 is reachable. 'live 6' mid-turn leaves out the 2 played cards; reads like I lost them."
+    },
+    {
+      "at": 124,
+      "text": "Floor 1 cleared turn 4. Room choice let me hold the Stairwell until I could count Red's deck down to Charge, Overdrive, Overdrive. Ascend fully heals, so exhaust is a per-floor budget: spend it on rewards, keep enough for the boss. 'Red shuffles 13 cards back in' while Red now has 15: unclear what 13 counts."
+    },
+    {
+      "at": 126,
+      "text": "cards.yaml: Floors 1-2 draw from only two Room kinds (Security Turnstile x14, Flooded Ventilation Shaft x10). The room choice on these floors is really FVS vs Turnstile vs boss-now."
+    },
+    {
+      "at": 174,
+      "text": "Peek 1 on the Floor deck showed Security Turnstile and moved on. Rulebook Peek: 'Discard any number of them, then put the rest back in any order.' No discard choice was offered. Did the engine skip it for the Floor deck on purpose? And what would discarding a Room (or the Stairwell) even mean? Rulebook gap."
+    },
+    {
+      "at": 236,
+      "text": "Passing the Sentry Drone again with a sure kill in hand (Overdrive x2 + Cross Punch). Greedy for one more Turnstile while the boss hand is held; held cards stay in hand so the boss kill keeps."
+    },
+    {
+      "at": 297,
+      "text": "Gray shows live 2 (deck 0, discard 0, hand 2) with 4 cards in the play zone. Hit 'n Run paying with Peek would reach Scramble 6, but would leave Gray with nothing in hand, deck or discard until Hit 'n Run's effect lands. Rulebook 9: 'If one player has no cards in their hand, deck, or discard pile, you go Down.' Do play-zone cards count? Is Down checked mid-play? Not risking it: stopping at Oomph 5 only. The 'live' number made this look scarier than it is, but I can't tell from the rulebook."
+    },
+    {
+      "at": 345,
+      "text": "Floor 2 cleared turn 10, no Flees. The Sentry auto-entered when it was the last card. Room lines in the CLI do not show which thresholds share a challenge; I had to read cards.yaml to learn Gears & Glitch's two lines are two challenges."
+    },
+    {
+      "at": 392,
+      "text": "Turret Scrap: Gray's only option was the Pry Bar just gained, because all 5 played cards sit in the play zone until Cleanup and the discard was empty after a reshuffle. Scrap 'from your hand or discard pile' at Outcome mostly misses the cards you just used. Intended?"
+    },
+    {
+      "at": 440,
+      "text": "Floor 3 room choice: only Hydroponics (Scramble 11, Good Stuff) left besides the boss. Red's held hand (Fast Follow x2, Overdrive, Charge, Overcharged Battery) plus Gray's Pry Bar already makes Oomph 12, so I take Gears & Glitch now rather than spend on Hydroponics."
+    },
+    {
+      "at": 483,
+      "text": "Floor 3 cleared turn 13, both Gears & Glitch challenges met. Floor 3 rooms give no card rewards (Turret and Hydroponics give Good Stuff or Scrap), so the boss is the only card-reward source there; with room choice that pushes me to fight the boss as soon as the hand allows."
+    },
+    {
+      "at": 559,
+      "text": "Hack the Doors Peek 3 on the Floor deck: ordering offered, discard again not offered. With 3-room reveals at Turn Start, Peek 3 on the Floor deck only tells me what next turn's flip will show anyway."
+    },
+    {
+      "at": 660,
+      "text": "Peek on the Good Stuff pool: again only 'put those 3 back in the order you choose'. Rulebook Peek says 'Discard any number of them, then put the rest back in any order.' The discard step is missing on every pile I tried (Floor deck twice, Good Stuff pool). Engine mismatch? Also: I Know Kung Fu drew for Gray when Red played Lean In; matches 'every time a Scramble card is played', nice synergy."
+    },
+    {
+      "at": 721,
+      "text": "Floor 4 cleared turn 18 through Oomph 7 and Scramble 7. Passed Gears & Glitch three times on floor 4 to take both Hubs and two Turrets first. Decks now Red 27, Gray 26 for floor 5."
+    },
+    {
+      "at": 723,
+      "text": "Floor 5 flip shows Bio-Hazard Containment Vault with only its thresholds. Its room rule ('Players may Scrap Good Stuff cards from their hand during Play to add +3 Oomph or +3 Scramble') is missing from the reveal; I only know it from bin/nvu card. Choosing the room blind of the hand (draw comes after the choice) makes the Monolith a gamble on a fresh floor, so Smoldering Armory (Oomph 10, Flee 3) first."
+    },
+    {
+      "at": 786,
+      "text": "After entering Armory blind, the combined hand (Red: Salvage Kit, Reckless Swing, Charge, Tag Team, Overdrive; Gray: Pivot, I'll Take That, Duct Tape, Duck Under, Pry Bar) would likely have beaten the Monolith. The choice comes before the draw, so on floor 5 I am guessing which turn my hand will be good."
+    },
+    {
+      "at": 829,
+      "text": "Monolith showed with a held hand of Scramble 11 (Coil, Salvage Kit, Pick The Lock, Duct Tape) and Oomph 8 if paid for. Here the choice is informed: 5 of the 10 cards are known before the draw. Taking it."
+    },
+    {
+      "at": 838,
+      "text": "Monolith: best line is Oomph 9 (Overdrive 3 + Second Wind 4 paid with both Coils + Duct Tape 2), one short of 10, and Scramble would then fall short too. Red has no spare payment cards; Gray's Pick The Locks cannot pay for Red. Will Flee (Exhaust 5 each). Setting up next turn: Red plays Salvage Kit paying Second Wind and keeps Coil, Coil, Overdrive; Gray plays Pick The Lock paying Pick The Lock + Peek and keeps Pick The Lock, Duct Tape. Next flip shows all 3 remaining rooms, so I can re-enter the Monolith at once."
+    },
+    {
+      "at": 864,
+      "text": "My miscount: the Floor deck held 4 (Laser, Laser, Bio-Hazard, Monolith), so the Monolith did not come back this flip. The CLI never lists the Floor deck order, though every card in it is known to me from earlier flips; a 'floor deck' line in show would have saved this."
+    },
+    {
+      "at": 873,
+      "text": "Deliberate Flee of Laser Grid (Exhaust 4 each) with no cards played. The drawn hand beats the Monolith (Red: Coil, Coil, Cross Punch paid by Charge + Overdrive = Oomph 8 Scramble 6; Gray: Quick Vault, Kung Fu, Pick The Lock = Oomph 5 Scramble 4). Hands carry over and no draw happens at 5, so fleeing banks the hand for the next flip, which must show the Monolith. Room choice plus hand carry-over makes a deliberate Flee a real move."
+    },
+    {
+      "at": 910,
+      "text": "Monolith: Oomph 16 Scramble 10 from the banked hand. The Kung Fu draw prompt on Red's Coil says 'Draw 1 card?' without naming who draws (Gray)."
+    }
+  ],
+  "log": [
+    "Floor 1 is built: 6 rooms.",
+    "Turn Start phase starts.",
+    "Revealed: Security Turnstile, Security Turnstile, Flooded Ventilation Shaft.",
+    "You are in: Flooded Ventilation Shaft.",
+    "To the bottom of the Floor deck: Security Turnstile, Security Turnstile.",
+    "Red draws Overdrive.",
+    "Red draws Charge.",
+    "Red draws Shove.",
+    "Red draws Charge.",
+    "Red draws Shove.",
+    "Gray draws Pick The Lock.",
+    "Gray draws Pick The Lock.",
+    "Gray draws Peek Around Corner.",
+    "Gray draws Duck Under.",
+    "Gray draws Pick The Lock.",
+    "Turn Start phase ends.",
+    "Play phase starts.",
+    "Red plays Overdrive.",
+    "Overdrive triggers: Red Exhausts Shove.",
+    "Gray pays with Peek Around Corner, Duck Under, Exhausting them.",
+    "Gray plays Pick The Lock.",
+    "Play phase ends.",
+    "Outcome phase starts.",
+    "Oomph 3 and Scramble 3 met — Both players reveal a card reward.",
+    "Flooded Ventilation Shaft is Cleared.",
+    "Flooded Ventilation Shaft triggers: Red's reward pool shows Brute Recycle, Momentum Shift, Momentum Shift.",
+    "Red takes Momentum Shift into their discard pile.",
+    "Flooded Ventilation Shaft triggers: Gray's reward pool shows I'll Take That, Hit 'n Run, Synergy Link.",
+    "Gray takes Hit 'n Run into their discard pile.",
+    "Outcome phase ends.",
+    "Cleanup phase starts.",
+    "Red discards Overdrive from their play zone.",
+    "Gray discards Pick The Lock from their play zone.",
+    "Cleanup phase ends.",
+    "— end of turn 1 —",
+    "Turn Start phase starts.",
+    "Revealed: Flooded Ventilation Shaft, The Sentry Drone, Security Turnstile.",
+    "You are in: Flooded Ventilation Shaft.",
+    "To the bottom of the Floor deck: Security Turnstile, The Sentry Drone.",
+    "Red draws Lean In.",
+    "Gray draws Peek Around Corner.",
+    "Gray draws Duck Under.",
+    "Gray draws Pick The Lock.",
+    "Turn Start phase ends.",
+    "Play phase starts.",
+    "Gray pays with Peek Around Corner, Exhausting it.",
+    "Gray plays Duck Under.",
+    "Red pays with Shove, Exhausting it.",
+    "Red plays Lean In.",
+    "Play phase ends.",
+    "Outcome phase starts.",
+    "You Flee Flooded Ventilation Shaft.",
+    "Flooded Ventilation Shaft triggers: Gray Exhausts Work The Angles.",
+    "Flooded Ventilation Shaft triggers: Gray Exhausts Duck Under.",
+    "Outcome phase ends.",
+    "Cleanup phase starts.",
+    "Red discards Lean In from their play zone.",
+    "Gray discards Duck Under from their play zone.",
+    "Flooded Ventilation Shaft goes to the bottom of the Floor deck.",
+    "Cleanup phase ends.",
+    "— end of turn 2 —",
+    "Turn Start phase starts.",
+    "Revealed: Security Turnstile, Security Turnstile, Security Turnstile.",
+    "You are in: Security Turnstile.",
+    "To the bottom of the Floor deck: Security Turnstile, Security Turnstile.",
+    "Red draws Shove.",
+    "Red draws Charge.",
+    "Gray draws Pick The Lock.",
+    "Gray draws Duck Under.",
+    "Turn Start phase ends.",
+    "Play phase starts.",
+    "Red pays with Shove, Charge, Exhausting them.",
+    "Red plays Charge.",
+    "Red pays with Charge, Exhausting it.",
+    "Red plays Shove.",
+    "Play phase ends.",
+    "Outcome phase starts.",
+    "Oomph 5 met — Red reveals a card reward.",
+    "Security Turnstile is Cleared.",
+    "Security Turnstile triggers: Red's reward pool shows Heavy Pockets, Junk Launcher, Cross Punch.",
+    "Red takes Cross Punch into their discard pile.",
+    "Outcome phase ends.",
+    "Cleanup phase starts.",
+    "Red discards Charge from their play zone.",
+    "Red discards Shove from their play zone.",
+    "Cleanup phase ends.",
+    "— end of turn 3 —",
+    "Turn Start phase starts.",
+    "Revealed: The Sentry Drone, Flooded Ventilation Shaft, Security Turnstile.",
+    "You are in: The Sentry Drone.",
+    "To the bottom of the Floor deck: Flooded Ventilation Shaft, Security Turnstile.",
+    "Red draws Overdrive.",
+    "Red draws Overdrive.",
+    "Red draws Charge.",
+    "Red's deck is empty — the discard pile shuffles in to make a new one (6 cards).",
+    "Red draws Shove.",
+    "Red draws Cross Punch.",
+    "Turn Start phase ends.",
+    "Play phase starts.",
+    "Red plays Overdrive.",
+    "Overdrive triggers: Red Exhausts Momentum Shift.",
+    "Red plays Overdrive.",
+    "Overdrive triggers: Red Exhausts Charge.",
+    "Red pays with Charge, Exhausting it.",
+    "Red plays Shove.",
+    "Play phase ends.",
+    "Outcome phase starts.",
+    "Oomph 8 met — Ascend, and both players reveal a card reward.",
+    "The Sentry Drone is Cleared.",
+    "The Sentry Drone triggers: Red's reward pool shows Brute Recycle, Set 'Em Up, Fast Follow.",
+    "Red takes Fast Follow into their discard pile.",
+    "The Sentry Drone triggers: Gray's reward pool shows Pivot, Quick Vault, One Man's Junk.",
+    "Gray takes Quick Vault into their discard pile.",
+    "Outcome phase ends.",
+    "Cleanup phase starts.",
+    "Red discards Overdrive from their play zone.",
+    "Red discards Overdrive from their play zone.",
+    "Red discards Shove from their play zone.",
+    "Cleanup phase ends.",
+    "— end of turn 4 —",
+    "Floor 1 is clear.",
+    "Red shuffles 13 cards back in.",
+    "Gray shuffles 14 cards back in.",
+    "Floor 2 is built: 6 rooms.",
+    "Turn Start phase starts.",
+    "Revealed: Flooded Ventilation Shaft, Security Turnstile, Security Turnstile.",
+    "You are in: Flooded Ventilation Shaft.",
+    "To the bottom of the Floor deck: Security Turnstile, Security Turnstile.",
+    "Red draws Shove.",
+    "Red draws Fast Follow.",
+    "Red draws Lean In.",
+    "Red draws Charge.",
+    "Red draws Shove.",
+    "Gray draws Pick The Lock.",
+    "Gray draws Pick The Lock.",
+    "Gray draws Pick The Lock.",
+    "Gray draws Duck Under.",
+    "Gray draws Duck Under.",
+    "Turn Start phase ends.",
+    "Play phase starts.",
+    "Gray pays with Duck Under, Exhausting it.",
+    "Gray plays Duck Under.",
+    "Red plays Fast Follow.",
+    "Red pays with Shove, Exhausting it.",
+    "Red plays Lean In.",
+    "Play phase ends.",
+    "Outcome phase starts.",
+    "Oomph 3 and Scramble 3 met — Both players reveal a card reward.",
+    "Flooded Ventilation Shaft is Cleared.",
+    "Flooded Ventilation Shaft triggers: Red's reward pool shows Second Wind, Rhythm & Bruise, Rhythm & Bruise.",
+    "Red takes Second Wind into their discard pile.",
+    "Flooded Ventilation Shaft triggers: Gray's reward pool shows Catch Your Breath, Covering Fire, I Know Kung Fu.",
+    "Gray takes I Know Kung Fu into their discard pile.",
+    "Outcome phase ends.",
+    "Cleanup phase starts.",
+    "Red discards Fast Follow from their play zone.",
+    "Red discards Lean In from their play zone.",
+    "Gray discards Duck Under from their play zone.",
+    "Cleanup phase ends.",
+    "— end of turn 5 —",
+    "Turn Start phase starts.",
+    "Revealed: The Sentry Drone, Security Turnstile, Flooded Ventilation Shaft.",
+    "You are in: Flooded Ventilation Shaft.",
+    "To the bottom of the Floor deck: Security Turnstile, The Sentry Drone.",
+    "Red draws Cross Punch.",
+    "Red draws Momentum Shift.",
+    "Red draws Charge.",
+    "Gray draws Peek Around Corner.",
+    "Gray draws Hit 'n Run.",
+    "Turn Start phase ends.",
+    "Play phase starts.",
+    "Gray pays with Pick The Lock, Exhausting it.",
+    "Gray plays Peek Around Corner.",
+    "Peek Around Corner triggers: A look at the Floor deck: Security Turnstile.",
+    "Gray pays with Pick The Lock, Exhausting it.",
+    "Gray plays Hit 'n Run.",
+    "Hit 'n Run triggers: Gray shuffles 1 card back in.",
+    "Red pays with Charge, Exhausting it.",
+    "Red plays Shove.",
+    "Play phase ends.",
+    "Outcome phase starts.",
+    "Oomph 3 and Scramble 3 met — Both players reveal a card reward.",
+    "Flooded Ventilation Shaft is Cleared.",
+    "Flooded Ventilation Shaft triggers: Red's reward pool shows Fast Follow, It Pays To Be Reckless, Tag Team.",
+    "Red takes Fast Follow into their discard pile.",
+    "Flooded Ventilation Shaft triggers: Gray's reward pool shows Pivot, Pack Mule, Quick Vault.",
+    "Gray takes Quick Vault into their discard pile.",
+    "Outcome phase ends.",
+    "Cleanup phase starts.",
+    "Red discards Shove from their play zone.",
+    "Gray discards Peek Around Corner from their play zone.",
+    "Gray discards Hit 'n Run from their play zone.",
+    "Cleanup phase ends.",
+    "— end of turn 6 —",
+    "Turn Start phase starts.",
+    "Revealed: Security Turnstile, Security Turnstile, Security Turnstile.",
+    "You are in: Security Turnstile.",
+    "To the bottom of the Floor deck: Security Turnstile, Security Turnstile.",
+    "Red draws Overdrive.",
+    "Red draws Charge.",
+    "Gray draws Pick The Lock.",
+    "Gray draws Duck Under.",
+    "Gray draws Pick The Lock.",
+    "Gray draws Duck Under.",
+    "Turn Start phase ends.",
+    "Play phase starts.",
+    "Gray pays with Pick The Lock, Duck Under, Exhausting them.",
+    "Gray plays Pick The Lock.",
+    "Gray pays with Pick The Lock, Exhausting it.",
+    "Gray plays Duck Under.",
+    "Red pays with Charge, Exhausting it.",
+    "Red plays Momentum Shift.",
+    "Momentum Shift triggers: Red draws Overdrive.",
+    "Momentum Shift triggers: Red draws Overdrive.",
+    "Momentum Shift triggers: Red Exhausts Charge.",
+    "Red plays Overdrive.",
+    "Overdrive triggers: Red Exhausts Charge.",
+    "Play phase ends.",
+    "Outcome phase starts.",
+    "Scramble 5 met — Gray reveals a card reward.",
+    "Oomph 5 met — Red reveals a card reward.",
+    "Security Turnstile is Cleared.",
+    "Security Turnstile triggers: Gray's reward pool shows I Know Kung Fu, Pack Mule, Sharing Is Caring.",
+    "Gray takes I Know Kung Fu into their discard pile.",
+    "Security Turnstile triggers: Red's reward pool shows Junk Launcher, Heavy Pockets, Reckless Swing.",
+    "Red takes Reckless Swing into their discard pile.",
+    "Outcome phase ends.",
+    "Cleanup phase starts.",
+    "Red discards Momentum Shift from their play zone.",
+    "Red discards Overdrive from their play zone.",
+    "Gray discards Pick The Lock from their play zone.",
+    "Gray discards Duck Under from their play zone.",
+    "Cleanup phase ends.",
+    "— end of turn 7 —",
+    "Turn Start phase starts.",
+    "Revealed: The Sentry Drone, Security Turnstile, Security Turnstile.",
+    "You are in: Security Turnstile.",
+    "To the bottom of the Floor deck: The Sentry Drone, Security Turnstile.",
+    "Red draws Shove.",
+    "Red draws Shove.",
+    "Gray draws Quick Vault.",
+    "Gray draws Pick The Lock.",
+    "Gray draws Work The Angles.",
+    "Gray draws Peek Around Corner.",
+    "Gray's deck is empty — the discard pile shuffles in to make a new one (8 cards).",
+    "Gray draws Duck Under.",
+    "Turn Start phase ends.",
+    "Play phase starts.",
+    "Gray plays Quick Vault.",
+    "Quick Vault triggers: Gray draws I Know Kung Fu.",
+    "Quick Vault triggers: Gray draws I Know Kung Fu.",
+    "Gray pays with Peek Around Corner, Exhausting it.",
+    "Gray plays I Know Kung Fu.",
+    "Gray pays with Work The Angles, Exhausting it.",
+    "Gray plays Duck Under.",
+    "I Know Kung Fu triggers: Gray draws Pick The Lock.",
+    "Gray pays with Pick The Lock, I Know Kung Fu, Exhausting them.",
+    "Gray plays Pick The Lock.",
+    "I Know Kung Fu triggers: Gray draws Quick Vault.",
+    "Play phase ends.",
+    "Outcome phase starts.",
+    "Scramble 5 met — Gray reveals a card reward.",
+    "Oomph 5 met — Red reveals a card reward.",
+    "Security Turnstile is Cleared.",
+    "Security Turnstile triggers: Gray's reward pool shows Catch Your Breath, In Step, Hit 'n Run.",
+    "Gray takes Hit 'n Run into their discard pile.",
+    "Security Turnstile triggers: Red's reward pool shows Fast Follow, Tag Team, Reckless Swing.",
+    "Red takes Reckless Swing into their discard pile.",
+    "Outcome phase ends.",
+    "Cleanup phase starts.",
+    "Gray discards Quick Vault from their play zone.",
+    "Gray discards I Know Kung Fu from their play zone.",
+    "Gray discards Duck Under from their play zone.",
+    "Gray discards Pick The Lock from their play zone.",
+    "Cleanup phase ends.",
+    "— end of turn 8 —",
+    "Turn Start phase starts.",
+    "Revealed: The Sentry Drone, Security Turnstile.",
+    "You are in: Security Turnstile.",
+    "To the bottom of the Floor deck: The Sentry Drone.",
+    "Gray draws Peek Around Corner.",
+    "Gray draws Hit 'n Run.",
+    "Gray draws Duck Under.",
+    "Gray's deck is empty — the discard pile shuffles in to make a new one (5 cards).",
+    "Gray draws Pick The Lock.",
+    "Turn Start phase ends.",
+    "Play phase starts.",
+    "Gray plays Quick Vault.",
+    "Quick Vault triggers: Gray draws Hit 'n Run.",
+    "Quick Vault triggers: Gray draws Quick Vault.",
+    "Gray plays Quick Vault.",
+    "Quick Vault triggers: Gray draws Duck Under.",
+    "Quick Vault triggers: Gray draws I Know Kung Fu.",
+    "Gray pays with Hit 'n Run, Exhausting it.",
+    "Gray plays I Know Kung Fu.",
+    "Gray pays with Duck Under, Duck Under, Exhausting them.",
+    "Gray plays Pick The Lock.",
+    "Play phase ends.",
+    "Outcome phase starts.",
+    "Oomph 5 met — Red reveals a card reward.",
+    "Security Turnstile is Cleared.",
+    "Security Turnstile triggers: Red's reward pool shows Break Through, Reckless Swing, Break Through.",
+    "Red takes Reckless Swing into their discard pile.",
+    "Outcome phase ends.",
+    "Cleanup phase starts.",
+    "Gray discards Quick Vault from their play zone.",
+    "Gray discards Quick Vault from their play zone.",
+    "Gray discards I Know Kung Fu from their play zone.",
+    "Gray discards Pick The Lock from their play zone.",
+    "Cleanup phase ends.",
+    "— end of turn 9 —",
+    "Turn Start phase starts.",
+    "You are in: The Sentry Drone.",
+    "Gray's deck is empty — the discard pile shuffles in to make a new one (4 cards).",
+    "Gray draws I Know Kung Fu.",
+    "Gray draws Quick Vault.",
+    "Gray draws Quick Vault.",
+    "Turn Start phase ends.",
+    "Play phase starts.",
+    "Gray pays with Quick Vault, Exhausting it.",
+    "Gray plays I Know Kung Fu.",
+    "Red plays Overdrive.",
+    "Overdrive triggers: Red's deck is empty — the discard pile shuffles in to make a new one (10 cards).",
+    "Overdrive triggers: Red Exhausts Shove.",
+    "Red plays Overdrive.",
+    "Overdrive triggers: Red Exhausts Fast Follow.",
+    "Play phase ends.",
+    "Outcome phase starts.",
+    "Oomph 8 met — Ascend, and both players reveal a card reward.",
+    "The Sentry Drone is Cleared.",
+    "The Sentry Drone triggers: Red's reward pool shows Cross Punch, Bull Rush, Bull Rush.",
+    "Red takes Bull Rush into their discard pile.",
+    "The Sentry Drone triggers: Gray's reward pool shows I'll Take That, In Step, Synergy Link.",
+    "Gray takes I'll Take That into their discard pile.",
+    "Outcome phase ends.",
+    "Cleanup phase starts.",
+    "Red discards Overdrive from their play zone.",
+    "Red discards Overdrive from their play zone.",
+    "Gray discards I Know Kung Fu from their play zone.",
+    "Cleanup phase ends.",
+    "— end of turn 10 —",
+    "Floor 2 is clear.",
+    "Red shuffles 13 cards back in.",
+    "Gray shuffles 18 cards back in.",
+    "Floor 3 is built: 6 rooms.",
+    "Turn Start phase starts.",
+    "Revealed: Overgrown Hydroponics Bay, Overgrown Hydroponics Bay, Automated Defense Turret.",
+    "You are in: Automated Defense Turret.",
+    "To the bottom of the Floor deck: Overgrown Hydroponics Bay, Overgrown Hydroponics Bay.",
+    "Red draws Overdrive.",
+    "Red draws Shove.",
+    "Red draws Shove.",
+    "Red draws Reckless Swing.",
+    "Red draws Charge.",
+    "Gray draws Quick Vault.",
+    "Gray draws Pick The Lock.",
+    "Gray draws Duck Under.",
+    "Gray draws Work The Angles.",
+    "Gray draws Hit 'n Run.",
+    "Turn Start phase ends.",
+    "Play phase starts.",
+    "Gray plays Quick Vault.",
+    "Quick Vault triggers: Gray draws Peek Around Corner.",
+    "Quick Vault triggers: Gray draws Quick Vault.",
+    "Gray plays Quick Vault.",
+    "Quick Vault triggers: Gray draws Pick The Lock.",
+    "Quick Vault triggers: Gray draws Hit 'n Run.",
+    "Gray pays with Peek Around Corner, Work The Angles, Exhausting them.",
+    "Gray plays Pick The Lock.",
+    "Gray pays with Duck Under, Exhausting it.",
+    "Gray plays Hit 'n Run.",
+    "Hit 'n Run triggers: Gray shuffles 1 card back in.",
+    "Gray pays with Pick The Lock, Exhausting it.",
+    "Gray plays Hit 'n Run.",
+    "Hit 'n Run triggers: Gray shuffles 1 card back in.",
+    "Red plays Overdrive.",
+    "Overdrive triggers: Red Exhausts Lean In.",
+    "Red pays with Shove, Exhausting it.",
+    "Red plays Reckless Swing.",
+    "Reckless Swing triggers: Red Exhausts Shove.",
+    "Play phase ends.",
+    "Outcome phase starts.",
+    "Scramble 8 met — Both players get Good Stuff.",
+    "Oomph 10 met — Both players may Scrap a card from their hand or discard pile.",
+    "Automated Defense Turret is Cleared.",
+    "Automated Defense Turret triggers: Red reveals Good Stuff: Duct Tape & Wire, Riot Shield, Coil Of Cable.",
+    "Automated Defense Turret triggers: Gray reveals Good Stuff: Pry Bar, Crowbar, Stim Pack.",
+    "Red gets Coil Of Cable.",
+    "Red takes Coil Of Cable into hand.",
+    "Gray gets Pry Bar.",
+    "Gray takes Pry Bar into hand.",
+    "Shove is Scrapped.",
+    "Outcome phase ends.",
+    "Cleanup phase starts.",
+    "Red discards Overdrive from their play zone.",
+    "Red discards Reckless Swing from their play zone.",
+    "Gray discards Quick Vault from their play zone.",
+    "Gray discards Quick Vault from their play zone.",
+    "Gray discards Pick The Lock from their play zone.",
+    "Gray discards Hit 'n Run from their play zone.",
+    "Gray discards Hit 'n Run from their play zone.",
+    "Cleanup phase ends.",
+    "— end of turn 11 —",
+    "Turn Start phase starts.",
+    "Revealed: Overgrown Hydroponics Bay, Automated Defense Turret, Gears & Glitch.",
+    "You are in: Automated Defense Turret.",
+    "To the bottom of the Floor deck: Gears & Glitch, Overgrown Hydroponics Bay.",
+    "Red draws Fast Follow.",
+    "Red draws Fast Follow.",
+    "Red draws Overdrive.",
+    "Gray draws Pick The Lock.",
+    "Gray draws Duck Under.",
+    "Gray draws Pick The Lock.",
+    "Gray draws Peek Around Corner.",
+    "Turn Start phase ends.",
+    "Play phase starts.",
+    "Red plays Coil Of Cable.",
+    "Gray pays with Pry Bar, Peek Around Corner, Exhausting them.",
+    "Gray plays Pick The Lock.",
+    "Gray pays with Pick The Lock, Exhausting it.",
+    "Gray plays Duck Under.",
+    "Play phase ends.",
+    "Outcome phase starts.",
+    "Scramble 8 met — Both players get Good Stuff.",
+    "Automated Defense Turret is Cleared.",
+    "Automated Defense Turret triggers: Red reveals Good Stuff: Cutting Torch, Overcharged Battery, Cutting Torch.",
+    "Automated Defense Turret triggers: Gray reveals Good Stuff: Pry Bar, Coil Of Cable, Overcharged Battery.",
+    "Red gets Overcharged Battery.",
+    "Red takes Overcharged Battery into hand.",
+    "Gray gets Pry Bar.",
+    "Gray takes Pry Bar into hand.",
+    "Outcome phase ends.",
+    "Cleanup phase starts.",
+    "Red discards Coil Of Cable from their play zone.",
+    "Gray discards Pick The Lock from their play zone.",
+    "Gray discards Duck Under from their play zone.",
+    "Cleanup phase ends.",
+    "— end of turn 12 —",
+    "Turn Start phase starts.",
+    "Revealed: Overgrown Hydroponics Bay, Overgrown Hydroponics Bay, Gears & Glitch.",
+    "You are in: Gears & Glitch.",
+    "To the bottom of the Floor deck: Overgrown Hydroponics Bay, Overgrown Hydroponics Bay.",
+    "Gray draws I Know Kung Fu.",
+    "Gray draws Duck Under.",
+    "Gray draws Duck Under.",
+    "Gray draws Pick The Lock.",
+    "Turn Start phase ends.",
+    "Play phase starts.",
+    "Gray pays with Duck Under, Exhausting it.",
+    "Gray plays Duck Under.",
+    "Gray pays with I Know Kung Fu, Pry Bar, Exhausting them.",
+    "Gray plays Pick The Lock.",
+    "Red plays Fast Follow.",
+    "Red plays Fast Follow.",
+    "Red pays with Overdrive, Exhausting it.",
+    "Red plays Overcharged Battery.",
+    "Red plays Charge.",
+    "Play phase ends.",
+    "Outcome phase starts.",
+    "Oomph 12 met — Ascend, and both players reveal a card reward.",
+    "Oomph 7 and Scramble 7 met — Ascend; one player reveals a card reward, and the other may Scrap a card from their hand or discard pile.",
+    "Gears & Glitch is Cleared.",
+    "Gears & Glitch triggers: Red's reward pool shows Set 'Em Up, Second Wind, Brute Recycle.",
+    "Red takes Second Wind into their discard pile.",
+    "Gears & Glitch triggers: Gray's reward pool shows One Man's Junk, Hack the Doors, Covering Fire.",
+    "Gray takes Hack the Doors into their discard pile.",
+    "Gears & Glitch triggers: Red's reward pool shows Momentum Shift, Heavy Pockets, Junk Launcher.",
+    "Red takes Momentum Shift into their discard pile.",
+    "Duck Under is Scrapped.",
+    "Outcome phase ends.",
+    "Cleanup phase starts.",
+    "Red discards Fast Follow from their play zone.",
+    "Red discards Fast Follow from their play zone.",
+    "Red discards Overcharged Battery from their play zone.",
+    "Red discards Charge from their play zone.",
+    "Gray discards Duck Under from their play zone.",
+    "Gray discards Pick The Lock from their play zone.",
+    "Cleanup phase ends.",
+    "— end of turn 13 —",
+    "Floor 3 is clear.",
+    "Red shuffles 13 cards back in.",
+    "Gray shuffles 17 cards back in.",
+    "Floor 4 is built: 6 rooms.",
+    "Turn Start phase starts.",
+    "Revealed: Gears & Glitch, Automated Defense Turret, Automated Defense Turret.",
+    "You are in: Automated Defense Turret.",
+    "To the bottom of the Floor deck: Automated Defense Turret, Gears & Glitch.",
+    "Red draws Overdrive.",
+    "Red draws Reckless Swing.",
+    "Red draws Momentum Shift.",
+    "Red draws Charge.",
+    "Red draws Charge.",
+    "Gray draws Pick The Lock.",
+    "Gray draws Quick Vault.",
+    "Gray draws I Know Kung Fu.",
+    "Gray draws Duck Under.",
+    "Gray draws Peek Around Corner.",
+    "Turn Start phase ends.",
+    "Play phase starts.",
+    "Gray plays Quick Vault.",
+    "Quick Vault triggers: Gray draws Pick The Lock.",
+    "Quick Vault triggers: Gray draws I Know Kung Fu.",
+    "Gray pays with Peek Around Corner, I Know Kung Fu, Exhausting them.",
+    "Gray plays Pick The Lock.",
+    "Gray pays with I Know Kung Fu, Duck Under, Exhausting them.",
+    "Gray plays Pick The Lock.",
+    "Red plays Overdrive.",
+    "Overdrive triggers: Red Exhausts Bull Rush.",
+    "Red pays with Charge, Exhausting it.",
+    "Red plays Reckless Swing.",
+    "Reckless Swing triggers: Red Exhausts Overdrive.",
+    "Red pays with Charge, Exhausting it.",
+    "Red plays Momentum Shift.",
+    "Momentum Shift triggers: Red draws Reckless Swing.",
+    "Momentum Shift triggers: Red draws Cross Punch.",
+    "Momentum Shift triggers: Red Exhausts Reckless Swing.",
+    "Play phase ends.",
+    "Outcome phase starts.",
+    "Scramble 8 met — Both players get Good Stuff.",
+    "Oomph 10 met — Both players may Scrap a card from their hand or discard pile.",
+    "Automated Defense Turret is Cleared.",
+    "Automated Defense Turret triggers: Red reveals Good Stuff: Overcharged Battery, Stim Pack, A Pair Of Stitch-Em-Ups.",
+    "Automated Defense Turret triggers: Gray reveals Good Stuff: Riot Shield, Pry Bar, Pry Bar.",
+    "Red gets Overcharged Battery.",
+    "Red takes Overcharged Battery into hand.",
+    "Gray gets Pry Bar.",
+    "Gray takes Pry Bar into hand.",
+    "Outcome phase ends.",
+    "Cleanup phase starts.",
+    "Red discards Overdrive from their play zone.",
+    "Red discards Reckless Swing from their play zone.",
+    "Red discards Momentum Shift from their play zone.",
+    "Gray discards Quick Vault from their play zone.",
+    "Gray discards Pick The Lock from their play zone.",
+    "Gray discards Pick The Lock from their play zone.",
+    "Cleanup phase ends.",
+    "— end of turn 14 —",
+    "Turn Start phase starts.",
+    "Revealed: Pressurized Maintenance Hub, Automated Defense Turret, Pressurized Maintenance Hub.",
+    "You are in: Pressurized Maintenance Hub.",
+    "To the bottom of the Floor deck: Pressurized Maintenance Hub, Automated Defense Turret.",
+    "Red draws Overcharged Battery.",
+    "Red draws Shove.",
+    "Red draws Fast Follow.",
+    "Gray draws Pick The Lock.",
+    "Gray draws Duck Under.",
+    "Gray draws Hack the Doors.",
+    "Gray draws Pick The Lock.",
+    "Turn Start phase ends.",
+    "Play phase starts.",
+    "Gray pays with Duck Under, Exhausting it.",
+    "Gray plays Hack the Doors.",
+    "Hack the Doors triggers: A look at the Floor deck: Automated Defense Turret, Gears & Glitch, Pressurized Maintenance Hub.",
+    "Gray pays with Pry Bar, Pick The Lock, Exhausting them.",
+    "Gray plays Pick The Lock.",
+    "Red pays with Shove, Exhausting it.",
+    "Red plays Overcharged Battery.",
+    "Red plays Cross Punch.",
+    "Cross Punch triggers: Red Exhausts Charge.",
+    "Play phase ends.",
+    "Outcome phase starts.",
+    "Oomph 7 met — Red reveals a card reward.",
+    "Scramble 7 met — Gray reveals a card reward.",
+    "Pressurized Maintenance Hub is Cleared.",
+    "Pressurized Maintenance Hub triggers: Red's reward pool shows Brute Recycle, Set 'Em Up, Rhythm & Bruise.",
+    "Red takes Brute Recycle into their discard pile.",
+    "Pressurized Maintenance Hub triggers: Gray's reward pool shows Zen Mode, Hack the Doors, I'll Take That.",
+    "Gray takes Zen Mode into their discard pile.",
+    "Outcome phase ends.",
+    "Cleanup phase starts.",
+    "Red discards Overcharged Battery from their play zone.",
+    "Red discards Cross Punch from their play zone.",
+    "Gray discards Hack the Doors from their play zone.",
+    "Gray discards Pick The Lock from their play zone.",
+    "Cleanup phase ends.",
+    "— end of turn 15 —",
+    "Turn Start phase starts.",
+    "Revealed: Pressurized Maintenance Hub, Automated Defense Turret, Gears & Glitch.",
+    "You are in: Pressurized Maintenance Hub.",
+    "To the bottom of the Floor deck: Automated Defense Turret, Gears & Glitch.",
+    "Red draws Coil Of Cable.",
+    "Red draws Second Wind.",
+    "Red draws Fast Follow.",
+    "Gray draws I'll Take That.",
+    "Gray draws Work The Angles.",
+    "Gray draws Hit 'n Run.",
+    "Gray draws Pick The Lock.",
+    "Gray draws Pry Bar.",
+    "Turn Start phase ends.",
+    "Play phase starts.",
+    "Gray plays Pry Bar.",
+    "Red plays Fast Follow.",
+    "Red plays Fast Follow.",
+    "Red plays Coil Of Cable.",
+    "Gray pays with Work The Angles, Exhausting it.",
+    "Gray plays Hit 'n Run.",
+    "Hit 'n Run triggers: Gray shuffles 1 card back in.",
+    "Gray pays with Pick The Lock, Exhausting it.",
+    "Gray plays I'll Take That.",
+    "I'll Take That triggers: Red shuffles 1 card back in.",
+    "Play phase ends.",
+    "Outcome phase starts.",
+    "Oomph 7 met — Red reveals a card reward.",
+    "Scramble 7 met — Gray reveals a card reward.",
+    "Pressurized Maintenance Hub is Cleared.",
+    "Pressurized Maintenance Hub triggers: Red's reward pool shows Rhythm & Bruise, It Pays To Be Reckless, Tag Team.",
+    "Red takes Tag Team into their discard pile.",
+    "Pressurized Maintenance Hub triggers: Gray's reward pool shows Synergy Link, Pivot, One Man's Junk.",
+    "Gray takes Synergy Link into their discard pile.",
+    "Outcome phase ends.",
+    "Cleanup phase starts.",
+    "Red discards Fast Follow from their play zone.",
+    "Red discards Fast Follow from their play zone.",
+    "Red discards Coil Of Cable from their play zone.",
+    "Gray discards Pry Bar from their play zone.",
+    "Gray discards Hit 'n Run from their play zone.",
+    "Gray discards I'll Take That from their play zone.",
+    "Cleanup phase ends.",
+    "— end of turn 16 —",
+    "Turn Start phase starts.",
+    "Revealed: Automated Defense Turret, Automated Defense Turret, Gears & Glitch.",
+    "You are in: Automated Defense Turret.",
+    "To the bottom of the Floor deck: Gears & Glitch, Automated Defense Turret.",
+    "Red draws Shove.",
+    "Red draws Lean In.",
+    "Red draws Overdrive.",
+    "Red draws Reckless Swing.",
+    "Gray draws I Know Kung Fu.",
+    "Gray draws Hit 'n Run.",
+    "Gray draws Pry Bar.",
+    "Gray draws Peek Around Corner.",
+    "Gray draws Quick Vault.",
+    "Turn Start phase ends.",
+    "Play phase starts.",
+    "Gray plays Quick Vault.",
+    "Quick Vault triggers: Gray draws Duck Under.",
+    "Quick Vault triggers: Gray's deck is empty — the discard pile shuffles in to make a new one (10 cards).",
+    "Quick Vault triggers: Gray draws Pry Bar.",
+    "Gray pays with Pry Bar, Exhausting it.",
+    "Gray plays I Know Kung Fu.",
+    "Gray pays with Pry Bar, Exhausting it.",
+    "Gray plays Hit 'n Run.",
+    "Hit 'n Run triggers: Gray shuffles 1 card back in.",
+    "I Know Kung Fu triggers: Gray draws Pick The Lock.",
+    "Red plays Overdrive.",
+    "Overdrive triggers: Red Exhausts Momentum Shift.",
+    "Red pays with Shove, Exhausting it.",
+    "Red plays Lean In.",
+    "I Know Kung Fu triggers: Gray draws Quick Vault.",
+    "Gray plays Quick Vault.",
+    "Quick Vault triggers: Gray draws Pick The Lock.",
+    "Quick Vault triggers: Gray draws Synergy Link.",
+    "Gray pays with Peek Around Corner, Exhausting it.",
+    "Gray plays Synergy Link.",
+    "Synergy Link triggers: Gray draws Hit 'n Run.",
+    "Synergy Link triggers: Gray draws Hack the Doors.",
+    "I Know Kung Fu triggers: Gray draws Pick The Lock.",
+    "Gray pays with Duck Under, Exhausting it.",
+    "Gray plays Hack the Doors.",
+    "Hack the Doors triggers: A look at the Good Stuff pool: Pocket Dynamo, Pocket Dynamo, Duct Tape & Wire.",
+    "I Know Kung Fu triggers: Gray draws Zen Mode.",
+    "Play phase ends.",
+    "Outcome phase starts.",
+    "Scramble 8 met — Both players get Good Stuff.",
+    "Oomph 10 met — Both players may Scrap a card from their hand or discard pile.",
+    "Automated Defense Turret is Cleared.",
+    "Automated Defense Turret triggers: Red reveals Good Stuff: Pocket Dynamo, Duct Tape & Wire, Pocket Dynamo.",
+    "Automated Defense Turret triggers: Gray reveals Good Stuff: Emergency Breaker, Pocket Dynamo, Duct Tape & Wire.",
+    "Red gets Duct Tape & Wire.",
+    "Red takes Duct Tape & Wire into hand.",
+    "Gray gets Duct Tape & Wire.",
+    "Gray takes Duct Tape & Wire into hand.",
+    "Outcome phase ends.",
+    "Cleanup phase starts.",
+    "Red discards Overdrive from their play zone.",
+    "Red discards Lean In from their play zone.",
+    "Gray discards Quick Vault from their play zone.",
+    "Gray discards I Know Kung Fu from their play zone.",
+    "Gray discards Hit 'n Run from their play zone.",
+    "Gray discards Quick Vault from their play zone.",
+    "Gray discards Synergy Link from their play zone.",
+    "Gray discards Hack the Doors from their play zone.",
+    "Cleanup phase ends.",
+    "— end of turn 17 —",
+    "Turn Start phase starts.",
+    "Revealed: Gears & Glitch, Automated Defense Turret.",
+    "You are in: Gears & Glitch.",
+    "To the bottom of the Floor deck: Automated Defense Turret.",
+    "Red draws Charge.",
+    "Red draws Second Wind.",
+    "Turn Start phase ends.",
+    "Play phase starts.",
+    "Gray pays with Pick The Lock, Zen Mode, Exhausting them.",
+    "Gray plays Pick The Lock.",
+    "Gray pays with Duct Tape & Wire, Exhausting it.",
+    "Gray plays Hit 'n Run.",
+    "Hit 'n Run triggers: Gray shuffles 1 card back in.",
+    "Red pays with Charge, Exhausting it.",
+    "Red plays Duct Tape & Wire.",
+    "Red pays with Second Wind, Exhausting it.",
+    "Red plays Reckless Swing.",
+    "Reckless Swing triggers: Red Exhausts Shove.",
+    "Play phase ends.",
+    "Outcome phase starts.",
+    "Oomph 7 and Scramble 7 met — Ascend; one player reveals a card reward, and the other may Scrap a card from their hand or discard pile.",
+    "Gears & Glitch is Cleared.",
+    "Gears & Glitch triggers: Gray's reward pool shows Catch Your Breath, Covering Fire, Pivot.",
+    "Gray takes Pivot into their discard pile.",
+    "Lean In is Scrapped.",
+    "Outcome phase ends.",
+    "Cleanup phase starts.",
+    "Red discards Duct Tape & Wire from their play zone.",
+    "Red discards Reckless Swing from their play zone.",
+    "Gray discards Pick The Lock from their play zone.",
+    "Gray discards Hit 'n Run from their play zone.",
+    "Cleanup phase ends.",
+    "— end of turn 18 —",
+    "Floor 4 is clear.",
+    "Red shuffles 26 cards back in.",
+    "Gray shuffles 23 cards back in.",
+    "Floor 5 is built: 6 rooms.",
+    "Turn Start phase starts.",
+    "Revealed: Smoldering Armory, Bio-Hazard Containment Vault, The Monolith Core.",
+    "You are in: Smoldering Armory.",
+    "To the bottom of the Floor deck: The Monolith Core, Bio-Hazard Containment Vault.",
+    "Red draws Second Wind.",
+    "Red draws Momentum Shift.",
+    "Red draws Overdrive.",
+    "Red draws Reckless Swing.",
+    "Red draws Bull Rush.",
+    "Gray draws Pivot.",
+    "Gray draws Work The Angles.",
+    "Gray draws Duct Tape & Wire.",
+    "Gray draws I'll Take That.",
+    "Gray draws Pry Bar.",
+    "Turn Start phase ends.",
+    "Play phase starts.",
+    "Gray plays Pry Bar.",
+    "Gray pays with Work The Angles, Exhausting it.",
+    "Gray plays Duct Tape & Wire.",
+    "Red plays Overdrive.",
+    "Overdrive triggers: Red Exhausts Shove.",
+    "Red pays with Second Wind, Exhausting it.",
+    "Red plays Momentum Shift.",
+    "Momentum Shift triggers: Red draws Overcharged Battery.",
+    "Momentum Shift triggers: Red draws Brute Recycle.",
+    "Momentum Shift triggers: Red Exhausts Brute Recycle.",
+    "Red pays with Reckless Swing, Exhausting it.",
+    "Red plays Overcharged Battery.",
+    "Red plays Bull Rush.",
+    "Play phase ends.",
+    "Outcome phase starts.",
+    "Oomph 16 met — Both players reveal a card reward, and both players get Good Stuff.",
+    "Smoldering Armory is Cleared.",
+    "Smoldering Armory triggers: Red's reward pool shows Junk Launcher, Heavy Pockets, Fast Follow.",
+    "Red takes Fast Follow into their discard pile.",
+    "Smoldering Armory triggers: Gray's reward pool shows Pack Mule, Pack Mule, Sharing Is Caring.",
+    "Gray takes Pack Mule into their discard pile.",
+    "Smoldering Armory triggers: Red reveals Good Stuff: A Pair Of Stitch-Em-Ups, Salvaged Blueprint, Automated Salvage Kit.",
+    "Smoldering Armory triggers: Gray reveals Good Stuff: Stim Pack, Crowbar, Duct Tape & Wire.",
+    "Red gets Automated Salvage Kit.",
+    "Red takes Automated Salvage Kit into hand.",
+    "Gray gets Duct Tape & Wire.",
+    "Gray takes Duct Tape & Wire into hand.",
+    "Outcome phase ends.",
+    "Cleanup phase starts.",
+    "Red discards Overdrive from their play zone.",
+    "Red discards Momentum Shift from their play zone.",
+    "Red discards Overcharged Battery from their play zone.",
+    "Red discards Bull Rush from their play zone.",
+    "Gray discards Pry Bar from their play zone.",
+    "Gray discards Duct Tape & Wire from their play zone.",
+    "Cleanup phase ends.",
+    "— end of turn 19 —",
+    "Turn Start phase starts.",
+    "Revealed: Smoldering Armory, Laser Grid Security Hall, Laser Grid Security Hall.",
+    "You are in: Smoldering Armory.",
+    "To the bottom of the Floor deck: Laser Grid Security Hall, Laser Grid Security Hall.",
+    "Red draws Reckless Swing.",
+    "Red draws Charge.",
+    "Red draws Tag Team.",
+    "Red draws Overdrive.",
+    "Gray draws Duck Under.",
+    "Gray draws Pry Bar.",
+    "Turn Start phase ends.",
+    "Play phase starts.",
+    "Gray plays Pry Bar.",
+    "Gray pays with Duck Under, Exhausting it.",
+    "Gray plays Duct Tape & Wire.",
+    "Red pays with Charge, Exhausting it.",
+    "Red plays Tag Team.",
+    "Tag Team triggers: Red draws Second Wind.",
+    "Tag Team triggers: Gray draws Quick Vault.",
+    "Gray plays Quick Vault.",
+    "Quick Vault triggers: Gray draws Pick The Lock.",
+    "Quick Vault triggers: Gray draws Pick The Lock.",
+    "Gray pays with I'll Take That, Pick The Lock, Exhausting them.",
+    "Gray plays Pivot.",
+    "Red plays Reckless Swing.",
+    "Reckless Swing triggers: Red Exhausts Shove.",
+    "Red plays Overdrive.",
+    "Overdrive triggers: Red Exhausts Charge.",
+    "Play phase ends.",
+    "Outcome phase starts.",
+    "Oomph 16 met — Both players reveal a card reward, and both players get Good Stuff.",
+    "Smoldering Armory is Cleared.",
+    "Smoldering Armory triggers: Red's reward pool shows Tag Team, Break Through, Break Through.",
+    "Red takes Tag Team into their discard pile.",
+    "Smoldering Armory triggers: Gray's reward pool shows Catch Your Breath, In Step, In Step.",
+    "Gray takes In Step into their discard pile.",
+    "Smoldering Armory triggers: Red reveals Good Stuff: Scrap Magnet, Coil Of Cable, Scrap Magnet.",
+    "Smoldering Armory triggers: Gray reveals Good Stuff: Duct Tape & Wire, Grav Harness, Cutting Torch.",
+    "Red gets Coil Of Cable.",
+    "Red takes Coil Of Cable into hand.",
+    "Gray gets Duct Tape & Wire.",
+    "Gray takes Duct Tape & Wire into hand.",
+    "Outcome phase ends.",
+    "Cleanup phase starts.",
+    "Red discards Tag Team from their play zone.",
+    "Red discards Reckless Swing from their play zone.",
+    "Red discards Overdrive from their play zone.",
+    "Gray discards Pry Bar from their play zone.",
+    "Gray discards Duct Tape & Wire from their play zone.",
+    "Gray discards Quick Vault from their play zone.",
+    "Gray discards Pivot from their play zone.",
+    "Cleanup phase ends.",
+    "— end of turn 20 —",
+    "Turn Start phase starts.",
+    "Revealed: The Monolith Core, Bio-Hazard Containment Vault, Laser Grid Security Hall.",
+    "You are in: The Monolith Core.",
+    "To the bottom of the Floor deck: Laser Grid Security Hall, Bio-Hazard Containment Vault.",
+    "Red draws Coil Of Cable.",
+    "Red draws Overdrive.",
+    "Gray draws Peek Around Corner.",
+    "Gray draws Pick The Lock.",
+    "Gray draws Pick The Lock.",
+    "Turn Start phase ends.",
+    "Play phase starts.",
+    "Red pays with Second Wind, Exhausting it.",
+    "Red plays Automated Salvage Kit.",
+    "Gray pays with Pick The Lock, Peek Around Corner, Exhausting them.",
+    "Gray plays Pick The Lock.",
+    "Play phase ends.",
+    "Outcome phase starts.",
+    "You Flee The Monolith Core.",
+    "The Monolith Core triggers: Red Exhausts Duct Tape & Wire.",
+    "The Monolith Core triggers: Red Exhausts Fast Follow.",
+    "The Monolith Core triggers: Red Exhausts Momentum Shift.",
+    "The Monolith Core triggers: Red Exhausts Shove.",
+    "The Monolith Core triggers: Red Exhausts Fast Follow.",
+    "The Monolith Core triggers: Gray Exhausts I Know Kung Fu.",
+    "The Monolith Core triggers: Gray Exhausts Duck Under.",
+    "The Monolith Core triggers: Gray Exhausts Hit 'n Run.",
+    "The Monolith Core triggers: Gray Exhausts Synergy Link.",
+    "The Monolith Core triggers: Gray Exhausts Zen Mode.",
+    "Outcome phase ends.",
+    "Cleanup phase starts.",
+    "Red discards Automated Salvage Kit from their play zone.",
+    "Gray discards Pick The Lock from their play zone.",
+    "The Monolith Core goes to the bottom of the Floor deck.",
+    "Cleanup phase ends.",
+    "— end of turn 21 —",
+    "Turn Start phase starts.",
+    "Revealed: Laser Grid Security Hall, Laser Grid Security Hall, Bio-Hazard Containment Vault.",
+    "You are in: Laser Grid Security Hall.",
+    "To the bottom of the Floor deck: Laser Grid Security Hall, Bio-Hazard Containment Vault.",
+    "Red draws Charge.",
+    "Red draws Cross Punch.",
+    "Gray draws Quick Vault.",
+    "Gray draws I Know Kung Fu.",
+    "Gray draws Hit 'n Run.",
+    "Turn Start phase ends.",
+    "Play phase starts.",
+    "Play phase ends.",
+    "Outcome phase starts.",
+    "You Flee Laser Grid Security Hall.",
+    "Laser Grid Security Hall triggers: Red Exhausts Overcharged Battery.",
+    "Laser Grid Security Hall triggers: Red Exhausts Charge.",
+    "Laser Grid Security Hall triggers: Red Exhausts Reckless Swing.",
+    "Laser Grid Security Hall triggers: Red's deck is empty — the discard pile shuffles in to make a new one (10 cards).",
+    "Laser Grid Security Hall triggers: Red Exhausts Reckless Swing.",
+    "Laser Grid Security Hall triggers: Gray Exhausts Peek Around Corner.",
+    "Laser Grid Security Hall triggers: Gray Exhausts Duck Under.",
+    "Laser Grid Security Hall triggers: Gray Exhausts Hack the Doors.",
+    "Laser Grid Security Hall triggers: Gray Exhausts Pick The Lock.",
+    "Outcome phase ends.",
+    "Cleanup phase starts.",
+    "Laser Grid Security Hall goes to the bottom of the Floor deck.",
+    "Cleanup phase ends.",
+    "— end of turn 22 —",
+    "Turn Start phase starts.",
+    "Revealed: The Monolith Core, Laser Grid Security Hall, Bio-Hazard Containment Vault.",
+    "You are in: The Monolith Core.",
+    "To the bottom of the Floor deck: Laser Grid Security Hall, Bio-Hazard Containment Vault.",
+    "Turn Start phase ends.",
+    "Play phase starts.",
+    "Gray plays Quick Vault.",
+    "Quick Vault triggers: Gray draws Pry Bar.",
+    "Quick Vault triggers: Gray's deck is empty — the discard pile shuffles in to make a new one (9 cards).",
+    "Quick Vault triggers: Gray draws Pivot.",
+    "Gray pays with Hit 'n Run, Exhausting it.",
+    "Gray plays I Know Kung Fu.",
+    "Gray plays Pry Bar.",
+    "Gray pays with Pivot, Duct Tape & Wire, Exhausting them.",
+    "Gray plays Pick The Lock.",
+    "Red plays Coil Of Cable.",
+    "Red plays Coil Of Cable.",
+    "Red pays with Charge, Overdrive, Exhausting them.",
+    "Red plays Cross Punch.",
+    "Cross Punch triggers: Red Exhausts Momentum Shift.",
+    "Play phase ends.",
+    "Outcome phase starts.",
+    "Oomph 10 and Scramble 10 met — You Win!",
+    "The Monolith Core is Cleared.",
+    "Outcome phase ends.",
+    "Cleanup phase starts.",
+    "Red discards Coil Of Cable from their play zone.",
+    "Red discards Coil Of Cable from their play zone.",
+    "Red discards Cross Punch from their play zone.",
+    "Gray discards Quick Vault from their play zone.",
+    "Gray discards I Know Kung Fu from their play zone.",
+    "Gray discards Pry Bar from their play zone.",
+    "Gray discards Pick The Lock from their play zone.",
+    "Cleanup phase ends.",
+    "— end of turn 23 —",
+    "Floor 5 is clear.",
+    "You reach the rooftop. You win."
+  ]
+}

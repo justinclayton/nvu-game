@@ -18,6 +18,7 @@ export type ZoneId =
   | "scrap"
   | "red-rewards"
   | "gray-rewards"
+  | "revealed"
   | "red-offer"
   | "gray-offer"
   | "red-deck"
@@ -46,6 +47,7 @@ export const ZONE_SHAPE: Readonly<Record<ZoneId, ZoneShape>> = {
   scrap: "stack",
   "red-rewards": "stack",
   "gray-rewards": "stack",
+  revealed: "float",
   "red-offer": "float",
   "gray-offer": "float",
   "red-deck": "stack",
@@ -164,7 +166,16 @@ export function placements(state: GameState, debug = false): readonly Placement[
     (["Red", "Gray"] as const).flatMap((c) => offeredTo(state, c).map((x) => x.id)),
   );
 
-  rooms(state.floorDeck, "floor", true, false);
+  // Rooms revealed at Turn Start are lifted off the floor deck, face up, until one is entered.
+  const revealed = state.pending?.kind === "ChooseRoom" ? state.pending.options : [];
+  const revealedIds = new Set(revealed.map((r) => r.id));
+  rooms(
+    state.floorDeck.filter((r) => !revealedIds.has(r.id)),
+    "floor",
+    true,
+    false,
+  );
+  rooms(revealed, "revealed", false, true);
   if (state.activeRoom) rooms([state.activeRoom], "room", true, true);
   rooms(state.cleared, "cleared", false, true);
 

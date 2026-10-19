@@ -90,6 +90,28 @@ An answer that changes what the rulebook or cards say is the designer's to
 make on the branch; say so in the plan and leave the item blocked until the
 sources change.
 
+## A comment from the designer
+
+When "This run" says a comment started it, that comment is one of four
+things. Decide which, then act:
+
+- **An answer** to an open question. The plan you post drops the item's
+  `Blocked by:` line and says what the answer settled.
+- **An adjustment** to the code that stays within what the sources say, such
+  as "the log line should name the card too". Add an item for it under a new
+  slug, with criteria, and restate the rest of the plan.
+- **A request that changes what the rules or cards say.** The sources are the
+  authority, so this is not an item. Reply with `gh pr comment` in one or two
+  sentences saying the change belongs in `rulebook.md` or `cards.yaml` on the
+  branch, and that the next push will plan it. Then post the plan unchanged.
+- **Nothing to act on**, such as agreement, a thank-you, or a note to a third
+  party. Your whole final message is then the one line `No change to the
+  plan.` and nothing else; the job posts it and builds nothing.
+
+The thread may also hold comments on the diff, under "Comments on the
+diff". Treat each the same way; one on a line of code is usually an
+adjustment to the item whose commit wrote that line.
+
 ## On a later run
 
 - **Answered.** An item whose question the designer answered loses its

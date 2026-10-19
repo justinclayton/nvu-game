@@ -1,12 +1,15 @@
 # Steps 3 to 5 of the design loop (design/loop/spec.md): the planner and the
 # coder, both on the source PR. A push to a branch with an open PR to main
 # whose rulebook.md or cards.yaml differ from main, that PR's opened event, or
-# a comment on the PR from the designer while a question is open, runs the
-# planner. It reads what changed in the sources and the PR's thread, and posts
-# one plan comment listing the work as items, with each question for the
-# designer as a comment of its own. The coder then builds every unblocked item
-# as one commit on the PR's branch and, when every item is built and both
-# checks pass, marks the PR ready for review. Nothing here merges.
+# any comment on the PR from the designer, runs the planner. It reads what
+# changed in the sources and the PR's thread, and posts one plan comment
+# listing the work as items, with each question for the designer as a comment
+# of its own. A designer's comment can answer a question, ask for an
+# adjustment (a new item), or change nothing, and the planner says which. The
+# coder then builds every unblocked item as one commit on the PR's branch and,
+# when every item is built and both checks pass, marks the PR ready for
+# review; a PR with an item still to build goes back to draft. Nothing here
+# merges.
 #
 # Every write is nvu-agent's (NVU_AGENT_APP_ID, NVU_AGENT_PRIVATE_KEY). The
 # agents have no token and no git credentials: the job posts, commits and
@@ -26,6 +29,8 @@ on:
     branches: [main]
   issue_comment:
     types: [created]
+  pull_request_review_comment:
+    types: [created]
 
 permissions:
   contents: read
@@ -34,12 +39,14 @@ permissions:
 
 jobs:
   gate:
-    # Pushes and PR events from this repo only; a comment only from the
-    # designer, on an open PR to main, while a question is open on it.
+    # Pushes and PR events from this repo only; a comment, in the conversation
+    # or on the diff, only from the designer and only on an open PR to main.
     if: >-
       github.event_name == 'push'
       || (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository)
       || (github.event_name == 'issue_comment' && github.event.issue.pull_request != null
+          && github.event.comment.user.login == github.repository_owner)
+      || (github.event_name == 'pull_request_review_comment'
           && github.event.comment.user.login == github.repository_owner)
     runs-on: ubuntu-latest
     outputs:
@@ -47,6 +54,7 @@ jobs:
       branch: ${{ steps.pr.outputs.branch }}
       trigger: ${{ steps.pr.outputs.trigger }}
       comment: ${{ steps.pr.outputs.comment }}
+      kind: ${{ steps.pr.outputs.kind }}
     steps:
       - name: Which PR, and what started this?
         id: event
@@ -61,22 +69,22 @@ jobs:
             pull_request)
               echo "branch=$GITHUB_HEAD_REF" >> "$GITHUB_OUTPUT"
               echo "trigger=push" >> "$GITHUB_OUTPUT" ;;
-            issue_comment)
-              n=$(jq -r .issue.number "$GITHUB_EVENT_PATH")
+            issue_comment | pull_request_review_comment)
+              if [ "$GITHUB_EVENT_NAME" = issue_comment ]; then
+                n=$(jq -r .issue.number "$GITHUB_EVENT_PATH"); kind=issue
+              else
+                n=$(jq -r .pull_request.number "$GITHUB_EVENT_PATH"); kind=review
+              fi
               read -r state base fork branch < <(gh api "repos/$GITHUB_REPOSITORY/pulls/$n" \
                 --jq '[.state, .base.ref, (.head.repo.full_name != "'"$GITHUB_REPOSITORY"'"), .head.ref] | @tsv')
               if [ "$state" != open ] || [ "$base" != main ] || [ "$fork" = true ]; then
                 echo "#$n is not an open PR to main from this repo."
                 exit 0
               fi
-              if ! gh api --paginate "repos/$GITHUB_REPOSITORY/issues/$n/comments" --jq '.[].body' \
-                  | grep -q '<!-- nvu-loop: question '; then
-                echo "No question is open on #$n: the comment is not an answer."
-                exit 0
-              fi
               echo "branch=$branch" >> "$GITHUB_OUTPUT"
               echo "trigger=comment" >> "$GITHUB_OUTPUT"
-              echo "comment=$(jq -r .comment.id "$GITHUB_EVENT_PATH")" >> "$GITHUB_OUTPUT" ;;
+              echo "comment=$(jq -r .comment.id "$GITHUB_EVENT_PATH")" >> "$GITHUB_OUTPUT"
+              echo "kind=$kind" >> "$GITHUB_OUTPUT" ;;
           esac
 
       - uses: actions/checkout@v4
@@ -98,6 +106,7 @@ jobs:
           BRANCH: ${{ steps.event.outputs.branch }}
           TRIGGER: ${{ steps.event.outputs.trigger }}
           COMMENT: ${{ steps.event.outputs.comment }}
+          KIND: ${{ steps.event.outputs.kind }}
           BEFORE: ${{ github.event.before }}
         run: |
           set -eu
@@ -119,6 +128,7 @@ jobs:
             echo "branch=$BRANCH"
             echo "trigger=$TRIGGER"
             echo "comment=$COMMENT"
+            echo "kind=$KIND"
           } >> "$GITHUB_OUTPUT"
 
   loop:
@@ -136,6 +146,7 @@ jobs:
       BRANCH: ${{ needs.gate.outputs.branch }}
       TRIGGER: ${{ needs.gate.outputs.trigger }}
       COMMENT: ${{ needs.gate.outputs.comment }}
+      KIND: ${{ needs.gate.outputs.kind }}
       DESIGNER: ${{ github.repository_owner }}
       RUN: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
     steps:
@@ -196,10 +207,20 @@ jobs:
           FIRST: ${{ steps.range.outputs.first }}
         run: |
           set -eu
-          # The thread, without the job's own start, build and playtest notes.
+          # The thread, without the job's own start, build and playtest notes,
+          # then the designer's comments on the diff.
           gh api --paginate "repos/$GITHUB_REPOSITORY/issues/$PR/comments" \
             --jq '.[] | select(.body | test("<!-- nvu-loop: (plan-start|build|playtest)") | not)
                  | "#### \(.user.login), \(.created_at[:16])\n\n\(.body)\n"' > "$RUNNER_TEMP/thread.md"
+          gh api --paginate "repos/$GITHUB_REPOSITORY/pulls/$PR/comments" \
+            --jq '.[] | "#### \(.user.login), \(.created_at[:16]), on `\(.path)`\(if .line then " line \(.line)" else "" end)\n\n\(.body)\n"' > "$RUNNER_TEMP/review-comments.md"
+          if [ "$TRIGGER" = comment ]; then
+            if [ "$KIND" = review ]; then
+              gh api "repos/$GITHUB_REPOSITORY/pulls/comments/$COMMENT" --jq '"On `\(.path)`\(if .line then " line \(.line)" else "" end):\n\n\(.body)"'
+            else
+              gh api "repos/$GITHUB_REPOSITORY/issues/comments/$COMMENT" --jq .body
+            fi > "$RUNNER_TEMP/started-by.md"
+          fi
           {
             cat .github/loop/plan.md
             echo
@@ -210,7 +231,9 @@ jobs:
             echo "- Read the sources from \`$FROM\` to \`$SHA\`$( [ "$FIRST" = true ] && echo ' (where the branch left main: this is the first plan)' || echo ' (the commit the last plan read)')."
             echo "- The designer: \`$DESIGNER\`"
             if [ "$TRIGGER" = comment ]; then
-              echo "- Started by: a comment from the designer, the last one in the thread below."
+              echo "- Started by: this comment from the designer:"
+              echo
+              sed 's/^/  > /' "$RUNNER_TEMP/started-by.md"
             else
               echo "- Started by: a push to the branch."
             fi
@@ -218,6 +241,12 @@ jobs:
             echo "## The PR's thread so far"
             echo
             if [ -s "$RUNNER_TEMP/thread.md" ]; then cat "$RUNNER_TEMP/thread.md"; else echo "(no comments yet)"; fi
+            if [ -s "$RUNNER_TEMP/review-comments.md" ]; then
+              echo
+              echo "## Comments on the diff"
+              echo
+              cat "$RUNNER_TEMP/review-comments.md"
+            fi
           } > "$RUNNER_TEMP/plan-prompt.md"
 
       - name: Say the plan has started
@@ -279,7 +308,14 @@ jobs:
             echo "The planner did not finish; posting nothing. The transcript is on the run."
             exit 1
           fi
-          printf '%s\n\n%s\n' "$result" "$MARKER" > "$RUNNER_TEMP/plan-comment.md"
+          marker=$MARKER
+          case "$result" in
+            "No change to the plan"*)
+              # The build reads only plan comments whose marker ends in the sha or comment id.
+              marker="${MARKER% -->} unchanged -->"
+              echo "unchanged=true" >> "$GITHUB_OUTPUT" ;;
+          esac
+          printf '%s\n\n%s\n' "$result" "$marker" > "$RUNNER_TEMP/plan-comment.md"
           gh api -X POST "repos/$GITHUB_REPOSITORY/issues/$PR/comments" \
             -F body=@"$RUNNER_TEMP/plan-comment.md" --jq '"posted \(.html_url)"'
 
@@ -305,6 +341,7 @@ jobs:
 
       - name: Read the newest plan's items
         id: items
+        if: steps.post.outputs.unchanged != 'true'
         env:
           GH_TOKEN: ${{ steps.build-token.outputs.token }}
           BOT: ${{ steps.range.outputs.bot }}
@@ -312,7 +349,7 @@ jobs:
           set -eu
           # Comments come oldest first, so the last plan comment is the newest plan.
           gh api --paginate --slurp "repos/$GITHUB_REPOSITORY/issues/$PR/comments" \
-            --jq "[.[][] | select(.user.login == \"$BOT\") | select(.body | test(\"<!-- nvu-loop: plan [0-9a-f]{40}\"))] | last | .body // empty" \
+            --jq "[.[][] | select(.user.login == \"$BOT\") | select(.body | test(\"<!-- nvu-loop: plan [0-9a-f]{40}( comment [0-9]+)? -->\"))] | last | .body // empty" \
             > "$RUNNER_TEMP/plan.md"
           if [ ! -s "$RUNNER_TEMP/plan.md" ]; then
             echo "No plan is posted on #$PR: nothing to build."
@@ -469,18 +506,23 @@ jobs:
           set -eu
           marker="<!-- nvu-loop: build $FINAL -->"
           ready=false
+          draft=$(gh api "repos/$GITHUB_REPOSITORY/pulls/$PR" --jq .draft)
           if [ "$BLOCKED" = 0 ] && [ "$FAILED" = 0 ] && [ "$CHECK" = pass ] && [ "$APP" = pass ]; then
             ready=true
-            if [ "$(gh api "repos/$GITHUB_REPOSITORY/pulls/$PR" --jq .draft)" = true ]; then
+            if [ "$draft" = true ]; then
               gh pr ready "$PR"
               echo "#$PR is ready for review."
             fi
+          elif [ "$draft" = false ]; then
+            # Ready means every item is built and both checks pass; a new item or a failure takes it back.
+            gh pr ready --undo "$PR"
+            echo "#$PR is a draft again."
           fi
           {
             if [ "$ready" = true ]; then
               printf 'Built: every item is in, both checks pass, and the PR is ready for review. [Run](%s)\n\n' "$RUN"
             else
-              printf 'Build stopped short: the PR stays a draft. [Run](%s)\n\n' "$RUN"
+              printf 'Build stopped short: the PR is a draft until every item is built and both checks pass. [Run](%s)\n\n' "$RUN"
             fi
             printf '%s\n\n' "$( [ -s "$RUNNER_TEMP/build-summary.md" ] && cat "$RUNNER_TEMP/build-summary.md" || echo '- The plan has no items.')"
             # shellcheck disable=SC2016

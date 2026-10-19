@@ -21,6 +21,7 @@ import {
   resetRig,
   rig,
   room,
+  goodStuffTurnstile,
 } from "./__fixtures__/rig";
 import type { CardId, Character, Command, DomainEvent, GameState } from "./types";
 import type { Ran } from "./__fixtures__/rig";
@@ -107,7 +108,7 @@ describe("a reaction resolves where its event happens", () => {
   it("Crowbar in the play zone: the bonus piece lands before Cleanup begins", () => {
     const state = rig({
       phase: "Play",
-      activeRoom: room("Security Turnstile"),
+      activeRoom: goodStuffTurnstile(),
       Red: player({
         deck: pile("Shove", 4),
         hand: [card("Crowbar"), card("Shove"), card("Shove"), card("Pry Bar")],

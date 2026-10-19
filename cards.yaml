@@ -29,7 +29,7 @@
 #   flee    string               room and stairwell only: the printed Flee line
 
 meta:
-  version: C50
+  version: C51
   updated: 2026-10-03
 
 cards:
@@ -699,16 +699,16 @@ cards:
     set: proposed
     kind: room
     tier: 1
-    flavor: A rusted barrier blocks the thoroughfare. You can slip through quietly or tear it off its hinges.
+    flavor: A rusted barrier blocks the thoroughfare. Gray can slip through quietly, or Red can tear it off its hinges.
     challenges:
       - thresholds:
           - stat: Scramble
-            value: 3
-            outcome: Clear.
+            value: 5
+            outcome: Gray reveals a card reward.
       - thresholds:
           - stat: Oomph
             value: 5
-            outcome: Clear, and Red gets Good Stuff.
+            outcome: Red reveals a card reward.
     flee: Both players Exhaust 1.
 
   - name: Flooded Ventilation Shaft
@@ -719,12 +719,8 @@ cards:
     flavor: A narrow duct dripping with murky condensation. Red can force the grate while Gray navigates the wiring.
     challenges:
       - thresholds:
-          - stat: Scramble
-            value: 4
-            outcome: Clear.
-      - thresholds:
           - stats: { Oomph: 3, Scramble: 3 }
-            outcome: Clear, and both players get Good Stuff.
+            outcome: Both players reveal a card reward.
     flee: Gray Exhausts 2.
 
   - name: The Sentry Drone
@@ -736,15 +732,12 @@ cards:
     challenges:
       - thresholds:
           - stat: Oomph
-            value: 6
+            value: 8
             outcome: Ascend, and both players reveal a card reward.
       - thresholds:
           - stat: Scramble
-            value: 6
-            outcome: Ascend, and both players reveal a card reward.
-      - thresholds:
-          - stats: { Oomph: 4, Scramble: 4 }
-            outcome: Ascend; both players reveal a card reward, and both players get 2 Good Stuff!
+            value: 8
+            outcome: Ascend, and both players may Scrap a card from their hand or discard pile.
     flee: Both players Exhaust 1, and both players get Bad Stuff.
 
   ## Band 2 (floors 4–6)
@@ -759,11 +752,11 @@ cards:
       - thresholds:
           - stat: Scramble
             value: 8
-            outcome: Clear, and Gray gets Good Stuff.
+            outcome: Both players get Good Stuff.
       - thresholds:
           - stat: Oomph
             value: 10
-            outcome: Clear, and one player may Scrap a Bad Stuff card from their hand.
+            outcome: Both players may Scrap a card from their hand or discard pile.
     flee: Both players Exhaust 2, and both players get Bad Stuff.
 
   - name: Pressurized Maintenance Hub
@@ -776,11 +769,11 @@ cards:
       - thresholds:
           - stat: Oomph
             value: 7
-            outcome: Clear, and Red reveals a card reward.
+            outcome: Red reveals a card reward.
       - thresholds:
           - stat: Scramble
             value: 7
-            outcome: Clear, and Gray reveals a card reward.
+            outcome: Gray reveals a card reward.
     flee: Both players Exhaust 2.
 
   - name: Overgrown Hydroponics Bay
@@ -792,12 +785,9 @@ cards:
     challenges:
       - thresholds:
           - stat: Scramble
-            value: 6
-            outcome: Clear, but both players get Bad Stuff.
-          - stat: Scramble
             value: 11
-            outcome: Clear, and both players get Good Stuff.
-    flee: Both players Exhaust 2, and Gray gets Bad Stuff.
+            outcome: Both players get Good Stuff.
+    flee: Both players Exhaust 2, and both players get Bad Stuff.
 
   - name: Gears & Glitch
     count: 3
@@ -812,8 +802,8 @@ cards:
             outcome: Ascend, and both players reveal a card reward.
       - thresholds:
           - stats: { Oomph: 7, Scramble: 7 }
-            outcome: Ascend, and one player reveals a card reward.
-    flee: Both players Exhaust 3, and Red gets Bad Stuff.
+            outcome: Ascend; one player reveals a card reward, and the other may Scrap a card from their hand or discard pile.
+    flee: Both players Exhaust 3, and both players get Bad Stuff.
 
   ## Band 3 (floors 7–9)
 
@@ -827,11 +817,7 @@ cards:
       - thresholds:
           - stat: Scramble
             value: 14
-            outcome: Clear, and Gray reveals a card reward.
-      - thresholds:
-          - stat: Oomph
-            value: 18
-            outcome: Clear, but both players Exhaust 2.
+            outcome: Both players reveal a card reward.
     flee: Both players Exhaust 4.
 
   - name: Bio-Hazard Containment Vault
@@ -845,11 +831,11 @@ cards:
       - thresholds:
           - stat: Oomph
             value: 15
-            outcome: Clear, and one player reveals a card reward.
+            outcome: One player reveals a card reward, and the other may Scrap a card from their hand or discard pile.
       - thresholds:
           - stat: Scramble
             value: 15
-            outcome: Clear, and one player reveals a card reward.
+            outcome: One player reveals a card reward, and the other may Scrap a card from their hand or discard pile.
     flee: Both players get 2 Bad Stuff, and both players Exhaust 2.
 
   - name: Smoldering Armory
@@ -862,11 +848,11 @@ cards:
       - thresholds:
           - stat: Oomph
             value: 10
-            outcome: Clear, and Red gets Good Stuff.
+            outcome: Both players get Good Stuff.
           - stat: Oomph
             value: 16
-            outcome: Clear; both players reveal a card reward, and both players get Good Stuff.
-    flee: Red Exhausts 5.
+            outcome: Both players reveal a card reward, and both players get Good Stuff.
+    flee: Both players Exhaust 3.
 
   - name: The Iron Sentinel
     count: 3

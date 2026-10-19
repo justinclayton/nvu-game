@@ -36,17 +36,18 @@ export type CardSet = "official" | "proposed";
  * threshold outcomes are lists of these, so the engine never parses prose.
  *
  * `who: "one"` means the team chooses which character, and that character
- * takes all of it. There is no splitting.
+ * takes all of it. There is no splitting. `who: "other"` is the character
+ * `"one"` did not choose in the effect just before it.
  */
-export type EffectTarget = Character | "one" | "both";
+export type EffectTarget = Character | "one" | "both" | "other";
 
 export type RoomEffect =
   | { readonly type: "ExhaustFromDeck"; readonly who: EffectTarget; readonly amount: number }
   | { readonly type: "DealBadStuff"; readonly who: EffectTarget; readonly count: number }
   | { readonly type: "TakeGoodStuff"; readonly who: EffectTarget; readonly count: number }
   | { readonly type: "RevealReward"; readonly who: EffectTarget }
-  /** "One of you may Scrap a Bad Stuff card from your hand" — always declinable. */
-  | { readonly type: "ScrapBadStuffFromHand"; readonly who: EffectTarget; readonly optional: boolean };
+  /** Always declinable. */
+  | { readonly type: "ScrapFromHandOrDiscard"; readonly who: EffectTarget };
 
 /**
  * What a threshold asks of the shared pool: an Oomph amount, a Scramble

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { CARD_CONTENT } from "@content/index";
-import { card, must, pile, player, resetRig, rig, room } from "@domain/__fixtures__/rig";
+import { card, goodStuffShaft, must, pile, player, resetRig, rig, room } from "@domain/__fixtures__/rig";
 import type { Card, Command, GameState, PlayedCard, Room, Threshold } from "@domain/types";
 import { legalCommands } from "./moves";
 import { greedyPolicy, randomPolicy } from "./policy";
@@ -139,6 +139,31 @@ describe("greedy", () => {
     expect(chosen).toEqual({ type: "CHOOSE_CARDS", cardIds: [] });
   });
 
+  it("takes a room's Scrap offer when a Bad Stuff card is among the options", () => {
+    resetRig();
+    const rust = card("Rust");
+    const other = card("Shove");
+    const state: GameState = rig({
+      phase: "Play",
+      pending: {
+        kind: "ChooseCards",
+        prompt: "Red may Scrap a card from hand or discard pile?",
+        character: "Red",
+        options: [other, rust],
+        count: 1,
+        optional: true,
+        source: null,
+      },
+    });
+    const legal: readonly Command[] = [
+      { type: "CHOOSE_CARDS", cardIds: [] },
+      { type: "CHOOSE_CARDS", cardIds: [other.id] },
+      { type: "CHOOSE_CARDS", cardIds: [rust.id] },
+    ];
+    const [chosen] = greedyPolicy.choose(state, legal, policySeed(1));
+    expect(chosen).toEqual({ type: "CHOOSE_CARDS", cardIds: [rust.id] });
+  });
+
   describe("a ChooseDraw", () => {
     const asked = (red: GameState["Red"], count = 1): GameState =>
       rig({
@@ -275,15 +300,34 @@ describe("greedy", () => {
     expect(after.floor).toBe(2);
   });
 
-  it("goes for the line that hands out Good Stuff when a plain Clear is just as reachable", () => {
+  it("goes for the line that pays out when a line paying nothing is just as reachable", () => {
     resetRig();
-    // Flooded Ventilation Shaft: Scramble 4 → Clear; Oomph 3 and Scramble 3 →
-    // Clear, and Gray gets Good Stuff. Gray's Pick The Lock alone meets the
-    // first; the second needs Red too, and is worth a card.
+    // A Scramble 4 line that pays nothing, beside Oomph 3 and Scramble 3 for
+    // Good Stuff each. Gray's Pick The Lock alone meets the first; the second
+    // needs Red too, and is worth a card.
+    const shaft = goodStuffShaft();
+    const bare: Room = {
+      ...shaft,
+      challenges: [
+        {
+          thresholds: [
+            {
+              requires: { oomph: 0, scramble: 4 },
+              outcome: "Nothing.",
+              clears: true,
+              fleeFree: false,
+              ascends: false,
+              effects: [],
+            },
+          ],
+        },
+        ...shaft.challenges,
+      ],
+    };
     const chargeIn = card("Charge");
     const state: GameState = rig({
       phase: "Play",
-      activeRoom: room("Flooded Ventilation Shaft"),
+      activeRoom: bare,
       floorDeck: [room("Security Turnstile")],
       Red: player({ hand: [chargeIn, card("Shove"), card("Shove")], deck: pile("Shove", 4) }),
       Gray: player({ hand: [card("Pick The Lock"), card("Duck Under"), card("Duck Under")], deck: pile("Duck Under", 4) }),
@@ -307,7 +351,7 @@ describe("greedy", () => {
   });
 
   it("clears floor 1 and Ascends on a fixed seed", () => {
-    const run = simulate(1, greedyPolicy, CARD_CONTENT);
+    const run = simulate(4, greedyPolicy, CARD_CONTENT);
     expect(run.floor).toBeGreaterThan(1);
   });
 

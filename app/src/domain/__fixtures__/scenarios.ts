@@ -11,7 +11,7 @@
  */
 
 import type { DomainEvent, GameState } from "../types";
-import { card, must, pile, play, player, resetRig, rig, room, type Ran } from "./rig";
+import { card, goodStuffShaft, must, pile, play, player, resetRig, rig, room, type Ran } from "./rig";
 
 export interface Fixture {
   readonly name: string;
@@ -104,7 +104,7 @@ function momentumShiftDraw(): GameState {
   }).state;
 }
 
-/** A pending `ChooseCards`: Automated Defense Turret's Scrap offer asks whether to. */
+/** A pending `ChooseCards`: Automated Defense Turret asks Gray whether to Scrap a card. */
 function choosingCards(): GameState {
   const state = rig({
     phase: "Play",
@@ -122,15 +122,14 @@ function choosingCards(): GameState {
     { type: "PLAY_CARD", character: "Red", cardId: r[2]!.id, payWith: [] },
     { type: "END_PLAY" },
   ]);
-  const { state: asked } = must(afterPlay, { type: "CHOOSE_CHARACTER", character: "Gray" });
-  return asked;
+  return afterPlay;
 }
 
-/** A pending `ChooseGoodStuff`: Flooded Ventilation Shaft paid both players, and both spreads are face up. */
+/** A pending `ChooseGoodStuff`: a Flooded Ventilation Shaft that pays both players Good Stuff, and both spreads are face up. */
 function goodStuffSpread(): GameState {
   const state = rig({
     phase: "Play",
-    activeRoom: room("Flooded Ventilation Shaft"),
+    activeRoom: goodStuffShaft(),
     Red: player({ deck: pile("Shove", 5), hand: [card("Pry Bar"), card("Coil Of Cable")] }),
     Gray: player({ deck: pile("Duck Under", 5) }),
   });
@@ -164,7 +163,7 @@ function cardReward(): GameState {
   return asked;
 }
 
-/** A pending `TakeReward` printed by a Stairwell: The Sentry Drone's Oomph 6 line, Red first. */
+/** A pending `TakeReward` printed by a Stairwell: The Sentry Drone's Oomph 8 line, Red first. */
 function stairwellReward(): GameState {
   const state = rig({
     phase: "Play",
@@ -186,23 +185,21 @@ function stairwellReward(): GameState {
   return asked;
 }
 
-/** A pending `ChooseCharacter` raised at Outcome: The Sentry Drone's Scramble line asks who gets Good Stuff. */
+/** A pending `ChooseCharacter` raised at Outcome: Gears & Glitch's Oomph 7 and Scramble 7 line asks who reveals the card reward. */
 function outcomeChoice(): GameState {
   const state = rig({
     phase: "Play",
-    activeRoom: room("The Sentry Drone"),
-    Red: player({ deck: pile("Shove", 5) }),
+    floor: 1,
+    activeRoom: room("Gears & Glitch"),
+    Red: player({ deck: pile("Shove", 5), hand: pile("Pry Bar", 3) }),
     Gray: player({
       deck: pile("Duck Under", 5),
       hand: pile("Coil Of Cable", 3),
     }),
   });
-  const [first, second, third] = state.Gray.hand;
-  if (!first || !second || !third) throw new Error("rig");
+  const plays = [...state.Red.hand.map((c) => ["Red", c.id] as const), ...state.Gray.hand.map((c) => ["Gray", c.id] as const)];
   const { state: asked } = play(state, [
-    { type: "PLAY_CARD", character: "Gray", cardId: first.id, payWith: [] },
-    { type: "PLAY_CARD", character: "Gray", cardId: second.id, payWith: [] },
-    { type: "PLAY_CARD", character: "Gray", cardId: third.id, payWith: [] },
+    ...plays.map(([character, cardId]) => ({ type: "PLAY_CARD" as const, character, cardId, payWith: [] })),
     { type: "END_PLAY" },
   ]);
   return asked;
@@ -363,7 +360,7 @@ export const FIXTURES: readonly Fixture[] = [
   },
   {
     name: "choose-cards",
-    description: "Automated Defense Turret's Scrap offer pending a ChooseCards answer.",
+    description: "Automated Defense Turret's Scrap offer to Gray pending a ChooseCards answer.",
     build: stable(choosingCards),
   },
   {

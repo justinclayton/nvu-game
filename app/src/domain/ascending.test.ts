@@ -64,7 +64,7 @@ function atStairwell(stairwell: Room, over: Partial<GameState> = {}): GameState 
   });
 }
 
-/** Play the Oomph 6 line and end Play. */
+/** Play the Oomph 8 line and end Play. */
 function clearIt(state: GameState): Ran {
   const [charge, payA, payB, pryA, pryB] = state.Red.hand;
   if (!charge || !payA || !payB || !pryA || !pryB) throw new Error("rig");
@@ -125,6 +125,42 @@ describe("Ascending, the reward comes from the outcome", () => {
     const owner = first.character;
     expect(next[owner].deck.some((c) => c.id === taken.id)).toBe(true);
     expect(next.pools[owner].some((c) => c.id === taken.id)).toBe(false);
+  });
+
+  it("meeting both Sentry Drone challenges pays a reward to both, then offers both a Scrap, before Ascending", () => {
+    const state = atStairwell(room("The Sentry Drone"), {
+      Gray: player({
+        deck: pile("Duck Under", 4),
+        hand: pile("Coil Of Cable", 3),
+        discard: pile("Pick The Lock", 3),
+      }),
+    });
+    const [charge, payA, payB, pryA, pryB] = state.Red.hand;
+    if (!charge || !payA || !payB || !pryA || !pryB) throw new Error("rig");
+    const played = play(state, [
+      { type: "PLAY_CARD", character: "Red", cardId: charge.id, payWith: [payA.id, payB.id] },
+      { type: "PLAY_CARD", character: "Red", cardId: pryA.id, payWith: [] },
+      { type: "PLAY_CARD", character: "Red", cardId: pryB.id, payWith: [] },
+      ...state.Gray.hand.map((c) => ({ type: "PLAY_CARD" as const, character: "Gray" as const, cardId: c.id, payWith: [] })),
+      { type: "END_PLAY" },
+    ]);
+    const rewarded = declineEvery(played);
+    expect(eventTypes(rewarded.events).filter((t) => t === "REWARD_REVEALED")).toHaveLength(2);
+
+    const redOffer = rewarded.state.pending;
+    if (redOffer?.kind !== "ChooseCards") throw new Error("expected Red's Scrap offer");
+    expect(redOffer.character).toBe("Red");
+    const scrapped = redOffer.options[0];
+    if (!scrapped) throw new Error("rig");
+    const { state: grayAsked } = must(rewarded.state, { type: "CHOOSE_CARDS", cardIds: [scrapped.id] });
+    const grayOffer = grayAsked.pending;
+    if (grayOffer?.kind !== "ChooseCards") throw new Error("expected Gray's Scrap offer");
+    expect(grayOffer.character).toBe("Gray");
+
+    const { state: next } = must(grayAsked, { type: "CHOOSE_CARDS", cardIds: [] });
+    expect(next.floor).toBe(2);
+    expect(next.scrapyard.map((c) => c.id)).toEqual([scrapped.id]);
+    expect(next.Red.deck.some((c) => c.id === scrapped.id)).toBe(false);
   });
 
   it("the revealed reward names the Stairwell that printed it", () => {

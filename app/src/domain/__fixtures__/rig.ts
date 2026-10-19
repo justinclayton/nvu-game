@@ -57,6 +57,55 @@ export function room(name: string): Room {
   return mintRoom(face, counter);
 }
 
+/** Security Turnstile with its Oomph 5 line paying Red Good Stuff, for tests of Good Stuff arriving at Outcome. */
+export function goodStuffTurnstile(): Room {
+  const printed = room("Security Turnstile");
+  return {
+    ...printed,
+    challenges: printed.challenges.map((challenge) => ({
+      thresholds: challenge.thresholds.map((t) =>
+        t.requires.oomph > 0
+          ? {
+              ...t,
+              outcome: "Red gets Good Stuff.",
+              effects: [{ type: "TakeGoodStuff", who: "Red", count: 1 } as const],
+            }
+          : t,
+      ),
+    })),
+  };
+}
+
+/** Flooded Ventilation Shaft with its Oomph 3 and Scramble 3 line paying both players Good Stuff. */
+export function goodStuffShaft(): Room {
+  const printed = room("Flooded Ventilation Shaft");
+  return {
+    ...printed,
+    challenges: printed.challenges.map((challenge) => ({
+      thresholds: challenge.thresholds.map((t) => ({
+        ...t,
+        outcome: "Both players get Good Stuff.",
+        effects: [{ type: "TakeGoodStuff", who: "both", count: 1 } as const],
+      })),
+    })),
+  };
+}
+
+/** Security Turnstile with Scramble 3 and Oomph 5 lines that pay nothing, for tests that need a room to Clear. */
+export function plainTurnstile(): Room {
+  const printed = room("Security Turnstile");
+  return {
+    ...printed,
+    challenges: printed.challenges.map((challenge) => ({
+      thresholds: challenge.thresholds.map((t) => ({
+        ...t,
+        requires: t.requires.scramble > 0 ? { oomph: 0, scramble: 3 } : t.requires,
+        effects: [],
+      })),
+    })),
+  };
+}
+
 export const player = (over: Partial<PlayerState> = {}): PlayerState => ({
   deck: [],
   hand: [],
@@ -185,7 +234,7 @@ export const playing = (over: Partial<GameState> = {}): GameState =>
     ...over,
   });
 
-/** Play phase at Smoldering Armory (Flee: Red Exhausts 5), both decks and discard piles empty: one Exhaust away from Going Down. */
+/** Play phase at Smoldering Armory (Flee: Both players Exhaust 3), both decks and discard piles empty: one Exhaust away from Going Down. */
 export const goingDown = (hand: readonly Card[] = []): GameState =>
   rig({
     phase: "Play",

@@ -95,7 +95,7 @@ function effectsValue(effects: readonly RoomEffect[]): number {
         value += heads * e.count;
         break;
       case "RevealReward":
-      case "ScrapBadStuffFromHand":
+      case "ScrapFromHandOrDiscard":
         value += 1;
         break;
     }
@@ -372,9 +372,12 @@ function choosePending(state: GameState, legal: readonly Command[]): Command {
     // same as the comment above always meant to (e.g. Level Up's "Scrap a
     // card?" is a bad trade the moment the Rewards pool it draws from is
     // empty, and this prompt carries nothing that says which case it is).
+    const roomScrap = pending.source === null && pending.optional;
     const wanted = pending.optional ? 0 : Math.min(pending.count, pending.options.length);
-    const desired =
-      wanted === 0
+    const worst = roomScrap ? pending.options.find((c) => c.kind === "bad_stuff") : undefined;
+    const desired = worst
+      ? [worst]
+      : wanted === 0
         ? []
         : [...pending.options]
             .sort((a, b) => a.cost - b.cost || a.id.localeCompare(b.id))

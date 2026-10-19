@@ -323,6 +323,7 @@ function who(word) {
   const w = word.trim().toLowerCase();
   if (w === "both players" || w === "both") return "both";
   if (w === "one player" || w === "one") return "one";
+  if (w === "the other") return "other";
   if (w === "red") return "Red";
   if (w === "gray") return "Gray";
   throw new Error(`unrecognised target: "${word}"`);
@@ -333,7 +334,6 @@ function who(word) {
 const CLAUSES = [
   [/^(?:and )?ascend$/i, () => ({ clears: true, ascends: true })],
   [/^you win$/i, () => ({ clears: true, ascends: true })],
-  [/^(?:and )?clear(?: the room)?$/i, () => ({ clears: true })],
   [/^(?:and )?flee this room for free$/i, () => ({ fleeFree: true })],
   [/^(?:and )?leave empty-handed$/i, () => ({})],
   [
@@ -353,8 +353,8 @@ const CLAUSES = [
     (m) => ({ effect: { type: "RevealReward", who: who(m[1]) } }),
   ],
   [
-    /^(both players|one player|red|gray) may scrap a bad stuff card from (?:your|their) hand$/i,
-    (m) => ({ effect: { type: "ScrapBadStuffFromHand", who: who(m[1]), optional: true } }),
+    /^(both players|one player|the other|red|gray) may scrap a card from (?:your|their) hand or discard pile$/i,
+    (m) => ({ effect: { type: "ScrapFromHandOrDiscard", who: who(m[1]) } }),
   ],
 ];
 

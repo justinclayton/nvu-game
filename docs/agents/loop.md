@@ -141,9 +141,10 @@ The prompt is [`.github/loop/layer.md`](../../.github/loop/layer.md).
   `Source PR: #n` line. The planner writes that line. The `gate` job, on a
   GitHub-hosted runner, stops unless the issue has no open blocker and PR `#n`
   is an open PR to `main` from this repo, then finds the stack by following
-  open PRs based on each branch. A blocked issue is skipped: once its blockers
-  close, remove and add `ready-for-agent` to start it. A labeled event needs
-  write access, so a fork cannot start it.
+  open PRs based on each branch. A blocked issue is skipped. When an issue
+  closes, the `unblock` job removes and adds `ready-for-agent`, as `nvu-agent`,
+  on each loop issue it blocked that has no open blocker left, which starts it.
+  A labeled event needs write access, so a fork cannot start it.
 - **A new layer.** The job claims the issue (`in-progress` on, `ready-for-agent`
   off), comments on it, and runs the coder on Sonnet in a checkout of the
   stack's top. The coder edits files and runs `make check` and `make app-check`.

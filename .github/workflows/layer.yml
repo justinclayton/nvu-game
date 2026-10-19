@@ -376,11 +376,12 @@ jobs:
           git config user.name "$BOT_SLUG"
           git config user.email "$id+$BOT_SLUG@users.noreply.github.com"
           git config credential.https://github.com.helper '!gh auth git-credential'
+          # The checkout sets no origin/HEAD, so gh stack cannot find the trunk itself.
           read -ra stack <<< "$BRANCHES"
           withwork=("${stack[@]}" "$WORK")
           if [ "$BUILT" = false ]; then
             if [ -n "$LAYER" ]; then
-              gh stack init "${stack[@]}"
+              gh stack init --base main "${stack[@]}"
               git switch -q "$WORK"
               git add -A
               git commit -q -m "Issue #$N: $TITLE"
@@ -388,11 +389,11 @@ jobs:
               gh stack rebase --upstack
               gh stack push
             else
-              gh stack init "${stack[@]}"
+              gh stack init --base main "${stack[@]}"
               gh stack add -Am "Issue #$N: $TITLE" "$WORK"
             fi
           elif [ -z "$LAYER" ]; then
-            gh stack init "${withwork[@]}"
+            gh stack init --base main "${withwork[@]}"
           fi
           echo "final=$(git rev-parse "$WORK")" >> "$GITHUB_OUTPUT"
 

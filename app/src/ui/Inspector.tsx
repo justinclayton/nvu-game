@@ -156,6 +156,7 @@ function useOverlayStyle(
   active: boolean,
   item: Inspected | null,
   state: GameState,
+  clear: string | undefined,
 ): CSSProperties | undefined {
   const [style, setStyle] = useState<CSSProperties | undefined>(undefined);
   useLayoutEffect(() => {
@@ -164,7 +165,8 @@ function useOverlayStyle(
       /* The dock holds the bottom edge of the window; the overlay stays above it. */
       const dock = document.querySelector(".dock")?.getBoundingClientRect();
       const height = dock ? Math.min(window.innerHeight, dock.top) : window.innerHeight;
-      const slot = sourceHand(item, state)?.getBoundingClientRect() ?? null;
+      const away = clear ? document.querySelector<HTMLElement>(clear) : sourceHand(item, state);
+      const slot = away?.getBoundingClientRect() ?? null;
       const box = overlayBox(slot, { width: window.innerWidth, height });
       setStyle({
         top: box.top,
@@ -180,7 +182,7 @@ function useOverlayStyle(
       window.removeEventListener("scroll", measure);
       window.removeEventListener("resize", measure);
     };
-  }, [active, item, state]);
+  }, [active, item, state, clear]);
   return active ? style : undefined;
 }
 
@@ -191,10 +193,12 @@ interface Props {
   readonly overlay: boolean;
   /** Opened by tapping: the zoom takes taps itself, and a tap on it closes it (the table clears the zoom on any tap that is not on a card). */
   readonly touch: boolean;
+  /** Overlay only: a selector for what to keep clear, instead of the hand the card came from. */
+  readonly clear?: string | undefined;
 }
 
-export function Inspector({ inspected, state, overlay, touch }: Props) {
-  const style = useOverlayStyle(overlay, inspected, state);
+export function Inspector({ inspected, state, overlay, touch, clear }: Props) {
+  const style = useOverlayStyle(overlay, inspected, state, clear);
   if (!inspected) return null;
   const classes = [
     "inspector",

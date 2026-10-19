@@ -80,8 +80,8 @@ export function PilePanel({ state, zone, onClose, inspected, onInspect }: Props)
             ))
           )}
         </div>
-        {/* The panel covers the mat's own zoom, so it draws one of its own, over it. */}
-        <Inspector inspected={inspected} state={state} overlay touch={touch} />
+        {/* The panel covers the mat's own zoom, so it draws one of its own, beside the panel. */}
+        <Inspector inspected={inspected} state={state} overlay touch={touch} clear=".pile-panel" />
       </div>
     </div>
   );

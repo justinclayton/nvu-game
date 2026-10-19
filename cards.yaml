@@ -318,7 +318,7 @@ cards:
     cost: 1
     scramble: 3
     text: Move any number of Stuff cards from Red's hand to yours.
-    flavor: Toss a heavy tool over before it bogs you down.
+    flavor: I'll carry your books for you, Senpai!
 
   - name: Hit 'n Run
     count: 2

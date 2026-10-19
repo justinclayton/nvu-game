@@ -14,15 +14,15 @@ const noop = () => {
   /* a new run is the composition root's business */
 };
 
-function table(touch: boolean) {
+function table(touch: boolean, fixture = "play") {
   vi.stubGlobal("matchMedia", (query: string) => ({
     matches: touch && query === TOUCH_QUERY,
     media: query,
     addEventListener: noop,
     removeEventListener: noop,
   }));
-  const state = buildFixture("play");
-  if (!state) throw new Error("no fixture play");
+  const state = buildFixture(fixture);
+  if (!state) throw new Error(`no fixture ${fixture}`);
   act(() => {
     render(<App session={createSessionFrom(state)} onNewRun={noop} onOpenRun={noop} />);
   });
@@ -98,6 +98,47 @@ describe("on touch", () => {
   it("zooms a card that is not a button on a tap", () => {
     table(true);
     fireEvent.click(document.querySelector('[data-zone="room"]') as HTMLElement);
+    expect(inspector()).not.toBeNull();
+  });
+});
+
+/* The cards in a choice panel in the dock zoom the same way. */
+describe("in a choice panel", () => {
+  const choice = () => document.querySelector(".dock .card") as HTMLElement;
+  const picked = () => document.querySelectorAll(".dock .is-selected").length;
+
+  it("previews a card on hover and focus, and one click picks it", () => {
+    table(false, "choose-cards");
+    fireEvent.mouseEnter(choice());
+    expect(inspector()).not.toBeNull();
+    fireEvent.mouseLeave(choice());
+    expect(inspector()).toBeNull();
+    fireEvent.focus(choice());
+    expect(inspector()).not.toBeNull();
+    fireEvent.blur(choice());
+
+    fireEvent.click(choice());
+    expect(picked()).toBe(1);
+  });
+
+  it("zooms on the first tap and picks on the second, on touch", () => {
+    table(true, "choose-cards");
+    fireEvent.click(choice());
+    expect(inspector()).not.toBeNull();
+    expect(picked()).toBe(0);
+
+    fireEvent.click(choice());
+    expect(inspector()).not.toBeNull();
+    expect(picked()).toBe(1);
+  });
+
+  it("zooms the cards of an ordering, which no click acts on", () => {
+    table(false, "order-cards");
+    fireEvent.mouseEnter(choice());
+    expect(inspector()).not.toBeNull();
+    cleanup();
+    table(true, "order-cards");
+    fireEvent.click(choice());
     expect(inspector()).not.toBeNull();
   });
 });

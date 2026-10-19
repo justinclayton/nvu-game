@@ -58,6 +58,14 @@ export interface HeldModifiers {
   readonly thresholdScrambleDelta?: number;
 }
 
+/** What a `While this is in play` line changes, for as long as the card sits in the play zone. */
+export interface InPlayModifiers {
+  /** Zen Mode: none of this character's cards are Exhausted, by any route. */
+  readonly preventsExhaust?: boolean;
+  /** Sharing Is Caring: either character may pay with cards from the other's hand. */
+  readonly sharesHands?: boolean;
+}
+
 export interface CardBehaviour {
   /** A bare `Exhaust X` printed on the card. */
   exhaustX?: number;
@@ -74,6 +82,8 @@ export interface CardBehaviour {
   onPlay?(state: GameState, ctx: BehaviourContext): StepResult;
   /** A `Holding:` line, in force while the card is in hand. */
   whileHeld?: HeldModifiers;
+  /** A line in force while the card is in the play zone. */
+  whileInPlay?: InPlayModifiers;
   /**
    * A this-turn trigger. Listens while the card is in hand or in the play zone,
    * and must not ask a question — it resolves in the middle of whatever set it

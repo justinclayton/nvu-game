@@ -266,6 +266,35 @@ export const GRAY: Registry = {
     onChoice: (answer, state) => drawnAs(answer, state),
   },
 
+  /* Covering Fire's shape: listens from the play zone, either character's play, printed Scramble. */
+  "I Know Kung Fu": {
+    onEvent(event, state, ctx) {
+      if (ctx.zone !== "playZone") return nothing(state);
+      if (event.type !== "CARD_PLAYED" || event.card.scramble === 0) return nothing(state);
+      if (playerOf(state, ctx.character).down) return nothing(state);
+      return done(
+        askLater(
+          state,
+          drawQuestion(
+            ctx,
+            "i-know-kung-fu",
+            `I Know Kung Fu: ${event.character} played ${event.card.name}. Draw 1 card?`,
+            ctx.character,
+          ),
+        ),
+      );
+    },
+    onChoice: (answer, state) => drawnAs(answer, state),
+  },
+
+  "Sharing Is Caring": {
+    whileInPlay: { sharesHands: true },
+  },
+
+  "Zen Mode": {
+    whileInPlay: { preventsExhaust: true },
+  },
+
   Pivot: {
     onPlay(state) {
       return done(grantPlayDiscount(state, "Red"));

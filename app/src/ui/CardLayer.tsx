@@ -9,7 +9,7 @@
 
 import { useLayoutEffect, useRef, useState, type CSSProperties } from "react";
 
-import { costOf, playableCards } from "@domain/queries";
+import { costOf, handsShared, playableCards } from "@domain/queries";
 import type { Card, Character, GameState, Room } from "@domain/types";
 import { CardBack, CardFace, RoomFace, toneOf } from "./CardFace";
 import { FLOAT_SCALE, STACK_STEP_MAX, STACK_STEP_X, STACK_STEP_Y, type Metrics } from "./metrics";
@@ -148,9 +148,13 @@ export function CardLayer({
     Gray: new Set(playableCards(state, "Gray").map((c) => c.id)),
   };
 
+  /* The payment in progress that this hand can pay into: its own, or the partner's while hands are shared. */
+  const payingFrom = (c: Character) =>
+    paying && (paying.character === c || handsShared(state)) ? paying : null;
+
   const canClick = (c: Character, card: Card): boolean => {
     if (state.pending || state.phase !== "Play" || state[c].down) return false;
-    const payingHere = paying?.character === c ? paying : null;
+    const payingHere = payingFrom(c);
     if (!payingHere) return playable[c].has(card.id);
     return card.id !== payingHere.cardId; // mid-payment, any other card is a way to pay
   };
@@ -164,7 +168,7 @@ export function CardLayer({
         const isMoving = moving.has(p.id);
         const hand = p.kind === "card" ? handOf(p.zone) : null;
         const offer = p.kind === "card" ? offerOf(p.zone) : null;
-        const payingHere = hand && paying?.character === hand ? paying : null;
+        const payingHere = hand ? payingFrom(hand) : null;
         const selected = p.kind === "card" && payingHere?.cardId === p.id;
         const chosen = p.kind === "card" && (payingHere?.chosen.includes(p.card.id) ?? false);
         const clickable =

@@ -10,6 +10,7 @@ import {
   free,
   handCard,
   ids,
+  names,
   must,
   noDraw,
   pile,
@@ -19,7 +20,7 @@ import {
   resetRig,
   room,
 } from "../__fixtures__/rig";
-import type { CardId } from "../types";
+import type { Card, CardId } from "../types";
 
 beforeEach(resetRig);
 
@@ -541,5 +542,167 @@ describe("Synergy Link — 'You may draw 1 card. If Red has played a card this t
     expect(drawnBy(asked, drawing("Gray", 2))).toBe(2);
     expect(drawnBy(asked, drawing("Gray", 1))).toBe(1);
     expect(drawnBy(asked, noDraw)).toBe(0);
+  });
+});
+
+describe("I Know Kung Fu — 'Play: every time a Scramble card is played this turn, you may draw a card'", () => {
+  const armedState = () => {
+    const state = playing({
+      Red: player({ deck: pile("Shove", 4), hand: [card("Crowbar"), card("Pry Bar")] }),
+      Gray: player({
+        deck: pile("Duck Under", 4),
+        hand: [card("I Know Kung Fu"), card("Duck Under"), card("Coil Of Cable")],
+      }),
+    });
+    return must(state, {
+      type: "PLAY_CARD",
+      character: "Gray",
+      cardId: handCard(state, "Gray", "I Know Kung Fu").id,
+      payWith: [handCard(state, "Gray", "Duck Under").id],
+    }).state;
+  };
+
+  it("asks Gray whether to draw when Red plays Crowbar", () => {
+    const armed = armedState();
+    const next = must(armed, free("Red", handCard(armed, "Red", "Crowbar").id));
+    expect(next.state.pending).toMatchObject({
+      kind: "ChooseDraw",
+      options: [{ character: "Gray", count: 1 }],
+    });
+    expect(must(next.state, drawing("Gray", 1)).state.Gray.hand).toHaveLength(2);
+  });
+
+  it("asks when Gray plays a Scramble card too", () => {
+    const armed = armedState();
+    const next = must(armed, free("Gray", handCard(armed, "Gray", "Coil Of Cable").id));
+    expect(next.state.pending?.kind).toBe("ChooseDraw");
+  });
+
+  it("asks nothing for a card with no Scramble", () => {
+    const armed = armedState();
+    const next = must(armed, free("Red", handCard(armed, "Red", "Pry Bar").id));
+    expect(next.state.pending).toBeNull();
+  });
+});
+
+describe("Zen Mode — 'While this is in play, you don't exhaust cards'", () => {
+  const zen = (gray: Card[], red: Card[] = []) => {
+    const state = playing({
+      Red: player({ deck: pile("Shove", 4), hand: red }),
+      Gray: player({ deck: pile("Duck Under", 4), hand: [card("Zen Mode"), card("Duck Under"), ...gray] }),
+    });
+    return must(state, {
+      type: "PLAY_CARD",
+      character: "Gray",
+      cardId: handCard(state, "Gray", "Zen Mode").id,
+      payWith: [handCard(state, "Gray", "Duck Under").id],
+    }).state;
+  };
+
+  it("pays its own cost as normal", () => {
+    const armed = zen([]);
+    expect(names(armed.Gray.exhaust)).toEqual(["Duck Under"]);
+  });
+
+  it("keeps Gray's payment cards in hand", () => {
+    const armed = zen([card("Duck Under"), card("Duck Under")]);
+    const [played, payer] = armed.Gray.hand;
+    if (!played || !payer) throw new Error("hand too short");
+    const next = must(armed, { type: "PLAY_CARD", character: "Gray", cardId: played.id, payWith: [payer.id] });
+    expect(next.state.Gray.hand.map((c) => c.id)).toEqual([payer.id]);
+    expect(next.state.Gray.exhaust).toHaveLength(1);
+    expect(eventTypes(next.events)).toContain("EXHAUST_PREVENTED");
+    expect(eventTypes(next.events)).not.toContain("COST_PAID");
+  });
+
+  it("still needs the payment cards in hand", () => {
+    const armed = zen([card("Duck Under")]);
+    const rejected = execute(armed, {
+      type: "PLAY_CARD",
+      character: "Gray",
+      cardId: handCard(armed, "Gray", "Duck Under").id,
+      payWith: [],
+    });
+    expect(rejected.ok).toBe(false);
+  });
+
+  it("stops a bare Exhaust X off Gray's deck", () => {
+    const armed = zen([card("Emergency Power Core")]);
+    const next = must(armed, free("Gray", handCard(armed, "Gray", "Emergency Power Core").id));
+    expect(next.state.Gray.deck).toHaveLength(4);
+    expect(next.state.Gray.exhaust).toHaveLength(1);
+  });
+
+  it("does nothing for Red's cards", () => {
+    const armed = zen([], [card("Shove"), card("Shove")]);
+    const [played, payer] = armed.Red.hand;
+    if (!played || !payer) throw new Error("hand too short");
+    const next = must(armed, { type: "PLAY_CARD", character: "Red", cardId: played.id, payWith: [payer.id] });
+    expect(names(next.state.Red.exhaust)).toEqual(["Shove"]);
+  });
+});
+
+describe("Sharing Is Caring — 'Play: both players may pay for cards from the other player's hand'", () => {
+  const setup = (gray: Card[] = [card("Duck Under"), card("Duck Under")]) =>
+    playing({
+      Red: player({ deck: pile("Shove", 4), hand: [card("Charge"), card("Shove")] }),
+      Gray: player({ deck: pile("Duck Under", 4), hand: [card("Sharing Is Caring"), ...gray] }),
+    });
+  const shared = (state = setup()) => must(state, free("Gray", handCard(state, "Gray", "Sharing Is Caring").id)).state;
+
+  it("lets Red pay with a card from Gray's hand, which goes to Gray's Exhaust pile", () => {
+    const state = shared();
+    const charge = handCard(state, "Red", "Charge");
+    const [g1, g2] = state.Gray.hand;
+    if (!g1 || !g2) throw new Error("hand too short");
+    const next = must(state, { type: "PLAY_CARD", character: "Red", cardId: charge.id, payWith: [g1.id, g2.id] });
+    expect(names(next.state.Gray.exhaust)).toEqual(["Duck Under", "Duck Under"]);
+    expect(next.state.Gray.hand).toHaveLength(0);
+    expect(names(next.state.Red.hand)).toEqual(["Shove"]);
+  });
+
+  it("lets one payment mix both hands", () => {
+    const state = shared();
+    const charge = handCard(state, "Red", "Charge");
+    const shove = handCard(state, "Red", "Shove");
+    const [g1] = state.Gray.hand;
+    if (!g1) throw new Error("hand too short");
+    const next = must(state, { type: "PLAY_CARD", character: "Red", cardId: charge.id, payWith: [shove.id, g1.id] });
+    expect(names(next.state.Red.exhaust)).toEqual(["Shove"]);
+    expect(names(next.state.Gray.exhaust)).toEqual(["Duck Under"]);
+  });
+
+  it("does not open Gray's hand before it is played", () => {
+    const state = setup();
+    const [, g1, g2] = state.Gray.hand;
+    if (!g1 || !g2) throw new Error("hand too short");
+    const rejected = execute(state, {
+      type: "PLAY_CARD",
+      character: "Red",
+      cardId: handCard(state, "Red", "Charge").id,
+      payWith: [g1.id, g2.id],
+    });
+    expect(rejected.ok).toBe(false);
+  });
+
+  it("with Zen Mode in play, Gray's cards that Red pays with stay in Gray's hand", () => {
+    const state = setup([card("Zen Mode"), card("Duck Under"), card("Duck Under"), card("Duck Under")]);
+    const zen = must(state, {
+      type: "PLAY_CARD",
+      character: "Gray",
+      cardId: handCard(state, "Gray", "Zen Mode").id,
+      payWith: [handCard(state, "Gray", "Duck Under").id],
+    }).state;
+    const armed = shared(zen);
+    const [g1, g2] = armed.Gray.hand;
+    if (!g1 || !g2) throw new Error("hand too short");
+    const next = must(armed, {
+      type: "PLAY_CARD",
+      character: "Red",
+      cardId: handCard(armed, "Red", "Charge").id,
+      payWith: [g1.id, g2.id],
+    });
+    expect(next.state.Gray.hand).toHaveLength(2);
+    expect(next.state.Gray.exhaust).toHaveLength(1);
   });
 });

@@ -203,7 +203,8 @@ body {
   flex: 1 1 0;
   min-width: 72px;
 }
-.mat-side__piles {
+.mat-side__piles,
+.mat-floor__piles {
   display: flex;
   gap: 12px;
 }
@@ -1185,7 +1186,6 @@ body {
   }
   .table {
     padding: 8px max(10px, env(safe-area-inset-right)) 24px max(10px, env(safe-area-inset-left));
-    overflow-x: hidden;
   }
   .table__head {
     flex-wrap: wrap;
@@ -1220,7 +1220,8 @@ body {
   .mat-side {
     gap: 8px;
   }
-  .mat-side__piles {
+  .mat-side__piles,
+  .mat-floor__piles {
     gap: 8px;
   }
   .mat__divider {
@@ -1348,6 +1349,139 @@ body {
   .inspector .card--large {
     --cw: 150px;
     --ch: 210px;
+  }
+}
+
+/* ---------------------------------------------------------- phone, upright
+ *
+ * Under 600px across, the compact table's two sides no longer fit next to each
+ * other. Red's side (piles, play zone, hand) stacks above Gray's, the brief
+ * drops under the floor piles and the pools wrap, so nothing is wider than the
+ * screen and the page only scrolls down. The rows are flattened with
+ * `display: contents` and reordered, so every tier draws the same mat. */
+@media (max-width: 599px) {
+  .mat__main {
+    grid-template-rows: none;
+  }
+  .mat-row--floor {
+    flex-wrap: wrap;
+  }
+  .mat-row--floor .brief {
+    flex-basis: 100%;
+    height: auto;
+    margin-top: 0;
+  }
+  .mat-row--table,
+  .mat-row--hands {
+    display: contents;
+  }
+  .mat-row--table > .mat__divider {
+    display: none;
+  }
+  .mat-side--red {
+    order: 1;
+  }
+  .slot--hand.slot--red {
+    order: 2;
+  }
+  .mat-row--hands > .mat__divider {
+    order: 3;
+    width: auto;
+    margin: 2px 0;
+    border-left: 0;
+    border-top: 1.5px solid var(--print-faint);
+  }
+  .mat-side--gray {
+    order: 4;
+  }
+  .slot--hand.slot--gray {
+    order: 5;
+  }
+  .mat__rail {
+    flex-wrap: wrap;
+  }
+}
+
+/* -------------------------------------------------------- phone, sideways
+ *
+ * A compact screen under 500px tall (a phone held sideways) cannot fit the
+ * floor row, the piles, the play zones and the hands above the dock. The brief
+ * takes a narrow column of its own beside the play zones and hands, so the
+ * room's lines, the hands and the dock's button share one screen; each side's
+ * piles sit under its hand, and the floor deck, Cleared and the room card
+ * under those. */
+@media (min-width: 600px) and (max-width: 1179px) and (max-height: 500px) {
+  .table {
+    padding-top: 4px;
+  }
+  .table__head {
+    padding-bottom: 4px;
+  }
+  .mat {
+    padding-top: 6px;
+  }
+  .mat__main {
+    grid-template-columns: minmax(0, 0.5fr) minmax(0, 1fr) minmax(0, 1fr);
+    grid-template-rows: none;
+  }
+  .mat-row--floor,
+  .mat-row--table,
+  .mat-row--hands,
+  .mat-side {
+    display: contents;
+  }
+  .mat__divider {
+    display: none;
+  }
+  /* Sized by the two rows it sits beside, never sizing them: a long room
+   * scrolls inside the brief instead of pushing the hands down. */
+  .brief {
+    grid-column: 1;
+    grid-row: 1 / span 2;
+    height: auto;
+    contain: size;
+  }
+  .mat-side--red > .slot--row,
+  .slot--hand.slot--red,
+  .mat-side--red > .mat-side__piles {
+    grid-column: 2;
+  }
+  .mat-side--gray > .slot--row,
+  .slot--hand.slot--gray,
+  .mat-side--gray > .mat-side__piles {
+    grid-column: 3;
+  }
+  .mat-side > .slot--row {
+    grid-row: 1;
+  }
+  .slot--hand {
+    grid-row: 2;
+  }
+  .mat-side__piles {
+    grid-row: 3;
+    flex-wrap: wrap;
+  }
+  .mat-floor__piles {
+    grid-column: 1 / -1;
+    grid-row: 4;
+  }
+
+  /* The column is narrow: each line's outcome goes under its numbers. */
+  .bline {
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas:
+      "need have"
+      "outcome outcome";
+    gap: 0 6px;
+  }
+  .bline__need {
+    grid-area: need;
+  }
+  .bline__outcome {
+    grid-area: outcome;
+  }
+  .bline__have {
+    grid-area: have;
   }
 }
 

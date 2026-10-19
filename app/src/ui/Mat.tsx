@@ -8,6 +8,12 @@
  * sit off to the right, as the rulebook keeps them off to one side. Every
  * slot here is an empty, measured box; the card layer draws the cards over
  * it.
+ *
+ * On a phone the CSS rearranges these same elements rather than rendering a
+ * second mat: held upright, Red's side and hand stack above Gray's; held
+ * sideways, the brief takes a column beside the play zones and hands, and the
+ * piles move under them. The card layer follows, since it only reads where
+ * each `data-slot` ended up.
  */
 
 import { useRef, type CSSProperties } from "react";
@@ -153,14 +159,16 @@ export function Mat({
     >
       <div className="mat__main">
         <div className="mat-row mat-row--floor">
-          <Slot id="floor" label="Floor deck" count={state.floorDeck.length} onOpenPile={openPile} />
-          <Slot id="cleared" label="Cleared" count={state.cleared.length} onOpenPile={openPile} />
-          <Slot id="room" label="Active room" />
+          <div className="mat-floor__piles">
+            <Slot id="floor" label="Floor deck" count={state.floorDeck.length} onOpenPile={openPile} />
+            <Slot id="cleared" label="Cleared" count={state.cleared.length} onOpenPile={openPile} />
+            <Slot id="room" label="Active room" />
+          </div>
           <RoomBrief state={state} />
         </div>
 
         <div className="mat-row mat-row--table">
-          <div className="mat-side">
+          <div className="mat-side mat-side--red">
             <div className="mat-side__piles">
               <Slot
                 id="red-deck"
@@ -187,7 +195,7 @@ export function Mat({
             <Slot id="red-play" label="Play zone" row tone="red" />
           </div>
           <div className="mat__divider" />
-          <div className="mat-side">
+          <div className="mat-side mat-side--gray">
             <div className="mat-side__piles">
               <Slot
                 id="gray-deck"

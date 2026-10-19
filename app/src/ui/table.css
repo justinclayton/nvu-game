@@ -64,7 +64,6 @@ body {
   max-width: 1180px;
   margin: 0 auto;
   padding: 14px 20px 40px;
-  overflow-x: auto;
 }
 
 .table__head {
@@ -1124,12 +1123,13 @@ body {
 
 /* ------------------------------------------------------------ compact table
  *
- * Under 960px across — a phone held sideways — the table is drawn compact:
+ * Under 1180px across — a phone held sideways, a tablet, a small laptop —
+ * the table is drawn compact:
  * smaller cards (the numbers are `COMPACT` in metrics.ts; the mat sets the
  * variables from them), the pools moved from a rail at the side to a row under
  * the mat, tighter chrome and a smaller zoomed card. The breakpoint is
  * `COMPACT_BELOW` in metrics.ts. */
-@media (max-width: 959px) {
+@media (max-width: 1179px) {
   body {
     font-size: 14px;
   }

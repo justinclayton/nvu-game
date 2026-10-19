@@ -306,7 +306,7 @@ cards:
     owner: Gray
     rarity: Cool
     cost: 0
-    text: If this is the only card you play this turn, move 3 cards from your Exhaust pile to the bottom of your deck.
+    text: Play: If this is the only card you play this turn, move 3 cards from your Exhaust pile to the bottom of your deck.
     flavor: Pause for a second to read the room.
 
   - name: Here, Catch

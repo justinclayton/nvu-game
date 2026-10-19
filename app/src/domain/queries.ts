@@ -18,7 +18,7 @@ import type {
   Stat,
   Threshold,
 } from "./types";
-import { CHARACTERS, playerOf } from "./verbs";
+import { CHARACTERS, other, playerOf } from "./verbs";
 
 export interface StatTotals {
   readonly oomph: number;
@@ -70,8 +70,22 @@ export function exhaustXPreventedBy(state: GameState, c: Character): Card | null
   for (const card of playerOf(state, c).hand) {
     if (held(card)?.ignoresExhaustX === true) return card;
   }
-  return null;
+  return exhaustPreventedBy(state, c);
 }
+
+/* ------------------------------------------------- what a played card changes */
+
+const inPlay = (card: Card) => behaviourOf(card.name)?.whileInPlay;
+
+/** The card on this character's side of the play zone that stops every Exhaust of their cards, if one is. */
+export function exhaustPreventedBy(state: GameState, c: Character): Card | null {
+  const found = state.playZone.find((p) => p.owner === c && inPlay(p.card)?.preventsExhaust === true);
+  return found ? found.card : null;
+}
+
+/** Whether either character may pay with cards from the other's hand. */
+export const handsShared = (state: GameState): boolean =>
+  state.playZone.some((p) => inPlay(p.card)?.sharesHands === true);
 
 /**
  * Each Turn, Turn Start: draw up to 5. A "draw N fewer" `Holding:` line comes
@@ -306,7 +320,8 @@ export function costOverrideSpentBy(
  * and Gray's hand are separate, so Red never pays for Gray.
  */
 export function payOptions(state: GameState, c: Character, cardId: CardId): readonly Card[] {
-  return playerOf(state, c).hand.filter((x) => x.id !== cardId);
+  const own = playerOf(state, c).hand.filter((x) => x.id !== cardId);
+  return handsShared(state) ? [...own, ...playerOf(state, other(c)).hand] : own;
 }
 
 /** The cards this character could play right now, cost and all. */

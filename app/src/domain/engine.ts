@@ -15,6 +15,7 @@ import {
   costOf,
   costOverrideSpentBy,
   drawTargetFor,
+  exhaustPreventedBy,
   exhaustXPreventedBy,
   payOptions,
   statPool,
@@ -540,10 +541,12 @@ function playCard(
   const p = playerOf(state, c);
   const card = p.hand.find((x) => x.id === cardId);
   if (!card) throw new CorruptStateError("Played a card that is not in hand.");
-  const payment = payWith.flatMap((id) => {
-    const found = p.hand.find((x) => x.id === id);
-    return found ? [found] : [];
-  });
+  const payment = payWith.flatMap((id) =>
+    CHARACTERS.flatMap((owner) => {
+      const found = playerOf(state, owner).hand.find((x) => x.id === id);
+      return found ? [{ owner, card: found }] : [];
+    }),
+  );
 
   let s = state;
   // A one-shot cost override is used up here: Overcharged Battery's free play,
@@ -556,11 +559,22 @@ function playCard(
     s = spendPlayDiscount(s, c);
   }
 
-  // Each Turn, Play: you pay in *other* cards from your own hand. Red never pays for Gray.
+  // Each payment card goes to its owner's Exhaust pile, unless its owner has Zen Mode in play.
   const from = run.events.length;
-  s = payCostFromHand(s, c, payment);
-  if (payment.length > 0) {
-    run.events.push({ type: "COST_PAID", character: c, cards: payment });
+  const exhausted: Card[] = [];
+  for (const owner of CHARACTERS) {
+    const cards = payment.filter((x) => x.owner === owner).map((x) => x.card);
+    if (cards.length === 0) continue;
+    const keptBy = exhaustPreventedBy(s, owner);
+    if (keptBy) {
+      run.events.push({ type: "EXHAUST_PREVENTED", character: owner, amount: cards.length, by: keptBy });
+      continue;
+    }
+    s = payCostFromHand(s, owner, cards);
+    exhausted.push(...cards);
+  }
+  if (exhausted.length > 0) {
+    run.events.push({ type: "COST_PAID", character: c, cards: exhausted });
   }
 
   const after = playerOf(s, c);

@@ -72,13 +72,15 @@ export function Table({ onNewRun, onOpenRun, replay }: Props) {
   const pickCard = useCallback(
     (character: Character, card: Card) => {
       if (replaying) return;
-      const play = (cardId: Card["id"], payWith: readonly Card["id"][]) => {
-        session.getState().dispatch({ type: "PLAY_CARD", character, cardId, payWith });
+      const play = (by: Character, cardId: Card["id"], payWith: readonly Card["id"][]) => {
+        session.getState().dispatch({ type: "PLAY_CARD", character: by, cardId, payWith });
         setPaying(null);
       };
-      if (!paying || paying.character !== character) {
+      const legal =
+        paying !== null && payOptions(state, paying.character, paying.cardId).some((c) => c.id === card.id);
+      if (!paying || (paying.character !== character && !legal)) {
         if (costOf(state, character, card) === 0) {
-          play(card.id, []);
+          play(character, card.id, []);
         } else {
           setPaying({ character, cardId: card.id, chosen: [] });
         }
@@ -88,13 +90,13 @@ export function Table({ onNewRun, onOpenRun, replay }: Props) {
         setPaying(null); // click it again to cancel
         return;
       }
-      const legal = payOptions(state, character, paying.cardId).some((c) => c.id === card.id);
       if (!legal) return;
       const chosen = paying.chosen.includes(card.id)
         ? paying.chosen.filter((id) => id !== card.id)
         : [...paying.chosen, card.id];
-      if (chosen.length === costOf(state, character, cardById(state, character, paying.cardId))) {
-        play(paying.cardId, chosen);
+      const by = paying.character;
+      if (chosen.length === costOf(state, by, cardById(state, by, paying.cardId))) {
+        play(by, paying.cardId, chosen);
       } else {
         setPaying({ ...paying, chosen });
       }

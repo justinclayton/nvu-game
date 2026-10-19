@@ -117,13 +117,11 @@ function exhaustCost(state: GameState, character: Character, card: Card): number
 
 /**
  * How much a card in hand is worth keeping while the turn still needs
- * `deficit`: Bad Stuff is worth less than nothing (paying with it is the
- * cheapest way to be rid of a `Holding:` line), then a card counts by what
- * it would add toward the line, then by its raw stats, and a card that
- * needs payers itself is worth a little less than one that plays free.
+ * `deficit`: a card counts by what it would add toward the line, then by its
+ * raw stats, and a card that needs payers itself is worth a little less than
+ * one that plays free.
  */
 function keepValue(state: GameState, character: Character, card: Card, deficit: StatTotals): number {
-  if (card.kind === "bad_stuff") return -1;
   const gain = contributionOf(state, { owner: character, card });
   return towards(gain, deficit) * 10 + gain.oomph + gain.scramble - costOf(state, character, card);
 }
@@ -179,10 +177,12 @@ function planFor(state: GameState, target: Threshold): Plan | null {
     }
     if (best === null) return null;
     const chosen = best;
-    const others = [...hands[chosen.character]]
-      .filter((c) => c.id !== chosen.card.id)
+    const rest = hands[chosen.character].filter((c) => c.id !== chosen.card.id);
+    const stuck = rest.filter((c) => c.kind === "bad_stuff");
+    const others = rest
+      .filter((c) => c.kind !== "bad_stuff")
       .sort((a, b) => keepValue(state, chosen.character, a, deficit) - keepValue(state, chosen.character, b, deficit) || a.id.localeCompare(b.id));
-    hands[chosen.character] = others.slice(chosen.cost);
+    hands[chosen.character] = [...others.slice(chosen.cost), ...stuck];
     deficit = lessDeficit(deficit, contributionOf(state, { owner: chosen.character, card: chosen.card }));
     steps.push({ character: chosen.character, card: chosen.card });
     spent += 1 + chosen.cost;

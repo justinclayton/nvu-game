@@ -317,11 +317,13 @@ export function costOverrideSpentBy(
 
 /**
  * Each Turn, Play: you pay in *other* cards from your own hand — Red's hand
- * and Gray's hand are separate, so Red never pays for Gray.
+ * and Gray's hand are separate, so Red never pays for Gray. Bad Stuff cannot
+ * pay for other cards.
  */
 export function payOptions(state: GameState, c: Character, cardId: CardId): readonly Card[] {
   const own = playerOf(state, c).hand.filter((x) => x.id !== cardId);
-  return handsShared(state) ? [...own, ...playerOf(state, other(c)).hand] : own;
+  const pool = handsShared(state) ? [...own, ...playerOf(state, other(c)).hand] : own;
+  return pool.filter((x) => x.kind !== "bad_stuff");
 }
 
 /** The cards this character could play right now, cost and all. */

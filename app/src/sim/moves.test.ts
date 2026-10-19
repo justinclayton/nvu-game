@@ -3,7 +3,7 @@
 import { describe, expect, it } from "vitest";
 import { CARD_CONTENT } from "@content/index";
 import { execute, validate } from "@domain/engine";
-import { card, resetRig, rig, room } from "@domain/__fixtures__/rig";
+import { card, player, resetRig, rig, room } from "@domain/__fixtures__/rig";
 import { createInitialState } from "@domain/setup";
 import type { Command, GameState } from "@domain/types";
 import { CHARACTERS } from "@domain/verbs";
@@ -51,6 +51,23 @@ describe("combinatorics", () => {
 });
 
 describe("legalCommands", () => {
+  it("never offers Bad Stuff as payment", () => {
+    resetRig();
+    const charge = card("Charge");
+    const seal = card("Torn Seal");
+    const shove = card("Shove");
+    const lean = card("Lean In");
+    const state = rig({
+      phase: "Play",
+      activeRoom: room("Security Turnstile"),
+      Red: player({ hand: [charge, seal, shove, lean] }),
+    });
+    const pays = legalCommands(state).flatMap((c) =>
+      c.type === "PLAY_CARD" && c.cardId === charge.id ? [c.payWith] : [],
+    );
+    expect(pays).toEqual([[shove.id, lean.id]]);
+  });
+
   it("returns only commands validate accepts, along a random walk", () => {
     for (const seed of SEEDS) {
       for (const state of statesAlong(seed)) {

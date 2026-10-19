@@ -1014,7 +1014,7 @@ function finishCleanup(state: GameState, run: Run): GameState {
   return { ...s, phase: "Turn Start", playZone: [] };
 }
 
-/** Each Turn, Cleanup: discard the entire play zone. The hand carries over untouched. */
+/** Each Turn, Cleanup: discard the play zone, Scrapping Bad Stuff. The hand carries over untouched. */
 function cleanupPiles(state: GameState, run: Run): GameState {
   let s = state;
 
@@ -1037,7 +1037,13 @@ function cleanupPiles(state: GameState, run: Run): GameState {
   // Then the play zone itself.
   for (const c of CHARACTERS) {
     const played = s.playZone.filter((x) => x.owner === c).map((x) => x.card);
-    for (const card of played) s = discard(s, c, card, "playZone", run.events);
+    for (const card of played) {
+      if (card.kind === "bad_stuff") {
+        s = scrap(s, c, card, run.events);
+      } else {
+        s = discard(s, c, card, "playZone", run.events);
+      }
+    }
   }
   return settle({ ...s, playZone: [] }, run);
 }

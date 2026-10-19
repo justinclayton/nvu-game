@@ -29,7 +29,7 @@
 #   flee    string               room and stairwell only: the printed Flee line
 
 meta:
-  version: C51
+  version: C52
   updated: 2026-10-03
 
 cards:
@@ -619,7 +619,7 @@ cards:
     set: proposed
     kind: bad_stuff
     cost: 3
-    text: null
+    text: "Can't be used to pay for other cards. Play: Scrap this card."
     flavor: Broken rubber gasket. Useless dead weight clogging your pack.
 
   - name: Sluggish
@@ -627,7 +627,7 @@ cards:
     set: proposed
     kind: bad_stuff
     cost: 2
-    text: "Holding: Cards you play cost +1 card to play."
+    text: "Holding: Cards you play cost +1 card to play. Can't be used to pay for other cards. Play: Scrap this card."
     flavor: Limb fatigue slows down every movement.
 
   - name: Rust
@@ -635,7 +635,7 @@ cards:
     set: proposed
     kind: bad_stuff
     cost: 3
-    text: "Holding: Stuff cards you play have -1 Oomph and -1 Scramble."
+    text: "Holding: Stuff cards you play have -1 Oomph and -1 Scramble. Can't be used to pay for other cards. Play: Scrap this card."
     flavor: Corrosion degrades the quality of your scavenged gear.
 
   - name: Faceful Of Slime
@@ -643,7 +643,7 @@ cards:
     set: proposed
     kind: bad_stuff
     cost: 3
-    text: "Holding: At Turn Start, draw 1 fewer card."
+    text: "Holding: At Turn Start, draw 1 fewer card. Can't be used to pay for other cards. Play: Scrap this card."
     flavor: Murky goop blinds your vision and slows drawing.
 
   - name: Spore Cloud
@@ -651,7 +651,7 @@ cards:
     set: proposed
     kind: bad_stuff
     cost: 3
-    text: "Holding: At Cleanup, discard cards other than this one until you hold 3."
+    text: "Holding: At Cleanup, discard cards other than this one until you hold 3. Can't be used to pay for other cards. Play: Scrap this card."
     flavor: Choking spores force you to drop excess gear.
 
   - name: My Head Is Quantum Spinning
@@ -659,7 +659,7 @@ cards:
     set: proposed
     kind: bad_stuff
     cost: 2
-    text: "Holding: Whenever your partner draws a card during Play, Exhaust 1."
+    text: "Holding: Whenever your partner draws a card during Play, Exhaust 1. Can't be used to pay for other cards. Play: Scrap this card."
     flavor: Disorientation drains stamina whenever team communication spikes.
 
   - name: Panic
@@ -669,7 +669,8 @@ cards:
     cost: 2
     text: >-
       Holding: Every room threshold requires +2 Scramble to be met.
-      Play: Exhaust 2.
+      Play: Exhaust 2. Scrap this card.
+      Can't be used to pay for other cards.
     flavor: Blinding fear raises room difficulty and drains team stamina.
 
   - name: Corrosive Acid
@@ -679,7 +680,8 @@ cards:
     cost: 3
     text: >-
       Holding: At Turn Start, Exhaust 1.
-      Play: Scrap 1 Good Stuff card from your hand.
+      Play: Scrap 1 Good Stuff card from your hand. Scrap this card.
+      Can't be used to pay for other cards.
     flavor: Caustic fluid eats away at your deck stamina and gear.
 
   - name: System Feedback
@@ -687,7 +689,7 @@ cards:
     set: proposed
     kind: bad_stuff
     cost: 2
-    text: "Holding: Whenever you play a card with Cost 0, lose 1 Oomph and 1 Scramble from the Stat pool this turn."
+    text: "Holding: Whenever you play a card with Cost 0, lose 1 Oomph and 1 Scramble from the Stat pool this turn. Can't be used to pay for other cards. Play: Scrap this card."
     flavor: Electrical backlash dampens cheap card plays.
 
   # Rooms

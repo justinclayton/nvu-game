@@ -11,10 +11,10 @@
  * and no server.
  */
 var NVU_CARDS = {
-  meta: {"version":"C53","updated":"2026-10-03"},
+  meta: {"version":"C54","updated":"2026-10-03"},
   rulesVersion: "R32",
-  cardsVersion: "C53",
-  cardListId: "de97648d17f8",
+  cardsVersion: "C54",
+  cardListId: "aae4cace5c0c",
   cards: [
     {"name":"Shove","set":"official","kind":"player","owner":"Red","starter":true,"cost":1,"oomph":2,"flavor":"'Oomph!', he shouted.","count":4},
     {"name":"Charge","set":"official","kind":"player","owner":"Red","starter":true,"cost":2,"oomph":4,"flavor":"I am bolder, so I lower my shoulder.","count":4},
@@ -45,7 +45,7 @@ var NVU_CARDS = {
     {"name":"I'll Take That","set":"proposed","kind":"player","owner":"Gray","rarity":"Fine","cost":1,"scramble":3,"flavor":"Relieve Red of that cumbersome pack.","text":"Shuffle 1 Stuff from Red's hand into Red's deck.","count":2},
     {"name":"Quick Vault","set":"proposed","kind":"player","owner":"Gray","rarity":"Fine","cost":1,"oomph":1,"scramble":2,"flavor":"Spring off Red's shoulder to clear the gap.","count":2},
     {"name":"In Step","set":"proposed","kind":"player","owner":"Gray","rarity":"Cool","cost":2,"conditional_stat":true,"flavor":"Sync your movements perfectly with Red's brute rhythm.","text":"Scramble equal to 2 times the number of cards Red has played this turn.","count":2},
-    {"name":"One Man's Junk","set":"proposed","kind":"player","owner":"Gray","rarity":"Cool","cost":1,"oomph":2,"scramble":2,"conditional_stat":true,"flavor":"Turn hazardous junk into a makeshift advantage.","text":"If any Bad Stuff is played this turn, gain Oomph +1 and Scramble +1.","count":2},
+    {"name":"One Man's Junk","set":"proposed","kind":"player","owner":"Gray","rarity":"Cool","cost":1,"conditional_stat":true,"flavor":"Turn hazardous junk into a makeshift advantage.","text":"+3 Oomph and +3 Scramble for each Bad Stuff you're holding.","count":2},
     {"name":"Hack the Doors","set":"proposed","kind":"player","owner":"Gray","rarity":"Cool","cost":1,"scramble":3,"flavor":"Bypass the security subroutines to peek ahead.","text":"Peek 3","count":2},
     {"name":"Covering Fire","set":"proposed","kind":"player","owner":"Gray","rarity":"Cool","cost":1,"flavor":"Keep their eyes on you so Red can maneuver freely.","text":"Every time Red plays a card this turn, you may draw 1 card.","count":2},
     {"name":"Pivot","set":"proposed","kind":"player","owner":"Gray","rarity":"Cool","cost":2,"oomph":2,"scramble":3,"flavor":"Pronounced \"Piv-aaahhht\".","text":"The next card Red plays this turn costs 1 fewer card to play.","count":2},

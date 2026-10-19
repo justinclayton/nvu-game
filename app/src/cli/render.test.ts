@@ -29,30 +29,14 @@ describe("cardLine — a conditional stat", () => {
     );
   });
 
-  it("shows One Man's Junk's boosted stats once Bad Stuff has been played this turn", () => {
+  it("shows One Man's Junk's stats from the Bad Stuff Gray is holding", () => {
     const state = playing({
       Red: player({ deck: pile("Shove", 6) }),
-      Gray: player({ hand: [card("One Man's Junk")] }),
+      Gray: player({ hand: [card("One Man's Junk"), card("Torn Seal")] }),
     });
-
     const line = cardLine(state, "Gray", handCard(state, "Gray", "One Man's Junk"));
     expect(line).toBe(
-      "One Man's Junk [cost 1; Oomph 2 now, Scramble 2 now] — If any Bad Stuff is played this turn, gain Oomph +1 and Scramble +1.",
-    );
-
-    const badStuff = state.pools.badStuff[0];
-    if (!badStuff) throw new Error("rig: no Bad Stuff in the pool");
-    const withBadStuffPlayed = {
-      ...state,
-      playZone: [{ owner: "Red" as const, card: badStuff }],
-    };
-    const boosted = cardLine(
-      withBadStuffPlayed,
-      "Gray",
-      handCard(withBadStuffPlayed, "Gray", "One Man's Junk"),
-    );
-    expect(boosted).toBe(
-      "One Man's Junk [cost 1; Oomph 3 now, Scramble 3 now] — If any Bad Stuff is played this turn, gain Oomph +1 and Scramble +1.",
+      "One Man's Junk [cost 1; Oomph 3 now, Scramble 3 now] — +3 Oomph and +3 Scramble for each Bad Stuff you're holding.",
     );
   });
 

@@ -271,43 +271,28 @@ describe("In Step — 'Scramble equal to 2 times the number of cards Red has pla
   });
 });
 
-describe("One Man's Junk — 'If any Bad Stuff is played this turn, gain Oomph +1 and Scramble +1'", () => {
-  it("contributes its printed stats on its own, then +1/+1 more once Bad Stuff is on the table", () => {
+describe("One Man's Junk — '+3 Oomph and +3 Scramble for each Bad Stuff you're holding'", () => {
+  const playJunk = (gray: ReturnType<typeof card>[], red: ReturnType<typeof card>[] = []) => {
     const state = playing({
-      Gray: player({
-        deck: pile("Duck Under", 4),
-        hand: [
-          card("One Man's Junk"),
-          card("Duck Under"),
-          card("Torn Seal"),
-          card("Duck Under"),
-          card("Duck Under"),
-          card("Duck Under"),
-        ],
-      }),
+      Red: player({ deck: pile("Shove", 4), hand: red }),
+      Gray: player({ deck: pile("Duck Under", 4), hand: [card("One Man's Junk"), card("Duck Under"), ...gray] }),
     });
     const junk = handCard(state, "Gray", "One Man's Junk");
-    const [duckPay] = state.Gray.hand.filter((c) => c.name === "Duck Under").map((c) => c.id);
-    if (!duckPay) throw new Error("Gray is not holding a Duck Under");
-    const one = must(state, {
-      type: "PLAY_CARD",
-      character: "Gray",
-      cardId: junk.id,
-      payWith: [duckPay],
-    });
-    expect(statPool(one.state)).toEqual({ oomph: 2, scramble: 2 });
+    const pay = handCard(state, "Gray", "Duck Under");
+    return must(state, { type: "PLAY_CARD", character: "Gray", cardId: junk.id, payWith: [pay.id] }).state;
+  };
 
-    // Torn Seal is Bad Stuff: it contributes no stats itself, but it is what
-    // this card was waiting for.
-    const tornSeal = handCard(one.state, "Gray", "Torn Seal");
-    const payWith = one.state.Gray.hand.filter((c) => c.name === "Duck Under").map((c) => c.id);
-    const two = must(one.state, {
-      type: "PLAY_CARD",
-      character: "Gray",
-      cardId: tornSeal.id,
-      payWith,
-    });
-    expect(statPool(two.state)).toEqual({ oomph: 3, scramble: 3 });
+  it("adds nothing with no Bad Stuff in Gray's hand", () => {
+    expect(statPool(playJunk([]))).toEqual({ oomph: 0, scramble: 0 });
+  });
+
+  it("adds 3 and 3 for each Bad Stuff in Gray's hand", () => {
+    expect(statPool(playJunk([card("Torn Seal")]))).toEqual({ oomph: 3, scramble: 3 });
+    expect(statPool(playJunk([card("Torn Seal"), card("Rust")]))).toEqual({ oomph: 6, scramble: 6 });
+  });
+
+  it("does not count Bad Stuff in Red's hand", () => {
+    expect(statPool(playJunk([], [card("Torn Seal"), card("Rust")]))).toEqual({ oomph: 0, scramble: 0 });
   });
 });
 

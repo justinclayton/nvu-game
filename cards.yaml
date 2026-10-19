@@ -29,7 +29,7 @@
 #   flee    string               room and stairwell only: the printed Flee line
 
 meta:
-  version: C53
+  version: C54
   updated: 2026-10-03
 
 cards:
@@ -371,10 +371,8 @@ cards:
     owner: Gray
     rarity: Cool
     cost: 1
-    oomph: 2
-    scramble: 2
     conditional_stat: true
-    text: If any Bad Stuff is played this turn, gain Oomph +1 and Scramble +1.
+    text: "+3 Oomph and +3 Scramble for each Bad Stuff you're holding."
     flavor: Turn hazardous junk into a makeshift advantage.
 
   - name: Hack the Doors

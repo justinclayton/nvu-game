@@ -270,6 +270,17 @@ export function scrap(
   return { ...state, scrapyard: [...state.scrapyard, card] };
 }
 
+/** A Bad Stuff card's "Play: Scrap this card.", once the rest of its Play line has resolved. It goes from hand, never through the play zone. */
+export function scrapFromHand(
+  state: GameState,
+  c: Character,
+  card: Card,
+  events: DomainEvent[],
+): GameState {
+  if (!playerOf(state, c).hand.some((x) => x.id === card.id)) return state;
+  return scrap(takeFrom(state, c, "hand", [card]), c, card, events);
+}
+
 /** Shuffle cards into a character's deck. Returns the state with the seed advanced. */
 export function shuffleIntoDeck(
   state: GameState,

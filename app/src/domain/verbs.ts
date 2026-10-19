@@ -158,8 +158,23 @@ export function exhaustFromDeck(
     const exhausting = playerOf(after, c);
     events.push({ type: "CARD_EXHAUSTED", character: c, card });
     next = withPlayer(after, c, { ...exhausting, exhaust: [...exhausting.exhaust, card] });
+    next = countExhausted(next, c, 1, true);
   }
   return next;
+}
+
+function countExhausted(state: GameState, c: Character, n: number, fromDeck: boolean): GameState {
+  const t = state.thisTurn;
+  return {
+    ...state,
+    thisTurn: {
+      ...t,
+      exhausted: { ...t.exhausted, [c]: t.exhausted[c] + n },
+      exhaustedFromDeck: fromDeck
+        ? { ...t.exhaustedFromDeck, [c]: t.exhaustedFromDeck[c] + n }
+        : t.exhaustedFromDeck,
+    },
+  };
 }
 
 /**
@@ -169,7 +184,7 @@ export function exhaustFromDeck(
 export function payCostFromHand(state: GameState, c: Character, cards: readonly Card[]): GameState {
   const next = takeFrom(state, c, "hand", cards);
   const p = playerOf(next, c);
-  return withPlayer(next, c, { ...p, exhaust: [...p.exhaust, ...cards] });
+  return countExhausted(withPlayer(next, c, { ...p, exhaust: [...p.exhaust, ...cards] }), c, cards.length, false);
 }
 
 /** Rulebook, Card anatomy: Keywords: `Discard X cards from your hand` — a cost you chose. */
@@ -410,7 +425,7 @@ export function exhaustFromHand(
     events.push({ type: "CARD_EXHAUSTED", character: c, card });
     next = withPlayer(next, c, { ...p, exhaust: [...p.exhaust, card] });
   }
-  return next;
+  return countExhausted(next, c, cards.length, false);
 }
 
 /** System Feedback: bank a one-shot loss against this turn's shared stat pool. */

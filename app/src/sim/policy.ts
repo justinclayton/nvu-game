@@ -105,7 +105,7 @@ function effectsValue(effects: readonly RoomEffect[]): number {
 
 /**
  * The permanent loss this card's own printed text would cost right now: a
- * bare `Exhaust X` line (Overdrive, Reckless Swing, Reckless, Panic), unless
+ * bare `Exhaust X` line (Overdrive, Reckless Swing, Panic), unless
  * this character holds something that stops it (Zen Mode). Payment cost is
  * not part of this: the payers are chosen by `keepValue`, not charged to the card.
  */
@@ -282,8 +282,8 @@ const printedExhaustCost = (card: Card): number => behaviourOf(card.name)?.exhau
  * What a card offered as a reward is worth to this character: its stats as
  * `contributionOf` reads them (so a conditional stat counts as it would
  * played), favoring the weaker stat, less its play cost and less the
- * permanent loss of a printed `Exhaust X`. Reckless's 5 Oomph is not worth
- * taking over a clean 4 if it also taxes the deck 3 cards every time it
+ * permanent loss of a printed `Exhaust X`. Reckless Swing's 5 Oomph is not worth
+ * taking over a clean 4 if it also taxes the deck a card every time it
  * gets played, and a card that costs a payer more is worth less.
  */
 function rewardScore(state: GameState, character: Character, card: Card, weak: Stat): number {

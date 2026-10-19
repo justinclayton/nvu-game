@@ -16,7 +16,6 @@ describe("initials collisions", () => {
         "Charge / Crowbar",
         "Panic / Pivot",
         "Reckless Swing / Riot Shield",
-        "Reckless / Rust",
         "Shove / Sluggish",
       ].sort(),
     );

@@ -185,14 +185,10 @@ export const GRAY: Registry = {
     },
   },
 
-  /* Bad Stuff itself contributes no stats; this card is what makes playing
-   * a piece of it worth anything. */
   "One Man's Junk": {
-    stats(state, _owner, card) {
-      const played = state.playZone.some((p) => p.card.kind === "bad_stuff");
-      return played
-        ? { oomph: card.oomph + 1, scramble: card.scramble + 1 }
-        : { oomph: card.oomph, scramble: card.scramble };
+    stats(state, owner) {
+      const held = playerOf(state, owner).hand.filter((c) => c.kind === "bad_stuff").length;
+      return { oomph: 3 * held, scramble: 3 * held };
     },
   },
 

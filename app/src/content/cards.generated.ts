@@ -45,7 +45,7 @@ export const CARD_CONTENT = {
     {"name":"I'll Take That","set":"proposed","kind":"player","owner":"Gray","rarity":"Fine","starter":false,"count":2,"cost":1,"oomph":0,"scramble":3,"conditionalStat":false,"text":"Shuffle 1 Stuff from Red's hand into Red's deck.","flavor":"Relieve Red of that cumbersome pack."},
     {"name":"Quick Vault","set":"proposed","kind":"player","owner":"Gray","rarity":"Fine","starter":false,"count":2,"cost":1,"oomph":1,"scramble":2,"conditionalStat":false,"text":"","flavor":"Spring off Red's shoulder to clear the gap."},
     {"name":"In Step","set":"proposed","kind":"player","owner":"Gray","rarity":"Cool","starter":false,"count":2,"cost":2,"oomph":0,"scramble":0,"conditionalStat":true,"text":"Scramble equal to 2 times the number of cards Red has played this turn.","flavor":"Sync your movements perfectly with Red's brute rhythm."},
-    {"name":"One Man's Junk","set":"proposed","kind":"player","owner":"Gray","rarity":"Cool","starter":false,"count":2,"cost":1,"oomph":2,"scramble":2,"conditionalStat":true,"text":"If any Bad Stuff is played this turn, gain Oomph +1 and Scramble +1.","flavor":"Turn hazardous junk into a makeshift advantage."},
+    {"name":"One Man's Junk","set":"proposed","kind":"player","owner":"Gray","rarity":"Cool","starter":false,"count":2,"cost":1,"oomph":0,"scramble":0,"conditionalStat":true,"text":"+3 Oomph and +3 Scramble for each Bad Stuff you're holding.","flavor":"Turn hazardous junk into a makeshift advantage."},
     {"name":"Hack the Doors","set":"proposed","kind":"player","owner":"Gray","rarity":"Cool","starter":false,"count":2,"cost":1,"oomph":0,"scramble":3,"conditionalStat":false,"text":"Peek 3","flavor":"Bypass the security subroutines to peek ahead."},
     {"name":"Covering Fire","set":"proposed","kind":"player","owner":"Gray","rarity":"Cool","starter":false,"count":2,"cost":1,"oomph":0,"scramble":0,"conditionalStat":false,"text":"Every time Red plays a card this turn, you may draw 1 card.","flavor":"Keep their eyes on you so Red can maneuver freely."},
     {"name":"Pivot","set":"proposed","kind":"player","owner":"Gray","rarity":"Cool","starter":false,"count":2,"cost":2,"oomph":2,"scramble":3,"conditionalStat":false,"text":"The next card Red plays this turn costs 1 fewer card to play.","flavor":"Pronounced \"Piv-aaahhht\"."},
@@ -96,10 +96,10 @@ export const CARD_CONTENT = {
 } as const satisfies CardContent;
 
 /** The first 12 hex of sha256 over the JSON of CARD_CONTENT above — identifies this card list. */
-export const CARD_LIST_ID = "de97648d17f8";
+export const CARD_LIST_ID = "aae4cace5c0c";
 
 /** R of the kit revision: the rulebook's "Rules version:" line. Recorded runs refuse to replay across a change to it. Kept out of CARD_CONTENT so a rules bump does not change CARD_LIST_ID. */
 export const RULES_VERSION = "R33";
 
 /** C of the kit revision: the "version:" line under meta in cards.yaml, bumped when the card list changes. The print sheet stamps RULES_VERSION.CARDS_VERSION on every card; tools/kit-revision.sh adds the engine count. */
-export const CARDS_VERSION = "C53";
+export const CARDS_VERSION = "C54";

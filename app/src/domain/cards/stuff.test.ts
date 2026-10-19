@@ -2,7 +2,7 @@
 
 import { beforeEach, describe, expect, it } from "vitest";
 import { execute } from "../engine";
-import { costOf, statPool, thresholdIsMet, thresholdRequirement } from "../queries";
+import { contributionOf, costOf, playedBy, statPool, thresholdIsMet, thresholdRequirement } from "../queries";
 import {
   card,
   drawing,
@@ -1422,47 +1422,168 @@ describe("Bad Stuff — 'Play: Scrap this card.'", () => {
       Red: player({ deck: pile("Shove", 6), hand: [card(name), ...pile("Shove", payerCount), ...extra] }),
     });
     const bad = handCard(state, "Red", name);
-    const payWith = state.Red.hand.filter((c) => c.name === "Shove").map((c) => c.id);
+    const payWith = state.Red.hand
+      .filter((c) => c.name === "Shove")
+      .slice(0, costOf(state, "Red", bad))
+      .map((c) => c.id);
     return { state, bad, payWith };
   };
+  const playIt = (name: string, extra: ReturnType<typeof card>[] = []) => {
+    const { state, bad, payWith } = playBad(name, extra, 4);
+    const ran = must(state, { type: "PLAY_CARD", character: "Red", cardId: bad.id, payWith });
+    return { before: state, bad, payWith, ...ran };
+  };
 
-  it("Torn Seal goes to the Scrapyard, not the discard pile, at Cleanup", () => {
-    const { state, bad, payWith } = playBad("Torn Seal", [], 3);
-    const { state: next } = play(state, [
-      { type: "PLAY_CARD", character: "Red", cardId: bad.id, payWith },
-      { type: "END_PLAY" },
-    ]);
-    expect(next.scrapyard.map((c) => c.id)).toContain(bad.id);
-    expect(next.Red.discard.map((c) => c.id)).not.toContain(bad.id);
+  it("goes from hand to the Scrapyard without touching the play zone or the played count", () => {
+    for (const name of [
+      "Torn Seal",
+      "Sluggish",
+      "Rust",
+      "Faceful Of Slime",
+      "Spore Cloud",
+      "My Head Is Quantum Spinning",
+      "System Feedback",
+    ]) {
+      const { before, bad, state: next, events } = playIt(name);
+      expect(next.scrapyard.map((c) => c.id), name).toEqual([bad.id]);
+      expect(next.playZone, name).toEqual([]);
+      expect(next.Red.hand.map((c) => c.id), name).not.toContain(bad.id);
+      expect(playedBy(next, "Red"), name).toBe(playedBy(before, "Red"));
+      expect(eventTypes(events), name).not.toContain("CARD_PLAYED");
+    }
+  });
+
+  it("Exhausts the cards that paid for it", () => {
+    const { state, bad, payWith } = playBad("Torn Seal", [], 4);
+    const { state: next } = must(state, { type: "PLAY_CARD", character: "Red", cardId: bad.id, payWith });
+    expect(next.Red.exhaust.map((c) => c.id).sort()).toEqual([...payWith].sort());
+  });
+
+  it("Panic Exhausts 2, then is Scrapped", () => {
+    const { before, bad, state: next } = playIt("Panic");
+    expect(next.Red.deck).toHaveLength(before.Red.deck.length - 2);
+    expect(next.scrapyard.map((c) => c.id)).toEqual([bad.id]);
     expect(next.playZone).toEqual([]);
   });
 
-  it("stays in the play zone until Cleanup", () => {
-    const { state, bad, payWith } = playBad("Torn Seal", [], 3);
-    const { state: next } = must(state, { type: "PLAY_CARD", character: "Red", cardId: bad.id, payWith });
-    expect(next.playZone.map((z) => z.card.id)).toEqual([bad.id]);
-    expect(next.scrapyard).toHaveLength(0);
-  });
-
-  it("Panic still Exhausts 2 when played, then is Scrapped", () => {
-    const { state, bad, payWith } = playBad("Panic", [], 2);
-    const { state: played } = must(state, { type: "PLAY_CARD", character: "Red", cardId: bad.id, payWith });
-    expect(played.Red.deck).toHaveLength(4);
-    const { state: next } = must(played, { type: "END_PLAY" });
-    expect(next.scrapyard.map((c) => c.id)).toContain(bad.id);
-  });
-
-  it("Corrosive Acid's Play line resolves, then it is Scrapped", () => {
-    const { state, bad, payWith } = playBad("Corrosive Acid", [card("Pry Bar")], 3);
-    const asked = must(state, { type: "PLAY_CARD", character: "Red", cardId: bad.id, payWith });
-    const pending = asked.state.pending;
+  it("Corrosive Acid asks first, then Scraps the chosen Good Stuff and itself", () => {
+    const { bad, state: asked } = playIt("Corrosive Acid", [card("Pry Bar")]);
+    const pending = asked.pending;
     if (pending?.kind !== "ChooseCards") throw new Error("expected a card choice");
+    expect(asked.scrapyard).toHaveLength(0);
+    expect(asked.playZone).toEqual([]);
     const pryBar = pending.options[0];
     if (!pryBar) throw new Error("rig");
-    const chosen = must(asked.state, { type: "CHOOSE_CARDS", cardIds: [pryBar.id] });
-    const { state: next } = must(chosen.state, { type: "END_PLAY" });
+    const { state: next } = must(asked, { type: "CHOOSE_CARDS", cardIds: [pryBar.id] });
     expect(next.scrapyard.map((c) => c.name).sort()).toEqual(["Corrosive Acid", "Pry Bar"]);
-    expect(next.Red.discard.map((c) => c.id)).not.toContain(bad.id);
+    expect(next.Red.hand.map((c) => c.id)).not.toContain(bad.id);
+    expect(next.pending).toBeNull();
+    expect(next.playZone).toEqual([]);
+  });
+
+  it("Corrosive Acid with no Good Stuff in hand asks nothing and is Scrapped", () => {
+    const { bad, state: next } = playIt("Corrosive Acid");
+    expect(next.pending).toBeNull();
+    expect(next.scrapyard.map((c) => c.id)).toEqual([bad.id]);
+  });
+
+  it("does not wake a card that reacts to a card being played", () => {
+    const base = playBad("Torn Seal", [], 4);
+    const state = {
+      ...base.state,
+      playZone: [{ owner: "Red" as const, card: card("Set 'Em Up") }],
+      Gray: player({ deck: pile("Duck Under", 3) }),
+    };
+    const { state: next } = must(state, {
+      type: "PLAY_CARD",
+      character: "Red",
+      cardId: base.bad.id,
+      payWith: base.payWith,
+    });
+    expect(next.pending).toBeNull();
+    expect(next.thisTurn.questions).toEqual([]);
+  });
+
+  it("is paid for free by Overcharged Battery, which is then spent", () => {
+    const base = playBad("Torn Seal", [card("Charge"), card("Charge")], 4);
+    const armed = { ...base.state, thisTurn: { ...base.state.thisTurn, freePlays: 1 } };
+    expect(costOf(armed, "Red", base.bad)).toBe(0);
+    const { state: next, events } = must(armed, {
+      type: "PLAY_CARD",
+      character: "Red",
+      cardId: base.bad.id,
+      payWith: [],
+    });
+    expect(next.thisTurn.freePlays).toBe(0);
+    expect(next.Red.exhaust).toEqual([]);
+    expect(eventTypes(events)).not.toContain("CARD_PLAYED");
+    const charge = handCard(next, "Red", "Charge");
+    expect(costOf(next, "Red", charge)).toBe(charge.cost);
+  });
+
+  it("is paid 1 fewer by Pivot, which is then spent", () => {
+    const base = playBad("Torn Seal", [card("Charge")], 4);
+    const armed = {
+      ...base.state,
+      thisTurn: { ...base.state.thisTurn, playDiscount: { Red: 1, Gray: 0 } },
+    };
+    expect(costOf(armed, "Red", base.bad)).toBe(base.bad.cost - 1);
+    const { state: next } = must(armed, {
+      type: "PLAY_CARD",
+      character: "Red",
+      cardId: base.bad.id,
+      payWith: base.payWith.slice(0, base.bad.cost - 1),
+    });
+    expect(next.thisTurn.playDiscount.Red).toBe(0);
+    const charge = handCard(next, "Red", "Charge");
+    expect(costOf(next, "Red", charge)).toBe(charge.cost);
+  });
+
+  it("is not counted by Junk Launcher, Rhythm & Bruise or In Step", () => {
+    const state = playing({
+      Red: player({
+        deck: pile("Shove", 6),
+        hand: [card("Torn Seal"), card("Junk Launcher"), card("Rhythm & Bruise"), ...pile("Shove", 8)],
+      }),
+      Gray: player({ deck: pile("Duck Under", 6), hand: [card("In Step"), ...pile("Duck Under", 3)] }),
+    });
+    const seal = handCard(state, "Red", "Torn Seal");
+    const shoves = state.Red.hand.filter((c) => c.name === "Shove").map((c) => c.id);
+    let s = must(state, {
+      type: "PLAY_CARD",
+      character: "Red",
+      cardId: seal.id,
+      payWith: shoves.slice(0, seal.cost),
+    }).state;
+    const launcher = handCard(s, "Red", "Junk Launcher");
+    const rhythm = handCard(s, "Red", "Rhythm & Bruise");
+    const inStep = handCard(s, "Gray", "In Step");
+    const rest = s.Red.hand.filter((c) => c.name === "Shove").map((c) => c.id);
+    s = must(s, { type: "PLAY_CARD", character: "Red", cardId: launcher.id, payWith: rest.slice(0, launcher.cost) }).state;
+    const rest2 = s.Red.hand.filter((c) => c.name === "Shove").map((c) => c.id);
+    s = must(s, { type: "PLAY_CARD", character: "Red", cardId: rhythm.id, payWith: rest2.slice(0, rhythm.cost) }).state;
+    const ducks = s.Gray.hand.filter((c) => c.name === "Duck Under").map((c) => c.id);
+    s = must(s, { type: "PLAY_CARD", character: "Gray", cardId: inStep.id, payWith: ducks.slice(0, inStep.cost) }).state;
+    expect(playedBy(s, "Red")).toBe(2);
+    expect(playedBy(s, "Gray")).toBe(1);
+    const zoneCost = s.playZone.reduce((sum, p) => sum + p.card.cost, 0);
+    expect(zoneCost).toBe(launcher.cost + rhythm.cost + inStep.cost);
+    const stats = (name: string) => {
+      const p = s.playZone.find((z) => z.card.name === name);
+      if (!p) throw new Error("rig");
+      return contributionOf(s, p);
+    };
+    expect(stats("Junk Launcher").oomph).toBe(zoneCost);
+    expect(stats("Rhythm & Bruise").oomph).toBe(rhythm.oomph + 2);
+    expect(stats("In Step").scramble).toBe(2 * 2);
+  });
+
+  it("Cleanup discards the whole play zone to the discard pile", () => {
+    const state = playing({ Red: player({ deck: pile("Shove", 4), hand: [card("Pry Bar")] }) });
+    const pryBar = handCard(state, "Red", "Pry Bar");
+    const { state: next } = play(state, [free("Red", pryBar.id), { type: "END_PLAY" }]);
+    expect(next.Red.discard.map((c) => c.id)).toContain(pryBar.id);
+    expect(next.playZone).toEqual([]);
   });
 
   it("Good Stuff played at Cleanup still goes to the discard pile", () => {

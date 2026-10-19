@@ -12,7 +12,7 @@
  */
 var NVU_CARDS = {
   meta: {"version":"C53","updated":"2026-10-03"},
-  rulesVersion: "R32",
+  rulesVersion: "R33",
   cardsVersion: "C53",
   cardListId: "de97648d17f8",
   cards: [

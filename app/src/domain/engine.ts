@@ -61,6 +61,7 @@ import {
   giveGoodStuff,
   playerOf,
   scrap,
+  scrapFromHand,
   shuffleIntoDeck,
   spendFreePlay,
   spendPlayDiscount,
@@ -577,10 +578,14 @@ function playCard(
     run.events.push({ type: "COST_PAID", character: c, cards: exhausted });
   }
 
-  const after = playerOf(s, c);
-  s = withPlayer(s, c, { ...after, hand: after.hand.filter((x) => x.id !== cardId) });
-  s = { ...s, playZone: [...s.playZone, { owner: c, card }] };
-  run.events.push({ type: "CARD_PLAYED", character: c, card });
+  // Bad Stuff is never put in the play zone and is not a played card: it stays in hand until its Play line has resolved, then is Scrapped from there.
+  const inZone = card.kind !== "bad_stuff";
+  if (inZone) {
+    const after = playerOf(s, c);
+    s = withPlayer(s, c, { ...after, hand: after.hand.filter((x) => x.id !== cardId) });
+    s = { ...s, playZone: [...s.playZone, { owner: c, card }] };
+    run.events.push({ type: "CARD_PLAYED", character: c, card });
+  }
   const to = run.events.length;
   trackEntries(run, from, to);
   run.settled = to;
@@ -594,14 +599,21 @@ function playCard(
   }
   const onPlay = behaviour?.onPlay;
   if (onPlay && s.phase !== "GameOver") {
-    const step = onPlay(s, { card, character: c, zone: "playZone" });
+    const step = onPlay(s, { card, character: c, zone: inZone ? "playZone" : "hand" });
     run.events.push(...causedBy(step.events, card.name));
     s = settle(step.state, run);
   }
+  s = scrapBadStuff(s, c, card, run);
   return finishPlay(s, run, {
     events: run.events.slice(from, to),
     listeners: presentSince(s, run, from),
   });
+}
+
+/** Bad Stuff prints "Play: Scrap this card.": it goes once nothing of its Play line is left to ask. */
+function scrapBadStuff(state: GameState, c: Character, card: Card, run: Run): GameState {
+  if (card.kind !== "bad_stuff" || state.pending || state.phase === "GameOver") return state;
+  return scrapFromHand(state, c, card, run.events);
 }
 
 /**
@@ -1014,7 +1026,7 @@ function finishCleanup(state: GameState, run: Run): GameState {
   return { ...s, phase: "Turn Start", playZone: [] };
 }
 
-/** Each Turn, Cleanup: discard the play zone, Scrapping Bad Stuff. The hand carries over untouched. */
+/** Each Turn, Cleanup: discard the play zone. The hand carries over untouched. */
 function cleanupPiles(state: GameState, run: Run): GameState {
   let s = state;
 
@@ -1038,11 +1050,7 @@ function cleanupPiles(state: GameState, run: Run): GameState {
   for (const c of CHARACTERS) {
     const played = s.playZone.filter((x) => x.owner === c).map((x) => x.card);
     for (const card of played) {
-      if (card.kind === "bad_stuff") {
-        s = scrap(s, c, card, run.events);
-      } else {
-        s = discard(s, c, card, "playZone", run.events);
-      }
+      s = discard(s, c, card, "playZone", run.events);
     }
   }
   return settle({ ...s, playZone: [] }, run);
@@ -1071,6 +1079,7 @@ function runChoice(state: GameState, answer: ChoiceAnswer, run: Run): GameState 
   run.events.push(...causedBy(step.events, ctx.card.name));
   let s = settle(step.state, run);
   if (play) {
+    s = scrapBadStuff(s, ctx.character, ctx.card, run);
     const stayed = new Set(presentSince(s, run, 0));
     s = finishPlay(s, run, { ...play, listeners: play.listeners.filter((id) => stayed.has(id)) });
   }

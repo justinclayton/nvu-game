@@ -11,10 +11,10 @@
  * and no server.
  */
 var NVU_CARDS = {
-  meta: {"version":"C49","updated":"2026-10-03"},
+  meta: {"version":"C51","updated":"2026-10-03"},
   rulesVersion: "R31",
-  cardsVersion: "C49",
-  cardListId: "7945e42585a6",
+  cardsVersion: "C51",
+  cardListId: "d37add14701a",
   cards: [
     {"name":"Shove","set":"official","kind":"player","owner":"Red","starter":true,"cost":1,"oomph":2,"flavor":"'Oomph!', he shouted.","count":4},
     {"name":"Charge","set":"official","kind":"player","owner":"Red","starter":true,"cost":2,"oomph":4,"flavor":"I am bolder, so I lower my shoulder.","count":4},
@@ -28,15 +28,15 @@ var NVU_CARDS = {
     {"name":"Fast Follow","set":"official","kind":"player","owner":"Red","rarity":"Fine","cost":1,"oomph":3,"flavor":"The old one-two!","text":"If Gray played a card this turn, play this card for free.","count":3},
     {"name":"Reckless","set":"official","kind":"player","owner":"Red","rarity":"Fine","cost":1,"oomph":5,"flavor":"GYAHHHHHHHOUCH","text":"Exhaust 2.","count":2},
     {"name":"Bull Rush","set":"proposed","kind":"player","owner":"Red","rarity":"Fine","cost":1,"oomph":2,"scramble":1,"flavor":"Charge ahead while keeping your footing on loose debris.","count":2},
-    {"name":"Cross Punch","set":"proposed","kind":"player","owner":"Red","rarity":"Fine","cost":2,"oomph":4,"scramble":2,"flavor":"A heavy two-part combination attack.","text":"Exhaust 1.","count":2},
+    {"name":"Cross Punch","set":"proposed","kind":"player","owner":"Red","rarity":"Fine","cost":2,"oomph":4,"flavor":"A heavy two-part combination attack.","text":"Exhaust 1. If a Scramble card was already played this turn, +4 Oomph.","count":2},
     {"name":"Break Through","set":"proposed","kind":"player","owner":"Red","rarity":"Fine","cost":1,"oomph":2,"flavor":"Smash through the obstacle and leave the broken starter gear behind.","text":"Play: Scrap 1 card from your hand.","count":2},
-    {"name":"Set 'Em Up","set":"proposed","kind":"player","owner":"Red","rarity":"Fine","cost":1,"conditional_stat":true,"flavor":"Clear the heavy debris so Gray can maneuver effortlessly.","text":"Has 1 Scramble for each card Gray has played this turn.","count":2},
+    {"name":"Set 'Em Up","set":"proposed","kind":"player","owner":"Red","rarity":"Cool","cost":1,"flavor":"Clear the heavy debris so Gray can maneuver effortlessly.","text":"Every time you play a card this turn (including this one), Gray may draw a card.","count":2},
     {"name":"Second Wind","set":"proposed","kind":"player","owner":"Red","rarity":"Cool","cost":2,"oomph":4,"flavor":"Catch your breath and shake off the fatigue.","text":"Shuffle a Red card from your Exhaust pile into your deck.","count":2},
     {"name":"Junk Launcher","set":"proposed","kind":"player","owner":"Red","rarity":"Cool","cost":2,"conditional_stat":true,"flavor":"Hurl whatever scrap isn't nailed down.","text":"Oomph equal to the total printed cost of all cards in the play zone.","count":2},
     {"name":"Heavy Pockets","set":"proposed","kind":"player","owner":"Red","rarity":"Cool","cost":1,"oomph":2,"scramble":1,"flavor":"The potion problem, now in card form.","text":"Shuffle 1 Stuff from your hand into your deck.","count":2},
     {"name":"Tag Team","set":"proposed","kind":"player","owner":"Red","rarity":"Cool","cost":1,"oomph":2,"scramble":2,"flavor":"Seamless hand-off between partners.","text":"If Gray played a card this turn, you may draw 1 card.","count":2},
     {"name":"Brute Recycle","set":"proposed","kind":"player","owner":"Red","rarity":"Cool","cost":1,"oomph":3,"flavor":"Crush outdated gear into raw momentum.","text":"Play: Scrap 1 starter card from your hand or discard pile. If you do, you may draw 1 card.","count":2},
-    {"name":"Rhythm & Bruise","set":"proposed","kind":"player","owner":"Red","rarity":"Cool","cost":1,"conditional_stat":true,"flavor":"Let's get it on...leeeettt's get it on...","text":"Oomph equal to 2 times the number of cards Gray has played this turn. Play: If Gray has played 2 or more cards, you may draw 1 card.","count":2},
+    {"name":"Rhythm & Bruise","set":"proposed","kind":"player","owner":"Red","rarity":"Cool","cost":2,"conditional_stat":true,"flavor":"Let's get it on...leeeettt's get it on...","text":"Oomph equal to 2 times the number of cards Gray has played this turn.","count":2},
     {"name":"Momentum Shift","set":"proposed","kind":"player","owner":"Red","rarity":"Cool","cost":1,"oomph":4,"flavor":"Keep charging forward without looking back.","text":"Play: You may draw up to 2 cards, then Exhaust 1 card from your hand.","count":2},
     {"name":"Zen Mode","set":"proposed","kind":"player","owner":"Gray","rarity":"Woah","cost":1,"flavor":"Sorry, I can't hear you over the sound of how friggin calm I am","text":"While this is in play, you don't exhaust cards.","count":1},
     {"name":"Catch Your Breath","set":"proposed","kind":"player","owner":"Gray","rarity":"Fine","cost":1,"scramble":2,"flavor":"Pause for a second to read the room.","text":"Peek 3.","count":2},

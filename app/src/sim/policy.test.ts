@@ -416,7 +416,7 @@ describe("greedy", () => {
 
   it("scores a conditional-stat reward by what it contributes", () => {
     resetRig();
-    const setEmUp = card("Set 'Em Up"); // Scramble 0 + 1 per card Gray has played
+    const setEmUp = card("Rhythm & Bruise"); // Oomph 0 + 2 per card Gray has played
     const shove = card("Shove");
     const gray = (): PlayedCard => ({ owner: "Gray", card: card("Shove") });
     const deck = pile("Shove", 6); // Red is weak on Scramble

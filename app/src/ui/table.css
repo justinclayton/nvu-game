@@ -14,14 +14,16 @@
   --felt: #24363a;
   --felt-deep: #1a2a2d;
   --table: #171f21;
-  --print: rgba(245, 239, 225, 0.4);
+  /* Text on the felt is --print: 5.5:1 on the felt, 4.7:1 at the mat's lightest
+   * point. --print-faint is for borders and rules only, never for text. */
+  --print: rgba(245, 239, 225, 0.64);
   --print-faint: rgba(245, 239, 225, 0.18);
   --stock: #f5efe1;
   --stock-edge: #cfc4ab;
   --ink: #1c1a17;
   --ink-soft: #5a5347;
   --red: #b8382c;
-  --red-light: #e08a80;
+  --red-light: #ea9d94;
   --gray: #62707c;
   --gray-light: #b6c6d2;
   --good: #3f8f4a;
@@ -31,6 +33,12 @@
   --fine: #0fa3a8;
   --cool: #8f6fc4;
   --woah: #daa520;
+  /* The rarity colours above are edges. As text on stock they print darker,
+   * each at 4.5:1 or better. */
+  --fine-text: #0a7478;
+  --cool-text: #6b4fa0;
+  --woah-text: #8a6200;
+  --stock-faint: #6f6857;
   --stairwell: #8d1f18;
   --room: #c98a12;
 
@@ -88,7 +96,6 @@ body {
   margin-left: auto;
   font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
   font-size: 12px;
-  opacity: 0.7;
 }
 .table__phase {
   font-weight: 700;
@@ -212,8 +219,8 @@ body {
   position: absolute;
   left: 6px;
   top: 0;
-  font: 400 10px/16px var(--stencil);
-  letter-spacing: 0.14em;
+  font: 400 11px/16px var(--stencil);
+  letter-spacing: 0.05em;
   text-transform: uppercase;
   color: var(--print);
   white-space: nowrap;
@@ -336,7 +343,7 @@ body {
   flex-wrap: wrap;
 }
 .brief__kind {
-  font: 400 10px/16px var(--stencil);
+  font: 400 11px/16px var(--stencil);
   letter-spacing: 0.14em;
   text-transform: uppercase;
   color: var(--print);
@@ -403,7 +410,7 @@ body {
   color: var(--stock);
   text-transform: uppercase;
   letter-spacing: 0.08em;
-  font-size: 10.5px;
+  font-size: 11px;
   margin-right: 4px;
 }
 .brief--empty {
@@ -806,16 +813,17 @@ body {
   font-size: 0.9em;
   text-transform: uppercase;
   letter-spacing: 0.08em;
-  color: #8a8270;
+  color: var(--stock-faint);
 }
 .rarity--fine .rarity {
-  color: var(--fine);
+  color: var(--fine-text);
 }
 .rarity--cool .rarity {
-  color: var(--cool);
+  color: var(--cool-text);
 }
 .rarity--woah .rarity {
-  color: #a8790a;
+  color: var(--woah-text);
+  font-weight: 700;
 }
 
 /* A room card prints its threshold lines and its Flee line. Like a player
@@ -1013,7 +1021,7 @@ body {
 }
 .log__title {
   margin: 0;
-  font: 400 10px/16px var(--stencil);
+  font: 400 11px/16px var(--stencil);
   letter-spacing: 0.14em;
   text-transform: uppercase;
   color: var(--print);
@@ -1025,7 +1033,7 @@ body {
   gap: 6px;
 }
 .log__exports-label {
-  font: 400 10px/16px var(--stencil);
+  font: 400 11px/16px var(--stencil);
   letter-spacing: 0.14em;
   text-transform: uppercase;
   color: var(--print);
@@ -1039,7 +1047,7 @@ body {
   margin-top: 6px;
 }
 .note-box__label {
-  font: 400 10px/16px var(--stencil);
+  font: 400 11px/16px var(--stencil);
   letter-spacing: 0.14em;
   text-transform: uppercase;
   color: var(--print);
@@ -1055,7 +1063,7 @@ body {
   font: 14px/1.2 var(--sans);
 }
 .note-box__input::placeholder {
-  color: var(--print-faint);
+  color: var(--print);
 }
 .note-box__input:focus-visible {
   outline: 2px solid var(--woah);
@@ -1188,8 +1196,10 @@ body {
   }
 
   .slot__label {
-    font-size: 8px;
-    letter-spacing: 0.1em;
+    /* The stencil face is too wide at 10px for the slot widths here; the
+     * condensed display face holds the 10px floor and still fits. */
+    font: 700 10px/16px var(--display);
+    letter-spacing: 0.06em;
     left: 4px;
   }
   .slot__count {
@@ -1209,7 +1219,7 @@ body {
     font-size: 13px;
   }
   .status {
-    font-size: 9px;
+    font-size: 10px;
   }
   .slot__head .button--small {
     font-size: 11px;
@@ -1220,7 +1230,7 @@ body {
     padding: 5px 8px;
   }
   .brief__kind {
-    font-size: 8px;
+    font-size: 10px;
   }
   .brief__name {
     font-size: 14px;
@@ -1393,7 +1403,7 @@ body {
   border-radius: 4px;
   background: var(--ink);
   color: var(--print);
-  font: 600 9px/16px var(--display);
+  font: 600 10px/16px var(--display);
   letter-spacing: 0.06em;
   text-transform: uppercase;
   cursor: pointer;

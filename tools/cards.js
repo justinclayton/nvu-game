@@ -11,10 +11,10 @@
  * and no server.
  */
 var NVU_CARDS = {
-  meta: {"version":"C52","updated":"2026-10-03"},
+  meta: {"version":"C53","updated":"2026-10-03"},
   rulesVersion: "R32",
-  cardsVersion: "C52",
-  cardListId: "6cd1a4ba952a",
+  cardsVersion: "C53",
+  cardListId: "de97648d17f8",
   cards: [
     {"name":"Shove","set":"official","kind":"player","owner":"Red","starter":true,"cost":1,"oomph":2,"flavor":"'Oomph!', he shouted.","count":4},
     {"name":"Charge","set":"official","kind":"player","owner":"Red","starter":true,"cost":2,"oomph":4,"flavor":"I am bolder, so I lower my shoulder.","count":4},
@@ -75,8 +75,8 @@ var NVU_CARDS = {
     {"name":"Faceful Of Slime","set":"proposed","kind":"bad_stuff","cost":3,"flavor":"Murky goop blinds your vision and slows drawing.","text":"Holding: At Turn Start, draw 1 fewer card. Can't be used to pay for other cards. Play: Scrap this card.","count":2},
     {"name":"Spore Cloud","set":"proposed","kind":"bad_stuff","cost":3,"flavor":"Choking spores force you to drop excess gear.","text":"Holding: At Cleanup, discard cards other than this one until you hold 3. Can't be used to pay for other cards. Play: Scrap this card.","count":2},
     {"name":"My Head Is Quantum Spinning","set":"proposed","kind":"bad_stuff","cost":2,"flavor":"Disorientation drains stamina whenever team communication spikes.","text":"Holding: Whenever your partner draws a card during Play, Exhaust 1. Can't be used to pay for other cards. Play: Scrap this card.","count":2},
-    {"name":"Panic","set":"proposed","kind":"bad_stuff","cost":2,"flavor":"Blinding fear raises room difficulty and drains team stamina.","text":"Holding: Every room threshold requires +2 Scramble to be met. Play: Exhaust 2. Scrap this card. Can't be used to pay for other cards.","count":2},
-    {"name":"Corrosive Acid","set":"proposed","kind":"bad_stuff","cost":3,"flavor":"Caustic fluid eats away at your deck stamina and gear.","text":"Holding: At Turn Start, Exhaust 1. Play: Scrap 1 Good Stuff card from your hand. Scrap this card. Can't be used to pay for other cards.","count":2},
+    {"name":"Panic","set":"proposed","kind":"bad_stuff","cost":2,"flavor":"Blinding fear raises room difficulty and drains team stamina.","text":"Holding: Every room threshold requires +2 Scramble to be met. Can't be used to pay for other cards. Play: Exhaust 2. Scrap this card.","count":2},
+    {"name":"Corrosive Acid","set":"proposed","kind":"bad_stuff","cost":3,"flavor":"Caustic fluid eats away at your deck stamina and gear.","text":"Holding: At Turn Start, Exhaust 1. Can't be used to pay for other cards. Play: Scrap 1 Good Stuff card from your hand. Scrap this card.","count":2},
     {"name":"System Feedback","set":"proposed","kind":"bad_stuff","cost":2,"flavor":"Electrical backlash dampens cheap card plays.","text":"Holding: Whenever you play a card with Cost 0, lose 1 Oomph and 1 Scramble from the Stat pool this turn. Can't be used to pay for other cards. Play: Scrap this card.","count":2},
     {"name":"Security Turnstile","set":"proposed","kind":"room","tier":1,"flavor":"A rusted barrier blocks the thoroughfare. Gray can slip through quietly, or Red can tear it off its hinges.","challenges":[{"thresholds":[{"stat":"Scramble","value":5,"outcome":"Gray reveals a card reward."}]},{"thresholds":[{"stat":"Oomph","value":5,"outcome":"Red reveals a card reward."}]}],"flee":"Both players Exhaust 1.","count":14},
     {"name":"Flooded Ventilation Shaft","set":"proposed","kind":"room","tier":1,"flavor":"A narrow duct dripping with murky condensation. Red can force the grate while Gray navigates the wiring.","challenges":[{"thresholds":[{"stats":{"Oomph":3,"Scramble":3},"outcome":"Both players reveal a card reward."}]}],"flee":"Gray Exhausts 2.","count":10},

@@ -75,8 +75,8 @@ export const CARD_CONTENT = {
     {"name":"Faceful Of Slime","set":"proposed","kind":"bad_stuff","owner":null,"rarity":null,"starter":false,"count":2,"cost":3,"oomph":0,"scramble":0,"conditionalStat":false,"text":"Holding: At Turn Start, draw 1 fewer card. Can't be used to pay for other cards. Play: Scrap this card.","flavor":"Murky goop blinds your vision and slows drawing."},
     {"name":"Spore Cloud","set":"proposed","kind":"bad_stuff","owner":null,"rarity":null,"starter":false,"count":2,"cost":3,"oomph":0,"scramble":0,"conditionalStat":false,"text":"Holding: At Cleanup, discard cards other than this one until you hold 3. Can't be used to pay for other cards. Play: Scrap this card.","flavor":"Choking spores force you to drop excess gear."},
     {"name":"My Head Is Quantum Spinning","set":"proposed","kind":"bad_stuff","owner":null,"rarity":null,"starter":false,"count":2,"cost":2,"oomph":0,"scramble":0,"conditionalStat":false,"text":"Holding: Whenever your partner draws a card during Play, Exhaust 1. Can't be used to pay for other cards. Play: Scrap this card.","flavor":"Disorientation drains stamina whenever team communication spikes."},
-    {"name":"Panic","set":"proposed","kind":"bad_stuff","owner":null,"rarity":null,"starter":false,"count":2,"cost":2,"oomph":0,"scramble":0,"conditionalStat":false,"text":"Holding: Every room threshold requires +2 Scramble to be met. Play: Exhaust 2. Scrap this card. Can't be used to pay for other cards.","flavor":"Blinding fear raises room difficulty and drains team stamina."},
-    {"name":"Corrosive Acid","set":"proposed","kind":"bad_stuff","owner":null,"rarity":null,"starter":false,"count":2,"cost":3,"oomph":0,"scramble":0,"conditionalStat":false,"text":"Holding: At Turn Start, Exhaust 1. Play: Scrap 1 Good Stuff card from your hand. Scrap this card. Can't be used to pay for other cards.","flavor":"Caustic fluid eats away at your deck stamina and gear."},
+    {"name":"Panic","set":"proposed","kind":"bad_stuff","owner":null,"rarity":null,"starter":false,"count":2,"cost":2,"oomph":0,"scramble":0,"conditionalStat":false,"text":"Holding: Every room threshold requires +2 Scramble to be met. Can't be used to pay for other cards. Play: Exhaust 2. Scrap this card.","flavor":"Blinding fear raises room difficulty and drains team stamina."},
+    {"name":"Corrosive Acid","set":"proposed","kind":"bad_stuff","owner":null,"rarity":null,"starter":false,"count":2,"cost":3,"oomph":0,"scramble":0,"conditionalStat":false,"text":"Holding: At Turn Start, Exhaust 1. Can't be used to pay for other cards. Play: Scrap 1 Good Stuff card from your hand. Scrap this card.","flavor":"Caustic fluid eats away at your deck stamina and gear."},
     {"name":"System Feedback","set":"proposed","kind":"bad_stuff","owner":null,"rarity":null,"starter":false,"count":2,"cost":2,"oomph":0,"scramble":0,"conditionalStat":false,"text":"Holding: Whenever you play a card with Cost 0, lose 1 Oomph and 1 Scramble from the Stat pool this turn. Can't be used to pay for other cards. Play: Scrap this card.","flavor":"Electrical backlash dampens cheap card plays."}
   ],
   rooms: [
@@ -96,10 +96,10 @@ export const CARD_CONTENT = {
 } as const satisfies CardContent;
 
 /** The first 12 hex of sha256 over the JSON of CARD_CONTENT above — identifies this card list. */
-export const CARD_LIST_ID = "6cd1a4ba952a";
+export const CARD_LIST_ID = "de97648d17f8";
 
 /** R of the kit revision: the rulebook's "Rules version:" line. Recorded runs refuse to replay across a change to it. Kept out of CARD_CONTENT so a rules bump does not change CARD_LIST_ID. */
 export const RULES_VERSION = "R32";
 
 /** C of the kit revision: the "version:" line under meta in cards.yaml, bumped when the card list changes. The print sheet stamps RULES_VERSION.CARDS_VERSION on every card; tools/kit-revision.sh adds the engine count. */
-export const CARDS_VERSION = "C52";
+export const CARDS_VERSION = "C53";

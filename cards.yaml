@@ -29,7 +29,7 @@
 #   flee    string               room and stairwell only: the printed Flee line
 
 meta:
-  version: C52
+  version: C53
   updated: 2026-10-03
 
 cards:
@@ -669,8 +669,8 @@ cards:
     cost: 2
     text: >-
       Holding: Every room threshold requires +2 Scramble to be met.
-      Play: Exhaust 2. Scrap this card.
       Can't be used to pay for other cards.
+      Play: Exhaust 2. Scrap this card.
     flavor: Blinding fear raises room difficulty and drains team stamina.
 
   - name: Corrosive Acid
@@ -680,8 +680,8 @@ cards:
     cost: 3
     text: >-
       Holding: At Turn Start, Exhaust 1.
-      Play: Scrap 1 Good Stuff card from your hand. Scrap this card.
       Can't be used to pay for other cards.
+      Play: Scrap 1 Good Stuff card from your hand. Scrap this card.
     flavor: Caustic fluid eats away at your deck stamina and gear.
 
   - name: System Feedback

@@ -299,6 +299,16 @@ function playZoneFull(): GameState {
   };
 }
 
+/** Play phase, seven cards in each hand, to check how a row reads once its cards overlap. */
+function sevenCardHands(): GameState {
+  return rig({
+    phase: "Play",
+    activeRoom: room(CLEARED_ROOM),
+    Red: player({ deck: pile("Shove", 3), hand: pile("Shove", 7) }),
+    Gray: player({ deck: pile("Duck Under", 3), hand: pile("Duck Under", 7) }),
+  });
+}
+
 /**
  * Play phase: Sorting Room's Oomph 2 line owes Red a Good Stuff, but the pool
  * is dry. The reward line still prints, followed by the pool-empty line
@@ -426,6 +436,11 @@ export const FIXTURES: readonly Fixture[] = [
     name: "play-zone",
     description: "Both play zones full, to check the zone reads as a row as wide as the hand.",
     build: stable(playZoneFull),
+  },
+  {
+    name: "seven-card-hands",
+    description: "Seven cards in each hand, to check how a row reads once its cards overlap.",
+    build: stable(sevenCardHands),
   },
   (() => {
     const ran = stableRan(emptyGoodStuffPool);

@@ -5,6 +5,7 @@
 
 import { allThresholds, statPool, thresholdIsMet, thresholdLines } from "@domain/queries";
 import type { GameState } from "@domain/types";
+import { phaseName } from "./phase";
 
 const PHASE_BLURB: Record<GameState["phase"], string> = {
   "Turn Start": "Turn the top card of the floor deck face up, then both players draw to 5.",
@@ -58,7 +59,7 @@ export function RoomBrief({ state }: { readonly state: GameState }) {
         </>
       ) : (
         <>
-          <span className="brief__kind">{state.phase}</span>
+          <span className="brief__kind">{phaseName(state.phase)}</span>
           <p className="brief__blurb">{PHASE_BLURB[state.phase]}</p>
           <span className="brief__pool">
             <b>{pool.oomph}</b> Oomph · <b>{pool.scramble}</b> Scramble

@@ -61,12 +61,17 @@ function Slot({ id, label, count, row, tone, onOpenPile }: SlotProps) {
   const inspectable = !row && onOpenPile;
   return (
     <div className={classes}>
-      <span className="slot__label">{label}</span>
-      {count !== undefined ? (
-        <span className="slot__count" aria-label={`${label}: ${plural(count, "card")}`}>
-          {count}
-        </span>
-      ) : null}
+      <span className="slot__label">
+        {label}
+        {count !== undefined ? (
+          <>
+            <span className="slot__count" aria-hidden="true">
+              {count}
+            </span>
+            <span className="visually-hidden">: {plural(count, "card")}</span>
+          </>
+        ) : null}
+      </span>
       <div className="well" data-slot={id} />
       {inspectable ? (
         <button
@@ -156,6 +161,8 @@ export function Mat({
     <div
       className="mat"
       ref={matRef}
+      role="region"
+      aria-label="The table"
       style={vars}
       onMouseLeave={() => {
         onInspect(null);

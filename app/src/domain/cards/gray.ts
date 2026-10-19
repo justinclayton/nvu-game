@@ -173,8 +173,8 @@ function shuffleStuffFromHand(whose: (ctx: BehaviourContext) => Character): Card
   };
 }
 
-/** Here, Catch: offer the next piece of Stuff in Red's hand, or stop when none is left. */
-function hereCatch(state: GameState, ctx: BehaviourContext, events: readonly DomainEvent[]) {
+/** Pack Mule: offer the next piece of Stuff in Red's hand, or stop when none is left. */
+function packMule(state: GameState, ctx: BehaviourContext, events: readonly DomainEvent[]) {
   const options = playerOf(state, "Red").hand.filter((c) => c.kind !== "player");
   if (options.length === 0) return done(state, events);
   return ask(
@@ -186,7 +186,7 @@ function hereCatch(state: GameState, ctx: BehaviourContext, events: readonly Dom
       options,
       count: 1,
       optional: true,
-      source: source(ctx, "here-catch"),
+      source: source(ctx, "pack-mule"),
     },
     events,
   );
@@ -249,16 +249,16 @@ export const GRAY: Registry = {
   },
 
   /* One card at a time until Gray takes no more, since a question offers an exact count. */
-  "Here, Catch": {
+  "Pack Mule": {
     onPlay(state, ctx) {
-      return hereCatch(state, ctx, []);
+      return packMule(state, ctx, []);
     },
     onChoice(answer, state, ctx) {
       if (answer.kind !== "cards" || answer.cards.length === 0) return nothing(state);
       const events: DomainEvent[] = [];
       let s = takeFrom(state, "Red", "hand", answer.cards);
       for (const card of answer.cards) s = moveToHand(s, ctx.character, card, events);
-      return hereCatch(s, ctx, events);
+      return packMule(s, ctx, events);
     },
   },
 

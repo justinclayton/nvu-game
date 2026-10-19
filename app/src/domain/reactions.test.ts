@@ -254,10 +254,10 @@ describe("playing a card is heard after the card's own effect", () => {
       Red: player({ deck: pile("Shove", 3), hand: [card(probe.name)] }),
       Gray: player({
         deck: pile("Duck Under", 3),
-        hand: [card("Here, Catch"), card("Duck Under")],
+        hand: [card("Pack Mule"), card("Duck Under")],
       }),
     });
-    const asking = must(state, playPaying(state, "Gray", "Here, Catch", ["Duck Under"])).state;
+    const asking = must(state, playPaying(state, "Gray", "Pack Mule", ["Duck Under"])).state;
     const pryBar = handCard(asking, "Red", probe.name);
     const { state: next } = must(asking, { type: "CHOOSE_CARDS", cardIds: [pryBar.id] });
     expect(names(next.Gray.hand)).toEqual([probe.name]);

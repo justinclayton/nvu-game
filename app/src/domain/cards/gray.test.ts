@@ -289,16 +289,16 @@ describe("One Man's Junk — '+3 Oomph and +3 Scramble for each Bad Stuff you're
   });
 });
 
-describe("Here, Catch — 'Move any number of Stuff cards from Red's hand to yours'", () => {
+describe("Pack Mule —'Move any number of Stuff cards from Red's hand to yours'", () => {
   const catching = () => {
     const state = playing({
       Red: player({ deck: pile("Shove", 4), hand: [card("Pry Bar"), card("Torn Seal"), card("Shove")] }),
-      Gray: player({ deck: pile("Duck Under", 4), hand: [card("Here, Catch"), card("Duck Under")] }),
+      Gray: player({ deck: pile("Duck Under", 4), hand: [card("Pack Mule"), card("Duck Under")] }),
     });
     return must(state, {
       type: "PLAY_CARD",
       character: "Gray",
-      cardId: handCard(state, "Gray", "Here, Catch").id,
+      cardId: handCard(state, "Gray", "Pack Mule").id,
       payWith: [handCard(state, "Gray", "Duck Under").id],
     }).state;
   };
@@ -331,12 +331,12 @@ describe("Here, Catch — 'Move any number of Stuff cards from Red's hand to you
 
   it("does nothing when Red holds no Stuff", () => {
     const state = playing({
-      Gray: player({ deck: pile("Duck Under", 4), hand: [card("Here, Catch"), card("Duck Under")] }),
+      Gray: player({ deck: pile("Duck Under", 4), hand: [card("Pack Mule"), card("Duck Under")] }),
     });
     const played = must(state, {
       type: "PLAY_CARD",
       character: "Gray",
-      cardId: handCard(state, "Gray", "Here, Catch").id,
+      cardId: handCard(state, "Gray", "Pack Mule").id,
       payWith: [handCard(state, "Gray", "Duck Under").id],
     });
     expect(played.state.pending).toBeNull();

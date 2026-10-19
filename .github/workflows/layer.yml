@@ -19,6 +19,10 @@
 # A labeled event comes only from someone with write access to this repo, so a
 # fork cannot start it. The fork guard is still checked on the source PR.
 #
+# A closed issue, such as an answered `needs-human` question, wakes each loop
+# issue it blocked that is `ready-for-agent` and has no open blocker left, by
+# removing and adding the label as nvu-agent. That starts the labeled path.
+#
 # Retries: a re-run (attempt 2 and up) resumes on an issue it already
 # claimed, and a layer whose commit already exists on its branch skips the
 # agent. Each comment carries a marker and is not posted twice.
@@ -26,7 +30,7 @@ name: Layer
 
 on:
   issues:
-    types: [labeled]
+    types: [labeled, closed]
 
 permissions:
   contents: read
@@ -34,8 +38,54 @@ permissions:
   issues: read
 
 jobs:
+  unblock:
+    if: github.event.action == 'closed'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Find the loop issues this close unblocked
+        id: find
+        env:
+          GH_TOKEN: ${{ github.token }}
+          N: ${{ github.event.issue.number }}
+        run: |
+          set -eu
+          ready=
+          for m in $(gh api --paginate "repos/$GITHUB_REPOSITORY/issues/$N/dependencies/blocking" \
+              --jq '.[] | select(.state == "open" and (.pull_request | not))
+                | select([.labels[].name] | index("ready-for-agent"))
+                | select((.body // "") | test("(?m)^Source PR: #[0-9]+\\s*$")) | .number'); do
+            open=$(gh api "repos/$GITHUB_REPOSITORY/issues/$m/dependencies/blocked_by" --jq '[.[] | select(.state == "open")] | length')
+            if [ "$open" = 0 ]; then ready="$ready $m"; else echo "#$m is still blocked by $open open issue(s)."; fi
+          done
+          [ -n "$ready" ] || echo "Closing #$N unblocked no loop issue."
+          echo "ready=${ready# }" >> "$GITHUB_OUTPUT"
+
+      - name: Mint the nvu-agent token
+        id: app-token
+        if: steps.find.outputs.ready != ''
+        uses: actions/create-github-app-token@v1
+        with:
+          app-id: ${{ vars.NVU_AGENT_APP_ID }}
+          private-key: ${{ secrets.NVU_AGENT_PRIVATE_KEY }}
+
+      - name: Wake them
+        if: steps.find.outputs.ready != ''
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+          READY: ${{ steps.find.outputs.ready }}
+        run: |
+          set -eu
+          # A write with GITHUB_TOKEN would start no run, so the label is nvu-agent's.
+          # Issues in one stack queue in its concurrency group, and a layer that
+          # finishes wakes the stack's next ready issue in any case.
+          for m in $READY; do
+            gh api -X DELETE "repos/$GITHUB_REPOSITORY/issues/$m/labels/ready-for-agent" --silent
+            gh api -X POST "repos/$GITHUB_REPOSITORY/issues/$m/labels" -f 'labels[]=ready-for-agent' --silent
+            echo "Woke #$m."
+          done
+
   gate:
-    if: github.event.label.name == 'ready-for-agent' && github.event.issue.pull_request == null
+    if: github.event.action == 'labeled' && github.event.label.name == 'ready-for-agent' && github.event.issue.pull_request == null
     runs-on: ubuntu-latest
     outputs:
       source: ${{ steps.stack.outputs.source }}
@@ -60,7 +110,7 @@ jobs:
           fi
           open=$(gh api "repos/$GITHUB_REPOSITORY/issues/$N/dependencies/blocked_by" --jq '[.[] | select(.state == "open")] | length')
           if [ "$open" != 0 ]; then
-            echo "#$N is blocked by $open open issue(s). Close them, then remove and add ready-for-agent again."
+            echo "#$N is blocked by $open open issue(s). It starts when the last of them closes."
             exit 0
           fi
           read -r base head fork state < <(gh api "repos/$GITHUB_REPOSITORY/pulls/$source" \

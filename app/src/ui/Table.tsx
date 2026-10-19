@@ -110,18 +110,24 @@ export function Table({ onNewRun, onOpenRun, replay }: Props) {
     setInspected(null);
   }, [state]);
 
-  const payingHint =
+  /* What a payment in progress still needs, said where the player is looking:
+   * next to the paying hand, and in the bar with the way out. */
+  const payingNeed =
     paying && state[paying.character].hand.some((c) => c.id === paying.cardId)
-      ? `${paying.character}: choose ${plural(
+      ? `choose ${plural(
           costOf(state, paying.character, cardById(state, paying.character, paying.cardId)) -
             paying.chosen.length,
           "more card",
-        )} to discard, or click the card again to cancel.`
+        )} to discard`
+      : null;
+  const payingHint =
+    paying && payingNeed
+      ? `${paying.character}: ${payingNeed}, or click the card again to cancel.`
       : null;
 
   return (
     <div
-      className={`table${replaying ? " table--replaying" : ""}`}
+      className={`table-page${replaying ? " table--replaying" : ""}`}
       onDragOver={(e) => {
         e.preventDefault();
       }}
@@ -131,87 +137,94 @@ export function Table({ onNewRun, onOpenRun, replay }: Props) {
         if (file) void file.text().then(onOpenRun);
       }}
     >
-      <header className="table__head">
-        <h1>North vs Up</h1>
-        <div className="table__meta">
-          <span>Floor {state.floor}</span>
-          <span>Turn {state.turn}</span>
-          <span className="table__phase">{state.phase}</span>
-          {KIT_REVISION === undefined ? null : (
-            <span className="table__kit" title="Kit revision: rules, card list, engine build.">
-              {KIT_REVISION}
-            </span>
+      <div className="table">
+        <header className="table__head">
+          <h1>North vs Up</h1>
+          <div className="table__meta">
+            <span>Floor {state.floor}</span>
+            <span>Turn {state.turn}</span>
+            <span className="table__phase">{state.phase}</span>
+            {KIT_REVISION === undefined ? null : (
+              <span className="table__kit" title="Kit revision: rules, card list, engine build.">
+                {KIT_REVISION}
+              </span>
+            )}
+          </div>
+          <div className="table__actions">
+            <label
+              className="debug-toggle"
+              title="Turn every pile face up, for inspecting the table."
+            >
+              <input
+                type="checkbox"
+                checked={debug}
+                onChange={(e) => {
+                  setDebug(e.target.checked);
+                  if (!e.target.checked) setOpenPile(null);
+                }}
+              />
+              Debug
+            </label>
+            <OpenRun onOpen={onOpenRun} />
+            <button
+              type="button"
+              className="button"
+              disabled={!undoable || replaying}
+              title="Undo reaches back to the last thing that showed you a card."
+              onClick={() => {
+                session.getState().undo();
+                setPaying(null);
+              }}
+            >
+              Undo
+            </button>
+            <button type="button" className="button" onClick={onNewRun}>
+              New run
+            </button>
+          </div>
+        </header>
+
+        <Mat
+          state={state}
+          metrics={metrics}
+          delays={delays}
+          paying={paying}
+          payingNeed={payingNeed}
+          onPickCard={pickCard}
+          onPickReward={(_c, card) => {
+            if (state.pending?.kind === "TakeReward") {
+              dispatch({ type: "TAKE_REWARD", cardId: card.id });
+            } else if (state.pending?.kind === "ChooseGoodStuff") {
+              dispatch({ type: "CHOOSE_CARDS", cardIds: [card.id] });
+            }
+          }}
+          onInspect={setInspected}
+          debug={debug}
+          onOpenPile={setOpenPile}
+        />
+
+        <EventLog />
+      </div>
+
+      {/* Whatever the game is waiting for stays on screen at the bottom of the
+          window while the mat scrolls beneath it. */}
+      <div className="dock">
+        <div className="dock__inner">
+          {rejection ? <p className="rejection">{rejection.message}</p> : null}
+          {replaying && replay ? (
+            <ReplayBar replay={replay} />
+          ) : state.phase === "GameOver" ? (
+            <section className="over">
+              <h2>{state.outcome === "Victory" ? "You reach the rooftop." : "You lose"}</h2>
+              <button type="button" className="button button--primary" onClick={onNewRun}>
+                Go again
+              </button>
+            </section>
+          ) : (
+            <Controls state={state} dispatch={dispatch} hint={payingHint} />
           )}
         </div>
-        <div className="table__actions">
-          <label
-            className="debug-toggle"
-            title="Turn every pile face up, for inspecting the table."
-          >
-            <input
-              type="checkbox"
-              checked={debug}
-              onChange={(e) => {
-                setDebug(e.target.checked);
-                if (!e.target.checked) setOpenPile(null);
-              }}
-            />
-            Debug
-          </label>
-          <OpenRun onOpen={onOpenRun} />
-          <button
-            type="button"
-            className="button"
-            disabled={!undoable || replaying}
-            title="Undo reaches back to the last thing that showed you a card."
-            onClick={() => {
-              session.getState().undo();
-              setPaying(null);
-            }}
-          >
-            Undo
-          </button>
-          <button type="button" className="button" onClick={onNewRun}>
-            New run
-          </button>
-        </div>
-      </header>
-
-      <Mat
-        state={state}
-        metrics={metrics}
-        delays={delays}
-        paying={paying}
-        onPickCard={pickCard}
-        onPickReward={(_c, card) => {
-          if (state.pending?.kind === "TakeReward") {
-            dispatch({ type: "TAKE_REWARD", cardId: card.id });
-          } else if (state.pending?.kind === "ChooseGoodStuff") {
-            dispatch({ type: "CHOOSE_CARDS", cardIds: [card.id] });
-          }
-        }}
-        onInspect={setInspected}
-        debug={debug}
-        onOpenPile={setOpenPile}
-      />
-
-      {replaying && replay ? (
-        <ReplayBar replay={replay} />
-      ) : state.phase === "GameOver" ? (
-        <section className="over">
-          <h2>
-            {state.outcome === "Victory" ? "You reach the rooftop." : "You lose"}
-          </h2>
-          <button type="button" className="button button--primary" onClick={onNewRun}>
-            Go again
-          </button>
-        </section>
-      ) : (
-        <Controls state={state} dispatch={dispatch} hint={payingHint} />
-      )}
-
-      {rejection ? <p className="rejection">{rejection.message}</p> : null}
-      <EventLog />
+      </div>
 
       {inspected ? (
         <div className="inspector" aria-hidden="true">

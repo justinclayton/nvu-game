@@ -34,8 +34,22 @@ export const WIDE: Metrics = { cardW: 110, cardH: 154, slotPad: 10, rowGap: 15 }
 export const COMPACT_BELOW = 1180;
 export const COMPACT_QUERY = `(max-width: ${String(COMPACT_BELOW - 1)}px)`;
 
-/** The viewport width at and above which the wide table is used. Matches table.css. */
-export const WIDE_ABOVE = 1700;
+/** The viewport width at and above which the wide table is used. Matches table.css.
+ *
+ * It is the width where the wide layout fits: the mat's minimum width, the gap
+ * and the log column, plus the table's side padding, have to fit inside the
+ * table's share of the viewport (`1425 + 24 + 340 + 40 = 1829`, over 0.96, is
+ * 1905px), rounded up to 1910. Below that the grid squeezes the mat and the
+ * log is drawn over its rail. `metrics.test.ts` checks these numbers against
+ * table.css. */
+export const WIDE_ABOVE = 1910;
+export const WIDE_MAT_MIN_WIDTH = 1425;
+export const WIDE_COLUMN_GAP = 24;
+export const WIDE_LOG_WIDTH = 340;
+/** `.table`'s left and right padding together. */
+export const WIDE_TABLE_PADDING_X = 40;
+/** `.table`'s `max-width` in the wide layout is `min(96vw, 2000px)`. */
+export const WIDE_TABLE_VIEWPORT_SHARE = 0.96;
 export const WIDE_QUERY = `(min-width: ${String(WIDE_ABOVE)}px)`;
 
 /** How far each card in a stack sits off the one beneath it. */

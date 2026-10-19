@@ -72,7 +72,6 @@ body {
   max-width: 1180px;
   margin: 0 auto;
   padding: 14px 20px 40px;
-  overflow-x: auto;
 }
 
 .table__head {
@@ -1132,12 +1131,13 @@ body {
 
 /* ------------------------------------------------------------ compact table
  *
- * Under 960px across — a phone held sideways — the table is drawn compact:
+ * Under 1180px across — a phone held sideways, a tablet, a small laptop —
+ * the table is drawn compact:
  * smaller cards (the numbers are `COMPACT` in metrics.ts; the mat sets the
  * variables from them), the pools moved from a rail at the side to a row under
  * the mat, tighter chrome and a smaller zoomed card. The breakpoint is
  * `COMPACT_BELOW` in metrics.ts. */
-@media (max-width: 959px) {
+@media (max-width: 1179px) {
   body {
     font-size: 14px;
   }
@@ -1307,14 +1307,20 @@ body {
 
 /* --------------------------------------------------------------- wide table
  *
- * From `WIDE_ABOVE` in metrics.ts (1700px), there is room to spare: the mat
+ * From `WIDE_ABOVE` in metrics.ts (1910px), there is room to spare: the mat
  * draws at the `WIDE` metrics tier — bigger cards, not more empty felt around
  * the same ones — and the log moves to a column of its own beside the mat
  * instead of stacking underneath it, since it is the thing a playtester reads
  * most. `.table` becomes the grid; everything below the mat row still spans
  * both columns, in DOM order. Capped rather than filling ever-wider screens,
- * so the same "empty felt" problem doesn't just reappear at a larger scale. */
-@media (min-width: 1700px) {
+ * so the same "empty felt" problem doesn't just reappear at a larger scale.
+ *
+ * 1910px is the first width where the mat's `min-width` (1425px), the column
+ * gap (24px), the log column (340px) and the table's 20px side padding fit in
+ * 96vw: (1789 + 40) / 0.96 = 1905px, rounded up. Change any of those
+ * numbers and `WIDE_ABOVE` together; metrics.test.ts checks them against
+ * metrics.ts. */
+@media (min-width: 1910px) {
   .table {
     max-width: min(96vw, 2000px);
     display: grid;

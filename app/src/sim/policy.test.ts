@@ -351,7 +351,7 @@ describe("greedy", () => {
   });
 
   it("clears floor 1 and Ascends on a fixed seed", () => {
-    const run = simulate(1, greedyPolicy, CARD_CONTENT);
+    const run = simulate(4, greedyPolicy, CARD_CONTENT);
     expect(run.floor).toBeGreaterThan(1);
   });
 

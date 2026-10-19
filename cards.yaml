@@ -29,7 +29,7 @@
 #   flee    string               room and stairwell only: the printed Flee line
 
 meta:
-  version: C48
+  version: C49
   updated: 2026-10-03
 
 cards:
@@ -202,10 +202,9 @@ cards:
     set: proposed
     kind: player
     owner: Red
-    rarity: Fine
+    rarity: Cool
     cost: 1
-    conditional_stat: true
-    text: "Has 1 Scramble for each card Gray has played this turn."
+    text: "Every time you play a card this turn (including this one), Gray may draw a card."
     flavor: "Clear the heavy debris so Gray can maneuver effortlessly."
 
   - name: Second Wind
@@ -271,8 +270,8 @@ cards:
     kind: player
     owner: Red
     rarity: Cool
-    cost: 1
-    text: "Oomph equal to 2 times the number of cards Gray has played this turn. Play: If Gray has played 2 or more cards, you may draw 1 card."
+    cost: 2
+    text: "Oomph equal to 2 times the number of cards Gray has played this turn."
     conditional_stat: true
     flavor: "Let's get it on...leeeettt's get it on..."
 

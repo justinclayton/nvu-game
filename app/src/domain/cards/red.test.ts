@@ -374,45 +374,67 @@ describe("Break Through — 'Scrap 1 card from your hand'", () => {
   });
 });
 
-describe("Set 'Em Up — 'Has 1 Scramble for each card Gray has played this turn'", () => {
-  const armed = () => {
-    const state = playing({
-      Red: player({ deck: pile("Shove", 3), hand: [card("Set 'Em Up"), card("Shove")] }),
-      Gray: player({
-        deck: pile("Duck Under", 3),
-        hand: pile("Coil Of Cable", 3),
-      }),
-    });
-    return cast(state, "Red", "Set 'Em Up").state;
-  };
-
-  it("adds no Scramble or Oomph while Gray has played nothing", () => {
-    const pool = statPool(armed());
-    expect(pool.scramble).toBe(0);
-    expect(pool.oomph).toBe(0);
-  });
-
-  it("gains 1 Scramble for each card Gray plays", () => {
-    const state = armed();
-    const [a, b] = state.Gray.hand;
-    if (!a || !b) throw new Error("rig");
-    const first = must(state, { type: "PLAY_CARD", character: "Gray", cardId: a.id, payWith: [] });
-    expect(statPool(first.state).scramble).toBe(1 + a.scramble);
-    const second = must(first.state, { type: "PLAY_CARD", character: "Gray", cardId: b.id, payWith: [] });
-    expect(statPool(second.state).scramble).toBe(2 + a.scramble + b.scramble);
-  });
-
-  it("does not count Red's own plays", () => {
-    const state = playing({
+describe("Set 'Em Up — 'Every time you play a card this turn (including this one), Gray may draw a card'", () => {
+  const setup = () =>
+    playing({
       Red: player({
         deck: pile("Shove", 3),
-        hand: [card("Set 'Em Up"), card("Shove"), card("Coil Of Cable")],
+        hand: [card("Shove"), card("Set 'Em Up"), card("Coil Of Cable"), card("Coil Of Cable")],
       }),
+      Gray: player({ deck: pile("Duck Under", 5), hand: [] }),
     });
-    const after = cast(state, "Red", "Set 'Em Up").state;
-    const cable = handCard(after, "Red", "Coil Of Cable");
-    const next = must(after, { type: "PLAY_CARD", character: "Red", cardId: cable.id, payWith: [] });
-    expect(statPool(next.state).scramble).toBe(cable.scramble);
+
+  it("has no printed stats and adds none", () => {
+    const { state } = cast(setup(), "Red", "Set 'Em Up");
+    expect(statPool(state)).toMatchObject({ oomph: 0, scramble: 0 });
+  });
+
+  it("offers Gray a draw on itself", () => {
+    const { state } = cast(setup(), "Red", "Set 'Em Up");
+    expect(state.pending).toMatchObject({ kind: "ChooseDraw", options: [{ character: "Gray", count: 1 }] });
+    const drawn = must(state, drawing("Gray", 1)).state;
+    expect(drawn.Gray.hand).toHaveLength(1);
+    expect(drawn.pending).toBeNull();
+  });
+
+  it("offers a draw on each later Red play, and Gray can decline each time", () => {
+    const first = cast(setup(), "Red", "Set 'Em Up").state;
+    const declined = must(first, noDraw).state;
+    expect(declined.Gray.hand).toHaveLength(0);
+    const second = must(declined, free("Red", handCard(declined, "Red", "Coil Of Cable").id));
+    expect(second.state.pending?.kind).toBe("ChooseDraw");
+    const taken = must(second.state, drawing("Gray", 1)).state;
+    expect(taken.Gray.hand).toHaveLength(1);
+    const third = must(taken, free("Red", handCard(taken, "Red", "Coil Of Cable").id));
+    expect(third.state.pending?.kind).toBe("ChooseDraw");
+  });
+
+  it("does not offer a draw for cards Red played before it", () => {
+    const start = setup();
+    const before = must(start, free("Red", handCard(start, "Red", "Coil Of Cable").id));
+    expect(before.state.pending).toBeNull();
+    const { state } = cast(before.state, "Red", "Set 'Em Up");
+    expect(state.pending?.kind).toBe("ChooseDraw");
+    const after = must(state, noDraw).state;
+    expect(after.Gray.hand).toHaveLength(0);
+    expect(after.thisTurn.questions).toHaveLength(0);
+  });
+
+  it("does not offer a draw for Gray's plays", () => {
+    const state = playing({
+      Red: player({ deck: pile("Shove", 3), hand: [card("Set 'Em Up"), card("Shove")] }),
+      Gray: player({ deck: pile("Duck Under", 5), hand: [card("Coil Of Cable")] }),
+    });
+    const armed = must(cast(state, "Red", "Set 'Em Up").state, noDraw).state;
+    const next = must(armed, free("Gray", handCard(armed, "Gray", "Coil Of Cable").id));
+    expect(next.state.pending).toBeNull();
+  });
+
+  it("stops at the end of the turn", () => {
+    const armed = must(cast(setup(), "Red", "Set 'Em Up").state, noDraw).state;
+    const ended = must(armed, { type: "END_PLAY" }).state;
+    expect(ended.playZone.some((p) => p.card.name === "Set 'Em Up")).toBe(false);
+    expect(ended.thisTurn.questions).toHaveLength(0);
   });
 });
 
@@ -506,7 +528,7 @@ describe("Rhythm & Bruise — 'Oomph equal to 2 times the number of cards Gray h
     const state = playing({
       Red: player({
         deck: pile("Shove", 4),
-        hand: [card("Rhythm & Bruise"), card("Shove")],
+        hand: [card("Rhythm & Bruise"), card("Shove"), card("Shove")],
       }),
       Gray: player({
         deck: pile("Duck Under", 4),
@@ -529,24 +551,15 @@ describe("Rhythm & Bruise — 'Oomph equal to 2 times the number of cards Gray h
     expect(contributionOf(more.state, rhythm).oomph).toBe(4);
   });
 
-  it("does not draw when Gray has played fewer than 2 cards", () => {
-    const { events } = cast(withGrayPlays(1), "Red", "Rhythm & Bruise");
+  it("no longer draws, however many cards Gray has played", () => {
+    const { state, events } = cast(withGrayPlays(3), "Red", "Rhythm & Bruise");
+    expect(state.pending).toBeNull();
     expect(eventTypes(events)).not.toContain("CARD_DRAWN");
   });
 
-  it("draws 1 when Gray has played 2 cards, if you take it", () => {
-    const asked = cast(withGrayPlays(2), "Red", "Rhythm & Bruise");
-    expect(asked.state.pending?.kind).toBe("ChooseDraw");
-    const { state: next, events } = must(asked.state, drawing("Red", 1));
-    expect(eventTypes(events).filter((t) => t === "CARD_DRAWN")).toHaveLength(1);
-    expect(next.Red.deck).toHaveLength(3);
-  });
-
-  it("draws nothing when Gray has played 2 cards and you decline", () => {
-    const asked = cast(withGrayPlays(2), "Red", "Rhythm & Bruise");
-    const { state: next, events } = must(asked.state, noDraw);
-    expect(eventTypes(events)).not.toContain("CARD_DRAWN");
-    expect(next.Red.deck).toHaveLength(4);
+  it("costs 2", () => {
+    const state = withGrayPlays(0);
+    expect(costOf(state, "Red", handCard(state, "Red", "Rhythm & Bruise"))).toBe(2);
   });
 
   it("does not draw for cards Gray plays after it", () => {

@@ -10,7 +10,7 @@ import {
   shuffleIntoDeck,
   takeFrom,
 } from "../verbs";
-import { ask, done, drawnAs, drawQuestion, nothing, source, type Registry } from "./behaviour";
+import { ask, askLater, done, drawnAs, drawQuestion, nothing, source, type Registry } from "./behaviour";
 
 export const RED: Registry = {
   Overdrive: { exhaustX: 1 },
@@ -111,9 +111,27 @@ export const RED: Registry = {
   },
 
   "Set 'Em Up": {
-    stats(state, _owner, card) {
-      return { oomph: card.oomph, scramble: card.scramble + playedBy(state, "Gray") };
+    onPlay(state, ctx) {
+      if (playerOf(state, "Gray").down) return nothing(state);
+      return ask(state, drawQuestion(ctx, "set-em-up", "Set 'Em Up: Gray draws 1 card?", "Gray"));
     },
+    onEvent(event, state, ctx) {
+      if (ctx.zone !== "playZone") return nothing(state);
+      if (event.type !== "CARD_PLAYED" || event.character !== ctx.character) return nothing(state);
+      if (playerOf(state, "Gray").down) return nothing(state);
+      return done(
+        askLater(
+          state,
+          drawQuestion(
+            ctx,
+            "set-em-up",
+            `Set 'Em Up: Red played ${event.card.name}. Gray draws 1 card?`,
+            "Gray",
+          ),
+        ),
+      );
+    },
+    onChoice: (answer, state) => drawnAs(answer, state),
   },
 
   "Brute Recycle": {
@@ -153,11 +171,6 @@ export const RED: Registry = {
     stats(state, _owner, card) {
       return { oomph: card.oomph + 2 * playedBy(state, "Gray"), scramble: card.scramble };
     },
-    onPlay(state, ctx) {
-      if (playedBy(state, "Gray") < 2) return nothing(state);
-      return ask(state, drawQuestion(ctx, "rhythm-and-bruise", "Draw 1 card?", ctx.character));
-    },
-    onChoice: (answer, state) => drawnAs(answer, state),
   },
 
   /* Only the draw is optional: the Exhaust happens whether or not any card was drawn. */

@@ -11,10 +11,10 @@
  * and no server.
  */
 var NVU_CARDS = {
-  meta: {"version":"C55","updated":"2026-10-03"},
+  meta: {"version":"C56","updated":"2026-10-03"},
   rulesVersion: "R33",
-  cardsVersion: "C55",
-  cardListId: "415a500458a0",
+  cardsVersion: "C56",
+  cardListId: "c51830126ef0",
   cards: [
     {"name":"Shove","set":"official","kind":"player","owner":"Red","starter":true,"cost":1,"oomph":2,"flavor":"'Oomph!', he shouted.","count":4},
     {"name":"Charge","set":"official","kind":"player","owner":"Red","starter":true,"cost":2,"oomph":4,"flavor":"I am bolder, so I lower my shoulder.","count":4},
@@ -27,7 +27,7 @@ var NVU_CARDS = {
     {"name":"Reckless Swing","set":"official","kind":"player","owner":"Red","rarity":"Fine","cost":1,"oomph":5,"flavor":"Ok, NOW I'm mad!","text":"Exhaust 1 from the top of your deck.","count":3},
     {"name":"Fast Follow","set":"official","kind":"player","owner":"Red","rarity":"Fine","cost":1,"oomph":3,"flavor":"The old one-two!","text":"If Gray played a card this turn, play this card for free.","count":3},
     {"name":"It Pays To Be Reckless","set":"proposed","kind":"player","owner":"Red","rarity":"Woah","cost":0,"conditional_stat":true,"flavor":"GYAHHHHHHHOUCH","text":"+2 Scramble and +2 Oomph for every card you exhaust this turn. Exhaust 1 from the top of the deck.","count":1},
-    {"name":"Bull Rush","set":"proposed","kind":"player","owner":"Red","rarity":"Fine","cost":1,"oomph":2,"scramble":2,"conditional_stat":true,"flavor":"Charge ahead while keeping your footing on loose debris.","text":"If a card was Exhausted from your deck this turn, +3 Oomph.","count":2},
+    {"name":"Bull Rush","set":"proposed","kind":"player","owner":"Red","rarity":"Fine","cost":1,"oomph":2,"scramble":2,"conditional_stat":true,"flavor":"Charge ahead while keeping your footing on loose debris.","text":"Play: If a card was Exhausted from your deck this turn, +3 Oomph.","count":2},
     {"name":"Cross Punch","set":"proposed","kind":"player","owner":"Red","rarity":"Fine","cost":2,"oomph":4,"flavor":"A heavy two-part combination attack.","text":"Exhaust 1. If a Scramble card was already played this turn, +4 Oomph.","count":2},
     {"name":"Break Through","set":"proposed","kind":"player","owner":"Red","rarity":"Fine","cost":1,"oomph":2,"flavor":"Smash through the obstacle and leave the broken starter gear behind.","text":"Play: Scrap 1 card from your hand.","count":2},
     {"name":"Set 'Em Up","set":"proposed","kind":"player","owner":"Red","rarity":"Cool","cost":1,"flavor":"Clear the heavy debris so Gray can maneuver effortlessly.","text":"Every time you play a card this turn (including this one), Gray may draw a card.","count":2},
@@ -39,8 +39,8 @@ var NVU_CARDS = {
     {"name":"Rhythm & Bruise","set":"proposed","kind":"player","owner":"Red","rarity":"Cool","cost":2,"conditional_stat":true,"flavor":"Let's get it on...leeeettt's get it on...","text":"Oomph equal to 2 times the number of cards Gray has played this turn.","count":2},
     {"name":"Momentum Shift","set":"proposed","kind":"player","owner":"Red","rarity":"Cool","cost":1,"oomph":4,"flavor":"Keep charging forward without looking back.","text":"Play: You may draw up to 2 cards, then Exhaust 1 card from your hand.","count":2},
     {"name":"Zen Mode","set":"proposed","kind":"player","owner":"Gray","rarity":"Woah","cost":1,"flavor":"Sorry, I can't hear you over the sound of how friggin calm I am","text":"While this is in play, you don't exhaust cards.","count":1},
-    {"name":"Catch Your Breath","set":"proposed","kind":"player","owner":"Gray","rarity":"Cool","cost":0,"flavor":"Pause for a second to read the room.","text":"If this is the only card you play this turn, move 3 cards from your Exhaust pile to the bottom of your deck.","count":2},
-    {"name":"Here, Catch","set":"proposed","kind":"player","owner":"Gray","rarity":"Fine","cost":1,"scramble":3,"flavor":"Toss a heavy tool over before it bogs you down.","text":"Move any number of Stuff cards from Red's hand to yours.","count":2},
+    {"name":"Catch Your Breath","set":"proposed","kind":"player","owner":"Gray","rarity":"Cool","cost":0,"flavor":"Pause for a second to read the room.","text":"Play: If this is the only card you play this turn, move 3 cards from your Exhaust pile to the bottom of your deck.","count":2},
+    {"name":"Pack Mule","set":"proposed","kind":"player","owner":"Gray","rarity":"Fine","cost":1,"scramble":3,"flavor":"I'll carry your books for you, Senpai!","text":"Move any number of Stuff cards from Red's hand to yours.","count":2},
     {"name":"Hit 'n Run","set":"proposed","kind":"player","owner":"Gray","rarity":"Fine","cost":1,"oomph":1,"scramble":2,"flavor":"Strike fast and disappear into the shadows.","text":"Shuffle a card from your Exhaust pile into your deck.","count":2},
     {"name":"I'll Take That","set":"proposed","kind":"player","owner":"Gray","rarity":"Fine","cost":1,"scramble":3,"flavor":"Relieve Red of that cumbersome pack.","text":"Shuffle 1 Stuff from Red's hand into Red's deck.","count":2},
     {"name":"Quick Vault","set":"proposed","kind":"player","owner":"Gray","rarity":"Fine","cost":0,"flavor":"Spring off Red's shoulder to clear the gap.","text":"You may draw 2 cards.","count":2},

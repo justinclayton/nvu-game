@@ -289,7 +289,7 @@ describe("One Man's Junk — '+3 Oomph and +3 Scramble for each Bad Stuff you're
   });
 });
 
-describe("Pack Mule —'Move any number of Stuff cards from Red's hand to yours'", () => {
+describe("Pack Mule — 'Move any number of Stuff cards from Red's hand to yours'", () => {
   const catching = () => {
     const state = playing({
       Red: player({ deck: pile("Shove", 4), hand: [card("Pry Bar"), card("Torn Seal"), card("Shove")] }),

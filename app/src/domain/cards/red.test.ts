@@ -61,29 +61,32 @@ describe("It Pays To Be Reckless — '+2 Scramble and +2 Oomph for every card yo
   });
 });
 
-describe("Bull Rush — 'If a card was Exhausted from your deck this turn, +3 Oomph'", () => {
-  it("is its printed stats when nothing came off the deck, even after paying", () => {
-    const state = playing({
-      Red: player({ deck: pile("Shove", 4), hand: [card("Bull Rush"), card("Shove")] }),
-    });
-    const next = cast(state, "Red", "Bull Rush").state;
-    const rush = next.playZone.find((p) => p.card.name === "Bull Rush");
-    if (!rush) throw new Error("not in play");
-    expect(contributionOf(next, rush)).toEqual({ oomph: 2, scramble: 2 });
-  });
-
-  it("gains 3 Oomph once a card is Exhausted from the deck, even after it", () => {
-    const state = playing({
+describe("Bull Rush — 'Play: If a card was Exhausted from your deck this turn, +3 Oomph'", () => {
+  const rushHand = (): GameState =>
+    playing({
       Red: player({
         deck: pile("Shove", 4),
-        hand: [card("Bull Rush"), card("Shove"), card("Overdrive")],
+        hand: [card("Bull Rush"), card("Shove"), card("Overdrive"), card("Shove")],
       }),
     });
-    const rushed = cast(state, "Red", "Bull Rush").state;
+
+  it("adds nothing when nothing came off the deck, even after paying", () => {
+    const next = cast(rushHand(), "Red", "Bull Rush").state;
+    expect(statPool(next).oomph).toBe(2);
+  });
+
+  it("adds 3 Oomph when a card was Exhausted from the deck before it was played", () => {
+    const overdriven = cast(rushHand(), "Red", "Overdrive").state;
+    const next = cast(overdriven, "Red", "Bull Rush").state;
+    expect(statPool(next).oomph - statPool(overdriven).oomph).toBe(5);
+  });
+
+  it("is not triggered by a deck Exhaust after it", () => {
+    const rushed = cast(rushHand(), "Red", "Bull Rush").state;
     const next = cast(rushed, "Red", "Overdrive").state;
-    const rush = next.playZone.find((p) => p.card.name === "Bull Rush");
-    if (!rush) throw new Error("not in play");
-    expect(contributionOf(next, rush)).toEqual({ oomph: 5, scramble: 2 });
+    const overdrive = next.playZone.find((p) => p.card.name === "Overdrive");
+    if (!overdrive) throw new Error("not in play");
+    expect(statPool(next).oomph).toBe(2 + contributionOf(next, overdrive).oomph);
   });
 });
 

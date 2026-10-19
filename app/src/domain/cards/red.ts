@@ -28,9 +28,9 @@ export const RED: Registry = {
   },
 
   "Bull Rush": {
-    stats(state, owner, card) {
-      const bonus = state.thisTurn.exhaustedFromDeck[owner] > 0 ? 3 : 0;
-      return { oomph: card.oomph + bonus, scramble: card.scramble };
+    onPlay(state, ctx) {
+      const earlier = state.thisTurn.exhaustedFromDeck[ctx.character] > 0;
+      return earlier ? done(applyPoolBonus(state, "Oomph", 3)) : nothing(state);
     },
   },
 

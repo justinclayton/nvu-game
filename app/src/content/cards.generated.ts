@@ -27,7 +27,7 @@ export const CARD_CONTENT = {
     {"name":"Reckless Swing","set":"official","kind":"player","owner":"Red","rarity":"Fine","starter":false,"count":3,"cost":1,"oomph":5,"scramble":0,"conditionalStat":false,"text":"Exhaust 1 from the top of your deck.","flavor":"Ok, NOW I'm mad!"},
     {"name":"Fast Follow","set":"official","kind":"player","owner":"Red","rarity":"Fine","starter":false,"count":3,"cost":1,"oomph":3,"scramble":0,"conditionalStat":false,"text":"If Gray played a card this turn, play this card for free.","flavor":"The old one-two!"},
     {"name":"It Pays To Be Reckless","set":"proposed","kind":"player","owner":"Red","rarity":"Woah","starter":false,"count":1,"cost":0,"oomph":0,"scramble":0,"conditionalStat":true,"text":"+2 Scramble and +2 Oomph for every card you exhaust this turn. Exhaust 1 from the top of the deck.","flavor":"GYAHHHHHHHOUCH"},
-    {"name":"Bull Rush","set":"proposed","kind":"player","owner":"Red","rarity":"Fine","starter":false,"count":2,"cost":1,"oomph":2,"scramble":2,"conditionalStat":true,"text":"Play: If a card was Exhausted from your deck this turn, +3 Oomph.","flavor":"Charge ahead while keeping your footing on loose debris."},
+    {"name":"Bull Rush","set":"proposed","kind":"player","owner":"Red","rarity":"Fine","starter":false,"count":2,"cost":1,"oomph":2,"scramble":2,"conditionalStat":false,"text":"Play: If a card was Exhausted from your deck this turn, +3 Oomph.","flavor":"Charge ahead while keeping your footing on loose debris."},
     {"name":"Cross Punch","set":"proposed","kind":"player","owner":"Red","rarity":"Fine","starter":false,"count":2,"cost":2,"oomph":4,"scramble":0,"conditionalStat":false,"text":"Exhaust 1. If a Scramble card was already played this turn, +4 Oomph.","flavor":"A heavy two-part combination attack."},
     {"name":"Break Through","set":"proposed","kind":"player","owner":"Red","rarity":"Fine","starter":false,"count":2,"cost":1,"oomph":2,"scramble":0,"conditionalStat":false,"text":"Play: Scrap 1 card from your hand.","flavor":"Smash through the obstacle and leave the broken starter gear behind."},
     {"name":"Set 'Em Up","set":"proposed","kind":"player","owner":"Red","rarity":"Cool","starter":false,"count":2,"cost":1,"oomph":0,"scramble":0,"conditionalStat":false,"text":"Every time you play a card this turn (including this one), Gray may draw a card.","flavor":"Clear the heavy debris so Gray can maneuver effortlessly."},
@@ -39,7 +39,7 @@ export const CARD_CONTENT = {
     {"name":"Rhythm & Bruise","set":"proposed","kind":"player","owner":"Red","rarity":"Cool","starter":false,"count":2,"cost":2,"oomph":0,"scramble":0,"conditionalStat":true,"text":"Oomph equal to 2 times the number of cards Gray has played this turn.","flavor":"Let's get it on...leeeettt's get it on..."},
     {"name":"Momentum Shift","set":"proposed","kind":"player","owner":"Red","rarity":"Cool","starter":false,"count":2,"cost":1,"oomph":4,"scramble":0,"conditionalStat":false,"text":"Play: You may draw up to 2 cards, then Exhaust 1 card from your hand.","flavor":"Keep charging forward without looking back."},
     {"name":"Zen Mode","set":"proposed","kind":"player","owner":"Gray","rarity":"Woah","starter":false,"count":1,"cost":1,"oomph":0,"scramble":0,"conditionalStat":false,"text":"While this is in play, you don't exhaust cards.","flavor":"Sorry, I can't hear you over the sound of how friggin calm I am"},
-    {"name":"Catch Your Breath","set":"proposed","kind":"player","owner":"Gray","rarity":"Cool","starter":false,"count":2,"cost":0,"oomph":0,"scramble":0,"conditionalStat":false,"text":"Play: If this is the only card you play this turn, move 3 cards from your Exhaust pile to the bottom of your deck.","flavor":"Pause for a second to read the room."},
+    {"name":"Catch Your Breath","set":"proposed","kind":"player","owner":"Gray","rarity":"Cool","starter":false,"count":2,"cost":0,"oomph":0,"scramble":0,"conditionalStat":false,"text":"If this is the only card you play this turn, move 3 cards from your Exhaust pile to the bottom of your deck.","flavor":"Pause for a second to read the room."},
     {"name":"Pack Mule","set":"proposed","kind":"player","owner":"Gray","rarity":"Fine","starter":false,"count":2,"cost":1,"oomph":0,"scramble":3,"conditionalStat":false,"text":"Move any number of Stuff cards from Red's hand to yours.","flavor":"I'll carry your books for you, Senpai!"},
     {"name":"Hit 'n Run","set":"proposed","kind":"player","owner":"Gray","rarity":"Fine","starter":false,"count":2,"cost":1,"oomph":1,"scramble":2,"conditionalStat":false,"text":"Shuffle a card from your Exhaust pile into your deck.","flavor":"Strike fast and disappear into the shadows."},
     {"name":"I'll Take That","set":"proposed","kind":"player","owner":"Gray","rarity":"Fine","starter":false,"count":2,"cost":1,"oomph":0,"scramble":3,"conditionalStat":false,"text":"Shuffle 1 Stuff from Red's hand into Red's deck.","flavor":"Relieve Red of that cumbersome pack."},
@@ -96,10 +96,10 @@ export const CARD_CONTENT = {
 } as const satisfies CardContent;
 
 /** The first 12 hex of sha256 over the JSON of CARD_CONTENT above — identifies this card list. */
-export const CARD_LIST_ID = "c51830126ef0";
+export const CARD_LIST_ID = "85a13a978c3f";
 
 /** R of the kit revision: the rulebook's "Rules version:" line. Recorded runs refuse to replay across a change to it. Kept out of CARD_CONTENT so a rules bump does not change CARD_LIST_ID. */
 export const RULES_VERSION = "R33";
 
 /** C of the kit revision: the "version:" line under meta in cards.yaml, bumped when the card list changes. The print sheet stamps RULES_VERSION.CARDS_VERSION on every card; tools/kit-revision.sh adds the engine count. */
-export const CARDS_VERSION = "C56";
+export const CARDS_VERSION = "C57";

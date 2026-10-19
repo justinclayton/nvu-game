@@ -104,7 +104,8 @@ const OVERLAY_MIN_HEIGHT = 110;
 const CARD_RATIO = 5 / 7;
 
 /** Where the compact overlay goes: the larger band of the screen above or below `avoid`, centred in it.
- * `avoid` is the vertical extent of what must stay visible, in viewport coordinates. */
+ * `avoid` is the vertical extent of what must stay visible, in viewport coordinates, and
+ * `viewportHeight` is the height of the screen the overlay may use (down to the dock). */
 export function overlayBox(
   avoid: { readonly top: number; readonly bottom: number } | null,
   viewportHeight: number,
@@ -129,7 +130,10 @@ function useOverlayStyle(
   useLayoutEffect(() => {
     if (!active || !item) return;
     const measure = () => {
-      const box = overlayBox(avoid.current?.getBoundingClientRect() ?? null, window.innerHeight);
+      /* The dock holds the bottom edge of the window; the overlay stays above it. */
+      const dock = document.querySelector(".dock")?.getBoundingClientRect();
+      const bottom = dock ? Math.min(window.innerHeight, dock.top) : window.innerHeight;
+      const box = overlayBox(avoid.current?.getBoundingClientRect() ?? null, bottom);
       setStyle({
         top: box.top,
         "--inspect-h": `${String(box.height)}px`,

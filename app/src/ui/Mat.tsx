@@ -26,6 +26,8 @@ interface Props {
   readonly metrics: Metrics;
   readonly delays: ReadonlyMap<string, number>;
   readonly paying: Paying | null;
+  /** What the payment in progress still needs, shown beside the paying hand. */
+  readonly payingNeed?: string | null | undefined;
   readonly onPickCard: (character: Character, card: Card) => void;
   readonly onPickReward?: ((character: Character, card: Card) => void) | undefined;
   readonly inspected: Inspected | null;
@@ -83,9 +85,12 @@ function statusOf(state: GameState, c: Character): string {
 function HandSlot({
   state,
   character,
+  need,
 }: {
   readonly state: GameState;
   readonly character: Character;
+  /** What this hand's payment in progress still needs, if it is the one paying. */
+  readonly need?: string | null | undefined;
 }) {
   const status = statusOf(state, character);
   const tone = character.toLowerCase();
@@ -100,6 +105,11 @@ function HandSlot({
         <span className="slot__label slot__label--inline">
           hand · {state[character].hand.length}
         </span>
+        {need ? (
+          <span className="slot__pay" role="status">
+            {need}
+          </span>
+        ) : null}
       </header>
       <div className="well well--hand" data-slot={`${tone}-hand`} />
       {/* The band over this character's side of the play zone, where the cards
@@ -114,6 +124,7 @@ export function Mat({
   metrics,
   delays,
   paying,
+  payingNeed,
   onPickCard,
   onPickReward,
   inspected,
@@ -210,9 +221,17 @@ export function Mat({
         </div>
 
         <div className="mat-row mat-row--hands" ref={handsRef}>
-          <HandSlot state={state} character="Red" />
+          <HandSlot
+            state={state}
+            character="Red"
+            need={paying?.character === "Red" ? payingNeed : null}
+          />
           <div className="mat__divider" />
-          <HandSlot state={state} character="Gray" />
+          <HandSlot
+            state={state}
+            character="Gray"
+            need={paying?.character === "Gray" ? payingNeed : null}
+          />
         </div>
       </div>
 

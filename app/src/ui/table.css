@@ -1109,24 +1109,38 @@ body {
   font-weight: 700;
 }
 
-/* The zoomed copy of whatever is under the pointer. */
+/* The zoomed copy of whatever is being looked at. On the full and wide tables
+ * it sits on the empty felt at the foot of the pools rail, where it cannot
+ * cover a hand; the compact table has its own overlay, below. */
 .inspector {
-  position: fixed;
-  right: 18px;
-  bottom: 18px;
+  --inspect-w: 190px;
+  --inspect-h: 266px;
+  position: absolute;
+  right: 20px;
+  bottom: 20px;
   z-index: 1000;
   pointer-events: none;
   filter: drop-shadow(0 14px 28px rgba(0, 0, 0, 0.6));
 }
-/* Past the wide table's own cap (below), there is room beside it again, and
- * the zoomed card sits there instead of over the mat. */
-@media (min-width: 2500px) {
-  .inspector {
-    right: auto;
-    bottom: auto;
-    left: calc(50% + 1020px);
-    top: 78px;
-  }
+.inspector .card--large {
+  --cw: var(--inspect-w);
+  --ch: var(--inspect-h);
+}
+/* Opened by a tap: a tap on the zoom puts it away. */
+.inspector--tap {
+  pointer-events: auto;
+  cursor: pointer;
+}
+/* Compact: centred on the screen, in the band the hands row leaves clear.
+ * `top` and the card size are set from script, as the hands move with scroll. */
+.inspector--overlay {
+  --inspect-w: 150px;
+  --inspect-h: 210px;
+  position: fixed;
+  right: auto;
+  bottom: auto;
+  left: 50%;
+  transform: translateX(-50%);
 }
 
 /* ------------------------------------------------------------ compact table
@@ -1294,15 +1308,6 @@ body {
     gap: 4px;
   }
 
-  /* The zoomed card, small enough to leave the hands visible on a short screen. */
-  .inspector {
-    right: max(8px, env(safe-area-inset-right));
-    bottom: 8px;
-  }
-  .inspector .card--large {
-    --cw: 150px;
-    --ch: 210px;
-  }
 }
 
 /* --------------------------------------------------------------- wide table
@@ -1339,6 +1344,11 @@ body {
     grid-area: mat;
     min-width: 1425px;
     grid-template-columns: minmax(0, 1fr) 265px;
+  }
+  /* The rail is wider here, and so is the zoom that sits at its foot. */
+  .inspector {
+    --inspect-w: 245px;
+    --inspect-h: 343px;
   }
   .over,
   .controls {

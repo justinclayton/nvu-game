@@ -14,8 +14,9 @@ import { useRef, type CSSProperties } from "react";
 
 import { plural } from "@domain/plural";
 import type { Card, Character, GameState } from "@domain/types";
-import { CardLayer, type Inspected, type Paying } from "./CardLayer";
-import type { Metrics } from "./metrics";
+import { CardLayer, type Paying } from "./CardLayer";
+import { Inspector, useTouchInspect, type Inspected } from "./Inspector";
+import { COMPACT, type Metrics } from "./metrics";
 import type { ZoneId } from "./placements";
 import { RoomBrief } from "./RoomBrief";
 import { useSlotRects } from "./useSlotRects";
@@ -27,6 +28,7 @@ interface Props {
   readonly paying: Paying | null;
   readonly onPickCard: (character: Character, card: Card) => void;
   readonly onPickReward?: ((character: Character, card: Card) => void) | undefined;
+  readonly inspected: Inspected | null;
   readonly onInspect: (item: Inspected | null) => void;
   /** Debug mode: every pile is face up, and a stacked one can be opened for a full read. */
   readonly debug?: boolean | undefined;
@@ -114,11 +116,14 @@ export function Mat({
   paying,
   onPickCard,
   onPickReward,
+  inspected,
   onInspect,
   debug,
   onOpenPile,
 }: Props) {
   const matRef = useRef<HTMLDivElement>(null);
+  const handsRef = useRef<HTMLDivElement>(null);
+  const touch = useTouchInspect();
   const rects = useSlotRects(matRef, state, metrics);
   // Only offered in debug mode, and only for piles that stack more than one
   // card deep — a row already shows everything, and the active room is a
@@ -204,7 +209,7 @@ export function Mat({
           </div>
         </div>
 
-        <div className="mat-row mat-row--hands">
+        <div className="mat-row mat-row--hands" ref={handsRef}>
           <HandSlot state={state} character="Red" />
           <div className="mat__divider" />
           <HandSlot state={state} character="Gray" />
@@ -239,8 +244,17 @@ export function Mat({
         paying={paying}
         onPickCard={onPickCard}
         onPickReward={onPickReward}
+        inspected={inspected}
         onInspect={onInspect}
         debug={debug}
+      />
+
+      <Inspector
+        inspected={inspected}
+        state={state}
+        overlay={metrics === COMPACT}
+        touch={touch}
+        avoid={handsRef}
       />
     </div>
   );

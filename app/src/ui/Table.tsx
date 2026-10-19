@@ -13,10 +13,10 @@ import { canUndo, type SessionState } from "@application/session";
 import { plural } from "@domain/plural";
 import { costOf, payOptions } from "@domain/queries";
 import type { Card, Character, Command, GameState } from "@domain/types";
-import { type Inspected, type Paying } from "./CardLayer";
-import { CardView, RoomCardView } from "./CardView";
+import { type Paying } from "./CardLayer";
 import { Controls } from "./Controls";
 import { EventLog } from "./EventLog";
+import { useTouchInspect, type Inspected } from "./Inspector";
 import { Mat } from "./Mat";
 import { moveDelays, type ZoneId } from "./placements";
 import { OpenRun } from "./OpenRun";
@@ -42,6 +42,7 @@ export function Table({ onNewRun, onOpenRun, replay }: Props) {
   const rejection = useSessionState((s: SessionState) => s.lastRejection);
   const undoable = useSessionState(canUndo);
   const metrics = useMetrics();
+  const touch = useTouchInspect();
   const [paying, setPaying] = useState<Paying | null>(null);
   const [inspected, setInspected] = useState<Inspected | null>(null);
   /* Debug mode: a playtester's view, not a rule. Off by default, and nothing
@@ -125,6 +126,12 @@ export function Table({ onNewRun, onOpenRun, replay }: Props) {
       onDragOver={(e) => {
         e.preventDefault();
       }}
+      onClick={(e) => {
+        /* Touch: a tap anywhere but on a card puts the zoom away. */
+        if (touch && !(e.target instanceof Element && e.target.closest(".sprite"))) {
+          setInspected(null);
+        }
+      }}
       onDrop={(e) => {
         e.preventDefault();
         const file = e.dataTransfer.files[0];
@@ -190,6 +197,7 @@ export function Table({ onNewRun, onOpenRun, replay }: Props) {
             dispatch({ type: "CHOOSE_CARDS", cardIds: [card.id] });
           }
         }}
+        inspected={inspected}
         onInspect={setInspected}
         debug={debug}
         onOpenPile={setOpenPile}
@@ -212,16 +220,6 @@ export function Table({ onNewRun, onOpenRun, replay }: Props) {
 
       {rejection ? <p className="rejection">{rejection.message}</p> : null}
       <EventLog />
-
-      {inspected ? (
-        <div className="inspector" aria-hidden="true">
-          {inspected.kind === "card" ? (
-            <CardView card={inspected.card} state={state} owner={inspected.owner} size="large" />
-          ) : (
-            <RoomCardView room={inspected.room} state={state} size="large" />
-          )}
-        </div>
-      ) : null}
 
       {openPile ? (
         <PilePanel

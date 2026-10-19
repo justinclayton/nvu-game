@@ -54,8 +54,10 @@ export interface Room {
   readonly id: RoomId;
   readonly name: string;
   readonly kind: RoomKind;
-  /** Which floors' pool the card is drawn from; `null` for the one fixed Floor 10 Stairwell. */
+  /** The printed tier colour; `null` for the one fixed roof Stairwell. */
   readonly tier: RoomBand;
+  /** The floors whose floor deck may draw this card (rulebook Setup, "Floor deck"). Empty: no floor does. */
+  readonly floors: readonly number[];
   readonly flavor: string;
   readonly challenges: readonly Challenge[];
   readonly flee: FleeLine;

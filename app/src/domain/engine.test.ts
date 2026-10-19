@@ -41,6 +41,7 @@ function fixtureRoom(challenges: readonly Challenge[]): Room {
     name: "Fixture Room",
     kind: "room",
     tier: 1,
+    floors: [1, 2],
     flavor: "",
     challenges,
     flee: { text: "Leave empty-handed.", clears: false, effects: [] },

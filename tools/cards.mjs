@@ -236,7 +236,7 @@ export function parseCardsYaml(text) {
 const FIELD_ORDER = [
   "name", "set", "kind", "owner", "starter", "rarity",
   "rarity_status", "cost", "oomph", "scramble", "conditional_stat",
-  "tier", "flavor", "challenges", "flee", "text", "note", "flagged",
+  "tier", "floors", "flavor", "challenges", "flee", "text", "note", "flagged",
 ];
 
 function ordered(card) {
@@ -446,16 +446,20 @@ function roomFace(c) {
   const challenges = (c.challenges ?? []).map((ch) => challenge(ch, c.name));
   if (challenges.length === 0) throw new Error(`${c.name}: a room prints at least one challenge`);
   if (c.tier !== 1 && c.tier !== 2 && c.tier !== 3 && c.tier !== null) {
-    throw new Error(`${c.name}: a room needs a tier of 1, 2, 3, or null for the fixed Floor 10 Stairwell`);
+    throw new Error(`${c.name}: a room needs a tier of 1, 2, 3, or null for the fixed roof Stairwell`);
   }
   if (c.tier === null && c.kind !== "stairwell") {
     throw new Error(`${c.name}: only a Stairwell may print tier: null`);
+  }
+  if (!Array.isArray(c.floors) || !c.floors.every((f) => Number.isInteger(f) && f >= 1)) {
+    throw new Error(`${c.name}: a room needs floors, a list of the floor numbers that draw it`);
   }
   return {
     name: c.name,
     set: c.set,
     kind: c.kind,
     tier: c.tier,
+    floors: c.floors,
     flavor: c.flavor ?? "",
     text: c.text ?? "",
     count: c.count ?? 1,
@@ -476,7 +480,7 @@ export function structure(doc) {
   const fixedStairwells = rooms.filter((r) => r.tier === null);
   if (fixedStairwells.length !== 1) {
     throw new Error(
-      `expected exactly one Floor 10 Stairwell (tier: null), found ${fixedStairwells.length}`,
+      `expected exactly one roof Stairwell (tier: null), found ${fixedStairwells.length}`,
     );
   }
   return { meta: { updated: String(doc.meta.updated ?? "") }, cards, rooms };

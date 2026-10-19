@@ -7,12 +7,12 @@
  */
 
 import { cardId, roomId } from "./ids";
-import type { Band, CardContent, CardFace, Character, RoomFace } from "./printed";
+import type { CardContent, CardFace, Character, RoomFace } from "./printed";
 import { shuffle } from "./rng";
 import type { Card, DomainEvent, GameState, PlayerState, Room, TurnRecord } from "./types";
 
-/** The tenth floor is the roof: clearing it wins the run (rulebook, Winning and losing). */
-export const TOP_FLOOR = 10;
+/** The fifth floor is the roof: clearing it wins the run (rulebook, Winning and losing). */
+export const TOP_FLOOR = 5;
 
 /** Draw up to this many, each turn (Each Turn, Turn Start: Draw up to five). A card may tighten it. */
 export const HAND_CAP = 5;
@@ -20,23 +20,11 @@ export const HAND_CAP = 5;
 /** Every floor holds exactly one Stairwell (rulebook Setup, "Floor deck"). */
 export const STAIRWELLS_PER_FLOOR = 1;
 
-/**
- * The floor deck is 10 cards on floor 1 and one fewer each floor above it
- * (rulebook Setup, "Floor deck"): 11 - floor.
- */
-export const roomsOnFloor = (floor: number): number => TOP_FLOOR + 1 - floor;
+/** Every floor deck is 6 cards: 1 Stairwell and 5 Rooms (rulebook Setup, "Floor deck"). */
+export const FLOOR_DECK_SIZE = 6;
 
-/**
- * Rooms and Stairwells pool by tier: floors 1–3, 4–6, 7–9 (rulebook Setup,
- * "Floor deck"). Floor 10 draws from no tier — it prints one fixed Stairwell
- * instead (cards.yaml, The Monolith Core; issue #66).
- */
-export function tierOf(floor: number): Band | null {
-  if (floor <= 3) return 1;
-  if (floor <= 6) return 2;
-  if (floor <= 9) return 3;
-  return null;
-}
+/** A room may be drawn for a floor when its card lists that floor (cards.yaml, `floors`). */
+export const servesFloor = (room: Room, floor: number): boolean => room.floors.includes(floor);
 
 /* ------------------------------------------------------ minting the cards */
 
@@ -63,6 +51,7 @@ export function mintRoom(face: RoomFace, copy: number): Room {
     name: face.name,
     kind: face.kind,
     tier: face.tier,
+    floors: face.floors,
     flavor: face.flavor,
     challenges: face.challenges,
     flee: face.flee,
@@ -92,24 +81,23 @@ function takeRooms(
 }
 
 /**
- * One Stairwell from the floor's tier, plus Rooms from the same tier drawn at
- * random until the floor is full (rulebook Setup, "Floor deck"). The floor
- * gets no harder as you climb — it gets emptier.
+ * One Stairwell for this floor, plus Rooms for this floor drawn at random
+ * until the floor deck holds 6 (rulebook Setup, "Floor deck"). Each card
+ * lists the floors it serves, so the floor-to-tier map is data, not code.
  *
- * Pools are sized so a tier always has enough for its floors. If a tier ever
- * comes up short of one Stairwell plus enough Rooms, the run is void: the
- * floor is not built, and the game ends Aborted instead.
+ * Pools are sized so a floor always has enough. If one ever comes up short of
+ * one Stairwell plus enough Rooms, the run is void: the floor is not built,
+ * and the game ends Aborted instead.
  */
 export function buildFloor(state: GameState, events: DomainEvent[]): GameState {
   let seed = state.seed;
   let supply = state.roomSupply;
   const rooms: Room[] = [];
-  const tier = tierOf(state.floor);
-  const need = roomsOnFloor(state.floor);
+  const floor = state.floor;
 
   const [stairwells, afterStairwell, s1] = takeRooms(
     supply,
-    (r) => r.kind === "stairwell" && r.tier === tier,
+    (r) => r.kind === "stairwell" && servesFloor(r, floor),
     STAIRWELLS_PER_FLOOR,
     seed,
   );
@@ -119,22 +107,22 @@ export function buildFloor(state: GameState, events: DomainEvent[]): GameState {
 
   const [rest, afterRest, s2] = takeRooms(
     supply,
-    (r) => r.kind === "room" && r.tier === tier,
-    need - STAIRWELLS_PER_FLOOR,
+    (r) => r.kind === "room" && servesFloor(r, floor),
+    FLOOR_DECK_SIZE - STAIRWELLS_PER_FLOOR,
     seed,
   );
   rooms.push(...rest);
   supply = afterRest;
   seed = s2;
 
-  if (rooms.length < need) {
-    const reason = `Floor ${String(state.floor)} needs ${String(need)} cards; tier ${String(tier)} holds ${String(rooms.length)}.`;
+  if (rooms.length < FLOOR_DECK_SIZE) {
+    const reason = `Floor ${String(floor)} needs ${String(FLOOR_DECK_SIZE)} cards; its pool holds ${String(rooms.length)}.`;
     events.push({ type: "RUN_ABORTED", reason });
     return { ...state, phase: "GameOver", outcome: "Aborted" };
   }
 
   const [floorDeck, s4] = shuffle(rooms, seed);
-  events.push({ type: "FLOOR_BUILT", floor: state.floor, rooms: floorDeck.length });
+  events.push({ type: "FLOOR_BUILT", floor, rooms: floorDeck.length });
   return {
     ...state,
     seed: s4,
@@ -145,7 +133,7 @@ export function buildFloor(state: GameState, events: DomainEvent[]): GameState {
 }
 
 /**
- * Unseen and Fled rooms go back to their tier's pool, ready for the next
+ * Unseen and Fled rooms go back to the pool, ready for the next
  * floor. Cleared rooms, the Stairwell included, stay on the Rooms pile for
  * the rest of the run (rulebook, Ascending).
  */

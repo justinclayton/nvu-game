@@ -258,22 +258,22 @@ describe("Ascending, Stuff stays until Scrapped or Exhausted", () => {
 });
 
 describe("Ascending, build the next floor", () => {
-  it("'Setup, Floor deck' — one fewer room than last time", () => {
+  it("'Setup, Floor deck' — every floor deck is 6 cards", () => {
     const { state: next, events } = clearIt(atStairwell(bareStairwell()));
     expect(next.floor).toBe(2);
     expect(next.phase).toBe("Turn Start");
     const kinds = next.floorDeck.map((r) => r.kind);
     expect(kinds.filter((k) => k === "stairwell")).toHaveLength(1);
-    expect(next.floorDeck).toHaveLength(9);
+    expect(next.floorDeck).toHaveLength(6);
     expect(eventTypes(events)).toContain("FLOOR_BUILT");
   });
 });
 
 describe("Winning and losing", () => {
-  it("'you win by clearing floor 10's Stairwell'", () => {
+  it("'you win by clearing floor 5's Stairwell'", () => {
     const state = rig({
       phase: "Play",
-      floor: 10,
+      floor: 5,
       activeRoom: bareStairwell(),
       Red: player({
         deck: pile("Shove", 4),

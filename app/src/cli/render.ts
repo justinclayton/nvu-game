@@ -79,8 +79,8 @@ const requirementText = (requires: StatRequirement): string => {
 
 /** A Room's printed face, with no run to check thresholds against — `bin/nvu card NAME`. */
 export function printedRoomLines(room: RoomFace): string[] {
-  const tier = room.tier === null ? "no tier" : `tier ${String(room.tier)}`;
-  const lines = [`${room.name} [${room.kind}; ${tier}]`];
+  const floors = room.floors.length === 0 ? "no floors" : `floors ${room.floors.join(", ")}`;
+  const lines = [`${room.name} [${room.kind}; ${floors}]`];
   if (room.text.trim() !== "") lines.push(`  ${room.text.trim()}`);
   for (const challenge of room.challenges) {
     for (const threshold of challenge.thresholds) {

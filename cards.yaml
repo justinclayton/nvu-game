@@ -7,6 +7,8 @@
 #                                 print-and-cut sheet) and app/src/content/cards.generated.ts
 #   node tools/cards.mjs check    fails if either generated module is stale, or if the card
 #                                 sheet stops printing the whole list
+#   make card-editor              every card as a face you can edit in a browser; /card-editor
+#                                 in an agent session writes the edits back here
 #
 #
 # Fields
@@ -20,8 +22,8 @@
 #   starter true                 part of a starting deck rather than a reward pool
 #   text    string               the literal printed rules text
 #   flavor  string               the printed flavor line
-#   tier    1 | 2 | 3 | null     room and stairwell only: which floors' pool the card is drawn from;
-#                                null marks the one fixed Floor 10 Stairwell
+#   tier    1 to 5 | null        room and stairwell only: the floor the card serves;
+#                                null marks the one fixed roof Stairwell
 #   challenges                   room and stairwell only: one or more, each a list of
 #                                `thresholds` (stat, value, outcome) in printed order. A threshold
 #                                that needs both stats prints `stats: { Oomph: N, Scramble: M }`
@@ -29,7 +31,7 @@
 #   flee    string               room and stairwell only: the printed Flee line
 
 meta:
-  version: C57
+  version: C58
   updated: 2026-10-03
 
 cards:
@@ -694,33 +696,100 @@ cards:
   ## Band 1 (floors 1–3)
 
   - name: Security Turnstile
-    count: 14
-    set: proposed
+    set: official
     kind: room
     tier: 1
-    flavor: A rusted barrier blocks the thoroughfare. Gray can slip through quietly, or Red can tear it off its hinges.
+    flavor: "A rusted barrier blocks your path. Slip through quietly, or tear it off its hinges."
     challenges:
       - thresholds:
           - stat: Scramble
             value: 5
-            outcome: Gray reveals a card reward.
+            outcome: "Gray reveals a card reward."
       - thresholds:
           - stat: Oomph
             value: 5
-            outcome: Red reveals a card reward.
-    flee: Both players Exhaust 1.
+            outcome: "Red reveals a card reward."
+    flee: "Both players Exhaust 1."
 
-  - name: Flooded Ventilation Shaft
-    count: 10
+  - name: Ventilation Shaft
+    set: official
+    kind: room
+    tier: 1
+    flavor: "Duct and cover. Get it"
+    challenges:
+      - thresholds:
+          - stats: { Oomph: 4, Scramble: 4 }
+            outcome: "Both players reveal a card reward."
+    flee: "Both players Exhaust 1."
+
+  - name: Room 1-3
+    set: official
+    kind: room
+    tier: 2
+    flavor: >-
+      I can't see! On the bright side, neither can "they"...
+    text: "Dim (only draw up to 4 cards)"
+    challenges:
+      - thresholds:
+          - stat: Scramble
+            value: 5
+            outcome: "Gray reveals a card reward."
+          - stats: { Oomph: 4, Scramble: 7 }
+            outcome: "Both players reveal a card reward."
+    flee: "Both players Exhaust 2."
+
+  - name: Puzzle Room
+    set: official
+    kind: room
+    tier: 1
+    flavor: "You'll need all of your skills to solve this riddle. Or just smash the big box thingie."
+    text: "Lockstep (no player may play two cards in a row)"
+    challenges:
+      - thresholds:
+          - stats: { Oomph: 3, Scramble: 5 }
+            outcome: "Both players reveal a card reward."
+          - stat: Oomph
+            value: 8
+            outcome: "Both players get Good Stuff."
+    flee: "Both players Exhaust 1."
+
+  - name: Gross Thing
+    set: official
+    kind: room
+    tier: 1
+    flavor: "Ew ew ew ew"
+    challenges:
+      - thresholds:
+          - stat: Oomph
+            value: 5
+            outcome: "Red gets Good Stuff."
+      - thresholds:
+          - stat: Scramble
+            value: 5
+            outcome: "Gray reveals a card reward."
+    flee: "Both players Exhaust 1."
+
+  - name: Tunnel of Rubble
     set: proposed
     kind: room
     tier: 1
-    flavor: A narrow duct dripping with murky condensation. Red can force the grate while Gray navigates the wiring.
+    flavor: "A tunnel. But there's rubble."
     challenges:
       - thresholds:
-          - stats: { Oomph: 3, Scramble: 3 }
-            outcome: Both players reveal a card reward.
-    flee: Gray Exhausts 2.
+          - stats: { Oomph: 4, Scramble: 4 }
+            outcome: "Both players reveal a card reward."
+    flee: "Both players Exhaust 1."
+
+  - name: Regular Room...OF DOOM
+    set: official
+    kind: room
+    tier: 1
+    flavor: "Nothing dangerous in this room. It's just...kind of decorated with a creepy vibe is all."
+    challenges:
+      - thresholds:
+          - stats: { Oomph: 4, Scramble: 4 }
+            outcome: "Both players reveal a card reward."
+    flee: "Both players Exhaust 1."
 
   - name: The Sentry Drone
     count: 3
@@ -742,51 +811,80 @@ cards:
   ## Band 2 (floors 4–6)
 
   - name: Automated Defense Turret
-    count: 7
-    set: proposed
+    set: official
     kind: room
     tier: 2
-    flavor: A heavy turretted cannon sweeps the corridor. Deactivating its targeting sensors requires precision; smashing it requires brute force.
+    flavor: >-
+      "Wait I thought this place was abandoned! What's with all the turret-y stuff?"
     challenges:
       - thresholds:
           - stat: Scramble
             value: 8
-            outcome: Both players get Good Stuff.
+            outcome: "Both players get Good Stuff."
       - thresholds:
           - stat: Oomph
             value: 10
-            outcome: Both players may Scrap a card from their hand or discard pile.
-    flee: Both players Exhaust 2, and both players get Bad Stuff.
+            outcome: "Both players may Scrap a card from their hand or discard pile."
+    flee: "Both players Exhaust 2, and both players get Bad Stuff."
 
-  - name: Pressurized Maintenance Hub
-    count: 4
-    set: proposed
+  - name: Maintenance
+    set: official
     kind: room
     tier: 2
-    flavor: High-pressure steam pipes obstruct the gangway. Red must brace the valves while Gray hacks the overrides.
+    flavor: "Even though this room is kind of boring, high-pressure steam pipes mean we can't stay long."
+    text: "Cap (A max of 3 cards may be in the play zone)"
     challenges:
       - thresholds:
           - stat: Oomph
             value: 7
-            outcome: Red reveals a card reward.
+            outcome: "Red reveals a card reward."
       - thresholds:
           - stat: Scramble
             value: 7
-            outcome: Gray reveals a card reward.
-    flee: Both players Exhaust 2.
+            outcome: "Gray reveals a card reward."
+    flee: "Both players Exhaust 2."
 
   - name: Overgrown Hydroponics Bay
-    count: 4
     set: proposed
     kind: room
     tier: 2
-    flavor: Mutated flora fills the chamber, emitting dense spore clouds.
+    flavor: "Mutated flora, dense spore clouds, and cool junk for the taking. But so much...emitting..."
     challenges:
       - thresholds:
           - stat: Scramble
             value: 11
-            outcome: Both players get Good Stuff.
-    flee: Both players Exhaust 2, and both players get Bad Stuff.
+            outcome: "Both players get Good Stuff."
+    flee: "Both players get Bad Stuff."
+
+  - name: Regular Monster 2
+    set: official
+    kind: room
+    tier: 2
+    flavor: "It grabs you both with one tentacle each. Now what"
+    text: "Ambush (When revealed, you must enter this room)"
+    challenges:
+      - thresholds:
+          - stat: Scramble
+            value: 10
+            outcome: "Gray reveals a card reward."
+          - stats: { Oomph: 8, Scramble: 8 }
+            outcome: "Both players reveal a card reward."
+    flee: "Both players get Bad Stuff."
+
+  - name: Dark Room
+    set: proposed
+    kind: room
+    tier: 2
+    text: "Dim (Only draw up to 4 here.)"
+    challenges:
+      - thresholds:
+          - stat: Scramble
+            value: 8
+            outcome: "Gray reveals a card reward."
+          - stat: Scramble
+            value: 12
+            outcome: "Both players reveal a card reward."
+    flee: "Both players Exhaust 1."
 
   - name: Gears & Glitch
     count: 3
@@ -806,52 +904,268 @@ cards:
 
   ## Band 3 (floors 7–9)
 
-  - name: Laser Grid Security Hall
-    count: 2
-    set: proposed
+  - name: Outrun The Laser
+    set: official
     kind: room
     tier: 3
-    flavor: Interlocking laser beams cover every inch of the floor. Slip through without touching a beam, or shatter the emitter relay.
+    flavor: runnnnnnnnnnnnnnnn
     challenges:
       - thresholds:
           - stat: Scramble
             value: 14
-            outcome: Both players reveal a card reward.
-    flee: Both players Exhaust 4.
+            outcome: "Both players reveal a card reward."
+    flee: "The player who played the least Scramble this turn Exhausts 3."
 
-  - name: Bio-Hazard Containment Vault
-    count: 2
-    set: proposed
+  - name: Slimy Bio-Hazard Containment
+    set: official
     kind: room
     tier: 3
-    flavor: A sealed vault holding experimental equipment. The door control requires an energy surge.
-    text: Players may Scrap Good Stuff cards from their hand during Play to add +3 Oomph or +3 Scramble per card.
+    flavor: "It's so goopy I can almost taste it"
+    text: "Toxic (On Enter: Both players get Bad Stuff.)"
     challenges:
       - thresholds:
           - stat: Oomph
             value: 15
-            outcome: One player reveals a card reward, and the other may Scrap a card from their hand or discard pile.
+            outcome: "Red gets Good Stuff. Gray may Scrap a card from their hand or discard pile."
       - thresholds:
           - stat: Scramble
             value: 15
-            outcome: One player reveals a card reward, and the other may Scrap a card from their hand or discard pile.
-    flee: Both players get 2 Bad Stuff, and both players Exhaust 2.
+            outcome: "Gray gets Good Stuff. Red may Scrap a card from their hand or discard pile."
+    flee: "Both players get Bad Stuff, and both players Exhaust 2."
 
-  - name: Smoldering Armory
-    count: 2
-    set: proposed
+  - name: Crumbling Armory
+    set: official
     kind: room
     tier: 3
-    flavor: An overheating weapons cache on the verge of exploding.
+    flavor: >-
+      "Um, shouldn't we just go?" "Just one more..."
+    text: "Unstable (Outcome phase: if you didn't meet the Scramble challenge, Exhaust 2.)"
     challenges:
       - thresholds:
           - stat: Oomph
             value: 10
-            outcome: Both players get Good Stuff.
+            outcome: "Both players get Good Stuff."
           - stat: Oomph
             value: 16
-            outcome: Both players reveal a card reward, and both players get Good Stuff.
-    flee: Both players Exhaust 3.
+            outcome: "Both players get 2 Good Stuff."
+      - thresholds:
+          - stat: Scramble
+            value: 8
+            outcome: "Both players reveal a card reward."
+    flee: "Both players Exhaust 2."
+
+  - name: Regular Monster 4
+    set: proposed
+    kind: room
+    tier: 4
+    text: "Ambush (When revealed, you must enter this room)"
+    challenges:
+      - thresholds:
+          - stats: { Oomph: 8, Scramble: 12 }
+            outcome: "Both players reveal a card reward."
+          - stat: Oomph
+            value: 20
+            outcome: "Both players get Good Stuff. Both players reveal a card reward."
+    flee: "Both players Exhaust 1."
+
+  - name: Vacuum Chamber
+    set: official
+    kind: room
+    tier: 4
+    flavor: "Sucks to be you"
+    text: "Draining (Cards played here are Exhausted at Cleanup, not discarded.)"
+    challenges:
+      - thresholds:
+          - stat: Oomph
+            value: 15
+            outcome: "Both players reveal a card reward."
+          - stat: Scramble
+            value: 15
+            outcome: "Both players reveal a card reward."
+    flee: "Both players Exhaust 2."
+
+  - name: Gravity...Room
+    set: official
+    kind: room
+    tier: 3
+    flavor: "something to do with gravity"
+    text: "Heavy (Whenever you play a card, Exhaust 1 from the top of your deck)."
+    challenges:
+      - thresholds:
+          - stats: { Oomph: 8, Scramble: 8 }
+            outcome: "Both players reveal a card reward."
+    flee: "Both players Exhaust 2."
+
+  - name: Communist Botox Lab
+    set: proposed
+    kind: room
+    tier: 4
+    text: "Toxic (On Enter: Both players get Bad Stuff.)"
+    challenges:
+      - thresholds:
+          - stats: { Oomph: 10, Scramble: 10 }
+            outcome: "Both players reveal a card reward."
+    flee: "Both players Exhaust 2."
+
+  - name: Mercenaries
+    set: proposed
+    kind: room
+    tier: 3
+    flavor: "They found us!"
+    text: "Relentless (If you Flee, this room goes on top of the Floor deck)"
+    challenges:
+      - thresholds:
+          - stats: { Oomph: 10, Scramble: 10 }
+            outcome: "Both players reveal a card reward."
+          - stat: Oomph
+            value: 15
+            outcome: "Both players reveal a card reward. Both players get Good Stuff."
+    flee: "Both players Exhaust 1."
+
+  - name: Bubbly Slime Monster
+    set: proposed
+    kind: room
+    tier: 5
+    flavor: "he stanky"
+    text: "Corrosive (Cards paid here are Scrapped, not Exhausted.)"
+    challenges:
+      - thresholds:
+          - stats: { Oomph: 8, Scramble: 8 }
+            outcome: "Both players reveal a card reward."
+    flee: "Both players Exhaust 2."
+
+  - name: Scrap Pile
+    set: proposed
+    kind: room
+    tier: 3
+    challenges:
+      - thresholds:
+          - stat: Scramble
+            value: 15
+            outcome: "Both players may Scrap a card from their hand or discard pile."
+      - thresholds:
+          - stat: Oomph
+            value: 15
+            outcome: "Both Players get Good Stuff."
+    flee: "Both players Exhaust 1."
+
+  - name: Laser Grid
+    set: proposed
+    kind: room
+    tier: 4
+    flavor: "Dance, dance, for the revolution!"
+    text: "Lockstep (no player may play two cards in a row)"
+    challenges:
+      - thresholds:
+          - stat: Scramble
+            value: 12
+            outcome: "Both players reveal a card reward."
+    flee: "Both players Exhaust 2."
+
+  - name: Oasis of Doom
+    set: official
+    kind: room
+    tier: 4
+    flavor: "actually nm it's chill "
+    challenges:
+      - thresholds:
+          - stats: { Oomph: 5, Scramble: 5 }
+            outcome: "Both players may Scrap a card from their hand or discard pile."
+          - stats: { Oomph: 10, Scramble: 10 }
+            outcome: "Both players may Scrap a card from their hand or discard pile. Both players may Scrap a card from their hand or discard pile."
+    flee: "Both players Exhaust 1."
+
+  - name: Ticking Time Bomb
+    set: official
+    kind: room
+    tier: 4
+    flavor: 'But why is the room *labelled* "Bomb Room"?? I have so many questions, but no time for answers'
+    text: "Cap (At most 3 cards in the play zone)"
+    challenges:
+      - thresholds:
+          - stat: Oomph
+            value: 10
+            outcome: "Both players reveal a card reward."
+      - thresholds:
+          - stat: Scramble
+            value: 10
+            outcome: "Both players reveal a card reward."
+    flee: "Both players Exhaust 3."
+
+  - name: Monster 5-2
+    set: proposed
+    kind: room
+    tier: 5
+    flavor: "Trust me it's gross though"
+    text: "Toxic (On Enter: both players get Bad Stuff.)"
+    challenges:
+      - thresholds:
+          - stats: { Oomph: 18, Scramble: 18 }
+            outcome: "Both players reveal a card reward."
+    flee: "Both players Exhaust 2."
+
+  - name: Monster 5-3
+    set: proposed
+    kind: room
+    tier: 5
+    flavor: "Grosser than the other one"
+    text: "Ambush Heavy (Whenever you play a card, Exhaust 1 from the top of your deck.)"
+    challenges:
+      - thresholds:
+          - stats: { Oomph: 15, Scramble: 15 }
+            outcome: "Both players reveal a card reward."
+    flee: "Both players Exhaust 2."
+
+  - name: Monster 5-4
+    set: proposed
+    kind: room
+    tier: 5
+    flavor: "This one's actually kind of cute, but it will kill you so maybe don't touch it"
+    text: "Draining (Cards played here are Exhausted at Cleanup, not discarded.)"
+    challenges:
+      - thresholds:
+          - stats: { Oomph: 18, Scramble: 18 }
+            outcome: "Both players get Good Stuff. Both players get Bad Stuff."
+          - stat: Scramble
+            value: 12
+            outcome: "Both players reveal a card reward."
+    flee: "Both players Exhaust 3."
+
+  - name: Double Dark Hallway of Death
+    set: proposed
+    kind: room
+    tier: 5
+    flavor: "The amount of death scales linearly with the amount of hallway."
+    text: "Lockstep Dim"
+    challenges:
+      - thresholds:
+          - stat: Oomph
+            value: 20
+            outcome: "Both players get Good Stuff."
+      - thresholds:
+          - stat: Scramble
+            value: 20
+            outcome: "Both players reveal a card reward."
+    flee: "Both players Exhaust 2."
+
+  - name: The Authorities
+    set: proposed
+    kind: room
+    tier: 5
+    flavor: "If you haven't learned to work together by now, the only other choice is to throw the other one under the bus."
+    text: "Relentless (If you Flee, this room goes on top of the Floor deck)"
+    challenges:
+      - thresholds:
+          - stat: Oomph
+            value: 15
+            outcome: "Red reveals a card reward. Gray gets Bad Stuff."
+          - stat: Scramble
+            value: 15
+            outcome: "Gray reveals a card reward. Red gets Bad Stuff"
+      - thresholds:
+          - stats: { Oomph: 15, Scramble: 15 }
+            outcome: "Both players get 2 Good Stuff"
+    flee: "Both players Exhaust 2."
 
   - name: The Iron Sentinel
     count: 3

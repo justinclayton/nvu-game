@@ -331,6 +331,7 @@ describe("Room kinds: Room and Stairwell", () => {
     const state = rig({
       phase: "Play",
       activeRoom: room("The Sentry Drone"),
+      roomSupply: [room("Gears & Glitch")],
       Red: player({
         deck: pile("Shove", 5),
         hand: [card("Charge"), card("Shove"), card("Shove"), card("Pry Bar"), card("Pry Bar")],

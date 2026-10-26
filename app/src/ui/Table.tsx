@@ -12,6 +12,7 @@ import type { Replay } from "@application/replay";
 import { canUndo, type SessionState } from "@application/session";
 import { plural } from "@domain/plural";
 import { costOf, payOptions } from "@domain/queries";
+import { floorName } from "@domain/setup";
 import type { Card, Character, Command, GameState } from "@domain/types";
 import { type Paying } from "./CardLayer";
 import { Controls } from "./Controls";
@@ -152,7 +153,7 @@ export function Table({ onNewRun, onOpenRun, replay }: Props) {
         <header className="table__head">
           <h1>North vs Up</h1>
           <div className="table__meta">
-            <span>Floor {state.floor}</span>
+            <span>{floorName(state.floor)}</span>
             <span>Turn {state.turn}</span>
             <span className="table__phase">{state.phase}</span>
             {KIT_REVISION === undefined ? null : (

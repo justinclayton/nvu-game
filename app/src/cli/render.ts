@@ -13,6 +13,7 @@ import {
 } from "@domain/queries";
 import type { Card, Character, GameState, Room } from "@domain/types";
 import type { CardFace, RoomFace, StatRequirement } from "@domain/printed";
+import { floorName } from "@domain/setup";
 import { CHARACTERS, playerOf } from "@domain/verbs";
 
 /**
@@ -152,7 +153,7 @@ export function renderTable(state: GameState): string {
   // turn it is about to start instead.
   const turn = state.phase === "Turn Start" ? state.turn + 1 : state.turn;
   lines.push(
-    `Floor ${String(state.floor)} · turn ${String(turn)} · ${state.phase}` +
+    `${floorName(state.floor)} · turn ${String(turn)} · ${state.phase}` +
       `   floor deck ${String(state.floorDeck.length)}, cleared ${String(state.cleared.length)}` +
       `   Good Stuff ${String(state.pools.goodStuff.length)}, Bad Stuff ${String(state.pools.badStuff.length)}`,
   );

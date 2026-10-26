@@ -107,6 +107,7 @@ describe("walkthrough 5 — Cleanup runs before Ascending", () => {
     const state = rig({
       phase: "Play",
       activeRoom: room("The Sentry Drone"),
+      roomSupply: [room("Gears & Glitch")],
       Red: player({
         deck: pile("Shove", 5),
         hand: [card("Charge"), card("Shove"), card("Shove"), card("Pry Bar"), card("Pry Bar")],
@@ -210,11 +211,12 @@ describe("walkthrough 8 — ascending end to end: the printed reward, then shuff
       floor: 1,
       activeRoom: room("The Sentry Drone"),
       roomSupply: [
-        room("The Sentry Drone"),
-        room("Puzzle Room"),
-        room("Puzzle Room"),
+        room("Gears & Glitch"),
+        room("Gears & Glitch"),
+        room("Gears & Glitch"),
         room("Overgrown Hydroponics Bay"),
-        ...Array.from({ length: 8 }, () => room("Security Turnstile")),
+        room("Maintenance"),
+        room("Security Turnstile"),
       ],
       Red: player({
         deck: pile("Shove", 5),

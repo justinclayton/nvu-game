@@ -1017,6 +1017,8 @@ function finishCleanup(state: GameState, run: Run): GameState {
   // the floor — a met threshold triggers this, whichever room printed it.
   if (ascends) {
     run.events.push({ type: "FLOOR_CLEARED", floor: s.floor });
+    // "You win by clearing the final room on the Roof" (Winning and losing):
+    // the Roof's Stairwell reads "You Win!" as an Ascend.
     if (s.floor >= TOP_FLOOR) {
       run.events.push({ type: "GAME_OVER", outcome: "Victory" });
       return { ...s, phase: "GameOver", outcome: "Victory", playZone: [] };
@@ -1334,9 +1336,10 @@ function ascend(state: GameState, run: Run): GameState {
   let s = state;
   for (const c of CHARACTERS) s = shuffleAllIntoDeck(s, c, run);
 
-  // Setup: build the next floor's deck, one card smaller than this one's.
+  // Setup: build the next floor's deck from every card printed for its tier.
   s = returnRoomsToSupply(s);
   s = buildFloor({ ...s, floor: s.floor + 1 }, run.events);
+  if (s.phase === "GameOver") return s;
   return { ...s, phase: "Turn Start", playZone: [], thisTurn: emptyTurnRecord() };
 }
 

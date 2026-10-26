@@ -1034,9 +1034,14 @@ function finishCleanup(state: GameState, run: Run): GameState {
 
   // Outcome: "then shuffle the room card back into the Floor deck."
   if (resolution?.roomEnded === "Fled") {
-    const [deck, seed] = shuffle([...s.floorDeck, resolution.room], s.seed);
     run.events.push({ type: "FLED_RESHUFFLED", room: resolution.room });
-    s = { ...s, floorDeck: deck, seed };
+    if (resolution.room.keywords.includes("Relentless")) {
+      // Relentless: a fled room goes on top of the Floor deck, not shuffled in.
+      s = { ...s, floorDeck: [resolution.room, ...s.floorDeck] };
+    } else {
+      const [deck, seed] = shuffle([...s.floorDeck, resolution.room], s.seed);
+      s = { ...s, floorDeck: deck, seed };
+    }
   }
 
   s = { ...s, resolution: null };

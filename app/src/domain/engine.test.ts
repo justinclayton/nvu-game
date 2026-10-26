@@ -465,6 +465,25 @@ describe("Cleanup", () => {
     expect(next.floorDeck).toEqual(expectedDeck);
     expect(next.seed).toBe(expectedSeed);
   });
+
+  it("Relentless: a fled Relentless room goes on top of the Floor deck, unshuffled", () => {
+    const below = [room("Puzzle Room"), room("The Sentry Drone"), room("Gears & Glitch")];
+    const state = rig({
+      seed: 4242,
+      phase: "Play",
+      activeRoom: room("Mercenaries"),
+      floorDeck: below,
+      Red: player({ deck: pile("Shove", 5) }),
+      Gray: player({ deck: pile("Duck Under", 5) }),
+    });
+    const fledRoom = state.activeRoom as Room;
+    const { state: next, events } = play(state, [{ type: "END_PLAY" }]);
+    expect(eventTypes(events)).toContain("FLED_RESHUFFLED");
+    expect(next.floorDeck).toEqual([fledRoom, ...below]);
+    expect(next.seed).toBe(state.seed);
+    const flipped = must({ ...next, phase: "Turn Start" }, { type: "FLIP_ROOM" });
+    expect(flipped.state.activeRoom?.name).toBe("Mercenaries");
+  });
 });
 
 describe("Room kinds: Room and Stairwell", () => {

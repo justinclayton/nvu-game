@@ -13,7 +13,9 @@ item" gives the item's text.
 2. The rulebook is the authority for any rule. Never edit `rulebook.md`,
    `cards.yaml`, the generated card modules, or anything under `.github/`.
    If the item asks for a source change, stop and say so in your final
-   message.
+   message. You may change the generator, `tools/cards.mjs`. `make check`
+   then rebuilds the generated modules, and the job rebuilds them again
+   before it commits.
 3. Write the tests the acceptance criteria call for beside the code, in the
    style of the tests already there.
 4. Before you finish, run `make check` and `make app-check`. A failure this

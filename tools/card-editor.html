@@ -175,7 +175,7 @@
 
 <main>
   <p class="howto">Every field on a card is live: click it and type. <b>Tab</b> moves through a card. Add a card with the dashed tile at the end of a section; remove, duplicate or revert from the row under each card.
-  A gold ring is an edited card, green is new, red has a problem the card generator would reject (the message under the card says what). Your draft is kept in this browser until you send it or discard it.
+  A gold ring is an edited card, green is new, red has a problem the card generator would reject (the message under the card says what); a yellow note is a line the engine can't read yet, which the PR plans as code. Your draft is kept in this browser until you send it or discard it.
   When you are done, open <b>changes</b> in the top bar. In Lavish, <b>Queue for agent</b> then <b>Send to Agent</b> and the agent writes the batch into <code>cards.yaml</code>. On your own, <b>Download changes.json</b> and run <code>node tools/card-editor.mjs apply changes.json</code>.</p>
   <div id="content"></div>
 </main>
@@ -250,7 +250,6 @@ const CLAUSES = [
   /^(?:and )?flee this room for free$/i,
   /^(?:and )?leave empty-handed$/i,
   /^(both players|one player|red|gray) exhausts? (\d+)$/i,
-  /^the player who played the least (oomph|scramble) this turn exhausts? (\d+)$/i,
   /^(both players|one player|red|gray) (?:gets?|takes?) (?:(\d+) )?bad stuff$/i,
   /^(both players|one player|red|gray) (?:gets?|takes?) (?:(\d+) )?good stuff$/i,
   /^(both players|one player|red|gray) reveals? (?:a |the )?(?:card )?reward$/i,
@@ -284,11 +283,11 @@ function validate(entry, names) {
           errors.push(`${where}: needs a stat and a number.`);
         }
         if (!t.outcome || !t.outcome.trim()) errors.push(`${where}: outcome is empty.`);
-        else badClauses(t.outcome).forEach((cl) => errors.push(`${where}: the generator can't read "${cl}".`));
+        else badClauses(t.outcome).forEach((cl) => warnings.push(`${where}: the engine can't read "${cl}" yet; the PR that prints it plans the work.`));
         if (/\bclear\b/i.test(t.outcome || "")) warnings.push(`${where}: "Clear" is implied and not printed (#263).`);
       });
     });
-    if (c.flee) badClauses(c.flee).forEach((cl) => errors.push(`Flee: the generator can't read "${cl}".`));
+    if (c.flee) badClauses(c.flee).forEach((cl) => warnings.push(`Flee: the engine can't read "${cl}" yet; the PR that prints it plans the work.`));
     const m = /exhausts?\s+(\d+)/i.exec(c.flee || "");
     if (m && Number(m[1]) > 3) warnings.push("Flee Exhausts more than 3 (#387 caps it at 3).");
     if (c.tier === null && c.kind !== "stairwell") errors.push("Only a Stairwell may be the roof card (tier null).");
@@ -678,7 +677,7 @@ document.getElementById("queueBtn").addEventListener("click", () => {
   const prompt = [
     `Apply ${n} card change(s) to cards.yaml: save the JSON below to a file and run node tools/card-editor.mjs apply <file>.`,
     `Then run make build check and node tools/card-editor.mjs, and reply with one line per card id saying applied, or why not.`,
-    broken.length ? `These cards still fail the generator's checks; apply them anyway and say what fails: ${broken.join(", ")}.` : "",
+    broken.length ? `These cards fail the generator's checks; apply them anyway and say what fails: ${broken.join(", ")}.` : "",
   ].filter(Boolean).join(" ");
   const data = changeData();
   if (window.lavish && typeof window.lavish.queuePrompt === "function") {

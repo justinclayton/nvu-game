@@ -304,8 +304,10 @@ if (typeof module !== "undefined") module.exports = NVU_CARDS;
 /* ------------------------------------------------- the printed prose, parsed
    A room prints its threshold outcomes and its Flee line as sentences.  The web
    game never reads a sentence, so the shapes the card list actually prints are
-   turned into structure here.  Anything this does not recognise is an error,
-   not a silently dropped rule.
+   turned into structure here.  A clause this does not recognise is kept as data
+   on the line, under `unparsed`, with no effect: the list still builds and the
+   app's content test names the line, so the PR that printed it plans the engine
+   work. A rule is never silently dropped.
 
    Rulebook, Card anatomy: Room Cards: a threshold or a Flee line resolves the same way whether
    it is printed on a Room or a Stairwell. Kind only decides which pool a card is drawn from and,
@@ -341,16 +343,6 @@ const CLAUSES = [
     (m) => ({ effect: { type: "ExhaustFromDeck", who: who(m[1]), amount: Number(m[2]) } }),
   ],
   [
-    /^the player who played the least (oomph|scramble) this turn exhausts? (\d+)$/i,
-    (m) => ({
-      effect: {
-        type: "ExhaustFromDeck",
-        who: m[1].toLowerCase() === "oomph" ? "leastOomph" : "leastScramble",
-        amount: Number(m[2]),
-      },
-    }),
-  ],
-  [
     /^(both players|one player|red|gray) (?:gets?|takes?) (?:(\d+) )?bad stuff$/i,
     (m) => ({ effect: { type: "DealBadStuff", who: who(m[1]), count: Number(m[2] ?? 1) } }),
   ],
@@ -376,11 +368,11 @@ function clausesOf(prose) {
     .filter((c) => c !== "");
 }
 
-function readProse(prose, where) {
-  const out = { clears: false, ascends: false, fleeFree: false, effects: [] };
+function readProse(prose) {
+  const out = { clears: false, ascends: false, fleeFree: false, effects: [], unparsed: [] };
   for (const clause of clausesOf(prose)) {
     const hit = CLAUSES.find(([re]) => re.test(clause));
-    if (!hit) throw new Error(`${where}: unparsed clause "${clause}" in "${prose}"`);
+    if (!hit) { out.unparsed.push(clause); continue; }
     const read = hit[1](clause.match(hit[0]));
     if (read.clears) out.clears = true;
     if (read.ascends) out.ascends = true;
@@ -408,7 +400,7 @@ function requirementsOf(raw, where) {
 function threshold(raw, where) {
   const requires = requirementsOf(raw, where);
   const outcome = String(raw.outcome ?? "");
-  const read = readProse(outcome, `${where} threshold "${outcome}"`);
+  const read = readProse(outcome);
   return {
     requires,
     outcome,
@@ -419,13 +411,14 @@ function threshold(raw, where) {
     fleeFree: read.fleeFree,
     ascends: read.ascends,
     effects: read.effects,
+    unparsed: read.unparsed,
   };
 }
 
 function fleeLine(card) {
-  if (!card.flee) return { text: NO_FLEE_PRINTED, clears: false, effects: [] };
-  const read = readProse(card.flee, `${card.name} Flee line`);
-  return { text: card.flee, clears: read.clears, effects: read.effects };
+  if (!card.flee) return { text: NO_FLEE_PRINTED, clears: false, effects: [], unparsed: [] };
+  const read = readProse(card.flee);
+  return { text: card.flee, clears: read.clears, effects: read.effects, unparsed: read.unparsed };
 }
 
 function cardFace(c) {
@@ -472,6 +465,25 @@ function roomFace(c) {
     challenges,
     flee: fleeLine(c),
   };
+}
+
+/** Every printed clause the engine cannot read yet, as "<room> <line>: <clause>". */
+export function unreadLines(content) {
+  const out = [];
+  for (const r of content.rooms) {
+    r.challenges.forEach((ch, i) => ch.thresholds.forEach((t, j) => {
+      for (const c of t.unparsed) out.push(`${r.name} line ${i + 1}.${j + 1}: "${c}"`);
+    }));
+    for (const c of r.flee.unparsed) out.push(`${r.name} Flee: "${c}"`);
+  }
+  return out;
+}
+
+function unreadNote(content) {
+  const lines = unreadLines(content);
+  if (!lines.length) return "";
+  return `\n${lines.length} printed line(s) the engine can't read yet, kept as data (the app's content test names them):\n` +
+    lines.map((l) => "  " + l).join("\n");
 }
 
 /** The whole card list, in the shape app/src/domain/printed.ts describes. */
@@ -632,10 +644,10 @@ if (isMain) {
   if (cmd === "build") {
     writeFileSync(OUT, generate(doc));
     writeFileSync(OUT_TS, generateTs(doc));
-    const { cards, rooms } = structure(doc);
+    const content = structure(doc);
     console.log(
       `wrote tools/cards.js and app/src/content/cards.generated.ts — ` +
-      `${cards.length} cards and ${rooms.length} rooms`,
+      `${content.cards.length} cards and ${content.rooms.length} rooms` + unreadNote(content),
     );
   } else if (cmd === "check") {
     const problems = [];
@@ -660,7 +672,7 @@ if (isMain) {
       process.exit(1);
     }
     console.log(`no drift — ${doc.cards.length} cards agree across cards.yaml and cards.js,
-  and the card sheet prints every copy of all ${doc.cards.length}`);
+  and the card sheet prints every copy of all ${doc.cards.length}` + unreadNote(structure(doc)));
   } else {
     console.error("usage: node tools/cards.mjs [build|check]");
     process.exit(2);

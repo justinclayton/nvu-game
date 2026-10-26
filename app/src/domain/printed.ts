@@ -78,6 +78,12 @@ export interface Threshold {
   /** The outcome says `Ascend`: the Floor is cleared instead of running Cleanup. */
   readonly ascends: boolean;
   readonly effects: readonly RoomEffect[];
+  /**
+   * Printed clauses the generator could not read. The line still prints and
+   * resolves whatever it did read; the content test fails while this is
+   * non-empty, so the PR that printed the line builds the rest.
+   */
+  readonly unparsed?: readonly string[];
 }
 
 /**
@@ -100,6 +106,8 @@ export interface FleeLine {
   /** Whether this room's Flee text Clears it. A Stuff room's never does. */
   readonly clears: boolean;
   readonly effects: readonly RoomEffect[];
+  /** As on a Threshold: clauses the generator could not read. */
+  readonly unparsed?: readonly string[];
 }
 
 /** A player card or a piece of Stuff, exactly as printed (rulebook, Card anatomy). */

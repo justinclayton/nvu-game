@@ -37,6 +37,23 @@ describe("content", () => {
     }
   });
 
+  it("reads every outcome and Flee line into effects", () => {
+    // A clause the generator does not know is kept on the line as `unparsed`
+    // so the list still builds. This test is where it goes red: the PR that
+    // printed the line plans the engine work, and extends the generator's
+    // clauses (tools/cards.mjs) and the engine together.
+    const unread: string[] = [];
+    for (const room of CARD_CONTENT.rooms) {
+      room.challenges.forEach((c, i) =>
+        c.thresholds.forEach((t, j) => {
+          for (const clause of t.unparsed ?? []) unread.push(`${room.name} line ${String(i + 1)}.${String(j + 1)}: "${clause}"`);
+        }),
+      );
+      for (const clause of room.flee.unparsed ?? []) unread.push(`${room.name} Flee: "${clause}"`);
+    }
+    expect(unread).toEqual([]);
+  });
+
   it("gives every room's threshold the same shape, whatever the room's printed kind", () => {
     // A Room and a Stairwell check a Challenge the same way, so no threshold
     // carries a kind-specific reading of the pool.

@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { act, fireEvent, render, screen } from "@testing-library/react";
+import { act, cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it } from "vitest";
 
 import { createSession, createSessionFrom, type Session } from "@application/session";
@@ -20,7 +20,7 @@ const noop = () => {
 
 beforeEach(() => {
   session = createSession(SEED, CARD_CONTENT);
-  render(<App session={session} onNewRun={noop} onOpenRun={noop} />);
+  render(<App session={session} onNewRun={noop} onOpenRun={() => null} />);
 });
 
 describe("the table", () => {
@@ -58,7 +58,9 @@ describe("the table", () => {
     act(() => {
       session.getState().dispatch({ type: "END_PLAY" });
     });
-    expect(screen.getByText(/Cannot end the play phase during the Turn Start phase/)).toBeDefined();
+    expect(screen.getByRole("alert").textContent).toMatch(
+      /Cannot end the play phase during the Turn Start phase/,
+    );
   });
 
   it("draws every card exactly once, face down in a deck until it is drawn", () => {
@@ -99,7 +101,7 @@ describe("a 'you may draw' question", () => {
     const state = buildFixture(name);
     if (!state) throw new Error(`no fixture ${name}`);
     act(() => {
-      render(<App session={createSessionFrom(state)} onNewRun={noop} onOpenRun={noop} />);
+      render(<App session={createSessionFrom(state)} onNewRun={noop} onOpenRun={() => null} />);
     });
   };
   const labels = () => screen.getAllByRole("button").map((b) => b.textContent);
@@ -125,7 +127,7 @@ describe("a 'you may draw' question", () => {
     if (!state) throw new Error("no fixture");
     const own = createSessionFrom(state);
     act(() => {
-      render(<App session={own} onNewRun={noop} onOpenRun={noop} />);
+      render(<App session={own} onNewRun={noop} onOpenRun={() => null} />);
     });
     fireEvent.click(screen.getAllByRole("button", { name: "Don't draw" })[0] as HTMLElement);
     expect(own.getState().state.pending).toBeNull();
@@ -209,5 +211,35 @@ describe("the playtester's notes", () => {
     for (const name of [".txt", ".csv", ".json"]) {
       expect(screen.getByRole("button", { name })).toBeDefined();
     }
+  });
+});
+
+describe("the end of a run", () => {
+  it("says who went Down, where, and how far the run got", () => {
+    const state = buildFixture("game-over");
+    if (!state) throw new Error("no fixture game-over");
+    cleanup();
+    render(<App session={createSessionFrom(state)} onNewRun={noop} onOpenRun={() => null} />);
+    expect(screen.getAllByText("Game Over")).toHaveLength(2);
+    const room = state.activeRoom ? ` in ${state.activeRoom.name}` : "";
+    expect(
+      screen.getByText(`Red went Down${room}. Floor ${String(state.floor)}, turn ${String(state.turn)}.`),
+    ).toBeDefined();
+  });
+});
+
+describe("opening a run file", () => {
+  it("says in the header why a file was refused, and keeps the table", async () => {
+    cleanup();
+    render(<App session={session} onNewRun={noop} onOpenRun={() => "not a run file"} />);
+    const input = document.querySelector<HTMLInputElement>(".open-run input");
+    if (!input) throw new Error("no file input");
+    const file = new File(["{}"], "run.json", { type: "application/json" });
+    fireEvent.change(input, { target: { files: [file] } });
+    const alert = await screen.findByRole("alert");
+    expect(alert.textContent).toMatch(/not a run file/);
+    expect(screen.getByRole("heading", { name: "Red" })).toBeDefined();
+    fireEvent.click(screen.getByRole("button", { name: "Dismiss" }));
+    expect(screen.queryByRole("alert")).toBeNull();
   });
 });

@@ -76,6 +76,7 @@ body {
 
 .table__head {
   display: flex;
+  flex-wrap: wrap;
   align-items: baseline;
   gap: 18px;
   padding: 4px 4px 12px;
@@ -108,6 +109,35 @@ body {
   margin-left: auto;
   display: flex;
   gap: 8px;
+}
+/* A run file that could not be opened, said in the header row rather than in
+ * a browser alert, so the table stays in view. */
+.table__refusal {
+  flex-basis: 100%;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 0;
+  padding: 6px 12px;
+  border-left: 4px solid var(--red-light);
+  background: rgba(224, 138, 128, 0.12);
+  font-size: 14px;
+}
+.table__refusal .button {
+  margin-left: auto;
+}
+
+/* Read by a screen reader, not drawn. */
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
 }
 
 .button {
@@ -220,28 +250,28 @@ body {
   position: absolute;
   left: 6px;
   top: 0;
+  display: flex;
+  align-items: center;
+  gap: 5px;
   font: 400 11px/16px var(--stencil);
   letter-spacing: 0.05em;
   text-transform: uppercase;
   color: var(--print);
   white-space: nowrap;
 }
+/* How many cards the pile holds, after its label, clear of the cards. */
 .slot__count {
-  position: absolute;
-  right: -7px;
-  bottom: -7px;
-  z-index: 400;
-  min-width: 20px;
-  height: 20px;
-  padding: 0 5px;
-  border-radius: 10px;
+  min-width: 18px;
+  height: 14px;
+  padding: 0 4px;
+  border-radius: 7px;
   border: 1px solid var(--print);
   background: var(--ink);
   color: var(--stock);
-  font: 700 11px/18px var(--display);
+  font: 700 10px/12px var(--display);
+  letter-spacing: 0;
   text-align: center;
   font-variant-numeric: tabular-nums;
-  pointer-events: none;
 }
 .well {
   width: calc(var(--cw) + 2 * var(--pad));
@@ -314,13 +344,15 @@ body {
 .well--hand {
   flex: none;
 }
-/* The band over this character's side of the play zone: the play row is one
- * gap above the hand slot, so this lines up with its well. Measured, not drawn. */
+/* The band the offered cards are held up in: over this character's hand,
+ * under the header. Nothing in the hand can be played while a card is on
+ * offer, while the play zone above holds what the room was just scored on.
+ * Measured, not drawn. */
 .float {
   position: absolute;
   left: 0;
   right: 0;
-  top: calc(-1 * (16px + var(--ch) + 2 * var(--pad)));
+  top: 28px;
   height: calc(var(--ch) + 2 * var(--pad));
   pointer-events: none;
 }
@@ -330,12 +362,11 @@ body {
   flex: 1 1 auto;
   min-width: 0;
   margin-top: 16px;
-  height: calc(var(--ch) + 2 * var(--pad));
+  min-height: calc(var(--ch) + 2 * var(--pad));
   padding: 8px 12px;
   border: 1.5px solid var(--print-faint);
   border-radius: 9px;
   background: rgba(0, 0, 0, 0.18);
-  overflow: auto;
 }
 .brief__head {
   display: flex;
@@ -461,8 +492,17 @@ body {
 .sprite.is-clickable {
   cursor: pointer;
 }
-.sprite--hand:hover {
+.sprite--hand:hover,
+.sprite.is-cost-covered:hover,
+.sprite.is-cost-covered:focus-visible {
   z-index: 300 !important;
+}
+/* A full row overlaps, and the next card covers each card's right edge. Once
+ * it covers the cost, the cost would show as a sliver, so it is hidden
+ * instead, and shows again on the card that is pointed at, which comes to the
+ * front. */
+.sprite.is-cost-covered:not(:hover, :focus-visible) .cost {
+  visibility: hidden;
 }
 
 /* The pose is one transform fed by variables: the layer sets the lean and the
@@ -1170,7 +1210,12 @@ body {
   text-align: center;
 }
 .over h2 {
+  margin-bottom: 4px;
   font: 700 28px/1.1 var(--display);
+}
+.over__summary {
+  margin: 0 0 12px;
+  color: var(--print);
 }
 
 /* The log, the note box that writes into it and the buttons that take it away
@@ -1373,6 +1418,12 @@ body {
   }
   .mat__rail .slot {
     flex: none;
+    padding-top: 0;
+  }
+  /* In the row of pools, a label and its count can be wider than the well, so
+   * the label takes up room and the slot widens to hold it. */
+  .mat__rail .slot__label {
+    position: static;
   }
 
   .slot__label {
@@ -1382,18 +1433,21 @@ body {
     letter-spacing: 0.06em;
     left: 4px;
   }
+  .slot__label {
+    gap: 3px;
+  }
   .slot__count {
-    min-width: 17px;
-    height: 17px;
-    font-size: 10px;
-    line-height: 15px;
-    right: -6px;
-    bottom: -6px;
+    min-width: 15px;
+    padding: 0 3px;
+    font-size: 9px;
   }
   .slot__head {
     gap: 6px;
     height: 24px;
     padding: 0 4px;
+  }
+  .float {
+    top: 24px;
   }
   .slot__title {
     font-size: 13px;
@@ -1496,7 +1550,7 @@ body {
   }
   .mat-row--floor .brief {
     flex-basis: 100%;
-    height: auto;
+    min-height: 0;
     margin-top: 0;
   }
   .mat-row--table,
@@ -1567,7 +1621,9 @@ body {
     grid-column: 1;
     grid-row: 1 / span 2;
     height: auto;
+    min-height: 0;
     contain: size;
+    overflow: auto;
   }
   .mat-side--red > .slot--row,
   .slot--hand.slot--red,
@@ -1629,10 +1685,20 @@ body {
  * numbers and `WIDE_ABOVE` together; metrics.test.ts checks them against
  * metrics.ts. */
 @media (min-width: 1910px) {
+  /* The page fills the window, so on a tall screen the log column runs down
+   * to the dock instead of stopping where the mat does. */
+  .table-page {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+  }
   .table {
+    flex: 1 0 auto;
+    width: 100%;
     max-width: min(96vw, 2000px);
     display: grid;
     grid-template-columns: minmax(0, 1fr) 340px;
+    grid-template-rows: auto 1fr;
     column-gap: 24px;
     grid-template-areas:
       "head head"
@@ -1643,6 +1709,7 @@ body {
   }
   .mat {
     grid-area: mat;
+    align-self: start;
     min-width: 1425px;
     grid-template-columns: minmax(0, 1fr) 265px;
   }
@@ -1700,10 +1767,11 @@ body {
   cursor: pointer;
 }
 
+/* Inside the well's bottom-right corner, clear of the label row above. */
 .slot__inspect {
   position: absolute;
-  top: 0;
-  right: 0;
+  right: 4px;
+  bottom: 4px;
   z-index: 401;
   padding: 1px 6px;
   border: 1px solid var(--print-faint);
@@ -1815,4 +1883,38 @@ body {
 }
 .open-run input {
   display: none;
+}
+
+/* ------------------------------------------------------------- drop target */
+
+/* A file dragged over the page: dropping it opens a replay. */
+.drop-target {
+  position: fixed;
+  inset: 12px;
+  z-index: 3000;
+  display: grid;
+  place-items: center;
+  border: 3px dashed var(--woah);
+  border-radius: 14px;
+  background: rgba(23, 31, 33, 0.7);
+  pointer-events: none;
+}
+.drop-target span {
+  font: 700 28px/1 var(--display);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--stock);
+}
+
+/* ------------------------------------------------------------ touch targets */
+
+/* A finger needs a target about 44px across; the small buttons get it on a
+ * touch screen, and keep their size under a mouse. */
+@media (pointer: coarse) {
+  .button,
+  .slot__inspect,
+  .debug-toggle {
+    min-height: 44px;
+    min-width: 44px;
+  }
 }

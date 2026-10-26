@@ -459,7 +459,7 @@ export const applyPoolPenalty = (state: GameState, oomph: number, scramble: numb
   },
 });
 
-/** Bio-Hazard Containment Vault: bank a stat gain against this turn's shared pool. */
+/** Bank a stat gain against this turn's shared pool. */
 export const applyPoolBonus = (state: GameState, stat: Stat, amount: number): GameState => ({
   ...state,
   thisTurn: {

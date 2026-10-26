@@ -138,7 +138,7 @@ export interface TurnRecord {
   readonly playDiscount: Readonly<Record<Character, number>>;
   /** System Feedback: banked off the shared pool this turn; a stat never reads below zero. */
   readonly poolPenalty: { readonly oomph: number; readonly scramble: number };
-  /** Bio-Hazard Containment Vault: banked onto the shared pool this turn by Scrapping Good Stuff. */
+  /** Banked onto the shared pool this turn by cards that add a stat. */
   readonly poolBonus: { readonly oomph: number; readonly scramble: number };
   /** It Pays To Be Reckless: cards each character put in their Exhaust pile this turn, from any pile. */
   readonly exhausted: Readonly<Record<Character, number>>;
@@ -347,13 +347,6 @@ export type Command =
       readonly payWith: readonly CardId[];
     }
   | { readonly type: "END_PLAY" }
-  | {
-      /** Bio-Hazard Containment Vault, while active: Scrap a Good Stuff card from hand for +3 to one stat. */
-      readonly type: "SCRAP_FOR_STATS";
-      readonly character: Character;
-      readonly cardId: CardId;
-      readonly stat: Stat;
-    }
   | { readonly type: "CHOOSE_CHARACTER"; readonly character: Character }
   | { readonly type: "CHOOSE_PILE"; readonly pile: Pile }
   | { readonly type: "CHOOSE_STAT"; readonly stat: Stat }
@@ -410,14 +403,6 @@ type DomainEventBody =
       readonly from: DiscardedFrom;
     }
   | { readonly type: "CARD_SCRAPPED"; readonly character: Character | null; readonly card: Card }
-  | {
-      /** Bio-Hazard Containment Vault: one Scrap, one stat, one line — see `narrate.ts`. */
-      readonly type: "CARD_SCRAPPED_FOR_STATS";
-      readonly character: Character;
-      readonly card: Card;
-      readonly stat: Stat;
-      readonly amount: number;
-    }
   | {
       readonly type: "CARD_EXHAUSTED";
       readonly character: Character;
@@ -494,9 +479,7 @@ export type RejectionCode =
   | "CannotPayWithThat"
   | "NotAnOption"
   | "NotOffered"
-  | "FloorDeckEmpty"
-  | "RoomDoesNotAllow"
-  | "NotGoodStuff";
+  | "FloorDeckEmpty";
 
 /** An illegal command is a value, not a throw. */
 export interface Rejection {

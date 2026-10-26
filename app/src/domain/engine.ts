@@ -10,7 +10,6 @@
  */
 
 import { behaviourOf, type BehaviourContext, type ChoiceAnswer } from "./cards/behaviours";
-import { roomAllowsScrapForStats } from "./cards/rooms";
 import {
   costOf,
   costOverrideSpentBy,
@@ -47,7 +46,6 @@ import type {
 } from "./types";
 import { CorruptStateError } from "./types";
 import {
-  applyPoolBonus,
   CHARACTERS,
   clearFreePlays,
   clearPlayDiscount,
@@ -150,26 +148,6 @@ export function validate(state: GameState, command: Command): Rejection | null {
 
     case "END_PLAY": {
       if (state.phase !== "Play") return wrongPhase(state, "end the play phase");
-      return null;
-    }
-
-    case "SCRAP_FOR_STATS": {
-      if (state.phase !== "Play") return wrongPhase(state, "Scrap for stats");
-      const room = state.activeRoom;
-      if (!room || !roomAllowsScrapForStats(room)) {
-        return reject(
-          "RoomDoesNotAllow",
-          `${room ? room.name : "This room"} prints no rule to Scrap for stats.`,
-        );
-      }
-      const c = command.character;
-      const p = playerOf(state, c);
-      if (p.down) return reject("CharacterIsDown", `${c} is Down.`);
-      const card = p.hand.find((x) => x.id === command.cardId);
-      if (!card) return reject("NotInHand", `That card is not in ${c}'s hand.`);
-      if (card.kind !== "good_stuff") {
-        return reject("NotGoodStuff", `${card.name} is not Good Stuff.`);
-      }
       return null;
     }
 
@@ -324,8 +302,6 @@ function apply(state: GameState, command: Command, run: Run): GameState {
       return playCard(state, command.character, command.cardId, command.payWith, run);
     case "END_PLAY":
       return endPlay(state, run);
-    case "SCRAP_FOR_STATS":
-      return scrapForStats(state, command.character, command.cardId, command.stat, run);
     case "CHOOSE_CHARACTER":
       return answerCharacter(state, command.character, run);
     case "CHOOSE_PILE":
@@ -646,27 +622,6 @@ function heavyExhaust(state: GameState, c: Character, card: Card, run: Run): Gam
 function scrapBadStuff(state: GameState, c: Character, card: Card, run: Run): GameState {
   if (card.kind !== "bad_stuff" || state.pending || state.phase === "GameOver") return state;
   return scrapFromHand(state, c, card, run.events);
-}
-
-/**
- * Bio-Hazard Containment Vault: Scrap a Good Stuff card from hand for +3 to
- * one stat in this turn's pool. Not a play — no `CARD_PLAYED` event, so
- * nothing that keys off a play (Fast Follow, Tag Team) hears it.
- */
-function scrapForStats(
-  state: GameState,
-  c: Character,
-  cardId: Card["id"],
-  stat: Stat,
-  run: Run,
-): GameState {
-  const card = playerOf(state, c).hand.find((x) => x.id === cardId);
-  if (!card) throw new CorruptStateError("Scrapped a card that is not in hand.");
-  let s = takeFrom(state, c, "hand", [card]);
-  s = { ...s, scrapyard: [...s.scrapyard, card] };
-  s = applyPoolBonus(s, stat, 3);
-  run.events.push({ type: "CARD_SCRAPPED_FOR_STATS", character: c, card, stat, amount: 3 });
-  return s;
 }
 
 /** Every card that can hear events and has been where it is since before the event at `index`. */

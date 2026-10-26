@@ -391,6 +391,44 @@ describe("Cleanup", () => {
     }
   });
 
+  it("Heavy: each card played, free plays included, Exhausts 1 from the player's own deck", () => {
+    for (const [name, heavy] of [["Gravity...Room", true], ["Security Turnstile", false]] as const) {
+      const state = rig({
+        phase: "Play",
+        activeRoom: room(name),
+        Red: player({ deck: pile("Shove", 5), hand: [card("Pry Bar")] }),
+        Gray: player({ deck: pile("Duck Under", 5), hand: [card("Coil Of Cable")] }),
+      });
+      const { state: next } = play(state, [
+        playFree("Red", ids(state, "Red")[0] as CardId),
+        playFree("Gray", ids(state, "Gray")[0] as CardId),
+      ]);
+      expect(next.Red.deck).toHaveLength(heavy ? 4 : 5);
+      expect(next.Gray.deck).toHaveLength(heavy ? 4 : 5);
+      expect(next.Red.exhaust.map((c) => c.name)).toEqual(heavy ? ["Shove"] : []);
+    }
+  });
+
+  it("Heavy: an empty deck follows the Empty deck rule", () => {
+    const state = rig({
+      phase: "Play",
+      activeRoom: room("Gravity...Room"),
+      Red: player({ deck: [], discard: pile("Shove", 3), hand: [card("Pry Bar")] }),
+      Gray: player({ deck: pile("Duck Under", 5), hand: [] }),
+    });
+    const { state: next } = play(state, [playFree("Red", ids(state, "Red")[0] as CardId)]);
+    expect(next.Red.exhaust.map((c) => c.name)).toEqual(["Shove"]);
+    expect(next.Red.deck).toHaveLength(2);
+    const empty = rig({
+      phase: "Play",
+      activeRoom: room("Gravity...Room"),
+      Red: player({ deck: [], discard: [], hand: [card("Pry Bar")] }),
+      Gray: player({ deck: pile("Duck Under", 5), hand: [] }),
+    });
+    const { state: over } = play(empty, [playFree("Red", ids(empty, "Red")[0] as CardId)]);
+    expect(over.phase).toBe("GameOver");
+  });
+
   it("'the hand carries over untouched'", () => {
     const state = rig({
       phase: "Play",

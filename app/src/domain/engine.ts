@@ -620,10 +620,24 @@ function playCard(
     s = settle(step.state, run);
   }
   s = scrapBadStuff(s, c, card, run);
+  s = heavyExhaust(s, c, card, run);
   return finishPlay(s, run, {
     events: run.events.slice(from, to),
     listeners: presentSince(s, run, from),
   });
+}
+
+/**
+ * Heavy (Whenever you play a card, Exhaust 1 from the top of your deck.): once the card's own
+ * text has resolved, nothing left to ask. Every play counts, free ones and Stuff included.
+ */
+function heavyExhaust(state: GameState, c: Character, card: Card, run: Run): GameState {
+  if (state.pending || state.phase === "GameOver") return state;
+  if (!state.activeRoom?.keywords.includes("Heavy")) return state;
+  const at = run.events.length;
+  const next = printedExhaust(state, c, 1, "Heavy", run);
+  attribute(run, at, card.name);
+  return settle(next, run);
 }
 
 /** Bad Stuff prints "Play: Scrap this card.": it goes once nothing of its Play line is left to ask. */
@@ -1101,6 +1115,7 @@ function runChoice(state: GameState, answer: ChoiceAnswer, run: Run): GameState 
   let s = settle(step.state, run);
   if (play) {
     s = scrapBadStuff(s, ctx.character, ctx.card, run);
+    s = heavyExhaust(s, ctx.character, ctx.card, run);
     const stayed = new Set(presentSince(s, run, 0));
     s = finishPlay(s, run, { ...play, listeners: play.listeners.filter((id) => stayed.has(id)) });
   }

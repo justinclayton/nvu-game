@@ -351,11 +351,19 @@ export function lockedOut(state: GameState, c: Character): boolean {
   return (state.activeRoom?.keywords.includes("Lockstep") ?? false) && state.thisTurn.lastPlayer === c;
 }
 
+/** Cap: the most cards the play zone holds, both sides together. */
+export const CAP_LIMIT = 3;
+
+/** Cap (at most 3 cards in the play zone, both sides together): once it holds that many, no one plays. */
+export function capReached(state: GameState): boolean {
+  return (state.activeRoom?.keywords.includes("Cap") ?? false) && state.playZone.length >= CAP_LIMIT;
+}
+
 /** The cards this character could play right now, cost and all. */
 export function playableCards(state: GameState, c: Character): readonly Card[] {
   if (state.phase !== "Play" || state.pending !== null) return [];
   const p = playerOf(state, c);
-  if (p.down || lockedOut(state, c)) return [];
+  if (p.down || lockedOut(state, c) || capReached(state)) return [];
   return p.hand.filter((card) => payOptions(state, c, card.id).length >= costOf(state, c, card));
 }
 

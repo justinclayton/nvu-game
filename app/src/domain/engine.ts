@@ -11,6 +11,7 @@
 
 import { behaviourOf, type BehaviourContext, type ChoiceAnswer } from "./cards/behaviours";
 import {
+  capReached,
   costOf,
   costOverrideSpentBy,
   drawTargetFor,
@@ -126,6 +127,9 @@ export function validate(state: GameState, command: Command): Rejection | null {
       if (p.down) return reject("CharacterIsDown", `${c} is Down.`);
       if (lockedOut(state, c)) {
         return reject("LockedOut", `Lockstep: ${c} played the last card and waits for their partner.`);
+      }
+      if (capReached(state)) {
+        return reject("CapReached", "Cap: the play zone already holds 3 cards.");
       }
       const card = p.hand.find((x) => x.id === command.cardId);
       if (!card) return reject("NotInHand", `That card is not in ${c}'s hand.`);

@@ -479,6 +479,7 @@ export type RejectionCode =
   | "GameIsOver"
   | "CharacterIsDown"
   | "LockedOut"
+  | "CapReached"
   | "NotInHand"
   | "WrongPayment"
   | "CannotPayWithThat"

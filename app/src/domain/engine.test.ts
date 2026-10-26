@@ -451,6 +451,31 @@ describe("Cleanup", () => {
     expect(playableCards(after, "Red").length).toBeGreaterThan(0);
   });
 
+  it("Cap: with 3 cards in the zone across both sides neither player may play; with 2 either may", () => {
+    const state = rig({
+      phase: "Play",
+      activeRoom: room("Maintenance"),
+      Red: player({ deck: pile("Shove", 5), hand: [card("Shove"), card("Shove"), card("Shove")] }),
+      Gray: player({ deck: pile("Duck Under", 5), hand: [card("Coil Of Cable"), card("Coil Of Cable")] }),
+    });
+    const red = ids(state, "Red");
+    const gray = ids(state, "Gray");
+    const { state: two } = play(state, [playFree("Red", red[0] as CardId), playFree("Red", red[1] as CardId)]);
+    expect(two.playZone).toHaveLength(2);
+    expect(playableCards(two, "Red").length).toBeGreaterThan(0);
+    expect(playableCards(two, "Gray").length).toBeGreaterThan(0);
+    expect(execute(two, playFree("Red", red[2] as CardId)).ok).toBe(true);
+    expect(execute(two, playFree("Gray", gray[0] as CardId)).ok).toBe(true);
+
+    const { state: three } = play(two, [playFree("Gray", gray[0] as CardId)]);
+    expect(three.playZone).toHaveLength(3);
+    expect(playableCards(three, "Red")).toEqual([]);
+    expect(playableCards(three, "Gray")).toEqual([]);
+    expect(execute(three, playFree("Red", red[2] as CardId)).ok).toBe(false);
+    expect(execute(three, playFree("Gray", gray[1] as CardId)).ok).toBe(false);
+    expect(execute(three, { type: "END_PLAY" }).ok).toBe(true);
+  });
+
   it("Corrosive: cards paid for a play are Scrapped, not Exhausted; other rooms are unchanged", () => {
     for (const [name, corrosive] of [["Bubbly Slime Monster", true], ["Security Turnstile", false]] as const) {
       const state = rig({

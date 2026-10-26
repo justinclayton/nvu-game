@@ -31,7 +31,7 @@
 #   flee    string               room and stairwell only: the printed Flee line
 
 meta:
-  version: C58
+  version: C59
   updated: 2026-10-03
 
 cards:
@@ -1185,17 +1185,42 @@ cards:
 
   ## Floor 10 (the roof)
 
-  - name: The Monolith Core
+  - name: The Supreme Commander
     set: proposed
     kind: stairwell
     tier: null
-    flavor: The central nexus at the apex of Pyramid Tower. It radiates crackling energy.
+    flavor: "The central nexus at the apex of Pyramid Tower. It radiates crackling energy."
+    text: "Relentless."
     challenges:
       - thresholds:
-          - stats: { Oomph: 10, Scramble: 10 }
-            outcome: You Win!
+          - stats: { Oomph: 30, Scramble: 30 }
+            outcome: "You Win!"
+    flee: "Both players Exhaust 5."
+
+  - name: Sexy Blob
+    set: proposed
+    kind: stairwell
+    tier: 4
+    text: "Ambush. Relentless."
+    challenges:
       - thresholds:
           - stat: Oomph
-            value: 22
-            outcome: You Win!
-    flee: Both players Exhaust 5.
+            value: 20
+            outcome: "Both players get Good Stuff. Both players get Good Stuff. Ascend."
+      - thresholds:
+          - stat: Scramble
+            value: 20
+            outcome: "Both players reveal a card reward. Both players reveal a card reward. Ascend."
+    flee: "Both players Exhaust 2, and both players get Bad Stuff."
+
+  - name: Comrade Black
+    set: proposed
+    kind: stairwell
+    tier: 5
+    flavor: "I'm not the traitor, you're the traitor"
+    text: "Heavy (Whenever you play a card, Exhaust 1 from the top of your deck.)"
+    challenges:
+      - thresholds:
+          - stats: { Oomph: 25, Scramble: 16 }
+            outcome: "Both players reveal a card reward. Both players may Scrap a card from their hand or discard pile. Ascend."
+    flee: "Both players Exhaust 1, and both players get Bad Stuff."

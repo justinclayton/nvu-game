@@ -11,10 +11,10 @@
  * and no server.
  */
 var NVU_CARDS = {
-  meta: {"version":"C58","updated":"2026-10-03"},
+  meta: {"version":"C59","updated":"2026-10-03"},
   rulesVersion: "R34",
-  cardsVersion: "C58",
-  cardListId: "c431a9b6b06c",
+  cardsVersion: "C59",
+  cardListId: "66134cff3ca2",
   cards: [
     {"name":"Shove","set":"official","kind":"player","owner":"Red","starter":true,"cost":1,"oomph":2,"flavor":"'Oomph!', he shouted.","count":4},
     {"name":"Charge","set":"official","kind":"player","owner":"Red","starter":true,"cost":2,"oomph":4,"flavor":"I am bolder, so I lower my shoulder.","count":4},
@@ -111,7 +111,9 @@ var NVU_CARDS = {
     {"name":"Double Dark Hallway of Death","set":"proposed","kind":"room","tier":5,"flavor":"The amount of death scales linearly with the amount of hallway.","challenges":[{"thresholds":[{"stat":"Oomph","value":20,"outcome":"Both players get Good Stuff."}]},{"thresholds":[{"stat":"Scramble","value":20,"outcome":"Both players reveal a card reward."}]}],"flee":"Both players Exhaust 2.","text":"Lockstep Dim"},
     {"name":"The Authorities","set":"proposed","kind":"room","tier":5,"flavor":"If you haven't learned to work together by now, the only other choice is to throw the other one under the bus.","challenges":[{"thresholds":[{"stat":"Oomph","value":15,"outcome":"Red reveals a card reward. Gray gets Bad Stuff."},{"stat":"Scramble","value":15,"outcome":"Gray reveals a card reward. Red gets Bad Stuff"}]},{"thresholds":[{"stats":{"Oomph":15,"Scramble":15},"outcome":"Both players get 2 Good Stuff"}]}],"flee":"Both players Exhaust 2.","text":"Relentless (If you Flee, this room goes on top of the Floor deck)"},
     {"name":"The Iron Sentinel","set":"proposed","kind":"stairwell","tier":3,"flavor":"The massive titan guarding the doorway to the upper tower.","challenges":[{"thresholds":[{"stats":{"Oomph":10,"Scramble":10},"outcome":"Ascend, and both players reveal a card reward."}]},{"thresholds":[{"stat":"Oomph","value":18,"outcome":"Ascend; both players reveal a card reward, but both players Exhaust 3."}]}],"flee":"Both players Exhaust 4, and both players get Bad Stuff.","count":3},
-    {"name":"The Monolith Core","set":"proposed","kind":"stairwell","tier":null,"flavor":"The central nexus at the apex of Pyramid Tower. It radiates crackling energy.","challenges":[{"thresholds":[{"stats":{"Oomph":10,"Scramble":10},"outcome":"You Win!"}]},{"thresholds":[{"stat":"Oomph","value":22,"outcome":"You Win!"}]}],"flee":"Both players Exhaust 5."}
+    {"name":"The Supreme Commander","set":"proposed","kind":"stairwell","tier":null,"flavor":"The central nexus at the apex of Pyramid Tower. It radiates crackling energy.","challenges":[{"thresholds":[{"stats":{"Oomph":30,"Scramble":30},"outcome":"You Win!"}]}],"flee":"Both players Exhaust 5.","text":"Relentless."},
+    {"name":"Sexy Blob","set":"proposed","kind":"stairwell","tier":4,"challenges":[{"thresholds":[{"stat":"Oomph","value":20,"outcome":"Both players get Good Stuff. Both players get Good Stuff. Ascend."}]},{"thresholds":[{"stat":"Scramble","value":20,"outcome":"Both players reveal a card reward. Both players reveal a card reward. Ascend."}]}],"flee":"Both players Exhaust 2, and both players get Bad Stuff.","text":"Ambush. Relentless."},
+    {"name":"Comrade Black","set":"proposed","kind":"stairwell","tier":5,"flavor":"I'm not the traitor, you're the traitor","challenges":[{"thresholds":[{"stats":{"Oomph":25,"Scramble":16},"outcome":"Both players reveal a card reward. Both players may Scrap a card from their hand or discard pile. Ascend."}]}],"flee":"Both players Exhaust 1, and both players get Bad Stuff.","text":"Heavy (Whenever you play a card, Exhaust 1 from the top of your deck.)"}
   ]
 };
 

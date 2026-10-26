@@ -435,8 +435,18 @@ jobs:
               < "$RUNNER_TEMP/build-prompt-$slug.md" \
               > "$RUNNER_TEMP/build-transcript-$slug.jsonl"
             result=$(jq -r 'select(.type == "result") | select(.subtype == "success" and (.is_error | not)) | .result' "$RUNNER_TEMP/build-transcript-$slug.jsonl")
+            # The card modules are the generator's output, not the coder's: an item
+            # that teaches tools/cards.mjs a clause changes them, and `make check`
+            # rebuilds them. Rebuild them here from the sources, as the pre-commit
+            # hook would, so the commit carries exactly what the generator writes.
+            if ! node tools/cards.mjs build > "$RUNNER_TEMP/generate-$slug.log" 2>&1; then
+              echo "The generator failed:"; cat "$RUNNER_TEMP/generate-$slug.log"
+              git checkout -- . && git clean -fdq
+              printf -- '- `%s` failed: `node tools/cards.mjs build` failed: %s\n' "$slug" "$(grep -m1 'Error' "$RUNNER_TEMP/generate-$slug.log" || tail -1 "$RUNNER_TEMP/generate-$slug.log")" >> "$summary"
+              failed=$((failed + 1)); continue
+            fi
             bad=$(git status --porcelain | awk '{print $NF}' \
-              | grep -E '^(rulebook\.md|cards\.yaml|tools/cards\.js|app/src/content/cards\.generated\.ts|\.github/|\.githooks/)' || true)
+              | grep -E '^(rulebook\.md|cards\.yaml|\.github/|\.githooks/)' || true)
             if [ -n "$bad" ]; then
               echo "The coder changed files that are not its to change:"; echo "$bad"
               git checkout -- . && git clean -fdq

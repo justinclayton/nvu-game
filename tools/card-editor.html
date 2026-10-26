@@ -44,6 +44,8 @@
   .section-head { display: flex; align-items: baseline; gap: 12px; margin: 10px 0 10px; }
   .section-head h2 { margin: 0; font-size: 14px; color: var(--muted); text-transform: uppercase; letter-spacing: .08em; font-weight: 600; }
   .section-head .count { font-size: 12px; color: var(--muted); }
+  .tally { display: flex; flex-wrap: wrap; gap: 6px; margin: -4px 0 10px; }
+  .tally span { font-size: 11.5px; color: #ffe9b0; background: #3a3220; border: 1px solid #6b5a2b; border-radius: 999px; padding: 2px 9px; }
   .grid { display: grid; grid-template-columns: repeat(auto-fill, calc(63 * var(--mm) + 2px)); gap: 18px 16px; align-items: start; margin-bottom: 28px; }
   .grid > * { min-width: 0; }
   .slot { position: relative; }
@@ -175,7 +177,7 @@
 
 <main>
   <p class="howto">Every field on a card is live: click it and type. <b>Tab</b> moves through a card. Add a card with the dashed tile at the end of a section; remove, duplicate or revert from the row under each card.
-  A gold ring is an edited card, green is new, red has a problem the card generator would reject (the message under the card says what); a yellow note is a line the engine can't read yet, which the PR plans as code. Your draft is kept in this browser until you send it or discard it.
+  A gold ring is an edited card, green is new, red has a problem the card generator would reject (the message under the card says what); a yellow note is a line the engine can't read yet, which the PR plans as code. Each floor's heading tallies its set against #387: 6 rooms, one plain and five with different verbs, and 2 stairwells, one of them Ambush; the Roof is one Stairwell (R34). Your draft is kept in this browser until you send it or discard it.
   When you are done, open <b>changes</b> in the top bar. In Lavish, <b>Queue for agent</b> then <b>Send to Agent</b> and the agent writes the batch into <code>cards.yaml</code>. On your own, <b>Download changes.json</b> and run <code>node tools/card-editor.mjs apply changes.json</code>.</p>
   <div id="content"></div>
 </main>
@@ -241,6 +243,30 @@ const TABS = [
   { id: "stairwells", label: "Stairwells", pick: (c) => c.kind === "stairwell", grouped: true, blank: (tier) => ({ name: "", set: "proposed", kind: "stairwell", tier: tier, flavor: "", challenges: [{ thresholds: [{ stat: "Oomph", value: 8, outcome: "Ascend, and both players reveal a card reward." }] }], flee: "Both players Exhaust 1, and both players get Bad Stuff." }) },
 ];
 const TIER_LABEL = { 1: "Floor 1", 2: "Floor 2", 3: "Floor 3", 4: "Floor 4", 5: "Floor 5", null: "Roof" };
+/* What a floor's set should hold: #387's ruling for floors 1 to 5 (one plain room, five
+   verb rooms each with a different verb, an Ambush stairwell and a deferrable one);
+   rulebook R34 for the Roof (one Stairwell, nothing else). */
+const FLOOR_TARGET = (tier) => (tier === null ? { rooms: 0, stairwells: 1 } : { rooms: 6, stairwells: 2 });
+const keywordsOf = (c) => String(c.text || "").split("(")[0].trim().split(/\s+/).filter(Boolean);
+function floorTally(tier) {
+  const live = entries.filter((e) => !e.removed && isRoom(e.card) && e.card.tier === tier);
+  const rooms = live.filter((e) => e.card.kind === "room");
+  const stairs = live.filter((e) => e.card.kind === "stairwell");
+  const t = FLOOR_TARGET(tier);
+  const notes = [];
+  if (stairs.length < t.stairwells) notes.push(`needs ${t.stairwells - stairs.length} more stairwell${t.stairwells - stairs.length === 1 ? "" : "s"}`);
+  if (stairs.length > t.stairwells) notes.push(`${stairs.length} stairwells, ${t.stairwells} expected`);
+  if (rooms.length !== t.rooms) notes.push(`${rooms.length} rooms, ${t.rooms} expected`);
+  const seen = new Map();
+  for (const e of rooms) for (const v of keywordsOf(e.card)) seen.set(v, (seen.get(v) || 0) + 1);
+  for (const [v, n] of seen) if (n > 1) notes.push(`${v} on ${n} rooms; once a floor`);
+  if (tier !== null) {
+    const plain = rooms.filter((e) => keywordsOf(e.card).length === 0).length;
+    if (plain !== 1) notes.push(`${plain} plain room${plain === 1 ? "" : "s"}; 1 expected`);
+    if (stairs.length && !stairs.some((e) => keywordsOf(e.card).includes("Ambush"))) notes.push("no Ambush stairwell");
+  }
+  return { rooms: rooms.length, stairs: stairs.length, verbs: [...seen.keys()], notes };
+}
 const TIER_OPTIONS = [1, 2, 3, 4, 5, null];
 
 /* ------------------------------------------------------------ validation (mirrors tools/cards.mjs) */
@@ -447,7 +473,9 @@ function render() {
   if (tab.grouped) {
     content.innerHTML = TIER_OPTIONS.map((tier) => {
       const inTier = list.filter((e) => e.card.tier === tier);
-      return `<div class="section-head"><h2>${TIER_LABEL[tier]}</h2><span class="count">${inTier.filter((e) => !e.removed).length} ${tab.label.toLowerCase()}</span></div>
+      const tally = floorTally(tier);
+      return `<div class="section-head"><h2>${TIER_LABEL[tier]}</h2><span class="count">${tally.rooms} room${tally.rooms === 1 ? "" : "s"} · ${tally.stairs} stairwell${tally.stairs === 1 ? "" : "s"}${tally.verbs.length ? " · " + tally.verbs.join(", ") : ""}</span></div>
+        ${tally.notes.length ? `<div class="tally">${tally.notes.map((n) => `<span>${esc(n)}</span>`).join("")}</div>` : ""}
         <div class="grid">${inTier.map((e) => slotHTML(e, names)).join("")}
         <button class="add-tile" data-add="${tab.id}" data-tier="${tier === null ? "null" : tier}" type="button">+ ${tab.label.replace(/s$/, "").toLowerCase()} on ${TIER_LABEL[tier]}</button></div>`;
     }).join("");

@@ -1095,8 +1095,9 @@ function cleanupPiles(state: GameState, run: Run): GameState {
     if (s.phase === "GameOver") return s;
   }
 
-  // Then the play zone itself. Draining: Exhausted, not discarded.
-  const draining = s.activeRoom?.keywords.includes("Draining") ?? false;
+  // Then the play zone itself. Draining: Exhausted, not discarded. The room
+  // is read from the resolution: endPlay has already taken it off the table.
+  const draining = s.resolution?.room.keywords.includes("Draining") ?? false;
   for (const c of CHARACTERS) {
     const played = s.playZone.filter((x) => x.owner === c).map((x) => x.card);
     for (const card of played) {

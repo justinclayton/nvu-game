@@ -21,6 +21,9 @@ export const TOP_FLOOR = 6;
 /** Draw up to this many, each turn (Each Turn, Turn Start: Draw up to five). A card may tighten it. */
 export const HAND_CAP = 5;
 
+/** The draw target under a Dim Active Room ("Dim (only draw up to 4 cards)"). */
+export const DIM_HAND_CAP = 4;
+
 /** What the players call a floor: "Floor 3", and "The Roof" for the sixth. */
 export const floorName = (floor: number): string =>
   floor >= TOP_FLOOR ? "The Roof" : `Floor ${String(floor)}`;

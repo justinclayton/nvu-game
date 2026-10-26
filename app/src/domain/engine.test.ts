@@ -113,6 +113,46 @@ describe("Turn Start", () => {
     expect(next.Red.hand).toHaveLength(5);
     expect(next.Red.deck).toHaveLength(2);
   });
+
+  it("Dim: 'only draw up to 4 cards' — each player draws until they hold 4", () => {
+    const state = rig({
+      phase: "Turn Start",
+      floorDeck: [room("Dark Room")],
+      Red: player({ deck: pile("Shove", 5) }),
+      Gray: player({ deck: pile("Duck Under", 5) }),
+    });
+    const { state: next } = must(state, { type: "FLIP_ROOM" });
+    expect(next.Red.hand).toHaveLength(4);
+    expect(next.Gray.hand).toHaveLength(4);
+    expect(next.Red.deck).toHaveLength(1);
+  });
+
+  it("Dim: a card that tightens the cap further still applies", () => {
+    const state = rig({
+      phase: "Turn Start",
+      floorDeck: [room("Dark Room")],
+      Red: player({ deck: pile("Shove", 5), hand: [card("Faceful Of Slime")] }),
+      Gray: player({ deck: pile("Duck Under", 5) }),
+    });
+    const { state: next } = must(state, { type: "FLIP_ROOM" });
+    // Target 4 - 1 = 3, and the held Faceful Of Slime counts toward it.
+    expect(next.Red.hand).toHaveLength(3);
+    expect(next.Gray.hand).toHaveLength(4);
+  });
+
+  it("Dim: a player already holding 4 or more draws nothing", () => {
+    const state = rig({
+      phase: "Turn Start",
+      floorDeck: [room("Dark Room")],
+      Red: player({ deck: pile("Shove", 5), hand: pile("Charge", 4) }),
+      Gray: player({ deck: pile("Duck Under", 5), hand: pile("Charge", 5) }),
+    });
+    const { state: next } = must(state, { type: "FLIP_ROOM" });
+    expect(next.Red.hand).toHaveLength(4);
+    expect(next.Red.deck).toHaveLength(5);
+    expect(next.Gray.hand).toHaveLength(5);
+    expect(next.Gray.deck).toHaveLength(5);
+  });
 });
 
 describe("Play", () => {

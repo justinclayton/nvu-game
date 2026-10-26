@@ -11,9 +11,10 @@ import { createSession, loadSession, type Session } from "./session";
 const content = CARD_CONTENT;
 // A seed the naive "always take what's affordable" driver below plays to a
 // Defeat well inside tier 1 (#122/#123/#125: floor 4 and up has no content
-// yet, so a run that ascends that far finds an empty floor deck). Band 1's
-// pool is also short of floor 1's own count (setup.test.ts), so this run
-// now ends Aborted at floor 1 before a single command runs.
+// yet, so a run that ascends that far finds an empty floor deck). C58 tier 1's
+// pool (6 Rooms, 3 Sentry Drones: 9 cards) is also short of floor 1's 10 cards
+// (setup.test.ts), so this run now ends Aborted at floor 1 before a single
+// command runs.
 const SEED = 20260918;
 // Same driver, a padded tier 1, and a seed proven (by simulate/randomPolicy) to
 // clear several turns before a Defeat — used only where a test needs more than
@@ -139,7 +140,7 @@ describe("the transcript (.txt)", () => {
 
 describe("one row per turn (.csv)", () => {
   it("counts what the events say, and files each note under the turn it was typed in", () => {
-    // Band 1's pool is short of floor 1's own count (setup.test.ts), so this
+    // C58 tier 1's pool (9 cards) is short of floor 1's 10 (setup.test.ts), so this
     // one plays out on a padded tier 1 — it is the only test here that needs
     // more than the one Aborted row to exercise turnRows across many turns.
     const session = playedAndNoted(FULL_SEED, FULL_CONTENT);

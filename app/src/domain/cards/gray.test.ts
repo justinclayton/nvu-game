@@ -187,7 +187,7 @@ describe("Hack the Doors — 'Peek 3'", () => {
 
   it("choosing the Floor deck peeks rooms and reorders it", () => {
     const first = room("Security Turnstile");
-    const second = room("Flooded Ventilation Shaft");
+    const second = room("Puzzle Room");
     const third = room("The Sentry Drone");
     const state = playing({
       Gray: player({ deck: pile("Duck Under", 4), hand: [card("Hack the Doors"), card("Duck Under")] }),

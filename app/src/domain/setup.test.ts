@@ -18,9 +18,9 @@ describe("Setting up a floor", () => {
     expect(state.Gray.deck).toHaveLength(12);
   });
 
-  // Band 1's pool covers every floor 1-3 calls for (10, 9, 8), with every
-  // room cleared — the worst case, since a cleared room never
-  // returns to the pool.
+  // C58 tier 1's pool (6 Rooms, 3 Sentry Drones: 9 cards) is short of floor 1's
+  // 10 cards; it covers floors 2 and 3 (9, 8), with every room cleared — the
+  // worst case, since a cleared room never returns to the pool.
   it("builds a full floor deck for every floor in tier 1 (floors 1-3)", () => {
     const [initial] = createInitialState(1, content);
     const fullSupply = returnRoomsToSupply(initial);
@@ -57,7 +57,7 @@ describe("Setting up a floor", () => {
     }
   });
 
-  // Band 2's pool (18 cards) covers every floor 4-6 calls for (7, 6, 5).
+  // C58 tier 2's pool (6 Rooms, 3 Gears & Glitch: 9 cards) covers every floor 4-6 calls for (7, 6, 5).
   it("builds a full floor deck for every floor in tier 2 (floors 4-6)", () => {
     const [initial] = createInitialState(1, content);
     const fullSupply = returnRoomsToSupply(initial);
@@ -69,7 +69,7 @@ describe("Setting up a floor", () => {
     }
   });
 
-  // Band 3's pool (9 cards) covers every floor 7-9 calls for (4, 3, 2).
+  // C58 tier 3's pool (6 Rooms, 3 Iron Sentinels: 9 cards) covers every floor 7-9 calls for (4, 3, 2).
   it("builds a full floor deck for every floor in tier 3 (floors 7-9)", () => {
     const [initial] = createInitialState(1, content);
     const fullSupply = returnRoomsToSupply(initial);
@@ -91,7 +91,7 @@ describe("Setting up a floor", () => {
     expect(state.floorDeck[0]?.tier).toBeNull();
   });
 
-  // Band 2's pool (18) has more cards than floor 4 needs (7), so which rooms
+  // C58 tier 2's pool (9) has more cards than floor 4 needs (7), so which rooms
   // sit out varies with the seed.
   it("floor 4's room composition varies with the seed", () => {
     const [initial] = createInitialState(1, content);
@@ -166,7 +166,7 @@ describe("Ending a floor (Ascending, Build the next floor)", () => {
 
   it("does not reset the cleared pile when building the next floor", () => {
     const [initial] = createInitialState(1, content);
-    const clearedRoom = room("Flooded Ventilation Shaft");
+    const clearedRoom = room("Puzzle Room");
     const fullSupply = returnRoomsToSupply({ ...initial, cleared: [] });
     const state = { ...fullSupply, floor: 2, cleared: [clearedRoom] };
 

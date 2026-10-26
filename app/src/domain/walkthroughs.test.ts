@@ -63,7 +63,7 @@ describe("walkthrough 1 — the deck runs dry mid-draw and the discard pile beco
 describe("walkthrough 2 — Down when the deck and discard are both empty ends the run on the spot", () => {
   it("stops a room's own punishment from finishing, and everything after it", () => {
     const state = goingDown([card("Shove")]);
-    // Smoldering Armory's Flee line: "Both players Exhaust 3." Nobody played
+    // Ticking Time Bomb's Flee line: "Both players Exhaust 3." Nobody played
     // anything, so no threshold is met and the room Flees.
     const { state: next, events } = play(state, [{ type: "END_PLAY" }]);
     expect(next.phase).toBe("GameOver");
@@ -139,13 +139,13 @@ describe("walkthrough 5 — Cleanup runs before Ascending", () => {
 
 describe("walkthrough 6 — a Room's Challenge reads the shared pool, not either character's side", () => {
   it("pays both lines even with the stats swapped between characters", () => {
-    // Pressurized Maintenance Hub asks for Oomph (pays Red) and Scramble
+    // Maintenance asks for Oomph (pays Red) and Scramble
     // (pays Gray) in two independent challenges. Red brings Scramble and
     // Gray brings Oomph — the shared pool has both, so both lines are met
     // and both characters are paid, regardless of whose cards supplied it.
     const state = rig({
       phase: "Play",
-      activeRoom: room("Pressurized Maintenance Hub"),
+      activeRoom: room("Maintenance"),
       Red: player({ deck: pile("Shove", 5), hand: pile("Coil Of Cable", 3) }),
       Gray: player({ deck: pile("Duck Under", 5), hand: pile("Pry Bar", 3) }),
     });
@@ -185,11 +185,11 @@ describe("walkthrough 7 — one Down ends the run immediately, mid multi-effect 
   it("stops a Flee line's own later effect from ever running", () => {
     const state = rig({
       phase: "Play",
-      activeRoom: room("Overgrown Hydroponics Bay"),
+      activeRoom: room("Automated Defense Turret"),
       Red: player({ deck: [], discard: [], hand: [] }),
       Gray: player({ deck: pile("Duck Under", 4), hand: [] }),
     });
-    // "Both players Exhaust 1, and one of you gets Bad Stuff." Nobody played
+    // "Both players Exhaust 2, and both players get Bad Stuff." Nobody played
     // anything, so the room Flees; Red's own Exhaust is first in the queue,
     // and Red has nothing left to lose it from.
     const { state: next, events } = must(state, { type: "END_PLAY" });
@@ -211,8 +211,8 @@ describe("walkthrough 8 — ascending end to end: the printed reward, then shuff
       activeRoom: room("The Sentry Drone"),
       roomSupply: [
         room("The Sentry Drone"),
-        room("Flooded Ventilation Shaft"),
-        room("Flooded Ventilation Shaft"),
+        room("Puzzle Room"),
+        room("Puzzle Room"),
         room("Overgrown Hydroponics Bay"),
         ...Array.from({ length: 8 }, () => room("Security Turnstile")),
       ],

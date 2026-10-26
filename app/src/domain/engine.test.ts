@@ -52,7 +52,7 @@ describe("Turn Start", () => {
     const first = room("Security Turnstile");
     const state = rig({
       phase: "Turn Start",
-      floorDeck: [first, room("Flooded Ventilation Shaft")],
+      floorDeck: [first, room("Puzzle Room")],
       Red: player({ deck: pile("Shove", 5) }),
       Gray: player({ deck: pile("Duck Under", 5) }),
     });
@@ -303,7 +303,7 @@ describe("Cleanup", () => {
   });
 
   it("Outcome: 'shuffle the room card back into the Floor deck' — the same turn it Flees", () => {
-    const rest = room("Flooded Ventilation Shaft");
+    const rest = room("Puzzle Room");
     const state = rig({
       seed: 4242,
       phase: "Play",
@@ -447,12 +447,23 @@ describe("Room kinds: Room and Stairwell", () => {
   });
 
   it("'one of you reveals a card reward' asks who, then offers it — taken or skipped", () => {
-    // Bio-Hazard Containment Vault's Oomph-15 challenge is its own "one of
-    // you reveals a card reward": two Charges (Oomph 4 each) plus three
-    // free Pry Bars (Oomph 3 each) clears it.
+    // Scrap Pile's Oomph-15 challenge, reworded to "one of you reveals a card
+    // reward" (no printed room says it): two Charges (Oomph 4 each) plus
+    // three free Pry Bars (Oomph 3 each) clears it.
+    const printed = room("Scrap Pile");
+    const oneReveals: Room = {
+      ...printed,
+      challenges: printed.challenges.map((challenge) => ({
+        thresholds: challenge.thresholds.map((t) => ({
+          ...t,
+          outcome: "One of you reveals a card reward.",
+          effects: [{ type: "RevealReward", who: "one" } as const],
+        })),
+      })),
+    };
     const state = rig({
       phase: "Play",
-      activeRoom: room("Bio-Hazard Containment Vault"),
+      activeRoom: oneReveals,
       Red: player({
         deck: pile("Shove", 4),
         hand: [
@@ -517,14 +528,14 @@ describe("Room kinds: Room and Stairwell", () => {
     ]);
   });
 
-  it("each challenge on a card resolves on its own, and meeting both fires both — Pressurized Maintenance Hub", () => {
-    // Pressurized Maintenance Hub's Oomph and Scramble challenges are
+  it("each challenge on a card resolves on its own, and meeting both fires both — Maintenance", () => {
+    // Maintenance's Oomph and Scramble challenges are
     // independent, each its own named reveal: Oomph 7 (Charge, cost 2,
     // plus a free Pry Bar) pays Red; Scramble 7 (Pick The Lock, cost 2, plus
     // a free Coil Of Cable) pays Gray.
     const state = rig({
       phase: "Play",
-      activeRoom: room("Pressurized Maintenance Hub"),
+      activeRoom: room("Maintenance"),
       Red: player({
         deck: pile("Shove", 5),
         hand: [card("Charge"), card("Shove"), card("Shove"), card("Pry Bar")],
@@ -581,11 +592,11 @@ describe("Room kinds: Room and Stairwell", () => {
   });
 
   it("a dual threshold is met only when the pool meets both stats", () => {
-    // Flooded Ventilation Shaft's line needs Oomph 3 and Scramble 3
-    // together. Scramble alone, even well past 3, does not meet it.
+    // Puzzle Room's first line needs Oomph 3 and Scramble 5
+    // together. Scramble alone, even well past 5, does not meet it.
     const state = rig({
       phase: "Play",
-      activeRoom: room("Flooded Ventilation Shaft"),
+      activeRoom: room("Puzzle Room"),
       Red: player({ deck: pile("Shove", 5), hand: [...pile("Coil Of Cable", 2), card("Pry Bar")] }),
       Gray: player({ deck: pile("Duck Under", 5) }),
     });
@@ -722,10 +733,19 @@ describe("Room kinds: Room and Stairwell", () => {
     expect(next.Gray.hand).toHaveLength(0);
   });
 
-  it("DealBadStuff honors a printed count — Bio-Hazard Containment Vault's Flee deals 2 each", () => {
+  it("DealBadStuff honors a printed count — a Flee that deals 2 each", () => {
+    // No printed room deals more than 1 Bad Stuff, so Scrap Pile's Flee line is
+    // rewritten to "Both players get 2 Bad Stuff."
+    const printed = room("Scrap Pile");
     const state = rig({
       phase: "Play",
-      activeRoom: room("Bio-Hazard Containment Vault"),
+      activeRoom: {
+        ...printed,
+        flee: {
+          ...printed.flee,
+          effects: [{ type: "DealBadStuff", who: "both", count: 2 } as const],
+        },
+      },
       Red: player({ deck: pile("Shove", 5) }),
       Gray: player({ deck: pile("Duck Under", 5) }),
     });
@@ -994,17 +1014,22 @@ describe("Rules 0.2.5: Good Stuff and card rewards come as a spread of 3", () =>
   ];
   const idsOf = (cards: readonly { readonly id: CardId }[]) => cards.map((c) => c.id);
 
-  /** A Flooded Ventilation Shaft whose Oomph 3 and Scramble 3 line reads "Both players get Good Stuff." */
+  /** A Puzzle Room whose Oomph 3 and Scramble 5 line reads "Both players get Good Stuff." */
   function bothEarn(pool: ReturnType<typeof goodStuff>) {
     const state = rig({
       phase: "Play",
       activeRoom: goodStuffShaft(),
-      Red: player({ deck: pile("Shove", 5), hand: [card("Pry Bar"), card("Coil Of Cable")] }),
+      Red: player({ deck: pile("Shove", 5), hand: [card("Pry Bar"), ...pile("Coil Of Cable", 2)] }),
       Gray: player({ deck: pile("Duck Under", 5) }),
       pools: { Red: [], Gray: [], goodStuff: pool, badStuff: [] },
     });
     const r = ids(state, "Red");
-    return play(state, [playFree("Red", r[0] as CardId), playFree("Red", r[1] as CardId), { type: "END_PLAY" }]);
+    return play(state, [
+      playFree("Red", r[0] as CardId),
+      playFree("Red", r[1] as CardId),
+      playFree("Red", r[2] as CardId),
+      { type: "END_PLAY" },
+    ]);
   }
 
   it("reveals both spreads before either player chooses, then hands both picks over together", () => {
@@ -1112,7 +1137,7 @@ describe("Rules 0.2.5: Good Stuff and card rewards come as a spread of 3", () =>
     const rewards = [card("Fast Follow"), card("Tag Team"), card("Bull Rush"), card("Second Wind"), card("Reckless Swing")];
     const state = rig({
       phase: "Play",
-      activeRoom: room("Pressurized Maintenance Hub"),
+      activeRoom: room("Maintenance"),
       Red: player({ deck: pile("Shove", 5), hand: [card("Charge"), card("Shove"), card("Shove"), card("Pry Bar")] }),
       Gray: player({ deck: pile("Duck Under", 5) }),
       pools: { Red: rewards, Gray: [], goodStuff: [], badStuff: [] },

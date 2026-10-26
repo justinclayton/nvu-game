@@ -54,7 +54,7 @@ export interface Room {
   readonly id: RoomId;
   readonly name: string;
   readonly kind: RoomKind;
-  /** Which floors' pool the card is drawn from; `null` for the one fixed Floor 10 Stairwell. */
+  /** The floor the card serves, 1 to 5; `null` for the Roof. */
   readonly tier: RoomBand;
   readonly flavor: string;
   readonly challenges: readonly Challenge[];

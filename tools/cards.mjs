@@ -19,7 +19,7 @@
  */
 
 import { readFileSync, writeFileSync } from "node:fs";
-import { fileURLToPath } from "node:url";
+import { fileURLToPath, pathToFileURL } from "node:url";
 import { dirname, join } from "node:path";
 import { createContext, runInContext } from "node:vm";
 import { createHash } from "node:crypto";
@@ -250,7 +250,7 @@ function ordered(card) {
    rulebook's "Rules version:" line, C from the "version:" line under meta in
    cards.yaml. The printed sheet stamps "R29.C43" on every card; the engine
    count, v, is git's to know and tools/kit-revision.sh prints the whole thing. */
-function rulesVersion() {
+export function rulesVersion() {
   const m = readFileSync(RULEBOOK, "utf8").match(/^Rules version:\s*(R\d+)\s*$/m);
   if (!m) throw new Error('rulebook.md has no "Rules version: R<n>" line');
   return m[1];
@@ -339,6 +339,16 @@ const CLAUSES = [
   [
     /^(both players|one player|red|gray) exhausts? (\d+)$/i,
     (m) => ({ effect: { type: "ExhaustFromDeck", who: who(m[1]), amount: Number(m[2]) } }),
+  ],
+  [
+    /^the player who played the least (oomph|scramble) this turn exhausts? (\d+)$/i,
+    (m) => ({
+      effect: {
+        type: "ExhaustFromDeck",
+        who: m[1].toLowerCase() === "oomph" ? "leastOomph" : "leastScramble",
+        amount: Number(m[2]),
+      },
+    }),
   ],
   [
     /^(both players|one player|red|gray) (?:gets?|takes?) (?:(\d+) )?bad stuff$/i,
@@ -445,8 +455,8 @@ function challenge(raw, where) {
 function roomFace(c) {
   const challenges = (c.challenges ?? []).map((ch) => challenge(ch, c.name));
   if (challenges.length === 0) throw new Error(`${c.name}: a room prints at least one challenge`);
-  if (c.tier !== 1 && c.tier !== 2 && c.tier !== 3 && c.tier !== null) {
-    throw new Error(`${c.name}: a room needs a tier of 1, 2, 3, or null for the fixed Floor 10 Stairwell`);
+  if (![1, 2, 3, 4, 5, null].includes(c.tier)) {
+    throw new Error(`${c.name}: a room needs a tier of 1 to 5, or null for the fixed roof Stairwell`);
   }
   if (c.tier === null && c.kind !== "stairwell") {
     throw new Error(`${c.name}: only a Stairwell may print tier: null`);
@@ -486,7 +496,7 @@ export function structure(doc) {
 
 /** The first 12 hex of sha256 over the JSON of the structured content — a stable
  * id for exactly this card list, independent of source formatting. */
-function cardListId(content) {
+export function cardListId(content) {
   return createHash("sha256").update(JSON.stringify(content)).digest("hex").slice(0, 12);
 }
 
@@ -610,42 +620,49 @@ function checkRenders(doc, cardsJs) {
 
 /* ---------------------------------------------------------------------- main */
 
-const doc = parseCardsYaml(readFileSync(YAML, "utf8"));
-const cmd = process.argv[2] || "build";
+/* Run as a script, this is the CLI. Imported (tools/card-editor.mjs), it only
+   lends out its parser and structure, and leaves the generated files alone. */
+const isMain = process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href;
 
-if (cmd === "build") {
-  writeFileSync(OUT, generate(doc));
-  writeFileSync(OUT_TS, generateTs(doc));
-  const { cards, rooms } = structure(doc);
-  console.log(
-    `wrote tools/cards.js and app/src/content/cards.generated.ts — ` +
-    `${cards.length} cards and ${rooms.length} rooms`,
-  );
-} else if (cmd === "check") {
-  const problems = [];
-  problems.push(...checkSchema(doc));
-  const want = generate(doc);
-  let have = "";
-  try { have = readFileSync(OUT, "utf8"); } catch { /* missing counts as stale */ }
-  if (have !== want) problems.push("tools/cards.js is stale — run: node tools/cards.mjs build");
+if (isMain) {
+  const doc = parseCardsYaml(readFileSync(YAML, "utf8"));
+  const cmd = process.argv[2] || "build";
 
-  const wantTs = generateTs(doc);
-  let haveTs = "";
-  try { haveTs = readFileSync(OUT_TS, "utf8"); } catch { /* missing counts as stale */ }
-  if (haveTs !== wantTs) {
-    problems.push("app/src/content/cards.generated.ts is stale — run: node tools/cards.mjs build");
+
+  if (cmd === "build") {
+    writeFileSync(OUT, generate(doc));
+    writeFileSync(OUT_TS, generateTs(doc));
+    const { cards, rooms } = structure(doc);
+    console.log(
+      `wrote tools/cards.js and app/src/content/cards.generated.ts — ` +
+      `${cards.length} cards and ${rooms.length} rooms`,
+    );
+  } else if (cmd === "check") {
+    const problems = [];
+    problems.push(...checkSchema(doc));
+    const want = generate(doc);
+    let have = "";
+    try { have = readFileSync(OUT, "utf8"); } catch { /* missing counts as stale */ }
+    if (have !== want) problems.push("tools/cards.js is stale — run: node tools/cards.mjs build");
+
+    const wantTs = generateTs(doc);
+    let haveTs = "";
+    try { haveTs = readFileSync(OUT_TS, "utf8"); } catch { /* missing counts as stale */ }
+    if (haveTs !== wantTs) {
+      problems.push("app/src/content/cards.generated.ts is stale — run: node tools/cards.mjs build");
+    }
+
+    problems.push(...checkRenders(doc, want));
+
+    if (problems.length) {
+      console.error(`card list has drifted — ${problems.length} problem(s):\n`);
+      for (const p of problems) console.error("  " + p);
+      process.exit(1);
+    }
+    console.log(`no drift — ${doc.cards.length} cards agree across cards.yaml and cards.js,
+  and the card sheet prints every copy of all ${doc.cards.length}`);
+  } else {
+    console.error("usage: node tools/cards.mjs [build|check]");
+    process.exit(2);
   }
-
-  problems.push(...checkRenders(doc, want));
-
-  if (problems.length) {
-    console.error(`card list has drifted — ${problems.length} problem(s):\n`);
-    for (const p of problems) console.error("  " + p);
-    process.exit(1);
-  }
-  console.log(`no drift — ${doc.cards.length} cards agree across cards.yaml and cards.js,
-and the card sheet prints every copy of all ${doc.cards.length}`);
-} else {
-  console.error("usage: node tools/cards.mjs [build|check]");
-  process.exit(2);
 }

@@ -1,0 +1,744 @@
+<!doctype html>
+<!-- North vs Up: the card editor. A template: node tools/card-editor.mjs puts the card
+     list and tools/card-yaml.js inside it and writes .lavish/cards-editor.html. -->
+<html lang="en" data-lavish-annotate="off">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>North vs Up — card editor</title>
+<style>
+  :root {
+    --bg: #1b1d22; --panel: #24272e; --panel-2: #2c3038; --line: #3a3f49;
+    --ink: #e9e9ea; --muted: #9aa0ab; --accent: #daa520; --danger: #e5484d; --ok: #3f8f4a; --info: #4a6a9a;
+    /* the printed card's own palette (tools/card-sheet.html) */
+    --fine: #0fa3a8; --cool: #8f6fc4; --woah: #daa520;
+    --red-owner: #b52d24; --gray-owner: #7a7f87;
+    --good-stuff: #3f8f4a; --bad-stuff: #5a3a6e; --floor: #111;
+    --tier-1: #2d6a4f; --tier-2: #1d4e89; --tier-3: #7c2d12; --tier-4: #5b2a86; --tier-5: #b8860b; --tier-10: #b8860b;
+    --oomph: #b52d24; --scramble: #4a6a9a;
+    --mm: 3.6px;
+  }
+  *, *::before, *::after { box-sizing: border-box; }
+  html, body { margin: 0; background: var(--bg); color: var(--ink); font-family: "Helvetica Neue", Helvetica, Arial, sans-serif; }
+  body { min-height: 100vh; }
+  button { font: inherit; cursor: pointer; }
+  .topbar { position: sticky; top: 0; z-index: 20; background: var(--panel); border-bottom: 1px solid var(--line); padding: 10px 16px; display: flex; flex-wrap: wrap; gap: 10px 16px; align-items: center; }
+  .topbar h1 { font-size: 15px; margin: 0; font-weight: 700; letter-spacing: .02em; }
+  .topbar .sub { color: var(--muted); font-size: 12px; }
+  .tabs { display: flex; flex-wrap: wrap; gap: 4px; }
+  .tab { background: transparent; color: var(--muted); border: 1px solid transparent; border-radius: 6px; padding: 5px 10px; font-size: 13px; }
+  .tab:hover { color: var(--ink); background: var(--panel-2); }
+  .tab.active { color: var(--ink); background: var(--panel-2); border-color: var(--line); }
+  .tab .n { color: var(--muted); font-size: 11px; margin-left: 4px; }
+  .spacer { flex: 1; }
+  .chip { display: inline-flex; align-items: center; gap: 6px; border-radius: 999px; padding: 4px 10px; font-size: 12px; background: var(--panel-2); border: 1px solid var(--line); color: var(--ink); }
+  .chip.warn { border-color: var(--danger); color: #ffb3b5; }
+  .chip.changes { border-color: var(--accent); color: var(--accent); }
+  .btn { background: var(--panel-2); color: var(--ink); border: 1px solid var(--line); border-radius: 6px; padding: 6px 12px; font-size: 13px; }
+  .btn:hover { border-color: var(--muted); }
+  .btn.primary { background: var(--accent); color: #1b1d22; border-color: var(--accent); font-weight: 700; }
+  .btn.primary:disabled { opacity: .45; cursor: not-allowed; }
+  .btn.ghost { background: transparent; }
+  .btn.danger { color: #ffb3b5; border-color: #6b2b2e; }
+  main { padding: 16px; }
+  .section-head { display: flex; align-items: baseline; gap: 12px; margin: 10px 0 10px; }
+  .section-head h2 { margin: 0; font-size: 14px; color: var(--muted); text-transform: uppercase; letter-spacing: .08em; font-weight: 600; }
+  .section-head .count { font-size: 12px; color: var(--muted); }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, calc(63 * var(--mm) + 2px)); gap: 18px 16px; align-items: start; margin-bottom: 28px; }
+  .grid > * { min-width: 0; }
+  .slot { position: relative; }
+
+  /* ----- the card face, as printed, every field live ----- */
+  .card {
+    width: calc(63 * var(--mm)); min-height: calc(88 * var(--mm));
+    background: #fff; color: #111;
+    border: 1.4px solid #000; border-radius: calc(3 * var(--mm));
+    padding: calc(3 * var(--mm));
+    display: flex; flex-direction: column; position: relative;
+    font-size: 11.5px; line-height: 1.35;
+  }
+  .slot.removed .card { opacity: .35; filter: grayscale(1); }
+  .slot.added .card { box-shadow: 0 0 0 3px var(--ok); }
+  .slot.edited .card { box-shadow: 0 0 0 3px var(--accent); }
+  .slot.invalid .card { box-shadow: 0 0 0 3px var(--danger); }
+  .type-bar { height: calc(2 * var(--mm)); border-radius: var(--mm); margin: calc(-1 * var(--mm)) calc(-1 * var(--mm)) calc(2 * var(--mm)); background: var(--floor); }
+  .owner-Red .type-bar { background: var(--red-owner); }
+  .owner-Gray .type-bar { background: var(--gray-owner); }
+  .kind-good_stuff .type-bar { background: var(--good-stuff); }
+  .kind-bad_stuff .type-bar { background: var(--bad-stuff); }
+  .tier-1 .type-bar { background: var(--tier-1); }
+  .tier-2 .type-bar { background: var(--tier-2); }
+  .tier-3 .type-bar { background: var(--tier-3); }
+  .tier-4 .type-bar { background: var(--tier-4); }
+  .tier-5 .type-bar, .tier-null .type-bar { background: var(--tier-5); }
+  .top { display: flex; justify-content: space-between; align-items: flex-start; gap: 6px; }
+  .top > div:first-child { flex: 1; min-width: 0; }
+  .name { font-size: 14px; font-weight: 700; line-height: 1.15; }
+  .cost { flex: 0 0 auto; font-size: 15px; font-weight: 700; border: 1.4px solid #222; border-radius: 50%; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; }
+  .cost input { width: 100%; height: 100%; border: 0; background: transparent; text-align: center; font: inherit; font-weight: 700; border-radius: 50%; padding: 0; }
+  .typeline { font-size: 9.5px; text-transform: uppercase; letter-spacing: .06em; color: #333; margin-top: 3px; font-weight: 600; display: flex; flex-wrap: wrap; gap: 3px 6px; align-items: center; }
+  .stats { display: flex; gap: 6px; margin: 8px 0 6px; }
+  .stats .s { flex: 1; border: 1.8px solid; border-radius: 5px; padding: 3px 0 3px; text-align: center; }
+  .stats .s.oomph { border-color: var(--oomph); color: var(--oomph); }
+  .stats .s.scramble { border-color: var(--scramble); color: var(--scramble); }
+  .stats .s .n { font-size: 24px; font-weight: 800; line-height: 1; }
+  .stats .s .n input { width: 100%; border: 0; background: transparent; text-align: center; font: inherit; font-weight: 800; color: inherit; padding: 0; }
+  .stats .s .l { font-size: 7.5px; letter-spacing: .12em; text-transform: uppercase; margin-top: 2px; display: flex; justify-content: center; gap: 4px; align-items: center; }
+  .stats .s .l label { display: inline-flex; gap: 2px; align-items: center; cursor: pointer; font-size: 7.5px; }
+  .stats .s .l input { margin: 0; width: 9px; height: 9px; }
+  .text { font-size: 11.5px; line-height: 1.4; margin-top: 4px; }
+  .flavor { margin: 5px 0 6px; font-size: 10.5px; font-style: italic; color: #555; line-height: 1.35; }
+  .foot { display: flex; justify-content: space-between; align-items: center; margin-top: auto; padding-top: 6px; gap: 6px; font-size: 8.5px; letter-spacing: .1em; text-transform: uppercase; color: #999; }
+  .card select { font: inherit; font-size: inherit; border: 0; background: transparent; color: inherit; padding: 0; cursor: pointer; text-transform: inherit; letter-spacing: inherit; font-weight: inherit; }
+  .card select:hover, .card input:hover, .card textarea:hover { background: #f3f0e4; }
+  .card select:focus, .card input:focus, .card textarea:focus { outline: 2px solid var(--accent); outline-offset: 1px; background: #fffbe8; }
+  .card textarea { display: block; width: 100%; border: 0; background: transparent; font: inherit; color: inherit; resize: none; padding: 0; margin: 0; line-height: inherit; overflow: hidden; }
+  .card textarea::placeholder, .card input::placeholder { color: #bbb; font-style: italic; font-weight: 400; }
+  .card input[type=number] { -moz-appearance: textfield; }
+  .card input[type=number]::-webkit-inner-spin-button { display: none; }
+  .card .plain { font: inherit; border: 0; background: transparent; padding: 0; width: 100%; }
+  .count-ctl { display: inline-flex; align-items: center; gap: 2px; }
+  .count-ctl input { width: 22px; text-align: center; border: 0; background: transparent; font: inherit; }
+
+  /* rooms */
+  .thresholds .challenge { padding: 5px 0; border-top: 1px dotted #999; }
+  .thresholds .challenge:last-of-type { border-bottom: 1px dotted #999; }
+  [hidden] { display: none !important; }
+  .th { display: block; font-size: 11.5px; line-height: 1.35; margin: 2px 0; }
+  .th .req { display: flex; flex-wrap: wrap; gap: 2px 4px; align-items: center; font-weight: 700; white-space: nowrap; margin-bottom: 2px; }
+  .th .req .oomph { color: var(--oomph); }
+  .th .req .scramble { color: var(--scramble); }
+  .th .req input { width: 24px; border: 0; background: transparent; font: inherit; font-weight: 700; color: inherit; padding: 0; text-align: center; border-bottom: 1px dashed currentColor; }
+  .th .req select { font-weight: 700; }
+  .th .outcome { min-width: 0; padding-left: 6px; border-left: 2px solid #e4e4e4; }
+  .th .outcome textarea { font-size: 11.5px; }
+  .or { font-size: 8.5px; font-weight: 800; letter-spacing: .1em; color: #444; margin: 2px 0; display: flex; align-items: center; gap: 6px; }
+  .flee { margin-top: auto; padding-top: 6px; border-top: 1.2px solid #999; font-size: 10.5px; line-height: 1.3; display: grid; grid-template-columns: auto 1fr; gap: 5px; }
+  .flee .label { text-transform: uppercase; letter-spacing: .06em; font-size: 9.5px; font-weight: 700; }
+  .mini { font-size: 9px; border: 1px solid #bbb; background: #fff; color: #555; border-radius: 4px; padding: 0 5px; line-height: 15px; }
+  .mini:hover { border-color: #333; color: #111; }
+  .mini.x { color: #a33; border-color: #d9b3b3; }
+  .line-tools { display: flex; gap: 4px; justify-content: flex-end; margin-top: 2px; }
+  .ch-tools { display: flex; gap: 4px; justify-content: flex-end; padding: 3px 0; }
+  .card-tools-row { display: flex; gap: 4px; margin: 4px 0 2px; }
+
+  /* under the card */
+  .under { display: flex; justify-content: space-between; align-items: center; gap: 6px; margin-top: 6px; font-size: 11px; color: var(--muted); }
+  .under .tools { display: flex; gap: 4px; }
+  .under .tools button { background: transparent; color: var(--muted); border: 1px solid var(--line); border-radius: 5px; padding: 2px 7px; font-size: 11px; }
+  .under .tools button:hover { color: var(--ink); border-color: var(--muted); }
+  .status { font-size: 10px; text-transform: uppercase; letter-spacing: .08em; }
+  .status.added { color: #7fcf8a; } .status.edited { color: var(--accent); } .status.removed { color: #ffb3b5; }
+  .problems { margin-top: 6px; background: #3a1f21; border: 1px solid #6b2b2e; color: #ffd4d5; border-radius: 6px; padding: 6px 8px; font-size: 11px; line-height: 1.4; }
+  .problems.warn { background: #3a3220; border-color: #6b5a2b; color: #ffe9b0; }
+  .problems div + div { margin-top: 2px; }
+  .add-tile { width: calc(63 * var(--mm)); min-height: calc(88 * var(--mm)); border: 2px dashed var(--line); border-radius: calc(3 * var(--mm)); background: transparent; color: var(--muted); font-size: 14px; display: flex; align-items: center; justify-content: center; }
+  .add-tile:hover { border-color: var(--accent); color: var(--accent); }
+
+  /* changes drawer */
+  .drawer { position: fixed; right: 0; top: 0; bottom: 0; width: min(420px, 100vw); background: var(--panel); border-left: 1px solid var(--line); z-index: 30; transform: translateX(100%); transition: transform .18s ease; display: flex; flex-direction: column; }
+  .drawer.open { transform: none; }
+  .drawer header { padding: 14px 16px; border-bottom: 1px solid var(--line); display: flex; align-items: center; gap: 10px; }
+  .drawer header h2 { margin: 0; font-size: 15px; flex: 1; }
+  .drawer .body { flex: 1; overflow: auto; padding: 12px 16px; font-size: 13px; }
+  .drawer .body h3 { font-size: 11px; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); margin: 14px 0 6px; }
+  .drawer .body h3:first-child { margin-top: 0; }
+  .drawer .item { padding: 6px 8px; border: 1px solid var(--line); border-radius: 6px; margin-bottom: 6px; background: var(--panel-2); cursor: pointer; }
+  .drawer .item:hover { border-color: var(--muted); }
+  .drawer .item .nm { font-weight: 700; }
+  .drawer .item .fields { color: var(--muted); font-size: 12px; margin-top: 2px; overflow-wrap: anywhere; }
+  .drawer footer { padding: 12px 16px; border-top: 1px solid var(--line); display: flex; flex-direction: column; gap: 8px; }
+  .drawer footer .row { display: flex; gap: 8px; flex-wrap: wrap; }
+  .drawer footer .note { font-size: 12px; color: var(--muted); line-height: 1.4; }
+  .drawer footer .note b { color: var(--ink); }
+  .toast { position: fixed; left: 50%; bottom: 20px; transform: translateX(-50%); background: var(--panel-2); border: 1px solid var(--line); color: var(--ink); padding: 8px 14px; border-radius: 8px; font-size: 13px; z-index: 40; opacity: 0; transition: opacity .2s; pointer-events: none; }
+  .toast.show { opacity: 1; }
+  .empty { color: var(--muted); font-size: 13px; padding: 20px 0; }
+  .howto { color: var(--muted); font-size: 12.5px; line-height: 1.5; max-width: 900px; margin: 0 0 8px; }
+  .howto b { color: var(--ink); }
+  kbd { font: inherit; font-size: 11px; background: var(--panel-2); border: 1px solid var(--line); border-radius: 4px; padding: 0 5px; }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div>
+    <h1>North vs Up — card editor</h1>
+    <div class="sub" id="edition"></div>
+  </div>
+  <div class="tabs" id="tabs"></div>
+  <div class="spacer"></div>
+  <span class="chip" id="problemChip" hidden></span>
+  <button class="chip changes" id="changesChip" type="button">No changes</button>
+  <button class="btn ghost" id="discardBtn" type="button" title="Throw away every unsent edit and reload the list from cards.yaml">Discard draft</button>
+</div>
+
+<main>
+  <p class="howto">Every field on a card is live: click it and type. <b>Tab</b> moves through a card. Add a card with the dashed tile at the end of a section; remove, duplicate or revert from the row under each card.
+  A gold ring is an edited card, green is new, red has a problem the card generator would reject (the message under the card says what). Your draft is kept in this browser until you send it or discard it.
+  When you are done, open <b>changes</b> in the top bar. In Lavish, <b>Queue for agent</b> then <b>Send to Agent</b> and the agent writes the batch into <code>cards.yaml</code>. On your own, <b>Download changes.json</b> and run <code>node tools/card-editor.mjs apply changes.json</code>.</p>
+  <div id="content"></div>
+</main>
+
+<aside class="drawer" id="drawer" aria-label="Changes">
+  <header>
+    <h2>Changes</h2>
+    <button class="btn ghost" id="closeDrawer" type="button">Close</button>
+  </header>
+  <div class="body" id="drawerBody"></div>
+  <footer>
+    <div class="note" id="queueNote">Nothing queued yet.</div>
+    <div class="row">
+      <button class="btn primary" id="queueBtn" type="button">Queue for agent</button>
+      <button class="btn" id="downloadChangesBtn" type="button" title="The change set as JSON, for: node tools/card-editor.mjs apply changes.json">Download changes.json</button>
+      <button class="btn" id="copyYamlBtn" type="button" title="Copy the YAML blocks of every added or edited card">Copy changed cards as YAML</button>
+      <button class="btn" id="downloadBtn" type="button" title="A whole cards.yaml built from this draft, without the hand-kept comments">Download full cards.yaml</button>
+    </div>
+  </footer>
+</aside>
+
+<div class="toast" id="toast"></div>
+
+<!--cards-data-start-->
+<script id="cards-data" type="application/json">{"meta":{},"cards":[],"rulesVersion":"","cardListId":"","buildNote":""}</script>
+<!--cards-data-end-->
+<script src="card-yaml.js"></script>
+<script>
+"use strict";
+
+/* ------------------------------------------------------------ data */
+const SRC = JSON.parse(document.getElementById("cards-data").textContent);
+const SRC_KEY = "nvu-card-editor:" + (SRC.cardListId || "x") + ":" + (SRC.meta.version || "");
+const clone = (o) => JSON.parse(JSON.stringify(o));
+const isRoom = (c) => c.kind === "room" || c.kind === "stairwell";
+
+let entries = SRC.cards.map((c, i) => ({ id: "c" + i, orig: clone(c), card: clone(c), removed: false, added: false }));
+let nextId = entries.length;
+let activeTab = "rooms";
+
+try {
+  const saved = JSON.parse(localStorage.getItem(SRC_KEY) || "null");
+  if (saved && Array.isArray(saved.entries)) {
+    entries = saved.entries;
+    nextId = saved.nextId || entries.length;
+    activeTab = saved.activeTab || activeTab;
+  }
+} catch (e) { /* no draft */ }
+
+function saveDraft() {
+  try { localStorage.setItem(SRC_KEY, JSON.stringify({ entries, nextId, activeTab })); } catch (e) { /* ignore */ }
+}
+
+/* ------------------------------------------------------------ sections */
+const TABS = [
+  { id: "red-starter", label: "Red starters", pick: (c) => c.kind === "player" && c.owner === "Red" && c.starter === true, blank: () => ({ name: "", count: 1, starter: true, set: "proposed", kind: "player", owner: "Red", cost: 1, oomph: 2, flavor: "" }) },
+  { id: "gray-starter", label: "Gray starters", pick: (c) => c.kind === "player" && c.owner === "Gray" && c.starter === true, blank: () => ({ name: "", count: 1, starter: true, set: "proposed", kind: "player", owner: "Gray", cost: 1, scramble: 2, flavor: "" }) },
+  { id: "red", label: "Red rewards", pick: (c) => c.kind === "player" && c.owner === "Red" && !c.starter, blank: () => ({ name: "", count: 2, set: "proposed", kind: "player", owner: "Red", rarity: "Fine", cost: 1, oomph: 3, text: "", flavor: "" }) },
+  { id: "gray", label: "Gray rewards", pick: (c) => c.kind === "player" && c.owner === "Gray" && !c.starter, blank: () => ({ name: "", count: 2, set: "proposed", kind: "player", owner: "Gray", rarity: "Fine", cost: 1, scramble: 3, text: "", flavor: "" }) },
+  { id: "good", label: "Good Stuff", pick: (c) => c.kind === "good_stuff", blank: () => ({ name: "", count: 3, set: "proposed", kind: "good_stuff", rarity: "Fine", cost: 0, oomph: 2, text: "", flavor: "" }) },
+  { id: "bad", label: "Bad Stuff", pick: (c) => c.kind === "bad_stuff", blank: () => ({ name: "", count: 2, set: "proposed", kind: "bad_stuff", cost: 2, text: "Can't be used to pay for other cards. Play: Scrap this card.", flavor: "" }) },
+  { id: "rooms", label: "Rooms", pick: (c) => c.kind === "room", grouped: true, blank: (tier) => ({ name: "", set: "proposed", kind: "room", tier: tier, flavor: "", challenges: [{ thresholds: [{ stat: "Oomph", value: 5, outcome: "Both players reveal a card reward." }] }], flee: "Both players Exhaust 1." }) },
+  { id: "stairwells", label: "Stairwells", pick: (c) => c.kind === "stairwell", grouped: true, blank: (tier) => ({ name: "", set: "proposed", kind: "stairwell", tier: tier, flavor: "", challenges: [{ thresholds: [{ stat: "Oomph", value: 8, outcome: "Ascend, and both players reveal a card reward." }] }], flee: "Both players Exhaust 1, and both players get Bad Stuff." }) },
+];
+const TIER_LABEL = { 1: "Floor 1", 2: "Floor 2", 3: "Floor 3", 4: "Floor 4", 5: "Floor 5", null: "Roof" };
+const TIER_OPTIONS = [1, 2, 3, 4, 5, null];
+
+/* ------------------------------------------------------------ validation (mirrors tools/cards.mjs) */
+const CLAUSES = [
+  /^(?:and )?ascend$/i,
+  /^you win$/i,
+  /^(?:and )?flee this room for free$/i,
+  /^(?:and )?leave empty-handed$/i,
+  /^(both players|one player|red|gray) exhausts? (\d+)$/i,
+  /^the player who played the least (oomph|scramble) this turn exhausts? (\d+)$/i,
+  /^(both players|one player|red|gray) (?:gets?|takes?) (?:(\d+) )?bad stuff$/i,
+  /^(both players|one player|red|gray) (?:gets?|takes?) (?:(\d+) )?good stuff$/i,
+  /^(both players|one player|red|gray) reveals? (?:a |the )?(?:card )?reward$/i,
+  /^(both players|one player|the other|red|gray) may scrap a card from (?:your|their) hand or discard pile$/i,
+];
+function clausesOf(prose) {
+  return String(prose).split(/[.;!]|,\s*(?:and\s+)?|\s+and\s+/i).map((c) => c.replace(/^\s*but\s+/i, "").trim()).filter((c) => c !== "");
+}
+function badClauses(prose) {
+  return clausesOf(prose).filter((cl) => !CLAUSES.some((re) => re.test(cl)));
+}
+
+function validate(entry, names) {
+  const c = entry.card;
+  const errors = [], warnings = [];
+  if (!c.name || !c.name.trim()) errors.push("Needs a name.");
+  else if ((names.get(c.name) || 0) > 1) errors.push("Another card has this name.");
+  if (c.set !== "official" && c.set !== "proposed") errors.push("Set must be official or proposed.");
+  if (/\b(?:one|both) of you\b/i.test(JSON.stringify(c))) errors.push('Says "of you"; write "one player" or "both players".');
+  if (c.kind === "player" && c.owner !== "Red" && c.owner !== "Gray") errors.push("A player card needs an owner.");
+  if (!isRoom(c) && (c.cost === null || c.cost === undefined)) warnings.push("Cost not set.");
+  if (isRoom(c)) {
+    if (!c.challenges || c.challenges.length === 0) errors.push("A room prints at least one challenge.");
+    (c.challenges || []).forEach((ch, i) => {
+      if (!ch.thresholds || ch.thresholds.length === 0) errors.push(`Challenge ${i + 1} has no threshold line.`);
+      (ch.thresholds || []).forEach((t, j) => {
+        const where = `Line ${i + 1}.${j + 1}`;
+        if (t.stats) {
+          if (typeof t.stats.Oomph !== "number" && typeof t.stats.Scramble !== "number") errors.push(`${where}: needs an Oomph or Scramble number.`);
+        } else if (!(typeof t.value === "number" && (t.stat === "Oomph" || t.stat === "Scramble"))) {
+          errors.push(`${where}: needs a stat and a number.`);
+        }
+        if (!t.outcome || !t.outcome.trim()) errors.push(`${where}: outcome is empty.`);
+        else badClauses(t.outcome).forEach((cl) => errors.push(`${where}: the generator can't read "${cl}".`));
+        if (/\bclear\b/i.test(t.outcome || "")) warnings.push(`${where}: "Clear" is implied and not printed (#263).`);
+      });
+    });
+    if (c.flee) badClauses(c.flee).forEach((cl) => errors.push(`Flee: the generator can't read "${cl}".`));
+    const m = /exhausts?\s+(\d+)/i.exec(c.flee || "");
+    if (m && Number(m[1]) > 3) warnings.push("Flee Exhausts more than 3 (#387 caps it at 3).");
+    if (c.tier === null && c.kind !== "stairwell") errors.push("Only a Stairwell may be the roof card (tier null).");
+    if (![1, 2, 3, 4, 5, null].includes(c.tier)) errors.push("A room's floor is 1 to 5, or the roof.");
+  }
+  return { errors, warnings };
+}
+
+function nameCounts() {
+  const m = new Map();
+  for (const e of entries) if (!e.removed) m.set(e.card.name, (m.get(e.card.name) || 0) + 1);
+  return m;
+}
+
+/* ------------------------------------------------------------ change tracking */
+function changedFields(a, b) {
+  const keys = new Set([...Object.keys(a), ...Object.keys(b)]);
+  const out = [];
+  for (const k of keys) if (JSON.stringify(a[k]) !== JSON.stringify(b[k])) out.push(k);
+  return out;
+}
+function entryState(e) {
+  if (e.removed) return e.added ? null : "removed";
+  if (e.added) return "added";
+  return changedFields(e.orig, e.card).length ? "edited" : "";
+}
+function changeSet() {
+  const added = [], edited = [], removed = [];
+  for (const e of entries) {
+    const st = entryState(e);
+    if (st === "added") added.push({ id: e.id, card: e.card });
+    else if (st === "edited") edited.push({ id: e.id, name: e.orig.name, changed: changedFields(e.orig, e.card), card: e.card });
+    else if (st === "removed") removed.push({ id: e.id, name: e.orig.name });
+  }
+  return { added, edited, removed };
+}
+
+/* ------------------------------------------------------------ rendering helpers */
+const esc = (s) => String(s ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+function sel(path, options, value, extra = "") {
+  return `<select data-path="${path}" data-type="${extra.includes("num") ? "intnull" : "str"}" ${extra}>` +
+    options.map(([v, l]) => `<option value="${esc(v)}" ${String(v) === String(value) ? "selected" : ""}>${esc(l)}</option>`).join("") + "</select>";
+}
+function ta(path, value, placeholder, cls = "") {
+  return `<textarea rows="1" class="${cls}" data-path="${path}" data-type="str" placeholder="${esc(placeholder)}">${esc(value)}</textarea>`;
+}
+function num(path, value, cls = "", placeholder = "") {
+  return `<input type="number" class="${cls}" data-path="${path}" data-type="intnull" value="${value === null || value === undefined ? "" : value}" placeholder="${placeholder}">`;
+}
+
+function statTiles(c) {
+  const tile = (key, label) => {
+    const on = key in c && c[key] !== null && c[key] !== undefined;
+    return `<div class="s ${key}"><div class="n">${num(key, on ? c[key] : null, "", "–")}</div>` +
+      `<div class="l">${label}</div></div>`;
+  };
+  return `<div class="stats">${tile("oomph", "Oomph")}${tile("scramble", "Scramble")}</div>` +
+    `<div class="card-tools-row"><label class="mini" style="display:inline-flex;gap:3px;align-items:center;cursor:pointer"><input type="checkbox" data-path="conditional_stat" data-type="bool" ${c.conditional_stat ? "checked" : ""} style="margin:0;width:9px;height:9px"> stat in text</label></div>`;
+}
+
+function playerFace(e) {
+  const c = e.card;
+  let typeline;
+  if (c.kind === "player") {
+    typeline = sel("owner", [["Red", "Red"], ["Gray", "Gray"]], c.owner) +
+      `<label style="display:inline-flex;gap:3px;align-items:center;cursor:pointer"><input type="checkbox" data-path="starter" data-type="bool" ${c.starter ? "checked" : ""} style="margin:0;width:9px;height:9px">starter</label>`;
+  } else {
+    typeline = sel("kind", [["good_stuff", "Good Stuff"], ["bad_stuff", "Bad Stuff"]], c.kind);
+  }
+  return `<div class="type-bar"></div>
+    <div class="top"><div>
+      <div class="name"><textarea rows="1" data-path="name" data-type="str" placeholder="Card name">${esc(c.name)}</textarea></div>
+      <div class="typeline">${typeline}</div>
+    </div><div class="cost" title="Cost">${num("cost", c.cost, "", "?")}</div></div>
+    ${statTiles(c)}
+    <div class="text">${ta("text", c.text || "", "Rules text (optional)")}</div>
+    <div class="flavor">${ta("flavor", c.flavor || "", "Flavor line")}</div>
+    <div class="foot">
+      <span>${sel("rarity", [["", "no rarity"], ["Fine", "Fine"], ["Cool", "Cool"], ["Woah", "Woah"]], c.rarity || "")}</span>
+      <span>${sel("set", [["proposed", "proposed"], ["official", "official"]], c.set)}</span>
+      <span class="count-ctl" title="Copies in the kit">×${num("count", c.count ?? 1)}</span>
+    </div>`;
+}
+
+function thresholdHTML(t, ci, ti) {
+  const base = `challenges.${ci}.thresholds.${ti}`;
+  const mode = t.stats ? "both" : (t.stat || "Oomph");
+  let req;
+  if (t.stats) {
+    req = `<span class="oomph">Oomph ${num(base + ".stats.Oomph", t.stats.Oomph ?? null)}</span><span>+</span><span class="scramble">Scramble ${num(base + ".stats.Scramble", t.stats.Scramble ?? null)}</span>`;
+  } else {
+    req = `<span class="${(t.stat || "oomph").toLowerCase()}">${num(base + ".value", t.value ?? null)}</span>`;
+  }
+  return `<div class="th">
+    <div class="req"><select data-mode="${base}" title="Which stat this line asks for">
+      <option value="Oomph" ${mode === "Oomph" ? "selected" : ""}>Oomph</option>
+      <option value="Scramble" ${mode === "Scramble" ? "selected" : ""}>Scramble</option>
+      <option value="both" ${mode === "both" ? "selected" : ""}>Both</option></select>${req}:</div>
+    <div class="outcome">${ta(base + ".outcome", t.outcome || "", "Outcome, e.g. Both players reveal a card reward.")}</div>
+  </div>
+  <div class="line-tools"><button class="mini" data-act="add-or" data-ci="${ci}" data-ti="${ti}" type="button" title="Add an OR line to this challenge">+ or</button><button class="mini x" data-act="del-line" data-ci="${ci}" data-ti="${ti}" type="button" title="Remove this line">×</button></div>`;
+}
+
+function roomFace(e) {
+  const c = e.card;
+  const challenges = (c.challenges || []).map((ch, ci) => {
+    const lines = (ch.thresholds || []).map((t, ti) => thresholdHTML(t, ci, ti)).join('<div class="or">OR</div>');
+    return `<div class="challenge">${lines}</div>`;
+  }).join("");
+  return `<div class="type-bar"></div>
+    <div class="top"><div>
+      <div class="name"><textarea rows="1" data-path="name" data-type="str" placeholder="Room name">${esc(c.name)}</textarea></div>
+      <div class="typeline">${sel("kind", [["room", "Room"], ["stairwell", "Stairwell"]], c.kind)} · ${sel("tier", TIER_OPTIONS.map((t) => [t === null ? "null" : t, TIER_LABEL[t]]), c.tier === null ? "null" : c.tier, 'data-num="1"')}</div>
+    </div></div>
+    <div class="flavor">${ta("flavor", c.flavor || "", "Flavor line")}</div>
+    <div class="text">${ta("text", c.text || "", "Room rule (verb sentence), if any")}</div>
+    <div class="thresholds">${challenges}</div>
+    <div class="ch-tools"><button class="mini" data-act="add-challenge" type="button" title="Add a separate challenge (its own block)">+ challenge</button></div>
+    <div class="flee"><span class="label">Flee:</span>${ta("flee", c.flee || "", "Leave empty-handed.")}</div>
+    <div class="foot">
+      <span>${sel("set", [["proposed", "proposed"], ["official", "official"]], c.set)}</span>
+      <span class="count-ctl" title="Copies in the kit">×${num("count", c.count ?? 1)}</span>
+    </div>`;
+}
+
+function slotHTML(e, names) {
+  const c = e.card;
+  const st = entryState(e);
+  const v = validate(e, names);
+  const classes = ["card", "kind-" + c.kind];
+  if (c.owner) classes.push("owner-" + c.owner);
+  if (isRoom(c)) classes.push("room", "tier-" + (c.tier === null ? "null" : c.tier));
+  const slotCls = ["slot", st, v.errors.length ? "invalid" : ""].filter(Boolean).join(" ");
+  const tools = e.removed
+    ? `<button data-act="restore" type="button">Restore</button>`
+    : `<button data-act="dup" type="button" title="Copy this card as a new card">Duplicate</button>` +
+      (st === "edited" ? `<button data-act="revert" type="button" title="Back to what cards.yaml says">Revert</button>` : "") +
+      `<button data-act="remove" type="button">${e.added ? "Delete" : "Remove"}</button>`;
+  return `<div class="${slotCls}" data-id="${e.id}" id="slot-${e.id}">
+    <div class="${classes.join(" ")}">${isRoom(c) ? roomFace(e) : playerFace(e)}</div>
+    <div class="under"><span class="status ${st}">${st || "&nbsp;"}</span><span class="tools">${tools}</span></div>
+    ${v.errors.length ? `<div class="problems">${v.errors.map((p) => `<div>${esc(p)}</div>`).join("")}</div>` : ""}
+    ${v.warnings.length ? `<div class="problems warn">${v.warnings.map((p) => `<div>${esc(p)}</div>`).join("")}</div>` : ""}
+  </div>`;
+}
+
+function render() {
+  const tabsEl = document.getElementById("tabs");
+  const names = nameCounts();
+  tabsEl.innerHTML = TABS.map((t) => {
+    const n = entries.filter((e) => !e.removed && t.pick(e.card)).length;
+    return `<button class="tab ${t.id === activeTab ? "active" : ""}" data-tab="${t.id}" type="button">${t.label}<span class="n">${n}</span></button>`;
+  }).join("");
+  const tab = TABS.find((t) => t.id === activeTab);
+  const content = document.getElementById("content");
+  const list = entries.filter((e) => tab.pick(e.card));
+  if (tab.grouped) {
+    content.innerHTML = TIER_OPTIONS.map((tier) => {
+      const inTier = list.filter((e) => e.card.tier === tier);
+      return `<div class="section-head"><h2>${TIER_LABEL[tier]}</h2><span class="count">${inTier.filter((e) => !e.removed).length} ${tab.label.toLowerCase()}</span></div>
+        <div class="grid">${inTier.map((e) => slotHTML(e, names)).join("")}
+        <button class="add-tile" data-add="${tab.id}" data-tier="${tier === null ? "null" : tier}" type="button">+ ${tab.label.replace(/s$/, "").toLowerCase()} on ${TIER_LABEL[tier]}</button></div>`;
+    }).join("");
+  } else {
+    content.innerHTML = `<div class="section-head"><h2>${tab.label}</h2><span class="count">${list.filter((e) => !e.removed).length} cards</span></div>
+      <div class="grid">${list.map((e) => slotHTML(e, names)).join("")}
+      <button class="add-tile" data-add="${tab.id}" type="button">+ new card</button></div>`;
+  }
+  content.querySelectorAll("textarea").forEach(autosize);
+  renderTop();
+  saveDraft();
+}
+
+function autosize(el) {
+  el.style.height = "auto";
+  el.style.height = el.scrollHeight + "px";
+}
+
+function rerenderSlot(e) {
+  const old = document.getElementById("slot-" + e.id);
+  if (!old) { render(); return; }
+  const tmp = document.createElement("div");
+  tmp.innerHTML = slotHTML(e, nameCounts());
+  old.replaceWith(tmp.firstElementChild);
+  document.getElementById("slot-" + e.id).querySelectorAll("textarea").forEach(autosize);
+  renderTop();
+  saveDraft();
+}
+
+function renderTop() {
+  const cs = changeSet();
+  const n = cs.added.length + cs.edited.length + cs.removed.length;
+  const chip = document.getElementById("changesChip");
+  chip.textContent = n ? `${n} change${n === 1 ? "" : "s"}` : "No changes";
+  const names = nameCounts();
+  const bad = entries.filter((e) => !e.removed && validate(e, names).errors.length).length;
+  const pc = document.getElementById("problemChip");
+  pc.hidden = !bad;
+  pc.className = "chip warn";
+  pc.textContent = `${bad} card${bad === 1 ? "" : "s"} the generator would reject`;
+  document.getElementById("queueBtn").disabled = n === 0;
+  renderDrawer(cs);
+}
+
+function renderDrawer(cs) {
+  const body = document.getElementById("drawerBody");
+  const item = (e, extra) => `<div class="item" data-jump="${e.id}"><div class="nm">${esc(e.card.name || e.name || "(unnamed)")}</div>${extra ? `<div class="fields">${esc(extra)}</div>` : ""}</div>`;
+  let html = "";
+  if (cs.added.length) html += `<h3>Added (${cs.added.length})</h3>` + cs.added.map((a) => item(a, a.card.kind + (a.card.tier !== undefined ? " · " + TIER_LABEL[a.card.tier] : ""))).join("");
+  if (cs.edited.length) html += `<h3>Edited (${cs.edited.length})</h3>` + cs.edited.map((a) => item(a, (a.name !== a.card.name ? `was "${a.name}" · ` : "") + a.changed.join(", "))).join("");
+  if (cs.removed.length) html += `<h3>Removed (${cs.removed.length})</h3>` + cs.removed.map((a) => item({ id: a.id, card: { name: a.name } }, "")).join("");
+  body.innerHTML = html || `<div class="empty">No changes yet. Edit a card and it shows up here.</div>`;
+}
+
+/* ------------------------------------------------------------ editing */
+const byId = (id) => entries.find((e) => e.id === id);
+
+function setPath(obj, path, value) {
+  const parts = path.split(".");
+  let o = obj;
+  for (let i = 0; i < parts.length - 1; i++) {
+    const k = /^\d+$/.test(parts[i]) ? Number(parts[i]) : parts[i];
+    if (o[k] === undefined || o[k] === null) o[k] = /^\d+$/.test(parts[i + 1]) ? [] : {};
+    o = o[k];
+  }
+  const last = parts[parts.length - 1];
+  if (value === undefined) delete o[last]; else o[last] = value;
+}
+
+function readValue(el) {
+  const type = el.dataset.type;
+  if (type === "bool") return el.checked ? true : undefined;
+  if (type === "intnull" || el.dataset.num) {
+    if (el.value === "" ) return null;
+    if (el.value === "null") return null;
+    const n = Number(el.value);
+    return Number.isFinite(n) ? n : null;
+  }
+  return el.value;
+}
+
+function onFieldChange(el, live) {
+  const slot = el.closest(".slot");
+  if (!slot) return;
+  const e = byId(slot.dataset.id);
+  const path = el.dataset.path;
+  if (!path) return;
+  let v = readValue(el);
+  // A card field is one line of print; cards.yaml cannot hold a line break in it.
+  if (typeof v === "string" && v.includes("\n")) { v = v.replace(/\s*\n\s*/g, " "); el.value = v; }
+  if (path === "oomph" || path === "scramble") { if (v === null || v === 0) v = undefined; }
+  if (path === "count" && (v === null || v === 1)) v = undefined;
+  if (path === "rarity" && v === "") v = undefined;
+  if ((path === "text" || path === "flavor" || path === "flee") && v === "") v = undefined;
+  if (path === "starter" && v === undefined) v = undefined;
+  setPath(e.card, path, v);
+  if (el.tagName === "TEXTAREA") autosize(el);
+  if (live) {
+    // keep focus: update only the status row and problems, not the face
+    const names = nameCounts();
+    const val = validate(e, names);
+    const st = entryState(e);
+    slot.className = ["slot", st, val.errors.length ? "invalid" : ""].filter(Boolean).join(" ");
+    const status = slot.querySelector(".status");
+    status.className = "status " + st;
+    status.innerHTML = st || "&nbsp;";
+    slot.querySelectorAll(".problems").forEach((p) => p.remove());
+    if (val.errors.length) slot.insertAdjacentHTML("beforeend", `<div class="problems">${val.errors.map((p) => `<div>${esc(p)}</div>`).join("")}</div>`);
+    if (val.warnings.length) slot.insertAdjacentHTML("beforeend", `<div class="problems warn">${val.warnings.map((p) => `<div>${esc(p)}</div>`).join("")}</div>`);
+    renderTop();
+    saveDraft();
+  } else {
+    rerenderSlot(e);
+  }
+}
+
+document.getElementById("content").addEventListener("input", (ev) => {
+  const el = ev.target;
+  if (el.matches("textarea, input[type=number]")) onFieldChange(el, true);
+});
+document.getElementById("content").addEventListener("change", (ev) => {
+  const el = ev.target;
+  if (el.matches("select[data-mode]")) {
+    const slot = el.closest(".slot"); const e = byId(slot.dataset.id);
+    const [, ci, , ti] = el.dataset.mode.split(".");
+    const t = e.card.challenges[Number(ci)].thresholds[Number(ti)];
+    const mode = el.value;
+    if (mode === "both") {
+      const prev = t.value ?? 5;
+      delete t.stat; delete t.value; t.stats = { Oomph: prev, Scramble: prev };
+    } else {
+      const prev = t.stats ? (t.stats[mode] ?? t.stats.Oomph ?? t.stats.Scramble ?? 5) : (t.value ?? 5);
+      delete t.stats; t.stat = mode; t.value = prev;
+    }
+    rerenderSlot(e);
+    return;
+  }
+  if (el.matches("select, input[type=checkbox]")) onFieldChange(el, false);
+  else if (el.matches("textarea, input[type=number]")) onFieldChange(el, true);
+});
+
+document.getElementById("content").addEventListener("click", (ev) => {
+  const addBtn = ev.target.closest("[data-add]");
+  if (addBtn) {
+    const tab = TABS.find((t) => t.id === addBtn.dataset.add);
+    const tier = addBtn.dataset.tier === undefined ? undefined : (addBtn.dataset.tier === "null" ? null : Number(addBtn.dataset.tier));
+    const card = tab.blank(tier);
+    const e = { id: "n" + (nextId++), orig: clone(card), card, removed: false, added: true };
+    entries.push(e);
+    render();
+    const ta = document.querySelector(`#slot-${e.id} textarea[data-path=name]`);
+    if (ta) { ta.focus(); ta.scrollIntoView({ block: "center", behavior: "smooth" }); }
+    return;
+  }
+  const btn = ev.target.closest("[data-act]");
+  if (!btn) return;
+  const slot = btn.closest(".slot"); const e = byId(slot.dataset.id);
+  const act = btn.dataset.act;
+  if (act === "remove") {
+    if (e.added) { entries = entries.filter((x) => x !== e); render(); return; }
+    e.removed = true; rerenderSlot(e);
+  } else if (act === "restore") { e.removed = false; rerenderSlot(e); }
+  else if (act === "revert") { e.card = clone(e.orig); rerenderSlot(e); }
+  else if (act === "dup") {
+    const card = clone(e.card); card.name = (card.name || "Card") + " (copy)";
+    const n = { id: "n" + (nextId++), orig: clone(card), card, removed: false, added: true };
+    entries.splice(entries.indexOf(e) + 1, 0, n);
+    render();
+    const ta = document.querySelector(`#slot-${n.id} textarea[data-path=name]`);
+    if (ta) { ta.focus(); ta.select(); }
+  } else if (act === "add-challenge") {
+    e.card.challenges = e.card.challenges || [];
+    e.card.challenges.push({ thresholds: [{ stat: "Oomph", value: 5, outcome: "" }] });
+    rerenderSlot(e);
+  } else if (act === "add-or") {
+    const ch = e.card.challenges[Number(btn.dataset.ci)];
+    const prev = ch.thresholds[Number(btn.dataset.ti)];
+    ch.thresholds.splice(Number(btn.dataset.ti) + 1, 0, prev.stats ? { stats: { ...prev.stats }, outcome: "" } : { stat: prev.stat, value: (prev.value || 0) + 2, outcome: "" });
+    rerenderSlot(e);
+  } else if (act === "del-line") {
+    const ci = Number(btn.dataset.ci), ti = Number(btn.dataset.ti);
+    e.card.challenges[ci].thresholds.splice(ti, 1);
+    if (e.card.challenges[ci].thresholds.length === 0) e.card.challenges.splice(ci, 1);
+    rerenderSlot(e);
+  }
+});
+
+document.getElementById("tabs").addEventListener("click", (ev) => {
+  const b = ev.target.closest("[data-tab]");
+  if (!b) return;
+  activeTab = b.dataset.tab;
+  render();
+  window.scrollTo({ top: 0 });
+});
+
+/* ------------------------------------------------------------ drawer, queue, fallbacks */
+const drawer = document.getElementById("drawer");
+document.getElementById("changesChip").addEventListener("click", () => drawer.classList.toggle("open"));
+document.getElementById("closeDrawer").addEventListener("click", () => drawer.classList.remove("open"));
+document.getElementById("drawerBody").addEventListener("click", (ev) => {
+  const it = ev.target.closest("[data-jump]");
+  if (!it) return;
+  const e = byId(it.dataset.jump);
+  if (!e) return;
+  const tab = TABS.find((t) => t.pick(e.card));
+  if (tab && tab.id !== activeTab) { activeTab = tab.id; render(); }
+  const slot = document.getElementById("slot-" + e.id);
+  if (slot) { slot.scrollIntoView({ block: "center", behavior: "smooth" }); }
+});
+
+function toast(msg) {
+  const t = document.getElementById("toast");
+  t.textContent = msg; t.classList.add("show");
+  clearTimeout(toast._h); toast._h = setTimeout(() => t.classList.remove("show"), 2600);
+}
+
+function yamlOf(cards) {
+  return cards.map((c) => CardYaml.cardLines(c).join("\n")).join("\n\n") + "\n";
+}
+
+document.getElementById("queueBtn").addEventListener("click", () => {
+  const cs = changeSet();
+  const n = cs.added.length + cs.edited.length + cs.removed.length;
+  if (!n) return;
+  const names = nameCounts();
+  const broken = entries.filter((e) => !e.removed && validate(e, names).errors.length).map((e) => e.card.name || "(unnamed)");
+  const prompt = [
+    `Apply ${n} card change(s) to cards.yaml: save the JSON below to a file and run node tools/card-editor.mjs apply <file>.`,
+    `Then run make build check and node tools/card-editor.mjs, and reply with one line per card id saying applied, or why not.`,
+    broken.length ? `These cards still fail the generator's checks; apply them anyway and say what fails: ${broken.join(", ")}.` : "",
+  ].filter(Boolean).join(" ");
+  const data = changeData();
+  if (window.lavish && typeof window.lavish.queuePrompt === "function") {
+    window.lavish.queuePrompt(prompt, { tag: "card-changes", text: `Apply ${n} card change${n === 1 ? "" : "s"} to cards.yaml`, data, queueKey: "card-changes" });
+    document.getElementById("queueNote").innerHTML = `<b>Queued ${n} change${n === 1 ? "" : "s"}.</b> Press <b>Send to Agent</b> in the Lavish bar to deliver them. Queue again after more edits and it replaces the earlier batch.`;
+    toast(`Queued ${n} change${n === 1 ? "" : "s"} for the agent`);
+  } else {
+    document.getElementById("queueNote").innerHTML = `Lavish isn't connected, so nothing can be queued from here. <b>Download changes.json</b> and run <code>node tools/card-editor.mjs apply changes.json</code>.`;
+  }
+});
+
+async function copyText(text) {
+  try { await navigator.clipboard.writeText(text); return true; } catch (e) { return false; }
+}
+
+document.getElementById("copyYamlBtn").addEventListener("click", async () => {
+  const cs = changeSet();
+  const cards = [...cs.added.map((a) => a.card), ...cs.edited.map((a) => a.card)];
+  let text = yamlOf(cards);
+  if (cs.removed.length) text += "\n# removed: " + cs.removed.map((r) => r.name).join(", ") + "\n";
+  toast((await copyText(text)) ? `Copied YAML for ${cards.length} card(s)` : "Clipboard unavailable");
+});
+
+document.getElementById("downloadBtn").addEventListener("click", () => {
+  const live = entries.filter((e) => !e.removed).map((e) => e.card);
+  const today = new Date().toISOString().slice(0, 10);
+  const text = `---\n# North vs Up — card list (written by the card editor; comments from the hand-kept file are not here)\n\nmeta:\n  version: ${SRC.meta.version || "C0"}\n  updated: ${today}\n\ncards:\n\n` + yamlOf(live);
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(new Blob([text], { type: "text/yaml" }));
+  a.download = "cards.yaml"; a.click();
+  setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+});
+
+function changeData() {
+  return { source: { cardListId: SRC.cardListId, version: SRC.meta.version }, ...changeSet() };
+}
+document.getElementById("downloadChangesBtn").addEventListener("click", () => {
+  const cs = changeSet();
+  if (!(cs.added.length + cs.edited.length + cs.removed.length)) { toast("No changes to download"); return; }
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(new Blob([JSON.stringify(changeData(), null, 1)], { type: "application/json" }));
+  a.download = "changes.json"; a.click();
+  setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+});
+
+document.getElementById("discardBtn").addEventListener("click", () => {
+  const cs = changeSet();
+  const n = cs.added.length + cs.edited.length + cs.removed.length;
+  if (n && !confirm(`Throw away ${n} unsent change${n === 1 ? "" : "s"} and reload from cards.yaml?`)) return;
+  try { localStorage.removeItem(SRC_KEY); } catch (e) { /* ignore */ }
+  entries = SRC.cards.map((c, i) => ({ id: "c" + i, orig: clone(c), card: clone(c), removed: false, added: false }));
+  nextId = entries.length;
+  render();
+  toast("Draft discarded");
+});
+
+document.getElementById("edition").textContent =
+  `${SRC.cards.length} cards from cards.yaml · ${SRC.meta.version || ""} · list ${SRC.cardListId || "(no id: the generator rejects this list)"} · rules ${SRC.rulesVersion || ""}` + (SRC.buildNote ? ` · ${SRC.buildNote}` : "");
+
+render();
+</script>
+</body>
+</html>

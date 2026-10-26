@@ -60,6 +60,8 @@ export function mintRoom(face: RoomFace, copy: number): Room {
     kind: face.kind,
     tier: face.tier,
     flavor: face.flavor,
+    text: face.text,
+    keywords: face.keywords,
     challenges: face.challenges,
     flee: face.flee,
   };

@@ -1,6 +1,7 @@
 import { execFileSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
+import { roomKeywords } from "../../../tools/cards.mjs";
 import { CARD_CONTENT, CARD_SOURCE } from "./index";
 
 const REPO = fileURLToPath(new URL("../../..", import.meta.url));
@@ -35,6 +36,17 @@ describe("content", () => {
         }
       }
     }
+  });
+
+  it("reads the words before any ( of a room's text into keywords", () => {
+    const keywordsOf = (name: string) => CARD_CONTENT.rooms.find((r) => r.name === name)?.keywords;
+    expect(keywordsOf("Monster 5-3")).toEqual(["Ambush", "Heavy"]);
+    expect(keywordsOf("Double Dark Hallway of Death")).toEqual(["Lockstep", "Dim"]);
+  });
+
+  it("fails the build on a room keyword it doesn't know", () => {
+    expect(() => roomKeywords("Sticky (clings)", "Test Room")).toThrow(/unknown room keyword "Sticky"/);
+    expect(roomKeywords("", "Test Room")).toEqual([]);
   });
 
   it("reads every outcome and Flee line into effects", () => {

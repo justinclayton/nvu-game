@@ -445,6 +445,22 @@ function challenge(raw, where) {
   return { thresholds };
 }
 
+/** The words a room's printed text may open with; the engine switches on these, not on the prose. */
+export const ROOM_KEYWORDS = [
+  "Ambush", "Dim", "Lockstep", "Cap", "Toxic", "Unstable", "Draining", "Heavy", "Relentless", "Corrosive",
+];
+
+/** The keywords before the first "(" of a room's text; a word not in ROOM_KEYWORDS fails the build. */
+export function roomKeywords(text, name) {
+  const words = String(text ?? "").split("(")[0].trim().split(/\s+/).filter((w) => w !== "");
+  for (const w of words) {
+    if (!ROOM_KEYWORDS.includes(w)) {
+      throw new Error(`${name}: unknown room keyword ${JSON.stringify(w)} (known: ${ROOM_KEYWORDS.join(", ")})`);
+    }
+  }
+  return words;
+}
+
 function roomFace(c) {
   const challenges = (c.challenges ?? []).map((ch) => challenge(ch, c.name));
   if (challenges.length === 0) throw new Error(`${c.name}: a room prints at least one challenge`);
@@ -461,6 +477,7 @@ function roomFace(c) {
     tier: c.tier,
     flavor: c.flavor ?? "",
     text: c.text ?? "",
+    keywords: roomKeywords(c.text, c.name),
     count: c.count ?? 1,
     challenges,
     flee: fleeLine(c),

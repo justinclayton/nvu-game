@@ -131,6 +131,10 @@ export interface CardFace {
   readonly flavor: string;
 }
 
+/** The words a room's text may open with. Ambush is shown only: no rule can skip a revealed room. */
+export type RoomKeyword =
+  | "Ambush" | "Dim" | "Lockstep" | "Cap" | "Toxic" | "Unstable" | "Draining" | "Heavy" | "Relentless" | "Corrosive";
+
 /** A room card, exactly as printed (rulebook, Card anatomy: Room Cards). */
 export interface RoomFace {
   readonly name: string;
@@ -142,6 +146,8 @@ export interface RoomFace {
   readonly flavor: string;
   /** A room's own printed rule, beyond its thresholds and Flee line (e.g. Bio-Hazard Containment Vault). */
   readonly text: string;
+  /** The words before any "(" in `text`, read by the generator; the engine switches on these. */
+  readonly keywords: readonly RoomKeyword[];
   readonly count: number;
   readonly challenges: readonly Challenge[];
   readonly flee: FleeLine;

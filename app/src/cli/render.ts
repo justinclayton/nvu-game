@@ -95,6 +95,7 @@ export function printedRoomLines(room: RoomFace): string[] {
 function roomLines(state: GameState, room: Room): string[] {
   const met = new Set(metThresholds(state));
   const lines = [`Room: ${room.name} (${room.kind})`];
+  if (room.text.trim() !== "") lines.push(`  ${room.text.trim()}`);
   for (const t of allThresholds(room)) {
     const mark = met.has(t) ? "✔" : " ";
     const need = thresholdLines(state, t)

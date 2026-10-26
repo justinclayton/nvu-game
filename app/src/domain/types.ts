@@ -17,6 +17,7 @@ import type {
   Rarity,
   RoomBand,
   RoomEffect,
+  RoomKeyword,
   RoomKind,
   Stat,
   Threshold,
@@ -57,6 +58,9 @@ export interface Room {
   /** The floor the card serves, 1 to 5; `null` for the Roof. */
   readonly tier: RoomBand;
   readonly flavor: string;
+  /** The printed rule text, e.g. "Dim (only draw up to 4 cards)". Empty for a plain room. */
+  readonly text: string;
+  readonly keywords: readonly RoomKeyword[];
   readonly challenges: readonly Challenge[];
   readonly flee: FleeLine;
 }

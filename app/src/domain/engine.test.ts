@@ -366,6 +366,31 @@ describe("Cleanup", () => {
     expect(next.Red.exhaust.map((c) => c.name)).toContain("Charge");
   });
 
+  it("Draining: every played card is Exhausted, not discarded, and other rooms are unchanged", () => {
+    for (const [name, draining] of [["Vacuum Chamber", true], ["Security Turnstile", false]] as const) {
+      const state = rig({
+        phase: "Play",
+        activeRoom: room(name),
+        Red: player({ deck: pile("Shove", 5), hand: [card("Pry Bar")] }),
+        Gray: player({ deck: pile("Duck Under", 5), hand: [card("Coil Of Cable")] }),
+      });
+      const { state: next } = play(state, [
+        playFree("Red", ids(state, "Red")[0] as CardId),
+        playFree("Gray", ids(state, "Gray")[0] as CardId),
+        { type: "END_PLAY" },
+      ]);
+      expect(next.playZone).toEqual([]);
+      if (draining) {
+        expect(next.Red.exhaust.map((c) => c.name)).toContain("Pry Bar");
+        expect(next.Gray.exhaust.map((c) => c.name)).toContain("Coil Of Cable");
+        expect(next.Red.discard.map((c) => c.name)).not.toContain("Pry Bar");
+      } else {
+        expect(next.Red.discard.map((c) => c.name)).toContain("Pry Bar");
+        expect(next.Gray.discard.map((c) => c.name)).toContain("Coil Of Cable");
+      }
+    }
+  });
+
   it("'the hand carries over untouched'", () => {
     const state = rig({
       phase: "Play",

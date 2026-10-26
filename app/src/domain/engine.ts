@@ -55,6 +55,7 @@ import {
   drawOne,
   discard,
   exhaustFromDeck,
+  exhaustFromPlay,
   payCostFromHand,
   earnGoodStuff,
   gainToDiscard,
@@ -1063,11 +1064,14 @@ function cleanupPiles(state: GameState, run: Run): GameState {
     if (s.phase === "GameOver") return s;
   }
 
-  // Then the play zone itself.
+  // Then the play zone itself. Draining: Exhausted, not discarded.
+  const draining = s.activeRoom?.keywords.includes("Draining") ?? false;
   for (const c of CHARACTERS) {
     const played = s.playZone.filter((x) => x.owner === c).map((x) => x.card);
     for (const card of played) {
-      s = discard(s, c, card, "playZone", run.events);
+      s = draining
+        ? exhaustFromPlay(s, c, card, run.events)
+        : discard(s, c, card, "playZone", run.events);
     }
   }
   return settle({ ...s, playZone: [] }, run);

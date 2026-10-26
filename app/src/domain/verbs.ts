@@ -428,6 +428,21 @@ export function exhaustFromHand(
   return countExhausted(next, c, cards.length, false);
 }
 
+/**
+ * Draining (Cards played here are Exhausted at Cleanup, not discarded.): a played card goes
+ * from the play zone to its owner's Exhaust pile. The caller clears the play zone.
+ */
+export function exhaustFromPlay(
+  state: GameState,
+  c: Character,
+  card: Card,
+  events: DomainEvent[],
+): GameState {
+  const p = playerOf(state, c);
+  events.push({ type: "CARD_EXHAUSTED", character: c, card });
+  return countExhausted(withPlayer(state, c, { ...p, exhaust: [...p.exhaust, card] }), c, 1, false);
+}
+
 /** System Feedback: bank a one-shot loss against this turn's shared stat pool. */
 export const applyPoolPenalty = (state: GameState, oomph: number, scramble: number): GameState => ({
   ...state,

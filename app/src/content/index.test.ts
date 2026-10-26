@@ -44,9 +44,10 @@ describe("content", () => {
     expect(keywordsOf("Double Dark Hallway of Death")).toEqual(["Lockstep", "Dim"]);
   });
 
-  it("fails the build on a room keyword it doesn't know", () => {
-    expect(() => roomKeywords("Sticky (clings)", "Test Room")).toThrow(/unknown room keyword "Sticky"/);
-    expect(roomKeywords("", "Test Room")).toEqual([]);
+  it("keeps a room keyword it doesn't know as data, and drops punctuation", () => {
+    expect(roomKeywords("Sticky (clings)")).toEqual({ keywords: [], unparsed: ["Sticky"] });
+    expect(roomKeywords("Ambush. Relentless.")).toEqual({ keywords: ["Ambush", "Relentless"], unparsed: [] });
+    expect(roomKeywords("")).toEqual({ keywords: [], unparsed: [] });
   });
 
   it("reads every outcome and Flee line into effects", () => {
@@ -62,6 +63,7 @@ describe("content", () => {
         }),
       );
       for (const clause of room.flee.unparsed ?? []) unread.push(`${room.name} Flee: "${clause}"`);
+      for (const word of room.unparsedKeywords ?? []) unread.push(`${room.name} keyword: "${word}"`);
     }
     expect(unread).toEqual([]);
   });

@@ -157,6 +157,8 @@ export interface RoomFace {
   readonly text: string;
   /** The words before any "(" in `text`, read by the generator; the engine switches on these. */
   readonly keywords: readonly RoomKeyword[];
+  /** Words before any "(" that are not keywords yet; the content test names them, as it does unread clauses. */
+  readonly unparsedKeywords?: readonly string[];
   readonly count: number;
   readonly challenges: readonly Challenge[];
   readonly flee: FleeLine;

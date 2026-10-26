@@ -452,15 +452,15 @@ export const ROOM_KEYWORDS = [
   "Ambush", "Dim", "Lockstep", "Cap", "Toxic", "Unstable", "Draining", "Heavy", "Relentless", "Corrosive",
 ];
 
-/** The keywords before the first "(" of a room's text; a word not in ROOM_KEYWORDS fails the build. */
-export function roomKeywords(text, name) {
-  const words = String(text ?? "").split("(")[0].trim().split(/\s+/).filter((w) => w !== "");
-  for (const w of words) {
-    if (!ROOM_KEYWORDS.includes(w)) {
-      throw new Error(`${name}: unknown room keyword ${JSON.stringify(w)} (known: ${ROOM_KEYWORDS.join(", ")})`);
-    }
-  }
-  return words;
+/** The words before the first "(" of a room's text, punctuation dropped: the
+ * ones in ROOM_KEYWORDS as `keywords`, any other as `unparsed`, kept as data
+ * like an outcome clause the generator can't read. */
+export function roomKeywords(text) {
+  const words = String(text ?? "").split("(")[0].split(/\s+/).map((w) => w.replace(/[.,;:!]+$/, "")).filter((w) => w !== "");
+  return {
+    keywords: words.filter((w) => ROOM_KEYWORDS.includes(w)),
+    unparsed: words.filter((w) => !ROOM_KEYWORDS.includes(w)),
+  };
 }
 
 function roomFace(c) {
@@ -479,7 +479,8 @@ function roomFace(c) {
     tier: c.tier,
     flavor: c.flavor ?? "",
     text: c.text ?? "",
-    keywords: roomKeywords(c.text, c.name),
+    keywords: roomKeywords(c.text).keywords,
+    unparsedKeywords: roomKeywords(c.text).unparsed,
     count: c.count ?? 1,
     challenges,
     flee: fleeLine(c),
@@ -494,6 +495,7 @@ export function unreadLines(content) {
       for (const c of t.unparsed) out.push(`${r.name} line ${i + 1}.${j + 1}: "${c}"`);
     }));
     for (const c of r.flee.unparsed) out.push(`${r.name} Flee: "${c}"`);
+    for (const w of r.unparsedKeywords ?? []) out.push(`${r.name} keyword: "${w}"`);
   }
   return out;
 }

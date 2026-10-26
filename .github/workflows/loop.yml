@@ -348,9 +348,12 @@ jobs:
         run: |
           set -eu
           # Comments come oldest first, so the last plan comment is the newest plan.
-          gh api --paginate --slurp "repos/$GITHUB_REPOSITORY/issues/$PR/comments" \
-            --jq "[.[][] | select(.user.login == \"$BOT\") | select(.body | test(\"<!-- nvu-loop: plan [0-9a-f]{40}( comment [0-9]+)? -->\"))] | last | .body // empty" \
-            > "$RUNNER_TEMP/plan.md"
+          # gh refuses --slurp together with --jq, so the filter runs page by page
+          # and prints each plan's body as one base64 line; the last line is the newest.
+          gh api --paginate "repos/$GITHUB_REPOSITORY/issues/$PR/comments" \
+            --jq ".[] | select(.user.login == \"$BOT\") | select(.body | test(\"<!-- nvu-loop: plan [0-9a-f]{40}( comment [0-9]+)? -->\")) | .body | @base64" \
+            > "$RUNNER_TEMP/plans.b64"
+          tail -n 1 "$RUNNER_TEMP/plans.b64" | base64 --decode > "$RUNNER_TEMP/plan.md"
           if [ ! -s "$RUNNER_TEMP/plan.md" ]; then
             echo "No plan is posted on #$PR: nothing to build."
             exit 0

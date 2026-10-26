@@ -136,6 +136,8 @@ export interface TurnRecord {
    * spent one per play regardless of what it saves.
    */
   readonly playDiscount: Readonly<Record<Character, number>>;
+  /** Lockstep: who put the latest card into the play zone this turn; null before the first. */
+  readonly lastPlayer: Character | null;
   /** System Feedback: banked off the shared pool this turn; a stat never reads below zero. */
   readonly poolPenalty: { readonly oomph: number; readonly scramble: number };
   /** Banked onto the shared pool this turn by cards that add a stat. */
@@ -476,6 +478,7 @@ export type RejectionCode =
   | "NoPendingChoice"
   | "GameIsOver"
   | "CharacterIsDown"
+  | "LockedOut"
   | "NotInHand"
   | "WrongPayment"
   | "CannotPayWithThat"

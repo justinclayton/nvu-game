@@ -4,7 +4,7 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import { execute } from "./engine";
 import { roomId } from "./ids";
-import { statPool, thresholdIsMet } from "./queries";
+import { playableCards, statPool, thresholdIsMet } from "./queries";
 import { shuffle } from "./rng";
 import {
   card,
@@ -407,6 +407,48 @@ describe("Cleanup", () => {
       expect(next.Gray.deck).toHaveLength(heavy ? 4 : 5);
       expect(next.Red.exhaust.map((c) => c.name)).toEqual(heavy ? ["Shove"] : []);
     }
+  });
+
+  const lockstepState = (name: string) =>
+    rig({
+      phase: "Play",
+      activeRoom: room(name),
+      Red: player({ deck: pile("Shove", 5), hand: [card("Pry Bar"), card("Shove"), card("Shove")] }),
+      Gray: player({ deck: pile("Duck Under", 5), hand: [card("Coil Of Cable"), card("Coil Of Cable")] }),
+    });
+
+  it("Lockstep: after Red plays and Gray passes, Red still cannot play; passing stays legal", () => {
+    const state = lockstepState("Puzzle Room");
+    const red = ids(state, "Red");
+    const { state: after } = play(state, [playFree("Red", red[0] as CardId)]);
+    expect(playableCards(after, "Red")).toEqual([]);
+    expect(playableCards(after, "Gray").length).toBeGreaterThan(0);
+    const again = execute(after, playFree("Red", red[1] as CardId));
+    expect(again.ok).toBe(false);
+    expect(execute(after, { type: "END_PLAY" }).ok).toBe(true);
+  });
+
+  it("Lockstep: once Gray plays, Red may play again", () => {
+    const state = lockstepState("Laser Grid");
+    const { state: after } = play(state, [
+      playFree("Red", ids(state, "Red")[0] as CardId),
+      playFree("Gray", ids(state, "Gray")[0] as CardId),
+    ]);
+    expect(playableCards(after, "Red").length).toBeGreaterThan(0);
+    expect(playableCards(after, "Gray")).toEqual([]);
+    expect(execute(after, playFree("Red", ids(after, "Red")[0] as CardId)).ok).toBe(true);
+  });
+
+  it("Lockstep: either player may play the first card; rooms without it allow plays in a row", () => {
+    const locked = lockstepState("Double Dark Hallway of Death");
+    expect(execute(locked, playFree("Red", ids(locked, "Red")[0] as CardId)).ok).toBe(true);
+    expect(execute(locked, playFree("Gray", ids(locked, "Gray")[0] as CardId)).ok).toBe(true);
+
+    const open = lockstepState("Security Turnstile");
+    const red = ids(open, "Red");
+    const { state: after } = play(open, [playFree("Red", red[0] as CardId), playFree("Red", red[1] as CardId)]);
+    expect(after.playZone).toHaveLength(2);
+    expect(playableCards(after, "Red").length).toBeGreaterThan(0);
   });
 
   it("Corrosive: cards paid for a play are Scrapped, not Exhausted; other rooms are unchanged", () => {

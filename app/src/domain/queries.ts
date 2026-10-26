@@ -342,11 +342,20 @@ export function payOptions(state: GameState, c: Character, cardId: CardId): read
   return pool.filter((x) => x.kind !== "bad_stuff");
 }
 
+/**
+ * Lockstep (no player may play two cards in a row): whoever played the last
+ * card this turn cannot play until their partner does. Passing is unaffected,
+ * and the first card of the turn is open to either player.
+ */
+export function lockedOut(state: GameState, c: Character): boolean {
+  return (state.activeRoom?.keywords.includes("Lockstep") ?? false) && state.thisTurn.lastPlayer === c;
+}
+
 /** The cards this character could play right now, cost and all. */
 export function playableCards(state: GameState, c: Character): readonly Card[] {
   if (state.phase !== "Play" || state.pending !== null) return [];
   const p = playerOf(state, c);
-  if (p.down) return [];
+  if (p.down || lockedOut(state, c)) return [];
   return p.hand.filter((card) => payOptions(state, c, card.id).length >= costOf(state, c, card));
 }
 

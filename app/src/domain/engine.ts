@@ -16,6 +16,7 @@ import {
   drawTargetFor,
   exhaustPreventedBy,
   exhaustXPreventedBy,
+  lockedOut,
   payOptions,
   playedStats,
   statPool,
@@ -123,6 +124,9 @@ export function validate(state: GameState, command: Command): Rejection | null {
       const c = command.character;
       const p = playerOf(state, c);
       if (p.down) return reject("CharacterIsDown", `${c} is Down.`);
+      if (lockedOut(state, c)) {
+        return reject("LockedOut", `Lockstep: ${c} played the last card and waits for their partner.`);
+      }
       const card = p.hand.find((x) => x.id === command.cardId);
       if (!card) return reject("NotInHand", `That card is not in ${c}'s hand.`);
 
@@ -578,7 +582,7 @@ function playCard(
   if (inZone) {
     const after = playerOf(s, c);
     s = withPlayer(s, c, { ...after, hand: after.hand.filter((x) => x.id !== cardId) });
-    s = { ...s, playZone: [...s.playZone, { owner: c, card }] };
+    s = { ...s, playZone: [...s.playZone, { owner: c, card }], thisTurn: { ...s.thisTurn, lastPlayer: c } };
     run.events.push({ type: "CARD_PLAYED", character: c, card });
   }
   const to = run.events.length;

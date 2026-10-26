@@ -579,10 +579,12 @@ function playCard(
   // Each payment card goes to its owner's Exhaust pile, unless its owner has Zen Mode in play.
   const from = run.events.length;
   const exhausted: Card[] = [];
+  const corrosive = s.activeRoom?.keywords.includes("Corrosive") ?? false;
   for (const owner of CHARACTERS) {
     const cards = payment.filter((x) => x.owner === owner).map((x) => x.card);
     if (cards.length === 0) continue;
-    const keptBy = exhaustPreventedBy(s, owner);
+    // Corrosive pays by Scrapping, which Zen Mode does not stop.
+    const keptBy = corrosive ? null : exhaustPreventedBy(s, owner);
     if (keptBy) {
       run.events.push({ type: "EXHAUST_PREVENTED", character: owner, amount: cards.length, by: keptBy });
       continue;

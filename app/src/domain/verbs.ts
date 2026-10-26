@@ -183,6 +183,10 @@ function countExhausted(state: GameState, c: Character, n: number, fromDeck: boo
  */
 export function payCostFromHand(state: GameState, c: Character, cards: readonly Card[]): GameState {
   const next = takeFrom(state, c, "hand", cards);
+  if (state.activeRoom?.keywords.includes("Corrosive")) {
+    // Corrosive (Cards paid here are Scrapped, not Exhausted.): they go to the Scrapyard.
+    return { ...next, scrapyard: [...next.scrapyard, ...cards] };
+  }
   const p = playerOf(next, c);
   return countExhausted(withPlayer(next, c, { ...p, exhaust: [...p.exhaust, ...cards] }), c, cards.length, false);
 }

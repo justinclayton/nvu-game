@@ -409,6 +409,27 @@ describe("Cleanup", () => {
     }
   });
 
+  it("Corrosive: cards paid for a play are Scrapped, not Exhausted; other rooms are unchanged", () => {
+    for (const [name, corrosive] of [["Bubbly Slime Monster", true], ["Security Turnstile", false]] as const) {
+      const state = rig({
+        phase: "Play",
+        activeRoom: room(name),
+        Red: player({ deck: pile("Shove", 5), hand: [card("Shove"), card("Charge")] }),
+        Gray: player({ deck: pile("Duck Under", 5) }),
+      });
+      const { state: next } = play(state, [
+        {
+          type: "PLAY_CARD",
+          character: "Red",
+          cardId: handCard(state, "Red", "Shove").id,
+          payWith: [handCard(state, "Red", "Charge").id],
+        },
+      ]);
+      expect(next.scrapyard.map((c) => c.name)).toEqual(corrosive ? ["Charge"] : []);
+      expect(next.Red.exhaust.map((c) => c.name)).toEqual(corrosive ? [] : ["Charge"]);
+    }
+  });
+
   it("Heavy: an empty deck follows the Empty deck rule", () => {
     const state = rig({
       phase: "Play",

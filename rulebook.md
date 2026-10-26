@@ -1,19 +1,16 @@
 # *North vs Up*: Rulebook
 
-Rules version: R33
+Rules version: R34
 
 ---
 
 ## Intro
 
-Something came down on Pyramid Tower and moved in. **Red** and **Gray** are going in to find out what it is.
-
-Ten floors. On each one you land in the dark, run through whatever is in front of you, grab
-whatever is not nailed down, and kill the thing that is guarding the stairs. If you're not prepared, you can always run -- but it'll keep rearing its ugly head until you take it down.
+Flavor Text To Be Written Later.
 
 To succeed, **Red and Gray must work together**. Each have their own strengths, and only through communication and teamwork will you be able to avoid doom.
 
-When you clear a floor, you move up. Because it's a pyramid, there will be fewer rooms to scavenge before you hit trouble all over again. When the final floor has been cleared and you reach the rooftop, you WIN!
+When you clear a floor, you can rest for a moment, then move up and run into trouble all over again. When the final floor has been cleared and you reach the rooftop and defeat what awaits you, you WIN!
 
 ---
 
@@ -40,15 +37,9 @@ Each player grabs the **starter cards** for their character. This will form your
 
 ### Floor deck
 
-The tower is made up of Floors, which are grouped into four tiers: Lower Floors (1–3), Middle Floors (4–6), Upper Floors (7–9), and the Penthouse (Floor 10). Each tier has its own set of cards, consisting of normal `Rooms`and special rooms called `Stairwells`. The Penthouse only contains one `Stairwell` room.
+The tower is made up of 5 numbered Floors, as well as a Roof where the final battle will take place. Each floor has its own set of cards, consisting of normal `Rooms` and special rooms called `Stairwells`. The Roof only contains one `Stairwell` room.
 
-Assemble the floor deck for the floor you're building:
-
-
-
-1.  **Pick the Stairwell:** Take one `Stairwell` at random from the tier for your floor (Lower Floors to start).
-1. **Pick the Rooms:** Randomly pick `Room` cards from that same tier. To start, pick 9 Room cards, combining with the Stairwell for a total of 10 rooms for Floor 1. As you move up, repeat this with one fewer room than the previous floor. Or, if this is easier for you to remember: for each floor, pick `11` minus the floor number. So floor 5 is `11 - 5 = 6` rooms total.)
-1. **Shuffle** the drawn cards together and place them in the middle of the table, face down.
+Assemble the floor deck for the floor you're building by **shuffling** the cards for that floor together and placing them in the middle of the table, face down.
 
 ### Table Layout
 
@@ -125,7 +116,7 @@ There are two kinds: `Room` and `Stairwell`. `Stairwell` cards are essentially f
 
 
 - **Name.**
-- **Type line:** `Room` or `Stairwell`, and the tier of floors it belongs to (`Room · Middle Floors`).
+- **Type line:** `Room` or `Stairwell`, and the floor it belongs to (`Room · Floor 3`).
 - **Flavor text.**
 - **Challenges:** one or more, each listing one or more `threshold: outcome` lines. A threshold consists of one or more stats (`Oomph 7 and Scramble 7`). An outcome prints its own reward, and prints `Ascend` when it ends the Floor. It never prints `Clear`.
 - **`Flee`**: what happens when no challenges are met.
@@ -195,7 +186,7 @@ When a resolved outcome says `Ascend`, you escape the current floor! You are saf
 
 ## 11. Winning and losing
 
-**You win** by clearing floor 10's Stairwell.
+**You win** by clearing the final room on the Roof.
 
 **You lose** when either character goes `Down`.
 

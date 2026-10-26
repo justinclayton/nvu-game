@@ -20,6 +20,7 @@ import {
   resetRig,
   rig,
   room,
+  plainRoom,
   goodStuffShaft,
   goodStuffTurnstile,
 } from "./__fixtures__/rig";
@@ -413,7 +414,7 @@ describe("Cleanup", () => {
     rig({
       phase: "Play",
       activeRoom: room(name),
-      Red: player({ deck: pile("Shove", 5), hand: [card("Pry Bar"), card("Shove"), card("Shove")] }),
+      Red: player({ deck: pile("Shove", 5), hand: pile("Pry Bar", 3) }),
       Gray: player({ deck: pile("Duck Under", 5), hand: [card("Coil Of Cable"), card("Coil Of Cable")] }),
     });
 
@@ -455,7 +456,7 @@ describe("Cleanup", () => {
     const state = rig({
       phase: "Play",
       activeRoom: room("Maintenance"),
-      Red: player({ deck: pile("Shove", 5), hand: [card("Shove"), card("Shove"), card("Shove")] }),
+      Red: player({ deck: pile("Shove", 5), hand: pile("Pry Bar", 3) }),
       Gray: player({ deck: pile("Duck Under", 5), hand: [card("Coil Of Cable"), card("Coil Of Cable")] }),
     });
     const red = ids(state, "Red");
@@ -513,7 +514,7 @@ describe("Cleanup", () => {
       ]);
 
     it("a Clear through the Oomph challenge, with Scramble under 8, Exhausts 2 each, logged against the room", () => {
-      const { state: next, events } = playAll(armory(["Charge", "Charge", "Pry Bar"], []));
+      const { state: next, events } = playAll(armory(["Pry Bar", "Pry Bar", "Pry Bar", "Pry Bar"], []));
       expect(eventTypes(events)).toContain("ROOM_CLEARED");
       expect(next.Red.exhaust.map((c) => c.name)).toEqual(["Shove", "Shove"]);
       expect(next.Gray.exhaust.map((c) => c.name)).toEqual(["Duck Under", "Duck Under"]);
@@ -820,10 +821,10 @@ describe("Room kinds: Room and Stairwell", () => {
     // Maintenance's Oomph and Scramble challenges are
     // independent, each its own named reveal: Oomph 7 (Charge, cost 2,
     // plus a free Pry Bar) pays Red; Scramble 7 (Pick The Lock, cost 2, plus
-    // a free Coil Of Cable) pays Gray.
+    // a free Coil Of Cable) pays Gray. Four plays, so Maintenance's Cap is left off.
     const state = rig({
       phase: "Play",
-      activeRoom: room("Maintenance"),
+      activeRoom: plainRoom("Maintenance"),
       Red: player({
         deck: pile("Shove", 5),
         hand: [card("Charge"), card("Shove"), card("Shove"), card("Pry Bar")],
@@ -881,10 +882,11 @@ describe("Room kinds: Room and Stairwell", () => {
 
   it("a dual threshold is met only when the pool meets both stats", () => {
     // Puzzle Room's first line needs Oomph 3 and Scramble 5
-    // together. Scramble alone, even well past 5, does not meet it.
+    // together. Scramble alone, even well past 5, does not meet it. Red plays
+    // every card, so Puzzle Room's Lockstep is left off.
     const state = rig({
       phase: "Play",
-      activeRoom: room("Puzzle Room"),
+      activeRoom: plainRoom("Puzzle Room"),
       Red: player({ deck: pile("Shove", 5), hand: [...pile("Coil Of Cable", 2), card("Pry Bar")] }),
       Gray: player({ deck: pile("Duck Under", 5) }),
     });

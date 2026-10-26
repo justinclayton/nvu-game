@@ -17,6 +17,7 @@ import {
   play,
   player,
   resetRig,
+  plainRoom,
   rig,
   room,
 } from "./__fixtures__/rig";
@@ -144,9 +145,10 @@ describe("walkthrough 6 — a Room's Challenge reads the shared pool, not either
     // (pays Gray) in two independent challenges. Red brings Scramble and
     // Gray brings Oomph — the shared pool has both, so both lines are met
     // and both characters are paid, regardless of whose cards supplied it.
+    // Six plays, so Maintenance's Cap is left off.
     const state = rig({
       phase: "Play",
-      activeRoom: room("Maintenance"),
+      activeRoom: plainRoom("Maintenance"),
       Red: player({ deck: pile("Shove", 5), hand: pile("Coil Of Cable", 3) }),
       Gray: player({ deck: pile("Duck Under", 5), hand: pile("Pry Bar", 3) }),
     });

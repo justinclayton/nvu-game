@@ -479,13 +479,28 @@ function flipRoom(state: GameState, run: Run): GameState {
   };
   const faced = settle(flipped, run);
   if (faced.phase === "GameOver") return faced;
-  const drawn = settle(drawPhase(faced, run), run);
+  const toxic = settle(enterToxic(faced, room, run), run);
+  if (toxic.phase === "GameOver") return toxic;
+  const drawn = settle(drawPhase(toxic, run), run);
   if (drawn.phase === "GameOver") return drawn;
   const held = turnStartHands(drawn, run);
   if (held.phase === "GameOver") return held;
   run.events.push({ type: "PHASE_ENDED", phase: "Turn Start" });
   run.events.push({ type: "PHASE_STARTED", phase: "Play" });
   return held;
+}
+
+/**
+ * Toxic (On Enter: Both players get Bad Stuff.): a room is entered when it is flipped as the
+ * Active Room, so this lands in step 1, before the draw, and each Bad Stuff counts toward the hand.
+ */
+function enterToxic(state: GameState, room: Room, run: Run): GameState {
+  if (!room.keywords.includes("Toxic")) return state;
+  const from = run.events.length;
+  let s = state;
+  for (const c of CHARACTERS) s = dealBadStuff(s, c, 1, run.events);
+  attribute(run, from, room.name);
+  return s;
 }
 
 /** A held card's own Turn Start line (Corrosive Acid), once the draw is done. */

@@ -42,6 +42,8 @@ function fixtureRoom(challenges: readonly Challenge[]): Room {
     kind: "room",
     tier: 1,
     flavor: "",
+    text: "",
+    keywords: [],
     challenges,
     flee: { text: "Leave empty-handed.", clears: false, effects: [] },
   };
@@ -152,6 +154,44 @@ describe("Turn Start", () => {
     expect(next.Red.deck).toHaveLength(5);
     expect(next.Gray.hand).toHaveLength(5);
     expect(next.Gray.deck).toHaveLength(5);
+  });
+
+  it("Toxic: 'On Enter: Both players get Bad Stuff' — one each before the draw, counted toward the hand, logged against the room", () => {
+    const toxic = room("Slimy Bio-Hazard Containment");
+    const state = rig({
+      phase: "Turn Start",
+      floorDeck: [toxic],
+      Red: player({ deck: pile("Shove", 6) }),
+      Gray: player({ deck: pile("Duck Under", 6) }),
+    });
+    const { state: next, events } = must(state, { type: "FLIP_ROOM" });
+    for (const c of ["Red", "Gray"] as const) {
+      expect(next[c].hand.filter((h) => h.kind === "bad_stuff")).toHaveLength(1);
+      expect(next[c].hand).toHaveLength(5);
+      expect(next[c].deck).toHaveLength(2);
+    }
+    const taken = events.filter((e) => e.type === "STUFF_TAKEN");
+    expect(taken.map((e) => e.source)).toEqual([toxic.name, toxic.name]);
+    const types = eventTypes(events);
+    expect(types.indexOf("STUFF_TAKEN")).toBeLessThan(types.indexOf("CARD_DRAWN"));
+  });
+
+  it("Toxic: a Toxic room that comes up again after a Flee deals Bad Stuff again", () => {
+    const toxic = room("Slimy Bio-Hazard Containment");
+    const state = rig({
+      phase: "Turn Start",
+      floorDeck: [toxic],
+      Red: player({ deck: pile("Shove", 10) }),
+      Gray: player({ deck: pile("Duck Under", 10) }),
+    });
+    const first = must(state, { type: "FLIP_ROOM" }).state;
+    // A Flee shuffles the room back into the floor deck; the next flip enters it again.
+    const again = must(
+      { ...first, phase: "Turn Start", floorDeck: [toxic], activeRoom: null },
+      { type: "FLIP_ROOM" },
+    );
+    expect(again.events.filter((e) => e.type === "STUFF_TAKEN")).toHaveLength(2);
+    expect(again.state.Red.hand.filter((h) => h.kind === "bad_stuff")).toHaveLength(2);
   });
 });
 

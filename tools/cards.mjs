@@ -519,7 +519,7 @@ export function structure(doc) {
   const fixedStairwells = rooms.filter((r) => r.tier === null);
   if (fixedStairwells.length !== 1) {
     throw new Error(
-      `expected exactly one Floor 10 Stairwell (tier: null), found ${fixedStairwells.length}`,
+      `expected exactly one Roof Stairwell (tier: null), found ${fixedStairwells.length}`,
     );
   }
   return { meta: { updated: String(doc.meta.updated ?? "") }, cards, rooms };

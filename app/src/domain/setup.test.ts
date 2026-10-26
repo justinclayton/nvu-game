@@ -57,24 +57,42 @@ describe("Setting up a floor", () => {
     expect(orders.size).toBeGreaterThan(1);
   });
 
-  // A tier that prints no Stairwell leaves no way up, so the run is void.
+  // C59 prints a Stairwell for each of floors 4 and 5.
+  it.each([
+    [4, "Sexy Blob"],
+    [5, "Comrade Black"],
+  ] as const)("floor %i's deck holds %s and every Room of its tier", (floor, stairwell) => {
+    const [initial] = createInitialState(1, content);
+    const fullSupply = returnRoomsToSupply(initial);
+    const printed = fullSupply.roomSupply.filter((r) => r.tier === floor);
+    const state = buildFloor({ ...fullSupply, floor }, []);
+    expect(state.phase).not.toBe("GameOver");
+    expect(state.floorDeck.map((r) => r.id).sort()).toEqual(printed.map((r) => r.id).sort());
+    const stairwells = state.floorDeck.filter((r) => r.kind === "stairwell");
+    expect(stairwells.map((r) => r.name)).toEqual([stairwell]);
+    expect(state.floorDeck.filter((r) => r.kind === "room").length).toBeGreaterThan(0);
+  });
+
+  // A tier that prints no Stairwell leaves no way up, so the run is void. The
+  // real supply prints one for every tier, so this rigs a supply without.
   it.each([4, 5])("aborts floor %i, its tier printing no Stairwell, naming the floor", (floor) => {
     const [initial] = createInitialState(1, content);
     const fullSupply = returnRoomsToSupply(initial);
+    const roomSupply = fullSupply.roomSupply.filter((r) => r.kind !== "stairwell");
     const events: DomainEvent[] = [];
-    const state = buildFloor({ ...fullSupply, floor }, events);
+    const state = buildFloor({ ...fullSupply, roomSupply, floor }, events);
     expect(state.phase).toBe("GameOver");
     expect(state.outcome).toBe("Aborted");
     const aborted = events.find((e) => e.type === "RUN_ABORTED");
     expect(aborted && "reason" in aborted ? aborted.reason : "").toContain(`Floor ${String(floor)}`);
   });
 
-  it("the Roof is The Monolith Core alone", () => {
+  it("the Roof is The Supreme Commander alone", () => {
     const [initial] = createInitialState(1, content);
     const fullSupply = returnRoomsToSupply(initial);
     const state = buildFloor({ ...fullSupply, floor: TOP_FLOOR }, []);
     expect(state.floorDeck).toHaveLength(1);
-    expect(state.floorDeck[0]?.name).toBe("The Monolith Core");
+    expect(state.floorDeck[0]?.name).toBe("The Supreme Commander");
     expect(state.floorDeck[0]?.kind).toBe("stairwell");
     expect(state.floorDeck[0]?.tier).toBeNull();
   });

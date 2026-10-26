@@ -31,7 +31,7 @@ export const floorName = (floor: number): string =>
 /**
  * Each numbered floor has "its own set of cards" (rulebook Setup, "Floor
  * deck"): floor N draws from tier N. The Roof draws from no tier; it prints
- * one fixed Stairwell instead (cards.yaml, The Monolith Core, `tier: null`).
+ * one fixed Stairwell instead (cards.yaml, The Supreme Commander, `tier: null`).
  */
 export function tierOf(floor: number): Band | null {
   return floor >= TOP_FLOOR ? null : (floor as Band);
@@ -83,7 +83,7 @@ const roomCopiesOf = (face: RoomFace): Room[] =>
  * "Assemble the floor deck for the floor you're building by shuffling the
  * cards for that floor together" (rulebook Setup, "Floor deck"): every copy of
  * every Room and Stairwell printed for the floor's tier. The Roof's deck is
- * The Monolith Core alone.
+ * The Supreme Commander alone.
  *
  * A floor whose tier prints no Stairwell cannot be climbed out of: the floor
  * is not built, and the game ends Aborted instead.

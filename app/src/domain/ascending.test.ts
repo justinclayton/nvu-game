@@ -272,15 +272,15 @@ describe("Ascending, build the next floor", () => {
     expect(eventTypes(events)).toContain("FLOOR_BUILT");
   });
 
-  it("ascending from floor 5 builds the Roof: The Monolith Core alone", () => {
+  it("ascending from floor 5 builds the Roof: The Supreme Commander alone", () => {
     const state = atStairwell(bareStairwell(), {
       floor: 5,
-      roomSupply: [room("The Monolith Core"), room("Gears & Glitch")],
+      roomSupply: [room("The Supreme Commander"), room("Gears & Glitch")],
     });
     const { state: next } = clearIt(state);
     expect(next.floor).toBe(6);
     expect(next.phase).toBe("Turn Start");
-    expect(next.floorDeck.map((r) => r.name)).toEqual(["The Monolith Core"]);
+    expect(next.floorDeck.map((r) => r.name)).toEqual(["The Supreme Commander"]);
   });
 
   // Rulebook Setup, "Floor deck": the floor deck is "the cards for that floor";

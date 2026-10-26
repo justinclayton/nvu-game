@@ -610,6 +610,49 @@ describe("Cleanup", () => {
     const flipped = must({ ...next, phase: "Turn Start" }, { type: "FLIP_ROOM" });
     expect(flipped.state.activeRoom?.name).toBe("Mercenaries");
   });
+
+  // C59: Stairwells print keywords too, and the rules read them off the active
+  // room whatever its kind.
+  it.each(["The Supreme Commander", "Sexy Blob"])(
+    "Relentless: a fled Stairwell, %s, goes on top of the Floor deck, unshuffled",
+    (name) => {
+      const below = [room("Puzzle Room"), room("The Sentry Drone"), room("Gears & Glitch")];
+      const state = rig({
+        seed: 4242,
+        phase: "Play",
+        activeRoom: room(name),
+        floorDeck: below,
+        Red: player({ deck: pile("Shove", 8) }),
+        Gray: player({ deck: pile("Duck Under", 8) }),
+      });
+      const fledRoom = state.activeRoom as Room;
+      expect(fledRoom.kind).toBe("stairwell");
+      expect(fledRoom.keywords).toContain("Relentless");
+      const { state: next } = play(state, [{ type: "END_PLAY" }]);
+      expect(next.floorDeck).toEqual([fledRoom, ...below]);
+      expect(next.seed).toBe(state.seed);
+    },
+  );
+
+  it("Heavy: with Comrade Black active, each card a player plays Exhausts 1 from their deck", () => {
+    const black = room("Comrade Black");
+    expect(black.kind).toBe("stairwell");
+    expect(black.keywords).toContain("Heavy");
+    const state = rig({
+      phase: "Play",
+      activeRoom: black,
+      Red: player({ deck: pile("Shove", 5), hand: [card("Pry Bar")] }),
+      Gray: player({ deck: pile("Duck Under", 5), hand: [card("Coil Of Cable")] }),
+    });
+    const { state: next } = play(state, [
+      playFree("Red", ids(state, "Red")[0] as CardId),
+      playFree("Gray", ids(state, "Gray")[0] as CardId),
+    ]);
+    expect(next.Red.deck).toHaveLength(4);
+    expect(next.Gray.deck).toHaveLength(4);
+    expect(next.Red.exhaust.map((c) => c.name)).toEqual(["Shove"]);
+    expect(next.Gray.exhaust.map((c) => c.name)).toEqual(["Duck Under"]);
+  });
 });
 
 describe("Room kinds: Room and Stairwell", () => {

@@ -736,7 +736,28 @@ function endPlay(state: GameState, run: Run): GameState {
   };
   s = playEndEffects(s, run);
   if (s.phase === "GameOver") return s;
-  return drain(settle(s, run), run);
+  s = settle(unstablePenalty(s, room, outcome, run), run);
+  if (s.phase === "GameOver") return s;
+  return drain(s, run);
+}
+
+/**
+ * Unstable (Outcome phase: if you didn't meet the Scramble challenge, Exhaust 2.): both players,
+ * on a Clear or a Flee alike. A Scramble challenge is one whose thresholds ask only for Scramble.
+ * It is an `Exhaust X` line, so it follows the Empty deck rule and any card that prevents it.
+ */
+function unstablePenalty(state: GameState, room: Room, outcome: RoomOutcome, run: Run): GameState {
+  if (!room.keywords.includes("Unstable")) return state;
+  const scrambleOnly = (t: Threshold) => t.requires.oomph === 0 && t.requires.scramble > 0;
+  const met = room.challenges.some(
+    (c) => c.thresholds.every(scrambleOnly) && c.thresholds.some((t) => outcome.met.includes(t)),
+  );
+  if (met) return state;
+  const from = run.events.length;
+  let s = state;
+  for (const c of CHARACTERS) s = printedExhaust(s, c, 2, room.name, run);
+  attribute(run, from, room.name);
+  return s;
 }
 
 /**

@@ -497,6 +497,43 @@ describe("Cleanup", () => {
     }
   });
 
+  describe("Unstable: 'if you didn't meet the Scramble challenge, Exhaust 2' — both players, Clear or Flee", () => {
+    const armory = (red: string[], gray: string[]) =>
+      rig({
+        phase: "Play",
+        activeRoom: room("Crumbling Armory"),
+        Red: player({ deck: pile("Shove", 10), hand: red.map((n) => card(n)) }),
+        Gray: player({ deck: pile("Duck Under", 10), hand: gray.map((n) => card(n)) }),
+      });
+    const playAll = (state: GameState) =>
+      play(state, [
+        ...ids(state, "Red").map((id) => playFree("Red", id)),
+        ...ids(state, "Gray").map((id) => playFree("Gray", id)),
+        { type: "END_PLAY" },
+      ]);
+
+    it("a Clear through the Oomph challenge, with Scramble under 8, Exhausts 2 each, logged against the room", () => {
+      const { state: next, events } = playAll(armory(["Charge", "Charge", "Pry Bar"], []));
+      expect(eventTypes(events)).toContain("ROOM_CLEARED");
+      expect(next.Red.exhaust.map((c) => c.name)).toEqual(["Shove", "Shove"]);
+      expect(next.Gray.exhaust.map((c) => c.name)).toEqual(["Duck Under", "Duck Under"]);
+      expect(JSON.stringify(events.filter((e) => e.type === "CARD_EXHAUSTED"))).toContain("Crumbling Armory");
+    });
+
+    it("a Flee Exhausts 2 each on top of the Flee line's own 'Both players Exhaust 2'", () => {
+      const { state: next, events } = playAll(armory([], []));
+      expect(eventTypes(events)).toContain("ROOM_FLED");
+      expect(next.Red.exhaust).toHaveLength(4);
+      expect(next.Gray.exhaust).toHaveLength(4);
+    });
+
+    it("meeting Scramble 8 Exhausts nothing extra", () => {
+      const { state: next } = playAll(armory([], ["Coil Of Cable", "Coil Of Cable", "Coil Of Cable"]));
+      expect(next.Red.exhaust).toEqual([]);
+      expect(next.Gray.exhaust).toEqual([]);
+    });
+  });
+
   it("Heavy: an empty deck follows the Empty deck rule", () => {
     const state = rig({
       phase: "Play",

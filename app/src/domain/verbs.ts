@@ -447,8 +447,21 @@ export function exhaustFromPlay(
   return countExhausted(withPlayer(state, c, { ...p, exhaust: [...p.exhaust, card] }), c, 1, false);
 }
 
-/** System Feedback: bank a one-shot loss against this turn's shared stat pool. */
-export const applyPoolPenalty = (state: GameState, oomph: number, scramble: number): GameState => ({
+const bankFor = (state: GameState, c: Character, oomph: number, scramble: number) => ({
+  ...state.thisTurn.banked,
+  [c]: {
+    oomph: state.thisTurn.banked[c].oomph + oomph,
+    scramble: state.thisTurn.banked[c].scramble + scramble,
+  },
+});
+
+/** System Feedback: bank a one-shot loss against this turn's shared stat pool, and against `c`'s side. */
+export const applyPoolPenalty = (
+  state: GameState,
+  c: Character,
+  oomph: number,
+  scramble: number,
+): GameState => ({
   ...state,
   thisTurn: {
     ...state.thisTurn,
@@ -456,20 +469,31 @@ export const applyPoolPenalty = (state: GameState, oomph: number, scramble: numb
       oomph: state.thisTurn.poolPenalty.oomph + oomph,
       scramble: state.thisTurn.poolPenalty.scramble + scramble,
     },
+    banked: bankFor(state, c, -oomph, -scramble),
   },
 });
 
-/** Bank a stat gain against this turn's shared pool. */
-export const applyPoolBonus = (state: GameState, stat: Stat, amount: number): GameState => ({
-  ...state,
-  thisTurn: {
-    ...state.thisTurn,
-    poolBonus: {
-      oomph: state.thisTurn.poolBonus.oomph + (stat === "Oomph" ? amount : 0),
-      scramble: state.thisTurn.poolBonus.scramble + (stat === "Scramble" ? amount : 0),
+/** Bank a stat gain against this turn's shared pool, and against `c`'s side. */
+export const applyPoolBonus = (
+  state: GameState,
+  c: Character,
+  stat: Stat,
+  amount: number,
+): GameState => {
+  const oomph = stat === "Oomph" ? amount : 0;
+  const scramble = stat === "Scramble" ? amount : 0;
+  return {
+    ...state,
+    thisTurn: {
+      ...state.thisTurn,
+      poolBonus: {
+        oomph: state.thisTurn.poolBonus.oomph + oomph,
+        scramble: state.thisTurn.poolBonus.scramble + scramble,
+      },
+      banked: bankFor(state, c, oomph, scramble),
     },
-  },
-});
+  };
+};
 
 /** Put a card on top of a deck. Nothing shuffles during a floor, so it is next. */
 export function topDeck(state: GameState, c: Character, card: Card): GameState {

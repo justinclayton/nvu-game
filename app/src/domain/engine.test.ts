@@ -939,6 +939,40 @@ describe("Room kinds: Room and Stairwell", () => {
     expect(next.Gray.hand.filter((c) => c.kind === "bad_stuff")).toHaveLength(2);
   });
 
+  describe("'The player who played the least Scramble this turn Exhausts 3' — Outrun The Laser", () => {
+    const outrun = (over: { Red?: Partial<PlayerState>; Gray?: Partial<PlayerState> } = {}) =>
+      rig({
+        phase: "Play",
+        activeRoom: room("Outrun The Laser"),
+        Red: player({ deck: pile("Shove", 6), ...over.Red }),
+        Gray: player({ deck: pile("Duck Under", 6), ...over.Gray }),
+      });
+
+    it("the one who played less takes it without being asked", () => {
+      const state = outrun({ Red: { hand: [card("Coil Of Cable")] } });
+      const r = ids(state, "Red");
+      const { state: next, events } = play(state, [
+        playFree("Red", r[0] as CardId),
+        { type: "END_PLAY" },
+      ]);
+      expect(eventTypes(events)).toContain("ROOM_FLED");
+      expect(next.pending).toBeNull();
+      expect(next.Gray.exhaust).toHaveLength(3);
+      expect(next.Red.exhaust).toHaveLength(0);
+    });
+
+    it("on a tie the team chooses, and only the chosen player Exhausts", () => {
+      const state = outrun();
+      const { state: asked } = must(state, { type: "END_PLAY" });
+      expect(asked.pending?.kind).toBe("ChooseCharacter");
+      if (asked.pending?.kind !== "ChooseCharacter") return;
+      expect(asked.pending.options).toEqual(["Red", "Gray"]);
+      const { state: next } = must(asked, { type: "CHOOSE_CHARACTER", character: "Red" });
+      expect(next.Red.exhaust).toHaveLength(3);
+      expect(next.Gray.exhaust).toHaveLength(0);
+    });
+  });
+
   describe("'both players may Scrap a card from their hand or discard pile' — Automated Defense Turret", () => {
     const meetsScrapLine = (over: { Red?: Partial<PlayerState>; Gray?: Partial<PlayerState> } = {}) =>
       rig({

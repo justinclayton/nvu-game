@@ -14,7 +14,7 @@ var NVU_CARDS = {
   meta: {"version":"C58","updated":"2026-10-03"},
   rulesVersion: "R34",
   cardsVersion: "C58",
-  cardListId: "a4a388497217",
+  cardListId: "f9f6f2868cc7",
   cards: [
     {"name":"Shove","set":"official","kind":"player","owner":"Red","starter":true,"cost":1,"oomph":2,"flavor":"'Oomph!', he shouted.","count":4},
     {"name":"Charge","set":"official","kind":"player","owner":"Red","starter":true,"cost":2,"oomph":4,"flavor":"I am bolder, so I lower my shoulder.","count":4},

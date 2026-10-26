@@ -138,6 +138,7 @@ export const emptyTurnRecord = (): TurnRecord => ({
   playDiscount: { Red: 0, Gray: 0 },
   poolPenalty: { oomph: 0, scramble: 0 },
   poolBonus: { oomph: 0, scramble: 0 },
+  banked: { Red: { oomph: 0, scramble: 0 }, Gray: { oomph: 0, scramble: 0 } },
   exhausted: { Red: 0, Gray: 0 },
   exhaustedFromDeck: { Red: 0, Gray: 0 },
 });

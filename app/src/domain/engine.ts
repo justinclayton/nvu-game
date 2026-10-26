@@ -17,6 +17,7 @@ import {
   exhaustPreventedBy,
   exhaustXPreventedBy,
   payOptions,
+  playedStats,
   statPool,
   thresholdIsMet,
 } from "./queries";
@@ -844,6 +845,31 @@ function drain(state: GameState, run: Run): GameState {
     }
     if (head.who === "other") {
       s = withEffects(s, rest);
+      continue;
+    }
+    if (head.who === "leastOomph" || head.who === "leastScramble") {
+      // Whoever played less takes it without being asked; on a tie the team
+      // picks among the players still standing, as for a "one" target.
+      const stat = head.who === "leastOomph" ? "oomph" : "scramble";
+      const red = playedStats(s, "Red")[stat];
+      const gray = playedStats(s, "Gray")[stat];
+      if (red !== gray) {
+        s = withEffects(s, [retarget(head, red < gray ? "Red" : "Gray"), ...rest]);
+        continue;
+      }
+      const options = standing(s);
+      const only = options[0];
+      if (!only) {
+        s = withEffects(s, rest);
+        continue;
+      }
+      if (options.length > 1) {
+        return {
+          ...s,
+          pending: { kind: "ChooseCharacter", prompt: promptFor(head), options, source: null },
+        };
+      }
+      s = withEffects(s, chosenOne(resolution.effects, only));
       continue;
     }
     if (head.who === "one") {

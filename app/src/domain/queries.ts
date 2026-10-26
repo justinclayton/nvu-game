@@ -155,6 +155,20 @@ export function statPool(state: GameState, side?: Character): StatTotals {
   };
 }
 
+/**
+ * What one player played this turn: their side's total from `statPool`, plus
+ * any gain or loss a card of theirs banked. "The player who played the least
+ * Scramble" reads this; a stat never reads below zero.
+ */
+export function playedStats(state: GameState, side: Character): StatTotals {
+  const own = statPool(state, side);
+  const banked = state.thisTurn.banked[side];
+  return {
+    oomph: Math.max(0, own.oomph + banked.oomph),
+    scramble: Math.max(0, own.scramble + banked.scramble),
+  };
+}
+
 /** A card that says "ALL rooms require an additional N Scramble" is read from either hand. */
 function thresholdScrambleDelta(state: GameState): number {
   let delta = 0;

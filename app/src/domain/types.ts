@@ -140,6 +140,8 @@ export interface TurnRecord {
   readonly poolPenalty: { readonly oomph: number; readonly scramble: number };
   /** Banked onto the shared pool this turn by cards that add a stat. */
   readonly poolBonus: { readonly oomph: number; readonly scramble: number };
+  /** The net of those two, by the character whose card banked it: what each side's own total gains or loses. */
+  readonly banked: Readonly<Record<Character, { readonly oomph: number; readonly scramble: number }>>;
   /** It Pays To Be Reckless: cards each character put in their Exhaust pile this turn, from any pile. */
   readonly exhausted: Readonly<Record<Character, number>>;
   /** Bull Rush: of those, the ones Exhausted off the top of the deck. */

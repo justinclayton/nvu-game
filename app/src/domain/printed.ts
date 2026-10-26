@@ -38,8 +38,17 @@ export type CardSet = "official" | "proposed";
  * `who: "one"` means the team chooses which character, and that character
  * takes all of it. There is no splitting. `who: "other"` is the character
  * `"one"` did not choose in the effect just before it.
+ *
+ * `leastOomph` and `leastScramble` are the player who played less of that
+ * stat this turn: the engine retargets to them, or asks the team on a tie.
  */
-export type EffectTarget = Character | "one" | "both" | "other";
+export type EffectTarget =
+  | Character
+  | "one"
+  | "both"
+  | "other"
+  | "leastOomph"
+  | "leastScramble";
 
 export type RoomEffect =
   | { readonly type: "ExhaustFromDeck"; readonly who: EffectTarget; readonly amount: number }

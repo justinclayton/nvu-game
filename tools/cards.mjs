@@ -326,6 +326,8 @@ function who(word) {
   if (w === "both players" || w === "both") return "both";
   if (w === "one player" || w === "one") return "one";
   if (w === "the other") return "other";
+  if (w === "the player who played the least oomph this turn") return "leastOomph";
+  if (w === "the player who played the least scramble this turn") return "leastScramble";
   if (w === "red") return "Red";
   if (w === "gray") return "Gray";
   throw new Error(`unrecognised target: "${word}"`);
@@ -339,7 +341,7 @@ const CLAUSES = [
   [/^(?:and )?flee this room for free$/i, () => ({ fleeFree: true })],
   [/^(?:and )?leave empty-handed$/i, () => ({})],
   [
-    /^(both players|one player|red|gray) exhausts? (\d+)$/i,
+    /^(both players|one player|red|gray|the player who played the least (?:oomph|scramble) this turn) exhausts? (\d+)$/i,
     (m) => ({ effect: { type: "ExhaustFromDeck", who: who(m[1]), amount: Number(m[2]) } }),
   ],
   [

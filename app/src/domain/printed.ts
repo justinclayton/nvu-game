@@ -22,10 +22,10 @@ export type CardKind = "player" | "good_stuff" | "bad_stuff";
 /** The type line of a room card (rulebook, Card anatomy: Room Cards). */
 export type RoomKind = "room" | "stairwell";
 
-/** Rooms and Stairwells pool by tier: floors 1–3, 4–6, 7–9 (rulebook Setup, "Floor deck"). */
-export type Band = 1 | 2 | 3;
+/** A room's tier is the floor the card serves, 1 to 5 (rulebook Setup, "Floor deck"). */
+export type Band = 1 | 2 | 3 | 4 | 5;
 
-/** A room's tier, or `null` for the one fixed Floor 10 Stairwell (cards.yaml, "Rooms"). */
+/** The floor a room serves, or `null` for the Roof, its one fixed Stairwell (cards.yaml, "Rooms"). */
 export type RoomBand = Band | null;
 
 /** Whether a card is ratified or still a proposal. Only official cards gate the build. */
@@ -38,8 +38,17 @@ export type CardSet = "official" | "proposed";
  * `who: "one"` means the team chooses which character, and that character
  * takes all of it. There is no splitting. `who: "other"` is the character
  * `"one"` did not choose in the effect just before it.
+ *
+ * `leastOomph` and `leastScramble` are the player who played less of that
+ * stat this turn: the engine retargets to them, or asks the team on a tie.
  */
-export type EffectTarget = Character | "one" | "both" | "other";
+export type EffectTarget =
+  | Character
+  | "one"
+  | "both"
+  | "other"
+  | "leastOomph"
+  | "leastScramble";
 
 export type RoomEffect =
   | { readonly type: "ExhaustFromDeck"; readonly who: EffectTarget; readonly amount: number }
@@ -78,6 +87,12 @@ export interface Threshold {
   /** The outcome says `Ascend`: the Floor is cleared instead of running Cleanup. */
   readonly ascends: boolean;
   readonly effects: readonly RoomEffect[];
+  /**
+   * Printed clauses the generator could not read. The line still prints and
+   * resolves whatever it did read; the content test fails while this is
+   * non-empty, so the PR that printed the line builds the rest.
+   */
+  readonly unparsed?: readonly string[];
 }
 
 /**
@@ -100,6 +115,8 @@ export interface FleeLine {
   /** Whether this room's Flee text Clears it. A Stuff room's never does. */
   readonly clears: boolean;
   readonly effects: readonly RoomEffect[];
+  /** As on a Threshold: clauses the generator could not read. */
+  readonly unparsed?: readonly string[];
 }
 
 /** A player card or a piece of Stuff, exactly as printed (rulebook, Card anatomy). */
@@ -123,6 +140,10 @@ export interface CardFace {
   readonly flavor: string;
 }
 
+/** The words a room's text may open with. Ambush is shown only: no rule can skip a revealed room. */
+export type RoomKeyword =
+  | "Ambush" | "Dim" | "Lockstep" | "Cap" | "Toxic" | "Unstable" | "Draining" | "Heavy" | "Relentless" | "Corrosive";
+
 /** A room card, exactly as printed (rulebook, Card anatomy: Room Cards). */
 export interface RoomFace {
   readonly name: string;
@@ -134,6 +155,10 @@ export interface RoomFace {
   readonly flavor: string;
   /** A room's own printed rule, beyond its thresholds and Flee line (e.g. Bio-Hazard Containment Vault). */
   readonly text: string;
+  /** The words before any "(" in `text`, read by the generator; the engine switches on these. */
+  readonly keywords: readonly RoomKeyword[];
+  /** Words before any "(" that are not keywords yet; the content test names them, as it does unread clauses. */
+  readonly unparsedKeywords?: readonly string[];
   readonly count: number;
   readonly challenges: readonly Challenge[];
   readonly flee: FleeLine;

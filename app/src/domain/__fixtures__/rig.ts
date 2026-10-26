@@ -57,6 +57,11 @@ export function room(name: string): Room {
   return mintRoom(face, counter);
 }
 
+/** A printed room without its keywords, for a test of a rule its Lockstep or Cap would get in the way of. */
+export function plainRoom(name: string): Room {
+  return { ...room(name), keywords: [] };
+}
+
 /** Security Turnstile with its Oomph 5 line paying Red Good Stuff, for tests of Good Stuff arriving at Outcome. */
 export function goodStuffTurnstile(): Room {
   const printed = room("Security Turnstile");
@@ -76,9 +81,12 @@ export function goodStuffTurnstile(): Room {
   };
 }
 
-/** Flooded Ventilation Shaft with its Oomph 3 and Scramble 3 line paying both players Good Stuff. */
+/**
+ * Puzzle Room with its Oomph 3 and Scramble 5 line paying both players Good
+ * Stuff, and without its Lockstep, so one player may play the whole line.
+ */
 export function goodStuffShaft(): Room {
-  const printed = room("Flooded Ventilation Shaft");
+  const printed = plainRoom("Puzzle Room");
   return {
     ...printed,
     challenges: printed.challenges.map((challenge) => ({
@@ -234,11 +242,11 @@ export const playing = (over: Partial<GameState> = {}): GameState =>
     ...over,
   });
 
-/** Play phase at Smoldering Armory (Flee: Both players Exhaust 3), both decks and discard piles empty: one Exhaust away from Going Down. */
+/** Play phase at Ticking Time Bomb (Flee: Both players Exhaust 3), both decks and discard piles empty: one Exhaust away from Going Down. */
 export const goingDown = (hand: readonly Card[] = []): GameState =>
   rig({
     phase: "Play",
-    activeRoom: room("Smoldering Armory"),
+    activeRoom: room("Ticking Time Bomb"),
     Red: player({ deck: [], discard: [], hand }),
     Gray: player({ deck: pile("Duck Under", 4) }),
   });

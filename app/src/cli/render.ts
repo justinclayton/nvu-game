@@ -7,12 +7,12 @@ import {
   metThresholds,
   payOptions,
   playableCards,
-  scrapForStatsCards,
   statPool,
   thresholdLines,
 } from "@domain/queries";
 import type { Card, Character, GameState, Room } from "@domain/types";
 import type { CardFace, RoomFace, StatRequirement } from "@domain/printed";
+import { floorName } from "@domain/setup";
 import { CHARACTERS, playerOf } from "@domain/verbs";
 
 /**
@@ -94,6 +94,7 @@ export function printedRoomLines(room: RoomFace): string[] {
 function roomLines(state: GameState, room: Room): string[] {
   const met = new Set(metThresholds(state));
   const lines = [`Room: ${room.name} (${room.kind})`];
+  if (room.text.trim() !== "") lines.push(`  ${room.text.trim()}`);
   for (const t of allThresholds(room)) {
     const mark = met.has(t) ? "✔" : " ";
     const need = thresholdLines(state, t)
@@ -152,7 +153,7 @@ export function renderTable(state: GameState): string {
   // turn it is about to start instead.
   const turn = state.phase === "Turn Start" ? state.turn + 1 : state.turn;
   lines.push(
-    `Floor ${String(state.floor)} · turn ${String(turn)} · ${state.phase}` +
+    `${floorName(state.floor)} · turn ${String(turn)} · ${state.phase}` +
       `   floor deck ${String(state.floorDeck.length)}, cleared ${String(state.cleared.length)}` +
       `   Good Stuff ${String(state.pools.goodStuff.length)}, Bad Stuff ${String(state.pools.badStuff.length)}`,
   );
@@ -241,9 +242,6 @@ export function moveHint(state: GameState): string {
           const payers = payOptions(state, c, card.id).map((x) => x.name);
           const pay = cost > 0 ? ` pay <${String(cost)} of: ${payers.join(", ")}>` : "";
           lines.push(`card ${c} ${card.name} (cost ${String(cost)})${pay}`);
-        }
-        for (const card of scrapForStatsCards(state, c)) {
-          lines.push(`scrap ${c} ${card.name} for <Oomph|Scramble>`);
         }
       }
       lines.push("end — end the Play phase and resolve the room");

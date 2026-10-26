@@ -19,9 +19,13 @@ import type { GameState, Room } from "./types";
 
 beforeEach(resetRig);
 
+/** What floor 2 is built from: tier 2's Stairwell and Rooms (tier 1's are already played). */
 const SUPPLY: readonly Room[] = [
-  room("The Sentry Drone"),
-  ...Array.from({ length: 8 }, () => room("Security Turnstile")),
+  room("Gears & Glitch"),
+  room("Gears & Glitch"),
+  room("Gears & Glitch"),
+  room("Maintenance"),
+  room("Dark Room"),
 ];
 
 /** The Sentry Drone with its Oomph line printed as a plain "Ascend.", no reward. */
@@ -258,22 +262,45 @@ describe("Ascending, Stuff stays until Scrapped or Exhausted", () => {
 });
 
 describe("Ascending, build the next floor", () => {
-  it("'Setup, Floor deck' — one fewer room than last time", () => {
+  it("'Setup, Floor deck' — the next floor's deck is every card printed for its tier", () => {
     const { state: next, events } = clearIt(atStairwell(bareStairwell()));
     expect(next.floor).toBe(2);
     expect(next.phase).toBe("Turn Start");
-    const kinds = next.floorDeck.map((r) => r.kind);
-    expect(kinds.filter((k) => k === "stairwell")).toHaveLength(1);
-    expect(next.floorDeck).toHaveLength(9);
+    expect(next.floorDeck).toHaveLength(SUPPLY.length);
+    expect(next.floorDeck.every((r) => r.tier === 2)).toBe(true);
+    expect(next.floorDeck.filter((r) => r.kind === "stairwell")).toHaveLength(3);
     expect(eventTypes(events)).toContain("FLOOR_BUILT");
+  });
+
+  it("ascending from floor 5 builds the Roof: The Supreme Commander alone", () => {
+    const state = atStairwell(bareStairwell(), {
+      floor: 5,
+      roomSupply: [room("The Supreme Commander"), room("Gears & Glitch")],
+    });
+    const { state: next } = clearIt(state);
+    expect(next.floor).toBe(6);
+    expect(next.phase).toBe("Turn Start");
+    expect(next.floorDeck.map((r) => r.name)).toEqual(["The Supreme Commander"]);
+  });
+
+  // Rulebook Setup, "Floor deck": the floor deck is "the cards for that floor";
+  // a tier that prints no Stairwell leaves the players no way up.
+  it("a floor whose tier prints no Stairwell ends Aborted, naming the floor", () => {
+    const state = atStairwell(bareStairwell(), { roomSupply: [room("Maintenance")] });
+    const { state: next, events } = clearIt(state);
+    expect(next.phase).toBe("GameOver");
+    expect(next.outcome).toBe("Aborted");
+    const aborted = events.find((e) => e.type === "RUN_ABORTED");
+    expect(aborted && "reason" in aborted ? aborted.reason : "").toContain("Floor 2");
   });
 });
 
 describe("Winning and losing", () => {
-  it("'you win by clearing floor 10's Stairwell'", () => {
+  // Rulebook, Winning and losing: "You win by clearing the final room on the Roof."
+  it("'you win by clearing the final room on the Roof'", () => {
     const state = rig({
       phase: "Play",
-      floor: 10,
+      floor: 6,
       activeRoom: bareStairwell(),
       Red: player({
         deck: pile("Shove", 4),

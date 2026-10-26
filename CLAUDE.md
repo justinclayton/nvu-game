@@ -12,6 +12,9 @@ build commands are in [`app/README.md`](app/README.md).
   `running-out.test.ts`, `reactions.test.ts`, `walkthroughs.test.ts`.
 - **A card.** `app/src/domain/cards/<red|gray|stuff>.ts` and its test. The
   card's text lives in `cards.yaml`.
+- **Cards by hand.** The `/card-editor` skill opens every card as an editable
+  face and writes the designer's edits back into `cards.yaml`
+  (`tools/card-editor.mjs`).
 - **A query the UI or CLI reads.** `app/src/domain/queries.ts`.
 - **A CLI verb.** `app/src/cli/args.ts`, then `main.ts`, then `render.ts` for
   what it prints.

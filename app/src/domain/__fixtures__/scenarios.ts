@@ -131,7 +131,7 @@ function orderingCards(): GameState {
     phase: "Play",
     activeRoom: room(CLEARED_ROOM),
     Gray: player({ deck: pile("Duck Under", 4), hand: [card("Hack the Doors"), card("Duck Under")] }),
-    floorDeck: [room(SORTING_ROOM), room("Flooded Ventilation Shaft"), room("The Sentry Drone")],
+    floorDeck: [room(SORTING_ROOM), room("Puzzle Room"), room("The Sentry Drone")],
   });
   const [hack, pay] = state.Gray.hand;
   if (!hack || !pay) throw new Error("rig");
@@ -139,29 +139,30 @@ function orderingCards(): GameState {
   return must(asked.state, { type: "CHOOSE_PILE", pile: "Floor deck" }).state;
 }
 
-/** A pending `ChooseGoodStuff`: a Flooded Ventilation Shaft that pays both players Good Stuff, and both spreads are face up. */
+/** A pending `ChooseGoodStuff`: a Puzzle Room that pays both players Good Stuff, and both spreads are face up. */
 function goodStuffSpread(): GameState {
   const state = rig({
     phase: "Play",
     activeRoom: goodStuffShaft(),
-    Red: player({ deck: pile("Shove", 5), hand: [card("Pry Bar"), card("Coil Of Cable")] }),
+    Red: player({ deck: pile("Shove", 5), hand: [card("Pry Bar"), ...pile("Coil Of Cable", 2)] }),
     Gray: player({ deck: pile("Duck Under", 5) }),
   });
-  const [pry, coil] = state.Red.hand;
-  if (!pry || !coil) throw new Error("rig");
+  const [pry, coil, coil2] = state.Red.hand;
+  if (!pry || !coil || !coil2) throw new Error("rig");
   const { state: asked } = play(state, [
     { type: "PLAY_CARD", character: "Red", cardId: pry.id, payWith: [] },
     { type: "PLAY_CARD", character: "Red", cardId: coil.id, payWith: [] },
+    { type: "PLAY_CARD", character: "Red", cardId: coil2.id, payWith: [] },
     { type: "END_PLAY" },
   ]);
   return asked;
 }
 
-/** A pending `TakeReward`: Pressurized Maintenance Hub revealed the top 3 of Red's reward pool. */
+/** A pending `TakeReward`: Maintenance revealed the top 3 of Red's reward pool. */
 function cardReward(): GameState {
   const state = rig({
     phase: "Play",
-    activeRoom: room("Pressurized Maintenance Hub"),
+    activeRoom: room("Maintenance"),
     Red: player({
       deck: pile("Shove", 5),
       hand: [card("Charge"), card("Shove"), card("Shove"), card("Pry Bar")],

@@ -10,14 +10,13 @@ import { createSession, loadSession, type Session } from "./session";
 
 const content = CARD_CONTENT;
 // A seed the naive "always take what's affordable" driver below plays to a
-// Defeat well inside tier 1 (#122/#123/#125: floor 4 and up has no content
-// yet, so a run that ascends that far finds an empty floor deck). Band 1's
-// pool is also short of floor 1's own count (setup.test.ts), so this run
-// now ends Aborted at floor 1 before a single command runs.
+// Defeat well inside tier 1. Every floor now prints a Stairwell (C59 adds
+// floors 4 and 5 and the Roof's The Supreme Commander), so a real run is not
+// Aborted; it ends in a Defeat or a Win.
 const SEED = 20260918;
 // Same driver, a padded tier 1, and a seed proven (by simulate/randomPolicy) to
-// clear several turns before a Defeat — used only where a test needs more than
-// the one Aborted row the real card list gives every other run in this file.
+// clear several turns before a Defeat — used where a test needs a run long
+// enough to exercise turnRows across many turns.
 const FULL_SEED = 9;
 const WHEN = new Date("2026-09-17T09:30:00.000Z");
 
@@ -139,9 +138,8 @@ describe("the transcript (.txt)", () => {
 
 describe("one row per turn (.csv)", () => {
   it("counts what the events say, and files each note under the turn it was typed in", () => {
-    // Band 1's pool is short of floor 1's own count (setup.test.ts), so this
-    // one plays out on a padded tier 1 — it is the only test here that needs
-    // more than the one Aborted row to exercise turnRows across many turns.
+    // This one plays out on a padded tier 1 so that the run lasts
+    // many turns, to exercise turnRows across all of them.
     const session = playedAndNoted(FULL_SEED, FULL_CONTENT);
     const rows = turnRows(
       session.getState().events,

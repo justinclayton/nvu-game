@@ -198,7 +198,7 @@ export const STUFF: Registry = {
         );
       }
       if (answer.kind !== "stat") return nothing(state);
-      return done(applyPoolBonus(state, answer.stat, 2));
+      return done(applyPoolBonus(state, ctx.character, answer.stat, 2));
     },
   },
 
@@ -212,7 +212,12 @@ export const STUFF: Registry = {
       let s = state;
       if (playedBy(s, other(ctx.character)) > 0) {
         const key = `${ctx.card.id}:pocket-dynamo`;
-        s = applyPoolBonus(applyPoolBonus(markFired(s, key), "Oomph", 1), "Scramble", 1);
+        s = applyPoolBonus(
+          applyPoolBonus(markFired(s, key), ctx.character, "Oomph", 1),
+          ctx.character,
+          "Scramble",
+          1,
+        );
       }
       return ask(s, drawQuestion(ctx, "pocket-dynamo", "Draw 1 card?", ctx.character));
     },
@@ -224,7 +229,12 @@ export const STUFF: Registry = {
       }
       const key = `${ctx.card.id}:pocket-dynamo`;
       if (hasFired(state, key)) return nothing(state);
-      const s = applyPoolBonus(applyPoolBonus(markFired(state, key), "Oomph", 1), "Scramble", 1);
+      const s = applyPoolBonus(
+        applyPoolBonus(markFired(state, key), ctx.character, "Oomph", 1),
+        ctx.character,
+        "Scramble",
+        1,
+      );
       return done(s);
     },
   },
@@ -443,7 +453,7 @@ export const STUFF: Registry = {
       if (ctx.zone !== "hand") return nothing(state);
       if (event.type !== "CARD_PLAYED" || event.character !== ctx.character) return nothing(state);
       if (event.card.cost !== 0) return nothing(state);
-      return done(applyPoolPenalty(state, 1, 1));
+      return done(applyPoolPenalty(state, ctx.character, 1, 1));
     },
   },
 };

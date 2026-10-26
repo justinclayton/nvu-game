@@ -4,7 +4,7 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import { execute } from "./engine";
 import { roomId } from "./ids";
-import { costOf, statPool, thresholdIsMet } from "./queries";
+import { playableCards, statPool, thresholdIsMet } from "./queries";
 import { shuffle } from "./rng";
 import {
   card,
@@ -20,6 +20,7 @@ import {
   resetRig,
   rig,
   room,
+  plainRoom,
   goodStuffShaft,
   goodStuffTurnstile,
 } from "./__fixtures__/rig";
@@ -42,6 +43,8 @@ function fixtureRoom(challenges: readonly Challenge[]): Room {
     kind: "room",
     tier: 1,
     flavor: "",
+    text: "",
+    keywords: [],
     challenges,
     flee: { text: "Leave empty-handed.", clears: false, effects: [] },
   };
@@ -52,7 +55,7 @@ describe("Turn Start", () => {
     const first = room("Security Turnstile");
     const state = rig({
       phase: "Turn Start",
-      floorDeck: [first, room("Flooded Ventilation Shaft")],
+      floorDeck: [first, room("Puzzle Room")],
       Red: player({ deck: pile("Shove", 5) }),
       Gray: player({ deck: pile("Duck Under", 5) }),
     });
@@ -112,6 +115,84 @@ describe("Turn Start", () => {
     const { state: next } = must(state, { type: "FLIP_ROOM" });
     expect(next.Red.hand).toHaveLength(5);
     expect(next.Red.deck).toHaveLength(2);
+  });
+
+  it("Dim: 'only draw up to 4 cards' — each player draws until they hold 4", () => {
+    const state = rig({
+      phase: "Turn Start",
+      floorDeck: [room("Dark Room")],
+      Red: player({ deck: pile("Shove", 5) }),
+      Gray: player({ deck: pile("Duck Under", 5) }),
+    });
+    const { state: next } = must(state, { type: "FLIP_ROOM" });
+    expect(next.Red.hand).toHaveLength(4);
+    expect(next.Gray.hand).toHaveLength(4);
+    expect(next.Red.deck).toHaveLength(1);
+  });
+
+  it("Dim: a card that tightens the cap further still applies", () => {
+    const state = rig({
+      phase: "Turn Start",
+      floorDeck: [room("Dark Room")],
+      Red: player({ deck: pile("Shove", 5), hand: [card("Faceful Of Slime")] }),
+      Gray: player({ deck: pile("Duck Under", 5) }),
+    });
+    const { state: next } = must(state, { type: "FLIP_ROOM" });
+    // Target 4 - 1 = 3, and the held Faceful Of Slime counts toward it.
+    expect(next.Red.hand).toHaveLength(3);
+    expect(next.Gray.hand).toHaveLength(4);
+  });
+
+  it("Dim: a player already holding 4 or more draws nothing", () => {
+    const state = rig({
+      phase: "Turn Start",
+      floorDeck: [room("Dark Room")],
+      Red: player({ deck: pile("Shove", 5), hand: pile("Charge", 4) }),
+      Gray: player({ deck: pile("Duck Under", 5), hand: pile("Charge", 5) }),
+    });
+    const { state: next } = must(state, { type: "FLIP_ROOM" });
+    expect(next.Red.hand).toHaveLength(4);
+    expect(next.Red.deck).toHaveLength(5);
+    expect(next.Gray.hand).toHaveLength(5);
+    expect(next.Gray.deck).toHaveLength(5);
+  });
+
+  it("Toxic: 'On Enter: Both players get Bad Stuff' — one each before the draw, counted toward the hand, logged against the room", () => {
+    const toxic = room("Slimy Bio-Hazard Containment");
+    const state = rig({
+      phase: "Turn Start",
+      floorDeck: [toxic],
+      Red: player({ deck: pile("Shove", 6) }),
+      Gray: player({ deck: pile("Duck Under", 6) }),
+    });
+    const { state: next, events } = must(state, { type: "FLIP_ROOM" });
+    for (const c of ["Red", "Gray"] as const) {
+      expect(next[c].hand.filter((h) => h.kind === "bad_stuff")).toHaveLength(1);
+      expect(next[c].hand).toHaveLength(5);
+      expect(next[c].deck).toHaveLength(2);
+    }
+    const taken = events.filter((e) => e.type === "STUFF_TAKEN");
+    expect(taken.map((e) => e.source)).toEqual([toxic.name, toxic.name]);
+    const types = eventTypes(events);
+    expect(types.indexOf("STUFF_TAKEN")).toBeLessThan(types.indexOf("CARD_DRAWN"));
+  });
+
+  it("Toxic: a Toxic room that comes up again after a Flee deals Bad Stuff again", () => {
+    const toxic = room("Slimy Bio-Hazard Containment");
+    const state = rig({
+      phase: "Turn Start",
+      floorDeck: [toxic],
+      Red: player({ deck: pile("Shove", 10) }),
+      Gray: player({ deck: pile("Duck Under", 10) }),
+    });
+    const first = must(state, { type: "FLIP_ROOM" }).state;
+    // A Flee shuffles the room back into the floor deck; the next flip enters it again.
+    const again = must(
+      { ...first, phase: "Turn Start", floorDeck: [toxic], activeRoom: null },
+      { type: "FLIP_ROOM" },
+    );
+    expect(again.events.filter((e) => e.type === "STUFF_TAKEN")).toHaveLength(2);
+    expect(again.state.Red.hand.filter((h) => h.kind === "bad_stuff")).toHaveLength(2);
   });
 });
 
@@ -286,6 +367,194 @@ describe("Cleanup", () => {
     expect(next.Red.exhaust.map((c) => c.name)).toContain("Charge");
   });
 
+  it("Draining: every played card is Exhausted, not discarded, and other rooms are unchanged", () => {
+    for (const [name, draining] of [["Vacuum Chamber", true], ["Security Turnstile", false]] as const) {
+      const state = rig({
+        phase: "Play",
+        activeRoom: room(name),
+        Red: player({ deck: pile("Shove", 5), hand: [card("Pry Bar")] }),
+        Gray: player({ deck: pile("Duck Under", 5), hand: [card("Coil Of Cable")] }),
+      });
+      const { state: next } = play(state, [
+        playFree("Red", ids(state, "Red")[0] as CardId),
+        playFree("Gray", ids(state, "Gray")[0] as CardId),
+        { type: "END_PLAY" },
+      ]);
+      expect(next.playZone).toEqual([]);
+      if (draining) {
+        expect(next.Red.exhaust.map((c) => c.name)).toContain("Pry Bar");
+        expect(next.Gray.exhaust.map((c) => c.name)).toContain("Coil Of Cable");
+        expect(next.Red.discard.map((c) => c.name)).not.toContain("Pry Bar");
+      } else {
+        expect(next.Red.discard.map((c) => c.name)).toContain("Pry Bar");
+        expect(next.Gray.discard.map((c) => c.name)).toContain("Coil Of Cable");
+      }
+    }
+  });
+
+  it("Heavy: each card played, free plays included, Exhausts 1 from the player's own deck", () => {
+    for (const [name, heavy] of [["Gravity...Room", true], ["Security Turnstile", false]] as const) {
+      const state = rig({
+        phase: "Play",
+        activeRoom: room(name),
+        Red: player({ deck: pile("Shove", 5), hand: [card("Pry Bar")] }),
+        Gray: player({ deck: pile("Duck Under", 5), hand: [card("Coil Of Cable")] }),
+      });
+      const { state: next } = play(state, [
+        playFree("Red", ids(state, "Red")[0] as CardId),
+        playFree("Gray", ids(state, "Gray")[0] as CardId),
+      ]);
+      expect(next.Red.deck).toHaveLength(heavy ? 4 : 5);
+      expect(next.Gray.deck).toHaveLength(heavy ? 4 : 5);
+      expect(next.Red.exhaust.map((c) => c.name)).toEqual(heavy ? ["Shove"] : []);
+    }
+  });
+
+  const lockstepState = (name: string) =>
+    rig({
+      phase: "Play",
+      activeRoom: room(name),
+      Red: player({ deck: pile("Shove", 5), hand: pile("Pry Bar", 3) }),
+      Gray: player({ deck: pile("Duck Under", 5), hand: [card("Coil Of Cable"), card("Coil Of Cable")] }),
+    });
+
+  it("Lockstep: after Red plays and Gray passes, Red still cannot play; passing stays legal", () => {
+    const state = lockstepState("Puzzle Room");
+    const red = ids(state, "Red");
+    const { state: after } = play(state, [playFree("Red", red[0] as CardId)]);
+    expect(playableCards(after, "Red")).toEqual([]);
+    expect(playableCards(after, "Gray").length).toBeGreaterThan(0);
+    const again = execute(after, playFree("Red", red[1] as CardId));
+    expect(again.ok).toBe(false);
+    expect(execute(after, { type: "END_PLAY" }).ok).toBe(true);
+  });
+
+  it("Lockstep: once Gray plays, Red may play again", () => {
+    const state = lockstepState("Laser Grid");
+    const { state: after } = play(state, [
+      playFree("Red", ids(state, "Red")[0] as CardId),
+      playFree("Gray", ids(state, "Gray")[0] as CardId),
+    ]);
+    expect(playableCards(after, "Red").length).toBeGreaterThan(0);
+    expect(playableCards(after, "Gray")).toEqual([]);
+    expect(execute(after, playFree("Red", ids(after, "Red")[0] as CardId)).ok).toBe(true);
+  });
+
+  it("Lockstep: either player may play the first card; rooms without it allow plays in a row", () => {
+    const locked = lockstepState("Double Dark Hallway of Death");
+    expect(execute(locked, playFree("Red", ids(locked, "Red")[0] as CardId)).ok).toBe(true);
+    expect(execute(locked, playFree("Gray", ids(locked, "Gray")[0] as CardId)).ok).toBe(true);
+
+    const open = lockstepState("Security Turnstile");
+    const red = ids(open, "Red");
+    const { state: after } = play(open, [playFree("Red", red[0] as CardId), playFree("Red", red[1] as CardId)]);
+    expect(after.playZone).toHaveLength(2);
+    expect(playableCards(after, "Red").length).toBeGreaterThan(0);
+  });
+
+  it("Cap: with 3 cards in the zone across both sides neither player may play; with 2 either may", () => {
+    const state = rig({
+      phase: "Play",
+      activeRoom: room("Maintenance"),
+      Red: player({ deck: pile("Shove", 5), hand: pile("Pry Bar", 3) }),
+      Gray: player({ deck: pile("Duck Under", 5), hand: [card("Coil Of Cable"), card("Coil Of Cable")] }),
+    });
+    const red = ids(state, "Red");
+    const gray = ids(state, "Gray");
+    const { state: two } = play(state, [playFree("Red", red[0] as CardId), playFree("Red", red[1] as CardId)]);
+    expect(two.playZone).toHaveLength(2);
+    expect(playableCards(two, "Red").length).toBeGreaterThan(0);
+    expect(playableCards(two, "Gray").length).toBeGreaterThan(0);
+    expect(execute(two, playFree("Red", red[2] as CardId)).ok).toBe(true);
+    expect(execute(two, playFree("Gray", gray[0] as CardId)).ok).toBe(true);
+
+    const { state: three } = play(two, [playFree("Gray", gray[0] as CardId)]);
+    expect(three.playZone).toHaveLength(3);
+    expect(playableCards(three, "Red")).toEqual([]);
+    expect(playableCards(three, "Gray")).toEqual([]);
+    expect(execute(three, playFree("Red", red[2] as CardId)).ok).toBe(false);
+    expect(execute(three, playFree("Gray", gray[1] as CardId)).ok).toBe(false);
+    expect(execute(three, { type: "END_PLAY" }).ok).toBe(true);
+  });
+
+  it("Corrosive: cards paid for a play are Scrapped, not Exhausted; other rooms are unchanged", () => {
+    for (const [name, corrosive] of [["Bubbly Slime Monster", true], ["Security Turnstile", false]] as const) {
+      const state = rig({
+        phase: "Play",
+        activeRoom: room(name),
+        Red: player({ deck: pile("Shove", 5), hand: [card("Shove"), card("Charge")] }),
+        Gray: player({ deck: pile("Duck Under", 5) }),
+      });
+      const { state: next } = play(state, [
+        {
+          type: "PLAY_CARD",
+          character: "Red",
+          cardId: handCard(state, "Red", "Shove").id,
+          payWith: [handCard(state, "Red", "Charge").id],
+        },
+      ]);
+      expect(next.scrapyard.map((c) => c.name)).toEqual(corrosive ? ["Charge"] : []);
+      expect(next.Red.exhaust.map((c) => c.name)).toEqual(corrosive ? [] : ["Charge"]);
+    }
+  });
+
+  describe("Unstable: 'if you didn't meet the Scramble challenge, Exhaust 2' — both players, Clear or Flee", () => {
+    const armory = (red: string[], gray: string[]) =>
+      rig({
+        phase: "Play",
+        activeRoom: room("Crumbling Armory"),
+        Red: player({ deck: pile("Shove", 10), hand: red.map((n) => card(n)) }),
+        Gray: player({ deck: pile("Duck Under", 10), hand: gray.map((n) => card(n)) }),
+      });
+    const playAll = (state: GameState) =>
+      play(state, [
+        ...ids(state, "Red").map((id) => playFree("Red", id)),
+        ...ids(state, "Gray").map((id) => playFree("Gray", id)),
+        { type: "END_PLAY" },
+      ]);
+
+    it("a Clear through the Oomph challenge, with Scramble under 8, Exhausts 2 each, logged against the room", () => {
+      const { state: next, events } = playAll(armory(["Pry Bar", "Pry Bar", "Pry Bar", "Pry Bar"], []));
+      expect(eventTypes(events)).toContain("ROOM_CLEARED");
+      expect(next.Red.exhaust.map((c) => c.name)).toEqual(["Shove", "Shove"]);
+      expect(next.Gray.exhaust.map((c) => c.name)).toEqual(["Duck Under", "Duck Under"]);
+      expect(JSON.stringify(events.filter((e) => e.type === "CARD_EXHAUSTED"))).toContain("Crumbling Armory");
+    });
+
+    it("a Flee Exhausts 2 each on top of the Flee line's own 'Both players Exhaust 2'", () => {
+      const { state: next, events } = playAll(armory([], []));
+      expect(eventTypes(events)).toContain("ROOM_FLED");
+      expect(next.Red.exhaust).toHaveLength(4);
+      expect(next.Gray.exhaust).toHaveLength(4);
+    });
+
+    it("meeting Scramble 8 Exhausts nothing extra", () => {
+      const { state: next } = playAll(armory([], ["Coil Of Cable", "Coil Of Cable", "Coil Of Cable"]));
+      expect(next.Red.exhaust).toEqual([]);
+      expect(next.Gray.exhaust).toEqual([]);
+    });
+  });
+
+  it("Heavy: an empty deck follows the Empty deck rule", () => {
+    const state = rig({
+      phase: "Play",
+      activeRoom: room("Gravity...Room"),
+      Red: player({ deck: [], discard: pile("Shove", 3), hand: [card("Pry Bar")] }),
+      Gray: player({ deck: pile("Duck Under", 5), hand: [] }),
+    });
+    const { state: next } = play(state, [playFree("Red", ids(state, "Red")[0] as CardId)]);
+    expect(next.Red.exhaust.map((c) => c.name)).toEqual(["Shove"]);
+    expect(next.Red.deck).toHaveLength(2);
+    const empty = rig({
+      phase: "Play",
+      activeRoom: room("Gravity...Room"),
+      Red: player({ deck: [], discard: [], hand: [card("Pry Bar")] }),
+      Gray: player({ deck: pile("Duck Under", 5), hand: [] }),
+    });
+    const { state: over } = play(empty, [playFree("Red", ids(empty, "Red")[0] as CardId)]);
+    expect(over.phase).toBe("GameOver");
+  });
+
   it("'the hand carries over untouched'", () => {
     const state = rig({
       phase: "Play",
@@ -303,7 +572,7 @@ describe("Cleanup", () => {
   });
 
   it("Outcome: 'shuffle the room card back into the Floor deck' — the same turn it Flees", () => {
-    const rest = room("Flooded Ventilation Shaft");
+    const rest = room("Puzzle Room");
     const state = rig({
       seed: 4242,
       phase: "Play",
@@ -322,6 +591,68 @@ describe("Cleanup", () => {
     expect(next.floorDeck).toEqual(expectedDeck);
     expect(next.seed).toBe(expectedSeed);
   });
+
+  it("Relentless: a fled Relentless room goes on top of the Floor deck, unshuffled", () => {
+    const below = [room("Puzzle Room"), room("The Sentry Drone"), room("Gears & Glitch")];
+    const state = rig({
+      seed: 4242,
+      phase: "Play",
+      activeRoom: room("Mercenaries"),
+      floorDeck: below,
+      Red: player({ deck: pile("Shove", 5) }),
+      Gray: player({ deck: pile("Duck Under", 5) }),
+    });
+    const fledRoom = state.activeRoom as Room;
+    const { state: next, events } = play(state, [{ type: "END_PLAY" }]);
+    expect(eventTypes(events)).toContain("FLED_RESHUFFLED");
+    expect(next.floorDeck).toEqual([fledRoom, ...below]);
+    expect(next.seed).toBe(state.seed);
+    const flipped = must({ ...next, phase: "Turn Start" }, { type: "FLIP_ROOM" });
+    expect(flipped.state.activeRoom?.name).toBe("Mercenaries");
+  });
+
+  // C59: Stairwells print keywords too, and the rules read them off the active
+  // room whatever its kind.
+  it.each(["The Supreme Commander", "Sexy Blob"])(
+    "Relentless: a fled Stairwell, %s, goes on top of the Floor deck, unshuffled",
+    (name) => {
+      const below = [room("Puzzle Room"), room("The Sentry Drone"), room("Gears & Glitch")];
+      const state = rig({
+        seed: 4242,
+        phase: "Play",
+        activeRoom: room(name),
+        floorDeck: below,
+        Red: player({ deck: pile("Shove", 8) }),
+        Gray: player({ deck: pile("Duck Under", 8) }),
+      });
+      const fledRoom = state.activeRoom as Room;
+      expect(fledRoom.kind).toBe("stairwell");
+      expect(fledRoom.keywords).toContain("Relentless");
+      const { state: next } = play(state, [{ type: "END_PLAY" }]);
+      expect(next.floorDeck).toEqual([fledRoom, ...below]);
+      expect(next.seed).toBe(state.seed);
+    },
+  );
+
+  it("Heavy: with Comrade Black active, each card a player plays Exhausts 1 from their deck", () => {
+    const black = room("Comrade Black");
+    expect(black.kind).toBe("stairwell");
+    expect(black.keywords).toContain("Heavy");
+    const state = rig({
+      phase: "Play",
+      activeRoom: black,
+      Red: player({ deck: pile("Shove", 5), hand: [card("Pry Bar")] }),
+      Gray: player({ deck: pile("Duck Under", 5), hand: [card("Coil Of Cable")] }),
+    });
+    const { state: next } = play(state, [
+      playFree("Red", ids(state, "Red")[0] as CardId),
+      playFree("Gray", ids(state, "Gray")[0] as CardId),
+    ]);
+    expect(next.Red.deck).toHaveLength(4);
+    expect(next.Gray.deck).toHaveLength(4);
+    expect(next.Red.exhaust.map((c) => c.name)).toEqual(["Shove"]);
+    expect(next.Gray.exhaust.map((c) => c.name)).toEqual(["Duck Under"]);
+  });
 });
 
 describe("Room kinds: Room and Stairwell", () => {
@@ -331,6 +662,7 @@ describe("Room kinds: Room and Stairwell", () => {
     const state = rig({
       phase: "Play",
       activeRoom: room("The Sentry Drone"),
+      roomSupply: [room("Gears & Glitch")],
       Red: player({
         deck: pile("Shove", 5),
         hand: [card("Charge"), card("Shove"), card("Shove"), card("Pry Bar"), card("Pry Bar")],
@@ -447,12 +779,23 @@ describe("Room kinds: Room and Stairwell", () => {
   });
 
   it("'one of you reveals a card reward' asks who, then offers it — taken or skipped", () => {
-    // Bio-Hazard Containment Vault's Oomph-15 challenge is its own "one of
-    // you reveals a card reward": two Charges (Oomph 4 each) plus three
-    // free Pry Bars (Oomph 3 each) clears it.
+    // Scrap Pile's Oomph-15 challenge, reworded to "one of you reveals a card
+    // reward" (no printed room says it): two Charges (Oomph 4 each) plus
+    // three free Pry Bars (Oomph 3 each) clears it.
+    const printed = room("Scrap Pile");
+    const oneReveals: Room = {
+      ...printed,
+      challenges: printed.challenges.map((challenge) => ({
+        thresholds: challenge.thresholds.map((t) => ({
+          ...t,
+          outcome: "One of you reveals a card reward.",
+          effects: [{ type: "RevealReward", who: "one" } as const],
+        })),
+      })),
+    };
     const state = rig({
       phase: "Play",
-      activeRoom: room("Bio-Hazard Containment Vault"),
+      activeRoom: oneReveals,
       Red: player({
         deck: pile("Shove", 4),
         hand: [
@@ -517,14 +860,14 @@ describe("Room kinds: Room and Stairwell", () => {
     ]);
   });
 
-  it("each challenge on a card resolves on its own, and meeting both fires both — Pressurized Maintenance Hub", () => {
-    // Pressurized Maintenance Hub's Oomph and Scramble challenges are
+  it("each challenge on a card resolves on its own, and meeting both fires both — Maintenance", () => {
+    // Maintenance's Oomph and Scramble challenges are
     // independent, each its own named reveal: Oomph 7 (Charge, cost 2,
     // plus a free Pry Bar) pays Red; Scramble 7 (Pick The Lock, cost 2, plus
-    // a free Coil Of Cable) pays Gray.
+    // a free Coil Of Cable) pays Gray. Four plays, so Maintenance's Cap is left off.
     const state = rig({
       phase: "Play",
-      activeRoom: room("Pressurized Maintenance Hub"),
+      activeRoom: plainRoom("Maintenance"),
       Red: player({
         deck: pile("Shove", 5),
         hand: [card("Charge"), card("Shove"), card("Shove"), card("Pry Bar")],
@@ -581,11 +924,12 @@ describe("Room kinds: Room and Stairwell", () => {
   });
 
   it("a dual threshold is met only when the pool meets both stats", () => {
-    // Flooded Ventilation Shaft's line needs Oomph 3 and Scramble 3
-    // together. Scramble alone, even well past 3, does not meet it.
+    // Puzzle Room's first line needs Oomph 3 and Scramble 5
+    // together. Scramble alone, even well past 5, does not meet it. Red plays
+    // every card, so Puzzle Room's Lockstep is left off.
     const state = rig({
       phase: "Play",
-      activeRoom: room("Flooded Ventilation Shaft"),
+      activeRoom: plainRoom("Puzzle Room"),
       Red: player({ deck: pile("Shove", 5), hand: [...pile("Coil Of Cable", 2), card("Pry Bar")] }),
       Gray: player({ deck: pile("Duck Under", 5) }),
     });
@@ -722,10 +1066,19 @@ describe("Room kinds: Room and Stairwell", () => {
     expect(next.Gray.hand).toHaveLength(0);
   });
 
-  it("DealBadStuff honors a printed count — Bio-Hazard Containment Vault's Flee deals 2 each", () => {
+  it("DealBadStuff honors a printed count — a Flee that deals 2 each", () => {
+    // No printed room deals more than 1 Bad Stuff, so Scrap Pile's Flee line is
+    // rewritten to "Both players get 2 Bad Stuff."
+    const printed = room("Scrap Pile");
     const state = rig({
       phase: "Play",
-      activeRoom: room("Bio-Hazard Containment Vault"),
+      activeRoom: {
+        ...printed,
+        flee: {
+          ...printed.flee,
+          effects: [{ type: "DealBadStuff", who: "both", count: 2 } as const],
+        },
+      },
       Red: player({ deck: pile("Shove", 5) }),
       Gray: player({ deck: pile("Duck Under", 5) }),
     });
@@ -733,6 +1086,40 @@ describe("Room kinds: Room and Stairwell", () => {
     expect(eventTypes(events)).toContain("ROOM_FLED");
     expect(next.Red.hand.filter((c) => c.kind === "bad_stuff")).toHaveLength(2);
     expect(next.Gray.hand.filter((c) => c.kind === "bad_stuff")).toHaveLength(2);
+  });
+
+  describe("'The player who played the least Scramble this turn Exhausts 3' — Outrun The Laser", () => {
+    const outrun = (over: { Red?: Partial<PlayerState>; Gray?: Partial<PlayerState> } = {}) =>
+      rig({
+        phase: "Play",
+        activeRoom: room("Outrun The Laser"),
+        Red: player({ deck: pile("Shove", 6), ...over.Red }),
+        Gray: player({ deck: pile("Duck Under", 6), ...over.Gray }),
+      });
+
+    it("the one who played less takes it without being asked", () => {
+      const state = outrun({ Red: { hand: [card("Coil Of Cable")] } });
+      const r = ids(state, "Red");
+      const { state: next, events } = play(state, [
+        playFree("Red", r[0] as CardId),
+        { type: "END_PLAY" },
+      ]);
+      expect(eventTypes(events)).toContain("ROOM_FLED");
+      expect(next.pending).toBeNull();
+      expect(next.Gray.exhaust).toHaveLength(3);
+      expect(next.Red.exhaust).toHaveLength(0);
+    });
+
+    it("on a tie the team chooses, and only the chosen player Exhausts", () => {
+      const state = outrun();
+      const { state: asked } = must(state, { type: "END_PLAY" });
+      expect(asked.pending?.kind).toBe("ChooseCharacter");
+      if (asked.pending?.kind !== "ChooseCharacter") return;
+      expect(asked.pending.options).toEqual(["Red", "Gray"]);
+      const { state: next } = must(asked, { type: "CHOOSE_CHARACTER", character: "Red" });
+      expect(next.Red.exhaust).toHaveLength(3);
+      expect(next.Gray.exhaust).toHaveLength(0);
+    });
   });
 
   describe("'both players may Scrap a card from their hand or discard pile' — Automated Defense Turret", () => {
@@ -876,112 +1263,6 @@ describe("Room kinds: Room and Stairwell", () => {
   });
 });
 
-describe("SCRAP_FOR_STATS — Bio-Hazard Containment Vault's own text", () => {
-  const rigged = (overrides: Partial<GameState> = {}) =>
-    rig({
-      phase: "Play",
-      activeRoom: room("Bio-Hazard Containment Vault"),
-      Red: player({ deck: pile("Shove", 4), hand: [card("Pry Bar"), card("Shove")] }),
-      Gray: player({ deck: pile("Duck Under", 4) }),
-      ...overrides,
-    });
-
-  it("is refused outside the Play phase", () => {
-    const state = rigged({ phase: "Outcome" });
-    const pryBar = state.Red.hand[0];
-    if (!pryBar) throw new Error("rig");
-    const rejected = execute(state, {
-      type: "SCRAP_FOR_STATS",
-      character: "Red",
-      cardId: pryBar.id,
-      stat: "Oomph",
-    });
-    expect(rejected.ok).toBe(false);
-    if (!rejected.ok) expect(rejected.reason.code).toBe("WrongPhase");
-  });
-
-  it("is refused while a different room is active", () => {
-    const state = rigged({ activeRoom: room("Security Turnstile") });
-    const pryBar = state.Red.hand[0];
-    if (!pryBar) throw new Error("rig");
-    const rejected = execute(state, {
-      type: "SCRAP_FOR_STATS",
-      character: "Red",
-      cardId: pryBar.id,
-      stat: "Oomph",
-    });
-    expect(rejected.ok).toBe(false);
-    if (!rejected.ok) expect(rejected.reason.code).toBe("RoomDoesNotAllow");
-  });
-
-  it("is refused for a card that is not Good Stuff", () => {
-    const state = rigged();
-    const shove = state.Red.hand.find((c) => c.name === "Shove");
-    if (!shove) throw new Error("rig");
-    const rejected = execute(state, {
-      type: "SCRAP_FOR_STATS",
-      character: "Red",
-      cardId: shove.id,
-      stat: "Oomph",
-    });
-    expect(rejected.ok).toBe(false);
-    if (!rejected.ok) expect(rejected.reason.code).toBe("NotGoodStuff");
-  });
-
-  it("is refused for a card not in that character's hand", () => {
-    const state = rigged();
-    const notHeld = card("Pry Bar");
-    const rejected = execute(state, {
-      type: "SCRAP_FOR_STATS",
-      character: "Red",
-      cardId: notHeld.id,
-      stat: "Oomph",
-    });
-    expect(rejected.ok).toBe(false);
-    if (!rejected.ok) expect(rejected.reason.code).toBe("NotInHand");
-  });
-
-  it("Scraps the card and adds +3 to the chosen stat", () => {
-    const state = rigged();
-    const pryBar = state.Red.hand.find((c) => c.name === "Pry Bar");
-    if (!pryBar) throw new Error("rig");
-    const { state: next, events } = must(state, {
-      type: "SCRAP_FOR_STATS",
-      character: "Red",
-      cardId: pryBar.id,
-      stat: "Oomph",
-    });
-    expect(next.Red.hand.some((c) => c.id === pryBar.id)).toBe(false);
-    expect(next.scrapyard.some((c) => c.id === pryBar.id)).toBe(true);
-    expect(statPool(next).oomph).toBe(3);
-    expect(statPool(next).scramble).toBe(0);
-    expect(eventTypes(events)).toContain("CARD_SCRAPPED_FOR_STATS");
-    expect(eventTypes(events)).not.toContain("CARD_PLAYED");
-  });
-
-  it("does not count as a played card for effects like Fast Follow / Tag Team", () => {
-    const state = rig({
-      phase: "Play",
-      activeRoom: room("Bio-Hazard Containment Vault"),
-      Red: player({ deck: pile("Shove", 4), hand: [card("Fast Follow")] }),
-      Gray: player({ deck: pile("Duck Under", 4), hand: [card("Pry Bar")] }),
-    });
-    const fastFollow = state.Red.hand[0];
-    const pryBar = state.Gray.hand[0];
-    if (!fastFollow || !pryBar) throw new Error("rig");
-    expect(costOf(state, "Red", fastFollow)).toBe(1);
-
-    const { state: next } = must(state, {
-      type: "SCRAP_FOR_STATS",
-      character: "Gray",
-      cardId: pryBar.id,
-      stat: "Scramble",
-    });
-    // Fast Follow reads free only once Gray has *played* a card; Gray only Scrapped one.
-    expect(costOf(next, "Red", fastFollow)).toBe(1);
-  });
-});
-
 describe("Rules 0.2.5: Good Stuff and card rewards come as a spread of 3", () => {
   const goodStuff = () => [
     card("Stim Pack"),
@@ -994,17 +1275,22 @@ describe("Rules 0.2.5: Good Stuff and card rewards come as a spread of 3", () =>
   ];
   const idsOf = (cards: readonly { readonly id: CardId }[]) => cards.map((c) => c.id);
 
-  /** A Flooded Ventilation Shaft whose Oomph 3 and Scramble 3 line reads "Both players get Good Stuff." */
+  /** A Puzzle Room whose Oomph 3 and Scramble 5 line reads "Both players get Good Stuff." */
   function bothEarn(pool: ReturnType<typeof goodStuff>) {
     const state = rig({
       phase: "Play",
       activeRoom: goodStuffShaft(),
-      Red: player({ deck: pile("Shove", 5), hand: [card("Pry Bar"), card("Coil Of Cable")] }),
+      Red: player({ deck: pile("Shove", 5), hand: [card("Pry Bar"), ...pile("Coil Of Cable", 2)] }),
       Gray: player({ deck: pile("Duck Under", 5) }),
       pools: { Red: [], Gray: [], goodStuff: pool, badStuff: [] },
     });
     const r = ids(state, "Red");
-    return play(state, [playFree("Red", r[0] as CardId), playFree("Red", r[1] as CardId), { type: "END_PLAY" }]);
+    return play(state, [
+      playFree("Red", r[0] as CardId),
+      playFree("Red", r[1] as CardId),
+      playFree("Red", r[2] as CardId),
+      { type: "END_PLAY" },
+    ]);
   }
 
   it("reveals both spreads before either player chooses, then hands both picks over together", () => {
@@ -1112,7 +1398,7 @@ describe("Rules 0.2.5: Good Stuff and card rewards come as a spread of 3", () =>
     const rewards = [card("Fast Follow"), card("Tag Team"), card("Bull Rush"), card("Second Wind"), card("Reckless Swing")];
     const state = rig({
       phase: "Play",
-      activeRoom: room("Pressurized Maintenance Hub"),
+      activeRoom: room("Maintenance"),
       Red: player({ deck: pile("Shove", 5), hand: [card("Charge"), card("Shove"), card("Shove"), card("Pry Bar")] }),
       Gray: player({ deck: pile("Duck Under", 5) }),
       pools: { Red: rewards, Gray: [], goodStuff: [], badStuff: [] },

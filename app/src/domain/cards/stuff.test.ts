@@ -582,7 +582,7 @@ describe("Stim Pack — 'Play: You may draw 1 card'", () => {
 describe("High-Frequency Scanner — 'Play: Look at the top 3 cards of the Floor deck'", () => {
   it("reveals the top of the Floor deck and puts it back untouched", () => {
     const first = room("Security Turnstile");
-    const second = room("Flooded Ventilation Shaft");
+    const second = room("Puzzle Room");
     const state = playing({
       floorDeck: [first, second],
       Red: player({ deck: pile("Shove", 3), hand: [card("High-Frequency Scanner"), card("Shove")] }),
@@ -1146,14 +1146,14 @@ describe("Panic — 'Holding: every room threshold requires +2 Scramble to be me
 
   it("adds to a dual threshold's own printed Scramble, not a second floor", () => {
     const state = playing({
-      activeRoom: room("Flooded Ventilation Shaft"),
+      activeRoom: room("Puzzle Room"),
       Gray: player({ deck: pile("Duck Under", 4), hand: [card("Panic")] }),
     });
-    // Challenge 0: Oomph 3 and Scramble 3 together.
+    // Challenge 0: Oomph 3 and Scramble 5 together.
     const line = state.activeRoom?.challenges[0]?.thresholds[0];
     if (!line) throw new Error("rig");
-    expect(line.requires).toEqual({ oomph: 3, scramble: 3 });
-    expect(thresholdRequirement(state, line)).toEqual({ oomph: 3, scramble: 5 });
+    expect(line.requires).toEqual({ oomph: 3, scramble: 5 });
+    expect(thresholdRequirement(state, line)).toEqual({ oomph: 3, scramble: 7 });
   });
 
   it("stacks: two Panics push the Scramble floor to 4", () => {

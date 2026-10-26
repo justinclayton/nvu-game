@@ -55,8 +55,11 @@ var BACKS = [
   { id: "room-2", label: "ROOM", ink: "#1d4e89", glyph: "tower2", tag: "FLOORS 4\u20136" },
   /* Floors 7–9 tier. */
   { id: "room-3", label: "ROOM", ink: "#7c2d12", glyph: "tower3", tag: "FLOORS 7\u20139" },
-  /* Floor 10: the one fixed Stairwell. */
-  { id: "room-4", label: "ROOM", ink: "#b8860b", glyph: "tower4", tag: "FLOOR 10" }
+  /* Floors 4 and 5, one floor per tier (#387). The glyphs are the old bands' until the kit is redrawn for five floors. */
+  { id: "room-4", label: "ROOM", ink: "#5b2a86", glyph: "tower2", tag: "FLOOR 4" },
+  { id: "room-5", label: "ROOM", ink: "#8a1c1c", glyph: "tower3", tag: "FLOOR 5" },
+  /* The roof: the one fixed Stairwell. */
+  { id: "room-roof", label: "ROOM", ink: "#b8860b", glyph: "tower4", tag: "ROOF" }
 ];
 
 function wordmark(x, y, rot) {
@@ -86,7 +89,7 @@ function backSVG(b) {
 
 /* Which back a face gets. */
 function backFor(c) {
-  if (c.kind === "room" || c.kind === "stairwell") return c.tier === null ? "room-4" : "room-" + c.tier;
+  if (c.kind === "room" || c.kind === "stairwell") return c.tier === null ? "room-roof" : "room-" + c.tier;
   if (c.kind === "good_stuff") return "good";
   if (c.kind === "bad_stuff") return "bad";
   return c.owner === "Red" ? "red" : "gray";

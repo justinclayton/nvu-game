@@ -17,6 +17,7 @@ import type {
   Rarity,
   RoomBand,
   RoomEffect,
+  RoomKeyword,
   RoomKind,
   Stat,
   Threshold,
@@ -54,9 +55,12 @@ export interface Room {
   readonly id: RoomId;
   readonly name: string;
   readonly kind: RoomKind;
-  /** Which floors' pool the card is drawn from; `null` for the one fixed Floor 10 Stairwell. */
+  /** The floor the card serves, 1 to 5; `null` for the Roof. */
   readonly tier: RoomBand;
   readonly flavor: string;
+  /** The printed rule text, e.g. "Dim (only draw up to 4 cards)". Empty for a plain room. */
+  readonly text: string;
+  readonly keywords: readonly RoomKeyword[];
   readonly challenges: readonly Challenge[];
   readonly flee: FleeLine;
 }
@@ -132,10 +136,14 @@ export interface TurnRecord {
    * spent one per play regardless of what it saves.
    */
   readonly playDiscount: Readonly<Record<Character, number>>;
+  /** Lockstep: who put the latest card into the play zone this turn; null before the first. */
+  readonly lastPlayer: Character | null;
   /** System Feedback: banked off the shared pool this turn; a stat never reads below zero. */
   readonly poolPenalty: { readonly oomph: number; readonly scramble: number };
-  /** Bio-Hazard Containment Vault: banked onto the shared pool this turn by Scrapping Good Stuff. */
+  /** Banked onto the shared pool this turn by cards that add a stat. */
   readonly poolBonus: { readonly oomph: number; readonly scramble: number };
+  /** The net of those two, by the character whose card banked it: what each side's own total gains or loses. */
+  readonly banked: Readonly<Record<Character, { readonly oomph: number; readonly scramble: number }>>;
   /** It Pays To Be Reckless: cards each character put in their Exhaust pile this turn, from any pile. */
   readonly exhausted: Readonly<Record<Character, number>>;
   /** Bull Rush: of those, the ones Exhausted off the top of the deck. */
@@ -343,13 +351,6 @@ export type Command =
       readonly payWith: readonly CardId[];
     }
   | { readonly type: "END_PLAY" }
-  | {
-      /** Bio-Hazard Containment Vault, while active: Scrap a Good Stuff card from hand for +3 to one stat. */
-      readonly type: "SCRAP_FOR_STATS";
-      readonly character: Character;
-      readonly cardId: CardId;
-      readonly stat: Stat;
-    }
   | { readonly type: "CHOOSE_CHARACTER"; readonly character: Character }
   | { readonly type: "CHOOSE_PILE"; readonly pile: Pile }
   | { readonly type: "CHOOSE_STAT"; readonly stat: Stat }
@@ -406,14 +407,6 @@ type DomainEventBody =
       readonly from: DiscardedFrom;
     }
   | { readonly type: "CARD_SCRAPPED"; readonly character: Character | null; readonly card: Card }
-  | {
-      /** Bio-Hazard Containment Vault: one Scrap, one stat, one line — see `narrate.ts`. */
-      readonly type: "CARD_SCRAPPED_FOR_STATS";
-      readonly character: Character;
-      readonly card: Card;
-      readonly stat: Stat;
-      readonly amount: number;
-    }
   | {
       readonly type: "CARD_EXHAUSTED";
       readonly character: Character;
@@ -485,14 +478,14 @@ export type RejectionCode =
   | "NoPendingChoice"
   | "GameIsOver"
   | "CharacterIsDown"
+  | "LockedOut"
+  | "CapReached"
   | "NotInHand"
   | "WrongPayment"
   | "CannotPayWithThat"
   | "NotAnOption"
   | "NotOffered"
-  | "FloorDeckEmpty"
-  | "RoomDoesNotAllow"
-  | "NotGoodStuff";
+  | "FloorDeckEmpty";
 
 /** An illegal command is a value, not a throw. */
 export interface Rejection {

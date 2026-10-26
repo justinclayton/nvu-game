@@ -94,9 +94,9 @@ describe("describeEvent", () => {
       type: "CARD_EXHAUSTED",
       character: "Red",
       card: crowbar,
-      source: "Smoldering Armory",
+      source: "Ticking Time Bomb",
     };
-    expect(describeEvent(event)).toBe("Smoldering Armory triggers: Red Exhausts Crowbar.");
+    expect(describeEvent(event)).toBe("Ticking Time Bomb triggers: Red Exhausts Crowbar.");
   });
 
   it("says nothing of a cause when a player acted on their own", () => {

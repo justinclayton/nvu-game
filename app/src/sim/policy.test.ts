@@ -296,7 +296,7 @@ describe("greedy", () => {
 
   it("goes for the line that pays out when a line paying nothing is just as reachable", () => {
     resetRig();
-    // A Scramble 4 line that pays nothing, beside Oomph 3 and Scramble 3 for
+    // A Scramble 4 line that pays nothing, beside Oomph 3 and Scramble 5 for
     // Good Stuff each. Gray's Pick The Lock alone meets the first; the second
     // needs Red too, and is worth a card.
     const shaft = goodStuffShaft();
@@ -324,11 +324,11 @@ describe("greedy", () => {
       activeRoom: bare,
       floorDeck: [room("Security Turnstile")],
       Red: player({ hand: [chargeIn, card("Shove"), card("Shove")], deck: pile("Shove", 4) }),
-      Gray: player({ hand: [card("Pick The Lock"), card("Duck Under"), card("Duck Under")], deck: pile("Duck Under", 4) }),
+      Gray: player({ hand: [card("Pick The Lock"), card("Duck Under"), card("Duck Under"), card("Coil Of Cable")], deck: pile("Duck Under", 4) }),
     });
     const { state: after, commands } = playOut(state);
     const played = commands.filter((c): c is Extract<Command, { type: "PLAY_CARD" }> => c.type === "PLAY_CARD");
-    expect(played.map((c) => c.character).sort()).toEqual(["Gray", "Red"]);
+    expect(played.map((c) => c.character).sort()).toEqual(["Gray", "Gray", "Red"]);
     expect(after.Gray.hand.some((c) => c.kind === "good_stuff")).toBe(true);
   });
 

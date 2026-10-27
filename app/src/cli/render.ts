@@ -237,7 +237,7 @@ export function moveHint(state: GameState): string {
             : "";
         lines.push(
           `choose <Name> — Exhaust 1 of ${String(pending.remaining)}: hand ${named(p.hand)}; ` +
-            `discard ${named(p.discard)}${deck}. Write "hand <Name>" or "discard <Name>" where both hold one.`,
+            `discard ${named(p.discard)}${deck}. Where both hold one, write choose hand <Name> or choose discard <Name>.`,
         );
         break;
       }

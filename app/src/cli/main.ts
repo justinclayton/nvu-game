@@ -244,8 +244,12 @@ function buildChoose(state: GameState, action: Extract<PlayAction, { kind: "choo
   }
 
   if (pending.kind === "ChooseExhaust") {
-    // "deck" for the top of the deck; "hand <Card>" or "discard <Card>" where both hold one.
-    const [first, ...rest] = action.names;
+    // "deck" for the top of the deck; "hand <Card>" or "discard <Card>" where both hold one,
+    // quoted whole or not.
+    const [first, ...rest] = action.names.flatMap((n) => {
+      const zoned = /^(hand|discard)\s+(.+)$/i.exec(n);
+      return zoned?.[1] && zoned[2] ? [zoned[1], zoned[2]] : [n];
+    });
     if (first === undefined) throw new MoveRefused("Name a card, or choose deck.");
     if (first.toLowerCase() === "deck" && rest.length === 0) {
       if (pending.deck === 0) throw new MoveRefused("The deck is empty.");

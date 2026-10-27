@@ -42,55 +42,22 @@ function playPeek(name: string, over: Parameters<typeof playing>[0] = {}) {
   return { state, asked };
 }
 
-describe("Peek Around Corner — 'Peek 1'", () => {
-  it("asks which pile, then whether to discard the one card shown", () => {
-    const { asked } = playPeek("Peek Around Corner");
-    expect(asked.state.pending?.kind).toBe("ChoosePile");
-    const looked = must(asked.state, { type: "CHOOSE_PILE", pile: "Gray deck" });
-    expect(eventTypes(looked.events)).toContain("CARDS_PEEKED");
-    const pending = looked.state.pending;
-    if (pending?.kind !== "ChooseCards") throw new Error("expected a card choice");
-    expect(pending.optional).toBe(true);
-    expect(pending.options).toHaveLength(1);
-    const top = looked.state.Gray.deck[0];
-    const done = must(looked.state, { type: "CHOOSE_CARDS", cardIds: [top?.id as CardId] });
-    expect(done.state.pending).toBeNull();
-    expect(done.state.Gray.deck).toHaveLength(3);
-    expect(done.state.Gray.discard.map((c) => c.id)).toContain(top?.id);
-  });
-
-  it("lets the player leave the card on top", () => {
-    const { asked } = playPeek("Peek Around Corner");
-    const looked = must(asked.state, { type: "CHOOSE_PILE", pile: "Gray deck" });
-    const before = looked.state.Gray.deck.map((c) => c.id);
-    const done = must(looked.state, { type: "CHOOSE_CARDS", cardIds: [] });
-    expect(done.state.pending).toBeNull();
-    expect(done.state.Gray.deck.map((c) => c.id)).toEqual(before);
-  });
-
-  it("discards a card from the partner's deck into the partner's discard pile", () => {
-    const { asked } = playPeek("Peek Around Corner");
-    const looked = must(asked.state, { type: "CHOOSE_PILE", pile: "Red deck" });
-    const top = looked.state.Red.deck[0];
-    const done = must(looked.state, { type: "CHOOSE_CARDS", cardIds: [top?.id as CardId] });
-    expect(done.state.Red.deck).toHaveLength(5);
-    expect(done.state.Red.discard.map((c) => c.id)).toEqual([top?.id]);
-    expect(done.state.Gray.discard).toHaveLength(0);
-  });
-
-  it("does not offer an empty deck, and never reshuffles its discard pile", () => {
-    const { asked } = playPeek("Peek Around Corner", {
-      Gray: player({
-        deck: [],
-        discard: pile("Duck Under", 3),
-        hand: [card("Peek Around Corner"), card("Duck Under")],
-      }),
+describe("Peek Around Corner — 'Draw 1 card.'", () => {
+  it("draws the top card of Gray's deck into Gray's hand", () => {
+    const state = playing({
+      Gray: player({ deck: pile("Duck Under", 4), hand: [card("Peek Around Corner"), card("Duck Under")] }),
     });
-    const pending = asked.state.pending;
-    if (pending?.kind !== "ChoosePile") throw new Error("expected a pile choice");
-    expect(pending.options).not.toContain("Gray deck");
-    expect(eventTypes(asked.events)).not.toContain("DISCARD_RESHUFFLED");
-    expect(asked.state.Gray.deck).toHaveLength(0);
+    const top = state.Gray.deck[0];
+    const { state: next, events } = must(state, {
+      type: "PLAY_CARD",
+      character: "Gray",
+      cardId: handCard(state, "Gray", "Peek Around Corner").id,
+      payWith: [handCard(state, "Gray", "Duck Under").id],
+    });
+    expect(next.pending).toBeNull();
+    expect(eventTypes(events)).toContain("CARD_DRAWN");
+    expect(next.Gray.hand.map((c) => c.id)).toEqual([top?.id]);
+    expect(next.Gray.deck).toHaveLength(3);
   });
 });
 

@@ -61,6 +61,8 @@ function nextCommand(state: GameState): Command {
         return { type: "TAKE_REWARD", cardId: pending.cards[0]?.id ?? null };
       case "ChooseGoodStuff":
         return { type: "CHOOSE_CARDS", cardIds: pending.options.slice(0, 1).map((c) => c.id) };
+      case "ChooseExhaust":
+        return { type: "EXHAUST_CARD", cardId: pending.deck > 0 ? null : (pending.options[0]?.id ?? null) };
       case "ChooseRoom": {
         const first = enterableRooms(pending)[0];
         if (!first) throw new Error("a room choice with nothing revealed");

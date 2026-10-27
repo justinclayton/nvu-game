@@ -243,6 +243,25 @@ function buildChoose(state: GameState, action: Extract<PlayAction, { kind: "choo
     return { type: "CHOOSE_CARDS", cardIds };
   }
 
+  if (pending.kind === "ChooseExhaust") {
+    // "deck" for the top of the deck; "hand <Card>" or "discard <Card>" where both hold one.
+    const [first, ...rest] = action.names;
+    if (first === undefined) throw new MoveRefused("Name a card, or choose deck.");
+    if (first.toLowerCase() === "deck" && rest.length === 0) {
+      if (pending.deck === 0) throw new MoveRefused("The deck is empty.");
+      return { type: "EXHAUST_CARD", cardId: null };
+    }
+    const p = playerOf(state, pending.character);
+    const zone = first.toLowerCase();
+    const from =
+      zone === "hand" ? p.hand : zone === "discard" ? p.discard : null;
+    const words = from ? rest : action.names;
+    const pool = from ? pending.options.filter((c) => from.some((x) => x.id === c.id)) : pending.options;
+    const [card] = resolveEach([words.join(" ")], pool);
+    if (!card) throw new MoveRefused("Name a card, or choose deck.");
+    return { type: "EXHAUST_CARD", cardId: card.id };
+  }
+
   if (pending.kind === "ChooseDraw") {
     const answer = answerDraw(pending.options, action.names);
     if (!answer.ok) throw new MoveRefused(answer.reason);

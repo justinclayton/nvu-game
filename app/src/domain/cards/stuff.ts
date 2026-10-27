@@ -10,12 +10,12 @@ import {
   CHARACTERS,
   discardFromHand,
   drawCards,
-  exhaustFromDeck,
   grantFreePlay,
   hasFired,
   markFired,
   moveToBottomOfDeck,
   other,
+  oweExhaust,
   playerOf,
   returnToHand,
   scrap,
@@ -411,7 +411,7 @@ export const STUFF: Registry = {
         events.push({ type: "EXHAUST_PREVENTED", character: ctx.character, amount: 1, by: stoppedBy });
         return done(state, events);
       }
-      return done(exhaustFromDeck(state, ctx.character, 1, ctx.card.name, events), events);
+      return done(oweExhaust(state, ctx.character, 1, ctx.card.name, false), events);
     },
   },
 
@@ -423,7 +423,7 @@ export const STUFF: Registry = {
         events.push({ type: "EXHAUST_PREVENTED", character: ctx.character, amount: 1, by: stoppedBy });
         return done(state, events);
       }
-      return done(exhaustFromDeck(state, ctx.character, 1, ctx.card.name, events), events);
+      return done(oweExhaust(state, ctx.character, 1, ctx.card.name, false), events);
     },
     onPlay(state, ctx) {
       const options = playerOf(state, ctx.character).hand.filter((c) => c.kind === "good_stuff");

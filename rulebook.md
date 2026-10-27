@@ -1,6 +1,6 @@
 # *North vs Up*: Rulebook
 
-Rules version: R36
+Rules version: R37
 
 ---
 
@@ -158,8 +158,8 @@ A `Stuff` card looks similar to a character card:
 - `Play:` An effect that happens once when the card is played.
 - `for free`: Play the card without paying. Overrides all other cost modifiers.
 - `Discard X cards from your hand`: Choose **X** cards from your hand and move them to your discard pile.
-- `Exhaust X cards from your deck`: Move the top **X** cards of your deck to your Exhaust pile. If your deck is empty, see `Empty deck`.
-- `Exhaust X`: the same as `Exhaust X cards from your deck`.
+- `Exhaust X cards from your deck`: Move the top **X** cards of your deck to your Exhaust pile. If your deck is empty, see `Empty deck`. If your deck and your discard pile are both empty, choose the rest from your hand.
+- `Exhaust X`: Move **X** cards from your hand, deck, or discard pile to your Exhaust pile. Choose each card: a card from your hand, the top card of your deck, or a card from your discard pile.
 - `Get Good Stuff`: Reveal the top **3** cards of the Good Stuff pool. Put **one** into your hand. Put the rest on the bottom of the Good Stuff pool. When both players get Good Stuff from the same outcome, both players reveal their 3 before either chooses, then both put their chosen card into their hand at the same time.
 - `Get X Good Stuff`: `Get Good Stuff` **X** times.
 - `Get Bad Stuff`: Move the top card of the Bad Stuff pool into your hand.

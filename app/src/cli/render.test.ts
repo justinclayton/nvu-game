@@ -100,3 +100,27 @@ describe("moveHint — a room choice", () => {
     expect(hint).toContain("Ambush: you must enter Regular Monster 2;");
   });
 });
+
+describe("moveHint — an Exhaust", () => {
+  it("names the hand, the discard pile and the deck", () => {
+    const state = rig({
+      phase: "Play",
+      Red: player({ deck: pile("Shove", 2), discard: [card("Charge")], hand: [card("Coil Of Cable")] }),
+    });
+    const hand = state.Red.hand;
+    const discard = state.Red.discard;
+    const hint = moveHint({
+      ...state,
+      pending: {
+        kind: "ChooseExhaust",
+        prompt: "Red: Exhaust 1.",
+        character: "Red",
+        options: [...hand, ...discard],
+        deck: 2,
+        remaining: 1,
+        source: null,
+      },
+    });
+    expect(hint).toContain("hand Coil Of Cable; discard Charge, or choose deck (2 cards)");
+  });
+});

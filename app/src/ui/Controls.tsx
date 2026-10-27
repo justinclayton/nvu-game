@@ -255,6 +255,36 @@ function PendingChoice({ state, dispatch, inspected, onInspect }: Props) {
       return (
         <ChooseCards state={state} dispatch={dispatch} inspected={inspected} onInspect={onInspect} />
       );
+
+    case "ChooseExhaust":
+      return (
+        <div className="controls controls--pending">
+          <p className="controls__prompt">{pending.prompt}</p>
+          <div className="zone">
+            {pending.options.map((card) => (
+              <CardView
+                key={card.id}
+                card={card}
+                inspect={{ inspected, onInspect }}
+                onClick={() => {
+                  dispatch({ type: "EXHAUST_CARD", cardId: card.id });
+                }}
+              />
+            ))}
+          </div>
+          {pending.deck > 0 ? (
+            <button
+              type="button"
+              className="button button--primary"
+              onClick={() => {
+                dispatch({ type: "EXHAUST_CARD", cardId: null });
+              }}
+            >
+              Top of the deck ({pending.deck})
+            </button>
+          ) : null}
+        </div>
+      );
   }
 }
 

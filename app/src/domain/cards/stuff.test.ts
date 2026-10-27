@@ -7,6 +7,7 @@ import {
   card,
   drawing,
   eventTypes,
+  exhaustFromDeck,
   free,
   handCard,
   ids,
@@ -1072,7 +1073,7 @@ describe("Spore Cloud — 'Holding: At Cleanup, discard cards other than this on
       }),
       Gray: player({ deck: pile("Duck Under", 3) }),
     });
-    const asked = must(state, { type: "END_PLAY" });
+    const asked = exhaustFromDeck(must(state, { type: "END_PLAY" }));
     const pending = asked.state.pending;
     if (pending?.kind !== "ChooseCards") throw new Error("expected a card choice");
     expect(asked.state.phase).toBe("Cleanup");
@@ -1103,7 +1104,7 @@ describe("Spore Cloud — 'Holding: At Cleanup, discard cards other than this on
       }),
       Gray: player({ deck: pile("Duck Under", 3) }),
     });
-    const asked = must(state, { type: "END_PLAY" });
+    const asked = exhaustFromDeck(must(state, { type: "END_PLAY" }));
     const pending = asked.state.pending;
     if (pending?.kind !== "ChooseCards") throw new Error("expected a card choice");
     // Two Spore Clouds count toward the 3 the same as any other card, and
@@ -1261,7 +1262,7 @@ describe("My Head Is Quantum Spinning — 'Holding: whenever your partner draws 
     });
     const pending = asked.state.pending;
     if (pending?.kind !== "ChooseDraw") throw new Error("expected a draw choice");
-    const { state: next, events } = must(asked.state, drawing("Gray", 1));
+    const { state: next, events } = exhaustFromDeck(must(asked.state, drawing("Gray", 1)));
     expect(next.Gray.hand).toHaveLength(1);
     expect(next.Red.deck).toHaveLength(3);
     expect(eventTypes(events)).toContain("CARD_EXHAUSTED");
@@ -1302,7 +1303,7 @@ describe("Corrosive Acid — 'Holding: At Turn Start, Exhaust 1. Play: Scrap 1 G
       Red: player({ deck: pile("Shove", 6), hand: [card("Corrosive Acid")] }),
       Gray: player({ deck: pile("Duck Under", 6) }),
     });
-    const { state: next, events } = must(state, { type: "FLIP_ROOM" });
+    const { state: next, events } = exhaustFromDeck(must(state, { type: "FLIP_ROOM" }));
     expect(next.Red.hand).toHaveLength(5);
     expect(next.Red.deck).toHaveLength(1);
     expect(next.Red.exhaust).toHaveLength(1);
@@ -1430,7 +1431,7 @@ describe("Bad Stuff — 'Play: Scrap this card.'", () => {
   };
   const playIt = (name: string, extra: ReturnType<typeof card>[] = []) => {
     const { state, bad, payWith } = playBad(name, extra, 4);
-    const ran = must(state, { type: "PLAY_CARD", character: "Red", cardId: bad.id, payWith });
+    const ran = exhaustFromDeck(must(state, { type: "PLAY_CARD", character: "Red", cardId: bad.id, payWith }));
     return { before: state, bad, payWith, ...ran };
   };
 

@@ -226,6 +226,18 @@ export function moveHint(state: GameState): string {
       case "ChooseGoodStuff":
         lines.push(`choose <Name> — keep 1 of: ${pending.options.map((c) => c.name).join(", ")}`);
         break;
+      case "ChooseExhaust": {
+        const p = playerOf(state, pending.character);
+        const named = (from: readonly { readonly id: string; readonly name: string }[]) =>
+          pending.options.filter((c) => from.some((x) => x.id === c.id)).map((c) => c.name).join(", ") ||
+          "nothing";
+        const deck = pending.deck > 0 ? `, or choose deck (${String(pending.deck)} cards)` : "";
+        lines.push(
+          `choose <Name> — Exhaust 1 of ${String(pending.remaining)}: hand ${named(p.hand)}; ` +
+            `discard ${named(p.discard)}${deck}. Write "hand <Name>" or "discard <Name>" where both hold one.`,
+        );
+        break;
+      }
       case "ChooseRoom": {
         const enterable = enterableRooms(pending).map((r) => r.name).join(", ");
         // Ambush narrows the entry, so say so rather than drop the other rooms without a word.

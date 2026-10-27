@@ -107,6 +107,11 @@ function answers(pending: Pending): readonly Command[] {
       ];
     case "ChooseGoodStuff":
       return pending.options.map((card): Command => ({ type: "CHOOSE_CARDS", cardIds: [card.id] }));
+    case "ChooseExhaust":
+      return [
+        ...pending.options.map((card): Command => ({ type: "EXHAUST_CARD", cardId: card.id })),
+        ...(pending.deck > 0 ? [{ type: "EXHAUST_CARD", cardId: null } as const] : []),
+      ];
     case "ChooseRoom":
       return enterableRooms(pending).flatMap((room) =>
         permutations(pending.options.filter((r) => r.id !== room.id)).map((rest): Command => ({

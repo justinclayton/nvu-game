@@ -123,7 +123,7 @@ export const CARD_CONTENT = {
 export const CARD_LIST_ID = "70a8e95701b2";
 
 /** R of the kit revision: the rulebook's "Rules version:" line. Recorded runs refuse to replay across a change to it. Kept out of CARD_CONTENT so a rules bump does not change CARD_LIST_ID. */
-export const RULES_VERSION = "R35";
+export const RULES_VERSION = "R36";
 
 /** C of the kit revision: the "version:" line under meta in cards.yaml, bumped when the card list changes. The print sheet stamps RULES_VERSION.CARDS_VERSION on every card; tools/kit-revision.sh adds the engine count. */
 export const CARDS_VERSION = "C60";

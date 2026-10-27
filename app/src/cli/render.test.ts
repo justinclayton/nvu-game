@@ -121,6 +121,8 @@ describe("moveHint — an Exhaust", () => {
         source: null,
       },
     });
-    expect(hint).toContain("hand Coil Of Cable; discard Charge, or choose deck (2 cards)");
+    expect(hint).toContain(
+      "hand Coil Of Cable; discard Charge, or choose deck for the top card, unseen (2 in the deck)",
+    );
   });
 });

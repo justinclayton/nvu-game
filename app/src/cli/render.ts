@@ -231,7 +231,10 @@ export function moveHint(state: GameState): string {
         const named = (from: readonly { readonly id: string; readonly name: string }[]) =>
           pending.options.filter((c) => from.some((x) => x.id === c.id)).map((c) => c.name).join(", ") ||
           "nothing";
-        const deck = pending.deck > 0 ? `, or choose deck (${String(pending.deck)} cards)` : "";
+        const deck =
+          pending.deck > 0
+            ? `, or choose deck for the top card, unseen (${String(pending.deck)} in the deck)`
+            : "";
         lines.push(
           `choose <Name> — Exhaust 1 of ${String(pending.remaining)}: hand ${named(p.hand)}; ` +
             `discard ${named(p.discard)}${deck}. Write "hand <Name>" or "discard <Name>" where both hold one.`,

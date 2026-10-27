@@ -98,11 +98,11 @@ describe("Keywords: Empty deck", () => {
   it("does not end the run while the deck runs out but the discard pile still has cards", () => {
     const state = rig({
       phase: "Play",
-      activeRoom: room("Smoldering Armory"),
+      activeRoom: room("Ticking Time Bomb"),
       Red: player({ deck: pile("Shove", 2), discard: pile("Shove", 3), hand: [] }),
       Gray: player({ deck: pile("Duck Under", 4) }),
     });
-    // Smoldering Armory's Flee line, Both players Exhaust 3, needs no choice — the
+    // Ticking Time Bomb's Flee line, Both players Exhaust 3, needs no choice — the
     // reshuffle lands in the middle of it, so the deck and discard pile run
     // out at exactly the same moment the exhaust does, never leaving Red
     // short.
@@ -116,7 +116,7 @@ describe("Keywords: Empty deck", () => {
 describe("Going Down", () => {
   it("'you go Down and the game is lost' — one character is enough", () => {
     const state = goingDown([card("Pry Bar")]);
-    // Smoldering Armory's Flee line: Both players Exhaust 3.
+    // Ticking Time Bomb's Flee line: Both players Exhaust 3.
     const { state: next, events } = play(state, [{ type: "END_PLAY" }]);
     expect(next.phase).toBe("GameOver");
     expect(next.outcome).toBe("Defeat");

@@ -1,10 +1,22 @@
 import { describe, expect, it } from "vitest";
 import { room } from "./__fixtures__/rig";
 import { CARD_CONTENT } from "../content";
-import { buildFloor, createInitialState, FLOOR_DECK_SIZE, returnRoomsToSupply, TOP_FLOOR } from "./setup";
+import { buildFloor, createInitialState, floorName, returnRoomsToSupply, tierOf, TOP_FLOOR } from "./setup";
 import type { DomainEvent } from "./types";
 
 const content = CARD_CONTENT;
+
+describe("Floors and tiers", () => {
+  it("the Roof is the sixth floor", () => {
+    expect(TOP_FLOOR).toBe(6);
+  });
+  it("floor 1 draws from tier 1", () => expect(tierOf(1)).toBe(1));
+  it("floor 2 draws from tier 2", () => expect(tierOf(2)).toBe(2));
+  it("floor 3 draws from tier 3", () => expect(tierOf(3)).toBe(3));
+  it("floor 4 draws from tier 4", () => expect(tierOf(4)).toBe(4));
+  it("floor 5 draws from tier 5", () => expect(tierOf(5)).toBe(5));
+  it("the Roof draws from no tier", () => expect(tierOf(6)).toBeNull());
+});
 
 describe("Setting up a floor", () => {
   it("deals each character their own deck and leaves both hands empty", () => {
@@ -18,95 +30,76 @@ describe("Setting up a floor", () => {
     expect(state.Gray.deck).toHaveLength(12);
   });
 
-  // Every floor deck is 6 cards, 1 Stairwell and 5 Rooms (rulebook Setup,
-  // "Floor deck"), and each card lists the floors it serves. The pools hold
-  // enough for every floor with every room cleared, the worst case, since a
-  // cleared room never returns to the pool.
-  it("builds a 6-card floor deck of 1 Stairwell and 5 Rooms for every floor", () => {
+  // Rulebook Setup, "Floor deck": "Assemble the floor deck for the floor
+  // you're building by shuffling the cards for that floor together." Floor N
+  // draws from tier N, and every copy of every card of that tier goes in.
+  it.each([1, 2, 3])("tier %i's floor deck holds every copy of its Rooms and Stairwell", (floor) => {
     const [initial] = createInitialState(1, content);
     const fullSupply = returnRoomsToSupply(initial);
-    for (let floor = 1; floor <= TOP_FLOOR; floor += 1) {
-      const state = buildFloor({ ...fullSupply, floor }, []);
-      expect(state.floorDeck).toHaveLength(FLOOR_DECK_SIZE);
-      expect(state.floorDeck.filter((r) => r.kind === "stairwell")).toHaveLength(1);
-      expect(state.floorDeck.every((r) => r.floors.includes(floor))).toBe(true);
-    }
+    const printed = fullSupply.roomSupply.filter((r) => r.tier === floor);
+    const state = buildFloor({ ...fullSupply, floor }, []);
+    expect(state.floorDeck.map((r) => r.id).sort()).toEqual(printed.map((r) => r.id).sort());
+    expect(state.floorDeck.filter((r) => r.kind === "stairwell")).toHaveLength(3);
+    expect(state.floorDeck.filter((r) => r.kind === "room")).toHaveLength(6);
+    expect(state.roomSupply.some((r) => r.tier === floor)).toBe(false);
   });
 
-  // Tiers map 2-2-1 (issue #276): floors 1 and 2 draw tier 1, floors 3 and 4
-  // tier 2, floor 5 tier 3 Rooms with the Monolith Core as its Stairwell.
-  it("draws tiers 2-2-1, with the Monolith Core as floor 5's Stairwell", () => {
+  it("shuffles the floor deck", () => {
     const [initial] = createInitialState(1, content);
     const fullSupply = returnRoomsToSupply(initial);
-    const tierOnFloor = (floor: number) =>
-      new Set(buildFloor({ ...fullSupply, floor }, []).floorDeck.filter((r) => r.kind === "room").map((r) => r.tier));
-    expect([1, 2, 3, 4, 5].map(tierOnFloor)).toEqual([
-      new Set([1]),
-      new Set([1]),
-      new Set([2]),
-      new Set([2]),
-      new Set([3]),
-    ]);
-    const roof = buildFloor({ ...fullSupply, floor: 5 }, []);
-    expect(roof.floorDeck.find((r) => r.kind === "stairwell")?.name).toBe("The Monolith Core");
-  });
-
-  it("reads which floors a room serves from the room, not the floor number", () => {
-    const [initial] = createInitialState(1, content);
-    const fullSupply = returnRoomsToSupply(initial);
-    const movedToFloor1 = fullSupply.roomSupply.map((r) =>
-      r.name === "Smoldering Armory" ? { ...r, floors: [1] } : r.floors.includes(1) && r.kind === "room" ? { ...r, floors: [] } : r,
+    const orders = new Set(
+      Array.from({ length: 20 }, (_, i) =>
+        buildFloor({ ...fullSupply, floor: 1, seed: i }, [])
+          .floorDeck.map((r) => r.id)
+          .join(","),
+      ),
     );
-    const state = buildFloor({ ...fullSupply, roomSupply: movedToFloor1, floor: 1 }, []);
-    expect(state.floorDeck.filter((r) => r.kind === "room").every((r) => r.name === "Smoldering Armory")).toBe(true);
+    expect(orders.size).toBeGreaterThan(1);
   });
 
-  // With floor 1's Rooms gone from the pool, building it aborts the run instead.
-  it("aborts a floor whose pool is short of 6 cards", () => {
+  // C59 prints a Stairwell for each of floors 4 and 5.
+  it.each([
+    [4, "Sexy Blob"],
+    [5, "Comrade Black"],
+  ] as const)("floor %i's deck holds %s and every Room of its tier", (floor, stairwell) => {
     const [initial] = createInitialState(1, content);
     const fullSupply = returnRoomsToSupply(initial);
-    const shortFloor1 = {
-      ...fullSupply,
-      roomSupply: fullSupply.roomSupply.filter((r) => !(r.kind === "room" && r.floors.includes(1))),
-    };
+    const printed = fullSupply.roomSupply.filter((r) => r.tier === floor);
+    const state = buildFloor({ ...fullSupply, floor }, []);
+    expect(state.phase).not.toBe("GameOver");
+    expect(state.floorDeck.map((r) => r.id).sort()).toEqual(printed.map((r) => r.id).sort());
+    const stairwells = state.floorDeck.filter((r) => r.kind === "stairwell");
+    expect(stairwells.map((r) => r.name)).toEqual([stairwell]);
+    expect(state.floorDeck.filter((r) => r.kind === "room").length).toBeGreaterThan(0);
+  });
+
+  // A tier that prints no Stairwell leaves no way up, so the run is void. The
+  // real supply prints one for every tier, so this rigs a supply without.
+  it.each([4, 5])("aborts floor %i, its tier printing no Stairwell, naming the floor", (floor) => {
+    const [initial] = createInitialState(1, content);
+    const fullSupply = returnRoomsToSupply(initial);
+    const roomSupply = fullSupply.roomSupply.filter((r) => r.kind !== "stairwell");
     const events: DomainEvent[] = [];
-    const state = buildFloor({ ...shortFloor1, floor: 1, seed: initial.seed }, events);
+    const state = buildFloor({ ...fullSupply, roomSupply, floor }, events);
     expect(state.phase).toBe("GameOver");
     expect(state.outcome).toBe("Aborted");
-    expect(events.some((e) => e.type === "RUN_ABORTED")).toBe(true);
+    const aborted = events.find((e) => e.type === "RUN_ABORTED");
+    expect(aborted && "reason" in aborted ? aborted.reason : "").toContain(`Floor ${String(floor)}`);
   });
 
-  it("leaves the Iron Sentinel out of every floor until #387", () => {
+  it("the Roof is The Supreme Commander alone", () => {
     const [initial] = createInitialState(1, content);
     const fullSupply = returnRoomsToSupply(initial);
-    for (let floor = 1; floor <= TOP_FLOOR; floor += 1) {
-      const state = buildFloor({ ...fullSupply, floor }, []);
-      expect(state.floorDeck.some((r) => r.name === "The Iron Sentinel")).toBe(false);
-    }
+    const state = buildFloor({ ...fullSupply, floor: TOP_FLOOR }, []);
+    expect(state.floorDeck).toHaveLength(1);
+    expect(state.floorDeck[0]?.name).toBe("The Supreme Commander");
+    expect(state.floorDeck[0]?.kind).toBe("stairwell");
+    expect(state.floorDeck[0]?.tier).toBeNull();
   });
 
-  // Tier 2's pool has more cards than floor 3 needs, so which rooms sit out
-  // varies with the seed.
-  it("floor 3's room composition varies with the seed", () => {
-    const [initial] = createInitialState(1, content);
-    const fullSupply = returnRoomsToSupply(initial);
-    const compositions = new Set(
-      Array.from({ length: 20 }, (_, i) => {
-        const state = buildFloor({ ...fullSupply, floor: 3, seed: i }, []);
-        return state.floorDeck
-          .map((r) => r.name)
-          .sort()
-          .join(",");
-      }),
-    );
-    expect(compositions.size).toBeGreaterThan(1);
-  });
-
-  it("takes floor 1's Stairwell and Rooms from tier 1", () => {
-    const [state] = createInitialState(1, content);
-    const stairwell = state.floorDeck.find((r) => r.kind === "stairwell");
-    expect(stairwell?.name).toBe("The Sentry Drone");
-    expect(state.floorDeck.every((r) => r.tier === 1)).toBe(true);
+  it("calls the sixth floor the Roof", () => {
+    expect(floorName(5)).toBe("Floor 5");
+    expect(floorName(TOP_FLOOR)).toBe("The Roof");
   });
 
   it("gives every physical copy its own id", () => {
@@ -134,7 +127,7 @@ describe("Setting up a floor", () => {
 });
 
 // Rulebook, Ascending step 4: "Return every room still in the floor deck, Fled
-// rooms included, to the pool. Rooms you cleared, the Stairwell
+// rooms included, to its tier's pool. Rooms you cleared, the Stairwell
 // included, stay on the Rooms pile."
 describe("Ending a floor (Ascending, Build the next floor)", () => {
   it("returns an unseen or Fled room (still in the floor deck) to the pool", () => {
@@ -160,7 +153,7 @@ describe("Ending a floor (Ascending, Build the next floor)", () => {
 
   it("does not reset the cleared pile when building the next floor", () => {
     const [initial] = createInitialState(1, content);
-    const clearedRoom = room("Flooded Ventilation Shaft");
+    const clearedRoom = room("Puzzle Room");
     const fullSupply = returnRoomsToSupply({ ...initial, cleared: [] });
     const state = { ...fullSupply, floor: 2, cleared: [clearedRoom] };
 

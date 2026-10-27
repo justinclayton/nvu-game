@@ -7,12 +7,12 @@ import {
   metThresholds,
   payOptions,
   playableCards,
-  scrapForStatsCards,
   statPool,
   thresholdLines,
 } from "@domain/queries";
 import type { Card, Character, GameState, Room } from "@domain/types";
 import type { CardFace, RoomFace, StatRequirement } from "@domain/printed";
+import { floorName } from "@domain/setup";
 import { CHARACTERS, playerOf } from "@domain/verbs";
 
 /**
@@ -79,8 +79,8 @@ const requirementText = (requires: StatRequirement): string => {
 
 /** A Room's printed face, with no run to check thresholds against — `bin/nvu card NAME`. */
 export function printedRoomLines(room: RoomFace): string[] {
-  const floors = room.floors.length === 0 ? "no floors" : `floors ${room.floors.join(", ")}`;
-  const lines = [`${room.name} [${room.kind}; ${floors}]`];
+  const tier = room.tier === null ? "no tier" : `tier ${String(room.tier)}`;
+  const lines = [`${room.name} [${room.kind}; ${tier}]`];
   if (room.text.trim() !== "") lines.push(`  ${room.text.trim()}`);
   for (const challenge of room.challenges) {
     for (const threshold of challenge.thresholds) {
@@ -94,6 +94,7 @@ export function printedRoomLines(room: RoomFace): string[] {
 function roomLines(state: GameState, room: Room, label = "Room"): string[] {
   const met = new Set(metThresholds(state));
   const lines = [`${label}: ${room.name} (${room.kind})`];
+  if (room.text.trim() !== "") lines.push(`  ${room.text.trim()}`);
   for (const t of allThresholds(room)) {
     const mark = met.has(t) ? "✔" : " ";
     const need = thresholdLines(state, t)
@@ -154,7 +155,7 @@ export function renderTable(state: GameState): string {
   const beforeFlip = state.phase === "Turn Start" && state.pending?.kind !== "ChooseRoom";
   const turn = beforeFlip ? state.turn + 1 : state.turn;
   lines.push(
-    `Floor ${String(state.floor)} · turn ${String(turn)} · ${state.phase}` +
+    `${floorName(state.floor)} · turn ${String(turn)} · ${state.phase}` +
       `   floor deck ${String(state.floorDeck.length)}, cleared ${String(state.cleared.length)}` +
       `   Good Stuff ${String(state.pools.goodStuff.length)}, Bad Stuff ${String(state.pools.badStuff.length)}`,
   );
@@ -252,9 +253,6 @@ export function moveHint(state: GameState): string {
           const payers = payOptions(state, c, card.id).map((x) => x.name);
           const pay = cost > 0 ? ` pay <${String(cost)} of: ${payers.join(", ")}>` : "";
           lines.push(`card ${c} ${card.name} (cost ${String(cost)})${pay}`);
-        }
-        for (const card of scrapForStatsCards(state, c)) {
-          lines.push(`scrap ${c} ${card.name} for <Oomph|Scramble>`);
         }
       }
       lines.push("end — end the Play phase and resolve the room");

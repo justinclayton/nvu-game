@@ -5,8 +5,7 @@
  */
 
 import { behaviourOf, type HeldModifiers } from "./cards/behaviours";
-import { roomAllowsScrapForStats } from "./cards/rooms";
-import { HAND_CAP } from "./setup";
+import { DIM_HAND_CAP, HAND_CAP } from "./setup";
 import type {
   Card,
   CardId,
@@ -91,11 +90,14 @@ export const handsShared = (state: GameState): boolean =>
   state.playZone.some((p) => inPlay(p.card)?.sharesHands === true);
 
 /**
- * Each Turn, Turn Start: draw up to 5. A "draw N fewer" `Holding:` line comes
- * off that target; copies stack, and the target never goes below 0.
+ * Each Turn, Turn Start: draw up to 5, or up to 4 under a Dim Active Room. A
+ * "draw N fewer" `Holding:` line comes off that target; copies stack, and the
+ * target never goes below 0.
  */
-export const drawTargetFor = (state: GameState, c: Character): number =>
-  Math.max(0, HAND_CAP - heldModifiers(state, c).drawTargetDelta);
+export const drawTargetFor = (state: GameState, c: Character): number => {
+  const dim = state.activeRoom?.keywords.includes("Dim") ?? false;
+  return Math.max(0, (dim ? DIM_HAND_CAP : HAND_CAP) - heldModifiers(state, c).drawTargetDelta);
+};
 
 /* ------------------------------------------------------------- the play zone */
 
@@ -144,7 +146,7 @@ export function statPool(state: GameState, side?: Character): StatTotals {
     oomph += c.oomph;
     scramble += c.scramble;
   }
-  // System Feedback banks a loss and Bio-Hazard Containment Vault a gain
+  // System Feedback banks a loss and Red's and Gray's Stuff a gain
   // against the shared pool, not either side's own display-only contribution.
   if (side) return { oomph, scramble };
   return {
@@ -153,6 +155,20 @@ export function statPool(state: GameState, side?: Character): StatTotals {
       0,
       scramble - state.thisTurn.poolPenalty.scramble + state.thisTurn.poolBonus.scramble,
     ),
+  };
+}
+
+/**
+ * What one player played this turn: their side's total from `statPool`, plus
+ * any gain or loss a card of theirs banked. "The player who played the least
+ * Scramble" reads this; a stat never reads below zero.
+ */
+export function playedStats(state: GameState, side: Character): StatTotals {
+  const own = statPool(state, side);
+  const banked = state.thisTurn.banked[side];
+  return {
+    oomph: Math.max(0, own.oomph + banked.oomph),
+    scramble: Math.max(0, own.scramble + banked.scramble),
   };
 }
 
@@ -329,21 +345,29 @@ export function payOptions(state: GameState, c: Character, cardId: CardId): read
   return pool.filter((x) => x.kind !== "bad_stuff");
 }
 
+/**
+ * Lockstep (no player may play two cards in a row): whoever played the last
+ * card this turn cannot play until their partner does. Passing is unaffected,
+ * and the first card of the turn is open to either player.
+ */
+export function lockedOut(state: GameState, c: Character): boolean {
+  return (state.activeRoom?.keywords.includes("Lockstep") ?? false) && state.thisTurn.lastPlayer === c;
+}
+
+/** Cap: the most cards the play zone holds, both sides together. */
+export const CAP_LIMIT = 3;
+
+/** Cap (at most 3 cards in the play zone, both sides together): once it holds that many, no one plays. */
+export function capReached(state: GameState): boolean {
+  return (state.activeRoom?.keywords.includes("Cap") ?? false) && state.playZone.length >= CAP_LIMIT;
+}
+
 /** The cards this character could play right now, cost and all. */
 export function playableCards(state: GameState, c: Character): readonly Card[] {
   if (state.phase !== "Play" || state.pending !== null) return [];
   const p = playerOf(state, c);
-  if (p.down) return [];
+  if (p.down || lockedOut(state, c) || capReached(state)) return [];
   return p.hand.filter((card) => payOptions(state, c, card.id).length >= costOf(state, c, card));
-}
-
-/** This character's Good Stuff cards eligible for `SCRAP_FOR_STATS` right now — only while the active room's own text allows it (e.g. Bio-Hazard Containment Vault). */
-export function scrapForStatsCards(state: GameState, c: Character): readonly Card[] {
-  if (state.phase !== "Play" || state.pending !== null) return [];
-  if (!state.activeRoom || !roomAllowsScrapForStats(state.activeRoom)) return [];
-  const p = playerOf(state, c);
-  if (p.down) return [];
-  return p.hand.filter((card) => card.kind === "good_stuff");
 }
 
 /** Every non-Stuff card this character owns, across deck, hand and discard pile. */

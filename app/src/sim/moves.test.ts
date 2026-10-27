@@ -171,7 +171,7 @@ describe("a ChooseRoom", () => {
       phase: "Turn Start",
       floorDeck: [
         room("Security Turnstile"),
-        room("Flooded Ventilation Shaft"),
+        room("Ventilation Shaft"),
         room("The Sentry Drone"),
       ],
       Red: player({ deck: [card("Shove")] }),

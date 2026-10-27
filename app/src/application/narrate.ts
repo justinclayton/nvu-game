@@ -9,6 +9,7 @@
 
 import { plural } from "@domain/plural";
 import { printedThresholdLines } from "@domain/queries";
+import { floorName } from "@domain/setup";
 import type { DomainEvent } from "@domain/types";
 import type { Note } from "./session";
 
@@ -24,7 +25,7 @@ function describeWhat(event: DomainEvent): string {
     case "PHASE_ENDED":
       return `${event.phase} phase ends.`;
     case "FLOOR_BUILT":
-      return `Floor ${String(event.floor)} is built: ${String(event.rooms)} rooms.`;
+      return `${floorName(event.floor)} is built: ${String(event.rooms)} rooms.`;
     case "ROOMS_REVEALED":
       return `Revealed: ${event.rooms.map((r) => r.name).join(", ")}.`;
     case "ROOM_FLIPPED":
@@ -41,8 +42,6 @@ function describeWhat(event: DomainEvent): string {
       return `${event.character} discards ${event.card.name} from their ${event.from === "playZone" ? "play zone" : event.from}.`;
     case "CARD_SCRAPPED":
       return `${event.card.name} is Scrapped.`;
-    case "CARD_SCRAPPED_FOR_STATS":
-      return `${event.character} Scraps ${event.card.name} for +${String(event.amount)} ${event.stat}.`;
     case "CARD_EXHAUSTED":
       return `${event.character} Exhausts ${event.card.name}.`;
     case "EXHAUST_PREVENTED":
@@ -73,6 +72,8 @@ function describeWhat(event: DomainEvent): string {
       return `You Flee ${event.room.name}.`;
     case "FLED_TO_BOTTOM":
       return `${event.room.name} goes to the bottom of the Floor deck.`;
+    case "FLED_TO_TOP":
+      return `${event.room.name} goes back on top of the Floor deck.`;
     case "WENT_DOWN":
       return `${event.character} is Down — ${event.cause}. The run is lost.`;
     case "REWARD_REVEALED":
@@ -90,7 +91,7 @@ function describeWhat(event: DomainEvent): string {
     case "TURN_ENDED":
       return `— end of turn ${String(event.turn)} —`;
     case "FLOOR_CLEARED":
-      return `Floor ${String(event.floor)} is clear.`;
+      return `${floorName(event.floor)} is clear.`;
     case "GAME_OVER":
       return event.outcome === "Victory" ? "You reach the rooftop. You win." : "You lose.";
     case "RUN_ABORTED":

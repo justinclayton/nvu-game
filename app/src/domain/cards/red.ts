@@ -30,7 +30,7 @@ export const RED: Registry = {
   "Bull Rush": {
     onPlay(state, ctx) {
       const earlier = state.thisTurn.exhaustedFromDeck[ctx.character] > 0;
-      return earlier ? done(applyPoolBonus(state, "Oomph", 3)) : nothing(state);
+      return earlier ? done(applyPoolBonus(state, ctx.character, "Oomph", 3)) : nothing(state);
     },
   },
 
@@ -38,7 +38,7 @@ export const RED: Registry = {
     exhaustX: 1,
     onPlay(state, ctx) {
       const earlier = state.playZone.some((p) => p.card.id !== ctx.card.id && p.card.scramble > 0);
-      return earlier ? done(applyPoolBonus(state, "Oomph", 4)) : nothing(state);
+      return earlier ? done(applyPoolBonus(state, ctx.character, "Oomph", 4)) : nothing(state);
     },
   },
 

@@ -199,20 +199,6 @@ function buildPlayCard(
   return { type: "PLAY_CARD", character, cardId: card.id, payWith };
 }
 
-function buildScrapForStats(
-  state: GameState,
-  action: Extract<PlayAction, { kind: "scrap" }>,
-): Command {
-  if (state.phase !== "Play") {
-    throw new MoveRefused(`Cannot Scrap for stats during the ${state.phase} phase.`);
-  }
-  const character = matchCharacter(action.character);
-  const named = resolveCardName(action.name, playerOf(state, character).hand);
-  if (!named.ok) throw new MoveRefused(named.reason);
-  const stat = matchStat(action.stat);
-  return { type: "SCRAP_FOR_STATS", character, cardId: named.card.id, stat };
-}
-
 function buildChoose(state: GameState, action: Extract<PlayAction, { kind: "choose" }>): Command {
   const pending = state.pending;
   if (!pending) throw new MoveRefused("Nothing is waiting to be answered.");
@@ -326,8 +312,6 @@ function describeAction(action: PlayAction): string {
       return action.pay.length > 0
         ? `Played ${action.name}, paying ${action.pay.join(", ")}.`
         : `Played ${action.name}.`;
-    case "scrap":
-      return `Scrapped ${action.name} for +3 ${action.stat}.`;
     case "choose":
       return action.names.length === 0 ? "Chose none." : `Chose ${action.names.join(", ")}.`;
     case "order":
@@ -446,9 +430,6 @@ function play(request: PlayRequest): number {
         break;
       case "card":
         dispatchOrThrow(session, buildPlayCard(session.getState().state, action));
-        break;
-      case "scrap":
-        dispatchOrThrow(session, buildScrapForStats(session.getState().state, action));
         break;
       case "choose":
         dispatchOrThrow(session, buildChoose(session.getState().state, action));

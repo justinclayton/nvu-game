@@ -96,7 +96,6 @@ The moves, one per engine command: `[agent, accepted]`
 | `play flip` | `FLIP_ROOM`; Turn Start is one step, see below |
 | `play end` | `END_PLAY` |
 | `play card Red CI pay Rope Flare` | `PLAY_CARD`, paying with the named cards; `pay` and its list are omitted for a cost of 0 |
-| `play scrap Red "Pry Bar" for Oomph` | `SCRAP_FOR_STATS`, legal only where the active room's own printed text allows it (e.g. Bio-Hazard Containment Vault) `[agent]` |
 | `play choose Red` | `CHOOSE_CHARACTER` |
 | `play choose Floor deck` | `CHOOSE_PILE` |
 | `play choose Rope Flare`, `play choose none` | `CHOOSE_CARDS`; also which piece of a Good Stuff spread to keep |

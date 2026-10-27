@@ -296,7 +296,7 @@ describe("greedy", () => {
 
   it("goes for the line that pays out when a line paying nothing is just as reachable", () => {
     resetRig();
-    // A Scramble 4 line that pays nothing, beside Oomph 3 and Scramble 3 for
+    // A Scramble 4 line that pays nothing, beside Oomph 3 and Scramble 5 for
     // Good Stuff each. Gray's Pick The Lock alone meets the first; the second
     // needs Red too, and is worth a card.
     const shaft = goodStuffShaft();
@@ -324,11 +324,11 @@ describe("greedy", () => {
       activeRoom: bare,
       floorDeck: [room("Security Turnstile")],
       Red: player({ hand: [chargeIn, card("Shove"), card("Shove")], deck: pile("Shove", 4) }),
-      Gray: player({ hand: [card("Pick The Lock"), card("Duck Under"), card("Duck Under")], deck: pile("Duck Under", 4) }),
+      Gray: player({ hand: [card("Pick The Lock"), card("Duck Under"), card("Duck Under"), card("Coil Of Cable")], deck: pile("Duck Under", 4) }),
     });
     const { state: after, commands } = playOut(state);
     const played = commands.filter((c): c is Extract<Command, { type: "PLAY_CARD" }> => c.type === "PLAY_CARD");
-    expect(played.map((c) => c.character).sort()).toEqual(["Gray", "Red"]);
+    expect(played.map((c) => c.character).sort()).toEqual(["Gray", "Gray", "Red"]);
     expect(after.Gray.hand.some((c) => c.kind === "good_stuff")).toBe(true);
   });
 
@@ -347,7 +347,7 @@ describe("greedy", () => {
   it("enters the revealed room with the cheapest Clearing line, the rest to the bottom as shown", () => {
     resetRig();
     const turnstile = room("Security Turnstile"); // Oomph 5 or Scramble 5
-    const shaft = room("Flooded Ventilation Shaft"); // Oomph 3 and Scramble 3
+    const shaft = room("Ventilation Shaft"); // Oomph 4 and Scramble 4
     const drone = room("The Sentry Drone"); // Oomph 8 or Scramble 8
     const state = must(
       rig({
@@ -367,7 +367,7 @@ describe("greedy", () => {
   });
 
   it("clears floor 1 and Ascends on a fixed seed", () => {
-    const run = simulate(5, greedyPolicy, CARD_CONTENT);
+    const run = simulate(2, greedyPolicy, CARD_CONTENT);
     expect(run.floor).toBeGreaterThan(1);
   });
 

@@ -7,24 +7,35 @@
  */
 
 import { cardId, roomId } from "./ids";
-import type { CardContent, CardFace, Character, RoomFace } from "./printed";
+import type { Band, CardContent, CardFace, Character, RoomFace } from "./printed";
 import { shuffle } from "./rng";
 import type { Card, DomainEvent, GameState, PlayerState, Room, TurnRecord } from "./types";
 
-/** The fifth floor is the roof: clearing it wins the run (rulebook, Winning and losing). */
-export const TOP_FLOOR = 5;
+/**
+ * The tower is 5 numbered Floors "as well as a Roof where the final battle will
+ * take place" (rulebook Setup, "Floor deck"). The Roof is the sixth floor, and
+ * "You win by clearing the final room on the Roof" (Winning and losing).
+ */
+export const TOP_FLOOR = 6;
 
 /** Draw up to this many, each turn (Each Turn, Turn Start: Draw up to five). A card may tighten it. */
 export const HAND_CAP = 5;
 
-/** Every floor holds exactly one Stairwell (rulebook Setup, "Floor deck"). */
-export const STAIRWELLS_PER_FLOOR = 1;
+/** The draw target under a Dim Active Room ("Dim (only draw up to 4 cards)"). */
+export const DIM_HAND_CAP = 4;
 
-/** Every floor deck is 6 cards: 1 Stairwell and 5 Rooms (rulebook Setup, "Floor deck"). */
-export const FLOOR_DECK_SIZE = 6;
+/** What the players call a floor: "Floor 3", and "The Roof" for the sixth. */
+export const floorName = (floor: number): string =>
+  floor >= TOP_FLOOR ? "The Roof" : `Floor ${String(floor)}`;
 
-/** A room may be drawn for a floor when its card lists that floor (cards.yaml, `floors`). */
-export const servesFloor = (room: Room, floor: number): boolean => room.floors.includes(floor);
+/**
+ * Each numbered floor has "its own set of cards" (rulebook Setup, "Floor
+ * deck"): floor N draws from tier N. The Roof draws from no tier; it prints
+ * one fixed Stairwell instead (cards.yaml, The Supreme Commander, `tier: null`).
+ */
+export function tierOf(floor: number): Band | null {
+  return floor >= TOP_FLOOR ? null : (floor as Band);
+}
 
 /* ------------------------------------------------------ minting the cards */
 
@@ -51,8 +62,9 @@ export function mintRoom(face: RoomFace, copy: number): Room {
     name: face.name,
     kind: face.kind,
     tier: face.tier,
-    floors: face.floors,
     flavor: face.flavor,
+    text: face.text,
+    keywords: face.keywords,
     challenges: face.challenges,
     flee: face.flee,
   };
@@ -67,75 +79,42 @@ const roomCopiesOf = (face: RoomFace): Room[] =>
 
 /* ------------------------------------------------------------ floor setup */
 
-/** Take `n` rooms of one kind out of the supply, shuffled. */
-function takeRooms(
-  supply: readonly Room[],
-  pick: (room: Room) => boolean,
-  n: number,
-  seed: number,
-): readonly [taken: Room[], rest: Room[], seed: number] {
-  const [candidates, next] = shuffle(supply.filter(pick), seed);
-  const taken = candidates.slice(0, n);
-  const takenIds = new Set(taken.map((r) => r.id));
-  return [taken, supply.filter((r) => !takenIds.has(r.id)), next];
-}
-
 /**
- * One Stairwell for this floor, plus Rooms for this floor drawn at random
- * until the floor deck holds 6 (rulebook Setup, "Floor deck"). Each card
- * lists the floors it serves, so the floor-to-tier map is data, not code.
+ * "Assemble the floor deck for the floor you're building by shuffling the
+ * cards for that floor together" (rulebook Setup, "Floor deck"): every copy of
+ * every Room and Stairwell printed for the floor's tier. The Roof's deck is
+ * The Supreme Commander alone.
  *
- * Pools are sized so a floor always has enough. If one ever comes up short of
- * one Stairwell plus enough Rooms, the run is void: the floor is not built,
- * and the game ends Aborted instead.
+ * A floor whose tier prints no Stairwell cannot be climbed out of: the floor
+ * is not built, and the game ends Aborted instead.
  */
 export function buildFloor(state: GameState, events: DomainEvent[]): GameState {
-  let seed = state.seed;
-  let supply = state.roomSupply;
-  const rooms: Room[] = [];
-  const floor = state.floor;
+  const tier = tierOf(state.floor);
+  const forFloor = state.roomSupply.filter((r) => r.tier === tier);
 
-  const [stairwells, afterStairwell, s1] = takeRooms(
-    supply,
-    (r) => r.kind === "stairwell" && servesFloor(r, floor),
-    STAIRWELLS_PER_FLOOR,
-    seed,
-  );
-  rooms.push(...stairwells);
-  supply = afterStairwell;
-  seed = s1;
-
-  const [rest, afterRest, s2] = takeRooms(
-    supply,
-    (r) => r.kind === "room" && servesFloor(r, floor),
-    FLOOR_DECK_SIZE - STAIRWELLS_PER_FLOOR,
-    seed,
-  );
-  rooms.push(...rest);
-  supply = afterRest;
-  seed = s2;
-
-  if (rooms.length < FLOOR_DECK_SIZE) {
-    const reason = `Floor ${String(floor)} needs ${String(FLOOR_DECK_SIZE)} cards; its pool holds ${String(rooms.length)}.`;
+  if (!forFloor.some((r) => r.kind === "stairwell")) {
+    const where = tier === null ? "the Roof" : `Floor ${String(state.floor)}`;
+    const reason = `${where} has no Stairwell; tier ${String(tier)} prints none.`;
     events.push({ type: "RUN_ABORTED", reason });
     return { ...state, phase: "GameOver", outcome: "Aborted" };
   }
 
-  const [floorDeck, s4] = shuffle(rooms, seed);
-  events.push({ type: "FLOOR_BUILT", floor, rooms: floorDeck.length });
+  const [floorDeck, seed] = shuffle(forFloor, state.seed);
+  const taken = new Set(floorDeck.map((r) => r.id));
+  events.push({ type: "FLOOR_BUILT", floor: state.floor, rooms: floorDeck.length });
   return {
     ...state,
-    seed: s4,
+    seed,
     floorDeck,
-    roomSupply: supply,
+    roomSupply: state.roomSupply.filter((r) => !taken.has(r.id)),
     activeRoom: null,
   };
 }
 
 /**
- * Unseen and Fled rooms go back to the pool, ready for the next
- * floor. Cleared rooms, the Stairwell included, stay on the Rooms pile for
- * the rest of the run (rulebook, Ascending).
+ * "Return every room still in the floor deck, Fled rooms included, to its
+ * tier's pool" (rulebook, Ascending, Build the next floor). Cleared rooms, the
+ * Stairwell included, stay on the Rooms pile for the rest of the run.
  */
 export function returnRoomsToSupply(state: GameState): GameState {
   const used = [...state.floorDeck, ...(state.activeRoom ? [state.activeRoom] : [])];
@@ -157,8 +136,10 @@ export const emptyTurnRecord = (): TurnRecord => ({
   questions: [],
   fired: [],
   playDiscount: { Red: 0, Gray: 0 },
+  lastPlayer: null,
   poolPenalty: { oomph: 0, scramble: 0 },
   poolBonus: { oomph: 0, scramble: 0 },
+  banked: { Red: { oomph: 0, scramble: 0 }, Gray: { oomph: 0, scramble: 0 } },
   exhausted: { Red: 0, Gray: 0 },
   exhaustedFromDeck: { Red: 0, Gray: 0 },
 });

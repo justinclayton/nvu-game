@@ -19,7 +19,7 @@
  */
 
 import { readFileSync, writeFileSync } from "node:fs";
-import { fileURLToPath } from "node:url";
+import { fileURLToPath, pathToFileURL } from "node:url";
 import { dirname, join } from "node:path";
 import { createContext, runInContext } from "node:vm";
 import { createHash } from "node:crypto";
@@ -236,7 +236,7 @@ export function parseCardsYaml(text) {
 const FIELD_ORDER = [
   "name", "set", "kind", "owner", "starter", "rarity",
   "rarity_status", "cost", "oomph", "scramble", "conditional_stat",
-  "tier", "floors", "flavor", "challenges", "flee", "text", "note", "flagged",
+  "tier", "flavor", "challenges", "flee", "text", "note", "flagged",
 ];
 
 function ordered(card) {
@@ -250,7 +250,7 @@ function ordered(card) {
    rulebook's "Rules version:" line, C from the "version:" line under meta in
    cards.yaml. The printed sheet stamps "R29.C43" on every card; the engine
    count, v, is git's to know and tools/kit-revision.sh prints the whole thing. */
-function rulesVersion() {
+export function rulesVersion() {
   const m = readFileSync(RULEBOOK, "utf8").match(/^Rules version:\s*(R\d+)\s*$/m);
   if (!m) throw new Error('rulebook.md has no "Rules version: R<n>" line');
   return m[1];
@@ -304,8 +304,10 @@ if (typeof module !== "undefined") module.exports = NVU_CARDS;
 /* ------------------------------------------------- the printed prose, parsed
    A room prints its threshold outcomes and its Flee line as sentences.  The web
    game never reads a sentence, so the shapes the card list actually prints are
-   turned into structure here.  Anything this does not recognise is an error,
-   not a silently dropped rule.
+   turned into structure here.  A clause this does not recognise is kept as data
+   on the line, under `unparsed`, with no effect: the list still builds and the
+   app's content test names the line, so the PR that printed it plans the engine
+   work. A rule is never silently dropped.
 
    Rulebook, Card anatomy: Room Cards: a threshold or a Flee line resolves the same way whether
    it is printed on a Room or a Stairwell. Kind only decides which pool a card is drawn from and,
@@ -324,6 +326,8 @@ function who(word) {
   if (w === "both players" || w === "both") return "both";
   if (w === "one player" || w === "one") return "one";
   if (w === "the other") return "other";
+  if (w === "the player who played the least oomph this turn") return "leastOomph";
+  if (w === "the player who played the least scramble this turn") return "leastScramble";
   if (w === "red") return "Red";
   if (w === "gray") return "Gray";
   throw new Error(`unrecognised target: "${word}"`);
@@ -337,7 +341,7 @@ const CLAUSES = [
   [/^(?:and )?flee this room for free$/i, () => ({ fleeFree: true })],
   [/^(?:and )?leave empty-handed$/i, () => ({})],
   [
-    /^(both players|one player|red|gray) exhausts? (\d+)$/i,
+    /^(both players|one player|red|gray|the player who played the least (?:oomph|scramble) this turn) exhausts? (\d+)$/i,
     (m) => ({ effect: { type: "ExhaustFromDeck", who: who(m[1]), amount: Number(m[2]) } }),
   ],
   [
@@ -366,11 +370,11 @@ function clausesOf(prose) {
     .filter((c) => c !== "");
 }
 
-function readProse(prose, where) {
-  const out = { clears: false, ascends: false, fleeFree: false, effects: [] };
+function readProse(prose) {
+  const out = { clears: false, ascends: false, fleeFree: false, effects: [], unparsed: [] };
   for (const clause of clausesOf(prose)) {
     const hit = CLAUSES.find(([re]) => re.test(clause));
-    if (!hit) throw new Error(`${where}: unparsed clause "${clause}" in "${prose}"`);
+    if (!hit) { out.unparsed.push(clause); continue; }
     const read = hit[1](clause.match(hit[0]));
     if (read.clears) out.clears = true;
     if (read.ascends) out.ascends = true;
@@ -398,7 +402,7 @@ function requirementsOf(raw, where) {
 function threshold(raw, where) {
   const requires = requirementsOf(raw, where);
   const outcome = String(raw.outcome ?? "");
-  const read = readProse(outcome, `${where} threshold "${outcome}"`);
+  const read = readProse(outcome);
   return {
     requires,
     outcome,
@@ -409,13 +413,14 @@ function threshold(raw, where) {
     fleeFree: read.fleeFree,
     ascends: read.ascends,
     effects: read.effects,
+    unparsed: read.unparsed,
   };
 }
 
 function fleeLine(card) {
-  if (!card.flee) return { text: NO_FLEE_PRINTED, clears: false, effects: [] };
-  const read = readProse(card.flee, `${card.name} Flee line`);
-  return { text: card.flee, clears: read.clears, effects: read.effects };
+  if (!card.flee) return { text: NO_FLEE_PRINTED, clears: false, effects: [], unparsed: [] };
+  const read = readProse(card.flee);
+  return { text: card.flee, clears: read.clears, effects: read.effects, unparsed: read.unparsed };
 }
 
 function cardFace(c) {
@@ -442,30 +447,64 @@ function challenge(raw, where) {
   return { thresholds };
 }
 
+/** The words a room's printed text may open with; the engine switches on these, not on the prose. */
+export const ROOM_KEYWORDS = [
+  "Ambush", "Dim", "Lockstep", "Cap", "Toxic", "Unstable", "Draining", "Heavy", "Relentless", "Corrosive",
+];
+
+/** The words before the first "(" of a room's text, punctuation dropped: the
+ * ones in ROOM_KEYWORDS as `keywords`, any other as `unparsed`, kept as data
+ * like an outcome clause the generator can't read. */
+export function roomKeywords(text) {
+  const words = String(text ?? "").split("(")[0].split(/\s+/).map((w) => w.replace(/[.,;:!]+$/, "")).filter((w) => w !== "");
+  return {
+    keywords: words.filter((w) => ROOM_KEYWORDS.includes(w)),
+    unparsed: words.filter((w) => !ROOM_KEYWORDS.includes(w)),
+  };
+}
+
 function roomFace(c) {
   const challenges = (c.challenges ?? []).map((ch) => challenge(ch, c.name));
   if (challenges.length === 0) throw new Error(`${c.name}: a room prints at least one challenge`);
-  if (c.tier !== 1 && c.tier !== 2 && c.tier !== 3 && c.tier !== null) {
-    throw new Error(`${c.name}: a room needs a tier of 1, 2, 3, or null for the fixed roof Stairwell`);
+  if (![1, 2, 3, 4, 5, null].includes(c.tier)) {
+    throw new Error(`${c.name}: a room needs a tier of 1 to 5, or null for the fixed roof Stairwell`);
   }
   if (c.tier === null && c.kind !== "stairwell") {
     throw new Error(`${c.name}: only a Stairwell may print tier: null`);
-  }
-  if (!Array.isArray(c.floors) || !c.floors.every((f) => Number.isInteger(f) && f >= 1)) {
-    throw new Error(`${c.name}: a room needs floors, a list of the floor numbers that draw it`);
   }
   return {
     name: c.name,
     set: c.set,
     kind: c.kind,
     tier: c.tier,
-    floors: c.floors,
     flavor: c.flavor ?? "",
     text: c.text ?? "",
+    keywords: roomKeywords(c.text).keywords,
+    unparsedKeywords: roomKeywords(c.text).unparsed,
     count: c.count ?? 1,
     challenges,
     flee: fleeLine(c),
   };
+}
+
+/** Every printed clause the engine cannot read yet, as "<room> <line>: <clause>". */
+export function unreadLines(content) {
+  const out = [];
+  for (const r of content.rooms) {
+    r.challenges.forEach((ch, i) => ch.thresholds.forEach((t, j) => {
+      for (const c of t.unparsed) out.push(`${r.name} line ${i + 1}.${j + 1}: "${c}"`);
+    }));
+    for (const c of r.flee.unparsed) out.push(`${r.name} Flee: "${c}"`);
+    for (const w of r.unparsedKeywords ?? []) out.push(`${r.name} keyword: "${w}"`);
+  }
+  return out;
+}
+
+function unreadNote(content) {
+  const lines = unreadLines(content);
+  if (!lines.length) return "";
+  return `\n${lines.length} printed line(s) the engine can't read yet, kept as data (the app's content test names them):\n` +
+    lines.map((l) => "  " + l).join("\n");
 }
 
 /** The whole card list, in the shape app/src/domain/printed.ts describes. */
@@ -480,7 +519,7 @@ export function structure(doc) {
   const fixedStairwells = rooms.filter((r) => r.tier === null);
   if (fixedStairwells.length !== 1) {
     throw new Error(
-      `expected exactly one roof Stairwell (tier: null), found ${fixedStairwells.length}`,
+      `expected exactly one Roof Stairwell (tier: null), found ${fixedStairwells.length}`,
     );
   }
   return { meta: { updated: String(doc.meta.updated ?? "") }, cards, rooms };
@@ -490,7 +529,7 @@ export function structure(doc) {
 
 /** The first 12 hex of sha256 over the JSON of the structured content — a stable
  * id for exactly this card list, independent of source formatting. */
-function cardListId(content) {
+export function cardListId(content) {
   return createHash("sha256").update(JSON.stringify(content)).digest("hex").slice(0, 12);
 }
 
@@ -614,42 +653,49 @@ function checkRenders(doc, cardsJs) {
 
 /* ---------------------------------------------------------------------- main */
 
-const doc = parseCardsYaml(readFileSync(YAML, "utf8"));
-const cmd = process.argv[2] || "build";
+/* Run as a script, this is the CLI. Imported (tools/card-editor.mjs), it only
+   lends out its parser and structure, and leaves the generated files alone. */
+const isMain = process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href;
 
-if (cmd === "build") {
-  writeFileSync(OUT, generate(doc));
-  writeFileSync(OUT_TS, generateTs(doc));
-  const { cards, rooms } = structure(doc);
-  console.log(
-    `wrote tools/cards.js and app/src/content/cards.generated.ts — ` +
-    `${cards.length} cards and ${rooms.length} rooms`,
-  );
-} else if (cmd === "check") {
-  const problems = [];
-  problems.push(...checkSchema(doc));
-  const want = generate(doc);
-  let have = "";
-  try { have = readFileSync(OUT, "utf8"); } catch { /* missing counts as stale */ }
-  if (have !== want) problems.push("tools/cards.js is stale — run: node tools/cards.mjs build");
+if (isMain) {
+  const doc = parseCardsYaml(readFileSync(YAML, "utf8"));
+  const cmd = process.argv[2] || "build";
 
-  const wantTs = generateTs(doc);
-  let haveTs = "";
-  try { haveTs = readFileSync(OUT_TS, "utf8"); } catch { /* missing counts as stale */ }
-  if (haveTs !== wantTs) {
-    problems.push("app/src/content/cards.generated.ts is stale — run: node tools/cards.mjs build");
+
+  if (cmd === "build") {
+    writeFileSync(OUT, generate(doc));
+    writeFileSync(OUT_TS, generateTs(doc));
+    const content = structure(doc);
+    console.log(
+      `wrote tools/cards.js and app/src/content/cards.generated.ts — ` +
+      `${content.cards.length} cards and ${content.rooms.length} rooms` + unreadNote(content),
+    );
+  } else if (cmd === "check") {
+    const problems = [];
+    problems.push(...checkSchema(doc));
+    const want = generate(doc);
+    let have = "";
+    try { have = readFileSync(OUT, "utf8"); } catch { /* missing counts as stale */ }
+    if (have !== want) problems.push("tools/cards.js is stale — run: node tools/cards.mjs build");
+
+    const wantTs = generateTs(doc);
+    let haveTs = "";
+    try { haveTs = readFileSync(OUT_TS, "utf8"); } catch { /* missing counts as stale */ }
+    if (haveTs !== wantTs) {
+      problems.push("app/src/content/cards.generated.ts is stale — run: node tools/cards.mjs build");
+    }
+
+    problems.push(...checkRenders(doc, want));
+
+    if (problems.length) {
+      console.error(`card list has drifted — ${problems.length} problem(s):\n`);
+      for (const p of problems) console.error("  " + p);
+      process.exit(1);
+    }
+    console.log(`no drift — ${doc.cards.length} cards agree across cards.yaml and cards.js,
+  and the card sheet prints every copy of all ${doc.cards.length}` + unreadNote(structure(doc)));
+  } else {
+    console.error("usage: node tools/cards.mjs [build|check]");
+    process.exit(2);
   }
-
-  problems.push(...checkRenders(doc, want));
-
-  if (problems.length) {
-    console.error(`card list has drifted — ${problems.length} problem(s):\n`);
-    for (const p of problems) console.error("  " + p);
-    process.exit(1);
-  }
-  console.log(`no drift — ${doc.cards.length} cards agree across cards.yaml and cards.js,
-and the card sheet prints every copy of all ${doc.cards.length}`);
-} else {
-  console.error("usage: node tools/cards.mjs [build|check]");
-  process.exit(2);
 }

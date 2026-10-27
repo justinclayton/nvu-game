@@ -226,12 +226,19 @@ export function moveHint(state: GameState): string {
       case "ChooseGoodStuff":
         lines.push(`choose <Name> — keep 1 of: ${pending.options.map((c) => c.name).join(", ")}`);
         break;
-      case "ChooseRoom":
+      case "ChooseRoom": {
+        const enterable = enterableRooms(pending).map((r) => r.name).join(", ");
+        // Ambush narrows the entry, so say so rather than drop the other rooms without a word.
+        const which =
+          enterableRooms(pending).length < pending.options.length
+            ? `Ambush: you must enter ${enterable}`
+            : `enter one of: ${enterable}`;
         lines.push(
-          `choose <Room> [<Room>...] — enter one of: ${enterableRooms(pending).map((r) => r.name).join(", ")}; ` +
+          `choose <Room> [<Room>...] — ${which}; ` +
             "name the rest to set the order they go to the bottom (default: as shown)",
         );
         break;
+      }
     }
     lines.push("undo — step back to the last checkpoint");
     return lines.join("\n");

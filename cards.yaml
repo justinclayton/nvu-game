@@ -31,7 +31,7 @@
 #   flee    string               room and stairwell only: the printed Flee line
 
 meta:
-  version: C59
+  version: C61
   updated: 2026-10-03
 
 cards:
@@ -125,7 +125,7 @@ cards:
     owner: Gray
     cost: 1
     scramble: 1
-    text: Peek 1.
+    text: Draw 1 card.
     flavor: "No harm in stopping to take in the scenery, right Red?"
 
   ## Character Reward Cards
@@ -307,7 +307,7 @@ cards:
     owner: Gray
     rarity: Cool
     cost: 0
-    text: If this is the only card you play this turn, move 3 cards from your Exhaust pile to the bottom of your deck.
+    text: At the end of the Play phase, if this was the only card you played this turn, move 3 cards from your Exhaust pile to the bottom of your deck.
     flavor: Pause for a second to read the room.
 
   - name: Pack Mule
@@ -617,7 +617,7 @@ cards:
     count: 2
     set: proposed
     kind: bad_stuff
-    cost: 3
+    cost: 2
     text: "Can't be used to pay for other cards. Play: Scrap this card."
     flavor: Broken rubber gasket. Useless dead weight clogging your pack.
 
@@ -625,7 +625,7 @@ cards:
     count: 2
     set: proposed
     kind: bad_stuff
-    cost: 2
+    cost: 1
     text: "Holding: Cards you play cost +1 card to play. Can't be used to pay for other cards. Play: Scrap this card."
     flavor: Limb fatigue slows down every movement.
 
@@ -633,7 +633,7 @@ cards:
     count: 2
     set: proposed
     kind: bad_stuff
-    cost: 3
+    cost: 2
     text: "Holding: Stuff cards you play have -1 Oomph and -1 Scramble. Can't be used to pay for other cards. Play: Scrap this card."
     flavor: Corrosion degrades the quality of your scavenged gear.
 
@@ -641,7 +641,7 @@ cards:
     count: 2
     set: proposed
     kind: bad_stuff
-    cost: 3
+    cost: 2
     text: "Holding: At Turn Start, draw 1 fewer card. Can't be used to pay for other cards. Play: Scrap this card."
     flavor: Murky goop blinds your vision and slows drawing.
 
@@ -649,7 +649,7 @@ cards:
     count: 2
     set: proposed
     kind: bad_stuff
-    cost: 3
+    cost: 2
     text: "Holding: At Cleanup, discard cards other than this one until you hold 3. Can't be used to pay for other cards. Play: Scrap this card."
     flavor: Choking spores force you to drop excess gear.
 
@@ -657,7 +657,7 @@ cards:
     count: 2
     set: proposed
     kind: bad_stuff
-    cost: 2
+    cost: 1
     text: "Holding: Whenever your partner draws a card during Play, Exhaust 1. Can't be used to pay for other cards. Play: Scrap this card."
     flavor: Disorientation drains stamina whenever team communication spikes.
 
@@ -665,7 +665,7 @@ cards:
     count: 2
     set: proposed
     kind: bad_stuff
-    cost: 2
+    cost: 1
     text: >-
       Holding: Every room threshold requires +2 Scramble to be met.
       Can't be used to pay for other cards.
@@ -676,7 +676,7 @@ cards:
     count: 2
     set: proposed
     kind: bad_stuff
-    cost: 3
+    cost: 2
     text: >-
       Holding: At Turn Start, Exhaust 1.
       Can't be used to pay for other cards.
@@ -687,7 +687,7 @@ cards:
     count: 2
     set: proposed
     kind: bad_stuff
-    cost: 2
+    cost: 1
     text: "Holding: Whenever you play a card with Cost 0, lose 1 Oomph and 1 Scramble from the Stat pool this turn. Can't be used to pay for other cards. Play: Scrap this card."
     flavor: Electrical backlash dampens cheap card plays.
 

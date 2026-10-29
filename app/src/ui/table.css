@@ -325,6 +325,17 @@ body {
   pointer-events: none;
 }
 
+/* The rooms revealed at Turn Start, held up over the brief to the right of the
+ * floor piles while the players choose one to enter. */
+.mat-row--floor {
+  position: relative;
+}
+.float--revealed {
+  top: 16px;
+  left: calc(3 * (var(--cw) + 2 * var(--pad)) + 36px);
+  height: calc(var(--ch) + 2 * var(--pad));
+}
+
 /* The room at reading size, beside the room card. */
 .brief {
   flex: 1 1 auto;

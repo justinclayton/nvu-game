@@ -7,7 +7,7 @@
 import { describe, expect, it } from "vitest";
 import { CARD_CONTENT } from "../content";
 import { execute } from "./engine";
-import { costOf, payOptions, playableCards } from "./queries";
+import { costOf, enterInShownOrder, enterableRooms, payOptions, playableCards } from "./queries";
 import { createInitialState } from "./setup";
 import type { Card, CardId, Command, GameState } from "./types";
 import { CHARACTERS } from "./verbs";
@@ -47,6 +47,12 @@ function nextCommand(state: GameState): Command | null {
         return { type: "TAKE_REWARD", cardId: pending.cards[0]?.id ?? null };
       case "ChooseGoodStuff":
         return { type: "CHOOSE_CARDS", cardIds: pending.options.slice(0, 1).map((c) => c.id) };
+      case "ChooseExhaust":
+        return { type: "EXHAUST_CARD", cardId: pending.deck > 0 ? null : (pending.options[0]?.id ?? null) };
+      case "ChooseRoom": {
+        const first = enterableRooms(pending)[0];
+        return first ? enterInShownOrder(pending, first.id) : null;
+      }
     }
   }
 

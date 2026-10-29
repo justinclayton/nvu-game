@@ -80,11 +80,11 @@ describe("Sluggish — 'Holding: cards cost +1 to play'", () => {
       Gray: player({ deck: pile("Duck Under", 4) }),
     });
     const sluggish = handCard(state, "Red", "Sluggish");
-    const [payA, payB, payC] = state.Red.hand.filter((c) => c.name === "Shove").map((c) => c.id);
-    if (!payA || !payB || !payC) throw new Error("Red is not holding three spare Shoves");
-    // Sluggish costs 3 while it is itself in hand: 2 printed, +1 from itself.
+    const [payA, payB] = state.Red.hand.filter((c) => c.name === "Shove").map((c) => c.id);
+    if (!payA || !payB) throw new Error("Red is not holding two spare Shoves");
+    // Sluggish costs 2 while it is itself in hand: 1 printed, +1 from itself.
     const played = play(state, [
-      { type: "PLAY_CARD", character: "Red", cardId: sluggish.id, payWith: [payA, payB, payC] },
+      { type: "PLAY_CARD", character: "Red", cardId: sluggish.id, payWith: [payA, payB] },
     ]);
     const remaining = handCard(played.state, "Red", "Shove");
     expect(costOf(played.state, "Red", remaining)).toBe(1);

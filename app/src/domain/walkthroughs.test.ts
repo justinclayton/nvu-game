@@ -61,7 +61,7 @@ describe("walkthrough 1 — the deck runs dry mid-draw and the discard pile beco
   });
 });
 
-describe("walkthrough 2 — Down when the deck and discard are both empty ends the run on the spot", () => {
+describe("walkthrough 2 — Down when out of cards ends the run on the spot", () => {
   it("stops a room's own punishment from finishing, and everything after it", () => {
     const state = goingDown([card("Shove")]);
     // Ticking Time Bomb's Flee line: "Both players Exhaust 3." Nobody played
@@ -69,9 +69,9 @@ describe("walkthrough 2 — Down when the deck and discard are both empty ends t
     const { state: next, events } = play(state, [{ type: "END_PLAY" }]);
     expect(next.phase).toBe("GameOver");
     expect(next.outcome).toBe("Defeat");
-    // Going Down still empties the hand into the discard pile.
+    // The Exhaust takes the Shove in hand first; then Red has no cards left.
     expect(next.Red.hand).toEqual([]);
-    expect(next.Red.discard.map((c) => c.name)).toEqual(["Shove"]);
+    expect(next.Red.exhaust.map((c) => c.name)).toEqual(["Shove"]);
     const types = eventTypes(events);
     expect(types).toContain("WENT_DOWN");
     expect(types).toContain("GAME_OVER");

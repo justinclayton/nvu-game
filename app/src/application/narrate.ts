@@ -26,14 +26,18 @@ function describeWhat(event: DomainEvent): string {
       return `${event.phase} phase ends.`;
     case "FLOOR_BUILT":
       return `${floorName(event.floor)} is built: ${String(event.rooms)} rooms.`;
+    case "ROOMS_REVEALED":
+      return `Revealed: ${event.rooms.map((r) => r.name).join(", ")}.`;
     case "ROOM_FLIPPED":
       return `You are in: ${event.room.name}.`;
+    case "ROOMS_TO_BOTTOM":
+      return `To the bottom of the Floor deck: ${event.rooms.map((r) => r.name).join(", ")}.`;
     case "CARD_DRAWN":
       return `${event.character} draws ${event.card.name}.`;
     case "CARD_PLAYED":
       return `${event.character} plays ${event.card.name}.`;
     case "COST_PAID":
-      return `${event.character} pays with ${event.cards.map((c) => c.name).join(", ")}, Exhausting ${event.cards.length === 1 ? "it" : "them"}.`;
+      return `${event.character} pays with ${event.cards.map((c) => c.name).join(", ")}, ${event.scrapped ? "Scrapping" : "Exhausting"} ${event.cards.length === 1 ? "it" : "them"}.`;
     case "CARD_DISCARDED":
       return `${event.character} discards ${event.card.name} from their ${event.from === "playZone" ? "play zone" : event.from}.`;
     case "CARD_SCRAPPED":
@@ -66,8 +70,10 @@ function describeWhat(event: DomainEvent): string {
       return `${event.room.name} is Cleared.`;
     case "ROOM_FLED":
       return `You Flee ${event.room.name}.`;
-    case "FLED_RESHUFFLED":
-      return `${event.room.name} shuffles back into the Floor deck.`;
+    case "FLED_TO_TOP":
+      return `${event.room.name} goes on top of the Floor deck.`;
+    case "FLED_TO_BOTTOM":
+      return `${event.room.name} goes to the bottom of the Floor deck.`;
     case "WENT_DOWN":
       return `${event.character} is Down — ${event.cause}. The run is lost.`;
     case "REWARD_REVEALED":

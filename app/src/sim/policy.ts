@@ -13,6 +13,7 @@ import {
   allThresholds,
   contributionOf,
   costOf,
+  enterableRooms,
   exhaustXPreventedBy,
   metThresholds,
   ownedPlayerCards,
@@ -27,6 +28,8 @@ import type {
   Character,
   Command,
   GameState,
+  Pending,
+  Room,
   RoomEffect,
   RoomId,
   Stat,
@@ -203,7 +206,7 @@ interface Target {
  * team comes out of best — an Ascend above all, then the outcome worth most
  * once the plan's own Exhaust is taken off, then the fewest cards spent,
  * then printed order. Null when Fleeing costs less than any reachable line
- * (the room only shuffles back into the Floor deck, while an Exhaust is for
+ * (the room only goes to the bottom of the Floor deck, while an Exhaust is for
  * good), or, once the room is already Cleared, when no further line would
  * add anything.
  */
@@ -337,10 +340,60 @@ function cardsDeepEqual(a: readonly (CardId | RoomId)[], b: readonly (CardId | R
   return a.length === b.length && a.every((id, i) => id === b[i]);
 }
 
+/** The stats a room's cheapest Clearing line asks for, added together. */
+function easiestLine(room: Room): number {
+  const totals = allThresholds(room)
+    .filter((t) => t.clears)
+    .map((t) => t.requires.oomph + t.requires.scramble);
+  return Math.min(...totals);
+}
+
+/**
+ * Enter the revealed room with the cheapest Clearing line, a Room before a
+ * Stairwell on a tie; the rest go to the bottom in the order shown. The hand
+ * is drawn after the choice, so the printed numbers are all there is to go on.
+ */
+function easiestRoom(options: readonly Room[]): Room {
+  const ranked = [...options].sort(
+    (a, b) =>
+      easiestLine(a) - easiestLine(b) ||
+      Number(a.kind === "stairwell") - Number(b.kind === "stairwell") ||
+      a.id.localeCompare(b.id),
+  );
+  const [first] = ranked;
+  if (!first) throw new Error("greedy: a room choice with nothing revealed");
+  return first;
+}
+
+/**
+ * Which card an `Exhaust X` gives up: Bad Stuff first, since losing it is a
+ * gain; then the top of the deck, the card the team knows least about; then
+ * the card with the fewest stats, a discard before a card in hand on a tie.
+ */
+function exhaustPick(state: GameState, pending: Extract<Pending, { kind: "ChooseExhaust" }>): CardId | null {
+  const bad = pending.options.find((c) => c.kind === "bad_stuff");
+  if (bad) return bad.id;
+  if (pending.deck > 0) return null;
+  const hand = new Set(playerOf(state, pending.character).hand.map((c) => c.id));
+  const ranked = [...pending.options].sort(
+    (a, b) =>
+      a.oomph + a.scramble - (b.oomph + b.scramble) ||
+      Number(hand.has(a.id)) - Number(hand.has(b.id)) ||
+      a.id.localeCompare(b.id),
+  );
+  return ranked[0]?.id ?? null;
+}
+
 /** Cards not asked about have no greedy opinion: sacrifice the cheapest, decline what is optional. */
 function choosePending(state: GameState, legal: readonly Command[]): Command {
   const pending = state.pending;
   if (!pending) throw new Error("greedy: no pending choice to answer");
+
+  if (pending.kind === "ChooseExhaust") {
+    const wanted = exhaustPick(state, pending);
+    const found = legal.find((c) => c.type === "EXHAUST_CARD" && c.cardId === wanted);
+    if (found) return found;
+  }
 
   if (pending.kind === "TakeReward") {
     // The same fit as the Ascend reward, including taking nothing.
@@ -403,6 +456,19 @@ function choosePending(state: GameState, legal: readonly Command[]): Command {
         : c.type === "CHOOSE_DRAW" && c.character === null,
     );
     if (found) return found;
+  }
+
+  if (pending.kind === "ChooseRoom") {
+    const wanted = easiestRoom(enterableRooms(pending));
+    const enter = legal.find(
+      (c) =>
+        c.type === "CHOOSE_ROOM" &&
+        cardsDeepEqual(
+          [c.roomId, ...c.bottom],
+          [wanted.id, ...pending.options.filter((r) => r.id !== wanted.id).map((r) => r.id)],
+        ),
+    );
+    if (enter) return enter;
   }
 
   if (pending.kind === "OrderCards") {

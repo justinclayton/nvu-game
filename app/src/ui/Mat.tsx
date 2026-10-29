@@ -19,7 +19,7 @@
 import { useRef, type CSSProperties } from "react";
 
 import { plural } from "@domain/plural";
-import type { Card, Character, GameState } from "@domain/types";
+import type { Card, Character, GameState, Room } from "@domain/types";
 import { CardLayer, type Paying } from "./CardLayer";
 import { Inspector, useTouchInspect, type Inspected } from "./Inspector";
 import { COMPACT, type Metrics } from "./metrics";
@@ -36,6 +36,7 @@ interface Props {
   readonly payingNeed?: string | null | undefined;
   readonly onPickCard: (character: Character, card: Card) => void;
   readonly onPickReward?: ((character: Character, card: Card) => void) | undefined;
+  readonly onPickRoom?: ((room: Room) => void) | undefined;
   readonly inspected: Inspected | null;
   readonly onInspect: (item: Inspected | null) => void;
   /** Debug mode: every pile is face up, and a stacked one can be opened for a full read. */
@@ -133,6 +134,7 @@ export function Mat({
   payingNeed,
   onPickCard,
   onPickReward,
+  onPickRoom,
   inspected,
   onInspect,
   debug,
@@ -145,6 +147,8 @@ export function Mat({
   // card deep — a row already shows everything, and the active room is a
   // single card that is already face up.
   const openPile = debug ? onOpenPile : undefined;
+  // Rooms revealed at Turn Start are lifted off the floor deck while the players choose.
+  const revealedCount = state.pending?.kind === "ChooseRoom" ? state.pending.options.length : 0;
 
   const vars: CSSProperties & Record<`--${string}`, string> = {
     "--cw": `${String(metrics.cardW)}px`,
@@ -164,11 +168,19 @@ export function Mat({
       <div className="mat__main">
         <div className="mat-row mat-row--floor">
           <div className="mat-floor__piles">
-            <Slot id="floor" label="Floor deck" count={state.floorDeck.length} onOpenPile={openPile} />
+            <Slot
+              id="floor"
+              label="Floor deck"
+              count={state.floorDeck.length - revealedCount}
+              onOpenPile={openPile}
+            />
             <Slot id="cleared" label="Cleared" count={state.cleared.length} onOpenPile={openPile} />
             <Slot id="room" label="Active room" />
           </div>
           <RoomBrief state={state} />
+          {/* The band over the brief where the rooms revealed at Turn Start are
+              held up to choose from. Measured only. */}
+          <div className="float float--revealed" data-slot="revealed" aria-hidden="true" />
         </div>
 
         <div className="mat-row mat-row--table">
@@ -270,6 +282,7 @@ export function Mat({
         paying={paying}
         onPickCard={onPickCard}
         onPickReward={onPickReward}
+        onPickRoom={onPickRoom}
         inspected={inspected}
         onInspect={onInspect}
         debug={debug}

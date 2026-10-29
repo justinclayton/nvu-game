@@ -182,14 +182,38 @@ export function must(state: GameState, command: Command): Ran {
   return { state: result.state, events: result.events };
 }
 
-/** Fold commands over a state, collecting every event. */
+/**
+ * Fold commands over a state, collecting every event. An Exhaust the run
+ * stops on is answered off the top of the deck (`exhaustFromDeck`) unless the
+ * next command answers it, so a test about something else reads as it did
+ * when every Exhaust came off the deck.
+ */
 export function play(state: GameState, commands: readonly Command[]): Ran {
   let s = state;
   const events: DomainEvent[] = [];
-  for (const command of commands) {
+  commands.forEach((command, i) => {
     const ran = must(s, command);
-    s = ran.state;
-    events.push(...ran.events);
+    const next = commands[i + 1];
+    const settled = next?.type === "EXHAUST_CARD" ? ran : exhaustFromDeck(ran);
+    s = settled.state;
+    events.push(...settled.events);
+  });
+  return { state: s, events };
+}
+
+/**
+ * Answer every Exhaust the run is waiting on with the top of the deck, or
+ * with the first card offered once the deck is empty, for a test about
+ * something other than which card goes (rulebook, Keywords: `Exhaust X`).
+ */
+export function exhaustFromDeck(ran: Ran): Ran {
+  let s = ran.state;
+  const events = [...ran.events];
+  while (s.pending?.kind === "ChooseExhaust") {
+    const cardId = s.pending.deck > 0 ? null : (s.pending.options[0]?.id ?? null);
+    const next = must(s, { type: "EXHAUST_CARD", cardId });
+    s = next.state;
+    events.push(...next.events);
   }
   return { state: s, events };
 }

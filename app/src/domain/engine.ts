@@ -744,7 +744,7 @@ function playCard(
     exhausted.push(...cards);
   }
   if (exhausted.length > 0) {
-    run.events.push({ type: "COST_PAID", character: c, cards: exhausted });
+    run.events.push({ type: "COST_PAID", character: c, cards: exhausted, scrapped: corrosive });
   }
 
   // Bad Stuff is never put in the play zone and is not a played card: it stays in hand until its Play line has resolved, then is Scrapped from there.

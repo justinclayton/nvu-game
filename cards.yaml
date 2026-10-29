@@ -31,7 +31,7 @@
 #   flee    string               room and stairwell only: the printed Flee line
 
 meta:
-  version: C60
+  version: C61
   updated: 2026-10-03
 
 cards:
@@ -307,7 +307,7 @@ cards:
     owner: Gray
     rarity: Cool
     cost: 0
-    text: If this is the only card you play this turn, move 3 cards from your Exhaust pile to the bottom of your deck.
+    text: At the end of the Play phase, if this was the only card you played this turn, move 3 cards from your Exhaust pile to the bottom of your deck.
     flavor: Pause for a second to read the room.
 
   - name: Pack Mule

@@ -61,7 +61,7 @@ describe("Peek Around Corner — 'Draw 1 card.'", () => {
   });
 });
 
-describe("Catch Your Breath — 'If this is the only card you play this turn, move 3 cards from your Exhaust pile to the bottom of your deck'", () => {
+describe("Catch Your Breath — 'At the end of the Play phase, if this was the only card you played this turn, move 3 cards from your Exhaust pile to the bottom of your deck'", () => {
   const breather = (hand: Card[], exhaust: Card[]) =>
     playing({
       Gray: player({ deck: pile("Duck Under", 10), hand: [card("Catch Your Breath"), ...hand], exhaust }),

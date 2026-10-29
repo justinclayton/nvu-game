@@ -39,7 +39,7 @@ export const CARD_CONTENT = {
     {"name":"Rhythm & Bruise","set":"proposed","kind":"player","owner":"Red","rarity":"Cool","starter":false,"count":2,"cost":2,"oomph":0,"scramble":0,"conditionalStat":true,"text":"Oomph equal to 2 times the number of cards Gray has played this turn.","flavor":"Let's get it on...leeeettt's get it on..."},
     {"name":"Momentum Shift","set":"proposed","kind":"player","owner":"Red","rarity":"Cool","starter":false,"count":2,"cost":1,"oomph":4,"scramble":0,"conditionalStat":false,"text":"Play: You may draw up to 2 cards, then Exhaust 1 card from your hand.","flavor":"Keep charging forward without looking back."},
     {"name":"Zen Mode","set":"proposed","kind":"player","owner":"Gray","rarity":"Woah","starter":false,"count":1,"cost":1,"oomph":0,"scramble":0,"conditionalStat":false,"text":"While this is in play, you don't exhaust cards.","flavor":"Sorry, I can't hear you over the sound of how friggin calm I am"},
-    {"name":"Catch Your Breath","set":"proposed","kind":"player","owner":"Gray","rarity":"Cool","starter":false,"count":2,"cost":0,"oomph":0,"scramble":0,"conditionalStat":false,"text":"If this is the only card you play this turn, move 3 cards from your Exhaust pile to the bottom of your deck.","flavor":"Pause for a second to read the room."},
+    {"name":"Catch Your Breath","set":"proposed","kind":"player","owner":"Gray","rarity":"Cool","starter":false,"count":2,"cost":0,"oomph":0,"scramble":0,"conditionalStat":false,"text":"At the end of the Play phase, if this was the only card you played this turn, move 3 cards from your Exhaust pile to the bottom of your deck.","flavor":"Pause for a second to read the room."},
     {"name":"Pack Mule","set":"proposed","kind":"player","owner":"Gray","rarity":"Fine","starter":false,"count":2,"cost":1,"oomph":0,"scramble":3,"conditionalStat":false,"text":"Move any number of Stuff cards from Red's hand to yours.","flavor":"I'll carry your books for you, Senpai!"},
     {"name":"Hit 'n Run","set":"proposed","kind":"player","owner":"Gray","rarity":"Fine","starter":false,"count":2,"cost":1,"oomph":1,"scramble":2,"conditionalStat":false,"text":"Shuffle a card from your Exhaust pile into your deck.","flavor":"Strike fast and disappear into the shadows."},
     {"name":"I'll Take That","set":"proposed","kind":"player","owner":"Gray","rarity":"Fine","starter":false,"count":2,"cost":1,"oomph":0,"scramble":3,"conditionalStat":false,"text":"Shuffle 1 Stuff from Red's hand into Red's deck.","flavor":"Relieve Red of that cumbersome pack."},
@@ -120,10 +120,10 @@ export const CARD_CONTENT = {
 } as const satisfies CardContent;
 
 /** The first 12 hex of sha256 over the JSON of CARD_CONTENT above — identifies this card list. */
-export const CARD_LIST_ID = "70a8e95701b2";
+export const CARD_LIST_ID = "eae1ef7bad1f";
 
 /** R of the kit revision: the rulebook's "Rules version:" line. Recorded runs refuse to replay across a change to it. Kept out of CARD_CONTENT so a rules bump does not change CARD_LIST_ID. */
 export const RULES_VERSION = "R37";
 
 /** C of the kit revision: the "version:" line under meta in cards.yaml, bumped when the card list changes. The print sheet stamps RULES_VERSION.CARDS_VERSION on every card; tools/kit-revision.sh adds the engine count. */
-export const CARDS_VERSION = "C60";
+export const CARDS_VERSION = "C61";

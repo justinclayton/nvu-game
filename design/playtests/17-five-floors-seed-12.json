@@ -1,0 +1,316 @@
+{
+  "format": "nvu-run/1",
+  "exportedAt": "2026-10-19T21:10:52.293Z",
+  "cards": "b9b917ecd96e",
+  "rules": "R34",
+  "kit": "R34.C58-v1",
+  "floor": 1,
+  "turn": 6,
+  "phase": "GameOver",
+  "outcome": "Defeat",
+  "run": {
+    "seed": 12,
+    "commands": [
+      {
+        "type": "FLIP_ROOM"
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Red",
+        "cardId": "Overdrive#1",
+        "payWith": []
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Gray",
+        "cardId": "Pick The Lock#5",
+        "payWith": [
+          "Duck Under#3",
+          "Duck Under#2"
+        ]
+      },
+      {
+        "type": "END_PLAY"
+      },
+      {
+        "type": "TAKE_REWARD",
+        "cardId": "Bull Rush#1"
+      },
+      {
+        "type": "TAKE_REWARD",
+        "cardId": "Quick Vault#1"
+      },
+      {
+        "type": "FLIP_ROOM"
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Red",
+        "cardId": "Overdrive#3",
+        "payWith": []
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Red",
+        "cardId": "Overdrive#2",
+        "payWith": []
+      },
+      {
+        "type": "END_PLAY"
+      },
+      {
+        "type": "TAKE_REWARD",
+        "cardId": "Set 'Em Up#1"
+      },
+      {
+        "type": "FLIP_ROOM"
+      },
+      {
+        "type": "END_PLAY"
+      },
+      {
+        "type": "FLIP_ROOM"
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Gray",
+        "cardId": "Work The Angles#1",
+        "payWith": [
+          "Pick The Lock#4"
+        ]
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Gray",
+        "cardId": "Duck Under#1",
+        "payWith": [
+          "Peek Around Corner#1"
+        ]
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Red",
+        "cardId": "Shove#3",
+        "payWith": [
+          "Charge#4",
+          "Charge#3"
+        ]
+      },
+      {
+        "type": "END_PLAY"
+      },
+      {
+        "type": "TAKE_REWARD",
+        "cardId": "Cross Punch#2"
+      },
+      {
+        "type": "TAKE_REWARD",
+        "cardId": "I Know Kung Fu#2"
+      },
+      {
+        "type": "FLIP_ROOM"
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Red",
+        "cardId": "Sluggish#2",
+        "payWith": [
+          "Charge#2",
+          "Shove#1",
+          "Shove#3"
+        ]
+      },
+      {
+        "type": "END_PLAY"
+      },
+      {
+        "type": "FLIP_ROOM"
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Red",
+        "cardId": "Overdrive#2",
+        "payWith": []
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Red",
+        "cardId": "Bull Rush#1",
+        "payWith": [
+          "Set 'Em Up#1"
+        ]
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Red",
+        "cardId": "Overdrive#3",
+        "payWith": []
+      }
+    ]
+  },
+  "notes": [
+    {
+      "at": 63,
+      "text": "Sentry Drone flipped 3rd on floor 1. Red max is Oomph 6 from Charge x3 + Shove x2 (every Charge needs 2 payers), Gray adds 1. Scramble max 6. Fleeing without playing anything: playing partial would just waste cards."
+    },
+    {
+      "at": 77,
+      "text": "Sluggish shows cost 3 (printed 2): its own Holding raises its own cost to Scrap it. Is that intended? Rulebook says Holding applies while the card is in hand, so it seems to follow, but it makes getting rid of Sluggish cost 3 cards."
+    },
+    {
+      "at": 112,
+      "text": "Drone again on turn 5, still out of reach (Oomph max 4, Scramble max 6). Red's hand is 5 with Sluggish, so Red would not draw next turn and would add Bad Stuff on top. Paying 3 to Scrap Sluggish now so Red can draw again, then Fleeing."
+    },
+    {
+      "at": 145,
+      "text": "Red went Down while still holding System Feedback in hand. Section 9 says Down is no cards in hand, deck or discard. I played the 2nd Overdrive expecting Exhaust 1 from an empty deck and empty discard to do nothing, for Oomph 9 and the Ascend. Also: Scramble showed 1 after Bull Rush (+2) though the pool showed Scramble 0 before; System Feedback's -1 from Overdrive seems to have been held as -1 below zero."
+    }
+  ],
+  "log": [
+    "Floor 1 is built: 6 rooms.",
+    "Turn Start phase starts.",
+    "You are in: Flooded Ventilation Shaft.",
+    "Red draws Charge.",
+    "Red draws Charge.",
+    "Red draws Overdrive.",
+    "Red draws Shove.",
+    "Red draws Overdrive.",
+    "Gray draws Duck Under.",
+    "Gray draws Duck Under.",
+    "Gray draws Pick The Lock.",
+    "Gray draws Duck Under.",
+    "Gray draws Pick The Lock.",
+    "Turn Start phase ends.",
+    "Play phase starts.",
+    "Red plays Overdrive.",
+    "Overdrive triggers: Red Exhausts Charge.",
+    "Gray pays with Duck Under, Duck Under, Exhausting them.",
+    "Gray plays Pick The Lock.",
+    "Play phase ends.",
+    "Outcome phase starts.",
+    "Oomph 3 and Scramble 3 met — Both players reveal a card reward.",
+    "Flooded Ventilation Shaft is Cleared.",
+    "Flooded Ventilation Shaft triggers: Red's reward pool shows Bull Rush, Reckless Swing, Second Wind.",
+    "Red takes Bull Rush into their discard pile.",
+    "Flooded Ventilation Shaft triggers: Gray's reward pool shows In Step, Quick Vault, Pack Mule.",
+    "Gray takes Quick Vault into their discard pile.",
+    "Outcome phase ends.",
+    "Cleanup phase starts.",
+    "Red discards Overdrive from their play zone.",
+    "Gray discards Pick The Lock from their play zone.",
+    "Cleanup phase ends.",
+    "— end of turn 1 —",
+    "Turn Start phase starts.",
+    "You are in: Security Turnstile.",
+    "Red draws Overdrive.",
+    "Gray draws Pick The Lock.",
+    "Gray draws Peek Around Corner.",
+    "Gray draws Work The Angles.",
+    "Turn Start phase ends.",
+    "Play phase starts.",
+    "Red plays Overdrive.",
+    "Overdrive triggers: Red Exhausts Shove.",
+    "Red plays Overdrive.",
+    "Overdrive triggers: Red Exhausts Lean In.",
+    "Play phase ends.",
+    "Outcome phase starts.",
+    "Oomph 5 met — Red reveals a card reward.",
+    "Security Turnstile is Cleared.",
+    "Security Turnstile triggers: Red's reward pool shows Heavy Pockets, Set 'Em Up, Junk Launcher.",
+    "Red takes Set 'Em Up into their discard pile.",
+    "Outcome phase ends.",
+    "Cleanup phase starts.",
+    "Red discards Overdrive from their play zone.",
+    "Red discards Overdrive from their play zone.",
+    "Cleanup phase ends.",
+    "— end of turn 2 —",
+    "Turn Start phase starts.",
+    "You are in: The Sentry Drone.",
+    "Red draws Charge.",
+    "Red draws Shove.",
+    "Turn Start phase ends.",
+    "Play phase starts.",
+    "Play phase ends.",
+    "Outcome phase starts.",
+    "You Flee The Sentry Drone.",
+    "The Sentry Drone triggers: Red Exhausts Shove.",
+    "The Sentry Drone triggers: Gray Exhausts Pick The Lock.",
+    "The Sentry Drone triggers: Red gets Sluggish.",
+    "The Sentry Drone triggers: Red takes Sluggish into hand.",
+    "The Sentry Drone triggers: Gray gets Rust.",
+    "The Sentry Drone triggers: Gray takes Rust into hand.",
+    "Outcome phase ends.",
+    "Cleanup phase starts.",
+    "The Sentry Drone shuffles back into the Floor deck.",
+    "Cleanup phase ends.",
+    "— end of turn 3 —",
+    "Turn Start phase starts.",
+    "You are in: Flooded Ventilation Shaft.",
+    "Turn Start phase ends.",
+    "Play phase starts.",
+    "Gray pays with Pick The Lock, Exhausting it.",
+    "Gray plays Work The Angles.",
+    "Gray pays with Peek Around Corner, Exhausting it.",
+    "Gray plays Duck Under.",
+    "Red pays with Charge, Charge, Exhausting them.",
+    "Red plays Shove.",
+    "Play phase ends.",
+    "Outcome phase starts.",
+    "Oomph 3 and Scramble 3 met — Both players reveal a card reward.",
+    "Flooded Ventilation Shaft is Cleared.",
+    "Flooded Ventilation Shaft triggers: Red's reward pool shows Cross Punch, Second Wind, Momentum Shift.",
+    "Red takes Cross Punch into their discard pile.",
+    "Flooded Ventilation Shaft triggers: Gray's reward pool shows I Know Kung Fu, Covering Fire, Synergy Link.",
+    "Gray takes I Know Kung Fu into their discard pile.",
+    "Outcome phase ends.",
+    "Cleanup phase starts.",
+    "Red discards Shove from their play zone.",
+    "Gray discards Work The Angles from their play zone.",
+    "Gray discards Duck Under from their play zone.",
+    "Cleanup phase ends.",
+    "— end of turn 4 —",
+    "Turn Start phase starts.",
+    "You are in: The Sentry Drone.",
+    "Red's deck is empty — the discard pile shuffles in to make a new one (7 cards).",
+    "Red draws Shove.",
+    "Red draws Bull Rush.",
+    "Gray draws Pick The Lock.",
+    "Gray draws Duck Under.",
+    "Gray draws Peek Around Corner.",
+    "Turn Start phase ends.",
+    "Play phase starts.",
+    "Red pays with Charge, Shove, Shove, Exhausting them.",
+    "Sluggish is Scrapped.",
+    "Play phase ends.",
+    "Outcome phase starts.",
+    "You Flee The Sentry Drone.",
+    "The Sentry Drone triggers: Red Exhausts Overdrive.",
+    "The Sentry Drone triggers: Gray's deck is empty — the discard pile shuffles in to make a new one (5 cards).",
+    "The Sentry Drone triggers: Gray Exhausts Pick The Lock.",
+    "The Sentry Drone triggers: Red gets System Feedback.",
+    "The Sentry Drone triggers: Red takes System Feedback into hand.",
+    "The Sentry Drone triggers: Gray gets My Head Is Quantum Spinning.",
+    "The Sentry Drone triggers: Gray takes My Head Is Quantum Spinning into hand.",
+    "Outcome phase ends.",
+    "Cleanup phase starts.",
+    "The Sentry Drone shuffles back into the Floor deck.",
+    "Cleanup phase ends.",
+    "— end of turn 5 —",
+    "Turn Start phase starts.",
+    "You are in: The Sentry Drone.",
+    "Red draws Overdrive.",
+    "Red draws Overdrive.",
+    "Red draws Set 'Em Up.",
+    "Turn Start phase ends.",
+    "Play phase starts.",
+    "Red plays Overdrive.",
+    "Overdrive triggers: Red Exhausts Cross Punch.",
+    "Red pays with Set 'Em Up, Exhausting it.",
+    "Red plays Bull Rush.",
+    "Red plays Overdrive.",
+    "Overdrive triggers: Red is Down — Overdrive. The run is lost.",
+    "Overdrive triggers: Red discards System Feedback from their hand.",
+    "Play phase ends.",
+    "Overdrive triggers: You lose."
+  ]
+}

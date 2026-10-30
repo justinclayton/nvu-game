@@ -113,9 +113,9 @@ export function goDown(
 /**
  * Rulebook, Keywords: Empty deck — shared by draw and Exhaust, the two ways a card can be
  * taken off the top of a deck. If the deck is empty, the discard pile
- * reshuffles into a new deck first. If the discard pile is empty too, the
- * character goes Down, which ends the run right there — the caller sees that
- * as a `null` card and a state already moved to `GameOver`.
+ * reshuffles into a new deck first. Callers check that one of the two holds a
+ * card; if neither does, the character goes Down here as a guard — the caller
+ * sees that as a `null` card and a state already moved to `GameOver`.
  */
 function takeTopOfDeck(
   state: GameState,
@@ -137,30 +137,57 @@ function takeTopOfDeck(
   return [withPlayer(next, c, { ...p, deck: p.deck.slice(1) }), card];
 }
 
+/** Rulebook, Going Down: a character with no cards in hand, deck or discard pile has run out. */
+export function outOfCards(state: GameState, c: Character): boolean {
+  const p = playerOf(state, c);
+  return p.hand.length === 0 && p.deck.length === 0 && p.discard.length === 0;
+}
+
 /**
- * Rulebook, Card anatomy: Keywords: `Exhaust X cards from your deck` — a loss you did not
- * choose, off the top, face up, into the Exhaust pile, gone for the run.
+ * Rulebook, Card anatomy: Keywords: `Exhaust X` and `Exhaust X cards from your
+ * deck`. A printed line only owes the cards: the engine picks them where no
+ * choice is left and asks the player for the rest, once nothing else is waiting.
  */
-export function exhaustFromDeck(
+export function oweExhaust(
   state: GameState,
   c: Character,
   amount: number,
   cause: string,
+  fromDeck: boolean,
+): GameState {
+  if (amount <= 0) return state;
+  const t = state.thisTurn;
+  const owed = { character: c, amount, cause, fromDeck };
+  return { ...state, thisTurn: { ...t, exhaustOwed: [...t.exhaustOwed, owed] } };
+}
+
+/**
+ * Move one card to the Exhaust pile: a card from the hand or the discard pile,
+ * or the top card of the deck, where the Empty deck rule applies.
+ */
+export function exhaustOne(
+  state: GameState,
+  c: Character,
+  from: Card | "deck",
+  cause: string,
   events: DomainEvent[],
 ): GameState {
-  let next = state;
-  for (let i = 0; i < amount; i++) {
-    if (next.phase === "GameOver") return next;
-    const p = playerOf(next, c);
-    if (p.down) return next; // A Down character takes no punishments.
-    const [after, card] = takeTopOfDeck(next, c, cause, events);
-    if (!card) return after; // Went Down — the run is over.
-    const exhausting = playerOf(after, c);
-    events.push({ type: "CARD_EXHAUSTED", character: c, card });
-    next = withPlayer(after, c, { ...exhausting, exhaust: [...exhausting.exhaust, card] });
-    next = countExhausted(next, c, 1, true);
+  let next: GameState;
+  let card: Card;
+  if (from === "deck") {
+    const [after, top] = takeTopOfDeck(state, c, cause, events);
+    if (!top) return after; // Went Down — the run is over.
+    next = after;
+    card = top;
+  } else {
+    const zone = playerOf(state, c).hand.some((x) => x.id === from.id) ? "hand" : "discard";
+    next = takeFrom(state, c, zone, [from]);
+    card = from;
   }
-  return next;
+  const exhausting = playerOf(next, c);
+  events.push({ type: "CARD_EXHAUSTED", character: c, card });
+  next = withPlayer(next, c, { ...exhausting, exhaust: [...exhausting.exhaust, card] });
+  return countExhausted(next, c, 1, from === "deck");
 }
 
 function countExhausted(state: GameState, c: Character, n: number, fromDeck: boolean): GameState {
@@ -224,9 +251,9 @@ export function discardFromHand(
  * card-driven draw during Play — see `My Head Is Quantum Spinning`, which
  * only hears the latter.
  *
- * Rulebook, Keywords: Empty deck: a draw from an empty deck and discard pile puts that
- * character Down, which ends the run (rulebook, Going Down) — every draw goes
- * through here, so this is the one place that needs to know.
+ * Rulebook, Going Down: a draw with the deck, discard pile and hand all empty puts that
+ * character Down, which ends the run; with cards in hand it takes nothing. Every
+ * draw goes through here, so this is the one place that needs to know.
  */
 export function drawOne(
   state: GameState,
@@ -237,6 +264,11 @@ export function drawOne(
 ): GameState {
   const p = playerOf(state, c);
   if (p.down) return state;
+  if (p.deck.length === 0 && p.discard.length === 0) {
+    // Rulebook, Going Down: only a character out of cards goes Down. With cards
+    // in hand and nothing to draw from, the draw takes nothing.
+    return p.hand.length === 0 ? goDown(state, c, "had no cards left to draw", events) : state;
+  }
   const [after, card] = takeTopOfDeck(state, c, "drew from an empty deck and discard pile", events);
   if (!card) return after; // Went Down — the run is over.
   const drawing = playerOf(after, c);

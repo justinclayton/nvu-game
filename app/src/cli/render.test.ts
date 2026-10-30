@@ -2,7 +2,7 @@
 
 import { beforeEach, describe, expect, it } from "vitest";
 import { cardLine, moveHint, printedFaceLine } from "./render";
-import { card, handCard, must, pile, player, playing, resetRig, rig } from "@domain/__fixtures__/rig";
+import { card, handCard, must, pile, player, playing, resetRig, rig, room } from "@domain/__fixtures__/rig";
 import { CARD_CONTENT } from "@content/index";
 
 beforeEach(resetRig);
@@ -80,5 +80,49 @@ describe("moveHint — a 'you may draw'", () => {
   it("asks for a name when either character may draw", () => {
     const hint = moveHint(asking([{ character: "Red", count: 1 }, { character: "Gray", count: 1 }]));
     expect(hint).toContain("choose <Name> — draw: Red 1, Gray 1 — or choose none");
+  });
+});
+
+describe("moveHint — a room choice", () => {
+  const revealing = (names: string[]) =>
+    rig({
+      phase: "Turn Start",
+      pending: { kind: "ChooseRoom", prompt: "Enter which room?", options: names.map(room), source: null },
+    });
+
+  it("offers every revealed room", () => {
+    const hint = moveHint(revealing(["Security Turnstile", "Ventilation Shaft", "Puzzle Room"]));
+    expect(hint).toContain("enter one of: Security Turnstile, Ventilation Shaft, Puzzle Room;");
+  });
+
+  it("names Ambush when it leaves one room to enter", () => {
+    const hint = moveHint(revealing(["Security Turnstile", "Regular Monster 2", "Puzzle Room"]));
+    expect(hint).toContain("Ambush: you must enter Regular Monster 2;");
+  });
+});
+
+describe("moveHint — an Exhaust", () => {
+  it("names the hand, the discard pile and the deck", () => {
+    const state = rig({
+      phase: "Play",
+      Red: player({ deck: pile("Shove", 2), discard: [card("Charge")], hand: [card("Coil Of Cable")] }),
+    });
+    const hand = state.Red.hand;
+    const discard = state.Red.discard;
+    const hint = moveHint({
+      ...state,
+      pending: {
+        kind: "ChooseExhaust",
+        prompt: "Red: Exhaust 1.",
+        character: "Red",
+        options: [...hand, ...discard],
+        deck: 2,
+        remaining: 1,
+        source: null,
+      },
+    });
+    expect(hint).toContain(
+      "hand Coil Of Cable; discard Charge, or choose deck for the top card, unseen (2 in the deck)",
+    );
   });
 });

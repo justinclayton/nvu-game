@@ -14,7 +14,7 @@
  * here.
  */
 
-import { costOf, payOptions, playableCards } from "@domain/queries";
+import { costOf, enterableRooms, payOptions, playableCards } from "@domain/queries";
 import type {
   Card,
   CardId,
@@ -107,8 +107,13 @@ function answers(pending: Pending): readonly Command[] {
       ];
     case "ChooseGoodStuff":
       return pending.options.map((card): Command => ({ type: "CHOOSE_CARDS", cardIds: [card.id] }));
+    case "ChooseExhaust":
+      return [
+        ...pending.options.map((card): Command => ({ type: "EXHAUST_CARD", cardId: card.id })),
+        ...(pending.deck > 0 ? [{ type: "EXHAUST_CARD", cardId: null } as const] : []),
+      ];
     case "ChooseRoom":
-      return pending.options.flatMap((room) =>
+      return enterableRooms(pending).flatMap((room) =>
         permutations(pending.options.filter((r) => r.id !== room.id)).map((rest): Command => ({
           type: "CHOOSE_ROOM",
           roomId: room.id,

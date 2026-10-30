@@ -15,6 +15,7 @@ import {
   costOf,
   costOverrideSpentBy,
   drawTargetFor,
+  enterableRooms,
   exhaustPreventedBy,
   exhaustXPreventedBy,
   lockedOut,
@@ -54,8 +55,11 @@ import {
   dealBadStuff,
   drawOne,
   discard,
-  exhaustFromDeck,
   exhaustFromPlay,
+  exhaustOne,
+  goDown,
+  outOfCards,
+  oweExhaust,
   payCostFromHand,
   earnGoodStuff,
   gainToDiscard,
@@ -110,6 +114,7 @@ export function validate(state: GameState, command: Command): Rejection | null {
     case "ORDER_CARDS":
     case "TAKE_REWARD":
     case "CHOOSE_ROOM":
+    case "EXHAUST_CARD":
       return reject("NoPendingChoice", "Nothing is waiting to be answered.");
 
     case "FLIP_ROOM": {
@@ -240,6 +245,10 @@ function validateAnswer(pending: Pending, command: Command): Rejection | null {
       if (!pending.options.some((r) => r.id === command.roomId)) {
         return reject("NotAnOption", "That room was not revealed.");
       }
+      const enterable = enterableRooms(pending);
+      if (!enterable.some((r) => r.id === command.roomId)) {
+        return reject("NotAnOption", `Ambush: enter ${enterable.map((r) => r.name).join(" or ")}.`);
+      }
       const want = pending.options
         .filter((r) => r.id !== command.roomId)
         .map((r) => r.id)
@@ -250,6 +259,15 @@ function validateAnswer(pending: Pending, command: Command): Rejection | null {
         ? null
         : reject("NotAnOption", "Put every other revealed room on the bottom, once each.");
     }
+
+    case "EXHAUST_CARD":
+      if (pending.kind !== "ChooseExhaust") return waiting;
+      if (command.cardId === null) {
+        return pending.deck > 0 ? null : reject("NotAnOption", "The deck is empty.");
+      }
+      return pending.options.some((x) => x.id === command.cardId)
+        ? null
+        : reject("NotAnOption", "That card is not in the hand or the discard pile.");
 
     case "TAKE_REWARD":
       if (pending.kind !== "TakeReward") return waiting;
@@ -301,7 +319,9 @@ export function execute(state: GameState, command: Command): Result {
   let next = settle(apply(state, command, run), run);
   // A card played during Play can earn Good Stuff (Crowbar); its spread is
   // revealed once the play has finished. Outcome's own drain does the same.
-  if (next.phase === "Play") next = offerQueuedQuestion(offerGoodStuff(next, run));
+  if (next.phase === "Play") {
+    next = offerQueuedQuestion(offerGoodStuff(offerExhaust(next, run), run));
+  }
   if (next.phase === "GameOver") closeOpenPhase(state, run);
   return { ok: true, state: next, events: run.events };
 }
@@ -343,6 +363,8 @@ function apply(state: GameState, command: Command, run: Run): GameState {
       return answerReward(state, command.cardId, run);
     case "CHOOSE_ROOM":
       return enterRoom(state, command.roomId, command.bottom, run);
+    case "EXHAUST_CARD":
+      return answerExhaust(state, command.cardId, run);
     default:
       return assertNever(command);
   }
@@ -434,9 +456,11 @@ function heldSince(run: Run, cardId: CardId, index: number): boolean {
 }
 
 /**
- * A bare `Exhaust X` line: X cards off the top of that character's own deck,
- * into the Exhaust pile. Rooms print it as their punishment and some cards
- * print it as their own cost.
+ * A bare `Exhaust X` line: X cards from that character's hand, deck or
+ * discard pile, into the Exhaust pile. Rooms print it as their punishment and
+ * some cards print it as their own cost. The line only owes the cards;
+ * `offerExhaust` has them picked. `fromDeck` is the `Exhaust X cards from your
+ * deck` shape (Heavy).
  *
  * This is the only shape a card can turn off. `Discard X cards from your
  * hand` names its zone, and so does cleanup and paying a cost — none of
@@ -449,13 +473,96 @@ function printedExhaust(
   amount: number,
   cause: string,
   run: Run,
+  fromDeck = false,
 ): GameState {
   const stoppedBy = exhaustXPreventedBy(state, c);
   if (stoppedBy) {
     run.events.push({ type: "EXHAUST_PREVENTED", character: c, amount, by: stoppedBy });
     return state;
   }
-  return exhaustFromDeck(state, c, amount, cause, run.events);
+  return oweExhaust(state, c, amount, cause, fromDeck);
+}
+
+const withOwed = (state: GameState, exhaustOwed: GameState["thisTurn"]["exhaustOwed"]): GameState => ({
+  ...state,
+  thisTurn: { ...state.thisTurn, exhaustOwed },
+});
+
+/**
+ * Carry out the owed Exhausts, oldest first, until one needs a decision; then
+ * ask it as a `ChooseExhaust`. A card goes without asking when it is the only
+ * answer: the deck alone holds cards, or everything left must go. An
+ * `Exhaust X cards from your deck` line takes the top of the deck, the discard
+ * pile reshuffled when it runs out, and asks for hand cards only once both are
+ * empty. A character who runs out of cards goes Down (rulebook, Going Down).
+ * Does nothing while another question is waiting.
+ */
+function offerExhaust(state: GameState, run: Run): GameState {
+  let s = state;
+  for (;;) {
+    if (s.pending || s.phase === "GameOver") return s;
+    const [head, ...rest] = s.thisTurn.exhaustOwed;
+    if (!head) return s;
+    const c = head.character;
+    const p = playerOf(s, c);
+    if (p.down || head.amount <= 0) {
+      s = withOwed(s, rest);
+      continue;
+    }
+    if (outOfCards(s, c)) return goDown(withOwed(s, rest), c, `${head.cause}: no cards left to Exhaust`, run.events);
+
+    const loose = head.fromDeck ? p.hand : [...p.hand, ...p.discard];
+    const deck = head.fromDeck ? p.deck.length + p.discard.length : p.deck.length;
+    const forced: Card | "deck" | null =
+      deck > 0 && (head.fromDeck || loose.length === 0)
+        ? "deck"
+        : loose.length + deck <= head.amount
+          ? (loose[0] ?? "deck")
+          : null;
+    if (forced === null) {
+      const remaining = head.amount;
+      return {
+        ...s,
+        pending: {
+          kind: "ChooseExhaust",
+          prompt: `${c}: Exhaust ${String(remaining)} (${head.cause}). Pick a card from your hand or discard pile, or the top of your deck.`,
+          character: c,
+          options: loose,
+          deck: p.deck.length,
+          remaining,
+          source: null,
+        },
+      };
+    }
+    s = exhaustOwedCard(s, forced, run);
+  }
+}
+
+/** Exhaust one card for the head of `exhaustOwed`, and put its character Down if that was their last. */
+function exhaustOwedCard(state: GameState, from: Card | "deck", run: Run): GameState {
+  const [head, ...rest] = state.thisTurn.exhaustOwed;
+  if (!head) throw new CorruptStateError("Exhausted a card nobody owed.");
+  const at = run.events.length;
+  let s = exhaustOne(state, head.character, from, head.cause, run.events);
+  attribute(run, at, head.cause);
+  s = withOwed(s, head.amount > 1 ? [{ ...head, amount: head.amount - 1 }, ...rest] : rest);
+  if (s.phase !== "GameOver" && outOfCards(s, head.character)) {
+    s = goDown(s, head.character, `${head.cause}: Exhausted the last card`, run.events);
+  }
+  return s;
+}
+
+/** Answer a `ChooseExhaust`: that card, or the top of the deck for null; then carry on with what was waiting. */
+function answerExhaust(state: GameState, cardId: CardId | null, run: Run): GameState {
+  const pending = state.pending;
+  if (pending?.kind !== "ChooseExhaust") {
+    throw new CorruptStateError("No Exhaust is waiting on that answer.");
+  }
+  const card = cardId === null ? "deck" : pending.options.find((x) => x.id === cardId);
+  if (!card) throw new CorruptStateError("Exhausted a card that was not offered.");
+  const s = exhaustOwedCard({ ...state, pending: null }, card, run);
+  if (s.phase === "GameOver") return s;
+  return drain(settle(s, run), run);
 }
 
 /* ------------------------------------------------------------ Turn Start */
@@ -534,8 +641,8 @@ function enterRoom(
 }
 
 /**
- * Toxic (On Enter: Both players get Bad Stuff.): a room is entered when it is flipped as the
- * Active Room, so this lands in step 1, before the draw, and each Bad Stuff counts toward the hand.
+ * Toxic (On Enter: Both players get Bad Stuff.): a room is entered when it is chosen as the
+ * Active Room, so this lands in step 2, before the draw, and each Bad Stuff counts toward the hand.
  */
 function enterToxic(state: GameState, room: Room, run: Run): GameState {
   if (!room.keywords.includes("Toxic")) return state;
@@ -583,6 +690,8 @@ function drawToCap(state: GameState, c: Character, run: Run): GameState {
   for (;;) {
     const p = playerOf(s, c);
     if (p.hand.length >= drawTargetFor(s, c)) return s;
+    // With cards in hand and none left to draw, the draw stops short (rulebook, Going Down).
+    if (p.hand.length > 0 && p.deck.length === 0 && p.discard.length === 0) return s;
     s = drawOne(s, c, run.events, false, true);
     if (s.phase === "GameOver") return s;
   }
@@ -635,7 +744,7 @@ function playCard(
     exhausted.push(...cards);
   }
   if (exhausted.length > 0) {
-    run.events.push({ type: "COST_PAID", character: c, cards: exhausted });
+    run.events.push({ type: "COST_PAID", character: c, cards: exhausted, scrapped: corrosive });
   }
 
   // Bad Stuff is never put in the play zone and is not a played card: it stays in hand until its Play line has resolved, then is Scrapped from there.
@@ -679,7 +788,7 @@ function heavyExhaust(state: GameState, c: Character, card: Card, run: Run): Gam
   if (state.pending || state.phase === "GameOver") return state;
   if (!state.activeRoom?.keywords.includes("Heavy")) return state;
   const at = run.events.length;
-  const next = printedExhaust(state, c, 1, "Heavy", run);
+  const next = printedExhaust(state, c, 1, "Heavy", run, true);
   attribute(run, at, card.name);
   return settle(next, run);
 }
@@ -885,7 +994,7 @@ const promptFor = (effect: RoomEffect): string => {
 function applyEffect(state: GameState, effect: RoomEffect, who: Character, run: Run): GameState {
   switch (effect.type) {
     case "ExhaustFromDeck":
-      return printedExhaust(state, who, effect.amount, "a room's printed punishment", run);
+      return printedExhaust(state, who, effect.amount, state.resolution?.room.name ?? "the room", run);
     case "DealBadStuff":
       return dealBadStuff(state, who, effect.count, run.events);
     case "TakeGoodStuff":
@@ -909,7 +1018,7 @@ function drain(state: GameState, run: Run): GameState {
   let s = state;
   for (;;) {
     if (s.phase === "GameOver") return s;
-    s = offerGoodStuff(s, run);
+    s = offerGoodStuff(offerExhaust(s, run), run);
     if (s.pending || s.phase === "GameOver") return s;
     const resolution = s.resolution;
     if (!resolution) return s;

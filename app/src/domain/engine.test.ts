@@ -60,7 +60,7 @@ describe("Turn Start", () => {
     ];
     const state = rig({
       phase: "Turn Start",
-      floorDeck: [...top, room("Security Turnstile")],
+      floorDeck: [...top, room("Puzzle Room")],
       Red: player({ deck: pile("Shove", 5) }),
       Gray: player({ deck: pile("Duck Under", 5) }),
     });
@@ -169,7 +169,53 @@ describe("Turn Start", () => {
     ).toBe(false);
   });
 
-  it("step 2, Draw up to five: 'draw cards from your deck until you hold 5' — all at once, no decision", () => {
+  it("Ambush: 'When revealed, you must enter this room' — no other revealed room may be entered", () => {
+    const a = room("Security Turnstile");
+    const ambush = room("Regular Monster 2");
+    const c = room("Puzzle Room");
+    expect(ambush.keywords).toContain("Ambush");
+    const state = rig({
+      phase: "Turn Start",
+      floorDeck: [a, ambush, c],
+      Red: player({ deck: pile("Shove", 5) }),
+      Gray: player({ deck: pile("Duck Under", 5) }),
+    });
+    const { state: revealed } = must(state, { type: "FLIP_ROOM" });
+    expect(
+      execute(revealed, { type: "CHOOSE_ROOM", roomId: a.id, bottom: [ambush.id, c.id] }).ok,
+    ).toBe(false);
+    const { state: next } = must(revealed, {
+      type: "CHOOSE_ROOM",
+      roomId: ambush.id,
+      bottom: [c.id, a.id],
+    });
+    expect(next.activeRoom?.id).toBe(ambush.id);
+    expect(roomIds(next.floorDeck)).toEqual(roomIds([c, a]));
+  });
+
+  it("Ambush: with two Ambush rooms revealed, the players pick which of them to enter", () => {
+    const first = room("Regular Monster 2");
+    const second = room("Regular Monster 4");
+    const other = room("Security Turnstile");
+    const state = rig({
+      phase: "Turn Start",
+      floorDeck: [first, other, second],
+      Red: player({ deck: pile("Shove", 5) }),
+      Gray: player({ deck: pile("Duck Under", 5) }),
+    });
+    const { state: revealed } = must(state, { type: "FLIP_ROOM" });
+    expect(
+      execute(revealed, { type: "CHOOSE_ROOM", roomId: other.id, bottom: [first.id, second.id] }).ok,
+    ).toBe(false);
+    const { state: next } = must(revealed, {
+      type: "CHOOSE_ROOM",
+      roomId: second.id,
+      bottom: [first.id, other.id],
+    });
+    expect(next.activeRoom?.id).toBe(second.id);
+  });
+
+  it("step 4, Draw up to five: 'draw cards from your deck until you hold 5' — all at once, no decision", () => {
     const state = rig({
       phase: "Turn Start",
       floorDeck: [room("Security Turnstile")],
@@ -279,7 +325,7 @@ describe("Turn Start", () => {
       Gray: player({ deck: pile("Duck Under", 10) }),
     });
     const first = must(state, { type: "FLIP_ROOM" }).state;
-    // A Flee shuffles the room back into the floor deck; the next flip enters it again.
+    // A Flee puts the room on the bottom of the floor deck; entering it again deals again.
     const again = must(
       { ...first, phase: "Turn Start", floorDeck: [toxic], activeRoom: null },
       { type: "FLIP_ROOM" },
@@ -679,7 +725,7 @@ describe("Cleanup", () => {
     expect(roomIds(next.floorDeck)).toEqual(roomIds([rest, fledRoom]));
   });
 
-  it("Relentless: a fled Relentless room goes on top of the Floor deck, unshuffled", () => {
+  it("Relentless: a fled Relentless room goes on top of the Floor deck, not the bottom", () => {
     const below = [room("Puzzle Room"), room("The Sentry Drone"), room("Gears & Glitch")];
     const state = rig({
       seed: 4242,
@@ -696,13 +742,15 @@ describe("Cleanup", () => {
     expect(next.seed).toBe(state.seed);
     const flipped = must({ ...next, phase: "Turn Start" }, { type: "FLIP_ROOM" });
     const pending = flipped.state.pending;
-    expect(pending?.kind === "ChooseRoom" ? pending.options[0]?.name : null).toBe("Mercenaries");
+    expect(pending?.kind === "ChooseRoom" ? pending.options.map((r) => r.name) : []).toContain(
+      "Mercenaries",
+    );
   });
 
   // C59: Stairwells print keywords too, and the rules read them off the active
   // room whatever its kind.
   it.each(["The Supreme Commander", "Sexy Blob"])(
-    "Relentless: a fled Stairwell, %s, goes on top of the Floor deck, unshuffled",
+    "Relentless: a fled Stairwell, %s, goes on top of the Floor deck, not the bottom",
     (name) => {
       const below = [room("Puzzle Room"), room("The Sentry Drone"), room("Gears & Glitch")];
       const state = rig({

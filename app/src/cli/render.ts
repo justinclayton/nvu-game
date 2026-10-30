@@ -4,6 +4,7 @@ import {
   allThresholds,
   contributionOf,
   costOf,
+  enterableRooms,
   metThresholds,
   payOptions,
   playableCards,
@@ -225,12 +226,34 @@ export function moveHint(state: GameState): string {
       case "ChooseGoodStuff":
         lines.push(`choose <Name> — keep 1 of: ${pending.options.map((c) => c.name).join(", ")}`);
         break;
-      case "ChooseRoom":
+      case "ChooseExhaust": {
+        const p = playerOf(state, pending.character);
+        const named = (from: readonly { readonly id: string; readonly name: string }[]) =>
+          pending.options.filter((c) => from.some((x) => x.id === c.id)).map((c) => c.name).join(", ") ||
+          "nothing";
+        const deck =
+          pending.deck > 0
+            ? `, or choose deck for the top card, unseen (${String(pending.deck)} in the deck)`
+            : "";
         lines.push(
-          `choose <Room> [<Room>...] — enter one of: ${pending.options.map((r) => r.name).join(", ")}; ` +
+          `choose <Name> — Exhaust 1 of ${String(pending.remaining)}: hand ${named(p.hand)}; ` +
+            `discard ${named(p.discard)}${deck}. Where both hold one, write choose hand <Name> or choose discard <Name>.`,
+        );
+        break;
+      }
+      case "ChooseRoom": {
+        const enterable = enterableRooms(pending).map((r) => r.name).join(", ");
+        // Ambush narrows the entry, so say so rather than drop the other rooms without a word.
+        const which =
+          enterableRooms(pending).length < pending.options.length
+            ? `Ambush: you must enter ${enterable}`
+            : `enter one of: ${enterable}`;
+        lines.push(
+          `choose <Room> [<Room>...] — ${which}; ` +
             "name the rest to set the order they go to the bottom (default: as shown)",
         );
         break;
+      }
     }
     lines.push("undo — step back to the last checkpoint");
     return lines.join("\n");

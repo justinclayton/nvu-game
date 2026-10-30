@@ -1,0 +1,2697 @@
+{
+  "format": "nvu-run/1",
+  "exportedAt": "2026-10-27T05:14:37.793Z",
+  "cards": "70a8e95701b2",
+  "rules": "R37",
+  "kit": "R37.C60-v2",
+  "floor": 5,
+  "turn": 35,
+  "phase": "GameOver",
+  "outcome": "Defeat",
+  "run": {
+    "seed": 39703,
+    "commands": [
+      {
+        "type": "FLIP_ROOM"
+      },
+      {
+        "type": "CHOOSE_ROOM",
+        "roomId": "Security Turnstile#1",
+        "bottom": [
+          "The Sentry Drone#2",
+          "Ventilation Shaft#1"
+        ]
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Red",
+        "cardId": "Overdrive#2",
+        "payWith": []
+      },
+      {
+        "type": "EXHAUST_CARD",
+        "cardId": "Charge#4"
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Gray",
+        "cardId": "Pick The Lock#3",
+        "payWith": [
+          "Peek Around Corner#1",
+          "Work The Angles#1"
+        ]
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Red",
+        "cardId": "Shove#2",
+        "payWith": [
+          "Lean In#1"
+        ]
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Gray",
+        "cardId": "Duck Under#2",
+        "payWith": [
+          "Pick The Lock#2"
+        ]
+      },
+      {
+        "type": "END_PLAY"
+      },
+      {
+        "type": "TAKE_REWARD",
+        "cardId": "In Step#1"
+      },
+      {
+        "type": "TAKE_REWARD",
+        "cardId": "Tag Team#1"
+      },
+      {
+        "type": "FLIP_ROOM"
+      },
+      {
+        "type": "CHOOSE_ROOM",
+        "roomId": "Gross Thing#1",
+        "bottom": [
+          "Regular Room...OF DOOM#1",
+          "Tunnel of Rubble#1"
+        ]
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Red",
+        "cardId": "Overdrive#1",
+        "payWith": []
+      },
+      {
+        "type": "EXHAUST_CARD",
+        "cardId": "Shove#2"
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Red",
+        "cardId": "Shove#1",
+        "payWith": [
+          "Charge#2"
+        ]
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Gray",
+        "cardId": "Pick The Lock#1",
+        "payWith": [
+          "Duck Under#3",
+          "Duck Under#4"
+        ]
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Gray",
+        "cardId": "Peek Around Corner#2",
+        "payWith": [
+          "Pick The Lock#4"
+        ]
+      },
+      {
+        "type": "END_PLAY"
+      },
+      {
+        "type": "CHOOSE_CARDS",
+        "cardIds": [
+          "Pry Bar#3"
+        ]
+      },
+      {
+        "type": "TAKE_REWARD",
+        "cardId": "Catch Your Breath#2"
+      },
+      {
+        "type": "FLIP_ROOM"
+      },
+      {
+        "type": "CHOOSE_ROOM",
+        "roomId": "Puzzle Room#1",
+        "bottom": [
+          "The Sentry Drone#3",
+          "The Sentry Drone#1"
+        ]
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Red",
+        "cardId": "Pry Bar#3",
+        "payWith": []
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Gray",
+        "cardId": "Pick The Lock#5",
+        "payWith": [
+          "In Step#1",
+          "Duck Under#1"
+        ]
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Red",
+        "cardId": "Overdrive#3",
+        "payWith": []
+      },
+      {
+        "type": "EXHAUST_CARD",
+        "cardId": "Shove#1"
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Gray",
+        "cardId": "Peek Around Corner#2",
+        "payWith": [
+          "Pick The Lock#3"
+        ]
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Red",
+        "cardId": "Shove#4",
+        "payWith": [
+          "Shove#3"
+        ]
+      },
+      {
+        "type": "END_PLAY"
+      },
+      {
+        "type": "CHOOSE_CARDS",
+        "cardIds": [
+          "A Pair Of Stitch-Em-Ups#1"
+        ]
+      },
+      {
+        "type": "CHOOSE_CARDS",
+        "cardIds": [
+          "Coil Of Cable#4"
+        ]
+      },
+      {
+        "type": "FLIP_ROOM"
+      },
+      {
+        "type": "CHOOSE_ROOM",
+        "roomId": "Ventilation Shaft#1",
+        "bottom": [
+          "The Sentry Drone#2",
+          "Regular Room...OF DOOM#1"
+        ]
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Red",
+        "cardId": "Charge#1",
+        "payWith": [
+          "Overdrive#1",
+          "Overdrive#2"
+        ]
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Gray",
+        "cardId": "Coil Of Cable#4",
+        "payWith": []
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Gray",
+        "cardId": "Duck Under#2",
+        "payWith": [
+          "Catch Your Breath#2"
+        ]
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Red",
+        "cardId": "A Pair Of Stitch-Em-Ups#1",
+        "payWith": [
+          "Charge#3"
+        ]
+      },
+      {
+        "type": "CHOOSE_CHARACTER",
+        "character": "Gray"
+      },
+      {
+        "type": "CHOOSE_CARDS",
+        "cardIds": [
+          "Pick The Lock#2",
+          "Pick The Lock#4"
+        ]
+      },
+      {
+        "type": "END_PLAY"
+      },
+      {
+        "type": "TAKE_REWARD",
+        "cardId": "Fast Follow#3"
+      },
+      {
+        "type": "TAKE_REWARD",
+        "cardId": "I Know Kung Fu#2"
+      },
+      {
+        "type": "FLIP_ROOM"
+      },
+      {
+        "type": "CHOOSE_ROOM",
+        "roomId": "Tunnel of Rubble#1",
+        "bottom": [
+          "The Sentry Drone#3",
+          "The Sentry Drone#1"
+        ]
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Gray",
+        "cardId": "Pick The Lock#1",
+        "payWith": [
+          "Peek Around Corner#2",
+          "Pick The Lock#5"
+        ]
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Red",
+        "cardId": "Pry Bar#3",
+        "payWith": []
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Red",
+        "cardId": "Fast Follow#3",
+        "payWith": []
+      },
+      {
+        "type": "END_PLAY"
+      },
+      {
+        "type": "TAKE_REWARD",
+        "cardId": "Second Wind#1"
+      },
+      {
+        "type": "TAKE_REWARD",
+        "cardId": "Hit 'n Run#1"
+      },
+      {
+        "type": "FLIP_ROOM"
+      },
+      {
+        "type": "CHOOSE_ROOM",
+        "roomId": "Regular Room...OF DOOM#1",
+        "bottom": [
+          "The Sentry Drone#2",
+          "The Sentry Drone#3"
+        ]
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Gray",
+        "cardId": "Coil Of Cable#4",
+        "payWith": []
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Red",
+        "cardId": "Overdrive#3",
+        "payWith": []
+      },
+      {
+        "type": "EXHAUST_CARD",
+        "cardId": "Shove#4"
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Red",
+        "cardId": "Tag Team#1",
+        "payWith": [
+          "Charge#1"
+        ]
+      },
+      {
+        "type": "CHOOSE_DRAW",
+        "character": "Red",
+        "count": 1
+      },
+      {
+        "type": "CHOOSE_DRAW",
+        "character": "Gray",
+        "count": 1
+      },
+      {
+        "type": "END_PLAY"
+      },
+      {
+        "type": "TAKE_REWARD",
+        "cardId": "Fast Follow#1"
+      },
+      {
+        "type": "TAKE_REWARD",
+        "cardId": "Zen Mode#1"
+      },
+      {
+        "type": "FLIP_ROOM"
+      },
+      {
+        "type": "CHOOSE_ROOM",
+        "roomId": "The Sentry Drone#1",
+        "bottom": [
+          "The Sentry Drone#2",
+          "The Sentry Drone#3"
+        ]
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Gray",
+        "cardId": "I Know Kung Fu#2",
+        "payWith": [
+          "Duck Under#2"
+        ]
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Red",
+        "cardId": "Pry Bar#3",
+        "payWith": []
+      },
+      {
+        "type": "END_PLAY"
+      },
+      {
+        "type": "TAKE_REWARD",
+        "cardId": "Cross Punch#1"
+      },
+      {
+        "type": "TAKE_REWARD",
+        "cardId": "Synergy Link#1"
+      },
+      {
+        "type": "FLIP_ROOM"
+      },
+      {
+        "type": "CHOOSE_ROOM",
+        "roomId": "Automated Defense Turret#1",
+        "bottom": [
+          "Gears & Glitch#3",
+          "Gears & Glitch#1"
+        ]
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Gray",
+        "cardId": "Pick The Lock#4",
+        "payWith": [
+          "In Step#1",
+          "Hit 'n Run#1"
+        ]
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Red",
+        "cardId": "Tag Team#1",
+        "payWith": [
+          "Shove#4"
+        ]
+      },
+      {
+        "type": "CHOOSE_DRAW",
+        "character": "Red",
+        "count": 1
+      },
+      {
+        "type": "CHOOSE_DRAW",
+        "character": "Gray",
+        "count": 1
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Gray",
+        "cardId": "Duck Under#4",
+        "payWith": [
+          "Peek Around Corner#2"
+        ]
+      },
+      {
+        "type": "END_PLAY"
+      },
+      {
+        "type": "CHOOSE_CARDS",
+        "cardIds": [
+          "Pry Bar#2"
+        ]
+      },
+      {
+        "type": "CHOOSE_CARDS",
+        "cardIds": [
+          "Riot Shield#3"
+        ]
+      },
+      {
+        "type": "FLIP_ROOM"
+      },
+      {
+        "type": "CHOOSE_ROOM",
+        "roomId": "Regular Monster 2#1",
+        "bottom": [
+          "Maintenance#1",
+          "Gears & Glitch#2"
+        ]
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Red",
+        "cardId": "Pry Bar#2",
+        "payWith": []
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Gray",
+        "cardId": "Synergy Link#1",
+        "payWith": [
+          "Work The Angles#1"
+        ]
+      },
+      {
+        "type": "CHOOSE_DRAW",
+        "character": "Gray",
+        "count": 2
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Gray",
+        "cardId": "Zen Mode#1",
+        "payWith": [
+          "Pick The Lock#3"
+        ]
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Gray",
+        "cardId": "Pick The Lock#5",
+        "payWith": [
+          "Riot Shield#3",
+          "Pick The Lock#1"
+        ]
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Gray",
+        "cardId": "Riot Shield#3",
+        "payWith": [
+          "Pick The Lock#1"
+        ]
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Red",
+        "cardId": "Cross Punch#1",
+        "payWith": [
+          "Charge#4",
+          "Charge#3"
+        ]
+      },
+      {
+        "type": "EXHAUST_CARD",
+        "cardId": "Overdrive#1"
+      },
+      {
+        "type": "END_PLAY"
+      },
+      {
+        "type": "TAKE_REWARD",
+        "cardId": "Brute Recycle#1"
+      },
+      {
+        "type": "TAKE_REWARD",
+        "cardId": "Quick Vault#1"
+      },
+      {
+        "type": "FLIP_ROOM"
+      },
+      {
+        "type": "CHOOSE_ROOM",
+        "roomId": "Room 1-3#1",
+        "bottom": [
+          "Dark Room#1",
+          "Overgrown Hydroponics Bay#1"
+        ]
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Gray",
+        "cardId": "Duck Under#3",
+        "payWith": [
+          "Pick The Lock#1"
+        ]
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Gray",
+        "cardId": "Riot Shield#3",
+        "payWith": [
+          "Pick The Lock#2"
+        ]
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Red",
+        "cardId": "A Pair Of Stitch-Em-Ups#1",
+        "payWith": [
+          "Shove#3"
+        ]
+      },
+      {
+        "type": "CHOOSE_CHARACTER",
+        "character": "Gray"
+      },
+      {
+        "type": "CHOOSE_CARDS",
+        "cardIds": [
+          "Pick The Lock#3",
+          "Pick The Lock#1"
+        ]
+      },
+      {
+        "type": "END_PLAY"
+      },
+      {
+        "type": "TAKE_REWARD",
+        "cardId": "I Know Kung Fu#1"
+      },
+      {
+        "type": "FLIP_ROOM"
+      },
+      {
+        "type": "CHOOSE_ROOM",
+        "roomId": "Gears & Glitch#3",
+        "bottom": [
+          "Gears & Glitch#1",
+          "Maintenance#1"
+        ]
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Gray",
+        "cardId": "Coil Of Cable#4",
+        "payWith": []
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Gray",
+        "cardId": "Riot Shield#3",
+        "payWith": [
+          "Peek Around Corner#1"
+        ]
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Red",
+        "cardId": "Pry Bar#3",
+        "payWith": []
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Red",
+        "cardId": "Fast Follow#3",
+        "payWith": []
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Red",
+        "cardId": "Lean In#1",
+        "payWith": [
+          "Charge#2"
+        ]
+      },
+      {
+        "type": "END_PLAY"
+      },
+      {
+        "type": "CHOOSE_CHARACTER",
+        "character": "Red"
+      },
+      {
+        "type": "TAKE_REWARD",
+        "cardId": "Reckless Swing#3"
+      },
+      {
+        "type": "CHOOSE_CARDS",
+        "cardIds": []
+      },
+      {
+        "type": "FLIP_ROOM"
+      },
+      {
+        "type": "CHOOSE_ROOM",
+        "roomId": "The Iron Sentinel#3",
+        "bottom": [
+          "The Iron Sentinel#1",
+          "Slimy Bio-Hazard Containment#1"
+        ]
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Gray",
+        "cardId": "Zen Mode#1",
+        "payWith": [
+          "Catch Your Breath#2"
+        ]
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Gray",
+        "cardId": "Coil Of Cable#4",
+        "payWith": []
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Red",
+        "cardId": "Tag Team#1",
+        "payWith": [
+          "Shove#1"
+        ]
+      },
+      {
+        "type": "CHOOSE_DRAW",
+        "character": "Red",
+        "count": 1
+      },
+      {
+        "type": "CHOOSE_DRAW",
+        "character": "Gray",
+        "count": 1
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Gray",
+        "cardId": "Riot Shield#3",
+        "payWith": [
+          "Duck Under#1"
+        ]
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Gray",
+        "cardId": "Duck Under#1",
+        "payWith": [
+          "Duck Under#2"
+        ]
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Red",
+        "cardId": "Fast Follow#3",
+        "payWith": []
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Red",
+        "cardId": "Overdrive#1",
+        "payWith": []
+      },
+      {
+        "type": "EXHAUST_CARD",
+        "cardId": "Charge#4"
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Red",
+        "cardId": "Overdrive#3",
+        "payWith": []
+      },
+      {
+        "type": "END_PLAY"
+      },
+      {
+        "type": "TAKE_REWARD",
+        "cardId": "Bull Rush#2"
+      },
+      {
+        "type": "TAKE_REWARD",
+        "cardId": "I'll Take That#1"
+      },
+      {
+        "type": "FLIP_ROOM"
+      },
+      {
+        "type": "CHOOSE_ROOM",
+        "roomId": "Sexy Blob#1",
+        "bottom": [
+          "Oasis of Doom#1",
+          "Vacuum Chamber#1"
+        ]
+      },
+      {
+        "type": "END_PLAY"
+      },
+      {
+        "type": "EXHAUST_CARD",
+        "cardId": "Shove#3"
+      },
+      {
+        "type": "EXHAUST_CARD",
+        "cardId": "Charge#1"
+      },
+      {
+        "type": "EXHAUST_CARD",
+        "cardId": "Work The Angles#1"
+      },
+      {
+        "type": "EXHAUST_CARD",
+        "cardId": "Duck Under#1"
+      },
+      {
+        "type": "FLIP_ROOM"
+      },
+      {
+        "type": "CHOOSE_ROOM",
+        "roomId": "Sexy Blob#1",
+        "bottom": [
+          "Laser Grid#1",
+          "Communist Botox Lab#1"
+        ]
+      },
+      {
+        "type": "END_PLAY"
+      },
+      {
+        "type": "EXHAUST_CARD",
+        "cardId": "System Feedback#2"
+      },
+      {
+        "type": "EXHAUST_CARD",
+        "cardId": "Charge#4"
+      },
+      {
+        "type": "EXHAUST_CARD",
+        "cardId": "My Head Is Quantum Spinning#1"
+      },
+      {
+        "type": "EXHAUST_CARD",
+        "cardId": "Duck Under#4"
+      },
+      {
+        "type": "FLIP_ROOM"
+      },
+      {
+        "type": "CHOOSE_ROOM",
+        "roomId": "Regular Monster 4#1",
+        "bottom": [
+          "Sexy Blob#1",
+          "Ticking Time Bomb#1"
+        ]
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Gray",
+        "cardId": "Quick Vault#1",
+        "payWith": []
+      },
+      {
+        "type": "CHOOSE_DRAW",
+        "character": "Gray",
+        "count": 2
+      },
+      {
+        "type": "END_PLAY"
+      },
+      {
+        "type": "EXHAUST_CARD",
+        "cardId": "Sluggish#1"
+      },
+      {
+        "type": "EXHAUST_CARD",
+        "cardId": "Panic#1"
+      },
+      {
+        "type": "FLIP_ROOM"
+      },
+      {
+        "type": "CHOOSE_ROOM",
+        "roomId": "Oasis of Doom#1",
+        "bottom": [
+          "Vacuum Chamber#1",
+          "Laser Grid#1"
+        ]
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Gray",
+        "cardId": "Catch Your Breath#2",
+        "payWith": []
+      },
+      {
+        "type": "END_PLAY"
+      },
+      {
+        "type": "CHOOSE_CARDS",
+        "cardIds": [
+          "Work The Angles#1",
+          "Duck Under#1",
+          "Duck Under#4"
+        ]
+      },
+      {
+        "type": "EXHAUST_CARD",
+        "cardId": null
+      },
+      {
+        "type": "EXHAUST_CARD",
+        "cardId": "Duck Under#3"
+      },
+      {
+        "type": "FLIP_ROOM"
+      },
+      {
+        "type": "CHOOSE_ROOM",
+        "roomId": "Sexy Blob#1",
+        "bottom": [
+          "Communist Botox Lab#1",
+          "Ticking Time Bomb#1"
+        ]
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Gray",
+        "cardId": "I Know Kung Fu#2",
+        "payWith": [
+          "Duck Under#2"
+        ]
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Gray",
+        "cardId": "Peek Around Corner#1",
+        "payWith": [
+          "Pick The Lock#3"
+        ]
+      },
+      {
+        "type": "CHOOSE_DRAW",
+        "character": "Gray",
+        "count": 1
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Gray",
+        "cardId": "Peek Around Corner#2",
+        "payWith": [
+          "Pick The Lock#1"
+        ]
+      },
+      {
+        "type": "CHOOSE_DRAW",
+        "character": "Gray",
+        "count": 1
+      },
+      {
+        "type": "END_PLAY"
+      },
+      {
+        "type": "EXHAUST_CARD",
+        "cardId": null
+      },
+      {
+        "type": "EXHAUST_CARD",
+        "cardId": null
+      },
+      {
+        "type": "EXHAUST_CARD",
+        "cardId": "I'll Take That#1"
+      },
+      {
+        "type": "EXHAUST_CARD",
+        "cardId": "Quick Vault#1"
+      },
+      {
+        "type": "FLIP_ROOM"
+      },
+      {
+        "type": "CHOOSE_ROOM",
+        "roomId": "Regular Monster 4#1",
+        "bottom": [
+          "Sexy Blob#1",
+          "Vacuum Chamber#1"
+        ]
+      },
+      {
+        "type": "END_PLAY"
+      },
+      {
+        "type": "EXHAUST_CARD",
+        "cardId": "Rust#2"
+      },
+      {
+        "type": "EXHAUST_CARD",
+        "cardId": "System Feedback#1"
+      },
+      {
+        "type": "FLIP_ROOM"
+      },
+      {
+        "type": "CHOOSE_ROOM",
+        "roomId": "Oasis of Doom#1",
+        "bottom": [
+          "Laser Grid#1",
+          "Communist Botox Lab#1"
+        ]
+      },
+      {
+        "type": "END_PLAY"
+      },
+      {
+        "type": "EXHAUST_CARD",
+        "cardId": null
+      },
+      {
+        "type": "EXHAUST_CARD",
+        "cardId": null
+      },
+      {
+        "type": "FLIP_ROOM"
+      },
+      {
+        "type": "CHOOSE_ROOM",
+        "roomId": "Sexy Blob#1",
+        "bottom": [
+          "Ticking Time Bomb#1",
+          "Vacuum Chamber#1"
+        ]
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Red",
+        "cardId": "Pry Bar#3",
+        "payWith": []
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Red",
+        "cardId": "Pry Bar#2",
+        "payWith": []
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Gray",
+        "cardId": "Zen Mode#1",
+        "payWith": [
+          "Pick The Lock#4"
+        ]
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Gray",
+        "cardId": "I Know Kung Fu#1",
+        "payWith": [
+          "Pick The Lock#5"
+        ]
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Gray",
+        "cardId": "Synergy Link#1",
+        "payWith": [
+          "Pick The Lock#5"
+        ]
+      },
+      {
+        "type": "CHOOSE_DRAW",
+        "character": "Gray",
+        "count": 2
+      },
+      {
+        "type": "CHOOSE_DRAW",
+        "character": "Gray",
+        "count": 1
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Gray",
+        "cardId": "Hit 'n Run#1",
+        "payWith": [
+          "Pick The Lock#5"
+        ]
+      },
+      {
+        "type": "CHOOSE_CARDS",
+        "cardIds": [
+          "Pick The Lock#3"
+        ]
+      },
+      {
+        "type": "CHOOSE_DRAW",
+        "character": "Gray",
+        "count": 1
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Red",
+        "cardId": "Cross Punch#1",
+        "payWith": [
+          "Tag Team#1",
+          "A Pair Of Stitch-Em-Ups#1"
+        ]
+      },
+      {
+        "type": "END_PLAY"
+      },
+      {
+        "type": "CHOOSE_CARDS",
+        "cardIds": [
+          "Grav Harness#1"
+        ]
+      },
+      {
+        "type": "CHOOSE_CARDS",
+        "cardIds": [
+          "Coil Of Cable#3"
+        ]
+      },
+      {
+        "type": "CHOOSE_CARDS",
+        "cardIds": [
+          "Pocket Dynamo#3"
+        ]
+      },
+      {
+        "type": "CHOOSE_CARDS",
+        "cardIds": [
+          "Riot Shield#1"
+        ]
+      },
+      {
+        "type": "FLIP_ROOM"
+      },
+      {
+        "type": "CHOOSE_ROOM",
+        "roomId": "Double Dark Hallway of Death#1",
+        "bottom": [
+          "The Authorities#1",
+          "Monster 5-4#1"
+        ]
+      },
+      {
+        "type": "END_PLAY"
+      },
+      {
+        "type": "EXHAUST_CARD",
+        "cardId": "System Feedback#2"
+      },
+      {
+        "type": "EXHAUST_CARD",
+        "cardId": null
+      },
+      {
+        "type": "EXHAUST_CARD",
+        "cardId": "System Feedback#1"
+      },
+      {
+        "type": "EXHAUST_CARD",
+        "cardId": null
+      },
+      {
+        "type": "FLIP_ROOM"
+      },
+      {
+        "type": "CHOOSE_ROOM",
+        "roomId": "Monster 5-3#1",
+        "bottom": [
+          "Monster 5-2#1",
+          "Bubbly Slime Monster#1"
+        ]
+      },
+      {
+        "type": "END_PLAY"
+      },
+      {
+        "type": "EXHAUST_CARD",
+        "cardId": "Shove#2"
+      },
+      {
+        "type": "EXHAUST_CARD",
+        "cardId": "Shove#3"
+      },
+      {
+        "type": "EXHAUST_CARD",
+        "cardId": "Duck Under#4"
+      },
+      {
+        "type": "EXHAUST_CARD",
+        "cardId": null
+      },
+      {
+        "type": "FLIP_ROOM"
+      },
+      {
+        "type": "CHOOSE_ROOM",
+        "roomId": "The Authorities#1",
+        "bottom": [
+          "Comrade Black#1",
+          "Monster 5-4#1"
+        ]
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Gray",
+        "cardId": "Catch Your Breath#2",
+        "payWith": []
+      },
+      {
+        "type": "END_PLAY"
+      },
+      {
+        "type": "CHOOSE_CARDS",
+        "cardIds": [
+          "Pick The Lock#3",
+          "Duck Under#4",
+          "Duck Under#1"
+        ]
+      },
+      {
+        "type": "EXHAUST_CARD",
+        "cardId": "Charge#4"
+      },
+      {
+        "type": "EXHAUST_CARD",
+        "cardId": "Lean In#1"
+      },
+      {
+        "type": "EXHAUST_CARD",
+        "cardId": null
+      },
+      {
+        "type": "EXHAUST_CARD",
+        "cardId": null
+      },
+      {
+        "type": "FLIP_ROOM"
+      },
+      {
+        "type": "CHOOSE_ROOM",
+        "roomId": "The Authorities#1",
+        "bottom": [
+          "Double Dark Hallway of Death#1",
+          "Monster 5-2#1"
+        ]
+      },
+      {
+        "type": "END_PLAY"
+      },
+      {
+        "type": "EXHAUST_CARD",
+        "cardId": "Charge#1"
+      },
+      {
+        "type": "EXHAUST_CARD",
+        "cardId": "Charge#2"
+      },
+      {
+        "type": "EXHAUST_CARD",
+        "cardId": "In Step#1"
+      },
+      {
+        "type": "EXHAUST_CARD",
+        "cardId": null
+      },
+      {
+        "type": "FLIP_ROOM"
+      },
+      {
+        "type": "CHOOSE_ROOM",
+        "roomId": "Monster 5-3#1",
+        "bottom": [
+          "The Authorities#1",
+          "Bubbly Slime Monster#1"
+        ]
+      },
+      {
+        "type": "END_PLAY"
+      },
+      {
+        "type": "EXHAUST_CARD",
+        "cardId": "Overdrive#1"
+      },
+      {
+        "type": "EXHAUST_CARD",
+        "cardId": "Reckless Swing#3"
+      },
+      {
+        "type": "EXHAUST_CARD",
+        "cardId": null
+      },
+      {
+        "type": "EXHAUST_CARD",
+        "cardId": null
+      },
+      {
+        "type": "FLIP_ROOM"
+      },
+      {
+        "type": "CHOOSE_ROOM",
+        "roomId": "Double Dark Hallway of Death#1",
+        "bottom": [
+          "Comrade Black#1",
+          "Monster 5-4#1"
+        ]
+      },
+      {
+        "type": "END_PLAY"
+      },
+      {
+        "type": "EXHAUST_CARD",
+        "cardId": "Pocket Dynamo#3"
+      },
+      {
+        "type": "EXHAUST_CARD",
+        "cardId": "Overdrive#3"
+      },
+      {
+        "type": "EXHAUST_CARD",
+        "cardId": null
+      },
+      {
+        "type": "EXHAUST_CARD",
+        "cardId": null
+      },
+      {
+        "type": "FLIP_ROOM"
+      },
+      {
+        "type": "CHOOSE_ROOM",
+        "roomId": "Bubbly Slime Monster#1",
+        "bottom": [
+          "Monster 5-2#1",
+          "The Authorities#1"
+        ]
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Gray",
+        "cardId": "Coil Of Cable#3",
+        "payWith": []
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Gray",
+        "cardId": "Coil Of Cable#4",
+        "payWith": []
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Gray",
+        "cardId": "Pick The Lock#1",
+        "payWith": [
+          "I Know Kung Fu#1",
+          "Pick The Lock#4"
+        ]
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Red",
+        "cardId": "Pry Bar#3",
+        "payWith": []
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Red",
+        "cardId": "Fast Follow#1",
+        "payWith": []
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Red",
+        "cardId": "Overdrive#2",
+        "payWith": []
+      },
+      {
+        "type": "EXHAUST_CARD",
+        "cardId": "Charge#3"
+      },
+      {
+        "type": "END_PLAY"
+      },
+      {
+        "type": "TAKE_REWARD",
+        "cardId": "Momentum Shift#1"
+      },
+      {
+        "type": "TAKE_REWARD",
+        "cardId": "Synergy Link#2"
+      },
+      {
+        "type": "FLIP_ROOM"
+      },
+      {
+        "type": "CHOOSE_ROOM",
+        "roomId": "Monster 5-3#1",
+        "bottom": [
+          "Comrade Black#1",
+          "Monster 5-4#1"
+        ]
+      },
+      {
+        "type": "END_PLAY"
+      },
+      {
+        "type": "EXHAUST_CARD",
+        "cardId": "Rust#2"
+      },
+      {
+        "type": "EXHAUST_CARD",
+        "cardId": "Bull Rush#2"
+      },
+      {
+        "type": "EXHAUST_CARD",
+        "cardId": "Duck Under#3"
+      },
+      {
+        "type": "EXHAUST_CARD",
+        "cardId": "Peek Around Corner#1"
+      },
+      {
+        "type": "FLIP_ROOM"
+      },
+      {
+        "type": "CHOOSE_ROOM",
+        "roomId": "Double Dark Hallway of Death#1",
+        "bottom": [
+          "Monster 5-2#1",
+          "The Authorities#1"
+        ]
+      },
+      {
+        "type": "END_PLAY"
+      },
+      {
+        "type": "EXHAUST_CARD",
+        "cardId": null
+      },
+      {
+        "type": "EXHAUST_CARD",
+        "cardId": null
+      },
+      {
+        "type": "EXHAUST_CARD",
+        "cardId": null
+      },
+      {
+        "type": "EXHAUST_CARD",
+        "cardId": null
+      },
+      {
+        "type": "FLIP_ROOM"
+      },
+      {
+        "type": "CHOOSE_ROOM",
+        "roomId": "Monster 5-3#1",
+        "bottom": [
+          "Comrade Black#1",
+          "Monster 5-4#1"
+        ]
+      },
+      {
+        "type": "END_PLAY"
+      },
+      {
+        "type": "EXHAUST_CARD",
+        "cardId": "Shove#1"
+      },
+      {
+        "type": "EXHAUST_CARD",
+        "cardId": "Fast Follow#3"
+      },
+      {
+        "type": "EXHAUST_CARD",
+        "cardId": "Work The Angles#1"
+      },
+      {
+        "type": "EXHAUST_CARD",
+        "cardId": "Peek Around Corner#2"
+      },
+      {
+        "type": "FLIP_ROOM"
+      },
+      {
+        "type": "CHOOSE_ROOM",
+        "roomId": "Double Dark Hallway of Death#1",
+        "bottom": [
+          "Monster 5-2#1",
+          "The Authorities#1"
+        ]
+      },
+      {
+        "type": "END_PLAY"
+      },
+      {
+        "type": "EXHAUST_CARD",
+        "cardId": "Sluggish#1"
+      },
+      {
+        "type": "EXHAUST_CARD",
+        "cardId": "Cross Punch#1"
+      },
+      {
+        "type": "EXHAUST_CARD",
+        "cardId": "Quick Vault#1"
+      },
+      {
+        "type": "EXHAUST_CARD",
+        "cardId": "I'll Take That#1"
+      },
+      {
+        "type": "FLIP_ROOM"
+      },
+      {
+        "type": "CHOOSE_ROOM",
+        "roomId": "Monster 5-3#1",
+        "bottom": [
+          "Comrade Black#1",
+          "Monster 5-4#1"
+        ]
+      },
+      {
+        "type": "END_PLAY"
+      },
+      {
+        "type": "EXHAUST_CARD",
+        "cardId": "Shove#4"
+      },
+      {
+        "type": "EXHAUST_CARD",
+        "cardId": "Fast Follow#1"
+      },
+      {
+        "type": "EXHAUST_CARD",
+        "cardId": "Duck Under#4"
+      },
+      {
+        "type": "EXHAUST_CARD",
+        "cardId": "Duck Under#1"
+      },
+      {
+        "type": "FLIP_ROOM"
+      },
+      {
+        "type": "CHOOSE_ROOM",
+        "roomId": "Double Dark Hallway of Death#1",
+        "bottom": [
+          "Monster 5-2#1",
+          "The Authorities#1"
+        ]
+      },
+      {
+        "type": "END_PLAY"
+      },
+      {
+        "type": "EXHAUST_CARD",
+        "cardId": "Grav Harness#1"
+      },
+      {
+        "type": "EXHAUST_CARD",
+        "cardId": "Tag Team#1"
+      },
+      {
+        "type": "EXHAUST_CARD",
+        "cardId": "Pick The Lock#5"
+      },
+      {
+        "type": "EXHAUST_CARD",
+        "cardId": "Pick The Lock#3"
+      },
+      {
+        "type": "FLIP_ROOM"
+      },
+      {
+        "type": "CHOOSE_ROOM",
+        "roomId": "Monster 5-3#1",
+        "bottom": [
+          "Comrade Black#1",
+          "Monster 5-4#1"
+        ]
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Gray",
+        "cardId": "Catch Your Breath#2",
+        "payWith": []
+      },
+      {
+        "type": "END_PLAY"
+      },
+      {
+        "type": "CHOOSE_CARDS",
+        "cardIds": [
+          "Zen Mode#1",
+          "I Know Kung Fu#2",
+          "Pick The Lock#2"
+        ]
+      },
+      {
+        "type": "EXHAUST_CARD",
+        "cardId": "Overdrive#2"
+      },
+      {
+        "type": "EXHAUST_CARD",
+        "cardId": "Momentum Shift#1"
+      },
+      {
+        "type": "EXHAUST_CARD",
+        "cardId": "Riot Shield#1"
+      },
+      {
+        "type": "EXHAUST_CARD",
+        "cardId": "Synergy Link#2"
+      },
+      {
+        "type": "FLIP_ROOM"
+      },
+      {
+        "type": "CHOOSE_ROOM",
+        "roomId": "Double Dark Hallway of Death#1",
+        "bottom": [
+          "Monster 5-2#1",
+          "The Authorities#1"
+        ]
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Gray",
+        "cardId": "Zen Mode#1",
+        "payWith": [
+          "I Know Kung Fu#2"
+        ]
+      },
+      {
+        "type": "END_PLAY"
+      }
+    ]
+  },
+  "notes": [
+    {
+      "at": 86,
+      "text": "Turn 3 flip shows The Sentry Drone twice in one reveal on floor 1, as in playtests 14 and 15. Is a floor deck meant to hold several copies of one stairwell? Entering Puzzle Room instead since Red cannot reach Oomph 8 from this hand."
+    },
+    {
+      "at": 113,
+      "text": "Gray's Good Stuff reveal showed Coil Of Cable twice in one three-card reveal (Cutting Torch, Coil, Coil). Rulebook does not say whether a Stuff pool holds copies of one card. Question for the designer."
+    },
+    {
+      "at": 224,
+      "text": "Red's reward pool shows Second Wind now, one turn after I took Second Wind from it (which sits in Red's deck), and Fast Follow again after I took one. Same question as playtest 15 note 2: does a reward pool hold copies of a card?"
+    },
+    {
+      "at": 236,
+      "text": "Turn 7 flip: three Sentry Drones, the only rooms left. Same duplicate question as the earlier notes. Entering one; Gray's I Know Kung Fu (Oomph 5) plus Red's Pry Bar (Oomph 3) makes Oomph 8 for one paid card."
+    },
+    {
+      "at": 254,
+      "text": "Gray's card reward reveal shows Pivot twice in one three-card reveal (Synergy Link, Pivot, Pivot). So a reward pool does hold copies of one card, at least here. Rulebook silent. Question for the designer: is that intended?"
+    },
+    {
+      "at": 267,
+      "text": "Floor 2's first reveal shows Gears & Glitch twice (a stairwell), with only 9 rooms in the floor deck. Floor 1 showed The Sentry Drone three times in one reveal. Rulebook Setup says each floor has 'its own set of cards, consisting of normal Rooms and special rooms called Stairwells', which does not say how many stairwells or whether copies are allowed. Question for the designer."
+    },
+    {
+      "at": 477,
+      "text": "Floor 4 turn 13: Sexy Blob is Ambush and Relentless, a stairwell at Oomph 20 or Scramble 20. Ambush forces entry on reveal and Relentless puts a fled room on top of the Floor deck, so as I read the rulebook it is revealed and forced again every turn I cannot reach 20. Question for the designer: is that loop intended, and does a revealed Ambush stairwell on the very first reveal of a floor leave any way to choose another room?"
+    },
+    {
+      "at": 533,
+      "text": "Turn 15 flip: Sexy Blob and Regular Monster 4 both Ambush. Rulebook says if more than one revealed room has Ambush, choose one to enter. I chose Monster 4, whose Flee is only Exhaust 1, so Sexy Blob (not entered) goes to the bottom of the Floor deck and the Relentless loop is broken for now. Is this meant to be the way out of a Relentless Ambush stairwell? Also Panic's text adds +2 Scramble to every threshold, shown here as 'Oomph 20 and Scramble 2 (printed 0)', so a threshold with no Scramble now asks for Scramble 2."
+    },
+    {
+      "at": 593,
+      "text": "Turn 17 Sexy Blob: I built Oomph 5 from Gray's Kung Fu and had Red ready for 14 (Cross Punch with the Scramble bonus, two Pry Bars), 19 of 20. Nothing in hand or draws gave the last point, so I fled without playing Red's cards. Every point of the Blob's threshold is a whole card, and a hand is five cards, so 20 sits at the edge of what one turn can reach with these decks."
+    },
+    {
+      "at": 716,
+      "text": "Floor 5 opening hands each hold a System Feedback (Bad Stuff). Both Bad Stuff cards I held at the Ascend came back in the reshuffled decks, so Bad Stuff goes into the deck at Ascend and is drawn next floor. Rulebook 10 says shuffle ALL your cards into your deck, which includes them as written, but Stuff section says Stuff you gain goes into your hand. Question for the designer: should Bad Stuff return to its pool at Ascend?"
+    },
+    {
+      "at": 853,
+      "text": "Bubbly Slime Monster is Corrosive. Gray paid for Pick The Lock with I Know Kung Fu and Pick The Lock and the log line says 'Exhausting them', but Gray's Exhaust pile stayed at 9, so the cards were Scrapped as the rulebook says. The log wording does not say Scrapped. Not a rules mismatch, a log mismatch."
+    }
+  ],
+  "log": [
+    "Floor 1 is built: 9 rooms.",
+    "Turn Start phase starts.",
+    "Revealed: Security Turnstile, The Sentry Drone, Ventilation Shaft.",
+    "You are in: Security Turnstile.",
+    "To the bottom of the Floor deck: The Sentry Drone, Ventilation Shaft.",
+    "Red draws Shove.",
+    "Red draws Charge.",
+    "Red draws Lean In.",
+    "Red draws Shove.",
+    "Red draws Overdrive.",
+    "Gray draws Pick The Lock.",
+    "Gray draws Pick The Lock.",
+    "Gray draws Peek Around Corner.",
+    "Gray draws Duck Under.",
+    "Gray draws Work The Angles.",
+    "Turn Start phase ends.",
+    "Play phase starts.",
+    "Red plays Overdrive.",
+    "Overdrive triggers: Red Exhausts Charge.",
+    "Gray pays with Peek Around Corner, Work The Angles, Exhausting them.",
+    "Gray plays Pick The Lock.",
+    "Red pays with Lean In, Exhausting it.",
+    "Red plays Shove.",
+    "Gray pays with Pick The Lock, Exhausting it.",
+    "Gray plays Duck Under.",
+    "Play phase ends.",
+    "Outcome phase starts.",
+    "Scramble 5 met — Gray reveals a card reward.",
+    "Oomph 5 met — Red reveals a card reward.",
+    "Security Turnstile is Cleared.",
+    "Security Turnstile triggers: Gray's reward pool shows I'll Take That, In Step, Sharing Is Caring.",
+    "Gray takes In Step into their discard pile.",
+    "Security Turnstile triggers: Red's reward pool shows Tag Team, Break Through, Brute Recycle.",
+    "Red takes Tag Team into their discard pile.",
+    "Outcome phase ends.",
+    "Cleanup phase starts.",
+    "Red discards Overdrive from their play zone.",
+    "Red discards Shove from their play zone.",
+    "Gray discards Pick The Lock from their play zone.",
+    "Gray discards Duck Under from their play zone.",
+    "Cleanup phase ends.",
+    "— end of turn 1 —",
+    "Turn Start phase starts.",
+    "Revealed: Regular Room...OF DOOM, Tunnel of Rubble, Gross Thing.",
+    "You are in: Gross Thing.",
+    "To the bottom of the Floor deck: Regular Room...OF DOOM, Tunnel of Rubble.",
+    "Red draws Charge.",
+    "Red draws Charge.",
+    "Red draws Shove.",
+    "Red draws Overdrive.",
+    "Gray draws Duck Under.",
+    "Gray draws Pick The Lock.",
+    "Gray draws Peek Around Corner.",
+    "Gray draws Pick The Lock.",
+    "Gray draws Duck Under.",
+    "Turn Start phase ends.",
+    "Play phase starts.",
+    "Red plays Overdrive.",
+    "Overdrive triggers: Red Exhausts Shove.",
+    "Red pays with Charge, Exhausting it.",
+    "Red plays Shove.",
+    "Gray pays with Duck Under, Duck Under, Exhausting them.",
+    "Gray plays Pick The Lock.",
+    "Gray pays with Pick The Lock, Exhausting it.",
+    "Gray plays Peek Around Corner.",
+    "Peek Around Corner triggers: Gray draws Duck Under.",
+    "Play phase ends.",
+    "Outcome phase starts.",
+    "Oomph 5 met — Red gets Good Stuff.",
+    "Scramble 5 met — Gray reveals a card reward.",
+    "Gross Thing is Cleared.",
+    "Gross Thing triggers: Red reveals Good Stuff: Pocket Dynamo, Pry Bar, Automated Salvage Kit.",
+    "Red gets Pry Bar.",
+    "Red takes Pry Bar into hand.",
+    "Gross Thing triggers: Gray's reward pool shows I'll Take That, Catch Your Breath, Synergy Link.",
+    "Gray takes Catch Your Breath into their discard pile.",
+    "Outcome phase ends.",
+    "Cleanup phase starts.",
+    "Red discards Overdrive from their play zone.",
+    "Red discards Shove from their play zone.",
+    "Gray discards Pick The Lock from their play zone.",
+    "Gray discards Peek Around Corner from their play zone.",
+    "Cleanup phase ends.",
+    "— end of turn 2 —",
+    "Turn Start phase starts.",
+    "Revealed: The Sentry Drone, The Sentry Drone, Puzzle Room.",
+    "You are in: Puzzle Room.",
+    "To the bottom of the Floor deck: The Sentry Drone, The Sentry Drone.",
+    "Red draws Shove.",
+    "Red draws Overdrive.",
+    "Gray draws Pick The Lock.",
+    "Gray's deck is empty — the discard pile shuffles in to make a new one (6 cards).",
+    "Gray draws Pick The Lock.",
+    "Gray draws Peek Around Corner.",
+    "Gray draws In Step.",
+    "Turn Start phase ends.",
+    "Play phase starts.",
+    "Red plays Pry Bar.",
+    "Gray pays with In Step, Duck Under, Exhausting them.",
+    "Gray plays Pick The Lock.",
+    "Red plays Overdrive.",
+    "Overdrive triggers: Red Exhausts Shove.",
+    "Gray pays with Pick The Lock, Exhausting it.",
+    "Gray plays Peek Around Corner.",
+    "Peek Around Corner triggers: Gray draws Pick The Lock.",
+    "Red pays with Shove, Exhausting it.",
+    "Red plays Shove.",
+    "Play phase ends.",
+    "Outcome phase starts.",
+    "Oomph 8 met — Both players get Good Stuff.",
+    "Puzzle Room is Cleared.",
+    "Puzzle Room triggers: Red reveals Good Stuff: Emergency Breaker, Pocket Dynamo, A Pair Of Stitch-Em-Ups.",
+    "Puzzle Room triggers: Gray reveals Good Stuff: Cutting Torch, Coil Of Cable, Coil Of Cable.",
+    "Red gets A Pair Of Stitch-Em-Ups.",
+    "Red takes A Pair Of Stitch-Em-Ups into hand.",
+    "Gray gets Coil Of Cable.",
+    "Gray takes Coil Of Cable into hand.",
+    "Outcome phase ends.",
+    "Cleanup phase starts.",
+    "Red discards Pry Bar from their play zone.",
+    "Red discards Overdrive from their play zone.",
+    "Red discards Shove from their play zone.",
+    "Gray discards Pick The Lock from their play zone.",
+    "Gray discards Peek Around Corner from their play zone.",
+    "Cleanup phase ends.",
+    "— end of turn 3 —",
+    "Turn Start phase starts.",
+    "Revealed: The Sentry Drone, Ventilation Shaft, Regular Room...OF DOOM.",
+    "You are in: Ventilation Shaft.",
+    "To the bottom of the Floor deck: The Sentry Drone, Regular Room...OF DOOM.",
+    "Red draws Charge.",
+    "Red's deck is empty — the discard pile shuffles in to make a new one (6 cards).",
+    "Red draws Overdrive.",
+    "Red draws Overdrive.",
+    "Gray draws Duck Under.",
+    "Gray draws Catch Your Breath.",
+    "Gray's deck is empty — the discard pile shuffles in to make a new one (2 cards).",
+    "Gray draws Pick The Lock.",
+    "Turn Start phase ends.",
+    "Play phase starts.",
+    "Red pays with Overdrive, Overdrive, Exhausting them.",
+    "Red plays Charge.",
+    "Gray plays Coil Of Cable.",
+    "Gray pays with Catch Your Breath, Exhausting it.",
+    "Gray plays Duck Under.",
+    "Red pays with Charge, Exhausting it.",
+    "Red plays A Pair Of Stitch-Em-Ups.",
+    "A Pair Of Stitch-Em-Ups triggers: Pick The Lock goes to Gray's deck.",
+    "A Pair Of Stitch-Em-Ups triggers: Pick The Lock goes to Gray's deck.",
+    "Play phase ends.",
+    "Outcome phase starts.",
+    "Oomph 4 and Scramble 4 met — Both players reveal a card reward.",
+    "Ventilation Shaft is Cleared.",
+    "Ventilation Shaft triggers: Red's reward pool shows Break Through, Heavy Pockets, Fast Follow.",
+    "Red takes Fast Follow into their discard pile.",
+    "Ventilation Shaft triggers: Gray's reward pool shows One Man's Junk, Pack Mule, I Know Kung Fu.",
+    "Gray takes I Know Kung Fu into their discard pile.",
+    "Outcome phase ends.",
+    "Cleanup phase starts.",
+    "Red discards Charge from their play zone.",
+    "Red discards A Pair Of Stitch-Em-Ups from their play zone.",
+    "Gray discards Coil Of Cable from their play zone.",
+    "Gray discards Duck Under from their play zone.",
+    "Cleanup phase ends.",
+    "— end of turn 4 —",
+    "Turn Start phase starts.",
+    "Revealed: Tunnel of Rubble, The Sentry Drone, The Sentry Drone.",
+    "You are in: Tunnel of Rubble.",
+    "To the bottom of the Floor deck: The Sentry Drone, The Sentry Drone.",
+    "Red draws Tag Team.",
+    "Red draws Overdrive.",
+    "Red draws Pry Bar.",
+    "Red draws Shove.",
+    "Red's deck is empty — the discard pile shuffles in to make a new one (3 cards).",
+    "Red draws Fast Follow.",
+    "Gray draws Peek Around Corner.",
+    "Gray draws Pick The Lock.",
+    "Gray draws Pick The Lock.",
+    "Turn Start phase ends.",
+    "Play phase starts.",
+    "Gray pays with Peek Around Corner, Pick The Lock, Exhausting them.",
+    "Gray plays Pick The Lock.",
+    "Red plays Pry Bar.",
+    "Red plays Fast Follow.",
+    "Play phase ends.",
+    "Outcome phase starts.",
+    "Oomph 4 and Scramble 4 met — Both players reveal a card reward.",
+    "Tunnel of Rubble is Cleared.",
+    "Tunnel of Rubble triggers: Red's reward pool shows Second Wind, Junk Launcher, Set 'Em Up.",
+    "Red takes Second Wind into their discard pile.",
+    "Tunnel of Rubble triggers: Gray's reward pool shows Hit 'n Run, Hack the Doors, One Man's Junk.",
+    "Gray takes Hit 'n Run into their discard pile.",
+    "Outcome phase ends.",
+    "Cleanup phase starts.",
+    "Red discards Pry Bar from their play zone.",
+    "Red discards Fast Follow from their play zone.",
+    "Gray discards Pick The Lock from their play zone.",
+    "Cleanup phase ends.",
+    "— end of turn 5 —",
+    "Turn Start phase starts.",
+    "Revealed: The Sentry Drone, Regular Room...OF DOOM, The Sentry Drone.",
+    "You are in: Regular Room...OF DOOM.",
+    "To the bottom of the Floor deck: The Sentry Drone, The Sentry Drone.",
+    "Red draws Charge.",
+    "Red draws A Pair Of Stitch-Em-Ups.",
+    "Gray's deck is empty — the discard pile shuffles in to make a new one (5 cards).",
+    "Gray draws Duck Under.",
+    "Gray draws I Know Kung Fu.",
+    "Gray draws Coil Of Cable.",
+    "Turn Start phase ends.",
+    "Play phase starts.",
+    "Gray plays Coil Of Cable.",
+    "Red plays Overdrive.",
+    "Overdrive triggers: Red Exhausts Shove.",
+    "Red pays with Charge, Exhausting it.",
+    "Red plays Tag Team.",
+    "Tag Team triggers: Red's deck is empty — the discard pile shuffles in to make a new one (3 cards).",
+    "Tag Team triggers: Red draws Pry Bar.",
+    "Tag Team triggers: Gray draws Hit 'n Run.",
+    "Play phase ends.",
+    "Outcome phase starts.",
+    "Oomph 4 and Scramble 4 met — Both players reveal a card reward.",
+    "Regular Room...OF DOOM is Cleared.",
+    "Regular Room...OF DOOM triggers: Red's reward pool shows Second Wind, Cross Punch, Fast Follow.",
+    "Red takes Fast Follow into their discard pile.",
+    "Regular Room...OF DOOM triggers: Gray's reward pool shows Hack the Doors, Zen Mode, Covering Fire.",
+    "Gray takes Zen Mode into their discard pile.",
+    "Outcome phase ends.",
+    "Cleanup phase starts.",
+    "Red discards Overdrive from their play zone.",
+    "Red discards Tag Team from their play zone.",
+    "Gray discards Coil Of Cable from their play zone.",
+    "Cleanup phase ends.",
+    "— end of turn 6 —",
+    "Turn Start phase starts.",
+    "Revealed: The Sentry Drone, The Sentry Drone, The Sentry Drone.",
+    "You are in: The Sentry Drone.",
+    "To the bottom of the Floor deck: The Sentry Drone, The Sentry Drone.",
+    "Red draws Second Wind.",
+    "Red draws Fast Follow.",
+    "Red's deck is empty — the discard pile shuffles in to make a new one (3 cards).",
+    "Red draws Tag Team.",
+    "Turn Start phase ends.",
+    "Play phase starts.",
+    "Gray pays with Duck Under, Exhausting it.",
+    "Gray plays I Know Kung Fu.",
+    "Red plays Pry Bar.",
+    "Play phase ends.",
+    "Outcome phase starts.",
+    "Oomph 8 met — Ascend, and both players reveal a card reward.",
+    "The Sentry Drone is Cleared.",
+    "The Sentry Drone triggers: Red's reward pool shows Tag Team, Cross Punch, Momentum Shift.",
+    "Red takes Cross Punch into their discard pile.",
+    "The Sentry Drone triggers: Gray's reward pool shows Synergy Link, Pivot, Pivot.",
+    "Gray takes Synergy Link into their discard pile.",
+    "Outcome phase ends.",
+    "Cleanup phase starts.",
+    "Red discards Pry Bar from their play zone.",
+    "Gray discards I Know Kung Fu from their play zone.",
+    "Cleanup phase ends.",
+    "— end of turn 7 —",
+    "Floor 1 is clear.",
+    "Red shuffles 17 cards back in.",
+    "Gray shuffles 18 cards back in.",
+    "Floor 2 is built: 9 rooms.",
+    "Turn Start phase starts.",
+    "Revealed: Gears & Glitch, Gears & Glitch, Automated Defense Turret.",
+    "You are in: Automated Defense Turret.",
+    "To the bottom of the Floor deck: Gears & Glitch, Gears & Glitch.",
+    "Red draws Tag Team.",
+    "Red draws Shove.",
+    "Red draws Charge.",
+    "Red draws Charge.",
+    "Red draws Overdrive.",
+    "Gray draws In Step.",
+    "Gray draws Duck Under.",
+    "Gray draws Pick The Lock.",
+    "Gray draws Hit 'n Run.",
+    "Gray draws Synergy Link.",
+    "Turn Start phase ends.",
+    "Play phase starts.",
+    "Gray pays with In Step, Hit 'n Run, Exhausting them.",
+    "Gray plays Pick The Lock.",
+    "Red pays with Shove, Exhausting it.",
+    "Red plays Tag Team.",
+    "Tag Team triggers: Red draws Cross Punch.",
+    "Tag Team triggers: Gray draws Peek Around Corner.",
+    "Gray pays with Peek Around Corner, Exhausting it.",
+    "Gray plays Duck Under.",
+    "Play phase ends.",
+    "Outcome phase starts.",
+    "Scramble 8 met — Both players get Good Stuff.",
+    "Automated Defense Turret is Cleared.",
+    "Automated Defense Turret triggers: Red reveals Good Stuff: Emergency Power Core, Pry Bar, A Pair Of Stitch-Em-Ups.",
+    "Automated Defense Turret triggers: Gray reveals Good Stuff: Overcharged Battery, Duct Tape & Wire, Riot Shield.",
+    "Red gets Pry Bar.",
+    "Red takes Pry Bar into hand.",
+    "Gray gets Riot Shield.",
+    "Gray takes Riot Shield into hand.",
+    "Outcome phase ends.",
+    "Cleanup phase starts.",
+    "Red discards Tag Team from their play zone.",
+    "Gray discards Pick The Lock from their play zone.",
+    "Gray discards Duck Under from their play zone.",
+    "Cleanup phase ends.",
+    "— end of turn 8 —",
+    "Turn Start phase starts.",
+    "Revealed: Regular Monster 2, Maintenance, Gears & Glitch.",
+    "You are in: Regular Monster 2.",
+    "To the bottom of the Floor deck: Maintenance, Gears & Glitch.",
+    "Gray draws Pick The Lock.",
+    "Gray draws Work The Angles.",
+    "Gray draws Pick The Lock.",
+    "Turn Start phase ends.",
+    "Play phase starts.",
+    "Red plays Pry Bar.",
+    "Gray pays with Work The Angles, Exhausting it.",
+    "Gray plays Synergy Link.",
+    "Synergy Link triggers: Gray draws Zen Mode.",
+    "Synergy Link triggers: Gray draws Pick The Lock.",
+    "Gray pays with Pick The Lock, Exhausting it.",
+    "Gray plays Zen Mode.",
+    "Zen Mode stops it: Gray Exhausts nothing.",
+    "Gray plays Pick The Lock.",
+    "Zen Mode stops it: Gray Exhausts nothing.",
+    "Gray plays Riot Shield.",
+    "Red pays with Charge, Charge, Exhausting them.",
+    "Red plays Cross Punch.",
+    "Cross Punch triggers: Red Exhausts Overdrive.",
+    "Play phase ends.",
+    "Outcome phase starts.",
+    "Oomph 8 and Scramble 8 met — Both players reveal a card reward.",
+    "Regular Monster 2 is Cleared.",
+    "Riot Shield triggers: Gray takes Riot Shield into hand.",
+    "Regular Monster 2 triggers: Red's reward pool shows Heavy Pockets, Brute Recycle, Junk Launcher.",
+    "Red takes Brute Recycle into their discard pile.",
+    "Regular Monster 2 triggers: Gray's reward pool shows Pack Mule, Covering Fire, Quick Vault.",
+    "Gray takes Quick Vault into their discard pile.",
+    "Outcome phase ends.",
+    "Cleanup phase starts.",
+    "Red discards Pry Bar from their play zone.",
+    "Red discards Cross Punch from their play zone.",
+    "Gray discards Synergy Link from their play zone.",
+    "Gray discards Zen Mode from their play zone.",
+    "Gray discards Pick The Lock from their play zone.",
+    "Cleanup phase ends.",
+    "— end of turn 9 —",
+    "Turn Start phase starts.",
+    "Revealed: Dark Room, Overgrown Hydroponics Bay, Room 1-3.",
+    "You are in: Room 1-3.",
+    "To the bottom of the Floor deck: Dark Room, Overgrown Hydroponics Bay.",
+    "Red draws A Pair Of Stitch-Em-Ups.",
+    "Red draws Pry Bar.",
+    "Red draws Shove.",
+    "Red draws Fast Follow.",
+    "Gray draws Pick The Lock.",
+    "Gray draws Duck Under.",
+    "Turn Start phase ends.",
+    "Play phase starts.",
+    "Gray pays with Pick The Lock, Exhausting it.",
+    "Gray plays Duck Under.",
+    "Gray pays with Pick The Lock, Exhausting it.",
+    "Gray plays Riot Shield.",
+    "Red pays with Shove, Exhausting it.",
+    "Red plays A Pair Of Stitch-Em-Ups.",
+    "A Pair Of Stitch-Em-Ups triggers: Pick The Lock goes to Gray's deck.",
+    "A Pair Of Stitch-Em-Ups triggers: Pick The Lock goes to Gray's deck.",
+    "Play phase ends.",
+    "Outcome phase starts.",
+    "Scramble 5 met — Gray reveals a card reward.",
+    "Room 1-3 is Cleared.",
+    "Riot Shield triggers: Gray takes Riot Shield into hand.",
+    "Room 1-3 triggers: Gray's reward pool shows I Know Kung Fu, Quick Vault, Hit 'n Run.",
+    "Gray takes I Know Kung Fu into their discard pile.",
+    "Outcome phase ends.",
+    "Cleanup phase starts.",
+    "Red discards A Pair Of Stitch-Em-Ups from their play zone.",
+    "Gray discards Duck Under from their play zone.",
+    "Cleanup phase ends.",
+    "— end of turn 10 —",
+    "Turn Start phase starts.",
+    "Revealed: Gears & Glitch, Gears & Glitch, Maintenance.",
+    "You are in: Gears & Glitch.",
+    "To the bottom of the Floor deck: Gears & Glitch, Maintenance.",
+    "Red draws Second Wind.",
+    "Red draws Lean In.",
+    "Red draws Charge.",
+    "Gray draws I Know Kung Fu.",
+    "Gray draws Duck Under.",
+    "Gray draws Coil Of Cable.",
+    "Gray draws Peek Around Corner.",
+    "Turn Start phase ends.",
+    "Play phase starts.",
+    "Gray plays Coil Of Cable.",
+    "Gray pays with Peek Around Corner, Exhausting it.",
+    "Gray plays Riot Shield.",
+    "Red plays Pry Bar.",
+    "Red plays Fast Follow.",
+    "Red pays with Charge, Exhausting it.",
+    "Red plays Lean In.",
+    "Play phase ends.",
+    "Outcome phase starts.",
+    "Oomph 7 and Scramble 7 met — Ascend; one player reveals a card reward, and the other may Scrap a card from their hand or discard pile.",
+    "Gears & Glitch is Cleared.",
+    "Riot Shield triggers: Gray takes Riot Shield into hand.",
+    "Gears & Glitch triggers: Red's reward pool shows Rhythm & Bruise, Set 'Em Up, Reckless Swing.",
+    "Red takes Reckless Swing into their discard pile.",
+    "Outcome phase ends.",
+    "Cleanup phase starts.",
+    "Red discards Pry Bar from their play zone.",
+    "Red discards Fast Follow from their play zone.",
+    "Red discards Lean In from their play zone.",
+    "Gray discards Coil Of Cable from their play zone.",
+    "Cleanup phase ends.",
+    "— end of turn 11 —",
+    "Floor 2 is clear.",
+    "Red shuffles 16 cards back in.",
+    "Gray shuffles 18 cards back in.",
+    "Floor 3 is built: 9 rooms.",
+    "Turn Start phase starts.",
+    "Revealed: The Iron Sentinel, The Iron Sentinel, Slimy Bio-Hazard Containment.",
+    "You are in: The Iron Sentinel.",
+    "To the bottom of the Floor deck: The Iron Sentinel, Slimy Bio-Hazard Containment.",
+    "Red draws Tag Team.",
+    "Red draws Charge.",
+    "Red draws Shove.",
+    "Red draws Overdrive.",
+    "Red draws Overdrive.",
+    "Gray draws Zen Mode.",
+    "Gray draws Duck Under.",
+    "Gray draws Coil Of Cable.",
+    "Gray draws Catch Your Breath.",
+    "Gray draws Riot Shield.",
+    "Turn Start phase ends.",
+    "Play phase starts.",
+    "Gray pays with Catch Your Breath, Exhausting it.",
+    "Gray plays Zen Mode.",
+    "Gray plays Coil Of Cable.",
+    "Red pays with Shove, Exhausting it.",
+    "Red plays Tag Team.",
+    "Tag Team triggers: Red draws Fast Follow.",
+    "Tag Team triggers: Gray draws Duck Under.",
+    "Zen Mode stops it: Gray Exhausts nothing.",
+    "Gray plays Riot Shield.",
+    "Zen Mode stops it: Gray Exhausts nothing.",
+    "Gray plays Duck Under.",
+    "Red plays Fast Follow.",
+    "Red plays Overdrive.",
+    "Overdrive triggers: Red Exhausts Charge.",
+    "Red plays Overdrive.",
+    "Overdrive triggers: Red Exhausts Pry Bar.",
+    "Play phase ends.",
+    "Outcome phase starts.",
+    "Oomph 10 and Scramble 10 met — Ascend, and both players reveal a card reward.",
+    "The Iron Sentinel is Cleared.",
+    "Riot Shield triggers: Gray takes Riot Shield into hand.",
+    "The Iron Sentinel triggers: Red's reward pool shows Bull Rush, Bull Rush, Rhythm & Bruise.",
+    "Red takes Bull Rush into their discard pile.",
+    "The Iron Sentinel triggers: Gray's reward pool shows In Step, Catch Your Breath, I'll Take That.",
+    "Gray takes I'll Take That into their discard pile.",
+    "Outcome phase ends.",
+    "Cleanup phase starts.",
+    "Red discards Tag Team from their play zone.",
+    "Red discards Fast Follow from their play zone.",
+    "Red discards Overdrive from their play zone.",
+    "Red discards Overdrive from their play zone.",
+    "Gray discards Zen Mode from their play zone.",
+    "Gray discards Coil Of Cable from their play zone.",
+    "Gray discards Duck Under from their play zone.",
+    "Cleanup phase ends.",
+    "— end of turn 12 —",
+    "Floor 3 is clear.",
+    "Red shuffles 8 cards back in.",
+    "Gray shuffles 7 cards back in.",
+    "Floor 4 is built: 7 rooms.",
+    "Turn Start phase starts.",
+    "Revealed: Sexy Blob, Oasis of Doom, Vacuum Chamber.",
+    "You are in: Sexy Blob.",
+    "To the bottom of the Floor deck: Oasis of Doom, Vacuum Chamber.",
+    "Red draws Cross Punch.",
+    "Red draws Charge.",
+    "Red draws Tag Team.",
+    "Red draws Charge.",
+    "Red draws Shove.",
+    "Gray draws Work The Angles.",
+    "Gray draws Pick The Lock.",
+    "Gray draws Duck Under.",
+    "Gray draws I Know Kung Fu.",
+    "Gray draws Pick The Lock.",
+    "Turn Start phase ends.",
+    "Play phase starts.",
+    "Play phase ends.",
+    "Outcome phase starts.",
+    "You Flee Sexy Blob.",
+    "Sexy Blob triggers: Red Exhausts Shove.",
+    "Sexy Blob triggers: Red Exhausts Charge.",
+    "Sexy Blob triggers: Gray Exhausts Work The Angles.",
+    "Sexy Blob triggers: Gray Exhausts Duck Under.",
+    "Sexy Blob triggers: Red gets System Feedback.",
+    "Sexy Blob triggers: Red takes System Feedback into hand.",
+    "Sexy Blob triggers: Gray gets My Head Is Quantum Spinning.",
+    "Sexy Blob triggers: Gray takes My Head Is Quantum Spinning into hand.",
+    "Outcome phase ends.",
+    "Cleanup phase starts.",
+    "Sexy Blob goes on top of the Floor deck.",
+    "Cleanup phase ends.",
+    "— end of turn 13 —",
+    "Turn Start phase starts.",
+    "Revealed: Sexy Blob, Laser Grid, Communist Botox Lab.",
+    "You are in: Sexy Blob.",
+    "To the bottom of the Floor deck: Laser Grid, Communist Botox Lab.",
+    "Red draws Pry Bar.",
+    "Gray draws Duck Under.",
+    "Turn Start phase ends.",
+    "Play phase starts.",
+    "Play phase ends.",
+    "Outcome phase starts.",
+    "You Flee Sexy Blob.",
+    "Sexy Blob triggers: Red Exhausts System Feedback.",
+    "Sexy Blob triggers: Red Exhausts Charge.",
+    "Sexy Blob triggers: Gray Exhausts My Head Is Quantum Spinning.",
+    "Sexy Blob triggers: Gray Exhausts Duck Under.",
+    "Sexy Blob triggers: Red gets Sluggish.",
+    "Sexy Blob triggers: Red takes Sluggish into hand.",
+    "Sexy Blob triggers: Gray gets Panic.",
+    "Sexy Blob triggers: Gray takes Panic into hand.",
+    "Outcome phase ends.",
+    "Cleanup phase starts.",
+    "Sexy Blob goes on top of the Floor deck.",
+    "Cleanup phase ends.",
+    "— end of turn 14 —",
+    "Turn Start phase starts.",
+    "Revealed: Sexy Blob, Ticking Time Bomb, Regular Monster 4.",
+    "You are in: Regular Monster 4.",
+    "To the bottom of the Floor deck: Sexy Blob, Ticking Time Bomb.",
+    "Red draws A Pair Of Stitch-Em-Ups.",
+    "Gray draws Quick Vault.",
+    "Turn Start phase ends.",
+    "Play phase starts.",
+    "Gray plays Quick Vault.",
+    "Quick Vault triggers: Gray draws Duck Under.",
+    "Quick Vault triggers: Gray draws Catch Your Breath.",
+    "Play phase ends.",
+    "Outcome phase starts.",
+    "You Flee Regular Monster 4.",
+    "Regular Monster 4 triggers: Red Exhausts Sluggish.",
+    "Regular Monster 4 triggers: Gray Exhausts Panic.",
+    "Outcome phase ends.",
+    "Cleanup phase starts.",
+    "Gray discards Quick Vault from their play zone.",
+    "Regular Monster 4 goes to the bottom of the Floor deck.",
+    "Cleanup phase ends.",
+    "— end of turn 15 —",
+    "Turn Start phase starts.",
+    "Revealed: Oasis of Doom, Vacuum Chamber, Laser Grid.",
+    "You are in: Oasis of Doom.",
+    "To the bottom of the Floor deck: Vacuum Chamber, Laser Grid.",
+    "Red draws Pry Bar.",
+    "Turn Start phase ends.",
+    "Play phase starts.",
+    "Gray plays Catch Your Breath.",
+    "Play phase ends.",
+    "Outcome phase starts.",
+    "You Flee Oasis of Doom.",
+    "Catch Your Breath triggers: Work The Angles goes to Gray's deck.",
+    "Catch Your Breath triggers: Duck Under goes to Gray's deck.",
+    "Catch Your Breath triggers: Duck Under goes to Gray's deck.",
+    "Oasis of Doom triggers: Red Exhausts Shove.",
+    "Oasis of Doom triggers: Gray Exhausts Duck Under.",
+    "Outcome phase ends.",
+    "Cleanup phase starts.",
+    "Gray discards Catch Your Breath from their play zone.",
+    "Oasis of Doom goes to the bottom of the Floor deck.",
+    "Cleanup phase ends.",
+    "— end of turn 16 —",
+    "Turn Start phase starts.",
+    "Revealed: Communist Botox Lab, Sexy Blob, Ticking Time Bomb.",
+    "You are in: Sexy Blob.",
+    "To the bottom of the Floor deck: Communist Botox Lab, Ticking Time Bomb.",
+    "Gray draws Peek Around Corner.",
+    "Gray draws Duck Under.",
+    "Turn Start phase ends.",
+    "Play phase starts.",
+    "Gray pays with Duck Under, Exhausting it.",
+    "Gray plays I Know Kung Fu.",
+    "Gray pays with Pick The Lock, Exhausting it.",
+    "Gray plays Peek Around Corner.",
+    "Peek Around Corner triggers: Gray draws Peek Around Corner.",
+    "I Know Kung Fu triggers: Gray draws Zen Mode.",
+    "Gray pays with Pick The Lock, Exhausting it.",
+    "Gray plays Peek Around Corner.",
+    "Peek Around Corner triggers: Gray draws Pick The Lock.",
+    "I Know Kung Fu triggers: Gray draws I'll Take That.",
+    "Play phase ends.",
+    "Outcome phase starts.",
+    "You Flee Sexy Blob.",
+    "Sexy Blob triggers: Red Exhausts Overdrive.",
+    "Sexy Blob triggers: Red Exhausts Overdrive.",
+    "Sexy Blob triggers: Gray Exhausts I'll Take That.",
+    "Sexy Blob triggers: Gray Exhausts Quick Vault.",
+    "Sexy Blob triggers: Red gets Rust.",
+    "Sexy Blob triggers: Red takes Rust into hand.",
+    "Sexy Blob triggers: Gray gets System Feedback.",
+    "Sexy Blob triggers: Gray takes System Feedback into hand.",
+    "Outcome phase ends.",
+    "Cleanup phase starts.",
+    "Gray discards I Know Kung Fu from their play zone.",
+    "Gray discards Peek Around Corner from their play zone.",
+    "Gray discards Peek Around Corner from their play zone.",
+    "Sexy Blob goes on top of the Floor deck.",
+    "Cleanup phase ends.",
+    "— end of turn 17 —",
+    "Turn Start phase starts.",
+    "Revealed: Sexy Blob, Regular Monster 4, Vacuum Chamber.",
+    "You are in: Regular Monster 4.",
+    "To the bottom of the Floor deck: Sexy Blob, Vacuum Chamber.",
+    "Gray draws I Know Kung Fu.",
+    "Gray draws Pick The Lock.",
+    "Turn Start phase ends.",
+    "Play phase starts.",
+    "Play phase ends.",
+    "Outcome phase starts.",
+    "You Flee Regular Monster 4.",
+    "Regular Monster 4 triggers: Red Exhausts Rust.",
+    "Regular Monster 4 triggers: Gray Exhausts System Feedback.",
+    "Outcome phase ends.",
+    "Cleanup phase starts.",
+    "Regular Monster 4 goes to the bottom of the Floor deck.",
+    "Cleanup phase ends.",
+    "— end of turn 18 —",
+    "Turn Start phase starts.",
+    "Revealed: Laser Grid, Oasis of Doom, Communist Botox Lab.",
+    "You are in: Oasis of Doom.",
+    "To the bottom of the Floor deck: Laser Grid, Communist Botox Lab.",
+    "Gray draws Synergy Link.",
+    "Turn Start phase ends.",
+    "Play phase starts.",
+    "Play phase ends.",
+    "Outcome phase starts.",
+    "You Flee Oasis of Doom.",
+    "Oasis of Doom triggers: Red Exhausts Charge.",
+    "Oasis of Doom triggers: Gray Exhausts In Step.",
+    "Outcome phase ends.",
+    "Cleanup phase starts.",
+    "Oasis of Doom goes to the bottom of the Floor deck.",
+    "Cleanup phase ends.",
+    "— end of turn 19 —",
+    "Turn Start phase starts.",
+    "Revealed: Ticking Time Bomb, Sexy Blob, Vacuum Chamber.",
+    "You are in: Sexy Blob.",
+    "To the bottom of the Floor deck: Ticking Time Bomb, Vacuum Chamber.",
+    "Turn Start phase ends.",
+    "Play phase starts.",
+    "Red plays Pry Bar.",
+    "Red plays Pry Bar.",
+    "Gray pays with Pick The Lock, Exhausting it.",
+    "Gray plays Zen Mode.",
+    "Zen Mode stops it: Gray Exhausts nothing.",
+    "Gray plays I Know Kung Fu.",
+    "Zen Mode stops it: Gray Exhausts nothing.",
+    "Gray plays Synergy Link.",
+    "Synergy Link triggers: Gray draws Riot Shield.",
+    "Synergy Link triggers: Gray draws Pick The Lock.",
+    "I Know Kung Fu triggers: Gray draws Hit 'n Run.",
+    "Zen Mode stops it: Gray Exhausts nothing.",
+    "Gray plays Hit 'n Run.",
+    "Hit 'n Run triggers: Gray shuffles 1 card back in.",
+    "I Know Kung Fu triggers: Gray draws Duck Under.",
+    "Red pays with Tag Team, A Pair Of Stitch-Em-Ups, Exhausting them.",
+    "Red plays Cross Punch.",
+    "Cross Punch triggers: Red Exhausts Fast Follow.",
+    "Play phase ends.",
+    "Outcome phase starts.",
+    "Oomph 20 met — Both players get Good Stuff. Both players get Good Stuff. Ascend.",
+    "Sexy Blob is Cleared.",
+    "Sexy Blob triggers: Red reveals Good Stuff: Grav Harness, High-Frequency Scanner, Salvaged Blueprint.",
+    "Sexy Blob triggers: Gray reveals Good Stuff: Crowbar, Overcharged Battery, Coil Of Cable.",
+    "Red gets Grav Harness.",
+    "Red takes Grav Harness into hand.",
+    "Gray gets Coil Of Cable.",
+    "Gray takes Coil Of Cable into hand.",
+    "Sexy Blob triggers: Red reveals Good Stuff: Pocket Dynamo, Duct Tape & Wire, Scrap Magnet.",
+    "Sexy Blob triggers: Gray reveals Good Stuff: Pry Bar, High-Frequency Scanner, Riot Shield.",
+    "Red gets Pocket Dynamo.",
+    "Red takes Pocket Dynamo into hand.",
+    "Gray gets Riot Shield.",
+    "Gray takes Riot Shield into hand.",
+    "Outcome phase ends.",
+    "Cleanup phase starts.",
+    "Red discards Pry Bar from their play zone.",
+    "Red discards Pry Bar from their play zone.",
+    "Red discards Cross Punch from their play zone.",
+    "Gray discards Zen Mode from their play zone.",
+    "Gray discards I Know Kung Fu from their play zone.",
+    "Gray discards Synergy Link from their play zone.",
+    "Gray discards Hit 'n Run from their play zone.",
+    "Cleanup phase ends.",
+    "— end of turn 20 —",
+    "Floor 4 is clear.",
+    "Red shuffles 18 cards back in.",
+    "Gray shuffles 24 cards back in.",
+    "Floor 5 is built: 7 rooms.",
+    "Turn Start phase starts.",
+    "Revealed: Double Dark Hallway of Death, The Authorities, Monster 5-4.",
+    "You are in: Double Dark Hallway of Death.",
+    "To the bottom of the Floor deck: The Authorities, Monster 5-4.",
+    "Red draws Shove.",
+    "Red draws Overdrive.",
+    "Red draws System Feedback.",
+    "Red draws Overdrive.",
+    "Gray draws System Feedback.",
+    "Gray draws Pick The Lock.",
+    "Gray draws Coil Of Cable.",
+    "Gray draws Coil Of Cable.",
+    "Turn Start phase ends.",
+    "Play phase starts.",
+    "Play phase ends.",
+    "Outcome phase starts.",
+    "You Flee Double Dark Hallway of Death.",
+    "Double Dark Hallway of Death triggers: Red Exhausts System Feedback.",
+    "Double Dark Hallway of Death triggers: Red Exhausts Pry Bar.",
+    "Double Dark Hallway of Death triggers: Gray Exhausts System Feedback.",
+    "Double Dark Hallway of Death triggers: Gray Exhausts Pick The Lock.",
+    "Outcome phase ends.",
+    "Cleanup phase starts.",
+    "Double Dark Hallway of Death goes to the bottom of the Floor deck.",
+    "Cleanup phase ends.",
+    "— end of turn 21 —",
+    "Turn Start phase starts.",
+    "Revealed: Monster 5-3, Monster 5-2, Bubbly Slime Monster.",
+    "You are in: Monster 5-3.",
+    "To the bottom of the Floor deck: Monster 5-2, Bubbly Slime Monster.",
+    "Red draws Lean In.",
+    "Red draws Shove.",
+    "Gray draws Duck Under.",
+    "Gray draws I Know Kung Fu.",
+    "Turn Start phase ends.",
+    "Play phase starts.",
+    "Play phase ends.",
+    "Outcome phase starts.",
+    "You Flee Monster 5-3.",
+    "Monster 5-3 triggers: Red Exhausts Shove.",
+    "Monster 5-3 triggers: Red Exhausts Shove.",
+    "Monster 5-3 triggers: Gray Exhausts Duck Under.",
+    "Monster 5-3 triggers: Gray Exhausts Duck Under.",
+    "Outcome phase ends.",
+    "Cleanup phase starts.",
+    "Monster 5-3 goes to the bottom of the Floor deck.",
+    "Cleanup phase ends.",
+    "— end of turn 22 —",
+    "Turn Start phase starts.",
+    "Revealed: Comrade Black, The Authorities, Monster 5-4.",
+    "You are in: The Authorities.",
+    "To the bottom of the Floor deck: Comrade Black, Monster 5-4.",
+    "Red draws Overdrive.",
+    "Red draws Charge.",
+    "Gray draws Catch Your Breath.",
+    "Turn Start phase ends.",
+    "Play phase starts.",
+    "Gray plays Catch Your Breath.",
+    "Play phase ends.",
+    "Outcome phase starts.",
+    "You Flee The Authorities.",
+    "Catch Your Breath triggers: Pick The Lock goes to Gray's deck.",
+    "Catch Your Breath triggers: Duck Under goes to Gray's deck.",
+    "Catch Your Breath triggers: Duck Under goes to Gray's deck.",
+    "The Authorities triggers: Red Exhausts Charge.",
+    "The Authorities triggers: Red Exhausts Lean In.",
+    "The Authorities triggers: Gray Exhausts Zen Mode.",
+    "The Authorities triggers: Gray Exhausts My Head Is Quantum Spinning.",
+    "Outcome phase ends.",
+    "Cleanup phase starts.",
+    "Gray discards Catch Your Breath from their play zone.",
+    "The Authorities goes on top of the Floor deck.",
+    "Cleanup phase ends.",
+    "— end of turn 23 —",
+    "Turn Start phase starts.",
+    "Revealed: The Authorities, Double Dark Hallway of Death, Monster 5-2.",
+    "You are in: The Authorities.",
+    "To the bottom of the Floor deck: Double Dark Hallway of Death, Monster 5-2.",
+    "Red draws Charge.",
+    "Red draws Charge.",
+    "Gray draws In Step.",
+    "Turn Start phase ends.",
+    "Play phase starts.",
+    "Play phase ends.",
+    "Outcome phase starts.",
+    "You Flee The Authorities.",
+    "The Authorities triggers: Red Exhausts Charge.",
+    "The Authorities triggers: Red Exhausts Charge.",
+    "The Authorities triggers: Gray Exhausts In Step.",
+    "The Authorities triggers: Gray Exhausts Riot Shield.",
+    "Outcome phase ends.",
+    "Cleanup phase starts.",
+    "The Authorities goes on top of the Floor deck.",
+    "Cleanup phase ends.",
+    "— end of turn 24 —",
+    "Turn Start phase starts.",
+    "Revealed: The Authorities, Bubbly Slime Monster, Monster 5-3.",
+    "You are in: Monster 5-3.",
+    "To the bottom of the Floor deck: The Authorities, Bubbly Slime Monster.",
+    "Red draws Pry Bar.",
+    "Red draws Reckless Swing.",
+    "Gray draws Pick The Lock.",
+    "Turn Start phase ends.",
+    "Play phase starts.",
+    "Play phase ends.",
+    "Outcome phase starts.",
+    "You Flee Monster 5-3.",
+    "Monster 5-3 triggers: Red Exhausts Overdrive.",
+    "Monster 5-3 triggers: Red Exhausts Reckless Swing.",
+    "Monster 5-3 triggers: Gray Exhausts I Know Kung Fu.",
+    "Monster 5-3 triggers: Gray Exhausts Duck Under.",
+    "Outcome phase ends.",
+    "Cleanup phase starts.",
+    "Monster 5-3 goes to the bottom of the Floor deck.",
+    "Cleanup phase ends.",
+    "— end of turn 25 —",
+    "Turn Start phase starts.",
+    "Revealed: Comrade Black, Monster 5-4, Double Dark Hallway of Death.",
+    "You are in: Double Dark Hallway of Death.",
+    "To the bottom of the Floor deck: Comrade Black, Monster 5-4.",
+    "Red draws Pocket Dynamo.",
+    "Turn Start phase ends.",
+    "Play phase starts.",
+    "Play phase ends.",
+    "Outcome phase starts.",
+    "You Flee Double Dark Hallway of Death.",
+    "Double Dark Hallway of Death triggers: Red Exhausts Pocket Dynamo.",
+    "Double Dark Hallway of Death triggers: Red Exhausts Overdrive.",
+    "Double Dark Hallway of Death triggers: Gray Exhausts Panic.",
+    "Double Dark Hallway of Death triggers: Gray Exhausts Synergy Link.",
+    "Outcome phase ends.",
+    "Cleanup phase starts.",
+    "Double Dark Hallway of Death goes to the bottom of the Floor deck.",
+    "Cleanup phase ends.",
+    "— end of turn 26 —",
+    "Turn Start phase starts.",
+    "Revealed: Monster 5-2, The Authorities, Bubbly Slime Monster.",
+    "You are in: Bubbly Slime Monster.",
+    "To the bottom of the Floor deck: Monster 5-2, The Authorities.",
+    "Red draws A Pair Of Stitch-Em-Ups.",
+    "Red draws Charge.",
+    "Red draws Fast Follow.",
+    "Turn Start phase ends.",
+    "Play phase starts.",
+    "Gray plays Coil Of Cable.",
+    "Gray plays Coil Of Cable.",
+    "Gray pays with I Know Kung Fu, Pick The Lock, Exhausting them.",
+    "Gray plays Pick The Lock.",
+    "Red plays Pry Bar.",
+    "Red plays Fast Follow.",
+    "Red plays Overdrive.",
+    "Overdrive triggers: Red Exhausts Charge.",
+    "Play phase ends.",
+    "Outcome phase starts.",
+    "Oomph 8 and Scramble 8 met — Both players reveal a card reward.",
+    "Bubbly Slime Monster is Cleared.",
+    "Bubbly Slime Monster triggers: Red's reward pool shows Reckless Swing, Reckless Swing, Momentum Shift.",
+    "Red takes Momentum Shift into their discard pile.",
+    "Bubbly Slime Monster triggers: Gray's reward pool shows Sharing Is Caring, I'll Take That, Synergy Link.",
+    "Gray takes Synergy Link into their discard pile.",
+    "Outcome phase ends.",
+    "Cleanup phase starts.",
+    "Red discards Pry Bar from their play zone.",
+    "Red discards Fast Follow from their play zone.",
+    "Red discards Overdrive from their play zone.",
+    "Gray discards Coil Of Cable from their play zone.",
+    "Gray discards Coil Of Cable from their play zone.",
+    "Gray discards Pick The Lock from their play zone.",
+    "Cleanup phase ends.",
+    "— end of turn 27 —",
+    "Turn Start phase starts.",
+    "Revealed: Monster 5-3, Comrade Black, Monster 5-4.",
+    "You are in: Monster 5-3.",
+    "To the bottom of the Floor deck: Comrade Black, Monster 5-4.",
+    "Red draws Bull Rush.",
+    "Red draws Fast Follow.",
+    "Red draws Cross Punch.",
+    "Red draws Rust.",
+    "Gray draws Peek Around Corner.",
+    "Gray draws Riot Shield.",
+    "Gray draws Pick The Lock.",
+    "Gray draws Peek Around Corner.",
+    "Gray draws Duck Under.",
+    "Turn Start phase ends.",
+    "Play phase starts.",
+    "Play phase ends.",
+    "Outcome phase starts.",
+    "You Flee Monster 5-3.",
+    "Monster 5-3 triggers: Red Exhausts Rust.",
+    "Monster 5-3 triggers: Red Exhausts Bull Rush.",
+    "Monster 5-3 triggers: Gray Exhausts Duck Under.",
+    "Monster 5-3 triggers: Gray Exhausts Peek Around Corner.",
+    "Outcome phase ends.",
+    "Cleanup phase starts.",
+    "Monster 5-3 goes to the bottom of the Floor deck.",
+    "Cleanup phase ends.",
+    "— end of turn 28 —",
+    "Turn Start phase starts.",
+    "Revealed: Double Dark Hallway of Death, Monster 5-2, The Authorities.",
+    "You are in: Double Dark Hallway of Death.",
+    "To the bottom of the Floor deck: Monster 5-2, The Authorities.",
+    "Red draws Tag Team.",
+    "Gray draws Work The Angles.",
+    "Turn Start phase ends.",
+    "Play phase starts.",
+    "Play phase ends.",
+    "Outcome phase starts.",
+    "You Flee Double Dark Hallway of Death.",
+    "Double Dark Hallway of Death triggers: Red Exhausts Brute Recycle.",
+    "Double Dark Hallway of Death triggers: Red Exhausts Second Wind.",
+    "Double Dark Hallway of Death triggers: Gray Exhausts Pick The Lock.",
+    "Double Dark Hallway of Death triggers: Gray Exhausts Hit 'n Run.",
+    "Outcome phase ends.",
+    "Cleanup phase starts.",
+    "Double Dark Hallway of Death goes to the bottom of the Floor deck.",
+    "Cleanup phase ends.",
+    "— end of turn 29 —",
+    "Turn Start phase starts.",
+    "Revealed: Comrade Black, Monster 5-4, Monster 5-3.",
+    "You are in: Monster 5-3.",
+    "To the bottom of the Floor deck: Comrade Black, Monster 5-4.",
+    "Red draws Shove.",
+    "Gray draws I'll Take That.",
+    "Turn Start phase ends.",
+    "Play phase starts.",
+    "Play phase ends.",
+    "Outcome phase starts.",
+    "You Flee Monster 5-3.",
+    "Monster 5-3 triggers: Red Exhausts Shove.",
+    "Monster 5-3 triggers: Red Exhausts Fast Follow.",
+    "Monster 5-3 triggers: Gray Exhausts Work The Angles.",
+    "Monster 5-3 triggers: Gray Exhausts Peek Around Corner.",
+    "Outcome phase ends.",
+    "Cleanup phase starts.",
+    "Monster 5-3 goes to the bottom of the Floor deck.",
+    "Cleanup phase ends.",
+    "— end of turn 30 —",
+    "Turn Start phase starts.",
+    "Revealed: Monster 5-2, The Authorities, Double Dark Hallway of Death.",
+    "You are in: Double Dark Hallway of Death.",
+    "To the bottom of the Floor deck: Monster 5-2, The Authorities.",
+    "Red draws Sluggish.",
+    "Gray draws Quick Vault.",
+    "Turn Start phase ends.",
+    "Play phase starts.",
+    "Play phase ends.",
+    "Outcome phase starts.",
+    "You Flee Double Dark Hallway of Death.",
+    "Double Dark Hallway of Death triggers: Red Exhausts Sluggish.",
+    "Double Dark Hallway of Death triggers: Red Exhausts Cross Punch.",
+    "Double Dark Hallway of Death triggers: Gray Exhausts Quick Vault.",
+    "Double Dark Hallway of Death triggers: Gray Exhausts I'll Take That.",
+    "Outcome phase ends.",
+    "Cleanup phase starts.",
+    "Double Dark Hallway of Death goes to the bottom of the Floor deck.",
+    "Cleanup phase ends.",
+    "— end of turn 31 —",
+    "Turn Start phase starts.",
+    "Revealed: Comrade Black, Monster 5-4, Monster 5-3.",
+    "You are in: Monster 5-3.",
+    "To the bottom of the Floor deck: Comrade Black, Monster 5-4.",
+    "Red draws Shove.",
+    "Red draws Grav Harness.",
+    "Red's deck is empty — the discard pile shuffles in to make a new one (4 cards).",
+    "Red draws Fast Follow.",
+    "Gray draws Pick The Lock.",
+    "Gray draws Duck Under.",
+    "Gray draws Duck Under.",
+    "Turn Start phase ends.",
+    "Play phase starts.",
+    "Play phase ends.",
+    "Outcome phase starts.",
+    "You Flee Monster 5-3.",
+    "Monster 5-3 triggers: Red Exhausts Shove.",
+    "Monster 5-3 triggers: Red Exhausts Fast Follow.",
+    "Monster 5-3 triggers: Gray Exhausts Duck Under.",
+    "Monster 5-3 triggers: Gray Exhausts Duck Under.",
+    "Outcome phase ends.",
+    "Cleanup phase starts.",
+    "Monster 5-3 goes to the bottom of the Floor deck.",
+    "Cleanup phase ends.",
+    "— end of turn 32 —",
+    "Turn Start phase starts.",
+    "Revealed: Monster 5-2, The Authorities, Double Dark Hallway of Death.",
+    "You are in: Double Dark Hallway of Death.",
+    "To the bottom of the Floor deck: Monster 5-2, The Authorities.",
+    "Red draws Pry Bar.",
+    "Gray's deck is empty — the discard pile shuffles in to make a new one (5 cards).",
+    "Gray draws Coil Of Cable.",
+    "Turn Start phase ends.",
+    "Play phase starts.",
+    "Play phase ends.",
+    "Outcome phase starts.",
+    "You Flee Double Dark Hallway of Death.",
+    "Double Dark Hallway of Death triggers: Red Exhausts Grav Harness.",
+    "Double Dark Hallway of Death triggers: Red Exhausts Tag Team.",
+    "Double Dark Hallway of Death triggers: Gray Exhausts Pick The Lock.",
+    "Double Dark Hallway of Death triggers: Gray Exhausts Pick The Lock.",
+    "Outcome phase ends.",
+    "Cleanup phase starts.",
+    "Double Dark Hallway of Death goes to the bottom of the Floor deck.",
+    "Cleanup phase ends.",
+    "— end of turn 33 —",
+    "Turn Start phase starts.",
+    "Revealed: Comrade Black, Monster 5-4, Monster 5-3.",
+    "You are in: Monster 5-3.",
+    "To the bottom of the Floor deck: Comrade Black, Monster 5-4.",
+    "Red draws Momentum Shift.",
+    "Red draws Overdrive.",
+    "Gray draws Synergy Link.",
+    "Gray draws Catch Your Breath.",
+    "Gray draws Coil Of Cable.",
+    "Turn Start phase ends.",
+    "Play phase starts.",
+    "Gray plays Catch Your Breath.",
+    "Heavy triggers: Gray Exhausts Pick The Lock.",
+    "Play phase ends.",
+    "Outcome phase starts.",
+    "You Flee Monster 5-3.",
+    "Catch Your Breath triggers: Zen Mode goes to Gray's deck.",
+    "Catch Your Breath triggers: I Know Kung Fu goes to Gray's deck.",
+    "Catch Your Breath triggers: Pick The Lock goes to Gray's deck.",
+    "Monster 5-3 triggers: Red Exhausts Overdrive.",
+    "Monster 5-3 triggers: Red Exhausts Momentum Shift.",
+    "Monster 5-3 triggers: Gray Exhausts Riot Shield.",
+    "Monster 5-3 triggers: Gray Exhausts Synergy Link.",
+    "Outcome phase ends.",
+    "Cleanup phase starts.",
+    "Gray discards Catch Your Breath from their play zone.",
+    "Monster 5-3 goes to the bottom of the Floor deck.",
+    "Cleanup phase ends.",
+    "— end of turn 34 —",
+    "Turn Start phase starts.",
+    "Revealed: Monster 5-2, The Authorities, Double Dark Hallway of Death.",
+    "You are in: Double Dark Hallway of Death.",
+    "To the bottom of the Floor deck: Monster 5-2, The Authorities.",
+    "Gray draws Zen Mode.",
+    "Gray draws I Know Kung Fu.",
+    "Turn Start phase ends.",
+    "Play phase starts.",
+    "Gray pays with I Know Kung Fu, Exhausting it.",
+    "Gray plays Zen Mode.",
+    "Play phase ends.",
+    "Outcome phase starts.",
+    "You Flee Double Dark Hallway of Death.",
+    "Double Dark Hallway of Death triggers: Red Exhausts A Pair Of Stitch-Em-Ups.",
+    "Double Dark Hallway of Death triggers: Red Exhausts Pry Bar.",
+    "Red is Down — Double Dark Hallway of Death: Exhausted the last card. The run is lost.",
+    "Outcome phase ends.",
+    "You lose."
+  ]
+}

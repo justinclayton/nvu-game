@@ -1,11 +1,11 @@
-# Playtest 14: Room choice on flip
+# Playtest 18: Room choice on flip
 
 Recorded 2026-10-19. Kit revision R35.C58-v1, the second commit for issue #276: on top of playtest
 13's five floors of six cards, Turn Start reveals the top 3 rooms (or all that remain), the players
 enter one and put the rest on the bottom in an order they choose, the Stairwell may be passed over
 until it is the last card, and a Fled room goes to the bottom of the floor deck. Played by an agent
 standing in for a human playtester, in the CLI (`bin/nvu`), one shell call per decision, on the same
-seeds as playtest 13: 10 and 12. Two runs, one note.
+seeds as playtest 17: 10 and 12. Two runs, one note.
 
 Notes are the agents', verbatim, tagged `[agent]`, with their log line from `bin/nvu replay`.
 Nothing here is a ruling. Suspected bugs were checked against `rulebook.md` and `cards.yaml` only;
@@ -18,11 +18,11 @@ the engine was not read. The greedy sim is not used as evidence.
 | 10 | Victory | 23 | 4, 6, 3, 5, 5 | 1 / 0 / 0 / 0 / 2 | 8 times |
 | 12 | Victory | 23 | 6, 6, 5, 5, 1 | 0 / 0 / 0 / 0 / 0 | 13 times |
 
-Compared with playtest 13 on the same seeds (seed 10 won in 19 turns with no Flee, seed 12 lost on
+Compared with playtest 17 on the same seeds (seed 10 won in 19 turns with no Flee, seed 12 lost on
 floor 1 in 6 turns with 2 Flees) and the 10-floor baseline (29 and 35 turns per win):
 
 - **Turns per win.** Both seeds won, in 23 turns each: 79% of seed 10's 29 and 66% of seed 12's 35.
-  The issue's target is near half. Room choice made floors longer than playtest 13's, because the
+  The issue's target is near half. Room choice made floors longer than playtest 17's, because the
   players clear the Rooms for their rewards and fight the Stairwell last.
 - **Flees.** Three in two runs. Only one came before floor 5, and it was a misplay (seed 10, note on
   floor 1). The two floor-5 Flees were on The Monolith Core, one Oomph short, and a Laser Grid Fled on
@@ -38,7 +38,7 @@ The two write-ups follow as the agents wrote them.
 
 Recorded 2026-10-19. Kit revision `R35.C58-v1`. Played by an agent standing in for a human
 playtester, in the CLI (`bin/nvu`), seed 10, one shell call per decision, run file
-`design/playtests/14-room-choice-seed-10.json`. The run ended in **Victory** on turn 23, when The
+`design/playtests/18-room-choice-seed-10.json`. The run ended in **Victory** on turn 23, when The
 Monolith Core fell to Oomph 16 / Scramble 10 on the second try.
 
 Notes are the agent's, quoted as written into the run, tagged `[agent]`. Nothing here is a ruling.
@@ -290,7 +290,7 @@ Card observations for a later re-tune:
 
 ### Appendix
 
-`bin/nvu replay design/playtests/14-room-choice-seed-10.json` (run file `design/playtests/14-room-choice-seed-10.json`), verbatim:
+`bin/nvu replay design/playtests/18-room-choice-seed-10.json` (run file `design/playtests/18-room-choice-seed-10.json`), verbatim:
 
 ```
   1. Floor 1 is built: 6 rooms.
@@ -1255,7 +1255,7 @@ seed 10, 255 commands replayed, recorded on R35.C58-v1, floor 5, turn 23, Victor
 ## Run: Seed 12, room choice (R35)
 
 Recorded 2026-10-19. Kit revision `R35.C58-v1`. Played by an agent standing in for a human
-playtester, in the CLI (`bin/nvu play ... --run design/playtests/14-room-choice-seed-12.json`), seed 12, one shell call per
+playtester, in the CLI (`bin/nvu play ... --run design/playtests/18-room-choice-seed-12.json`), seed 12, one shell call per
 decision. The run ended in **Victory** on turn 23, when The Monolith Core fell to Oomph 10 /
 Scramble 12 on the first turn of floor 5. There were no Flees.
 
@@ -1362,7 +1362,7 @@ Caring, two Quick Vaults, Momentum Shift and Synergy Link put enough cards on th
 
 Friction, worst first:
 
-1. `--run` on every call. In zsh, a variable holding `--run design/playtests/14-room-choice-seed-12.json` is passed as one
+1. `--run` on every call. In zsh, a variable holding `--run design/playtests/18-room-choice-seed-12.json` is passed as one
    argument, and the CLI printed a raw Node `TypeError [ERR_PARSE_ARGS_UNKNOWN_OPTION]` stack trace
    instead of a usage line. I wrapped the CLI in a script.
 2. Two verbs for one act: `take` for card rewards, `choose` for Good Stuff picks (note 9).
@@ -1392,7 +1392,7 @@ the replay numbered the notes in line.
 
 ### Appendix
 
-`bin/nvu replay design/playtests/14-room-choice-seed-12.json`:
+`bin/nvu replay design/playtests/18-room-choice-seed-12.json`:
 
 ```
   1. Floor 1 is built: 6 rooms.

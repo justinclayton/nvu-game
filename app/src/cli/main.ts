@@ -16,7 +16,7 @@ import { createSession, loadSession, type Note, type SavedRun, type Session } fr
 import { CARD_CONTENT, CARD_LIST_ID, CARDS_VERSION, RULES_VERSION } from "@content/index";
 import { resolveCardName } from "@content/names";
 import { plural } from "@domain/plural";
-import { costOf, enterInShownOrder, payOptions, playableCards } from "@domain/queries";
+import { costOf, enterInShownOrder, enterableRooms, payOptions, playableCards } from "@domain/queries";
 import type { Card, CardId, Character, Command, GameState, RoomId, Stat } from "@domain/types";
 import { CHARACTERS, playerOf } from "@domain/verbs";
 import { POLICIES, randomPolicy } from "@sim/policy";
@@ -243,6 +243,29 @@ function buildChoose(state: GameState, action: Extract<PlayAction, { kind: "choo
     return { type: "CHOOSE_CARDS", cardIds };
   }
 
+  if (pending.kind === "ChooseExhaust") {
+    // "deck" for the top of the deck; "hand <Card>" or "discard <Card>" where both hold one,
+    // quoted whole or not.
+    const [first, ...rest] = action.names.flatMap((n) => {
+      const zoned = /^(hand|discard)\s+(.+)$/i.exec(n);
+      return zoned?.[1] && zoned[2] ? [zoned[1], zoned[2]] : [n];
+    });
+    if (first === undefined) throw new MoveRefused("Name a card, or choose deck.");
+    if (first.toLowerCase() === "deck" && rest.length === 0) {
+      if (pending.deck === 0) throw new MoveRefused("The deck is empty.");
+      return { type: "EXHAUST_CARD", cardId: null };
+    }
+    const p = playerOf(state, pending.character);
+    const zone = first.toLowerCase();
+    const from =
+      zone === "hand" ? p.hand : zone === "discard" ? p.discard : null;
+    const words = from ? rest : action.names;
+    const pool = from ? pending.options.filter((c) => from.some((x) => x.id === c.id)) : pending.options;
+    const [card] = resolveEach([words.join(" ")], pool);
+    if (!card) throw new MoveRefused("Name a card, or choose deck.");
+    return { type: "EXHAUST_CARD", cardId: card.id };
+  }
+
   if (pending.kind === "ChooseDraw") {
     const answer = answerDraw(pending.options, action.names);
     if (!answer.ok) throw new MoveRefused(answer.reason);
@@ -252,7 +275,7 @@ function buildChoose(state: GameState, action: Extract<PlayAction, { kind: "choo
   if (pending.kind === "ChooseRoom") {
     const [entered, ...bottom] = resolveEach(action.names, pending.options);
     if (!entered) {
-      throw new MoveRefused(`Enter one of: ${pending.options.map((r) => r.name).join(", ")}.`);
+      throw new MoveRefused(`Enter one of: ${enterableRooms(pending).map((r) => r.name).join(", ")}.`);
     }
     if (bottom.length === 0) return enterInShownOrder(pending, entered.id);
     return { type: "CHOOSE_ROOM", roomId: entered.id, bottom: bottom.map((r) => r.id) };

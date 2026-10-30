@@ -1,0 +1,1775 @@
+{
+  "format": "nvu-run/1",
+  "exportedAt": "2026-10-27T04:36:17.314Z",
+  "cards": "70a8e95701b2",
+  "rules": "R37",
+  "kit": "R37.C60-v1",
+  "floor": 3,
+  "turn": 22,
+  "phase": "GameOver",
+  "outcome": "Defeat",
+  "run": {
+    "seed": 39702,
+    "commands": [
+      {
+        "type": "FLIP_ROOM"
+      },
+      {
+        "type": "CHOOSE_ROOM",
+        "roomId": "Ventilation Shaft#1",
+        "bottom": [
+          "Tunnel of Rubble#1",
+          "Regular Room...OF DOOM#1"
+        ]
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Red",
+        "cardId": "Charge#3",
+        "payWith": [
+          "Shove#2",
+          "Shove#1"
+        ]
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Gray",
+        "cardId": "Pick The Lock#5",
+        "payWith": [
+          "Duck Under#4",
+          "Duck Under#2"
+        ]
+      },
+      {
+        "type": "END_PLAY"
+      },
+      {
+        "type": "TAKE_REWARD",
+        "cardId": "Second Wind#2"
+      },
+      {
+        "type": "TAKE_REWARD",
+        "cardId": "Pack Mule#1"
+      },
+      {
+        "type": "FLIP_ROOM"
+      },
+      {
+        "type": "CHOOSE_ROOM",
+        "roomId": "Security Turnstile#1",
+        "bottom": [
+          "The Sentry Drone#3",
+          "Gross Thing#1"
+        ]
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Red",
+        "cardId": "Overdrive#1",
+        "payWith": []
+      },
+      {
+        "type": "EXHAUST_CARD",
+        "cardId": "Charge#3"
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Red",
+        "cardId": "Shove#3",
+        "payWith": [
+          "Lean In#1"
+        ]
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Gray",
+        "cardId": "Pick The Lock#2",
+        "payWith": [
+          "Work The Angles#1",
+          "Peek Around Corner#2"
+        ]
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Gray",
+        "cardId": "Duck Under#3",
+        "payWith": [
+          "Peek Around Corner#1"
+        ]
+      },
+      {
+        "type": "END_PLAY"
+      },
+      {
+        "type": "TAKE_REWARD",
+        "cardId": "Covering Fire#2"
+      },
+      {
+        "type": "TAKE_REWARD",
+        "cardId": "Fast Follow#3"
+      },
+      {
+        "type": "FLIP_ROOM"
+      },
+      {
+        "type": "CHOOSE_ROOM",
+        "roomId": "Puzzle Room#1",
+        "bottom": [
+          "The Sentry Drone#2",
+          "The Sentry Drone#1"
+        ]
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Red",
+        "cardId": "Overdrive#2",
+        "payWith": []
+      },
+      {
+        "type": "EXHAUST_CARD",
+        "cardId": "Shove#3"
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Gray",
+        "cardId": "Pick The Lock#1",
+        "payWith": [
+          "Pick The Lock#4",
+          "Pick The Lock#3"
+        ]
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Red",
+        "cardId": "Shove#4",
+        "payWith": [
+          "Charge#2"
+        ]
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Gray",
+        "cardId": "Duck Under#1",
+        "payWith": [
+          "Duck Under#3"
+        ]
+      },
+      {
+        "type": "END_PLAY"
+      },
+      {
+        "type": "TAKE_REWARD",
+        "cardId": "Fast Follow#1"
+      },
+      {
+        "type": "TAKE_REWARD",
+        "cardId": "I Know Kung Fu#2"
+      },
+      {
+        "type": "FLIP_ROOM"
+      },
+      {
+        "type": "CHOOSE_ROOM",
+        "roomId": "Tunnel of Rubble#1",
+        "bottom": [
+          "Regular Room...OF DOOM#1",
+          "The Sentry Drone#3"
+        ]
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Gray",
+        "cardId": "Pick The Lock#2",
+        "payWith": [
+          "Pack Mule#1",
+          "Covering Fire#2"
+        ]
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Red",
+        "cardId": "Fast Follow#1",
+        "payWith": []
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Red",
+        "cardId": "Overdrive#3",
+        "payWith": []
+      },
+      {
+        "type": "EXHAUST_CARD",
+        "cardId": "Overdrive#2"
+      },
+      {
+        "type": "END_PLAY"
+      },
+      {
+        "type": "TAKE_REWARD",
+        "cardId": "Bull Rush#1"
+      },
+      {
+        "type": "TAKE_REWARD",
+        "cardId": "Hack the Doors#2"
+      },
+      {
+        "type": "FLIP_ROOM"
+      },
+      {
+        "type": "CHOOSE_ROOM",
+        "roomId": "Gross Thing#1",
+        "bottom": [
+          "The Sentry Drone#2",
+          "The Sentry Drone#1"
+        ]
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Red",
+        "cardId": "Overdrive#1",
+        "payWith": []
+      },
+      {
+        "type": "EXHAUST_CARD",
+        "cardId": "Fast Follow#1"
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Red",
+        "cardId": "Shove#4",
+        "payWith": [
+          "Charge#1"
+        ]
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Gray",
+        "cardId": "Duck Under#1",
+        "payWith": [
+          "I Know Kung Fu#2"
+        ]
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Gray",
+        "cardId": "Hack the Doors#2",
+        "payWith": [
+          "Pick The Lock#5"
+        ]
+      },
+      {
+        "type": "CHOOSE_PILE",
+        "pile": "Floor deck"
+      },
+      {
+        "type": "ORDER_CARDS",
+        "cardIds": [
+          "Regular Room...OF DOOM#1",
+          "The Sentry Drone#3",
+          "The Sentry Drone#2"
+        ]
+      },
+      {
+        "type": "END_PLAY"
+      },
+      {
+        "type": "CHOOSE_CARDS",
+        "cardIds": [
+          "Coil Of Cable#5"
+        ]
+      },
+      {
+        "type": "TAKE_REWARD",
+        "cardId": "Hit 'n Run#1"
+      },
+      {
+        "type": "FLIP_ROOM"
+      },
+      {
+        "type": "CHOOSE_ROOM",
+        "roomId": "Regular Room...OF DOOM#1",
+        "bottom": [
+          "The Sentry Drone#3",
+          "The Sentry Drone#2"
+        ]
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Gray",
+        "cardId": "Hit 'n Run#1",
+        "payWith": [
+          "Duck Under#1"
+        ]
+      },
+      {
+        "type": "CHOOSE_CARDS",
+        "cardIds": [
+          "Pick The Lock#4"
+        ]
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Red",
+        "cardId": "Fast Follow#3",
+        "payWith": []
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Red",
+        "cardId": "Coil Of Cable#5",
+        "payWith": []
+      },
+      {
+        "type": "END_PLAY"
+      },
+      {
+        "type": "TAKE_REWARD",
+        "cardId": "Cross Punch#2"
+      },
+      {
+        "type": "TAKE_REWARD",
+        "cardId": "Hack the Doors#1"
+      },
+      {
+        "type": "FLIP_ROOM"
+      },
+      {
+        "type": "CHOOSE_ROOM",
+        "roomId": "The Sentry Drone#1",
+        "bottom": [
+          "The Sentry Drone#3",
+          "The Sentry Drone#2"
+        ]
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Red",
+        "cardId": "Overdrive#3",
+        "payWith": []
+      },
+      {
+        "type": "EXHAUST_CARD",
+        "cardId": null
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Red",
+        "cardId": "Bull Rush#1",
+        "payWith": [
+          "Shove#4"
+        ]
+      },
+      {
+        "type": "END_PLAY"
+      },
+      {
+        "type": "TAKE_REWARD",
+        "cardId": "Momentum Shift#2"
+      },
+      {
+        "type": "TAKE_REWARD",
+        "cardId": "Synergy Link#2"
+      },
+      {
+        "type": "FLIP_ROOM"
+      },
+      {
+        "type": "CHOOSE_ROOM",
+        "roomId": "Regular Monster 2#1",
+        "bottom": [
+          "Gears & Glitch#1",
+          "Dark Room#1"
+        ]
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Red",
+        "cardId": "Momentum Shift#2",
+        "payWith": [
+          "Shove#2"
+        ]
+      },
+      {
+        "type": "CHOOSE_DRAW",
+        "character": "Red",
+        "count": 2
+      },
+      {
+        "type": "CHOOSE_CARDS",
+        "cardIds": [
+          "Second Wind#2"
+        ]
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Gray",
+        "cardId": "Pick The Lock#3",
+        "payWith": [
+          "Pick The Lock#4",
+          "Pick The Lock#1"
+        ]
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Red",
+        "cardId": "Fast Follow#1",
+        "payWith": []
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Red",
+        "cardId": "Bull Rush#1",
+        "payWith": [
+          "Shove#1"
+        ]
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Gray",
+        "cardId": "Hack the Doors#1",
+        "payWith": [
+          "Hack the Doors#2"
+        ]
+      },
+      {
+        "type": "CHOOSE_PILE",
+        "pile": "Floor deck"
+      },
+      {
+        "type": "ORDER_CARDS",
+        "cardIds": [
+          "Room 1-3#1",
+          "Gears & Glitch#3",
+          "Automated Defense Turret#1"
+        ]
+      },
+      {
+        "type": "END_PLAY"
+      },
+      {
+        "type": "TAKE_REWARD",
+        "cardId": "Tag Team#1"
+      },
+      {
+        "type": "TAKE_REWARD",
+        "cardId": "I Know Kung Fu#1"
+      },
+      {
+        "type": "FLIP_ROOM"
+      },
+      {
+        "type": "CHOOSE_ROOM",
+        "roomId": "Room 1-3#1",
+        "bottom": [
+          "Gears & Glitch#3",
+          "Automated Defense Turret#1"
+        ]
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Red",
+        "cardId": "Overdrive#3",
+        "payWith": []
+      },
+      {
+        "type": "EXHAUST_CARD",
+        "cardId": "Fast Follow#1"
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Gray",
+        "cardId": "Synergy Link#2",
+        "payWith": [
+          "Work The Angles#1"
+        ]
+      },
+      {
+        "type": "CHOOSE_DRAW",
+        "character": "Gray",
+        "count": 2
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Gray",
+        "cardId": "Pick The Lock#2",
+        "payWith": [
+          "Duck Under#4",
+          "Pick The Lock#5"
+        ]
+      },
+      {
+        "type": "END_PLAY"
+      },
+      {
+        "type": "TAKE_REWARD",
+        "cardId": "Catch Your Breath#2"
+      },
+      {
+        "type": "FLIP_ROOM"
+      },
+      {
+        "type": "CHOOSE_ROOM",
+        "roomId": "Maintenance#1",
+        "bottom": [
+          "Overgrown Hydroponics Bay#1",
+          "Gears & Glitch#2"
+        ]
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Gray",
+        "cardId": "I Know Kung Fu#2",
+        "payWith": [
+          "Covering Fire#2"
+        ]
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Red",
+        "cardId": "Overdrive#1",
+        "payWith": []
+      },
+      {
+        "type": "EXHAUST_CARD",
+        "cardId": "Overdrive#3"
+      },
+      {
+        "type": "END_PLAY"
+      },
+      {
+        "type": "TAKE_REWARD",
+        "cardId": "Heavy Pockets#2"
+      },
+      {
+        "type": "FLIP_ROOM"
+      },
+      {
+        "type": "CHOOSE_ROOM",
+        "roomId": "Gears & Glitch#1",
+        "bottom": [
+          "Dark Room#1",
+          "Gears & Glitch#3"
+        ]
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Gray",
+        "cardId": "Pack Mule#1",
+        "payWith": [
+          "Peek Around Corner#2"
+        ]
+      },
+      {
+        "type": "CHOOSE_CARDS",
+        "cardIds": []
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Gray",
+        "cardId": "Duck Under#2",
+        "payWith": [
+          "Hit 'n Run#1"
+        ]
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Red",
+        "cardId": "Fast Follow#3",
+        "payWith": []
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Red",
+        "cardId": "Coil Of Cable#5",
+        "payWith": []
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Red",
+        "cardId": "Charge#2",
+        "payWith": [
+          "Shove#3",
+          "Charge#4"
+        ]
+      },
+      {
+        "type": "END_PLAY"
+      },
+      {
+        "type": "CHOOSE_CHARACTER",
+        "character": "Red"
+      },
+      {
+        "type": "TAKE_REWARD",
+        "cardId": "Tag Team#2"
+      },
+      {
+        "type": "CHOOSE_CARDS",
+        "cardIds": []
+      },
+      {
+        "type": "FLIP_ROOM"
+      },
+      {
+        "type": "CHOOSE_ROOM",
+        "roomId": "Crumbling Armory#1",
+        "bottom": [
+          "Gravity...Room#1",
+          "The Iron Sentinel#2"
+        ]
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Gray",
+        "cardId": "Pick The Lock#1",
+        "payWith": [
+          "Pick The Lock#5",
+          "Pick The Lock#2"
+        ]
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Gray",
+        "cardId": "Hit 'n Run#1",
+        "payWith": [
+          "Peek Around Corner#2"
+        ]
+      },
+      {
+        "type": "CHOOSE_CARDS",
+        "cardIds": [
+          "Pick The Lock#5"
+        ]
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Red",
+        "cardId": "Coil Of Cable#5",
+        "payWith": []
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Red",
+        "cardId": "Overdrive#3",
+        "payWith": []
+      },
+      {
+        "type": "EXHAUST_CARD",
+        "cardId": null
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Red",
+        "cardId": "Cross Punch#2",
+        "payWith": [
+          "Shove#2",
+          "Tag Team#1"
+        ]
+      },
+      {
+        "type": "END_PLAY"
+      },
+      {
+        "type": "CHOOSE_CARDS",
+        "cardIds": [
+          "Pry Bar#3"
+        ]
+      },
+      {
+        "type": "CHOOSE_CARDS",
+        "cardIds": [
+          "Riot Shield#1"
+        ]
+      },
+      {
+        "type": "TAKE_REWARD",
+        "cardId": "Momentum Shift#1"
+      },
+      {
+        "type": "TAKE_REWARD",
+        "cardId": "Zen Mode#1"
+      },
+      {
+        "type": "FLIP_ROOM"
+      },
+      {
+        "type": "CHOOSE_ROOM",
+        "roomId": "Mercenaries#1",
+        "bottom": [
+          "The Iron Sentinel#3",
+          "The Iron Sentinel#1"
+        ]
+      },
+      {
+        "type": "END_PLAY"
+      },
+      {
+        "type": "EXHAUST_CARD",
+        "cardId": "Overdrive#3"
+      },
+      {
+        "type": "EXHAUST_CARD",
+        "cardId": "Covering Fire#2"
+      },
+      {
+        "type": "FLIP_ROOM"
+      },
+      {
+        "type": "CHOOSE_ROOM",
+        "roomId": "Scrap Pile#1",
+        "bottom": [
+          "Mercenaries#1",
+          "Slimy Bio-Hazard Containment#1"
+        ]
+      },
+      {
+        "type": "END_PLAY"
+      },
+      {
+        "type": "EXHAUST_CARD",
+        "cardId": "Momentum Shift#1"
+      },
+      {
+        "type": "EXHAUST_CARD",
+        "cardId": null
+      },
+      {
+        "type": "FLIP_ROOM"
+      },
+      {
+        "type": "CHOOSE_ROOM",
+        "roomId": "Outrun The Laser#1",
+        "bottom": [
+          "Gravity...Room#1",
+          "The Iron Sentinel#2"
+        ]
+      },
+      {
+        "type": "END_PLAY"
+      },
+      {
+        "type": "CHOOSE_CHARACTER",
+        "character": "Gray"
+      },
+      {
+        "type": "EXHAUST_CARD",
+        "cardId": "Work The Angles#1"
+      },
+      {
+        "type": "EXHAUST_CARD",
+        "cardId": "Peek Around Corner#1"
+      },
+      {
+        "type": "EXHAUST_CARD",
+        "cardId": null
+      },
+      {
+        "type": "FLIP_ROOM"
+      },
+      {
+        "type": "CHOOSE_ROOM",
+        "roomId": "Mercenaries#1",
+        "bottom": [
+          "The Iron Sentinel#3",
+          "The Iron Sentinel#1"
+        ]
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Gray",
+        "cardId": "Catch Your Breath#2",
+        "payWith": []
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Red",
+        "cardId": "Pry Bar#3",
+        "payWith": []
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Red",
+        "cardId": "Fast Follow#3",
+        "payWith": []
+      },
+      {
+        "type": "END_PLAY"
+      },
+      {
+        "type": "CHOOSE_CARDS",
+        "cardIds": [
+          "Pick The Lock#2",
+          "Pick The Lock#5",
+          "Hack the Doors#1"
+        ]
+      },
+      {
+        "type": "EXHAUST_CARD",
+        "cardId": "Lean In#1"
+      },
+      {
+        "type": "EXHAUST_CARD",
+        "cardId": null
+      },
+      {
+        "type": "FLIP_ROOM"
+      },
+      {
+        "type": "CHOOSE_ROOM",
+        "roomId": "Scrap Pile#1",
+        "bottom": [
+          "Mercenaries#1",
+          "Slimy Bio-Hazard Containment#1"
+        ]
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Gray",
+        "cardId": "Synergy Link#2",
+        "payWith": [
+          "Duck Under#3"
+        ]
+      },
+      {
+        "type": "CHOOSE_DRAW",
+        "character": "Gray",
+        "count": 1
+      },
+      {
+        "type": "END_PLAY"
+      },
+      {
+        "type": "EXHAUST_CARD",
+        "cardId": "Shove#3"
+      },
+      {
+        "type": "EXHAUST_CARD",
+        "cardId": "Pack Mule#1"
+      },
+      {
+        "type": "FLIP_ROOM"
+      },
+      {
+        "type": "CHOOSE_ROOM",
+        "roomId": "Gravity...Room#1",
+        "bottom": [
+          "The Iron Sentinel#2",
+          "Outrun The Laser#1"
+        ]
+      },
+      {
+        "type": "END_PLAY"
+      },
+      {
+        "type": "EXHAUST_CARD",
+        "cardId": null
+      },
+      {
+        "type": "EXHAUST_CARD",
+        "cardId": null
+      },
+      {
+        "type": "EXHAUST_CARD",
+        "cardId": "Synergy Link#2"
+      },
+      {
+        "type": "EXHAUST_CARD",
+        "cardId": null
+      },
+      {
+        "type": "FLIP_ROOM"
+      },
+      {
+        "type": "CHOOSE_ROOM",
+        "roomId": "Mercenaries#1",
+        "bottom": [
+          "The Iron Sentinel#3",
+          "The Iron Sentinel#1"
+        ]
+      },
+      {
+        "type": "END_PLAY"
+      },
+      {
+        "type": "EXHAUST_CARD",
+        "cardId": "Heavy Pockets#2"
+      },
+      {
+        "type": "EXHAUST_CARD",
+        "cardId": "Duck Under#2"
+      },
+      {
+        "type": "FLIP_ROOM"
+      },
+      {
+        "type": "CHOOSE_ROOM",
+        "roomId": "Scrap Pile#1",
+        "bottom": [
+          "Mercenaries#1",
+          "Slimy Bio-Hazard Containment#1"
+        ]
+      },
+      {
+        "type": "END_PLAY"
+      },
+      {
+        "type": "EXHAUST_CARD",
+        "cardId": "Charge#1"
+      },
+      {
+        "type": "EXHAUST_CARD",
+        "cardId": "Duck Under#4"
+      },
+      {
+        "type": "FLIP_ROOM"
+      },
+      {
+        "type": "CHOOSE_ROOM",
+        "roomId": "Gravity...Room#1",
+        "bottom": [
+          "The Iron Sentinel#2",
+          "Outrun The Laser#1"
+        ]
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Gray",
+        "cardId": "I Know Kung Fu#1",
+        "payWith": [
+          "Duck Under#1"
+        ]
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Gray",
+        "cardId": "Riot Shield#1",
+        "payWith": [
+          "Hack the Doors#2"
+        ]
+      },
+      {
+        "type": "CHOOSE_DRAW",
+        "character": "Gray",
+        "count": 1
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Red",
+        "cardId": "Momentum Shift#2",
+        "payWith": [
+          "Second Wind#2"
+        ]
+      },
+      {
+        "type": "CHOOSE_DRAW",
+        "character": "Red",
+        "count": 2
+      },
+      {
+        "type": "CHOOSE_CARDS",
+        "cardIds": [
+          "Shove#1"
+        ]
+      },
+      {
+        "type": "END_PLAY"
+      },
+      {
+        "type": "EXHAUST_CARD",
+        "cardId": "Charge#3"
+      },
+      {
+        "type": "EXHAUST_CARD",
+        "cardId": "Charge#2"
+      },
+      {
+        "type": "EXHAUST_CARD",
+        "cardId": "Hack the Doors#1"
+      },
+      {
+        "type": "EXHAUST_CARD",
+        "cardId": "Hit 'n Run#1"
+      },
+      {
+        "type": "FLIP_ROOM"
+      },
+      {
+        "type": "CHOOSE_ROOM",
+        "roomId": "Mercenaries#1",
+        "bottom": [
+          "The Iron Sentinel#3",
+          "The Iron Sentinel#1"
+        ]
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Gray",
+        "cardId": "Zen Mode#1",
+        "payWith": [
+          "Catch Your Breath#2"
+        ]
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Gray",
+        "cardId": "Pick The Lock#4",
+        "payWith": [
+          "Riot Shield#1",
+          "Pick The Lock#1"
+        ]
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Gray",
+        "cardId": "Riot Shield#1",
+        "payWith": [
+          "Pick The Lock#1"
+        ]
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Red",
+        "cardId": "Coil Of Cable#5",
+        "payWith": []
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Red",
+        "cardId": "Cross Punch#2",
+        "payWith": [
+          "Fast Follow#1",
+          "Fast Follow#3"
+        ]
+      },
+      {
+        "type": "EXHAUST_CARD",
+        "cardId": null
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Red",
+        "cardId": "Overdrive#2",
+        "payWith": []
+      }
+    ]
+  },
+  "notes": [
+    {
+      "at": 74,
+      "text": "Turn 3 flip shows The Sentry Drone twice again (also in playtest 14). I took Puzzle Room, a stair needing Oomph 8 is out of reach with my current piles. Gray's reward pool also offered Pack Mule on turn 2 right after I took a Pack Mule on turn 1: are there two copies in the pool? Rulebook says nothing about duplicates in a reward pool."
+    },
+    {
+      "at": 169,
+      "text": "Hack the Doors (Peek 3) on the Floor deck showed Doom, Drone, Drone and went straight to 'put those 3 back in the order you choose'. Rulebook Peek says 'Discard any number of them, then put the rest back'. There was no discard prompt. For rooms, is discarding to the Rooms pile or the bottom meant? Question for the designer: does Peek on the Floor deck let me discard rooms, and where do they go?"
+    },
+    {
+      "at": 223,
+      "text": "Turn 7 flip showed The Sentry Drone three times, the only rooms left in the floor deck, so Ambush-like forced entry by absence. I entered one with Oomph 8 and Scramble 8 the thresholds. Same duplicate-stairwell question as playtest 14 note 1: three copies of one stairwell on floor 1 means floor 1 ends only through a Drone."
+    },
+    {
+      "at": 463,
+      "text": "Mercenaries needs Oomph 10 and Scramble 10 or Oomph 15; Gray's hand (Riot Shield 3, Duck 2, Angles 1, Peek 1, Covering Fire 0, all cost 1) tops out near Scramble 5 after payment. Fleeing for Exhaust 1 each; I chose it over Iron Sentinel (Flee Exhaust 4 plus Bad Stuff) knowing it goes on top of the deck and I will face it again."
+    },
+    {
+      "at": 499,
+      "text": "Outrun The Laser Flee with both players at Scramble 0: 'the player who played the least Scramble' has no answer on a tie, and the CLI asks me to choose Red or Gray. Rulebook is silent on ties. Question for the designer: who exhausts on a tie, both, neither, or the table's choice as the CLI does? I chose Gray (19 live vs 18)."
+    },
+    {
+      "at": 567,
+      "text": "Gravity Room needs Oomph 8 and Scramble 8. Red's hand is Second Wind, Charge x3 and Heavy Pockets: two Charges cost 4 payers, I hold 3 other cards, so 8 Oomph cannot be reached whatever I do. Fleeing for Exhaust 2 each. This is the third floor-3 turn where the visible hand cannot meet any room; nothing in the rulebook lets me change a held hand except playing (and paying) cards."
+    },
+    {
+      "at": 634,
+      "text": "Gravity Room attempt: Heavy made each of my five plays cost a deck card, so Gray went 12 -> 6 live in two plays and Red 12 -> 8 for a Scramble total of 3 against 8. I could only judge reach by hand; I did not account for the Heavy tax on the cards I would draw. Flee follows, Exhaust 2 each. Both decks are now empty and the discard piles become the decks."
+    },
+    {
+      "at": 673,
+      "text": "Zen Mode ('While this is in play, you don't exhaust cards') stopped Gray's payments from exhausting, so Gray paid for Lock and Riot Shield with cards that stayed in hand. I assumed it covered Red too: Red then paid Cross Punch with two Fast Follows and they were Exhausted ('Red pays ... Exhausting them'). The card says 'you', so Gray only; my mistake, but the table could read it as a team effect. Question for the designer: is Zen Mode meant to be per player? Its rulebook-free wording leaves it open."
+    },
+    {
+      "at": 679,
+      "text": "Defeat on turn 22. Overdrive's Exhaust 1 took Red's last card from deck, hand and discard while Coil, Cross Punch and Overdrive sat in the play zone with Oomph 11 and Scramble 10 on the table, enough for Mercenaries 10 and 10. The engine declared Red Down at once, before Outcome. Rulebook section 9 says Down is no cards in hand, deck, or discard pile, so the play zone does not count, which matches. Question for the designer: is Down meant to be checked in the middle of the Play phase, and should cards in the play zone count as live?"
+    }
+  ],
+  "log": [
+    "Floor 1 is built: 9 rooms.",
+    "Turn Start phase starts.",
+    "Revealed: Tunnel of Rubble, Regular Room...OF DOOM, Ventilation Shaft.",
+    "You are in: Ventilation Shaft.",
+    "To the bottom of the Floor deck: Tunnel of Rubble, Regular Room...OF DOOM.",
+    "Red draws Shove.",
+    "Red draws Shove.",
+    "Red draws Charge.",
+    "Red draws Shove.",
+    "Red draws Shove.",
+    "Gray draws Pick The Lock.",
+    "Gray draws Pick The Lock.",
+    "Gray draws Duck Under.",
+    "Gray draws Duck Under.",
+    "Gray draws Work The Angles.",
+    "Turn Start phase ends.",
+    "Play phase starts.",
+    "Red pays with Shove, Shove, Exhausting them.",
+    "Red plays Charge.",
+    "Gray pays with Duck Under, Duck Under, Exhausting them.",
+    "Gray plays Pick The Lock.",
+    "Play phase ends.",
+    "Outcome phase starts.",
+    "Oomph 4 and Scramble 4 met — Both players reveal a card reward.",
+    "Ventilation Shaft is Cleared.",
+    "Ventilation Shaft triggers: Red's reward pool shows Set 'Em Up, Second Wind, Brute Recycle.",
+    "Red takes Second Wind into their discard pile.",
+    "Ventilation Shaft triggers: Gray's reward pool shows Catch Your Breath, Pack Mule, Zen Mode.",
+    "Gray takes Pack Mule into their discard pile.",
+    "Outcome phase ends.",
+    "Cleanup phase starts.",
+    "Red discards Charge from their play zone.",
+    "Gray discards Pick The Lock from their play zone.",
+    "Cleanup phase ends.",
+    "— end of turn 1 —",
+    "Turn Start phase starts.",
+    "Revealed: Security Turnstile, The Sentry Drone, Gross Thing.",
+    "You are in: Security Turnstile.",
+    "To the bottom of the Floor deck: The Sentry Drone, Gross Thing.",
+    "Red draws Lean In.",
+    "Red draws Overdrive.",
+    "Red draws Charge.",
+    "Gray draws Duck Under.",
+    "Gray draws Peek Around Corner.",
+    "Gray draws Peek Around Corner.",
+    "Turn Start phase ends.",
+    "Play phase starts.",
+    "Red plays Overdrive.",
+    "Overdrive triggers: Red Exhausts Charge.",
+    "Red pays with Lean In, Exhausting it.",
+    "Red plays Shove.",
+    "Gray pays with Work The Angles, Peek Around Corner, Exhausting them.",
+    "Gray plays Pick The Lock.",
+    "Gray pays with Peek Around Corner, Exhausting it.",
+    "Gray plays Duck Under.",
+    "Play phase ends.",
+    "Outcome phase starts.",
+    "Scramble 5 met — Gray reveals a card reward.",
+    "Oomph 5 met — Red reveals a card reward.",
+    "Security Turnstile is Cleared.",
+    "Security Turnstile triggers: Gray's reward pool shows Pack Mule, In Step, Covering Fire.",
+    "Gray takes Covering Fire into their discard pile.",
+    "Security Turnstile triggers: Red's reward pool shows Reckless Swing, Fast Follow, Brute Recycle.",
+    "Red takes Fast Follow into their discard pile.",
+    "Outcome phase ends.",
+    "Cleanup phase starts.",
+    "Red discards Overdrive from their play zone.",
+    "Red discards Shove from their play zone.",
+    "Gray discards Pick The Lock from their play zone.",
+    "Gray discards Duck Under from their play zone.",
+    "Cleanup phase ends.",
+    "— end of turn 2 —",
+    "Turn Start phase starts.",
+    "Revealed: The Sentry Drone, The Sentry Drone, Puzzle Room.",
+    "You are in: Puzzle Room.",
+    "To the bottom of the Floor deck: The Sentry Drone, The Sentry Drone.",
+    "Red draws Charge.",
+    "Red draws Charge.",
+    "Red draws Overdrive.",
+    "Gray draws Pick The Lock.",
+    "Gray draws Duck Under.",
+    "Gray draws Pick The Lock.",
+    "Gray draws Pick The Lock.",
+    "Gray's deck is empty — the discard pile shuffles in to make a new one (5 cards).",
+    "Gray draws Duck Under.",
+    "Turn Start phase ends.",
+    "Play phase starts.",
+    "Red plays Overdrive.",
+    "Overdrive triggers: Red Exhausts Shove.",
+    "Gray pays with Pick The Lock, Pick The Lock, Exhausting them.",
+    "Gray plays Pick The Lock.",
+    "Red pays with Charge, Exhausting it.",
+    "Red plays Shove.",
+    "Gray pays with Duck Under, Exhausting it.",
+    "Gray plays Duck Under.",
+    "Play phase ends.",
+    "Outcome phase starts.",
+    "Oomph 3 and Scramble 5 met — Both players reveal a card reward.",
+    "Puzzle Room is Cleared.",
+    "Puzzle Room triggers: Red's reward pool shows Set 'Em Up, Break Through, Fast Follow.",
+    "Red takes Fast Follow into their discard pile.",
+    "Puzzle Room triggers: Gray's reward pool shows I Know Kung Fu, Sharing Is Caring, Covering Fire.",
+    "Gray takes I Know Kung Fu into their discard pile.",
+    "Outcome phase ends.",
+    "Cleanup phase starts.",
+    "Red discards Overdrive from their play zone.",
+    "Red discards Shove from their play zone.",
+    "Gray discards Pick The Lock from their play zone.",
+    "Gray discards Duck Under from their play zone.",
+    "Cleanup phase ends.",
+    "— end of turn 3 —",
+    "Turn Start phase starts.",
+    "Revealed: Tunnel of Rubble, Regular Room...OF DOOM, The Sentry Drone.",
+    "You are in: Tunnel of Rubble.",
+    "To the bottom of the Floor deck: Regular Room...OF DOOM, The Sentry Drone.",
+    "Red draws Overdrive.",
+    "Red's deck is empty — the discard pile shuffles in to make a new one (6 cards).",
+    "Red draws Fast Follow.",
+    "Red draws Overdrive.",
+    "Gray draws Pick The Lock.",
+    "Gray draws Pack Mule.",
+    "Gray draws Pick The Lock.",
+    "Gray draws Covering Fire.",
+    "Gray's deck is empty — the discard pile shuffles in to make a new one (3 cards).",
+    "Gray draws Pick The Lock.",
+    "Turn Start phase ends.",
+    "Play phase starts.",
+    "Gray pays with Pack Mule, Covering Fire, Exhausting them.",
+    "Gray plays Pick The Lock.",
+    "Red plays Fast Follow.",
+    "Red plays Overdrive.",
+    "Overdrive triggers: Red Exhausts Overdrive.",
+    "Play phase ends.",
+    "Outcome phase starts.",
+    "Oomph 4 and Scramble 4 met — Both players reveal a card reward.",
+    "Tunnel of Rubble is Cleared.",
+    "Tunnel of Rubble triggers: Red's reward pool shows Heavy Pockets, Bull Rush, It Pays To Be Reckless.",
+    "Red takes Bull Rush into their discard pile.",
+    "Tunnel of Rubble triggers: Gray's reward pool shows Pivot, Hack the Doors, In Step.",
+    "Gray takes Hack the Doors into their discard pile.",
+    "Outcome phase ends.",
+    "Cleanup phase starts.",
+    "Red discards Fast Follow from their play zone.",
+    "Red discards Overdrive from their play zone.",
+    "Gray discards Pick The Lock from their play zone.",
+    "Cleanup phase ends.",
+    "— end of turn 4 —",
+    "Turn Start phase starts.",
+    "Revealed: Gross Thing, The Sentry Drone, The Sentry Drone.",
+    "You are in: Gross Thing.",
+    "To the bottom of the Floor deck: The Sentry Drone, The Sentry Drone.",
+    "Red draws Overdrive.",
+    "Red draws Second Wind.",
+    "Red draws Shove.",
+    "Gray draws I Know Kung Fu.",
+    "Gray draws Duck Under.",
+    "Gray's deck is empty — the discard pile shuffles in to make a new one (2 cards).",
+    "Gray draws Hack the Doors.",
+    "Turn Start phase ends.",
+    "Play phase starts.",
+    "Red plays Overdrive.",
+    "Overdrive triggers: Red Exhausts Fast Follow.",
+    "Red pays with Charge, Exhausting it.",
+    "Red plays Shove.",
+    "Gray pays with I Know Kung Fu, Exhausting it.",
+    "Gray plays Duck Under.",
+    "Gray pays with Pick The Lock, Exhausting it.",
+    "Gray plays Hack the Doors.",
+    "Hack the Doors triggers: A look at the Floor deck: Regular Room...OF DOOM, The Sentry Drone, The Sentry Drone.",
+    "Play phase ends.",
+    "Outcome phase starts.",
+    "Oomph 5 met — Red gets Good Stuff.",
+    "Scramble 5 met — Gray reveals a card reward.",
+    "Gross Thing is Cleared.",
+    "Gross Thing triggers: Red reveals Good Stuff: Pocket Dynamo, Duct Tape & Wire, Coil Of Cable.",
+    "Red gets Coil Of Cable.",
+    "Red takes Coil Of Cable into hand.",
+    "Gross Thing triggers: Gray's reward pool shows I'll Take That, Synergy Link, Hit 'n Run.",
+    "Gray takes Hit 'n Run into their discard pile.",
+    "Outcome phase ends.",
+    "Cleanup phase starts.",
+    "Red discards Overdrive from their play zone.",
+    "Red discards Shove from their play zone.",
+    "Gray discards Duck Under from their play zone.",
+    "Gray discards Hack the Doors from their play zone.",
+    "Cleanup phase ends.",
+    "— end of turn 5 —",
+    "Turn Start phase starts.",
+    "Revealed: Regular Room...OF DOOM, The Sentry Drone, The Sentry Drone.",
+    "You are in: Regular Room...OF DOOM.",
+    "To the bottom of the Floor deck: The Sentry Drone, The Sentry Drone.",
+    "Red draws Fast Follow.",
+    "Red's deck is empty — the discard pile shuffles in to make a new one (4 cards).",
+    "Red draws Shove.",
+    "Gray draws Pick The Lock.",
+    "Gray's deck is empty — the discard pile shuffles in to make a new one (3 cards).",
+    "Gray draws Duck Under.",
+    "Gray draws Hit 'n Run.",
+    "Gray draws Hack the Doors.",
+    "Turn Start phase ends.",
+    "Play phase starts.",
+    "Gray pays with Duck Under, Exhausting it.",
+    "Gray plays Hit 'n Run.",
+    "Hit 'n Run triggers: Gray shuffles 1 card back in.",
+    "Red plays Fast Follow.",
+    "Red plays Coil Of Cable.",
+    "Play phase ends.",
+    "Outcome phase starts.",
+    "Oomph 4 and Scramble 4 met — Both players reveal a card reward.",
+    "Regular Room...OF DOOM is Cleared.",
+    "Regular Room...OF DOOM triggers: Red's reward pool shows Reckless Swing, Cross Punch, Rhythm & Bruise.",
+    "Red takes Cross Punch into their discard pile.",
+    "Regular Room...OF DOOM triggers: Gray's reward pool shows Pivot, Hack the Doors, Quick Vault.",
+    "Gray takes Hack the Doors into their discard pile.",
+    "Outcome phase ends.",
+    "Cleanup phase starts.",
+    "Red discards Fast Follow from their play zone.",
+    "Red discards Coil Of Cable from their play zone.",
+    "Gray discards Hit 'n Run from their play zone.",
+    "Cleanup phase ends.",
+    "— end of turn 6 —",
+    "Turn Start phase starts.",
+    "Revealed: The Sentry Drone, The Sentry Drone, The Sentry Drone.",
+    "You are in: The Sentry Drone.",
+    "To the bottom of the Floor deck: The Sentry Drone, The Sentry Drone.",
+    "Red draws Bull Rush.",
+    "Red draws Overdrive.",
+    "Gray draws Pick The Lock.",
+    "Gray's deck is empty — the discard pile shuffles in to make a new one (2 cards).",
+    "Gray draws Hack the Doors.",
+    "Turn Start phase ends.",
+    "Play phase starts.",
+    "Red plays Overdrive.",
+    "Overdrive triggers: Red Exhausts Overdrive.",
+    "Red pays with Shove, Exhausting it.",
+    "Red plays Bull Rush.",
+    "Play phase ends.",
+    "Outcome phase starts.",
+    "Oomph 8 met — Ascend, and both players reveal a card reward.",
+    "The Sentry Drone is Cleared.",
+    "The Sentry Drone triggers: Red's reward pool shows Reckless Swing, Bull Rush, Momentum Shift.",
+    "Red takes Momentum Shift into their discard pile.",
+    "The Sentry Drone triggers: Gray's reward pool shows Hit 'n Run, Synergy Link, Catch Your Breath.",
+    "Gray takes Synergy Link into their discard pile.",
+    "Outcome phase ends.",
+    "Cleanup phase starts.",
+    "Red discards Overdrive from their play zone.",
+    "Red discards Bull Rush from their play zone.",
+    "Cleanup phase ends.",
+    "— end of turn 7 —",
+    "Floor 1 is clear.",
+    "Red shuffles 19 cards back in.",
+    "Gray shuffles 18 cards back in.",
+    "Floor 2 is built: 9 rooms.",
+    "Turn Start phase starts.",
+    "Revealed: Gears & Glitch, Dark Room, Regular Monster 2.",
+    "You are in: Regular Monster 2.",
+    "To the bottom of the Floor deck: Gears & Glitch, Dark Room.",
+    "Red draws Shove.",
+    "Red draws Momentum Shift.",
+    "Red draws Charge.",
+    "Red draws Bull Rush.",
+    "Red draws Second Wind.",
+    "Gray draws Pick The Lock.",
+    "Gray draws Pick The Lock.",
+    "Gray draws Pick The Lock.",
+    "Gray draws Hack the Doors.",
+    "Gray draws Hack the Doors.",
+    "Turn Start phase ends.",
+    "Play phase starts.",
+    "Red pays with Shove, Exhausting it.",
+    "Red plays Momentum Shift.",
+    "Momentum Shift triggers: Red draws Shove.",
+    "Momentum Shift triggers: Red draws Fast Follow.",
+    "Momentum Shift triggers: Red Exhausts Second Wind.",
+    "Gray pays with Pick The Lock, Pick The Lock, Exhausting them.",
+    "Gray plays Pick The Lock.",
+    "Red plays Fast Follow.",
+    "Red pays with Shove, Exhausting it.",
+    "Red plays Bull Rush.",
+    "Gray pays with Hack the Doors, Exhausting it.",
+    "Gray plays Hack the Doors.",
+    "Hack the Doors triggers: A look at the Floor deck: Room 1-3, Gears & Glitch, Automated Defense Turret.",
+    "Play phase ends.",
+    "Outcome phase starts.",
+    "Oomph 8 and Scramble 8 met — Both players reveal a card reward.",
+    "Regular Monster 2 is Cleared.",
+    "Regular Monster 2 triggers: Red's reward pool shows Tag Team, Cross Punch, Second Wind.",
+    "Red takes Tag Team into their discard pile.",
+    "Regular Monster 2 triggers: Gray's reward pool shows I Know Kung Fu, One Man's Junk, Quick Vault.",
+    "Gray takes I Know Kung Fu into their discard pile.",
+    "Outcome phase ends.",
+    "Cleanup phase starts.",
+    "Red discards Momentum Shift from their play zone.",
+    "Red discards Fast Follow from their play zone.",
+    "Red discards Bull Rush from their play zone.",
+    "Gray discards Pick The Lock from their play zone.",
+    "Gray discards Hack the Doors from their play zone.",
+    "Cleanup phase ends.",
+    "— end of turn 8 —",
+    "Turn Start phase starts.",
+    "Revealed: Room 1-3, Gears & Glitch, Automated Defense Turret.",
+    "You are in: Room 1-3.",
+    "To the bottom of the Floor deck: Gears & Glitch, Automated Defense Turret.",
+    "Red draws Shove.",
+    "Red draws Fast Follow.",
+    "Red draws Overdrive.",
+    "Gray draws Synergy Link.",
+    "Gray draws Work The Angles.",
+    "Gray draws Duck Under.",
+    "Gray draws Pick The Lock.",
+    "Turn Start phase ends.",
+    "Play phase starts.",
+    "Red plays Overdrive.",
+    "Overdrive triggers: Red Exhausts Fast Follow.",
+    "Gray pays with Work The Angles, Exhausting it.",
+    "Gray plays Synergy Link.",
+    "Synergy Link triggers: Gray draws Hit 'n Run.",
+    "Synergy Link triggers: Gray draws Pick The Lock.",
+    "Gray pays with Duck Under, Pick The Lock, Exhausting them.",
+    "Gray plays Pick The Lock.",
+    "Play phase ends.",
+    "Outcome phase starts.",
+    "Scramble 5 met — Gray reveals a card reward.",
+    "Room 1-3 is Cleared.",
+    "Room 1-3 triggers: Gray's reward pool shows One Man's Junk, I'll Take That, Catch Your Breath.",
+    "Gray takes Catch Your Breath into their discard pile.",
+    "Outcome phase ends.",
+    "Cleanup phase starts.",
+    "Red discards Overdrive from their play zone.",
+    "Gray discards Synergy Link from their play zone.",
+    "Gray discards Pick The Lock from their play zone.",
+    "Cleanup phase ends.",
+    "— end of turn 9 —",
+    "Turn Start phase starts.",
+    "Revealed: Overgrown Hydroponics Bay, Gears & Glitch, Maintenance.",
+    "You are in: Maintenance.",
+    "To the bottom of the Floor deck: Overgrown Hydroponics Bay, Gears & Glitch.",
+    "Red draws Coil Of Cable.",
+    "Red draws Overdrive.",
+    "Gray draws Covering Fire.",
+    "Gray draws Peek Around Corner.",
+    "Gray draws Duck Under.",
+    "Gray draws I Know Kung Fu.",
+    "Turn Start phase ends.",
+    "Play phase starts.",
+    "Gray pays with Covering Fire, Exhausting it.",
+    "Gray plays I Know Kung Fu.",
+    "Red plays Overdrive.",
+    "Overdrive triggers: Red Exhausts Overdrive.",
+    "Play phase ends.",
+    "Outcome phase starts.",
+    "Oomph 7 met — Red reveals a card reward.",
+    "Maintenance is Cleared.",
+    "Maintenance triggers: Red's reward pool shows Heavy Pockets, Break Through, Junk Launcher.",
+    "Red takes Heavy Pockets into their discard pile.",
+    "Outcome phase ends.",
+    "Cleanup phase starts.",
+    "Red discards Overdrive from their play zone.",
+    "Gray discards I Know Kung Fu from their play zone.",
+    "Cleanup phase ends.",
+    "— end of turn 10 —",
+    "Turn Start phase starts.",
+    "Revealed: Gears & Glitch, Dark Room, Gears & Glitch.",
+    "You are in: Gears & Glitch.",
+    "To the bottom of the Floor deck: Dark Room, Gears & Glitch.",
+    "Red draws Charge.",
+    "Gray draws Pack Mule.",
+    "Gray draws Duck Under.",
+    "Turn Start phase ends.",
+    "Play phase starts.",
+    "Gray pays with Peek Around Corner, Exhausting it.",
+    "Gray plays Pack Mule.",
+    "Gray pays with Hit 'n Run, Exhausting it.",
+    "Gray plays Duck Under.",
+    "Red plays Fast Follow.",
+    "Red plays Coil Of Cable.",
+    "Red pays with Shove, Charge, Exhausting them.",
+    "Red plays Charge.",
+    "Play phase ends.",
+    "Outcome phase starts.",
+    "Oomph 7 and Scramble 7 met — Ascend; one player reveals a card reward, and the other may Scrap a card from their hand or discard pile.",
+    "Gears & Glitch is Cleared.",
+    "Gears & Glitch triggers: Red's reward pool shows Junk Launcher, Rhythm & Bruise, Tag Team.",
+    "Red takes Tag Team into their discard pile.",
+    "Outcome phase ends.",
+    "Cleanup phase starts.",
+    "Red discards Fast Follow from their play zone.",
+    "Red discards Coil Of Cable from their play zone.",
+    "Red discards Charge from their play zone.",
+    "Gray discards Pack Mule from their play zone.",
+    "Gray discards Duck Under from their play zone.",
+    "Cleanup phase ends.",
+    "— end of turn 11 —",
+    "Floor 2 is clear.",
+    "Red shuffles 16 cards back in.",
+    "Gray shuffles 19 cards back in.",
+    "Floor 3 is built: 9 rooms.",
+    "Turn Start phase starts.",
+    "Revealed: Gravity...Room, Crumbling Armory, The Iron Sentinel.",
+    "You are in: Crumbling Armory.",
+    "To the bottom of the Floor deck: Gravity...Room, The Iron Sentinel.",
+    "Red draws Shove.",
+    "Red draws Tag Team.",
+    "Red draws Overdrive.",
+    "Red draws Cross Punch.",
+    "Red draws Coil Of Cable.",
+    "Gray draws Pick The Lock.",
+    "Gray draws Pick The Lock.",
+    "Gray draws Hit 'n Run.",
+    "Gray draws Pick The Lock.",
+    "Gray draws Peek Around Corner.",
+    "Turn Start phase ends.",
+    "Play phase starts.",
+    "Gray pays with Pick The Lock, Pick The Lock, Exhausting them.",
+    "Gray plays Pick The Lock.",
+    "Gray pays with Peek Around Corner, Exhausting it.",
+    "Gray plays Hit 'n Run.",
+    "Hit 'n Run triggers: Gray shuffles 1 card back in.",
+    "Red plays Coil Of Cable.",
+    "Red plays Overdrive.",
+    "Overdrive triggers: Red Exhausts Tag Team.",
+    "Red pays with Shove, Tag Team, Exhausting them.",
+    "Red plays Cross Punch.",
+    "Cross Punch triggers: Red Exhausts Charge.",
+    "Play phase ends.",
+    "Outcome phase starts.",
+    "Oomph 10 met — Both players get Good Stuff.",
+    "Scramble 8 met — Both players reveal a card reward.",
+    "Crumbling Armory is Cleared.",
+    "Crumbling Armory triggers: Red reveals Good Stuff: Pry Bar, Coil Of Cable, A Pair Of Stitch-Em-Ups.",
+    "Crumbling Armory triggers: Gray reveals Good Stuff: Riot Shield, Overcharged Battery, Automated Salvage Kit.",
+    "Red gets Pry Bar.",
+    "Red takes Pry Bar into hand.",
+    "Gray gets Riot Shield.",
+    "Gray takes Riot Shield into hand.",
+    "Crumbling Armory triggers: Red's reward pool shows Momentum Shift, Fast Follow, Set 'Em Up.",
+    "Red takes Momentum Shift into their discard pile.",
+    "Crumbling Armory triggers: Gray's reward pool shows Zen Mode, Pack Mule, In Step.",
+    "Gray takes Zen Mode into their discard pile.",
+    "Outcome phase ends.",
+    "Cleanup phase starts.",
+    "Red discards Coil Of Cable from their play zone.",
+    "Red discards Overdrive from their play zone.",
+    "Red discards Cross Punch from their play zone.",
+    "Gray discards Pick The Lock from their play zone.",
+    "Gray discards Hit 'n Run from their play zone.",
+    "Cleanup phase ends.",
+    "— end of turn 12 —",
+    "Turn Start phase starts.",
+    "Revealed: Mercenaries, The Iron Sentinel, The Iron Sentinel.",
+    "You are in: Mercenaries.",
+    "To the bottom of the Floor deck: The Iron Sentinel, The Iron Sentinel.",
+    "Red draws Second Wind.",
+    "Red draws Lean In.",
+    "Red draws Charge.",
+    "Red draws Fast Follow.",
+    "Gray draws Work The Angles.",
+    "Gray draws Covering Fire.",
+    "Gray draws Duck Under.",
+    "Gray draws Peek Around Corner.",
+    "Turn Start phase ends.",
+    "Play phase starts.",
+    "Play phase ends.",
+    "Outcome phase starts.",
+    "You Flee Mercenaries.",
+    "Mercenaries triggers: Red Exhausts Overdrive.",
+    "Mercenaries triggers: Gray Exhausts Covering Fire.",
+    "Outcome phase ends.",
+    "Cleanup phase starts.",
+    "Mercenaries goes on top of the Floor deck.",
+    "Cleanup phase ends.",
+    "— end of turn 13 —",
+    "Turn Start phase starts.",
+    "Revealed: Mercenaries, Scrap Pile, Slimy Bio-Hazard Containment.",
+    "You are in: Scrap Pile.",
+    "To the bottom of the Floor deck: Mercenaries, Slimy Bio-Hazard Containment.",
+    "Gray draws Duck Under.",
+    "Turn Start phase ends.",
+    "Play phase starts.",
+    "Play phase ends.",
+    "Outcome phase starts.",
+    "You Flee Scrap Pile.",
+    "Scrap Pile triggers: Red Exhausts Momentum Shift.",
+    "Scrap Pile triggers: Gray Exhausts Hack the Doors.",
+    "Outcome phase ends.",
+    "Cleanup phase starts.",
+    "Scrap Pile goes to the bottom of the Floor deck.",
+    "Cleanup phase ends.",
+    "— end of turn 14 —",
+    "Turn Start phase starts.",
+    "Revealed: Outrun The Laser, Gravity...Room, The Iron Sentinel.",
+    "You are in: Outrun The Laser.",
+    "To the bottom of the Floor deck: Gravity...Room, The Iron Sentinel.",
+    "Turn Start phase ends.",
+    "Play phase starts.",
+    "Play phase ends.",
+    "Outcome phase starts.",
+    "You Flee Outrun The Laser.",
+    "Outrun The Laser triggers: Gray Exhausts Work The Angles.",
+    "Outrun The Laser triggers: Gray Exhausts Peek Around Corner.",
+    "Outrun The Laser triggers: Gray Exhausts Pick The Lock.",
+    "Outcome phase ends.",
+    "Cleanup phase starts.",
+    "Outrun The Laser goes to the bottom of the Floor deck.",
+    "Cleanup phase ends.",
+    "— end of turn 15 —",
+    "Turn Start phase starts.",
+    "Revealed: The Iron Sentinel, The Iron Sentinel, Mercenaries.",
+    "You are in: Mercenaries.",
+    "To the bottom of the Floor deck: The Iron Sentinel, The Iron Sentinel.",
+    "Gray draws Catch Your Breath.",
+    "Gray draws Synergy Link.",
+    "Turn Start phase ends.",
+    "Play phase starts.",
+    "Gray plays Catch Your Breath.",
+    "Red plays Pry Bar.",
+    "Red plays Fast Follow.",
+    "Play phase ends.",
+    "Outcome phase starts.",
+    "You Flee Mercenaries.",
+    "Catch Your Breath triggers: Pick The Lock goes to Gray's deck.",
+    "Catch Your Breath triggers: Pick The Lock goes to Gray's deck.",
+    "Catch Your Breath triggers: Hack the Doors goes to Gray's deck.",
+    "Mercenaries triggers: Red Exhausts Lean In.",
+    "Mercenaries triggers: Gray Exhausts Pick The Lock.",
+    "Outcome phase ends.",
+    "Cleanup phase starts.",
+    "Red discards Pry Bar from their play zone.",
+    "Red discards Fast Follow from their play zone.",
+    "Gray discards Catch Your Breath from their play zone.",
+    "Mercenaries goes on top of the Floor deck.",
+    "Cleanup phase ends.",
+    "— end of turn 16 —",
+    "Turn Start phase starts.",
+    "Revealed: Mercenaries, Slimy Bio-Hazard Containment, Scrap Pile.",
+    "You are in: Scrap Pile.",
+    "To the bottom of the Floor deck: Mercenaries, Slimy Bio-Hazard Containment.",
+    "Red draws Charge.",
+    "Red draws Heavy Pockets.",
+    "Red draws Shove.",
+    "Gray draws Pick The Lock.",
+    "Turn Start phase ends.",
+    "Play phase starts.",
+    "Gray pays with Duck Under, Exhausting it.",
+    "Gray plays Synergy Link.",
+    "Synergy Link triggers: Gray draws Pack Mule.",
+    "Play phase ends.",
+    "Outcome phase starts.",
+    "You Flee Scrap Pile.",
+    "Scrap Pile triggers: Red Exhausts Shove.",
+    "Scrap Pile triggers: Gray Exhausts Pack Mule.",
+    "Outcome phase ends.",
+    "Cleanup phase starts.",
+    "Gray discards Synergy Link from their play zone.",
+    "Scrap Pile goes to the bottom of the Floor deck.",
+    "Cleanup phase ends.",
+    "— end of turn 17 —",
+    "Turn Start phase starts.",
+    "Revealed: Gravity...Room, The Iron Sentinel, Outrun The Laser.",
+    "You are in: Gravity...Room.",
+    "To the bottom of the Floor deck: The Iron Sentinel, Outrun The Laser.",
+    "Red draws Charge.",
+    "Gray draws Duck Under.",
+    "Gray draws Hack the Doors.",
+    "Turn Start phase ends.",
+    "Play phase starts.",
+    "Play phase ends.",
+    "Outcome phase starts.",
+    "You Flee Gravity...Room.",
+    "Gravity...Room triggers: Red Exhausts Shove.",
+    "Gravity...Room triggers: Red Exhausts Bull Rush.",
+    "Gravity...Room triggers: Gray Exhausts Synergy Link.",
+    "Gravity...Room triggers: Gray Exhausts I Know Kung Fu.",
+    "Outcome phase ends.",
+    "Cleanup phase starts.",
+    "Gravity...Room goes to the bottom of the Floor deck.",
+    "Cleanup phase ends.",
+    "— end of turn 18 —",
+    "Turn Start phase starts.",
+    "Revealed: The Iron Sentinel, The Iron Sentinel, Mercenaries.",
+    "You are in: Mercenaries.",
+    "To the bottom of the Floor deck: The Iron Sentinel, The Iron Sentinel.",
+    "Turn Start phase ends.",
+    "Play phase starts.",
+    "Play phase ends.",
+    "Outcome phase starts.",
+    "You Flee Mercenaries.",
+    "Mercenaries triggers: Red Exhausts Heavy Pockets.",
+    "Mercenaries triggers: Gray Exhausts Duck Under.",
+    "Outcome phase ends.",
+    "Cleanup phase starts.",
+    "Mercenaries goes on top of the Floor deck.",
+    "Cleanup phase ends.",
+    "— end of turn 19 —",
+    "Turn Start phase starts.",
+    "Revealed: Mercenaries, Slimy Bio-Hazard Containment, Scrap Pile.",
+    "You are in: Scrap Pile.",
+    "To the bottom of the Floor deck: Mercenaries, Slimy Bio-Hazard Containment.",
+    "Red draws Momentum Shift.",
+    "Gray draws Duck Under.",
+    "Turn Start phase ends.",
+    "Play phase starts.",
+    "Play phase ends.",
+    "Outcome phase starts.",
+    "You Flee Scrap Pile.",
+    "Scrap Pile triggers: Red Exhausts Charge.",
+    "Scrap Pile triggers: Gray Exhausts Duck Under.",
+    "Outcome phase ends.",
+    "Cleanup phase starts.",
+    "Scrap Pile goes to the bottom of the Floor deck.",
+    "Cleanup phase ends.",
+    "— end of turn 20 —",
+    "Turn Start phase starts.",
+    "Revealed: The Iron Sentinel, Outrun The Laser, Gravity...Room.",
+    "You are in: Gravity...Room.",
+    "To the bottom of the Floor deck: The Iron Sentinel, Outrun The Laser.",
+    "Red draws Fast Follow.",
+    "Gray draws I Know Kung Fu.",
+    "Turn Start phase ends.",
+    "Play phase starts.",
+    "Gray pays with Duck Under, Exhausting it.",
+    "Gray plays I Know Kung Fu.",
+    "Heavy triggers: Gray Exhausts Pick The Lock.",
+    "Gray pays with Hack the Doors, Exhausting it.",
+    "Gray plays Riot Shield.",
+    "Heavy triggers: Gray Exhausts Pick The Lock.",
+    "I Know Kung Fu triggers: Gray draws Hack the Doors.",
+    "Red pays with Second Wind, Exhausting it.",
+    "Red plays Momentum Shift.",
+    "Momentum Shift triggers: Red draws Shove.",
+    "Momentum Shift triggers: Red draws Overdrive.",
+    "Momentum Shift triggers: Red Exhausts Shove.",
+    "Heavy triggers: Red Exhausts Overdrive.",
+    "Play phase ends.",
+    "Outcome phase starts.",
+    "You Flee Gravity...Room.",
+    "Gravity...Room triggers: Red Exhausts Charge.",
+    "Gravity...Room triggers: Red Exhausts Charge.",
+    "Gravity...Room triggers: Gray Exhausts Hack the Doors.",
+    "Gravity...Room triggers: Gray Exhausts Hit 'n Run.",
+    "Outcome phase ends.",
+    "Cleanup phase starts.",
+    "Red discards Momentum Shift from their play zone.",
+    "Gray discards I Know Kung Fu from their play zone.",
+    "Gray discards Riot Shield from their play zone.",
+    "Gravity...Room goes to the bottom of the Floor deck.",
+    "Cleanup phase ends.",
+    "— end of turn 21 —",
+    "Turn Start phase starts.",
+    "Revealed: The Iron Sentinel, The Iron Sentinel, Mercenaries.",
+    "You are in: Mercenaries.",
+    "To the bottom of the Floor deck: The Iron Sentinel, The Iron Sentinel.",
+    "Red's deck is empty — the discard pile shuffles in to make a new one (5 cards).",
+    "Red draws Fast Follow.",
+    "Red draws Coil Of Cable.",
+    "Red draws Cross Punch.",
+    "Gray's deck is empty — the discard pile shuffles in to make a new one (5 cards).",
+    "Gray draws Catch Your Breath.",
+    "Gray draws Zen Mode.",
+    "Gray draws Riot Shield.",
+    "Gray draws Pick The Lock.",
+    "Turn Start phase ends.",
+    "Play phase starts.",
+    "Gray pays with Catch Your Breath, Exhausting it.",
+    "Gray plays Zen Mode.",
+    "Zen Mode stops it: Gray Exhausts nothing.",
+    "Gray plays Pick The Lock.",
+    "Zen Mode stops it: Gray Exhausts nothing.",
+    "Gray plays Riot Shield.",
+    "Red plays Coil Of Cable.",
+    "Red pays with Fast Follow, Fast Follow, Exhausting them.",
+    "Red plays Cross Punch.",
+    "Cross Punch triggers: Red Exhausts Momentum Shift.",
+    "Red plays Overdrive.",
+    "Overdrive triggers: Red Exhausts Pry Bar.",
+    "Red is Down — Overdrive: Exhausted the last card. The run is lost.",
+    "Play phase ends.",
+    "You lose."
+  ]
+}

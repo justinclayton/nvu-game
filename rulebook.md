@@ -1,6 +1,6 @@
 # *North vs Up*: Rulebook
 
-Rules version: R36
+Rules version: R37
 
 ---
 
@@ -20,7 +20,7 @@ When you clear a floor, you can rest for a moment, then move up and run into tro
 
 Some things to note about how *North vs Up* works:
 
-**Your deck is your HP total, called `Stamina`.** Cards you lose do not come back. If you need a card and have none left, you go `Down`, and the game is lost.
+**Your deck is your HP total, called `Stamina`.** When you run out of cards, you go `Down`, and the game is lost.
 
 **You draw up to five cards each turn.** Cards you don't spend stay in your hand.
 
@@ -158,8 +158,8 @@ A `Stuff` card looks similar to a character card:
 - `Play:` An effect that happens once when the card is played.
 - `for free`: Play the card without paying. Overrides all other cost modifiers.
 - `Discard X cards from your hand`: Choose **X** cards from your hand and move them to your discard pile.
-- `Exhaust X cards from your deck`: Move the top **X** cards of your deck to your Exhaust pile. If your deck is empty, see `Empty deck`.
-- `Exhaust X`: the same as `Exhaust X cards from your deck`.
+- `Exhaust X cards from your deck`: Move the top **X** cards of your deck to your Exhaust pile. If your deck is empty, see `Empty deck`. If your deck and your discard pile are both empty, choose the rest from your hand.
+- `Exhaust X`: Move **X** cards from your hand, deck, or discard pile to your Exhaust pile. Choose each card: a card from your hand, the top card of your deck, or a card from your discard pile.
 - `Get Good Stuff`: Reveal the top **3** cards of the Good Stuff pool. Put **one** into your hand. Put the rest on the bottom of the Good Stuff pool. When both players get Good Stuff from the same outcome, both players reveal their 3 before either chooses, then both put their chosen card into their hand at the same time.
 - `Get X Good Stuff`: `Get Good Stuff` **X** times.
 - `Get Bad Stuff`: Move the top card of the Bad Stuff pool into your hand.
@@ -169,6 +169,21 @@ A `Stuff` card looks similar to a character card:
 - `any deck`: any face-down pile on the table: a character deck, a reward pool, the Floor deck, or a Stuff pool.
 - `Scrap`: Move the card to the Scrapyard. It is removed from play for the rest of the game.
 - `may Scrap a card from your hand or discard pile`: Choose **one** card from your hand or your discard pile and `Scrap` it, or choose none. When an outcome says *the other* player, it means the player who did not take the outcome's previous line.
+
+### Room keywords
+
+A room's text may open with one or more keywords.
+
+- `Ambush`: When this room is revealed, you must enter it. Put the other revealed rooms on the bottom of the Floor deck in any order you choose. If more than one revealed room has `Ambush`, choose **one** of them to enter.
+- `Cap`: At most **3** cards may be in the play zone, both sides together.
+- `Corrosive`: When you pay for a card, `Scrap` the cards you pay with instead of moving them to your Exhaust pile.
+- `Dim`: At Start of Turn, draw until you hold **4** instead of 5.
+- `Draining`: At Cleanup, move the cards in your play zone to your Exhaust pile instead of your discard pile.
+- `Heavy`: Whenever you play a card, `Exhaust 1 card from your deck`.
+- `Lockstep`: No player may play two cards in a row.
+- `Relentless`: If you Flee this room, put it on the **top** of the Floor deck instead of the bottom.
+- `Toxic`: When you enter this room, each player gets Bad Stuff.
+- `Unstable`: At Outcome, if you did not meet a challenge that asks for Scramble only, each player Exhausts 2 (see `Exhaust X`).
 
 ---
 ## 9. Going Down

@@ -140,7 +140,7 @@ export interface CardFace {
   readonly flavor: string;
 }
 
-/** The words a room's text may open with. Ambush is shown only: no rule can skip a revealed room. */
+/** The words a room's text may open with. */
 export type RoomKeyword =
   | "Ambush" | "Dim" | "Lockstep" | "Cap" | "Toxic" | "Unstable" | "Draining" | "Heavy" | "Relentless" | "Corrosive";
 

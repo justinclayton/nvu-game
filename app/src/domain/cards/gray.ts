@@ -12,6 +12,7 @@ import {
 } from "../types";
 import {
   discard,
+  drawCards,
   grantPlayDiscount,
   moveToBottomOfDeck,
   moveToHand,
@@ -193,7 +194,12 @@ function packMule(state: GameState, ctx: BehaviourContext, events: readonly Doma
 }
 
 export const GRAY: Registry = {
-  "Peek Around Corner": peek(1),
+  "Peek Around Corner": {
+    onPlay(state, ctx) {
+      const events: DomainEvent[] = [];
+      return done(drawCards(state, ctx.character, 1, events), events);
+    },
+  },
 
   /* Decided once Play ends, when it is known whether Gray played anything else. */
   "Catch Your Breath": {

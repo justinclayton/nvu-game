@@ -7,6 +7,7 @@
 
 import { useEffect, useState } from "react";
 
+import { enterableRooms } from "@domain/queries";
 import type { CardId, Command, GameState } from "@domain/types";
 import { isLegal, whyNot } from "./legal";
 import { CardView, RoomCardView } from "./CardView";
@@ -36,11 +37,18 @@ export function Controls({
 }: Props) {
   if (state.pending?.kind === "ChooseRoom") {
     const passing = state.pending.options.length - 1;
+    const enterable = enterableRooms(state.pending);
+    const ambush = enterable.length < state.pending.options.length;
     return (
       <div className="controls controls--pending">
         <p className="controls__prompt">
           {state.pending.prompt} Click a revealed room to enter it.
         </p>
+        {ambush ? (
+          <p className="controls__hint">
+            Ambush: you must enter {enterable.map((r) => r.name).join(" or ")}.
+          </p>
+        ) : null}
         {passing > 1 ? (
           <>
             <p className="controls__hint">
@@ -246,6 +254,36 @@ function PendingChoice({ state, dispatch, inspected, onInspect }: Props) {
     case "ChooseCards":
       return (
         <ChooseCards state={state} dispatch={dispatch} inspected={inspected} onInspect={onInspect} />
+      );
+
+    case "ChooseExhaust":
+      return (
+        <div className="controls controls--pending">
+          <p className="controls__prompt">{pending.prompt}</p>
+          <div className="zone">
+            {pending.options.map((card) => (
+              <CardView
+                key={card.id}
+                card={card}
+                inspect={{ inspected, onInspect }}
+                onClick={() => {
+                  dispatch({ type: "EXHAUST_CARD", cardId: card.id });
+                }}
+              />
+            ))}
+          </div>
+          {pending.deck > 0 ? (
+            <button
+              type="button"
+              className="button button--primary"
+              onClick={() => {
+                dispatch({ type: "EXHAUST_CARD", cardId: null });
+              }}
+            >
+              Top of the deck ({pending.deck})
+            </button>
+          ) : null}
+        </div>
       );
   }
 }

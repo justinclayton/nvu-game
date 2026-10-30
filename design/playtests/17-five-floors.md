@@ -1,4 +1,4 @@
-# Playtest 13: Five floors of six cards
+# Playtest 17: Five floors of six cards
 
 Recorded 2026-10-19. Kit revision R34.C58-v1, the first commit for issue #276 (5 floors, every floor
 deck 1 Stairwell and 5 Rooms, tiers 2-2-1, rooms still flipped one at a time and a Fled room still
@@ -36,7 +36,7 @@ The two write-ups follow as the agents wrote them.
 
 Recorded 2026-10-19. Kit revision R34.C58-v1. Played by an agent standing in for a human
 playtester, in the CLI (`bin/nvu`), seed 10, one shell call per decision, run file
-`design/playtests/13-five-floors-seed-10.json`. The run ended in **Victory** on turn 19, when The Monolith Core fell to
+`design/playtests/17-five-floors-seed-10.json`. The run ended in **Victory** on turn 19, when The Monolith Core fell to
 Oomph 13 / Scramble 10. There was no Flee in the whole run.
 
 Notes are the agent's, verbatim, tagged `[agent]`, with their log line from `bin/nvu replay`.
@@ -247,7 +247,7 @@ CLI:
 
 ### Appendix: the run transcript
 
-`bin/nvu replay design/playtests/13-five-floors-seed-10.json`:
+`bin/nvu replay design/playtests/17-five-floors-seed-10.json`:
 
 ```
   1. Floor 1 is built: 6 rooms.
@@ -1031,7 +1031,7 @@ seed 10, 216 commands replayed, recorded on R34.C58-v1, floor 5, turn 19, Victor
 ## Run: Seed 12, five floors of six cards
 
 Recorded 2026-10-19. Kit revision R34.C58-v1. Played by an agent standing in for a human
-playtester, in the CLI (`bin/nvu`), seed 12, run file `design/playtests/13-five-floors-seed-12.json`. The run ended in
+playtester, in the CLI (`bin/nvu`), seed 12, run file `design/playtests/17-five-floors-seed-12.json`. The run ended in
 **Defeat** on turn 6, floor 1: Red went Down to an Overdrive's Exhaust 1 on the same play that put
 the Stat pool at Oomph 10 against The Sentry Drone's Oomph 8.
 
@@ -1155,7 +1155,7 @@ Card observations, for a later re-tune:
 
 ### Appendix: the run transcript
 
-Run file: `design/playtests/13-five-floors-seed-12.json`, output of `bin/nvu replay design/playtests/13-five-floors-seed-12.json`.
+Run file: `design/playtests/17-five-floors-seed-12.json`, output of `bin/nvu replay design/playtests/17-five-floors-seed-12.json`.
 
 ```
   1. Floor 1 is built: 6 rooms.

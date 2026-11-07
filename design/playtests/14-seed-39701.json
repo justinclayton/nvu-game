@@ -1,0 +1,667 @@
+{
+  "format": "nvu-run/1",
+  "exportedAt": "2026-10-27T03:05:27.147Z",
+  "cards": "66134cff3ca2",
+  "rules": "R35",
+  "kit": "R35.C59-v1",
+  "floor": 2,
+  "turn": 12,
+  "phase": "GameOver",
+  "outcome": "Defeat",
+  "run": {
+    "seed": 39701,
+    "commands": [
+      {
+        "type": "FLIP_ROOM"
+      },
+      {
+        "type": "CHOOSE_ROOM",
+        "roomId": "Ventilation Shaft#1",
+        "bottom": [
+          "Puzzle Room#1",
+          "Tunnel of Rubble#1"
+        ]
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Red",
+        "cardId": "Charge#4",
+        "payWith": [
+          "Shove#2",
+          "Overdrive#3"
+        ]
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Gray",
+        "cardId": "Pick The Lock#2",
+        "payWith": [
+          "Peek Around Corner#2",
+          "Peek Around Corner#1"
+        ]
+      },
+      {
+        "type": "END_PLAY"
+      },
+      {
+        "type": "TAKE_REWARD",
+        "cardId": "Tag Team#1"
+      },
+      {
+        "type": "TAKE_REWARD",
+        "cardId": "Hack the Doors#2"
+      },
+      {
+        "type": "FLIP_ROOM"
+      },
+      {
+        "type": "CHOOSE_ROOM",
+        "roomId": "The Sentry Drone#3",
+        "bottom": [
+          "The Sentry Drone#1",
+          "The Sentry Drone#2"
+        ]
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Red",
+        "cardId": "Overdrive#1",
+        "payWith": []
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Red",
+        "cardId": "Charge#3",
+        "payWith": [
+          "Lean In#1",
+          "Shove#3"
+        ]
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Gray",
+        "cardId": "Work The Angles#1",
+        "payWith": [
+          "Duck Under#2"
+        ]
+      },
+      {
+        "type": "END_PLAY"
+      },
+      {
+        "type": "TAKE_REWARD",
+        "cardId": "Fast Follow#1"
+      },
+      {
+        "type": "TAKE_REWARD",
+        "cardId": "Pivot#2"
+      },
+      {
+        "type": "FLIP_ROOM"
+      },
+      {
+        "type": "CHOOSE_ROOM",
+        "roomId": "Room 1-3#1",
+        "bottom": [
+          "Dark Room#1",
+          "Gears & Glitch#1"
+        ]
+      },
+      {
+        "type": "END_PLAY"
+      },
+      {
+        "type": "FLIP_ROOM"
+      },
+      {
+        "type": "CHOOSE_ROOM",
+        "roomId": "Regular Monster 2#1",
+        "bottom": [
+          "Gears & Glitch#3",
+          "Automated Defense Turret#1"
+        ]
+      },
+      {
+        "type": "END_PLAY"
+      },
+      {
+        "type": "FLIP_ROOM"
+      },
+      {
+        "type": "CHOOSE_ROOM",
+        "roomId": "Maintenance#1",
+        "bottom": [
+          "Gears & Glitch#2",
+          "Overgrown Hydroponics Bay#1"
+        ]
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Red",
+        "cardId": "Overdrive#3",
+        "payWith": []
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Red",
+        "cardId": "Charge#4",
+        "payWith": [
+          "Shove#3",
+          "Lean In#1"
+        ]
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Gray",
+        "cardId": "Duck Under#2",
+        "payWith": [
+          "Peek Around Corner#2"
+        ]
+      },
+      {
+        "type": "END_PLAY"
+      },
+      {
+        "type": "TAKE_REWARD",
+        "cardId": "Reckless Swing#1"
+      },
+      {
+        "type": "FLIP_ROOM"
+      },
+      {
+        "type": "CHOOSE_ROOM",
+        "roomId": "Dark Room#1",
+        "bottom": [
+          "Gears & Glitch#1",
+          "Room 1-3#1"
+        ]
+      },
+      {
+        "type": "END_PLAY"
+      },
+      {
+        "type": "FLIP_ROOM"
+      },
+      {
+        "type": "CHOOSE_ROOM",
+        "roomId": "Regular Monster 2#1",
+        "bottom": [
+          "Gears & Glitch#3",
+          "Automated Defense Turret#1"
+        ]
+      },
+      {
+        "type": "END_PLAY"
+      },
+      {
+        "type": "CHOOSE_CARDS",
+        "cardIds": [
+          "Panic#2",
+          "Shove#4",
+          "Tag Team#1"
+        ]
+      },
+      {
+        "type": "FLIP_ROOM"
+      },
+      {
+        "type": "CHOOSE_ROOM",
+        "roomId": "Overgrown Hydroponics Bay#1",
+        "bottom": [
+          "Gears & Glitch#2",
+          "Gears & Glitch#1"
+        ]
+      },
+      {
+        "type": "END_PLAY"
+      },
+      {
+        "type": "CHOOSE_CARDS",
+        "cardIds": [
+          "Torn Seal#2",
+          "Charge#2",
+          "Overdrive#2"
+        ]
+      },
+      {
+        "type": "FLIP_ROOM"
+      },
+      {
+        "type": "CHOOSE_ROOM",
+        "roomId": "Dark Room#1",
+        "bottom": [
+          "Room 1-3#1",
+          "Gears & Glitch#3"
+        ]
+      },
+      {
+        "type": "END_PLAY"
+      },
+      {
+        "type": "CHOOSE_CARDS",
+        "cardIds": [
+          "Panic#2"
+        ]
+      },
+      {
+        "type": "FLIP_ROOM"
+      },
+      {
+        "type": "CHOOSE_ROOM",
+        "roomId": "Regular Monster 2#1",
+        "bottom": [
+          "Automated Defense Turret#1",
+          "Gears & Glitch#2"
+        ]
+      },
+      {
+        "type": "END_PLAY"
+      },
+      {
+        "type": "CHOOSE_CARDS",
+        "cardIds": [
+          "Torn Seal#1",
+          "Shove#4",
+          "Overdrive#1"
+        ]
+      },
+      {
+        "type": "FLIP_ROOM"
+      },
+      {
+        "type": "CHOOSE_ROOM",
+        "roomId": "Overgrown Hydroponics Bay#1",
+        "bottom": [
+          "Gears & Glitch#1",
+          "Room 1-3#1"
+        ]
+      },
+      {
+        "type": "END_PLAY"
+      },
+      {
+        "type": "CHOOSE_CARDS",
+        "cardIds": [
+          "Charge#3",
+          "Charge#4",
+          "Overdrive#3"
+        ]
+      },
+      {
+        "type": "FLIP_ROOM"
+      },
+      {
+        "type": "CHOOSE_ROOM",
+        "roomId": "Dark Room#1",
+        "bottom": [
+          "Gears & Glitch#3",
+          "Automated Defense Turret#1"
+        ]
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Gray",
+        "cardId": "Corrosive Acid#1",
+        "payWith": [
+          "Duck Under#1",
+          "Hack the Doors#2",
+          "Pick The Lock#4"
+        ]
+      },
+      {
+        "type": "END_PLAY"
+      }
+    ]
+  },
+  "notes": [
+    {
+      "at": 37,
+      "text": "Turn 2 flip revealed The Sentry Drone three times (same stairwell, three copies in the floor deck?). Rulebook Setup says each floor has its own set of cards with Stairwells, and does not say a floor may hold several copies of one stairwell. Question: is that intended? Entering one; I cannot reach Oomph 8 yet."
+    },
+    {
+      "at": 86,
+      "text": "Room 1-3 needs Scramble 5 and Gray holds Duck x2, Lock x2 (4 cards). Max I can reach is Scramble 4: every play spends hand cards as payment and there is no 5. I should have seen this before choosing the room over the others; lesson for the room choice. Fleeing without playing, Exhaust 2 each from decks, hands stay."
+    },
+    {
+      "at": 100,
+      "text": "Regular Monster 2 has Ambush: the CLI offered only it, hiding Gears & Glitch and the Turret from my choice. Rulebook Start of Turn step 2 says choose one revealed card and does not mention Ambush. Question: is a forced entry meant to override the choose-one rule, and do the other two go to the bottom in shown order?"
+    },
+    {
+      "at": 106,
+      "text": "Regular Monster 2: Scramble 10 is out of reach (Gray max is 6 with 5 cards), Oomph 8 and Scramble 8 likewise. Fleeing without playing; Flee here is only Bad Stuff, no Exhaust."
+    },
+    {
+      "at": 151,
+      "text": "Dark Room: Scramble 10 (printed 8, +2 from Panic) vs Gray's max 4-6. Unreachable. Fleeing for Exhaust 1 each, no Bad Stuff. Playing Panic to be rid of it would cost 2 payers plus Exhaust 2, four cards, so I keep it. Third turn of floor 2 with no clear attempt possible from Gray's hand."
+    },
+    {
+      "at": 169,
+      "text": "Regular Monster 2 again (Ambush, forced; it went to the bottom last time and is back after 4 turns). Scramble 12 and Oomph 8 and Scramble 10 are out of reach with Panic held. Only Flee is possible. Floor 2 has now had three Flees in four turns; I took one clear (Maintenance). Question: is Ambush meant to hide a stairwell that I could otherwise enter?"
+    },
+    {
+      "at": 178,
+      "text": "Spore Cloud prompt again says 'Discard down to 3 cards' / 'choose 3 of: Overdrive, Panic, Charge, Shove, Tag Team'. Five names listed, Cloud excluded, hand 6. Card text says hold 3 including Cloud, so 3 discards. I read 'choose 3' as the discards (from the previous playtest note that the engine discards what you name). Discarding Panic, Shove, Tag Team: dropping Panic also removes its +2 Scramble. Question: is discarding a Bad Stuff card a legal way to shed it? Rulebook gives no limit."
+    },
+    {
+      "at": 186,
+      "text": "Turn 8 flip revealed Gears & Glitch twice (first and third). Same duplicate-stairwell question as note 1. Choosing Overgrown Hydroponics Bay because its Flee is Bad Stuff only, and a Gears & Glitch Flee costs Exhaust 3 each plus Bad Stuff."
+    },
+    {
+      "at": 193,
+      "text": "Hydroponics Bay needs Scramble 11. Gray's hand has Lock, Lock, Hack, Duck-less: even with every card played I cannot reach 11 given payments. Red has no Scramble. Fleeing; Red's deck is empty so Red lives off its discard. Both of us are only getting Bad Stuff for rooms we cannot clear."
+    },
+    {
+      "at": 217,
+      "text": "Dark Room now reads Scramble 12 (printed 8): Gray holds Panic too, and Red's Panic is held in Red's hand as well. Two Panics show +4 total, so each held Panic adds +2 to every threshold and they stack. Rulebook has no entry for Holding effects that stack. Red's Charge is not offered: its only payer is Overdrive, Spore Cloud and Panic cannot pay. Fleeing, Exhaust 1 each."
+    },
+    {
+      "at": 278,
+      "text": "Gray's deck is 0 and discard 1, hand 9 (six of them Bad Stuff, which cannot pay). Corrosive Acid's Turn Start Exhaust 1 will hit an empty deck soon. Playlist 13 reports that this made a player go Down with a full hand. I am scrapping Acid now by playing it (cost 3 paid with Duck, Hack, Lock) to test whether I can stay alive; the rulebook section 9 says Down is no cards in hand, deck, or discard, which Gray is not near."
+    },
+    {
+      "at": 299,
+      "text": "Defeat on turn 12: Dark Room Flee (Exhaust 1) with Gray's deck and discard both empty and 5 cards in hand (Lock plus four Bad Stuff) printed 'Gray is Down'. Rulebook section 9 says Down is no cards in hand, deck, or discard pile; Gray held 5. Same shape as the Corrosive Acid Down in playtest 13, now from a room's Flee, so it is not Acid-specific. Question: what should Exhaust do on an empty deck and discard?"
+    }
+  ],
+  "log": [
+    "Floor 1 is built: 9 rooms.",
+    "Turn Start phase starts.",
+    "Revealed: Puzzle Room, Tunnel of Rubble, Ventilation Shaft.",
+    "You are in: Ventilation Shaft.",
+    "To the bottom of the Floor deck: Puzzle Room, Tunnel of Rubble.",
+    "Red draws Charge.",
+    "Red draws Charge.",
+    "Red draws Overdrive.",
+    "Red draws Shove.",
+    "Red draws Overdrive.",
+    "Gray draws Peek Around Corner.",
+    "Gray draws Peek Around Corner.",
+    "Gray draws Pick The Lock.",
+    "Gray draws Pick The Lock.",
+    "Gray draws Pick The Lock.",
+    "Turn Start phase ends.",
+    "Play phase starts.",
+    "Red pays with Shove, Overdrive, Exhausting them.",
+    "Red plays Charge.",
+    "Gray pays with Peek Around Corner, Peek Around Corner, Exhausting them.",
+    "Gray plays Pick The Lock.",
+    "Play phase ends.",
+    "Outcome phase starts.",
+    "Oomph 4 and Scramble 4 met — Both players reveal a card reward.",
+    "Ventilation Shaft is Cleared.",
+    "Ventilation Shaft triggers: Red's reward pool shows Heavy Pockets, Second Wind, Tag Team.",
+    "Red takes Tag Team into their discard pile.",
+    "Ventilation Shaft triggers: Gray's reward pool shows Catch Your Breath, Hack the Doors, In Step.",
+    "Gray takes Hack the Doors into their discard pile.",
+    "Outcome phase ends.",
+    "Cleanup phase starts.",
+    "Red discards Charge from their play zone.",
+    "Gray discards Pick The Lock from their play zone.",
+    "Cleanup phase ends.",
+    "— end of turn 1 —",
+    "Turn Start phase starts.",
+    "Revealed: The Sentry Drone, The Sentry Drone, The Sentry Drone.",
+    "You are in: The Sentry Drone.",
+    "To the bottom of the Floor deck: The Sentry Drone, The Sentry Drone.",
+    "Red draws Charge.",
+    "Red draws Lean In.",
+    "Red draws Shove.",
+    "Gray draws Duck Under.",
+    "Gray draws Work The Angles.",
+    "Gray draws Pick The Lock.",
+    "Turn Start phase ends.",
+    "Play phase starts.",
+    "Red plays Overdrive.",
+    "Overdrive triggers: Red Exhausts Shove.",
+    "Red pays with Lean In, Shove, Exhausting them.",
+    "Red plays Charge.",
+    "Gray pays with Duck Under, Exhausting it.",
+    "Gray plays Work The Angles.",
+    "Play phase ends.",
+    "Outcome phase starts.",
+    "Oomph 8 met — Ascend, and both players reveal a card reward.",
+    "The Sentry Drone is Cleared.",
+    "The Sentry Drone triggers: Red's reward pool shows Cross Punch, Fast Follow, Bull Rush.",
+    "Red takes Fast Follow into their discard pile.",
+    "The Sentry Drone triggers: Gray's reward pool shows I'll Take That, Covering Fire, Pivot.",
+    "Gray takes Pivot into their discard pile.",
+    "Outcome phase ends.",
+    "Cleanup phase starts.",
+    "Red discards Overdrive from their play zone.",
+    "Red discards Charge from their play zone.",
+    "Gray discards Work The Angles from their play zone.",
+    "Cleanup phase ends.",
+    "— end of turn 2 —",
+    "Floor 1 is clear.",
+    "Red shuffles 11 cards back in.",
+    "Gray shuffles 10 cards back in.",
+    "Floor 2 is built: 9 rooms.",
+    "Turn Start phase starts.",
+    "Revealed: Dark Room, Gears & Glitch, Room 1-3.",
+    "You are in: Room 1-3.",
+    "To the bottom of the Floor deck: Dark Room, Gears & Glitch.",
+    "Red draws Overdrive.",
+    "Red draws Charge.",
+    "Red draws Shove.",
+    "Red draws Overdrive.",
+    "Gray draws Duck Under.",
+    "Gray draws Pick The Lock.",
+    "Gray draws Duck Under.",
+    "Gray draws Pick The Lock.",
+    "Turn Start phase ends.",
+    "Play phase starts.",
+    "Play phase ends.",
+    "Outcome phase starts.",
+    "You Flee Room 1-3.",
+    "Room 1-3 triggers: Red Exhausts Shove.",
+    "Room 1-3 triggers: Red Exhausts Fast Follow.",
+    "Room 1-3 triggers: Gray Exhausts Pick The Lock.",
+    "Room 1-3 triggers: Gray Exhausts Duck Under.",
+    "Outcome phase ends.",
+    "Cleanup phase starts.",
+    "Room 1-3 goes to the bottom of the Floor deck.",
+    "Cleanup phase ends.",
+    "— end of turn 3 —",
+    "Turn Start phase starts.",
+    "Revealed: Gears & Glitch, Regular Monster 2, Automated Defense Turret.",
+    "You are in: Regular Monster 2.",
+    "To the bottom of the Floor deck: Gears & Glitch, Automated Defense Turret.",
+    "Red draws Lean In.",
+    "Gray draws Peek Around Corner.",
+    "Turn Start phase ends.",
+    "Play phase starts.",
+    "Play phase ends.",
+    "Outcome phase starts.",
+    "You Flee Regular Monster 2.",
+    "Regular Monster 2 triggers: Red gets Panic.",
+    "Regular Monster 2 triggers: Red takes Panic into hand.",
+    "Regular Monster 2 triggers: Gray gets My Head Is Quantum Spinning.",
+    "Regular Monster 2 triggers: Gray takes My Head Is Quantum Spinning into hand.",
+    "Outcome phase ends.",
+    "Cleanup phase starts.",
+    "Regular Monster 2 goes to the bottom of the Floor deck.",
+    "Cleanup phase ends.",
+    "— end of turn 4 —",
+    "Turn Start phase starts.",
+    "Revealed: Gears & Glitch, Overgrown Hydroponics Bay, Maintenance.",
+    "You are in: Maintenance.",
+    "To the bottom of the Floor deck: Gears & Glitch, Overgrown Hydroponics Bay.",
+    "Turn Start phase ends.",
+    "Play phase starts.",
+    "Red plays Overdrive.",
+    "Overdrive triggers: Red Exhausts Shove.",
+    "Red pays with Shove, Lean In, Exhausting them.",
+    "Red plays Charge.",
+    "Gray pays with Peek Around Corner, Exhausting it.",
+    "Gray plays Duck Under.",
+    "Play phase ends.",
+    "Outcome phase starts.",
+    "Oomph 7 met — Red reveals a card reward.",
+    "Maintenance is Cleared.",
+    "Maintenance triggers: Red's reward pool shows Reckless Swing, Brute Recycle, Reckless Swing.",
+    "Red takes Reckless Swing into their discard pile.",
+    "Outcome phase ends.",
+    "Cleanup phase starts.",
+    "Red discards Overdrive from their play zone.",
+    "Red discards Charge from their play zone.",
+    "Gray discards Duck Under from their play zone.",
+    "Cleanup phase ends.",
+    "— end of turn 5 —",
+    "Turn Start phase starts.",
+    "Revealed: Dark Room, Gears & Glitch, Room 1-3.",
+    "You are in: Dark Room.",
+    "To the bottom of the Floor deck: Gears & Glitch, Room 1-3.",
+    "Red draws Charge.",
+    "Red draws Shove.",
+    "Turn Start phase ends.",
+    "Play phase starts.",
+    "Play phase ends.",
+    "Outcome phase starts.",
+    "You Flee Dark Room.",
+    "Dark Room triggers: Red Exhausts Charge.",
+    "Dark Room triggers: Gray Exhausts Pick The Lock.",
+    "Outcome phase ends.",
+    "Cleanup phase starts.",
+    "Dark Room goes to the bottom of the Floor deck.",
+    "Cleanup phase ends.",
+    "— end of turn 6 —",
+    "Turn Start phase starts.",
+    "Revealed: Gears & Glitch, Automated Defense Turret, Regular Monster 2.",
+    "You are in: Regular Monster 2.",
+    "To the bottom of the Floor deck: Gears & Glitch, Automated Defense Turret.",
+    "Red draws Tag Team.",
+    "Gray draws Hack the Doors.",
+    "Turn Start phase ends.",
+    "Play phase starts.",
+    "Play phase ends.",
+    "Outcome phase starts.",
+    "You Flee Regular Monster 2.",
+    "Regular Monster 2 triggers: Red gets Spore Cloud.",
+    "Regular Monster 2 triggers: Red takes Spore Cloud into hand.",
+    "Regular Monster 2 triggers: Gray gets Corrosive Acid.",
+    "Regular Monster 2 triggers: Gray takes Corrosive Acid into hand.",
+    "Outcome phase ends.",
+    "Cleanup phase starts.",
+    "Spore Cloud triggers: Red discards Panic from their hand.",
+    "Spore Cloud triggers: Red discards Shove from their hand.",
+    "Spore Cloud triggers: Red discards Tag Team from their hand.",
+    "Regular Monster 2 goes to the bottom of the Floor deck.",
+    "Cleanup phase ends.",
+    "— end of turn 7 —",
+    "Turn Start phase starts.",
+    "Revealed: Gears & Glitch, Overgrown Hydroponics Bay, Gears & Glitch.",
+    "You are in: Overgrown Hydroponics Bay.",
+    "To the bottom of the Floor deck: Gears & Glitch, Gears & Glitch.",
+    "Red draws Charge.",
+    "Red draws Overdrive.",
+    "Corrosive Acid triggers: Gray Exhausts Duck Under.",
+    "Turn Start phase ends.",
+    "Play phase starts.",
+    "Play phase ends.",
+    "Outcome phase starts.",
+    "You Flee Overgrown Hydroponics Bay.",
+    "Overgrown Hydroponics Bay triggers: Red gets Torn Seal.",
+    "Overgrown Hydroponics Bay triggers: Red takes Torn Seal into hand.",
+    "Overgrown Hydroponics Bay triggers: Gray gets Panic.",
+    "Overgrown Hydroponics Bay triggers: Gray takes Panic into hand.",
+    "Outcome phase ends.",
+    "Cleanup phase starts.",
+    "Spore Cloud triggers: Red discards Torn Seal from their hand.",
+    "Spore Cloud triggers: Red discards Charge from their hand.",
+    "Spore Cloud triggers: Red discards Overdrive from their hand.",
+    "Overgrown Hydroponics Bay goes to the bottom of the Floor deck.",
+    "Cleanup phase ends.",
+    "— end of turn 8 —",
+    "Turn Start phase starts.",
+    "Revealed: Room 1-3, Dark Room, Gears & Glitch.",
+    "You are in: Dark Room.",
+    "To the bottom of the Floor deck: Room 1-3, Gears & Glitch.",
+    "Red's deck is empty — the discard pile shuffles in to make a new one (9 cards).",
+    "Red draws Panic.",
+    "Corrosive Acid triggers: Gray Exhausts Pick The Lock.",
+    "Turn Start phase ends.",
+    "Play phase starts.",
+    "Play phase ends.",
+    "Outcome phase starts.",
+    "You Flee Dark Room.",
+    "Dark Room triggers: Red Exhausts Charge.",
+    "Dark Room triggers: Gray Exhausts Work The Angles.",
+    "Outcome phase ends.",
+    "Cleanup phase starts.",
+    "Spore Cloud triggers: Red discards Panic from their hand.",
+    "Dark Room goes to the bottom of the Floor deck.",
+    "Cleanup phase ends.",
+    "— end of turn 9 —",
+    "Turn Start phase starts.",
+    "Revealed: Automated Defense Turret, Regular Monster 2, Gears & Glitch.",
+    "You are in: Regular Monster 2.",
+    "To the bottom of the Floor deck: Automated Defense Turret, Gears & Glitch.",
+    "Red draws Shove.",
+    "Red draws Overdrive.",
+    "Corrosive Acid triggers: Gray Exhausts Pivot.",
+    "Turn Start phase ends.",
+    "Play phase starts.",
+    "Play phase ends.",
+    "Outcome phase starts.",
+    "You Flee Regular Monster 2.",
+    "Regular Monster 2 triggers: Red gets Torn Seal.",
+    "Regular Monster 2 triggers: Red takes Torn Seal into hand.",
+    "Regular Monster 2 triggers: Gray gets System Feedback.",
+    "Regular Monster 2 triggers: Gray takes System Feedback into hand.",
+    "Outcome phase ends.",
+    "Cleanup phase starts.",
+    "Spore Cloud triggers: Red discards Torn Seal from their hand.",
+    "Spore Cloud triggers: Red discards Shove from their hand.",
+    "Spore Cloud triggers: Red discards Overdrive from their hand.",
+    "Regular Monster 2 goes to the bottom of the Floor deck.",
+    "Cleanup phase ends.",
+    "— end of turn 10 —",
+    "Turn Start phase starts.",
+    "Revealed: Gears & Glitch, Overgrown Hydroponics Bay, Room 1-3.",
+    "You are in: Overgrown Hydroponics Bay.",
+    "To the bottom of the Floor deck: Gears & Glitch, Room 1-3.",
+    "Red draws Charge.",
+    "Red draws Reckless Swing.",
+    "Corrosive Acid triggers: Gray Exhausts Peek Around Corner.",
+    "Turn Start phase ends.",
+    "Play phase starts.",
+    "Play phase ends.",
+    "Outcome phase starts.",
+    "You Flee Overgrown Hydroponics Bay.",
+    "Overgrown Hydroponics Bay triggers: Red gets Spore Cloud.",
+    "Overgrown Hydroponics Bay triggers: Red takes Spore Cloud into hand.",
+    "Overgrown Hydroponics Bay triggers: Gray gets My Head Is Quantum Spinning.",
+    "Overgrown Hydroponics Bay triggers: Gray takes My Head Is Quantum Spinning into hand.",
+    "Outcome phase ends.",
+    "Cleanup phase starts.",
+    "Spore Cloud triggers: Red discards Charge from their hand.",
+    "Spore Cloud triggers: Red discards Charge from their hand.",
+    "Spore Cloud triggers: Red discards Overdrive from their hand.",
+    "Overgrown Hydroponics Bay goes to the bottom of the Floor deck.",
+    "Cleanup phase ends.",
+    "— end of turn 11 —",
+    "Turn Start phase starts.",
+    "Revealed: Gears & Glitch, Dark Room, Automated Defense Turret.",
+    "You are in: Dark Room.",
+    "To the bottom of the Floor deck: Gears & Glitch, Automated Defense Turret.",
+    "Red draws Torn Seal.",
+    "Corrosive Acid triggers: Gray's deck is empty — the discard pile shuffles in to make a new one (1 card).",
+    "Corrosive Acid triggers: Gray Exhausts Duck Under.",
+    "Turn Start phase ends.",
+    "Play phase starts.",
+    "Gray pays with Duck Under, Hack the Doors, Pick The Lock, Exhausting them.",
+    "Corrosive Acid is Scrapped.",
+    "Play phase ends.",
+    "Outcome phase starts.",
+    "You Flee Dark Room.",
+    "Dark Room triggers: Red Exhausts Overdrive.",
+    "Dark Room triggers: Gray is Down — a room's printed punishment. The run is lost.",
+    "Dark Room triggers: Gray discards Pick The Lock from their hand.",
+    "Dark Room triggers: Gray discards My Head Is Quantum Spinning from their hand.",
+    "Dark Room triggers: Gray discards Panic from their hand.",
+    "Dark Room triggers: Gray discards System Feedback from their hand.",
+    "Dark Room triggers: Gray discards My Head Is Quantum Spinning from their hand.",
+    "Outcome phase ends.",
+    "Dark Room triggers: You lose."
+  ]
+}

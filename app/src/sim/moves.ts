@@ -14,7 +14,7 @@
  * here.
  */
 
-import { costOf, payOptions, playableCards, scrapForStatsCards } from "@domain/queries";
+import { costOf, enterableRooms, payOptions, playableCards } from "@domain/queries";
 import type {
   Card,
   CardId,
@@ -107,6 +107,19 @@ function answers(pending: Pending): readonly Command[] {
       ];
     case "ChooseGoodStuff":
       return pending.options.map((card): Command => ({ type: "CHOOSE_CARDS", cardIds: [card.id] }));
+    case "ChooseExhaust":
+      return [
+        ...pending.options.map((card): Command => ({ type: "EXHAUST_CARD", cardId: card.id })),
+        ...(pending.deck > 0 ? [{ type: "EXHAUST_CARD", cardId: null } as const] : []),
+      ];
+    case "ChooseRoom":
+      return enterableRooms(pending).flatMap((room) =>
+        permutations(pending.options.filter((r) => r.id !== room.id)).map((rest): Command => ({
+          type: "CHOOSE_ROOM",
+          roomId: room.id,
+          bottom: rest.map((r) => r.id),
+        })),
+      );
   }
 }
 
@@ -123,14 +136,6 @@ export function playsOf(state: GameState, c: Character, card: Card): readonly Co
   }));
 }
 
-/** Every legal `SCRAP_FOR_STATS`, one per eligible Good Stuff card and stat (Bio-Hazard Containment Vault). */
-export function scrapsOf(state: GameState, c: Character): readonly Command[] {
-  const stats = ["Oomph", "Scramble"] as const;
-  return scrapForStatsCards(state, c).flatMap((card) =>
-    stats.map((stat): Command => ({ type: "SCRAP_FOR_STATS", character: c, cardId: card.id, stat })),
-  );
-}
-
 /* ------------------------------------------------------------- the list */
 
 export function legalCommands(state: GameState): readonly Command[] {
@@ -145,7 +150,6 @@ export function legalCommands(state: GameState): readonly Command[] {
       const out: Command[] = [];
       for (const c of CHARACTERS) {
         for (const card of playableCards(state, c)) out.push(...playsOf(state, c, card));
-        out.push(...scrapsOf(state, c));
       }
       out.push({ type: "END_PLAY" });
       return out;

@@ -1,10 +1,22 @@
 import { describe, expect, it } from "vitest";
-import { FULL_CONTENT, room } from "./__fixtures__/rig";
+import { room } from "./__fixtures__/rig";
 import { CARD_CONTENT } from "../content";
-import { buildFloor, createInitialState, returnRoomsToSupply, roomsOnFloor, TOP_FLOOR } from "./setup";
+import { buildFloor, createInitialState, floorName, returnRoomsToSupply, tierOf, TOP_FLOOR } from "./setup";
 import type { DomainEvent } from "./types";
 
 const content = CARD_CONTENT;
+
+describe("Floors and tiers", () => {
+  it("the Roof is the sixth floor", () => {
+    expect(TOP_FLOOR).toBe(6);
+  });
+  it("floor 1 draws from tier 1", () => expect(tierOf(1)).toBe(1));
+  it("floor 2 draws from tier 2", () => expect(tierOf(2)).toBe(2));
+  it("floor 3 draws from tier 3", () => expect(tierOf(3)).toBe(3));
+  it("floor 4 draws from tier 4", () => expect(tierOf(4)).toBe(4));
+  it("floor 5 draws from tier 5", () => expect(tierOf(5)).toBe(5));
+  it("the Roof draws from no tier", () => expect(tierOf(6)).toBeNull());
+});
 
 describe("Setting up a floor", () => {
   it("deals each character their own deck and leaves both hands empty", () => {
@@ -18,101 +30,76 @@ describe("Setting up a floor", () => {
     expect(state.Gray.deck).toHaveLength(12);
   });
 
-  // Band 1's pool covers every floor 1-3 calls for (10, 9, 8), with every
-  // room cleared — the worst case, since a cleared room never
-  // returns to the pool.
-  it("builds a full floor deck for every floor in tier 1 (floors 1-3)", () => {
+  // Rulebook Setup, "Floor deck": "Assemble the floor deck for the floor
+  // you're building by shuffling the cards for that floor together." Floor N
+  // draws from tier N, and every copy of every card of that tier goes in.
+  it.each([1, 2, 3])("tier %i's floor deck holds every copy of its Rooms and Stairwell", (floor) => {
     const [initial] = createInitialState(1, content);
     const fullSupply = returnRoomsToSupply(initial);
-    for (const floor of [1, 2, 3]) {
-      const state = buildFloor({ ...fullSupply, floor }, []);
-      expect(state.floorDeck).toHaveLength(roomsOnFloor(floor));
-      expect(state.floorDeck.filter((r) => r.kind === "stairwell")).toHaveLength(1);
-      expect(state.floorDeck.every((r) => r.tier === 1)).toBe(true);
-    }
+    const printed = fullSupply.roomSupply.filter((r) => r.tier === floor);
+    const state = buildFloor({ ...fullSupply, floor }, []);
+    expect(state.floorDeck.map((r) => r.id).sort()).toEqual(printed.map((r) => r.id).sort());
+    expect(state.floorDeck.filter((r) => r.kind === "stairwell")).toHaveLength(3);
+    expect(state.floorDeck.filter((r) => r.kind === "room")).toHaveLength(6);
+    expect(state.roomSupply.some((r) => r.tier === floor)).toBe(false);
   });
 
-  // Rulebook Setup, "Floor deck": "The first floor consists of 10 cards. As
-  // you move up, each subsequent floor will have one fewer card than the
-  // previous one."
-  it("floor size is 11 - floor, per rulebook Setup > Floor deck", () => {
-    for (let floor = 1; floor <= TOP_FLOOR; floor += 1) {
-      expect(roomsOnFloor(floor)).toBe(11 - floor);
-    }
-    expect(roomsOnFloor(TOP_FLOOR)).toBe(1);
-  });
-
-  // With tier 1 emptied out, every floor 1-3 calls for cards the pool no
-  // longer holds, so building any of them aborts the run instead.
-  it("aborts every tier-1 floor (1-3), tier 1's pool being short of all of them", () => {
-    const [initial] = createInitialState(1, FULL_CONTENT);
-    const fullSupply = returnRoomsToSupply(initial);
-    const shortBand1 = { ...fullSupply, roomSupply: fullSupply.roomSupply.filter((r) => r.tier !== 1) };
-    for (const floor of [1, 2, 3]) {
-      const events: DomainEvent[] = [];
-      const state = buildFloor({ ...shortBand1, floor, seed: initial.seed }, events);
-      expect(state.phase).toBe("GameOver");
-      expect(state.outcome).toBe("Aborted");
-      expect(events.some((e) => e.type === "RUN_ABORTED")).toBe(true);
-    }
-  });
-
-  // Band 2's pool (18 cards) covers every floor 4-6 calls for (7, 6, 5).
-  it("builds a full floor deck for every floor in tier 2 (floors 4-6)", () => {
+  it("shuffles the floor deck", () => {
     const [initial] = createInitialState(1, content);
     const fullSupply = returnRoomsToSupply(initial);
-    for (const floor of [4, 5, 6]) {
-      const state = buildFloor({ ...fullSupply, floor }, []);
-      expect(state.floorDeck).toHaveLength(roomsOnFloor(floor));
-      expect(state.floorDeck.filter((r) => r.kind === "stairwell")).toHaveLength(1);
-      expect(state.floorDeck.every((r) => r.tier === 2)).toBe(true);
-    }
+    const orders = new Set(
+      Array.from({ length: 20 }, (_, i) =>
+        buildFloor({ ...fullSupply, floor: 1, seed: i }, [])
+          .floorDeck.map((r) => r.id)
+          .join(","),
+      ),
+    );
+    expect(orders.size).toBeGreaterThan(1);
   });
 
-  // Band 3's pool (9 cards) covers every floor 7-9 calls for (4, 3, 2).
-  it("builds a full floor deck for every floor in tier 3 (floors 7-9)", () => {
+  // C59 prints a Stairwell for each of floors 4 and 5.
+  it.each([
+    [4, "Sexy Blob"],
+    [5, "Comrade Black"],
+  ] as const)("floor %i's deck holds %s and every Room of its tier", (floor, stairwell) => {
     const [initial] = createInitialState(1, content);
     const fullSupply = returnRoomsToSupply(initial);
-    for (const floor of [7, 8, 9]) {
-      const state = buildFloor({ ...fullSupply, floor }, []);
-      expect(state.floorDeck).toHaveLength(roomsOnFloor(floor));
-      expect(state.floorDeck.filter((r) => r.kind === "stairwell")).toHaveLength(1);
-      expect(state.floorDeck.every((r) => r.tier === 3)).toBe(true);
-    }
+    const printed = fullSupply.roomSupply.filter((r) => r.tier === floor);
+    const state = buildFloor({ ...fullSupply, floor }, []);
+    expect(state.phase).not.toBe("GameOver");
+    expect(state.floorDeck.map((r) => r.id).sort()).toEqual(printed.map((r) => r.id).sort());
+    const stairwells = state.floorDeck.filter((r) => r.kind === "stairwell");
+    expect(stairwells.map((r) => r.name)).toEqual([stairwell]);
+    expect(state.floorDeck.filter((r) => r.kind === "room").length).toBeGreaterThan(0);
   });
 
-  it("floor 10 is the one fixed Stairwell alone", () => {
+  // A tier that prints no Stairwell leaves no way up, so the run is void. The
+  // real supply prints one for every tier, so this rigs a supply without.
+  it.each([4, 5])("aborts floor %i, its tier printing no Stairwell, naming the floor", (floor) => {
     const [initial] = createInitialState(1, content);
     const fullSupply = returnRoomsToSupply(initial);
-    const state = buildFloor({ ...fullSupply, floor: 10 }, []);
+    const roomSupply = fullSupply.roomSupply.filter((r) => r.kind !== "stairwell");
+    const events: DomainEvent[] = [];
+    const state = buildFloor({ ...fullSupply, roomSupply, floor }, events);
+    expect(state.phase).toBe("GameOver");
+    expect(state.outcome).toBe("Aborted");
+    const aborted = events.find((e) => e.type === "RUN_ABORTED");
+    expect(aborted && "reason" in aborted ? aborted.reason : "").toContain(`Floor ${String(floor)}`);
+  });
+
+  it("the Roof is The Supreme Commander alone", () => {
+    const [initial] = createInitialState(1, content);
+    const fullSupply = returnRoomsToSupply(initial);
+    const state = buildFloor({ ...fullSupply, floor: TOP_FLOOR }, []);
     expect(state.floorDeck).toHaveLength(1);
-    expect(state.floorDeck[0]?.name).toBe("The Monolith Core");
+    expect(state.floorDeck[0]?.name).toBe("The Supreme Commander");
     expect(state.floorDeck[0]?.kind).toBe("stairwell");
     expect(state.floorDeck[0]?.tier).toBeNull();
   });
 
-  // Band 2's pool (18) has more cards than floor 4 needs (7), so which rooms
-  // sit out varies with the seed.
-  it("floor 4's room composition varies with the seed", () => {
-    const [initial] = createInitialState(1, content);
-    const fullSupply = returnRoomsToSupply(initial);
-    const compositions = new Set(
-      Array.from({ length: 20 }, (_, i) => {
-        const state = buildFloor({ ...fullSupply, floor: 4, seed: i }, []);
-        return state.floorDeck
-          .map((r) => r.name)
-          .sort()
-          .join(",");
-      }),
-    );
-    expect(compositions.size).toBeGreaterThan(1);
-  });
-
-  it("takes the Stairwell and Rooms from the floor's own tier", () => {
-    const [state] = createInitialState(1, FULL_CONTENT);
-    const stairwell = state.floorDeck.find((r) => r.kind === "stairwell");
-    expect(stairwell?.tier).toBe(1);
-    expect(state.floorDeck.every((r) => r.tier === 1)).toBe(true);
+  it("calls the sixth floor the Roof", () => {
+    expect(floorName(5)).toBe("Floor 5");
+    expect(floorName(TOP_FLOOR)).toBe("The Roof");
   });
 
   it("gives every physical copy its own id", () => {
@@ -166,7 +153,7 @@ describe("Ending a floor (Ascending, Build the next floor)", () => {
 
   it("does not reset the cleared pile when building the next floor", () => {
     const [initial] = createInitialState(1, content);
-    const clearedRoom = room("Flooded Ventilation Shaft");
+    const clearedRoom = room("Puzzle Room");
     const fullSupply = returnRoomsToSupply({ ...initial, cleared: [] });
     const state = { ...fullSupply, floor: 2, cleared: [clearedRoom] };
 

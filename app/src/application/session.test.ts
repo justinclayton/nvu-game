@@ -1,6 +1,13 @@
 import { describe, expect, it } from "vitest";
-import { FULL_CONTENT as CARD_CONTENT, card, pile, player, rig, room } from "@domain/__fixtures__/rig";
-import type { Command } from "@domain/types";
+import {
+  FULL_CONTENT as CARD_CONTENT,
+  card,
+  pile,
+  player,
+  rig,
+  room,
+} from "@domain/__fixtures__/rig";
+import { enterInShownOrder } from "@domain/queries";
 import {
   canUndo,
   createSession,
@@ -23,9 +30,13 @@ function mustSave(session: Session): SavedRun {
   return saved;
 }
 
-/** The command a session needs to get from a new run into the Play phase. */
-function throughATurn(): readonly Command[] {
-  return [{ type: "FLIP_ROOM" }];
+/** Take a new run into the Play phase: flip, then enter the first room revealed. */
+function throughTurnStart(session: Session): void {
+  session.getState().dispatch({ type: "FLIP_ROOM" });
+  const pending = session.getState().state.pending;
+  const first = pending?.kind === "ChooseRoom" ? pending.options[0] : undefined;
+  if (pending?.kind === "ChooseRoom" && first)
+    session.getState().dispatch(enterInShownOrder(pending, first.id));
 }
 
 describe("dispatch", () => {
@@ -67,7 +78,7 @@ describe("dispatch", () => {
 describe("undo", () => {
   it("cannot reach back past a command that revealed hidden information", () => {
     const session = newSession();
-    for (const command of throughATurn()) session.getState().dispatch(command);
+    throughTurnStart(session);
     // The flip drew both hands to 5, all in the one command — that is itself
     // the checkpoint, so there is nothing before it in this run to undo to.
     expect(canUndo(session.getState())).toBe(false);
@@ -76,7 +87,7 @@ describe("undo", () => {
 
   it("takes back a play, and the log with it", () => {
     const session = newSession();
-    for (const command of throughATurn()) session.getState().dispatch(command);
+    throughTurnStart(session);
     const beforePlay = session.getState();
 
     const red = beforePlay.state.Red;
@@ -144,22 +155,23 @@ describe("a \"you may draw\" question", () => {
 describe("save and replay", () => {
   it("a run is its seed plus its command log", () => {
     const session = newSession();
-    for (const command of throughATurn()) session.getState().dispatch(command);
+    throughTurnStart(session);
     const saved = mustSave(session);
     expect(saved.seed).toBe(SEED);
-    expect(saved.commands).toEqual(throughATurn());
+    expect(saved.commands).toEqual(session.getState().commands);
+    expect(saved.commands.map((c) => c.type)).toEqual(["FLIP_ROOM", "CHOOSE_ROOM"]);
   });
 
   it("replays to exactly the same state", () => {
     const session = newSession();
-    for (const command of throughATurn()) session.getState().dispatch(command);
+    throughTurnStart(session);
     const loaded = loadSession(mustSave(session), content);
     expect(loaded.getState().state).toEqual(session.getState().state);
   });
 
   it("loads a saved run into a live session", () => {
     const session = newSession();
-    for (const command of throughATurn()) session.getState().dispatch(command);
+    throughTurnStart(session);
     const loaded = loadSession(mustSave(session), content);
     expect(loaded.getState().state).toEqual(session.getState().state);
     expect(loaded.getState().commands).toEqual(session.getState().commands);
@@ -197,7 +209,7 @@ describe("notes", () => {
 
   it("changes neither log, so a run replays the same with notes or without", () => {
     const session = newSession();
-    for (const command of throughATurn()) session.getState().dispatch(command);
+    throughTurnStart(session);
     const before = session.getState();
     session.getState().note("a thought");
     expect(session.getState().commands).toEqual(before.commands);

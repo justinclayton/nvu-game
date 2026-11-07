@@ -10,11 +10,12 @@
 #   make app-check  lint, typecheck and test the web game, the sim and the CLI
 #   bin/nvu         the CLI: bin/nvu play, bin/nvu replay, bin/nvu fuzz, bin/nvu help
 #   make sheet      open the print-and-cut card sheet
+#   make card-editor  open every card as an editable face (tools/card-editor.html)
 #   make revision   print the kit revision, R29.C43-v1 (tools/kit-revision.sh)
 #   make pdf        create the card sheet PDF, fronts and backs, print/card-sheet-R29.C43.pdf
 #   make rulebook   create the rulebook PDF, print/rulebook-R29.C43.pdf
 
-.PHONY: help build check bump-revision bump-rules-version revision app app-check app-install sheet pdf rulebook all
+.PHONY: help build check bump-revision bump-rules-version revision app app-check app-install sheet card-editor pdf rulebook all
 default: build
 
 help:
@@ -25,6 +26,7 @@ help:
 	@echo "bin/nvu         the CLI: bin/nvu play, bin/nvu replay, bin/nvu fuzz, bin/nvu help"
 	@echo "make revision   print the kit revision, R29.C43-v1"
 	@echo "make sheet   open the print-and-cut card sheet in a browser"
+	@echo "make card-editor  open every card as an editable face; /card-editor in an agent session writes the edits back"
 	@echo "make pdf     create the card sheet PDF, fronts and backs, print/card-sheet-R29.C43.pdf"
 	@echo "make rulebook  create the rulebook PDF, print/rulebook-R29.C43.pdf"
 	@echo ""
@@ -84,6 +86,15 @@ app-check: app/node_modules build
 # The print-and-cut card sheet, for playing on a table (tools/card-sheet.html).
 sheet: build
 	open tools/card-sheet.html
+
+# The card editor: every card as a face you can edit, add, remove or duplicate
+# (tools/card-editor.html, built into .lavish/ with the card list inside). On its
+# own it hands you a change set to download; /card-editor in an agent session
+# opens it in Lavish and the agent writes each batch into cards.yaml
+# (tools/card-editor.mjs apply).
+card-editor: build
+	node tools/card-editor.mjs
+	open .lavish/cards-editor.html
 
 # The printable kit's PDFs, named for R and C, the counters printed on the
 # cards. The engine count is left off because nothing printed depends on it.

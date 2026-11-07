@@ -1,0 +1,387 @@
+{
+  "format": "nvu-run/1",
+  "exportedAt": "2026-10-26T22:59:53.654Z",
+  "cards": "f9f6f2868cc7",
+  "rules": "R34",
+  "kit": "R34.C58-v17",
+  "floor": 2,
+  "turn": 8,
+  "phase": "GameOver",
+  "outcome": "Defeat",
+  "run": {
+    "seed": 39201,
+    "commands": [
+      {
+        "type": "FLIP_ROOM"
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Red",
+        "cardId": "Charge#4",
+        "payWith": [
+          "Shove#2",
+          "Charge#1"
+        ]
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Gray",
+        "cardId": "Pick The Lock#2",
+        "payWith": [
+          "Peek Around Corner#2",
+          "Duck Under#2"
+        ]
+      },
+      {
+        "type": "END_PLAY"
+      },
+      {
+        "type": "TAKE_REWARD",
+        "cardId": "Tag Team#1"
+      },
+      {
+        "type": "TAKE_REWARD",
+        "cardId": "Hit 'n Run#2"
+      },
+      {
+        "type": "FLIP_ROOM"
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Red",
+        "cardId": "Overdrive#3",
+        "payWith": []
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Red",
+        "cardId": "Charge#3",
+        "payWith": [
+          "Shove#3",
+          "Shove#4"
+        ]
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Gray",
+        "cardId": "Work The Angles#1",
+        "payWith": [
+          "Duck Under#1"
+        ]
+      },
+      {
+        "type": "END_PLAY"
+      },
+      {
+        "type": "TAKE_REWARD",
+        "cardId": "Second Wind#1"
+      },
+      {
+        "type": "TAKE_REWARD",
+        "cardId": "In Step#2"
+      },
+      {
+        "type": "FLIP_ROOM"
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Red",
+        "cardId": "Overdrive#1",
+        "payWith": []
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Red",
+        "cardId": "Charge#4",
+        "payWith": [
+          "Shove#1",
+          "Charge#2"
+        ]
+      },
+      {
+        "type": "END_PLAY"
+      },
+      {
+        "type": "TAKE_REWARD",
+        "cardId": "Fast Follow#2"
+      },
+      {
+        "type": "FLIP_ROOM"
+      },
+      {
+        "type": "END_PLAY"
+      },
+      {
+        "type": "CHOOSE_CARDS",
+        "cardIds": [
+          "Pick The Lock#2",
+          "Pick The Lock#3",
+          "Hit 'n Run#2"
+        ]
+      },
+      {
+        "type": "FLIP_ROOM"
+      },
+      {
+        "type": "PLAY_CARD",
+        "character": "Gray",
+        "cardId": "Spore Cloud#1",
+        "payWith": [
+          "Duck Under#1",
+          "Duck Under#4",
+          "Peek Around Corner#2"
+        ]
+      },
+      {
+        "type": "END_PLAY"
+      },
+      {
+        "type": "FLIP_ROOM"
+      },
+      {
+        "type": "END_PLAY"
+      },
+      {
+        "type": "FLIP_ROOM"
+      },
+      {
+        "type": "END_PLAY"
+      },
+      {
+        "type": "FLIP_ROOM"
+      }
+    ]
+  },
+  "notes": [
+    {
+      "at": 68,
+      "text": "Floor 1 took 2 turns: Ventilation Shaft first, then the Sentry Drone stairwell second of nine rooms. Oomph 8 cleared with Overdrive, Charge, and Gray's Work The Angles (Oomph 1). Cost only 6 cards exhausted, all healed on Ascend. Floor 1 is thin as a challenge when the stairwell shows early."
+    },
+    {
+      "at": 98,
+      "text": "Maintenance has Cap 3 (max 3 cards in the play zone). Gray's best was Scramble 6 (Pick The Lock paid by two cards, Hit n Run paid by the last), one short of 7, so only Red played. Does Cap count both players' cards together? Rulebook does not define Cap."
+    },
+    {
+      "at": 106,
+      "text": "Gears & Glitch came third on floor 2 and I cannot reach it: Red tops out at Oomph 7 with no Scramble (Overdrive, Charge; three plays need 3 payers and I have 2 spare), Gray at Scramble 6 plus Lean In would need Red to spend cards it cannot afford. Oomph 12 is far off. Fleeing without playing anything, since playing only exhausts more. Flee costs 3 each plus Bad Stuff on turn 4 of the run."
+    },
+    {
+      "at": 127,
+      "text": "Spore Cloud prompt said 'Discard down to 3 cards' and 'choose 3 of: ...'. I read it as choose 3 to keep and typed Lock, Lock, Hit n Run; the engine discarded exactly those. By luck I kept Duck, Duck, which is the best pair anyway (Spore Cloud counts in the 3, so Gray holds 2 usable cards, and Pick The Lock cannot be played). Wording should say which cards are discarded. Also question: Spore Cloud holds 'until you hold 3' - rulebook has no entry for Bad Stuff holding counts."
+    },
+    {
+      "at": 152,
+      "text": "Turn 6, Room 1-3 (Dim): Gray holds Pick The Lock x2 and Faceful Of Slime. Slime can't pay, so Gray has only one payer for a cost-2 card and can play nothing at all; Red cannot pay for Gray. Panic makes the Scramble 5 room a 7. A Bad Stuff hand can leave a player with a hand of 'playable' cards that cannot be played. Question: is a player locked out of playing by hand composition intended? Fleeing, Exhaust 2 each."
+    },
+    {
+      "at": 170,
+      "text": "Turn 7, Automated Defense Turret: both lines are out of reach (Red's hand maxes at Oomph 7 because Slime and Panic cannot pay and 3 plays need more payers than Red has; Gray's maximum is Scramble 4). I Flee without playing. Third Flee in a row on floor 2. The Bad Stuff from the first Flee (Slime, Spore Cloud, Panic) is what is now keeping both hands from playing, and each further Flee adds more."
+    },
+    {
+      "at": 200,
+      "text": "Turn 8 Turn Start: Corrosive Acid ('At Turn Start, Exhaust 1') with Red's deck and discard both empty ended the run as Defeat while Red held 8 cards in hand. Rulebook section 9: 'If one player has no cards in their hand, deck, or discard pile, you go Down.' Red had a full hand, so I expected no Down. Possible engine mismatch, or a rule gap on needing-to-exhaust from an empty deck."
+    }
+  ],
+  "log": [
+    "Floor 1 is built: 9 rooms.",
+    "Turn Start phase starts.",
+    "You are in: Ventilation Shaft.",
+    "Red draws Overdrive.",
+    "Red draws Charge.",
+    "Red draws Shove.",
+    "Red draws Charge.",
+    "Red draws Charge.",
+    "Gray draws Peek Around Corner.",
+    "Gray draws Work The Angles.",
+    "Gray draws Duck Under.",
+    "Gray draws Pick The Lock.",
+    "Gray draws Pick The Lock.",
+    "Turn Start phase ends.",
+    "Play phase starts.",
+    "Red pays with Shove, Charge, Exhausting them.",
+    "Red plays Charge.",
+    "Gray pays with Peek Around Corner, Duck Under, Exhausting them.",
+    "Gray plays Pick The Lock.",
+    "Play phase ends.",
+    "Outcome phase starts.",
+    "Oomph 4 and Scramble 4 met — Both players reveal a card reward.",
+    "Ventilation Shaft is Cleared.",
+    "Ventilation Shaft triggers: Red's reward pool shows Reckless Swing, Reckless Swing, Tag Team.",
+    "Red takes Tag Team into their discard pile.",
+    "Ventilation Shaft triggers: Gray's reward pool shows Catch Your Breath, Sharing Is Caring, Hit 'n Run.",
+    "Gray takes Hit 'n Run into their discard pile.",
+    "Outcome phase ends.",
+    "Cleanup phase starts.",
+    "Red discards Charge from their play zone.",
+    "Gray discards Pick The Lock from their play zone.",
+    "Cleanup phase ends.",
+    "— end of turn 1 —",
+    "Turn Start phase starts.",
+    "You are in: The Sentry Drone.",
+    "Red draws Shove.",
+    "Red draws Shove.",
+    "Red draws Shove.",
+    "Gray draws Duck Under.",
+    "Gray draws Pick The Lock.",
+    "Gray draws Pick The Lock.",
+    "Turn Start phase ends.",
+    "Play phase starts.",
+    "Red plays Overdrive.",
+    "Overdrive triggers: Red Exhausts Charge.",
+    "Red pays with Shove, Shove, Exhausting them.",
+    "Red plays Charge.",
+    "Gray pays with Duck Under, Exhausting it.",
+    "Gray plays Work The Angles.",
+    "Play phase ends.",
+    "Outcome phase starts.",
+    "Oomph 8 met — Ascend, and both players reveal a card reward.",
+    "The Sentry Drone is Cleared.",
+    "The Sentry Drone triggers: Red's reward pool shows Junk Launcher, Tag Team, Second Wind.",
+    "Red takes Second Wind into their discard pile.",
+    "The Sentry Drone triggers: Gray's reward pool shows Pack Mule, In Step, Hit 'n Run.",
+    "Gray takes In Step into their discard pile.",
+    "Outcome phase ends.",
+    "Cleanup phase starts.",
+    "Red discards Overdrive from their play zone.",
+    "Red discards Charge from their play zone.",
+    "Gray discards Work The Angles from their play zone.",
+    "Cleanup phase ends.",
+    "— end of turn 2 —",
+    "Floor 1 is clear.",
+    "Red shuffles 11 cards back in.",
+    "Gray shuffles 10 cards back in.",
+    "Floor 2 is built: 9 rooms.",
+    "Turn Start phase starts.",
+    "You are in: Maintenance.",
+    "Red draws Shove.",
+    "Red draws Charge.",
+    "Red draws Charge.",
+    "Red draws Overdrive.",
+    "Red draws Overdrive.",
+    "Gray draws Pick The Lock.",
+    "Gray draws Hit 'n Run.",
+    "Gray draws Pick The Lock.",
+    "Gray draws Duck Under.",
+    "Gray draws Duck Under.",
+    "Turn Start phase ends.",
+    "Play phase starts.",
+    "Red plays Overdrive.",
+    "Overdrive triggers: Red Exhausts Shove.",
+    "Red pays with Shove, Charge, Exhausting them.",
+    "Red plays Charge.",
+    "Play phase ends.",
+    "Outcome phase starts.",
+    "Oomph 7 met — Red reveals a card reward.",
+    "Maintenance is Cleared.",
+    "Maintenance triggers: Red's reward pool shows Fast Follow, Rhythm & Bruise, Break Through.",
+    "Red takes Fast Follow into their discard pile.",
+    "Outcome phase ends.",
+    "Cleanup phase starts.",
+    "Red discards Overdrive from their play zone.",
+    "Red discards Charge from their play zone.",
+    "Cleanup phase ends.",
+    "— end of turn 3 —",
+    "Turn Start phase starts.",
+    "You are in: Gears & Glitch.",
+    "Red draws Shove.",
+    "Red draws Lean In.",
+    "Red draws Charge.",
+    "Red draws Charge.",
+    "Turn Start phase ends.",
+    "Play phase starts.",
+    "Play phase ends.",
+    "Outcome phase starts.",
+    "You Flee Gears & Glitch.",
+    "Gears & Glitch triggers: Red Exhausts Second Wind.",
+    "Gears & Glitch triggers: Red Exhausts Overdrive.",
+    "Gears & Glitch triggers: Red Exhausts Shove.",
+    "Gears & Glitch triggers: Gray Exhausts Pick The Lock.",
+    "Gears & Glitch triggers: Gray Exhausts Work The Angles.",
+    "Gears & Glitch triggers: Gray Exhausts Duck Under.",
+    "Gears & Glitch triggers: Red gets Faceful Of Slime.",
+    "Gears & Glitch triggers: Red takes Faceful Of Slime into hand.",
+    "Gears & Glitch triggers: Gray gets Spore Cloud.",
+    "Gears & Glitch triggers: Gray takes Spore Cloud into hand.",
+    "Outcome phase ends.",
+    "Cleanup phase starts.",
+    "Spore Cloud triggers: Gray discards Pick The Lock from their hand.",
+    "Spore Cloud triggers: Gray discards Pick The Lock from their hand.",
+    "Spore Cloud triggers: Gray discards Hit 'n Run from their hand.",
+    "Gears & Glitch shuffles back into the Floor deck.",
+    "Cleanup phase ends.",
+    "— end of turn 4 —",
+    "Turn Start phase starts.",
+    "You are in: Overgrown Hydroponics Bay.",
+    "Gray draws Pick The Lock.",
+    "Gray draws Peek Around Corner.",
+    "Turn Start phase ends.",
+    "Play phase starts.",
+    "Gray pays with Duck Under, Duck Under, Peek Around Corner, Exhausting them.",
+    "Spore Cloud is Scrapped.",
+    "Play phase ends.",
+    "Outcome phase starts.",
+    "You Flee Overgrown Hydroponics Bay.",
+    "Overgrown Hydroponics Bay triggers: Red gets Panic.",
+    "Overgrown Hydroponics Bay triggers: Red takes Panic into hand.",
+    "Overgrown Hydroponics Bay triggers: Gray gets Faceful Of Slime.",
+    "Overgrown Hydroponics Bay triggers: Gray takes Faceful Of Slime into hand.",
+    "Outcome phase ends.",
+    "Cleanup phase starts.",
+    "Overgrown Hydroponics Bay shuffles back into the Floor deck.",
+    "Cleanup phase ends.",
+    "— end of turn 5 —",
+    "Turn Start phase starts.",
+    "You are in: Room 1-3.",
+    "Gray draws Pick The Lock.",
+    "Turn Start phase ends.",
+    "Play phase starts.",
+    "Play phase ends.",
+    "Outcome phase starts.",
+    "You Flee Room 1-3.",
+    "Room 1-3 triggers: Red Exhausts Tag Team.",
+    "Room 1-3 triggers: Red's deck is empty — the discard pile shuffles in to make a new one (3 cards).",
+    "Room 1-3 triggers: Red Exhausts Overdrive.",
+    "Room 1-3 triggers: Gray Exhausts Duck Under.",
+    "Room 1-3 triggers: Gray Exhausts Peek Around Corner.",
+    "Outcome phase ends.",
+    "Cleanup phase starts.",
+    "Room 1-3 shuffles back into the Floor deck.",
+    "Cleanup phase ends.",
+    "— end of turn 6 —",
+    "Turn Start phase starts.",
+    "You are in: Automated Defense Turret.",
+    "Gray draws In Step.",
+    "Turn Start phase ends.",
+    "Play phase starts.",
+    "Play phase ends.",
+    "Outcome phase starts.",
+    "You Flee Automated Defense Turret.",
+    "Automated Defense Turret triggers: Red Exhausts Charge.",
+    "Automated Defense Turret triggers: Red Exhausts Fast Follow.",
+    "Automated Defense Turret triggers: Gray's deck is empty — the discard pile shuffles in to make a new one (3 cards).",
+    "Automated Defense Turret triggers: Gray Exhausts Pick The Lock.",
+    "Automated Defense Turret triggers: Gray Exhausts Hit 'n Run.",
+    "Automated Defense Turret triggers: Red gets Corrosive Acid.",
+    "Automated Defense Turret triggers: Red takes Corrosive Acid into hand.",
+    "Automated Defense Turret triggers: Gray gets Sluggish.",
+    "Automated Defense Turret triggers: Gray takes Sluggish into hand.",
+    "Outcome phase ends.",
+    "Cleanup phase starts.",
+    "Automated Defense Turret shuffles back into the Floor deck.",
+    "Cleanup phase ends.",
+    "— end of turn 7 —",
+    "Turn Start phase starts.",
+    "You are in: Dark Room.",
+    "Corrosive Acid triggers: Red is Down — Corrosive Acid. The run is lost.",
+    "Corrosive Acid triggers: Red discards Overdrive from their hand.",
+    "Corrosive Acid triggers: Red discards Shove from their hand.",
+    "Corrosive Acid triggers: Red discards Lean In from their hand.",
+    "Corrosive Acid triggers: Red discards Charge from their hand.",
+    "Corrosive Acid triggers: Red discards Charge from their hand.",
+    "Corrosive Acid triggers: Red discards Faceful Of Slime from their hand.",
+    "Corrosive Acid triggers: Red discards Panic from their hand.",
+    "Corrosive Acid triggers: Red discards Corrosive Acid from their hand.",
+    "Turn Start phase ends.",
+    "Corrosive Acid triggers: You lose."
+  ]
+}

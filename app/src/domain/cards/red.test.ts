@@ -7,6 +7,7 @@ import {
   card,
   drawing,
   eventTypes,
+  exhaustFromDeck,
   free,
   handCard,
   ids,
@@ -105,12 +106,14 @@ describe("Cross Punch — 'Exhaust 1. If a Scramble card was already played this
 
   const punch = (state: GameState) => {
     const hand = state.Red.hand.filter((c) => c.name === "Shove");
-    return must(state, {
-      type: "PLAY_CARD",
-      character: "Red",
-      cardId: handCard(state, "Red", "Cross Punch").id,
-      payWith: hand.map((c) => c.id),
-    });
+    return exhaustFromDeck(
+      must(state, {
+        type: "PLAY_CARD",
+        character: "Red",
+        cardId: handCard(state, "Red", "Cross Punch").id,
+        payWith: hand.map((c) => c.id),
+      }),
+    );
   };
 
   it("has no printed Scramble", () => {
@@ -422,12 +425,14 @@ describe("Heavy Pockets — 'Shuffle 1 Stuff from your hand into your deck'", ()
 function cast(state: GameState, c: "Red" | "Gray", name: string) {
   const played = handCard(state, c, name);
   const pay = state[c].hand.filter((x) => x.id !== played.id).slice(0, played.cost);
-  return must(state, {
-    type: "PLAY_CARD",
-    character: c,
-    cardId: played.id,
-    payWith: pay.map((x) => x.id),
-  });
+  return exhaustFromDeck(
+    must(state, {
+      type: "PLAY_CARD",
+      character: c,
+      cardId: played.id,
+      payWith: pay.map((x) => x.id),
+    }),
+  );
 }
 
 function pendingCards(state: GameState) {
@@ -524,7 +529,7 @@ describe("Set 'Em Up — 'Every time you play a card this turn (including this o
 
   it("stops at the end of the turn", () => {
     const armed = must(cast(setup(), "Red", "Set 'Em Up").state, noDraw).state;
-    const ended = must(armed, { type: "END_PLAY" }).state;
+    const ended = exhaustFromDeck(must(armed, { type: "END_PLAY" })).state;
     expect(ended.playZone.some((p) => p.card.name === "Set 'Em Up")).toBe(false);
     expect(ended.thisTurn.questions).toHaveLength(0);
   });

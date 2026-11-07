@@ -348,9 +348,12 @@ jobs:
         run: |
           set -eu
           # Comments come oldest first, so the last plan comment is the newest plan.
-          gh api --paginate --slurp "repos/$GITHUB_REPOSITORY/issues/$PR/comments" \
-            --jq "[.[][] | select(.user.login == \"$BOT\") | select(.body | test(\"<!-- nvu-loop: plan [0-9a-f]{40}( comment [0-9]+)? -->\"))] | last | .body // empty" \
-            > "$RUNNER_TEMP/plan.md"
+          # gh refuses --slurp together with --jq, so the filter runs page by page
+          # and prints each plan's body as one base64 line; the last line is the newest.
+          gh api --paginate "repos/$GITHUB_REPOSITORY/issues/$PR/comments" \
+            --jq ".[] | select(.user.login == \"$BOT\") | select(.body | test(\"<!-- nvu-loop: plan [0-9a-f]{40}( comment [0-9]+)? -->\")) | .body | @base64" \
+            > "$RUNNER_TEMP/plans.b64"
+          tail -n 1 "$RUNNER_TEMP/plans.b64" | base64 --decode > "$RUNNER_TEMP/plan.md"
           if [ ! -s "$RUNNER_TEMP/plan.md" ]; then
             echo "No plan is posted on #$PR: nothing to build."
             exit 0
@@ -432,8 +435,18 @@ jobs:
               < "$RUNNER_TEMP/build-prompt-$slug.md" \
               > "$RUNNER_TEMP/build-transcript-$slug.jsonl"
             result=$(jq -r 'select(.type == "result") | select(.subtype == "success" and (.is_error | not)) | .result' "$RUNNER_TEMP/build-transcript-$slug.jsonl")
+            # The card modules are the generator's output, not the coder's: an item
+            # that teaches tools/cards.mjs a clause changes them, and `make check`
+            # rebuilds them. Rebuild them here from the sources, as the pre-commit
+            # hook would, so the commit carries exactly what the generator writes.
+            if ! node tools/cards.mjs build > "$RUNNER_TEMP/generate-$slug.log" 2>&1; then
+              echo "The generator failed:"; cat "$RUNNER_TEMP/generate-$slug.log"
+              git checkout -- . && git clean -fdq
+              printf -- '- `%s` failed: `node tools/cards.mjs build` failed: %s\n' "$slug" "$(grep -m1 'Error' "$RUNNER_TEMP/generate-$slug.log" || tail -1 "$RUNNER_TEMP/generate-$slug.log")" >> "$summary"
+              failed=$((failed + 1)); continue
+            fi
             bad=$(git status --porcelain | awk '{print $NF}' \
-              | grep -E '^(rulebook\.md|cards\.yaml|tools/cards\.js|app/src/content/cards\.generated\.ts|\.github/|\.githooks/)' || true)
+              | grep -E '^(rulebook\.md|cards\.yaml|\.github/|\.githooks/)' || true)
             if [ -n "$bad" ]; then
               echo "The coder changed files that are not its to change:"; echo "$bad"
               git checkout -- . && git clean -fdq

@@ -7,26 +7,11 @@
 
 import { useEffect, useId, useState } from "react";
 
-import { scrapForStatsCards } from "@domain/queries";
-import type { CardId, Command, GameState, Stat } from "@domain/types";
+import { enterableRooms } from "@domain/queries";
+import type { CardId, Command, GameState } from "@domain/types";
 import { whyNot } from "./legal";
 import { CardView, RoomCardView } from "./CardView";
 import type { Inspected } from "./Inspector";
-
-const STATS: readonly Stat[] = ["Oomph", "Scramble"];
-
-/** Bio-Hazard Containment Vault, while active: one button per Good Stuff card and stat. */
-function scrapButtons(state: GameState): readonly { label: string; command: Command }[] {
-  if (state.phase !== "Play") return [];
-  return (["Red", "Gray"] as const).flatMap((c) =>
-    scrapForStatsCards(state, c).flatMap((card) =>
-      STATS.map((stat) => ({
-        label: `${c} Scraps ${card.name} for +3 ${stat}`,
-        command: { type: "SCRAP_FOR_STATS", character: c, cardId: card.id, stat } as Command,
-      })),
-    ),
-  );
-}
 
 interface Props {
   readonly state: GameState;
@@ -36,10 +21,49 @@ interface Props {
   /** The zoomed card, and where to send a card the player points at. */
   readonly inspected: Inspected | null;
   readonly onInspect: (item: Inspected | null) => void;
+  /** At a room choice: whether the rooms passed over go to the bottom right one first. */
+  readonly bottomReversed?: boolean | undefined;
+  readonly onSwapBottom?: (() => void) | undefined;
 }
 
-export function Controls({ state, dispatch, hint, inspected, onInspect }: Props) {
+export function Controls({
+  state,
+  dispatch,
+  hint,
+  inspected,
+  onInspect,
+  bottomReversed,
+  onSwapBottom,
+}: Props) {
   const whyId = useId();
+  if (state.pending?.kind === "ChooseRoom") {
+    const passing = state.pending.options.length - 1;
+    const enterable = enterableRooms(state.pending);
+    const ambush = enterable.length < state.pending.options.length;
+    return (
+      <div className="controls controls--pending">
+        <p className="controls__prompt">
+          {state.pending.prompt} Click a revealed room to enter it.
+        </p>
+        {ambush ? (
+          <p className="controls__hint">
+            Ambush: you must enter {enterable.map((r) => r.name).join(" or ")}.
+          </p>
+        ) : null}
+        {passing > 1 ? (
+          <>
+            <p className="controls__hint">
+              The other two go to the bottom of the floor deck, {bottomReversed ? "right" : "left"}{" "}
+              one first.
+            </p>
+            <button type="button" className="button" onClick={onSwapBottom}>
+              Swap the order
+            </button>
+          </>
+        ) : null}
+      </div>
+    );
+  }
   if (state.pending) {
     return (
       <PendingChoice
@@ -53,10 +77,9 @@ export function Controls({ state, dispatch, hint, inspected, onInspect }: Props)
 
   const buttons: readonly { label: string; command: Command }[] =
     state.phase === "Turn Start"
-      ? [{ label: "Flip the next room", command: { type: "FLIP_ROOM" } }]
+      ? [{ label: "Reveal the top rooms", command: { type: "FLIP_ROOM" } }]
       : state.phase === "Play"
         ? [
-            ...scrapButtons(state),
             { label: "Both of us have stopped — check the room", command: { type: "END_PLAY" } },
           ]
         : [];
@@ -244,6 +267,36 @@ function PendingChoice({ state, dispatch, inspected, onInspect }: Props) {
     case "ChooseCards":
       return (
         <ChooseCards state={state} dispatch={dispatch} inspected={inspected} onInspect={onInspect} />
+      );
+
+    case "ChooseExhaust":
+      return (
+        <div className="controls controls--pending">
+          <p className="controls__prompt">{pending.prompt}</p>
+          <div className="zone">
+            {pending.options.map((card) => (
+              <CardView
+                key={card.id}
+                card={card}
+                inspect={{ inspected, onInspect }}
+                onClick={() => {
+                  dispatch({ type: "EXHAUST_CARD", cardId: card.id });
+                }}
+              />
+            ))}
+          </div>
+          {pending.deck > 0 ? (
+            <button
+              type="button"
+              className="button button--primary"
+              onClick={() => {
+                dispatch({ type: "EXHAUST_CARD", cardId: null });
+              }}
+            >
+              Top of the deck ({pending.deck})
+            </button>
+          ) : null}
+        </div>
       );
   }
 }

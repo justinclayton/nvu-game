@@ -1,6 +1,7 @@
 import { execFileSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
+import { roomKeywords } from "../../../tools/cards.mjs";
 import { CARD_CONTENT, CARD_SOURCE } from "./index";
 
 const REPO = fileURLToPath(new URL("../../..", import.meta.url));
@@ -35,6 +36,36 @@ describe("content", () => {
         }
       }
     }
+  });
+
+  it("reads the words before any ( of a room's text into keywords", () => {
+    const keywordsOf = (name: string) => CARD_CONTENT.rooms.find((r) => r.name === name)?.keywords;
+    expect(keywordsOf("Monster 5-3")).toEqual(["Ambush", "Heavy"]);
+    expect(keywordsOf("Double Dark Hallway of Death")).toEqual(["Lockstep", "Dim"]);
+  });
+
+  it("keeps a room keyword it doesn't know as data, and drops punctuation", () => {
+    expect(roomKeywords("Sticky (clings)")).toEqual({ keywords: [], unparsed: ["Sticky"] });
+    expect(roomKeywords("Ambush. Relentless.")).toEqual({ keywords: ["Ambush", "Relentless"], unparsed: [] });
+    expect(roomKeywords("")).toEqual({ keywords: [], unparsed: [] });
+  });
+
+  it("reads every outcome and Flee line into effects", () => {
+    // A clause the generator does not know is kept on the line as `unparsed`
+    // so the list still builds. This test is where it goes red: the PR that
+    // printed the line plans the engine work, and extends the generator's
+    // clauses (tools/cards.mjs) and the engine together.
+    const unread: string[] = [];
+    for (const room of CARD_CONTENT.rooms) {
+      room.challenges.forEach((c, i) =>
+        c.thresholds.forEach((t, j) => {
+          for (const clause of t.unparsed ?? []) unread.push(`${room.name} line ${String(i + 1)}.${String(j + 1)}: "${clause}"`);
+        }),
+      );
+      for (const clause of room.flee.unparsed ?? []) unread.push(`${room.name} Flee: "${clause}"`);
+      for (const word of room.unparsedKeywords ?? []) unread.push(`${room.name} keyword: "${word}"`);
+    }
+    expect(unread).toEqual([]);
   });
 
   it("gives every room's threshold the same shape, whatever the room's printed kind", () => {

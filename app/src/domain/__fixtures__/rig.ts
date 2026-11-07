@@ -57,6 +57,11 @@ export function room(name: string): Room {
   return mintRoom(face, counter);
 }
 
+/** A printed room without its keywords, for a test of a rule its Lockstep or Cap would get in the way of. */
+export function plainRoom(name: string): Room {
+  return { ...room(name), keywords: [] };
+}
+
 /** Security Turnstile with its Oomph 5 line paying Red Good Stuff, for tests of Good Stuff arriving at Outcome. */
 export function goodStuffTurnstile(): Room {
   const printed = room("Security Turnstile");
@@ -76,9 +81,12 @@ export function goodStuffTurnstile(): Room {
   };
 }
 
-/** Flooded Ventilation Shaft with its Oomph 3 and Scramble 3 line paying both players Good Stuff. */
+/**
+ * Puzzle Room with its Oomph 3 and Scramble 5 line paying both players Good
+ * Stuff, and without its Lockstep, so one player may play the whole line.
+ */
 export function goodStuffShaft(): Room {
-  const printed = room("Flooded Ventilation Shaft");
+  const printed = plainRoom("Puzzle Room");
   return {
     ...printed,
     challenges: printed.challenges.map((challenge) => ({
@@ -174,14 +182,38 @@ export function must(state: GameState, command: Command): Ran {
   return { state: result.state, events: result.events };
 }
 
-/** Fold commands over a state, collecting every event. */
+/**
+ * Fold commands over a state, collecting every event. An Exhaust the run
+ * stops on is answered off the top of the deck (`exhaustFromDeck`) unless the
+ * next command answers it, so a test about something else reads as it did
+ * when every Exhaust came off the deck.
+ */
 export function play(state: GameState, commands: readonly Command[]): Ran {
   let s = state;
   const events: DomainEvent[] = [];
-  for (const command of commands) {
+  commands.forEach((command, i) => {
     const ran = must(s, command);
-    s = ran.state;
-    events.push(...ran.events);
+    const next = commands[i + 1];
+    const settled = next?.type === "EXHAUST_CARD" ? ran : exhaustFromDeck(ran);
+    s = settled.state;
+    events.push(...settled.events);
+  });
+  return { state: s, events };
+}
+
+/**
+ * Answer every Exhaust the run is waiting on with the top of the deck, or
+ * with the first card offered once the deck is empty, for a test about
+ * something other than which card goes (rulebook, Keywords: `Exhaust X`).
+ */
+export function exhaustFromDeck(ran: Ran): Ran {
+  let s = ran.state;
+  const events = [...ran.events];
+  while (s.pending?.kind === "ChooseExhaust") {
+    const cardId = s.pending.deck > 0 ? null : (s.pending.options[0]?.id ?? null);
+    const next = must(s, { type: "EXHAUST_CARD", cardId });
+    s = next.state;
+    events.push(...next.events);
   }
   return { state: s, events };
 }
@@ -234,11 +266,11 @@ export const playing = (over: Partial<GameState> = {}): GameState =>
     ...over,
   });
 
-/** Play phase at Smoldering Armory (Flee: Both players Exhaust 3), both decks and discard piles empty: one Exhaust away from Going Down. */
+/** Play phase at Ticking Time Bomb (Flee: Both players Exhaust 3), both decks and discard piles empty: one Exhaust away from Going Down. */
 export const goingDown = (hand: readonly Card[] = []): GameState =>
   rig({
     phase: "Play",
-    activeRoom: room("Smoldering Armory"),
+    activeRoom: room("Ticking Time Bomb"),
     Red: player({ deck: [], discard: [], hand }),
     Gray: player({ deck: pile("Duck Under", 4) }),
   });

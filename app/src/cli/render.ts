@@ -4,15 +4,16 @@ import {
   allThresholds,
   contributionOf,
   costOf,
+  enterableRooms,
   metThresholds,
   payOptions,
   playableCards,
-  scrapForStatsCards,
   statPool,
   thresholdLines,
 } from "@domain/queries";
 import type { Card, Character, GameState, Room } from "@domain/types";
 import type { CardFace, RoomFace, StatRequirement } from "@domain/printed";
+import { floorName } from "@domain/setup";
 import { CHARACTERS, playerOf } from "@domain/verbs";
 
 /**
@@ -91,9 +92,10 @@ export function printedRoomLines(room: RoomFace): string[] {
   return lines;
 }
 
-function roomLines(state: GameState, room: Room): string[] {
+function roomLines(state: GameState, room: Room, label = "Room"): string[] {
   const met = new Set(metThresholds(state));
-  const lines = [`Room: ${room.name} (${room.kind})`];
+  const lines = [`${label}: ${room.name} (${room.kind})`];
+  if (room.text.trim() !== "") lines.push(`  ${room.text.trim()}`);
   for (const t of allThresholds(room)) {
     const mark = met.has(t) ? "✔" : " ";
     const need = thresholdLines(state, t)
@@ -149,14 +151,19 @@ export function renderTable(state: GameState): string {
   const lines: string[] = [];
   // Turn Start sits between turns with the just-ended turn's number still on
   // the state (the engine bumps it at the next flip, not here) — show the
-  // turn it is about to start instead.
-  const turn = state.phase === "Turn Start" ? state.turn + 1 : state.turn;
+  // turn it is about to start instead. Once the flip has revealed the rooms,
+  // the number is already the new turn's.
+  const beforeFlip = state.phase === "Turn Start" && state.pending?.kind !== "ChooseRoom";
+  const turn = beforeFlip ? state.turn + 1 : state.turn;
   lines.push(
-    `Floor ${String(state.floor)} · turn ${String(turn)} · ${state.phase}` +
+    `${floorName(state.floor)} · turn ${String(turn)} · ${state.phase}` +
       `   floor deck ${String(state.floorDeck.length)}, cleared ${String(state.cleared.length)}` +
       `   Good Stuff ${String(state.pools.goodStuff.length)}, Bad Stuff ${String(state.pools.badStuff.length)}`,
   );
   if (state.activeRoom) lines.push(...roomLines(state, state.activeRoom));
+  if (state.pending?.kind === "ChooseRoom") {
+    for (const room of state.pending.options) lines.push(...roomLines(state, room, "Revealed"));
+  }
   const pool = state.resolution?.pool ?? statPool(state);
   if (state.phase === "Play" || state.playZone.length > 0 || state.resolution?.pool) {
     lines.push(`Stat pool: Oomph ${String(pool.oomph)}, Scramble ${String(pool.scramble)}`);
@@ -219,6 +226,34 @@ export function moveHint(state: GameState): string {
       case "ChooseGoodStuff":
         lines.push(`choose <Name> — keep 1 of: ${pending.options.map((c) => c.name).join(", ")}`);
         break;
+      case "ChooseExhaust": {
+        const p = playerOf(state, pending.character);
+        const named = (from: readonly { readonly id: string; readonly name: string }[]) =>
+          pending.options.filter((c) => from.some((x) => x.id === c.id)).map((c) => c.name).join(", ") ||
+          "nothing";
+        const deck =
+          pending.deck > 0
+            ? `, or choose deck for the top card, unseen (${String(pending.deck)} in the deck)`
+            : "";
+        lines.push(
+          `choose <Name> — Exhaust 1 of ${String(pending.remaining)}: hand ${named(p.hand)}; ` +
+            `discard ${named(p.discard)}${deck}. Where both hold one, write choose hand <Name> or choose discard <Name>.`,
+        );
+        break;
+      }
+      case "ChooseRoom": {
+        const enterable = enterableRooms(pending).map((r) => r.name).join(", ");
+        // Ambush narrows the entry, so say so rather than drop the other rooms without a word.
+        const which =
+          enterableRooms(pending).length < pending.options.length
+            ? `Ambush: you must enter ${enterable}`
+            : `enter one of: ${enterable}`;
+        lines.push(
+          `choose <Room> [<Room>...] — ${which}; ` +
+            "name the rest to set the order they go to the bottom (default: as shown)",
+        );
+        break;
+      }
     }
     lines.push("undo — step back to the last checkpoint");
     return lines.join("\n");
@@ -228,7 +263,7 @@ export function moveHint(state: GameState): string {
     case "Turn Start":
       lines.push(
         state.floorDeck.length > 0
-          ? "flip — flip the next room and draw"
+          ? "flip — reveal the top 3 rooms of the floor deck"
           : "No legal moves — the run is over.",
       );
       break;
@@ -241,9 +276,6 @@ export function moveHint(state: GameState): string {
           const payers = payOptions(state, c, card.id).map((x) => x.name);
           const pay = cost > 0 ? ` pay <${String(cost)} of: ${payers.join(", ")}>` : "";
           lines.push(`card ${c} ${card.name} (cost ${String(cost)})${pay}`);
-        }
-        for (const card of scrapForStatsCards(state, c)) {
-          lines.push(`scrap ${c} ${card.name} for <Oomph|Scramble>`);
         }
       }
       lines.push("end — end the Play phase and resolve the room");

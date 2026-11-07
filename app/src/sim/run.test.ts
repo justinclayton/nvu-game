@@ -34,9 +34,9 @@ describe("simulate", () => {
     }
   });
 
-  // Band 1's pool is short of what floor 1 calls for (setup.test.ts), so a
-  // run on the real card list aborts before its first command — these two
-  // need an actual command in flight, so they play on a padded tier 1.
+  // Every floor prints a Stairwell (C59), so a run on the real card list is
+  // not Aborted; these two play on a padded tier 1 so the run is long enough
+  // to hit the command budget.
   it("stops at the command budget and says so", () => {
     const run = simulate(1, randomPolicy, FULL_CONTENT, { maxCommands: 5 });
     expect(run.stopped).toBe("Budget");

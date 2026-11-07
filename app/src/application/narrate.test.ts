@@ -73,6 +73,12 @@ describe("describeEvent", () => {
     expect(describeEvent(shuffled(3))).toBe("Red shuffles 3 cards back in.");
   });
 
+  it("says Scrapping for a payment a Corrosive room Scrapped, and Exhausting otherwise", () => {
+    const paid = (scrapped: boolean): DomainEvent => ({ type: "COST_PAID", character: "Gray", cards: [crowbar], scrapped });
+    expect(describeEvent(paid(true))).toBe("Gray pays with Crowbar, Scrapping it.");
+    expect(describeEvent(paid(false))).toBe("Gray pays with Crowbar, Exhausting it.");
+  });
+
   it("pluralises the reshuffled discard count", () => {
     const reshuffled = (n: number): DomainEvent => ({ type: "DISCARD_RESHUFFLED", character: "Gray", cards: n });
     expect(describeEvent(reshuffled(1))).toContain("(1 card).");
@@ -94,9 +100,9 @@ describe("describeEvent", () => {
       type: "CARD_EXHAUSTED",
       character: "Red",
       card: crowbar,
-      source: "Smoldering Armory",
+      source: "Ticking Time Bomb",
     };
-    expect(describeEvent(event)).toBe("Smoldering Armory triggers: Red Exhausts Crowbar.");
+    expect(describeEvent(event)).toBe("Ticking Time Bomb triggers: Red Exhausts Crowbar.");
   });
 
   it("says nothing of a cause when a player acted on their own", () => {

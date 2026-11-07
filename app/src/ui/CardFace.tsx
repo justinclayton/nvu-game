@@ -151,6 +151,7 @@ export function RoomFace({ room, state }: RoomFaceProps) {
       <div className="face__type">{ROOM_KIND[room.kind]}</div>
       <div className="name">{room.name}</div>
       <div className="face__art" aria-hidden="true" />
+      {room.text ? <div className="room-text">{room.text}</div> : null}
       <ul className="lines">
         {allThresholds(room).map((t, i) => {
           const met = state ? thresholdIsMet(state, t) : false;

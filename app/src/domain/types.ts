@@ -17,6 +17,7 @@ import type {
   Rarity,
   RoomBand,
   RoomEffect,
+  RoomKeyword,
   RoomKind,
   Stat,
   Threshold,
@@ -54,9 +55,12 @@ export interface Room {
   readonly id: RoomId;
   readonly name: string;
   readonly kind: RoomKind;
-  /** Which floors' pool the card is drawn from; `null` for the one fixed Floor 10 Stairwell. */
+  /** The floor the card serves, 1 to 5; `null` for the Roof. */
   readonly tier: RoomBand;
   readonly flavor: string;
+  /** The printed rule text, e.g. "Dim (only draw up to 4 cards)". Empty for a plain room. */
+  readonly text: string;
+  readonly keywords: readonly RoomKeyword[];
   readonly challenges: readonly Challenge[];
   readonly flee: FleeLine;
 }
@@ -132,23 +136,47 @@ export interface TurnRecord {
    * spent one per play regardless of what it saves.
    */
   readonly playDiscount: Readonly<Record<Character, number>>;
+  /** Lockstep: who put the latest card into the play zone this turn; null before the first. */
+  readonly lastPlayer: Character | null;
   /** System Feedback: banked off the shared pool this turn; a stat never reads below zero. */
   readonly poolPenalty: { readonly oomph: number; readonly scramble: number };
-  /** Bio-Hazard Containment Vault: banked onto the shared pool this turn by Scrapping Good Stuff. */
+  /** Banked onto the shared pool this turn by cards that add a stat. */
   readonly poolBonus: { readonly oomph: number; readonly scramble: number };
+  /** The net of those two, by the character whose card banked it: what each side's own total gains or loses. */
+  readonly banked: Readonly<Record<Character, { readonly oomph: number; readonly scramble: number }>>;
   /** It Pays To Be Reckless: cards each character put in their Exhaust pile this turn, from any pile. */
   readonly exhausted: Readonly<Record<Character, number>>;
   /** Bull Rush: of those, the ones Exhausted off the top of the deck. */
   readonly exhaustedFromDeck: Readonly<Record<Character, number>>;
+  /**
+   * Exhausts a printed line owes and nobody has picked yet, oldest first
+   * (rulebook, Keywords: `Exhaust X`). The engine takes what leaves no choice
+   * and asks a `ChooseExhaust` for the rest, as soon as nothing else is waiting.
+   */
+  readonly exhaustOwed: readonly OwedExhaust[];
+}
+
+/** One printed Exhaust line still to be carried out. */
+export interface OwedExhaust {
+  readonly character: Character;
+  readonly amount: number;
+  /** The card or room whose line it is, for the log. */
+  readonly cause: string;
+  /**
+   * `Exhaust X cards from your deck` (Heavy): off the top of the deck, with
+   * the discard pile reshuffled when the deck runs out, and from the hand
+   * only once both are empty. False for a bare `Exhaust X`.
+   */
+  readonly fromDeck: boolean;
 }
 
 /* ------------------------------------------------------------ the phases */
 
 /**
- * Rulebook, Each Turn, Turn Start: bundles both its steps, Flip the room and Draw up
- * to five, into `FLIP_ROOM` — there is no decision between them, so the state
- * rests at `Turn Start` before that command and moves straight to `Play`
- * after it. `END_PLAY` moves the state into `Outcome`, and once the room's
+ * Rulebook, Each Turn, Turn Start: `FLIP_ROOM` reveals the top rooms of the
+ * floor deck and rests at `Turn Start` on a `ChooseRoom` pending; `CHOOSE_ROOM`
+ * enters one and draws up to five, moving straight to `Play`. With one room
+ * left there is no choice, and `FLIP_ROOM` runs straight through to `Play`. `END_PLAY` moves the state into `Outcome`, and once the room's
  * effects are drained, into `Cleanup`. Both rest there only while a card or
  * the room has raised a `pending` choice — otherwise the transition runs
  * straight through to `Turn Start`, or to the next floor's `Turn Start` on an Ascend.
@@ -251,6 +279,32 @@ export type Pending =
       readonly source: PendingSource | null;
     }
   | {
+      /**
+       * Rulebook, Each Turn, Turn Start: the top 3 rooms of the floor deck,
+       * still in the floor deck. The players enter one, answered with
+       * `CHOOSE_ROOM`; the rest go to the bottom in the order they name.
+       */
+      readonly kind: "ChooseRoom";
+      readonly prompt: string;
+      readonly options: readonly Room[];
+      readonly source: null;
+    }
+  | {
+      /**
+       * Rulebook, Keywords: `Exhaust X` — the head of `exhaustOwed`, one card
+       * at a time. `options` are the cards in hand and in the discard pile
+       * that may go; `deck` is how many cards the deck holds, and its top card
+       * is the other answer. `remaining` counts this card.
+       */
+      readonly kind: "ChooseExhaust";
+      readonly prompt: string;
+      readonly character: Character;
+      readonly options: readonly Card[];
+      readonly deck: number;
+      readonly remaining: number;
+      readonly source: null;
+    }
+  | {
       /** Rulebook, Keywords: `Reveal a card reward` — the top 3 of the character's reward pool, still in the pool. */
       readonly kind: "TakeReward";
       readonly prompt: string;
@@ -283,7 +337,7 @@ export interface Resolution {
   readonly effects: readonly RoomEffect[];
   /** How the room ended. */
   readonly roomEnded: "Cleared" | "Fled";
-  /** The room that ended, so Cleanup can shuffle a Fled one back into the Floor deck. */
+  /** The room that ended, so Cleanup can put a Fled one on the bottom of the Floor deck. */
   readonly room: Room;
   /** A met challenge said `Ascend`: Cleanup runs, then the Ascending steps (rulebook, Outcome). */
   readonly ascends: boolean;
@@ -336,6 +390,10 @@ export interface GameState {
 
 export type Command =
   | { readonly type: "FLIP_ROOM" }
+  /** Enter `roomId`; `bottom` is every other revealed room, in the order they go under the floor deck. */
+  | { readonly type: "CHOOSE_ROOM"; readonly roomId: RoomId; readonly bottom: readonly RoomId[] }
+  /** Answers a `ChooseExhaust`: a card from hand or the discard pile, or null for the top of the deck. */
+  | { readonly type: "EXHAUST_CARD"; readonly cardId: CardId | null }
   | {
       readonly type: "PLAY_CARD";
       readonly character: Character;
@@ -343,13 +401,6 @@ export type Command =
       readonly payWith: readonly CardId[];
     }
   | { readonly type: "END_PLAY" }
-  | {
-      /** Bio-Hazard Containment Vault, while active: Scrap a Good Stuff card from hand for +3 to one stat. */
-      readonly type: "SCRAP_FOR_STATS";
-      readonly character: Character;
-      readonly cardId: CardId;
-      readonly stat: Stat;
-    }
   | { readonly type: "CHOOSE_CHARACTER"; readonly character: Character }
   | { readonly type: "CHOOSE_PILE"; readonly pile: Pile }
   | { readonly type: "CHOOSE_STAT"; readonly stat: Stat }
@@ -387,7 +438,9 @@ type DomainEventBody =
   | { readonly type: "PHASE_STARTED"; readonly phase: LoggedPhase }
   | { readonly type: "PHASE_ENDED"; readonly phase: LoggedPhase }
   | { readonly type: "FLOOR_BUILT"; readonly floor: number; readonly rooms: number }
+  | { readonly type: "ROOMS_REVEALED"; readonly rooms: readonly Room[] }
   | { readonly type: "ROOM_FLIPPED"; readonly room: Room }
+  | { readonly type: "ROOMS_TO_BOTTOM"; readonly rooms: readonly Room[] }
   | {
       readonly type: "CARD_DRAWN";
       readonly character: Character;
@@ -398,7 +451,13 @@ type DomainEventBody =
       readonly turnStart?: boolean;
     }
   | { readonly type: "CARD_PLAYED"; readonly character: Character; readonly card: Card }
-  | { readonly type: "COST_PAID"; readonly character: Character; readonly cards: readonly Card[] }
+  /** `scrapped`: a Corrosive room took the payment to the Scrapyard, not the Exhaust pile. */
+  | {
+      readonly type: "COST_PAID";
+      readonly character: Character;
+      readonly cards: readonly Card[];
+      readonly scrapped: boolean;
+    }
   | {
       readonly type: "CARD_DISCARDED";
       readonly character: Character;
@@ -406,14 +465,6 @@ type DomainEventBody =
       readonly from: DiscardedFrom;
     }
   | { readonly type: "CARD_SCRAPPED"; readonly character: Character | null; readonly card: Card }
-  | {
-      /** Bio-Hazard Containment Vault: one Scrap, one stat, one line — see `narrate.ts`. */
-      readonly type: "CARD_SCRAPPED_FOR_STATS";
-      readonly character: Character;
-      readonly card: Card;
-      readonly stat: Stat;
-      readonly amount: number;
-    }
   | {
       readonly type: "CARD_EXHAUSTED";
       readonly character: Character;
@@ -458,7 +509,8 @@ type DomainEventBody =
     }
   | { readonly type: "ROOM_CLEARED"; readonly room: Room }
   | { readonly type: "ROOM_FLED"; readonly room: Room }
-  | { readonly type: "FLED_RESHUFFLED"; readonly room: Room }
+  | { readonly type: "FLED_TO_BOTTOM"; readonly room: Room }
+  | { readonly type: "FLED_TO_TOP"; readonly room: Room }
   | { readonly type: "WENT_DOWN"; readonly character: Character; readonly cause: string }
   | { readonly type: "REWARD_REVEALED"; readonly character: Character; readonly cards: readonly Card[] }
   | {
@@ -485,14 +537,14 @@ export type RejectionCode =
   | "NoPendingChoice"
   | "GameIsOver"
   | "CharacterIsDown"
+  | "LockedOut"
+  | "CapReached"
   | "NotInHand"
   | "WrongPayment"
   | "CannotPayWithThat"
   | "NotAnOption"
   | "NotOffered"
-  | "FloorDeckEmpty"
-  | "RoomDoesNotAllow"
-  | "NotGoodStuff";
+  | "FloorDeckEmpty";
 
 /** An illegal command is a value, not a throw. */
 export interface Rejection {

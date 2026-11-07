@@ -10,6 +10,7 @@ import {
   card,
   drawing,
   eventTypes,
+  exhaustFromDeck,
   free,
   handCard,
   keepFirstGoodStuff,
@@ -77,16 +78,18 @@ const playPaying = (
 };
 
 /**
- * Covering Fire asks "draw 1 card?" once Red's play is done. Take every draw it offers, and
- * return everything that happened from the play to the last answer.
+ * Covering Fire asks "draw 1 card?" once Red's play is done. Take every draw it offers, answer
+ * each Exhaust off the top of the deck, and return everything that happened from the play to
+ * the last answer.
  */
 const takingEveryDraw = (first: Ran): Ran => {
-  let state = first.state;
-  const events = [...first.events];
+  const settled = exhaustFromDeck(first);
+  let state = settled.state;
+  const events = [...settled.events];
   while (state.pending?.kind === "ChooseDraw") {
     const offer = state.pending.options[0];
     if (!offer) throw new Error("a draw question with nothing on offer");
-    const answered = must(state, drawing(offer.character, offer.count));
+    const answered = exhaustFromDeck(must(state, drawing(offer.character, offer.count)));
     state = answered.state;
     events.push(...answered.events);
   }
@@ -171,17 +174,19 @@ describe("a reaction's consequences resolve before the next listener hears the e
     const { state: next, events } = takingEveryDraw(
       must(state, free("Red", handCard(state, "Red", "Coil Of Cable").id)),
     );
-    // The first Exhaust takes Red's last card; the second finds nothing left.
+    // The first Exhaust takes Red's last deck card; the second takes the last card in hand,
+    // and with nothing left Red goes Down (rulebook, Going Down).
     expect(drawsAndLosses(events)).toEqual([
       "Gray: draw",
       "Red: exhaust",
       "Gray: draw",
+      "Red: exhaust",
       "Red: down",
     ]);
     expect(next.phase).toBe("GameOver");
   });
 
-  it("with Red's deck and discard empty, Red goes Down after the first draw and the second never happens", () => {
+  it("with Red's deck and discard empty, the first draw's Exhaust takes Red's last card, Red goes Down, and the second draw never happens", () => {
     const state = rig({
       phase: "Play",
       activeRoom: room("Security Turnstile"),
@@ -192,7 +197,7 @@ describe("a reaction's consequences resolve before the next listener hears the e
     const { state: next, events } = takingEveryDraw(
       must(state, free("Red", handCard(state, "Red", "Coil Of Cable").id)),
     );
-    expect(drawsAndLosses(events)).toEqual(["Gray: draw", "Red: down"]);
+    expect(drawsAndLosses(events)).toEqual(["Gray: draw", "Red: exhaust", "Red: down"]);
     expect(next.Gray.hand).toHaveLength(1);
     expect(next.phase).toBe("GameOver");
   });

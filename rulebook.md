@@ -1,19 +1,16 @@
 # *North vs Up*: Rulebook
 
-Rules version: R33
+Rules version: R37
 
 ---
 
 ## Intro
 
-Something came down on Pyramid Tower and moved in. **Red** and **Gray** are going in to find out what it is.
-
-Ten floors. On each one you land in the dark, run through whatever is in front of you, grab
-whatever is not nailed down, and kill the thing that is guarding the stairs. If you're not prepared, you can always run -- but it'll keep rearing its ugly head until you take it down.
+Flavor Text To Be Written Later.
 
 To succeed, **Red and Gray must work together**. Each have their own strengths, and only through communication and teamwork will you be able to avoid doom.
 
-When you clear a floor, you move up. Because it's a pyramid, there will be fewer rooms to scavenge before you hit trouble all over again. When the final floor has been cleared and you reach the rooftop, you WIN!
+When you clear a floor, you can rest for a moment, then move up and run into trouble all over again. When the final floor has been cleared and you reach the rooftop and defeat what awaits you, you WIN!
 
 ---
 
@@ -23,7 +20,7 @@ When you clear a floor, you move up. Because it's a pyramid, there will be fewer
 
 Some things to note about how *North vs Up* works:
 
-**Your deck is your HP total, called `Stamina`.** Cards you lose do not come back. If you need a card and have none left, you go `Down`, and the game is lost.
+**Your deck is your HP total, called `Stamina`.** When you run out of cards, you go `Down`, and the game is lost.
 
 **You draw up to five cards each turn.** Cards you don't spend stay in your hand.
 
@@ -40,15 +37,9 @@ Each player grabs the **starter cards** for their character. This will form your
 
 ### Floor deck
 
-The tower is made up of Floors, which are grouped into four tiers: Lower Floors (1–3), Middle Floors (4–6), Upper Floors (7–9), and the Penthouse (Floor 10). Each tier has its own set of cards, consisting of normal `Rooms`and special rooms called `Stairwells`. The Penthouse only contains one `Stairwell` room.
+The tower is made up of 5 numbered Floors, as well as a Roof where the final battle will take place. Each floor has its own set of cards, consisting of normal `Rooms` and special rooms called `Stairwells`. The Roof only contains one `Stairwell` room.
 
-Assemble the floor deck for the floor you're building:
-
-
-
-1.  **Pick the Stairwell:** Take one `Stairwell` at random from the tier for your floor (Lower Floors to start).
-1. **Pick the Rooms:** Randomly pick `Room` cards from that same tier. To start, pick 9 Room cards, combining with the Stairwell for a total of 10 rooms for Floor 1. As you move up, repeat this with one fewer room than the previous floor. Or, if this is easier for you to remember: for each floor, pick `11` minus the floor number. So floor 5 is `11 - 5 = 6` rooms total.)
-1. **Shuffle** the drawn cards together and place them in the middle of the table, face down.
+Assemble the floor deck for the floor you're building by **shuffling** the cards for that floor together and placing them in the middle of the table, face down.
 
 ### Table Layout
 
@@ -76,8 +67,10 @@ In the middle of the table:
 
 ### 1. Start of Turn
 
-1. **Flip the room:** Turn the top card of the Floor deck face up onto the Rooms pile. This is the new Active Room.
-2. **Draw up to five:** Each player draws cards from their deck into their hand until they hold **5**. If you already hold 5 or more, do not draw. Resolve effects triggered by these draws after both players have drawn.
+1. **Reveal the rooms:** Turn the top **3** cards of the Floor deck face up. If fewer than 3 remain, turn up all of them.
+2. **Enter a room:** Choose **one** revealed card and put it on the Rooms pile. This is the new Active Room. If only one card is revealed, you must enter it.
+3. **Pass the rest:** Put the other revealed cards on the bottom of the Floor deck, in any order you choose.
+4. **Draw up to five:** Each player draws cards from their deck into their hand until they hold **5**. If you already hold 5 or more, do not draw. Resolve effects triggered by these draws after both players have drawn.
 
 >  **Empty Deck**: Whenever your deck is empty and you need to draw, reshuffle your discard pile to form a new deck first.
 
@@ -100,7 +93,7 @@ Players add their combined stats they accumulated this turn and check to see if 
 
 > If a resolved outcome says to `Ascend`, the entire Floor is cleared. Perform the Cleanup phase as normal, then perform the steps in section 10: *Ascending*.
 
-**Flee**: If *no challenges* have been met, the players must Flee the room. Resolve the `Flee:` outcome according to the text on the card, then **shuffle the room card back into the Floor deck**.
+**Flee**: If *no challenges* have been met, the players must Flee the room. Resolve the `Flee:` outcome according to the text on the card, then **put the room card on the bottom of the Floor deck**.
 
 ### 4. Cleanup (end of turn)
 
@@ -125,7 +118,7 @@ There are two kinds: `Room` and `Stairwell`. `Stairwell` cards are essentially f
 
 
 - **Name.**
-- **Type line:** `Room` or `Stairwell`, and the tier of floors it belongs to (`Room · Middle Floors`).
+- **Type line:** `Room` or `Stairwell`, and the floor it belongs to (`Room · Floor 3`).
 - **Flavor text.**
 - **Challenges:** one or more, each listing one or more `threshold: outcome` lines. A threshold consists of one or more stats (`Oomph 7 and Scramble 7`). An outcome prints its own reward, and prints `Ascend` when it ends the Floor. It never prints `Clear`.
 - **`Flee`**: what happens when no challenges are met.
@@ -165,8 +158,8 @@ A `Stuff` card looks similar to a character card:
 - `Play:` An effect that happens once when the card is played.
 - `for free`: Play the card without paying. Overrides all other cost modifiers.
 - `Discard X cards from your hand`: Choose **X** cards from your hand and move them to your discard pile.
-- `Exhaust X cards from your deck`: Move the top **X** cards of your deck to your Exhaust pile. If your deck is empty, see `Empty deck`.
-- `Exhaust X`: the same as `Exhaust X cards from your deck`.
+- `Exhaust X cards from your deck`: Move the top **X** cards of your deck to your Exhaust pile. If your deck is empty, see `Empty deck`. If your deck and your discard pile are both empty, choose the rest from your hand.
+- `Exhaust X`: Move **X** cards from your hand, deck, or discard pile to your Exhaust pile. Choose each card: a card from your hand, the top card of your deck, or a card from your discard pile.
 - `Get Good Stuff`: Reveal the top **3** cards of the Good Stuff pool. Put **one** into your hand. Put the rest on the bottom of the Good Stuff pool. When both players get Good Stuff from the same outcome, both players reveal their 3 before either chooses, then both put their chosen card into their hand at the same time.
 - `Get X Good Stuff`: `Get Good Stuff` **X** times.
 - `Get Bad Stuff`: Move the top card of the Bad Stuff pool into your hand.
@@ -176,6 +169,21 @@ A `Stuff` card looks similar to a character card:
 - `any deck`: any face-down pile on the table: a character deck, a reward pool, the Floor deck, or a Stuff pool.
 - `Scrap`: Move the card to the Scrapyard. It is removed from play for the rest of the game.
 - `may Scrap a card from your hand or discard pile`: Choose **one** card from your hand or your discard pile and `Scrap` it, or choose none. When an outcome says *the other* player, it means the player who did not take the outcome's previous line.
+
+### Room keywords
+
+A room's text may open with one or more keywords.
+
+- `Ambush`: When this room is revealed, you must enter it. Put the other revealed rooms on the bottom of the Floor deck in any order you choose. If more than one revealed room has `Ambush`, choose **one** of them to enter.
+- `Cap`: At most **3** cards may be in the play zone, both sides together.
+- `Corrosive`: When you pay for a card, `Scrap` the cards you pay with instead of moving them to your Exhaust pile.
+- `Dim`: At Start of Turn, draw until you hold **4** instead of 5.
+- `Draining`: At Cleanup, move the cards in your play zone to your Exhaust pile instead of your discard pile.
+- `Heavy`: Whenever you play a card, `Exhaust 1 card from your deck`.
+- `Lockstep`: No player may play two cards in a row.
+- `Relentless`: If you Flee this room, put it on the **top** of the Floor deck instead of the bottom.
+- `Toxic`: When you enter this room, each player gets Bad Stuff.
+- `Unstable`: At Outcome, if you did not meet a challenge that asks for Scramble only, each player Exhausts 2 (see `Exhaust X`).
 
 ---
 ## 9. Going Down
@@ -195,7 +203,7 @@ When a resolved outcome says `Ascend`, you escape the current floor! You are saf
 
 ## 11. Winning and losing
 
-**You win** by clearing floor 10's Stairwell.
+**You win** by clearing the final room on the Roof.
 
 **You lose** when either character goes `Down`.
 

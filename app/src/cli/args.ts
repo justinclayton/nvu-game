@@ -15,7 +15,6 @@ export type PlayAction =
   | { readonly kind: "flip" }
   | { readonly kind: "end" }
   | { readonly kind: "card"; readonly character: string; readonly name: string; readonly pay: readonly string[] }
-  | { readonly kind: "scrap"; readonly character: string; readonly name: string; readonly stat: string }
   | { readonly kind: "choose"; readonly names: readonly string[] }
   | { readonly kind: "order"; readonly names: readonly string[] }
   | { readonly kind: "take" }
@@ -77,14 +76,15 @@ export class UsageError extends Error {}
 export const USAGE = `North vs Up — the CLI. The same rules engine as the web game, one shell call at a time.
 
   bin/nvu play new  --seed N [--run FILE]
-  bin/nvu play flip                                  FLIP_ROOM (Turn Start: flip and draw)
+  bin/nvu play flip                                  FLIP_ROOM (Turn Start: reveal the top 3 rooms)
   bin/nvu play end                                    END_PLAY
   bin/nvu play card Red Charge [pay Rope Flare]     PLAY_CARD
-  bin/nvu play scrap Red "Pry Bar" for Oomph           SCRAP_FOR_STATS (only where a room's own text allows it)
+  bin/nvu play choose Turret [Shaft Drone]             CHOOSE_ROOM: enter one, the rest to the bottom in this order
   bin/nvu play choose Red                              CHOOSE_CHARACTER
   bin/nvu play choose Floor deck                       CHOOSE_PILE
   bin/nvu play choose Rope Flare | play choose none     CHOOSE_CARDS
   bin/nvu play choose 2 | play choose Red 1 | play choose none   CHOOSE_DRAW: a "you may draw" (none declines)
+  bin/nvu play choose deck | play choose discard Shove   EXHAUST_CARD: one card for an Exhaust
   bin/nvu play order Rope Flare Shove                  ORDER_CARDS, top first
   bin/nvu play take Zen Mode | play take none          a revealed card reward
   bin/nvu play skip                                    a room's card reward: take none
@@ -160,23 +160,9 @@ function parseMove(action: string, actionRest: readonly string[]): PlayAction {
       return { kind: "card", character, name, pay: pay ?? [] };
     }
 
-    case "scrap": {
-      const [character, ...rest] = actionRest;
-      if (character === undefined) {
-        throw new UsageError('play scrap wants: scrap <Character> <Card> for <Oomph|Scramble>.');
-      }
-      const at = rest.findIndex((p) => p === "for");
-      if (at === -1) {
-        throw new UsageError('play scrap wants: scrap <Character> <Card> for <Oomph|Scramble>.');
-      }
-      const name = oneName(rest.slice(0, at), "play scrap");
-      const stat = oneName(rest.slice(at + 1), 'play scrap ... "for"');
-      return { kind: "scrap", character, name, stat };
-    }
-
     case "choose": {
       if (actionRest.length === 0) {
-        throw new UsageError("play choose wants a name (a character or a card) or 'none'.");
+        throw new UsageError("play choose wants a name (a room, a character or a card) or 'none'.");
       }
       if (actionRest.length === 1 && actionRest[0]?.toLowerCase() === "none") {
         return { kind: "choose", names: [] };
@@ -201,7 +187,7 @@ function parseMove(action: string, actionRest: readonly string[]): PlayAction {
 
     default:
       throw new UsageError(
-        `Unknown "play ${action}". Choose flip, end, card, scrap, choose, order, take, skip, undo, note, show or pile.`,
+        `Unknown "play ${action}". Choose flip, end, card, choose, order, take, skip, undo, note, show or pile.`,
       );
   }
 }

@@ -46,7 +46,7 @@ export function EventLog() {
   }, [session]);
 
   return (
-    <div className="log">
+    <section className="log" aria-label="Run log">
       <div className="log__head">
         <h2 className="log__title" id="log-title">
           Log
@@ -55,7 +55,7 @@ export function EventLog() {
       </div>
       <ol className="log__lines" aria-labelledby="log-title" ref={listRef} />
       <NoteBox />
-    </div>
+    </section>
   );
 }
 

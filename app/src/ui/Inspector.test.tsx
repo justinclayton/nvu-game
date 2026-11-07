@@ -24,7 +24,7 @@ function table(touch: boolean, fixture = "play") {
   const state = buildFixture(fixture);
   if (!state) throw new Error(`no fixture ${fixture}`);
   act(() => {
-    render(<App session={createSessionFrom(state)} onNewRun={noop} onOpenRun={noop} />);
+    render(<App session={createSessionFrom(state)} onNewRun={noop} onOpenRun={() => null} />);
   });
 }
 

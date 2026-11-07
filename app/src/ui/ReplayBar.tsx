@@ -59,7 +59,7 @@ export function ReplayBar({ replay }: Props) {
           replay.getState().stepBack();
         }}
       >
-        ◀ Back
+        Back
       </button>
       <button
         type="button"
@@ -70,7 +70,7 @@ export function ReplayBar({ replay }: Props) {
           replay.getState().stepForward();
         }}
       >
-        Step ▶
+        Step
       </button>
       <button
         type="button"
@@ -81,7 +81,7 @@ export function ReplayBar({ replay }: Props) {
           replay.getState().nextTurn();
         }}
       >
-        Turn ▶▶
+        Next turn
       </button>
       <button
         type="button"
@@ -91,7 +91,7 @@ export function ReplayBar({ replay }: Props) {
           replay.getState().seek(total);
         }}
       >
-        End ⏭
+        To the end
       </button>
       <button
         type="button"

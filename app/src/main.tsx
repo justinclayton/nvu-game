@@ -28,13 +28,12 @@ function startFresh(): void {
 /**
  * A run file (the `.json` export, or one the CLI or a bot wrote) opens as a
  * replay: the table at the seed, and a bar that steps through the recording.
+ * A file that cannot be replayed leaves the table as it is, and the reason
+ * comes back for the table to show.
  */
-function startReplay(text: string): void {
+function startReplay(text: string): string | null {
   const opened = openRunFile(text, CARD_CONTENT);
-  if (!opened.ok) {
-    window.alert(opened.reason);
-    return;
-  }
+  if (!opened.ok) return opened.reason;
   root.render(
     <StrictMode>
       <App
@@ -45,6 +44,7 @@ function startReplay(text: string): void {
       />
     </StrictMode>,
   );
+  return null;
 }
 
 /**

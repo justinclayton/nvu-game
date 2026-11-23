@@ -15,7 +15,7 @@ import {
 import { ask, askLater, done, drawnAs, drawQuestion, nothing, source, type Registry } from "./behaviour";
 
 export const RED: Registry = {
-  Overdrive: { exhaustX: 1 },
+  Overdrive: { exhaustX: 1, exhaustFromDeck: true },
 
   "Reckless Swing": { exhaustX: 1 },
 

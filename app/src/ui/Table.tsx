@@ -13,7 +13,7 @@ import { canUndo, type SessionState } from "@application/session";
 import { plural } from "@domain/plural";
 import { costOf, payOptions } from "@domain/queries";
 import { floorName } from "@domain/setup";
-import type { Card, Character, Command, GameState, Room } from "@domain/types";
+import type { Card, Character, Command, DomainEvent, GameState, Room } from "@domain/types";
 import { type Paying } from "./CardLayer";
 import { Controls } from "./Controls";
 import { EventLog } from "./EventLog";
@@ -21,6 +21,7 @@ import { useTouchInspect, type Inspected } from "./Inspector";
 import { Mat } from "./Mat";
 import { moveDelays, type ZoneId } from "./placements";
 import { OpenRun } from "./OpenRun";
+import { phaseName } from "./phase";
 import { PilePanel } from "./PilePanel";
 import { ReplayBar } from "./ReplayBar";
 import { useMetrics } from "./useMetrics";
@@ -29,8 +30,8 @@ import { KIT_REVISION } from "./kit";
 
 interface Props {
   readonly onNewRun: () => void;
-  /** A run file's text, dropped or picked, to replay. */
-  readonly onOpenRun: (text: string) => void;
+  /** A run file's text, dropped or picked, to replay; returns why it was refused, or null. */
+  readonly onOpenRun: (text: string) => string | null;
   /** Set while a recording is being stepped through; the table is view-only until taken over. */
   readonly replay?: Replay | undefined;
 }
@@ -51,6 +52,12 @@ export function Table({ onNewRun, onOpenRun, replay }: Props) {
    * back to the card layer. */
   const [debug, setDebug] = useState(false);
   const [openPile, setOpenPile] = useState<ZoneId | null>(null);
+  /* A file being dragged over the page, and why the last run file was refused. */
+  const [dropping, setDropping] = useState(false);
+  const [runRefusal, setRunRefusal] = useState<string | null>(null);
+  const openRun = (text: string) => {
+    setRunRefusal(onOpenRun(text));
+  };
   /* Which way the rooms passed over at Turn Start go under the floor deck: in
    * the order revealed, or reversed. Back to revealed order for each new reveal. */
   const [bottomReversed, setBottomReversed] = useState(false);
@@ -146,10 +153,17 @@ export function Table({ onNewRun, onOpenRun, replay }: Props) {
       : null;
 
   return (
-    <div
+    <main
       className={`table-page${replaying ? " table--replaying" : ""}`}
       onDragOver={(e) => {
         e.preventDefault();
+        if (e.dataTransfer.types.includes("Files")) setDropping(true);
+      }}
+      onDragLeave={(e) => {
+        /* Leaving one element for another inside the page is not leaving the page. */
+        if (!(e.relatedTarget instanceof Node && e.currentTarget.contains(e.relatedTarget))) {
+          setDropping(false);
+        }
       }}
       onClick={(e) => {
         /* Touch: a tap anywhere but on a card puts the zoom away. */
@@ -162,8 +176,9 @@ export function Table({ onNewRun, onOpenRun, replay }: Props) {
       }}
       onDrop={(e) => {
         e.preventDefault();
+        setDropping(false);
         const file = e.dataTransfer.files[0];
-        if (file) void file.text().then(onOpenRun);
+        if (file) void file.text().then(openRun);
       }}
     >
       <div className="table">
@@ -172,7 +187,7 @@ export function Table({ onNewRun, onOpenRun, replay }: Props) {
           <div className="table__meta">
             <span>{floorName(state.floor)}</span>
             <span>Turn {state.turn}</span>
-            <span className="table__phase">{state.phase}</span>
+            <span className="table__phase">{phaseName(state.phase)}</span>
             {KIT_REVISION === undefined ? null : (
               <span className="table__kit" title="Kit revision: rules, card list, engine build.">
                 {KIT_REVISION}
@@ -194,7 +209,7 @@ export function Table({ onNewRun, onOpenRun, replay }: Props) {
               />
               Debug
             </label>
-            <OpenRun onOpen={onOpenRun} />
+            <OpenRun onOpen={openRun} />
             <button
               type="button"
               className="button"
@@ -211,6 +226,20 @@ export function Table({ onNewRun, onOpenRun, replay }: Props) {
               New run
             </button>
           </div>
+          {runRefusal ? (
+            <p className="table__refusal" role="alert">
+              <span>That file can&apos;t be replayed: {runRefusal}</span>
+              <button
+                type="button"
+                className="button button--small"
+                onClick={() => {
+                  setRunRefusal(null);
+                }}
+              >
+                Dismiss
+              </button>
+            </p>
+          ) : null}
         </header>
 
         <Mat
@@ -239,14 +268,19 @@ export function Table({ onNewRun, onOpenRun, replay }: Props) {
 
       {/* Whatever the game is waiting for stays on screen at the bottom of the
           window while the mat scrolls beneath it. */}
-      <div className="dock">
+      <section className="dock" aria-label="Your move">
         <div className="dock__inner">
-          {rejection ? <p className="rejection">{rejection.message}</p> : null}
+          {rejection ? (
+            <p className="rejection" role="alert">
+              {rejection.message}
+            </p>
+          ) : null}
           {replaying && replay ? (
             <ReplayBar replay={replay} />
           ) : state.phase === "GameOver" ? (
             <section className="over">
               <h2>{state.outcome === "Victory" ? "You reach the rooftop." : "You lose"}</h2>
+              <p className="over__summary">{howTheRunEnded(state, events)}</p>
               <button type="button" className="button button--primary" onClick={onNewRun}>
                 Go again
               </button>
@@ -265,7 +299,7 @@ export function Table({ onNewRun, onOpenRun, replay }: Props) {
             />
           )}
         </div>
-      </div>
+      </section>
 
       {openPile ? (
         <PilePanel
@@ -278,8 +312,29 @@ export function Table({ onNewRun, onOpenRun, replay }: Props) {
           }}
         />
       ) : null}
-    </div>
+
+      {dropping ? (
+        <div className="drop-target" aria-hidden="true">
+          <span>Drop to replay</span>
+        </div>
+      ) : null}
+    </main>
   );
+}
+
+/** One line on how the run ended: who went Down and where, and how far the run got. */
+function howTheRunEnded(state: GameState, events: readonly DomainEvent[]): string {
+  const reached = `Floor ${String(state.floor)}, turn ${String(state.turn)}.`;
+  if (state.outcome === "Aborted") {
+    const aborted = events.find((e) => e.type === "RUN_ABORTED");
+    return aborted?.type === "RUN_ABORTED" ? `The run is void: ${aborted.reason}. ${reached}` : reached;
+  }
+  const down = (["Red", "Gray"] as const).find((c) => state[c].down);
+  if (state.outcome !== "Defeat" || !down) return reached;
+  const room = state.activeRoom ? ` in ${state.activeRoom.name}` : "";
+  const fell = [...events].reverse().find((e) => e.type === "WENT_DOWN" && e.character === down);
+  const cause = fell?.type === "WENT_DOWN" ? `: ${fell.cause}` : "";
+  return `${down} went Down${room}${cause}. ${reached}`;
 }
 
 /** A store that says "no replay", so the hook above has something to subscribe to. */

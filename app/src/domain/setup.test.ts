@@ -39,7 +39,7 @@ describe("Setting up a floor", () => {
     const printed = fullSupply.roomSupply.filter((r) => r.tier === floor);
     const state = buildFloor({ ...fullSupply, floor }, []);
     expect(state.floorDeck.map((r) => r.id).sort()).toEqual(printed.map((r) => r.id).sort());
-    expect(state.floorDeck.filter((r) => r.kind === "stairwell")).toHaveLength(3);
+    expect(state.floorDeck.filter((r) => r.kind === "stairwell")).toHaveLength(1);
     expect(state.floorDeck.filter((r) => r.kind === "room")).toHaveLength(6);
     expect(state.roomSupply.some((r) => r.tier === floor)).toBe(false);
   });

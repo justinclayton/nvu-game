@@ -69,6 +69,8 @@ export interface InPlayModifiers {
 export interface CardBehaviour {
   /** A bare `Exhaust X` printed on the card. */
   exhaustX?: number;
+  /** The `Exhaust X` is `from the top of your deck`: no choice of card. */
+  exhaustFromDeck?: boolean;
   /** Conditional stats, recalculated every time the pool is read. */
   stats?(state: GameState, owner: Character, card: Card): { oomph: number; scramble: number };
   /** A printed cost that is not the number in the corner. */

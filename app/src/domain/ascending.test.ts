@@ -22,8 +22,6 @@ beforeEach(resetRig);
 /** What floor 2 is built from: tier 2's Stairwell and Rooms (tier 1's are already played). */
 const SUPPLY: readonly Room[] = [
   room("Gears & Glitch"),
-  room("Gears & Glitch"),
-  room("Gears & Glitch"),
   room("Maintenance"),
   room("Dark Room"),
 ];
@@ -268,7 +266,7 @@ describe("Ascending, build the next floor", () => {
     expect(next.phase).toBe("Turn Start");
     expect(next.floorDeck).toHaveLength(SUPPLY.length);
     expect(next.floorDeck.every((r) => r.tier === 2)).toBe(true);
-    expect(next.floorDeck.filter((r) => r.kind === "stairwell")).toHaveLength(3);
+    expect(next.floorDeck.filter((r) => r.kind === "stairwell")).toHaveLength(1);
     expect(eventTypes(events)).toContain("FLOOR_BUILT");
   });
 

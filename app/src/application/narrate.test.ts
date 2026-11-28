@@ -95,19 +95,6 @@ describe("describeEvent", () => {
     expect(describeEvent(event)).toBe("Corrosive Acid triggers: Gray Exhausts Crowbar.");
   });
 
-  it("says a discard is because of Faceful Of Slime", () => {
-    const event: DomainEvent = {
-      type: "CARD_DISCARDED",
-      character: "Red",
-      card: crowbar,
-      from: "hand",
-      source: "Faceful Of Slime",
-    };
-    expect(describeEvent(event)).toBe(
-      "Faceful Of Slime triggers: Red discards Crowbar from their hand.",
-    );
-  });
-
   it("names the room whose text caused an effect", () => {
     const event: DomainEvent = {
       type: "CARD_EXHAUSTED",

@@ -351,31 +351,7 @@ export const STUFF: Registry = {
   /* ------------------------------------------------------------- Bad Stuff */
 
   "Faceful Of Slime": {
-    /* Step 1: the holder discards 1 card of their choice, this one included.
-     * A lone card goes without asking. Discarding is not Exhausting. */
-    onTurnStart(state, ctx) {
-      const options = playerOf(state, ctx.character).hand;
-      const [only] = options;
-      if (!only) return nothing(state);
-      if (options.length === 1) {
-        const events: DomainEvent[] = [];
-        return done(discardFromHand(state, ctx.character, [only], events), events);
-      }
-      return ask(state, {
-        kind: "ChooseCards",
-        prompt: "Discard 1 card because of Faceful Of Slime.",
-        character: ctx.character,
-        options,
-        count: 1,
-        optional: false,
-        source: source(ctx, "faceful-of-slime"),
-      });
-    },
-    onChoice(answer, state, ctx) {
-      if (answer.kind !== "cards") return nothing(state);
-      const events: DomainEvent[] = [];
-      return done(discardFromHand(state, ctx.character, answer.cards, events), events);
-    },
+    whileHeld: { drawTargetDelta: 1 },
   },
 
   /* Bites its holder only: Red never pays for Gray (rulebook §7, Play). */

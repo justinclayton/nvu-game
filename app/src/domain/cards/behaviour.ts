@@ -45,13 +45,17 @@ export type ChoiceAnswer =
  * What a `Holding:` line changes for as long as the card sits in hand.
  *
  * The deltas add up across a hand. `thresholdScrambleDelta` is read from both
- * hands (Panic). */
+ * hands (Panic). `drawTargetDelta` is "draw N fewer": it comes off step 5's
+ * draw-to-5 target (floor 0), counted from the hand held as step 5 begins, and
+ * copies stack (see `drawTargetFor`).
+ */
 export interface HeldModifiers {
   readonly costDelta?: number;
   /** Bare `Exhaust X` lines do nothing to this character. */
   readonly ignoresExhaustX?: boolean;
   readonly playedPowerDelta?: number;
   readonly stuffPowerDelta?: number;
+  readonly drawTargetDelta?: number;
   readonly thresholdScrambleDelta?: number;
 }
 
@@ -108,9 +112,9 @@ export interface CardBehaviour {
    */
   onPlayEnd?(state: GameState, ctx: BehaviourContext): StepResult;
   /**
-   * A `Holding:` line that acts once at Turn Start, step 1 (Corrosive Acid,
-   * Faceful Of Slime). Called on the card held then, before any room is
-   * revealed. It may `ask`; the reveal waits for the answer.
+   * A `Holding:` line that acts once at Turn Start, step 1 (Corrosive Acid).
+   * Called on the card held then, before any room is revealed. It may `ask`;
+   * the reveal waits for the answer.
    */
   onTurnStart?(state: GameState, ctx: BehaviourContext): StepResult;
 }

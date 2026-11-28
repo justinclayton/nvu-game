@@ -159,6 +159,13 @@ export interface TurnRecord {
    * so a step that paused on a question carries on without repeating them.
    */
   readonly turnStartDone: readonly CardId[];
+  /**
+   * Faceful Of Slime: how many cards fewer each character draws in step 5,
+   * counted from the hand held when step 5 begins, so a copy a Toxic room dealt
+   * in steps 2 to 4 counts. It is fixed for the whole draw: a copy drawn during
+   * step 5 changes only the next turn's draw.
+   */
+  readonly drawLowered: Readonly<Record<Character, number>>;
 }
 
 /** One printed Exhaust line still to be carried out. */

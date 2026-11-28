@@ -17,6 +17,7 @@ import {
   drawTargetFor,
   enterableRooms,
   exhaustXPreventedBy,
+  heldModifiers,
   lockedOut,
   payOptions,
   playedStats,
@@ -583,10 +584,10 @@ const ROOMS_REVEALED = 3;
 
 /**
  * Rulebook, Each Turn, Turn Start, step 1: resolve `At Turn Start` effects
- * (Corrosive Acid, Faceful Of Slime) of the cards held now. If one asks which
- * card (Faceful Of Slime's discard, an Exhaust), the state rests on that
- * question and `runChoice` or `answerExhaust` carries on to `revealRooms` once
- * it is answered.
+ * (Corrosive Acid) of the cards held now. If an Exhaust asks which card, the
+ * state rests on that question and `answerExhaust` carries on to `revealRooms`
+ * once it is answered. Faceful Of Slime is not here: it lowers the draw at the
+ * start of step 5 (`drawPhase`).
  */
 function flipRoom(state: GameState, run: Run): GameState {
   if (state.floorDeck.length === 0) throw new CorruptStateError("Flipped an empty floor deck.");
@@ -688,9 +689,10 @@ function enterToxic(state: GameState, room: Room, run: Run): GameState {
 }
 
 /**
- * Step 1: a held card's own `At Turn Start` line (Corrosive Acid, Faceful Of
- * Slime), before any room is revealed. One card at a time, each only if it is
- * still in hand when its turn comes. Stops on a question.
+ * Step 1: a held card's own `At Turn Start` line (Corrosive Acid), before any
+ * room is revealed. One card at a time, each only if it is still in hand when
+ * its turn comes. Stops on a question. Cards that work at the start of step 5
+ * (Faceful Of Slime) are not read here.
  */
 function turnStartHands(state: GameState, run: Run): GameState {
   let s = state;
@@ -716,11 +718,21 @@ function turnStartHands(state: GameState, run: Run): GameState {
  * Step 5, Draw up to five: both characters draw until holding 5, all at once —
  * no opening draw, no alternating turns, no decision to make, so this never
  * pauses on its own (see `types.ts`, `Phase`: `Turn Start` covers all the steps).
- * A card can still lower a character's own target (`drawTargetFor`). Nothing
- * here settles: effects triggered by these draws resolve after both have drawn.
+ * A card can still lower a character's own target (`drawTargetFor`): the count
+ * is taken once as step 5 starts and held for the whole draw. Nothing here
+ * settles: effects triggered by these draws resolve after both have drawn.
  */
 function drawPhase(state: GameState, run: Run): GameState {
-  let s = state;
+  let s: GameState = {
+    ...state,
+    thisTurn: {
+      ...state.thisTurn,
+      drawLowered: {
+        Red: heldModifiers(state, "Red").drawTargetDelta,
+        Gray: heldModifiers(state, "Gray").drawTargetDelta,
+      },
+    },
+  };
   for (const c of CHARACTERS) {
     s = drawToCap(s, c, run);
     if (s.phase === "GameOver") return s;
@@ -1347,13 +1359,7 @@ function runChoice(state: GameState, answer: ChoiceAnswer, run: Run): GameState 
     const stayed = new Set(presentSince(s, run, 0));
     s = finishPlay(s, run, { ...play, listeners: play.listeners.filter((id) => stayed.has(id)) });
   }
-  if (s.pending || s.phase === "GameOver") return s;
-  const drained = drain(s, run);
-  // Step 1 was waiting on this choice (Faceful Of Slime): carry on to the reveal.
-  if (drained.phase === "Turn Start" && !drained.pending && !drained.activeRoom) {
-    return finishTurnStart(drained, run);
-  }
-  return drained;
+  return s.pending || s.phase === "GameOver" ? s : drain(s, run);
 }
 
 function answerCharacter(state: GameState, character: Character, run: Run): GameState {

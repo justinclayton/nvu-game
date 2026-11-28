@@ -16,7 +16,6 @@ import {
   costOverrideSpentBy,
   drawTargetFor,
   enterableRooms,
-  exhaustPreventedBy,
   exhaustXPreventedBy,
   lockedOut,
   payOptions,

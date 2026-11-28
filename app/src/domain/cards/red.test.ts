@@ -12,6 +12,7 @@ import {
   handCard,
   ids,
   must,
+  names,
   noDraw,
   pile,
   play,
@@ -20,7 +21,7 @@ import {
   resetRig,
 } from "../__fixtures__/rig";
 
-import type { CardId, GameState } from "../types";
+import type { Card, CardId, GameState } from "../types";
 
 beforeEach(resetRig);
 
@@ -732,5 +733,62 @@ describe("Momentum Shift — 'You may draw up to 2 cards, then Exhaust 1 card fr
     expect(pending.options.map((c) => c.name)).toEqual(["Pry Bar"]);
     const { state: next } = must(declined.state, { type: "CHOOSE_CARDS", cardIds: [pending.options[0]?.id as CardId] });
     expect(next.Red.hand).toHaveLength(0);
+  });
+});
+
+describe("Zen Mode — 'While this is in play, you don't exhaust cards'", () => {
+  const zen = (red: Card[], gray: Card[] = []) => {
+    const state = playing({
+      Red: player({ deck: pile("Shove", 4), hand: [card("Zen Mode"), card("Shove"), ...red] }),
+      Gray: player({ deck: pile("Duck Under", 4), hand: gray }),
+    });
+    return must(state, {
+      type: "PLAY_CARD",
+      character: "Red",
+      cardId: handCard(state, "Red", "Zen Mode").id,
+      payWith: [handCard(state, "Red", "Shove").id],
+    }).state;
+  };
+
+  it("pays its own cost as normal", () => {
+    const armed = zen([]);
+    expect(names(armed.Red.discard)).toEqual(["Shove"]);
+    expect(armed.Red.exhaust).toEqual([]);
+  });
+
+  it("still moves Red's payment cards to the discard pile, and logs no EXHAUST_PREVENTED", () => {
+    const armed = zen([card("Shove"), card("Shove")]);
+    const [played, payer] = armed.Red.hand;
+    if (!played || !payer) throw new Error("hand too short");
+    const next = must(armed, { type: "PLAY_CARD", character: "Red", cardId: played.id, payWith: [payer.id] });
+    expect(next.state.Red.discard.map((c) => c.id)).toContain(payer.id);
+    expect(next.state.Red.exhaust).toEqual([]);
+    expect(eventTypes(next.events)).not.toContain("EXHAUST_PREVENTED");
+    expect(eventTypes(next.events)).toContain("COST_PAID");
+  });
+
+  it("still needs the payment cards in hand", () => {
+    const armed = zen([card("Shove")]);
+    const rejected = execute(armed, {
+      type: "PLAY_CARD",
+      character: "Red",
+      cardId: handCard(armed, "Red", "Shove").id,
+      payWith: [],
+    });
+    expect(rejected.ok).toBe(false);
+  });
+
+  it("stops a bare Exhaust X off Red's deck", () => {
+    const armed = zen([card("Emergency Power Core")]);
+    const next = must(armed, free("Red", handCard(armed, "Red", "Emergency Power Core").id));
+    expect(next.state.Red.deck).toHaveLength(4);
+    expect(next.state.Red.exhaust).toEqual([]);
+  });
+
+  it("does not stop an Exhaust of Gray's cards", () => {
+    const armed = zen([], [card("Emergency Power Core")]);
+    const next = must(armed, free("Gray", handCard(armed, "Gray", "Emergency Power Core").id));
+    expect(next.state.Gray.exhaust.length).toBeGreaterThan(0);
+    expect(next.state.Gray.deck.length).toBeLessThan(4);
   });
 });

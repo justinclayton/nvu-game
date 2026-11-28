@@ -339,10 +339,6 @@ export const GRAY: Registry = {
     whileInPlay: { sharesHands: true },
   },
 
-  "Zen Mode": {
-    whileInPlay: { preventsExhaust: true },
-  },
-
   Pivot: {
     onPlay(state) {
       return done(grantPlayDiscount(state, "Red"));

@@ -542,66 +542,6 @@ describe("I Know Kung Fu — 'Play: every time a Scramble card is played this tu
   });
 });
 
-describe("Zen Mode — 'While this is in play, you don't exhaust cards'", () => {
-  const zen = (gray: Card[], red: Card[] = []) => {
-    const state = playing({
-      Red: player({ deck: pile("Shove", 4), hand: red }),
-      Gray: player({ deck: pile("Duck Under", 4), hand: [card("Zen Mode"), card("Duck Under"), ...gray] }),
-    });
-    return must(state, {
-      type: "PLAY_CARD",
-      character: "Gray",
-      cardId: handCard(state, "Gray", "Zen Mode").id,
-      payWith: [handCard(state, "Gray", "Duck Under").id],
-    }).state;
-  };
-
-  it("pays its own cost as normal", () => {
-    const armed = zen([]);
-    expect(names(armed.Gray.discard)).toEqual(["Duck Under"]);
-    expect(armed.Gray.exhaust).toEqual([]);
-  });
-
-  it("still moves Gray's payment cards to the discard pile, and logs no EXHAUST_PREVENTED", () => {
-    const armed = zen([card("Duck Under"), card("Duck Under")]);
-    const [played, payer] = armed.Gray.hand;
-    if (!played || !payer) throw new Error("hand too short");
-    const next = must(armed, { type: "PLAY_CARD", character: "Gray", cardId: played.id, payWith: [payer.id] });
-    expect(next.state.Gray.hand.map((c) => c.id)).not.toContain(payer.id);
-    expect(next.state.Gray.discard.map((c) => c.id)).toContain(payer.id);
-    expect(next.state.Gray.exhaust).toEqual([]);
-    expect(eventTypes(next.events)).not.toContain("EXHAUST_PREVENTED");
-    expect(eventTypes(next.events)).toContain("COST_PAID");
-  });
-
-  it("still needs the payment cards in hand", () => {
-    const armed = zen([card("Duck Under")]);
-    const rejected = execute(armed, {
-      type: "PLAY_CARD",
-      character: "Gray",
-      cardId: handCard(armed, "Gray", "Duck Under").id,
-      payWith: [],
-    });
-    expect(rejected.ok).toBe(false);
-  });
-
-  it("stops a bare Exhaust X off Gray's deck", () => {
-    const armed = zen([card("Emergency Power Core")]);
-    const next = must(armed, free("Gray", handCard(armed, "Gray", "Emergency Power Core").id));
-    expect(next.state.Gray.deck).toHaveLength(4);
-    expect(next.state.Gray.exhaust).toEqual([]);
-  });
-
-  it("does nothing for Red's cards", () => {
-    const armed = zen([], [card("Shove"), card("Shove")]);
-    const [played, payer] = armed.Red.hand;
-    if (!played || !payer) throw new Error("hand too short");
-    const next = must(armed, { type: "PLAY_CARD", character: "Red", cardId: played.id, payWith: [payer.id] });
-    expect(names(next.state.Red.discard)).toEqual(["Shove"]);
-    expect(next.state.Red.exhaust).toEqual([]);
-  });
-});
-
 describe("Sharing Is Caring — 'Play: both players may pay for cards from the other player's hand'", () => {
   const setup = (gray: Card[] = [card("Duck Under"), card("Duck Under")]) =>
     playing({
@@ -647,12 +587,18 @@ describe("Sharing Is Caring — 'Play: both players may pay for cards from the o
   });
 
   it("with Zen Mode in play, Gray's cards that Red pays with still go to Gray's discard pile", () => {
-    const state = setup([card("Zen Mode"), card("Duck Under"), card("Duck Under"), card("Duck Under")]);
+    const state = playing({
+      Red: player({ deck: pile("Shove", 4), hand: [card("Zen Mode"), card("Shove"), card("Charge")] }),
+      Gray: player({
+        deck: pile("Duck Under", 4),
+        hand: [card("Sharing Is Caring"), card("Duck Under"), card("Duck Under")],
+      }),
+    });
     const zen = must(state, {
       type: "PLAY_CARD",
-      character: "Gray",
-      cardId: handCard(state, "Gray", "Zen Mode").id,
-      payWith: [handCard(state, "Gray", "Duck Under").id],
+      character: "Red",
+      cardId: handCard(state, "Red", "Zen Mode").id,
+      payWith: [handCard(state, "Red", "Shove").id],
     }).state;
     const armed = shared(zen);
     const [g1, g2] = armed.Gray.hand;

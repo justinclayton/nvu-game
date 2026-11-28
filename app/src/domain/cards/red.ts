@@ -15,6 +15,10 @@ import {
 import { ask, askLater, done, drawnAs, drawQuestion, nothing, source, type Registry } from "./behaviour";
 
 export const RED: Registry = {
+  "Zen Mode": {
+    whileInPlay: { preventsExhaust: true },
+  },
+
   Overdrive: { exhaustX: 1, exhaustFromDeck: true },
 
   "Reckless Swing": { exhaustX: 1 },

@@ -78,16 +78,20 @@ const requirementText = (requires: StatRequirement): string => {
   return parts.join(" and ");
 };
 
+/** The line between one Challenge and the next on a Room. */
+const CHALLENGE_RULE = "  ────";
+
 /** A Room's printed face, with no run to check thresholds against — `bin/nvu card NAME`. */
 export function printedRoomLines(room: RoomFace): string[] {
   const tier = room.tier === null ? "no tier" : `tier ${String(room.tier)}`;
   const lines = [`${room.name} [${room.kind}; ${tier}]`];
   if (room.text.trim() !== "") lines.push(`  ${room.text.trim()}`);
-  for (const challenge of room.challenges) {
+  room.challenges.forEach((challenge, i) => {
+    if (i > 0) lines.push(CHALLENGE_RULE);
     for (const threshold of challenge.thresholds) {
       lines.push(`  ${requirementText(threshold.requires)}: ${threshold.outcome}`);
     }
-  }
+  });
   lines.push(`  Flee: ${room.flee.text}`);
   return lines;
 }
@@ -96,7 +100,9 @@ function roomLines(state: GameState, room: Room, label = "Room"): string[] {
   const met = new Set(metThresholds(state));
   const lines = [`${label}: ${room.name} (${room.kind})`];
   if (room.text.trim() !== "") lines.push(`  ${room.text.trim()}`);
+  const firsts = new Set(room.challenges.slice(1).map((c) => c.thresholds[0]));
   for (const t of allThresholds(room)) {
+    if (firsts.has(t)) lines.push(CHALLENGE_RULE);
     const mark = met.has(t) ? "✔" : " ";
     const need = thresholdLines(state, t)
       .map((l) => {
@@ -213,6 +219,11 @@ export function moveHint(state: GameState): string {
         lines.push(`${form} — draw: ${draws} — or choose none`);
         break;
       }
+      case "ChooseBottom":
+        lines.push(
+          `choose <Name>... — any of these to the bottom of the ${pending.pile}, or choose none: ${pending.cards.map((c) => c.name).join(", ")}`,
+        );
+        break;
       case "OrderCards":
         lines.push(
           `order <Name> <Name>... — top first, every one of: ${pending.cards.map((c) => c.name).join(", ")}`,

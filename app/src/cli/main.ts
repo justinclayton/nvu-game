@@ -238,6 +238,11 @@ function buildChoose(state: GameState, action: Extract<PlayAction, { kind: "choo
     return { type: "CHOOSE_STAT", stat };
   }
 
+  if (pending.kind === "ChooseBottom") {
+    const cardIds = resolveEach(action.names, pending.cards).map((c) => c.id);
+    return { type: "CHOOSE_CARDS", cardIds };
+  }
+
   if (pending.kind === "ChooseCards") {
     const cardIds = resolveEach(action.names, pending.options).map((c) => c.id);
     return { type: "CHOOSE_CARDS", cardIds };

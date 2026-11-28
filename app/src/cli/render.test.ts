@@ -1,7 +1,8 @@
 /* A conditional stat's hand line shows its current value, not `(conditional)`. */
 
 import { beforeEach, describe, expect, it } from "vitest";
-import { cardLine, moveHint, printedFaceLine } from "./render";
+import { cardLine, moveHint, printedFaceLine, printedRoomLines, renderTable } from "./render";
+import { mintRoom } from "@domain/setup";
 import { card, handCard, must, pile, player, playing, resetRig, rig, room } from "@domain/__fixtures__/rig";
 import { CARD_CONTENT } from "@content/index";
 
@@ -98,6 +99,27 @@ describe("moveHint — a room choice", () => {
   it("names Ambush when it leaves one room to enter", () => {
     const hint = moveHint(revealing(["Security Turnstile", "Regular Monster 2", "Puzzle Room"]));
     expect(hint).toContain("Ambush: you must enter Regular Monster 2;");
+  });
+});
+
+describe("challenge separators", () => {
+  const rule = "  ────";
+  const gross = CARD_CONTENT.rooms.find((r) => r.name === "Gross Thing");
+  if (!gross) throw new Error("Gross Thing is missing");
+  const [a, b] = gross.challenges;
+  if (!a || !b) throw new Error("Gross Thing needs two challenges");
+  const one = { ...gross, challenges: [{ thresholds: [...a.thresholds, ...b.thresholds] }] };
+
+  it("printedRoomLines puts a line between challenges and none within one", () => {
+    expect(printedRoomLines(gross).filter((l) => l === rule)).toHaveLength(1);
+    expect(printedRoomLines(one).filter((l) => l === rule)).toHaveLength(0);
+  });
+
+  it("the table's room view does the same", () => {
+    const two = renderTable(rig({ activeRoom: mintRoom(gross, 1) })).split("\n");
+    expect(two.filter((l) => l === rule)).toHaveLength(1);
+    const flat = renderTable(rig({ activeRoom: mintRoom(one, 2) })).split("\n");
+    expect(flat.filter((l) => l === rule)).toHaveLength(0);
   });
 });
 

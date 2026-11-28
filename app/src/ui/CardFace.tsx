@@ -57,7 +57,9 @@ const LONG_NAME = 16;
  */
 function roomTextTierOf(room: Room): TextTier {
   const weight =
-    allThresholds(room).reduce((sum, t) => sum + 30 + t.outcome.length, 0) + room.flee.text.length;
+    allThresholds(room).reduce((sum, t) => sum + 30 + t.outcome.length, 0) +
+    Math.max(0, room.challenges.length - 1) * 15 +
+    room.flee.text.length;
   if (weight > 160) return "xl";
   if (weight > 110) return "l";
   if (weight > 70) return "m";
@@ -154,11 +156,12 @@ export function RoomFace({ room, state }: RoomFaceProps) {
       {room.text ? <div className="room-text">{room.text}</div> : null}
       <ul className="lines">
         {allThresholds(room).map((t, i) => {
+          const first = room.challenges.slice(1).some((c) => c.thresholds[0] === t);
           const met = state ? thresholdIsMet(state, t) : false;
           const lines = state ? thresholdLines(state, t) : printedThresholdLines(t);
           const need = lines.map((l) => `${l.stat} ${l.effective}`).join(" and ");
           return (
-            <li key={i} className={met ? "line is-met" : "line"}>
+            <li key={i} className={(met ? "line is-met" : "line") + (first ? " line--new-challenge" : "")}>
               <b>{need}</b>
               <span>{t.outcome}</span>
             </li>

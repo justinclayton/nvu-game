@@ -20,7 +20,10 @@ import {
   resetRig,
   room,
 } from "../__fixtures__/rig";
-import type { Card, CardId } from "../types";
+import type { Card, CardId, GameState, Pile } from "../types";
+import { pileCards } from "../verbs";
+
+const pileOf = (state: GameState, name: Pile) => pileCards(state, name);
 
 beforeEach(resetRig);
 
@@ -117,8 +120,83 @@ describe("Hack the Doors — 'Peek 3'", () => {
     const { asked } = playPeek("Hack the Doors");
     const looked = must(asked.state, { type: "CHOOSE_PILE", pile: "Gray deck" });
     const pending = looked.state.pending;
-    if (pending?.kind !== "ChooseCards") throw new Error("expected a card choice");
-    expect(pending.options).toHaveLength(3);
+    if (pending?.kind !== "ChooseBottom") throw new Error("expected a choice of cards for the bottom");
+    expect(pending.cards).toHaveLength(3);
+    expect(pending.prompt).not.toMatch(/discard/i);
+  });
+
+  it("keeping all of them on top asks for their order, and discards nothing", () => {
+    const { asked } = playPeek("Hack the Doors");
+    const looked = must(asked.state, { type: "CHOOSE_PILE", pile: "Gray deck" });
+    const before = looked.state.Gray.deck;
+    const none = must(looked.state, { type: "CHOOSE_CARDS", cardIds: [] });
+    expect(eventTypes(none.events)).not.toContain("CARDS_TO_BOTTOM");
+    const pending = none.state.pending;
+    if (pending?.kind !== "OrderCards") throw new Error("expected an ordering");
+    expect(pending.cards.map((c) => c.id)).toEqual(before.slice(0, 3).map((c) => c.id));
+    const reversed = [...pending.cards].reverse().map((c) => c.id);
+    const done = must(none.state, { type: "ORDER_CARDS", cardIds: reversed });
+    expect(done.state.Gray.deck.map((c) => c.id)).toEqual([...reversed, before[3]?.id]);
+    expect(done.state.Gray.discard).toEqual(asked.state.Gray.discard);
+    expect(eventTypes(done.events)).not.toContain("CARD_DISCARDED");
+  });
+
+  it("moves one card to the bottom of a character deck without asking for any order", () => {
+    const { asked } = playPeek("Hack the Doors", {
+      Gray: player({
+        deck: [card("Duck Under"), card("Shove"), card("Charge"), card("Duck Under"), card("Rust")],
+        hand: [card("Hack the Doors"), card("Duck Under")],
+      }),
+    });
+    const looked = must(asked.state, { type: "CHOOSE_PILE", pile: "Gray deck" });
+    const deck = looked.state.Gray.deck;
+    const sent = must(looked.state, { type: "CHOOSE_CARDS", cardIds: [(deck[1] as Card).id] });
+    expect(sent.events.map((e) => e.type)).toContain("CARDS_TO_BOTTOM");
+    expect(eventTypes(sent.events)).not.toContain("CARD_DISCARDED");
+    // The two that stay still need an order; nothing else is asked first.
+    const pending = sent.state.pending;
+    if (pending?.kind !== "OrderCards") throw new Error("expected an ordering of those that stay");
+    expect(pending.cards.map((c) => c.id)).toEqual([deck[0], deck[2]].map((c) => (c as Card).id));
+    const done = must(sent.state, { type: "ORDER_CARDS", cardIds: [(deck[2] as Card).id, (deck[0] as Card).id] });
+    expect(done.state.pending).toBeNull();
+    expect(done.state.Gray.deck.map((c) => c.id)).toEqual(
+      [deck[2], deck[0], deck[3], deck[4], deck[1]].map((c) => (c as Card).id),
+    );
+    expect(done.state.Gray.discard).toEqual(asked.state.Gray.discard);
+  });
+
+  it("moving all three asks only for the bottom order, and puts them after the rest", () => {
+    const { asked } = playPeek("Hack the Doors");
+    const looked = must(asked.state, { type: "CHOOSE_PILE", pile: "Gray deck" });
+    const deck = looked.state.Gray.deck;
+    const [a, b, c, rest] = deck as [Card, Card, Card, Card];
+    const sent = must(looked.state, { type: "CHOOSE_CARDS", cardIds: [a.id, b.id, c.id] });
+    const pending = sent.state.pending;
+    if (pending?.kind !== "OrderCards") throw new Error("expected an ordering of the bottom");
+    expect(pending.cards.map((x) => x.id)).toEqual([a.id, b.id, c.id]);
+    const done = must(sent.state, { type: "ORDER_CARDS", cardIds: [c.id, a.id, b.id] });
+    expect(done.state.pending).toBeNull();
+    expect(done.state.Gray.deck.map((x) => x.id)).toEqual([rest.id, c.id, a.id, b.id]);
+  });
+
+  it("shows only what a short pile holds, and never reshuffles a discard pile", () => {
+    const { asked } = playPeek("Hack the Doors", {
+      Gray: player({
+        deck: [card("Duck Under"), card("Shove")],
+        discard: [],
+        hand: [card("Hack the Doors"), card("Duck Under")],
+      }),
+    });
+    const looked = must(asked.state, { type: "CHOOSE_PILE", pile: "Gray deck" });
+    const pending = looked.state.pending;
+    if (pending?.kind !== "ChooseBottom") throw new Error("expected a choice of cards for the bottom");
+    expect(pending.cards).toHaveLength(2);
+    expect(eventTypes(looked.events)).not.toContain("DISCARD_RESHUFFLED");
+    const [a, b] = pending.cards as [Card, Card];
+    const sent = must(looked.state, { type: "CHOOSE_CARDS", cardIds: [b.id] });
+    expect(sent.state.pending).toBeNull();
+    expect(sent.state.Gray.deck.map((x) => x.id)).toEqual([a.id, b.id]);
+    expect(eventTypes(sent.events)).not.toContain("DISCARD_RESHUFFLED");
   });
 
   it("offers all seven piles when all hold cards, and omits empty ones", () => {
@@ -174,14 +252,87 @@ describe("Hack the Doors — 'Peek 3'", () => {
     expect(peeked.cards.map((c) => c.id)).toEqual([first.id, second.id, third.id]);
 
     const pending = looked.state.pending;
-    if (pending?.kind !== "OrderCards") throw new Error("expected an ordering");
+    if (pending?.kind !== "ChooseBottom") throw new Error("expected a choice for the bottom");
     expect(pending.pile).toBe("Floor deck");
-    const reversed = [...pending.cards].reverse().map((c) => c.id);
-    const { state: next } = must(looked.state, { type: "ORDER_CARDS", cardIds: reversed });
-    expect(next.floorDeck.map((c) => c.id)).toEqual(reversed);
+    expect(pending.cards.map((c) => c.id)).toEqual([first.id, second.id, third.id]);
+
+    // Send the first room to the bottom; the other two stay, and are ordered.
+    const sent = must(looked.state, { type: "CHOOSE_CARDS", cardIds: [first.id] });
+    const order = sent.state.pending;
+    if (order?.kind !== "OrderCards") throw new Error("expected an ordering of those that stay");
+    expect(order.cards.map((c) => c.id)).toEqual([second.id, third.id]);
+    const { state: next } = must(sent.state, { type: "ORDER_CARDS", cardIds: [third.id, second.id] });
+    expect(next.floorDeck.map((c) => c.id)).toEqual([third.id, second.id, first.id]);
   });
 
-  it("choosing the Good Stuff pool reorders that pool", () => {
+  it("choosing the Good Stuff pool moves cards to the bottom of that pool", () => {
+    const state = playing({
+      Gray: player({ deck: pile("Duck Under", 4), hand: [card("Hack the Doors"), card("Duck Under")] }),
+      pools: {
+        Red: [],
+        Gray: [],
+        goodStuff: pile("Stim Pack", 4),
+        badStuff: [],
+      },
+    });
+    const g = ids(state, "Gray");
+    const asked = must(state, {
+      type: "PLAY_CARD",
+      character: "Gray",
+      cardId: g[0] as CardId,
+      payWith: [g[1] as CardId],
+    });
+    const looked = must(asked.state, { type: "CHOOSE_PILE", pile: "Good Stuff pool" });
+    const pending = looked.state.pending;
+    if (pending?.kind !== "ChooseBottom") throw new Error("expected a choice for the bottom");
+    expect(pending.pile).toBe("Good Stuff pool");
+    const pool = looked.state.pools.goodStuff;
+    const [a, b, c, d] = pool as [Card, Card, Card, Card];
+    const sent = must(looked.state, { type: "CHOOSE_CARDS", cardIds: [a.id, c.id] });
+    const bottom = sent.state.pending;
+    if (bottom?.kind !== "OrderCards") throw new Error("expected an ordering of the bottom");
+    // Only b stays on top, so once the bottom is ordered nothing more is asked.
+    const { state: done } = must(sent.state, { type: "ORDER_CARDS", cardIds: [c.id, a.id] });
+    expect(done.pending).toBeNull();
+    expect(done.pools.goodStuff.map((x) => x.id)).toEqual([b.id, d.id, c.id, a.id]);
+  });
+
+  it.each(["Red deck", "Gray deck", "Floor deck", "Red reward pool", "Gray reward pool", "Good Stuff pool"] as const)(
+    "%s: any subset of the peeked cards goes to the bottom, in any order, and nothing is lost",
+    (name) => {
+      const state = playing({
+        Red: player({ deck: pile("Shove", 5) }),
+        Gray: player({ deck: pile("Duck Under", 5), hand: [card("Hack the Doors"), card("Duck Under")] }),
+        floorDeck: [room("Security Turnstile"), room("Puzzle Room"), room("The Sentry Drone"), room("Security Turnstile")],
+        pools: { Red: pile("Charge", 5), Gray: pile("Duck Under", 5), goodStuff: pile("Stim Pack", 5), badStuff: [] },
+      });
+      const g = ids(state, "Gray");
+      const asked = must(state, { type: "PLAY_CARD", character: "Gray", cardId: g[0] as CardId, payWith: [g[1] as CardId] });
+      const looked = must(asked.state, { type: "CHOOSE_PILE", pile: name });
+      const pending = looked.state.pending;
+      if (pending?.kind !== "ChooseBottom") throw new Error("expected a choice for the bottom");
+      const before = pileOf(looked.state, name).map((c) => c.id);
+      const shown = pending.cards.map((c) => c.id);
+      expect(shown).toEqual(before.slice(0, 3));
+      // Send the 2nd and 3rd, then order both ways round.
+      const sent = must(looked.state, { type: "CHOOSE_CARDS", cardIds: [shown[1] as CardId, shown[2] as CardId] });
+      const bottom = sent.state.pending;
+      if (bottom?.kind !== "OrderCards") throw new Error("expected an ordering of the bottom");
+      const ordered = must(sent.state, { type: "ORDER_CARDS", cardIds: [shown[2] as CardId, shown[1] as CardId] });
+      expect(ordered.state.pending).toBeNull();
+      expect(pileOf(ordered.state, name).map((c) => c.id)).toEqual([
+        before[0],
+        ...before.slice(3),
+        shown[2],
+        shown[1],
+      ]);
+      for (const e of [...looked.events, ...sent.events, ...ordered.events]) {
+        expect(e.type).not.toBe("CARD_DISCARDED");
+      }
+    },
+  );
+
+  it("keeping every card of the Good Stuff pool on top reorders that pool", () => {
     const state = playing({
       Gray: player({ deck: pile("Duck Under", 4), hand: [card("Hack the Doors"), card("Duck Under")] }),
       pools: {
@@ -199,11 +350,12 @@ describe("Hack the Doors — 'Peek 3'", () => {
       payWith: [g[1] as CardId],
     });
     const looked = must(asked.state, { type: "CHOOSE_PILE", pile: "Good Stuff pool" });
-    const pending = looked.state.pending;
+    const kept = must(looked.state, { type: "CHOOSE_CARDS", cardIds: [] });
+    const pending = kept.state.pending;
     if (pending?.kind !== "OrderCards") throw new Error("expected an ordering");
     expect(pending.pile).toBe("Good Stuff pool");
     const reversed = [...pending.cards].reverse().map((c) => c.id);
-    const { state: next } = must(looked.state, { type: "ORDER_CARDS", cardIds: reversed });
+    const { state: next } = must(kept.state, { type: "ORDER_CARDS", cardIds: reversed });
     expect(next.pools.goodStuff.map((c) => c.id)).toEqual(reversed);
   });
 });

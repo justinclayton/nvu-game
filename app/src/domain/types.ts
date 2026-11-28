@@ -154,6 +154,12 @@ export interface TurnRecord {
    * and asks a `ChooseExhaust` for the rest, as soon as nothing else is waiting.
    */
   readonly exhaustOwed: readonly OwedExhaust[];
+  /**
+   * Faceful Of Slime: how many cards fewer each character draws in step 5,
+   * counted from the hand held when step 1 (`At Turn Start`) resolves. A card
+   * that arrives later does not change this turn's draw.
+   */
+  readonly drawLowered: Readonly<Record<Character, number>>;
 }
 
 /** One printed Exhaust line still to be carried out. */
@@ -173,10 +179,12 @@ export interface OwedExhaust {
 /* ------------------------------------------------------------ the phases */
 
 /**
- * Rulebook, Each Turn, Turn Start: `FLIP_ROOM` reveals the top rooms of the
- * floor deck and rests at `Turn Start` on a `ChooseRoom` pending; `CHOOSE_ROOM`
- * enters one and draws up to five, moving straight to `Play`. With one room
- * left there is no choice, and `FLIP_ROOM` runs straight through to `Play`. `END_PLAY` moves the state into `Outcome`, and once the room's
+ * Rulebook, Each Turn, Turn Start: `FLIP_ROOM` resolves `At Turn Start`
+ * effects (step 1; a `ChooseExhaust` may rest here first), then reveals the top
+ * rooms of the floor deck (step 2) and rests at `Turn Start` on a `ChooseRoom`
+ * pending; `CHOOSE_ROOM` enters one (step 3) and draws up to five (step 5),
+ * moving straight to `Play`. With one room left there is no choice, and
+ * `FLIP_ROOM` runs straight through to `Play`. `END_PLAY` moves the state into `Outcome`, and once the room's
  * effects are drained, into `Cleanup`. Both rest there only while a card or
  * the room has raised a `pending` choice — otherwise the transition runs
  * straight through to `Turn Start`, or to the next floor's `Turn Start` on an Ascend.
@@ -269,6 +277,18 @@ export type Pending =
       readonly kind: "ChooseDraw";
       readonly prompt: string;
       readonly options: readonly DrawOption[];
+      readonly source: PendingSource | null;
+    }
+  | {
+      /**
+       * Rulebook, Keywords: `Peek X` — `cards` are the top of `pile`, still in
+       * it. The answer, `CHOOSE_CARDS`, is any number of them, none to all,
+       * to move to the bottom of that pile.
+       */
+      readonly kind: "ChooseBottom";
+      readonly prompt: string;
+      readonly pile: Pile;
+      readonly cards: readonly (Card | Room)[];
       readonly source: PendingSource | null;
     }
   | {
@@ -404,7 +424,7 @@ export type Command =
   | { readonly type: "CHOOSE_CHARACTER"; readonly character: Character }
   | { readonly type: "CHOOSE_PILE"; readonly pile: Pile }
   | { readonly type: "CHOOSE_STAT"; readonly stat: Stat }
-  | { readonly type: "CHOOSE_CARDS"; readonly cardIds: readonly CardId[] }
+  | { readonly type: "CHOOSE_CARDS"; readonly cardIds: readonly (CardId | RoomId)[] }
   | {
       /** One of the draws on offer, or `{ character: null, count: 0 }` to draw nothing. */
       readonly type: "CHOOSE_DRAW";
@@ -496,6 +516,13 @@ type DomainEventBody =
     }
   | {
       readonly type: "CARDS_PEEKED";
+      readonly character: Character;
+      readonly pile: Pile;
+      readonly cards: readonly (Card | Room)[];
+    }
+  | {
+      /** Rulebook, Keywords: `Peek X` — these peeked cards were moved to the bottom of `pile`. */
+      readonly type: "CARDS_TO_BOTTOM";
       readonly character: Character;
       readonly pile: Pile;
       readonly cards: readonly (Card | Room)[];

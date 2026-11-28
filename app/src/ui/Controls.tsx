@@ -8,7 +8,7 @@
 import { useEffect, useId, useState } from "react";
 
 import { enterableRooms } from "@domain/queries";
-import type { CardId, Command, GameState } from "@domain/types";
+import type { CardId, Command, GameState, RoomId } from "@domain/types";
 import { whyNot } from "./legal";
 import { CardView, RoomCardView } from "./CardView";
 import type { Inspected } from "./Inspector";
@@ -264,6 +264,11 @@ function PendingChoice({ state, dispatch, inspected, onInspect }: Props) {
         </div>
       );
 
+    case "ChooseBottom":
+      return (
+        <ChooseBottom state={state} dispatch={dispatch} inspected={inspected} onInspect={onInspect} />
+      );
+
     case "ChooseCards":
       return (
         <ChooseCards state={state} dispatch={dispatch} inspected={inspected} onInspect={onInspect} />
@@ -299,6 +304,65 @@ function PendingChoice({ state, dispatch, inspected, onInspect }: Props) {
         </div>
       );
   }
+}
+
+/** Peek: toggle any of the peeked cards, none to all, to send to the bottom of the pile. */
+function ChooseBottom({ state, dispatch, inspected, onInspect }: Props) {
+  const pending = state.pending;
+  const [picked, setPicked] = useState<readonly (CardId | RoomId)[]>([]);
+  const prompt = pending?.kind === "ChooseBottom" ? pending.prompt : "";
+  useEffect(() => {
+    setPicked([]);
+  }, [prompt]);
+
+  if (pending?.kind !== "ChooseBottom") return null;
+
+  const toggle = (id: CardId | RoomId) => {
+    setPicked((current) => (current.includes(id) ? current.filter((x) => x !== id) : [...current, id]));
+  };
+
+  return (
+    <div className="controls controls--pending">
+      <p className="controls__prompt">{pending.prompt}</p>
+      <div className="zone">
+        {pending.cards.map((card) =>
+          "challenges" in card ? (
+            <RoomCardView
+              key={card.id}
+              room={card}
+              selected={picked.includes(card.id)}
+              inspect={{ inspected, onInspect }}
+              onClick={() => {
+                toggle(card.id);
+              }}
+            />
+          ) : (
+            <CardView
+              key={card.id}
+              card={card}
+              selected={picked.includes(card.id)}
+              inspect={{ inspected, onInspect }}
+              onClick={() => {
+                toggle(card.id);
+              }}
+            />
+          ),
+        )}
+      </div>
+      <button
+        type="button"
+        className="button button--primary"
+        onClick={() => {
+          dispatch({ type: "CHOOSE_CARDS", cardIds: picked });
+          setPicked([]);
+        }}
+      >
+        {picked.length === 0
+          ? "Keep all on top"
+          : `Move ${String(picked.length)} to the bottom`}
+      </button>
+    </div>
+  );
 }
 
 function ChooseCards({ state, dispatch, inspected, onInspect }: Props) {

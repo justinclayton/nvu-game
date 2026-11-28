@@ -17,6 +17,7 @@ import {
   drawTargetFor,
   enterableRooms,
   exhaustXPreventedBy,
+  heldModifiers,
   lockedOut,
   payOptions,
   playedStats,
@@ -202,12 +203,21 @@ function validateAnswer(pending: Pending, command: Command): Rejection | null {
           ? null
           : reject("NotAnOption", "That card was not revealed.");
       }
+      if (pending.kind === "ChooseBottom") {
+        const shown = new Set(pending.cards.map((x) => x.id));
+        if (new Set(command.cardIds).size !== command.cardIds.length) {
+          return reject("NotAnOption", "The same card was chosen twice.");
+        }
+        return command.cardIds.every((id) => shown.has(id))
+          ? null
+          : reject("NotAnOption", "That card was not revealed.");
+      }
       if (pending.kind !== "ChooseCards") return waiting;
       const chosen = new Set(command.cardIds);
       if (chosen.size !== command.cardIds.length) {
         return reject("NotAnOption", "The same card was chosen twice.");
       }
-      const options = new Set(pending.options.map((x) => x.id));
+      const options = new Set<CardId | RoomId>(pending.options.map((x) => x.id));
       for (const id of chosen) {
         if (!options.has(id)) return reject("NotAnOption", "That card was not offered.");
       }
@@ -561,7 +571,10 @@ function answerExhaust(state: GameState, cardId: CardId | null, run: Run): GameS
   if (!card) throw new CorruptStateError("Exhausted a card that was not offered.");
   const s = exhaustOwedCard({ ...state, pending: null }, card, run);
   if (s.phase === "GameOver") return s;
-  return drain(settle(s, run), run);
+  const drained = drain(settle(s, run), run);
+  // Step 1 was waiting on this choice: the rooms are revealed once it is made.
+  if (drained.phase === "Turn Start" && !drained.pending) return revealRooms(drained, run);
+  return drained;
 }
 
 /* ------------------------------------------------------------ Turn Start */
@@ -570,23 +583,48 @@ function answerExhaust(state: GameState, cardId: CardId | null, run: Run): GameS
 const ROOMS_REVEALED = 3;
 
 /**
- * Rulebook, Each Turn, Turn Start, step 1: reveal the top 3 rooms of the floor
- * deck, or all that remain. With one left there is nothing to choose, so it is
- * entered at once; this is how a Stairwell left alone must be fought.
+ * Rulebook, Each Turn, Turn Start, step 1: resolve `At Turn Start` effects
+ * (Corrosive Acid, Faceful Of Slime) of the cards held now. If an Exhaust asks
+ * which card, the state rests on that question and `answerExhaust` carries on
+ * with `revealRooms` once it is answered.
  */
 function flipRoom(state: GameState, run: Run): GameState {
-  const revealed = state.floorDeck.slice(0, ROOMS_REVEALED);
-  const [only] = revealed;
-  if (!only) throw new CorruptStateError("Flipped an empty floor deck.");
+  if (state.floorDeck.length === 0) throw new CorruptStateError("Flipped an empty floor deck.");
 
   run.events.push({ type: "PHASE_STARTED", phase: "Turn Start" });
-  const started: GameState = {
+  const reset: GameState = {
     ...state,
     turn: state.turn + 1,
     Red: { ...state.Red, drewThisTurn: 0 },
     Gray: { ...state.Gray, drewThisTurn: 0 },
     thisTurn: emptyTurnRecord(),
   };
+  const started: GameState = {
+    ...reset,
+    thisTurn: {
+      ...reset.thisTurn,
+      drawLowered: {
+        Red: heldModifiers(reset, "Red").drawTargetDelta,
+        Gray: heldModifiers(reset, "Gray").drawTargetDelta,
+      },
+    },
+  };
+  const held = turnStartHands(started, run);
+  if (held.phase === "GameOver") return held;
+  const owed = offerExhaust(held, run);
+  if (owed.phase === "GameOver" || owed.pending) return owed;
+  return revealRooms(owed, run);
+}
+
+/**
+ * Rulebook, Each Turn, Turn Start, step 2: reveal the top 3 rooms of the floor
+ * deck, or all that remain. With one left there is nothing to choose, so it is
+ * entered at once; this is how a Stairwell left alone must be fought.
+ */
+function revealRooms(started: GameState, run: Run): GameState {
+  const revealed = started.floorDeck.slice(0, ROOMS_REVEALED);
+  const [only] = revealed;
+  if (!only) throw new CorruptStateError("Flipped an empty floor deck.");
   if (revealed.length === 1) return enterRoom(started, only.id, [], run);
 
   run.events.push({ type: "ROOMS_REVEALED", rooms: revealed });
@@ -597,7 +635,7 @@ function flipRoom(state: GameState, run: Run): GameState {
 }
 
 /**
- * Rulebook, Each Turn, Turn Start, steps 2 and 3: enter the chosen room, put
+ * Rulebook, Each Turn, Turn Start, steps 3 to 5: enter the chosen room, put
  * the other revealed rooms on the bottom of the floor deck in the order
  * given, then draw both hands to 5.
  */
@@ -632,16 +670,14 @@ function enterRoom(
   if (toxic.phase === "GameOver") return toxic;
   const drawn = settle(drawPhase(toxic, run), run);
   if (drawn.phase === "GameOver") return drawn;
-  const held = turnStartHands(drawn, run);
-  if (held.phase === "GameOver") return held;
   run.events.push({ type: "PHASE_ENDED", phase: "Turn Start" });
   run.events.push({ type: "PHASE_STARTED", phase: "Play" });
-  return held;
+  return drawn;
 }
 
 /**
  * Toxic (On Enter: Both players get Bad Stuff.): a room is entered when it is chosen as the
- * Active Room, so this lands in step 2, before the draw, and each Bad Stuff counts toward the hand.
+ * Active Room, so this lands in step 3, before the draw, and each Bad Stuff counts toward the hand.
  */
 function enterToxic(state: GameState, room: Room, run: Run): GameState {
   if (!room.keywords.includes("Toxic")) return state;
@@ -652,7 +688,7 @@ function enterToxic(state: GameState, room: Room, run: Run): GameState {
   return s;
 }
 
-/** A held card's own Turn Start line (Corrosive Acid), once the draw is done. */
+/** Step 1: a held card's own `At Turn Start` line (Corrosive Acid), before any room is revealed. */
 function turnStartHands(state: GameState, run: Run): GameState {
   let s = state;
   for (const c of CHARACTERS) {
@@ -669,9 +705,9 @@ function turnStartHands(state: GameState, run: Run): GameState {
 }
 
 /**
- * Step 2, Draw up to five: both characters draw until holding 5, all at once —
+ * Step 5, Draw up to five: both characters draw until holding 5, all at once —
  * no opening draw, no alternating turns, no decision to make, so this never
- * pauses on its own (see `types.ts`, `Phase`: `Turn Start` covers both steps).
+ * pauses on its own (see `types.ts`, `Phase`: `Turn Start` covers all the steps).
  * A card can still lower a character's own target (`drawTargetFor`). Nothing
  * here settles: effects triggered by these draws resolve after both have drawn.
  */
@@ -1397,6 +1433,14 @@ function answerCards(
     const [only] = ids as readonly CardId[];
     if (only === undefined) throw new CorruptStateError("Kept no Good Stuff.");
     return answerGoodStuff(state, only, run);
+  }
+  if (kind === "cards" && pending.kind === "ChooseBottom") {
+    if (!pending.source) throw new CorruptStateError("No card is waiting on that answer.");
+    const cards = ids.flatMap((id) => {
+      const found = pending.cards.find((x) => x.id === id);
+      return found ? [found] : [];
+    });
+    return runChoice(state, { kind: "order", tag: pending.source.tag, cards }, run);
   }
   if (kind === "cards") {
     if (!pending.source) return answerRoomCards(state, pending, ids as readonly CardId[], run);

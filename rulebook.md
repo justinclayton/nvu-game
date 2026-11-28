@@ -1,6 +1,6 @@
 # *North vs Up*: Rulebook
 
-Rules version: R38
+Rules version: R39
 
 ---
 
@@ -67,10 +67,11 @@ In the middle of the table:
 
 ### 1. Start of Turn
 
-1. **Reveal the rooms:** Turn the top **3** cards of the Floor deck face up. If fewer than 3 remain, turn up all of them.
-2. **Enter a room:** Choose **one** revealed card and put it on the Rooms pile. This is the new Active Room. If only one card is revealed, you must enter it.
-3. **Pass the rest:** Put the other revealed cards on the bottom of the Floor deck, in any order you choose.
-4. **Draw up to five:** Each player draws cards from their deck into their hand until they hold **5**. If you already hold 5 or more, do not draw. Resolve effects triggered by these draws after both players have drawn.
+1. **Resolve `At Turn Start` effects:** Resolve each effect that says `At Turn Start`. An effect that changes how many cards you draw applies in step 5.
+2. **Reveal the rooms:** Turn the top **3** cards of the Floor deck face up. If fewer than 3 remain, turn up all of them.
+3. **Enter a room:** Choose **one** revealed card and put it on the Rooms pile. This is the new Active Room. If only one card is revealed, you must enter it.
+4. **Pass the rest:** Put the other revealed cards on the bottom of the Floor deck, in any order you choose.
+5. **Draw up to five:** Each player draws cards from their deck into their hand until they hold **5**. If you already hold 5 or more, do not draw. Resolve effects triggered by these draws after both players have drawn.
 
 >  **Empty Deck**: Whenever your deck is empty and you need to draw, reshuffle your discard pile to form a new deck first.
 
@@ -120,7 +121,7 @@ There are two kinds: `Room` and `Stairwell`. `Stairwell` cards are essentially f
 - **Name.**
 - **Type line:** `Room` or `Stairwell`, and the floor it belongs to (`Room · Floor 3`).
 - **Flavor text.**
-- **Challenges:** one or more, each listing one or more `threshold: outcome` lines. A threshold consists of one or more stats (`Oomph 7 and Scramble 7`). An outcome prints its own reward, and prints `Ascend` when it ends the Floor. It never prints `Clear`.
+- **Challenges:** one or more, each listing one or more `threshold: outcome` lines. A threshold consists of one or more stats (`Oomph 7 and Scramble 7`). An outcome prints its own reward, and prints `Ascend` when it ends the Floor. It never prints `Clear`. A line separates each challenge from the next.
 - **`Flee`**: what happens when no challenges are met.
 
 ### Character cards
@@ -164,7 +165,7 @@ A `Stuff` card looks similar to a character card:
 - `Get X Good Stuff`: `Get Good Stuff` **X** times.
 - `Get Bad Stuff`: Move the top card of the Bad Stuff pool into your hand.
 - `Reveal a card reward`: Reveal the top **3** cards of your reward pool. You may put **one** into your discard pile. Put the cards you did not take on the bottom of your reward pool.
-- `Peek X`: Reveal the top **X** cards of ANY face-down pile. Discard any number of them, then put the rest back in any order. If there are fewer than X cards, look at as many as there are; you do not reshuffle the discard pile when you Peek.
+- `Peek X`: Reveal the top **X** cards of ANY face-down pile. Move any number of them to the bottom of that pile in any order, then put the rest back on top in any order. If there are fewer than X cards, look at as many as there are; you do not reshuffle the discard pile when you Peek.
 - `you may draw X cards`: Draw any number of cards from none up to **X**.
 - `any deck`: any face-down pile on the table: a character deck, a reward pool, the Floor deck, or a Stuff pool.
 - `Scrap`: Move the card to the Scrapyard. It is removed from play for the rest of the game.

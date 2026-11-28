@@ -72,7 +72,7 @@ export const CARD_CONTENT = {
     {"name":"Torn Seal","set":"proposed","kind":"bad_stuff","owner":null,"rarity":null,"starter":false,"count":2,"cost":2,"oomph":0,"scramble":0,"conditionalStat":false,"text":"Can't be used to pay for other cards. Play: Scrap this card.","flavor":"Broken rubber gasket. Useless dead weight clogging your pack."},
     {"name":"Sluggish","set":"proposed","kind":"bad_stuff","owner":null,"rarity":null,"starter":false,"count":2,"cost":1,"oomph":0,"scramble":0,"conditionalStat":false,"text":"Holding: Cards you play cost +1 card to play. Can't be used to pay for other cards. Play: Scrap this card.","flavor":"Limb fatigue slows down every movement."},
     {"name":"Rust","set":"proposed","kind":"bad_stuff","owner":null,"rarity":null,"starter":false,"count":2,"cost":2,"oomph":0,"scramble":0,"conditionalStat":false,"text":"Holding: Stuff cards you play have -1 Oomph and -1 Scramble. Can't be used to pay for other cards. Play: Scrap this card.","flavor":"Corrosion degrades the quality of your scavenged gear."},
-    {"name":"Faceful Of Slime","set":"proposed","kind":"bad_stuff","owner":null,"rarity":null,"starter":false,"count":2,"cost":2,"oomph":0,"scramble":0,"conditionalStat":false,"text":"Holding: At Turn Start, discard 1 card from your hand. Can't be used to pay for other cards. Play: Scrap this card.","flavor":"Murky goop blinds your vision and slows drawing."},
+    {"name":"Faceful Of Slime","set":"proposed","kind":"bad_stuff","owner":null,"rarity":null,"starter":false,"count":2,"cost":2,"oomph":0,"scramble":0,"conditionalStat":false,"text":"Holding: During the Draw phase, draw 1 fewer card. Can't be used to pay for other cards. Play: Scrap this card.","flavor":"Murky goop blinds your vision and slows drawing."},
     {"name":"Spore Cloud","set":"proposed","kind":"bad_stuff","owner":null,"rarity":null,"starter":false,"count":2,"cost":2,"oomph":0,"scramble":0,"conditionalStat":false,"text":"Holding: At Cleanup, discard cards other than this one until you hold 3. Can't be used to pay for other cards. Play: Scrap this card.","flavor":"Choking spores force you to drop excess gear."},
     {"name":"My Head Is Quantum Spinning","set":"proposed","kind":"bad_stuff","owner":null,"rarity":null,"starter":false,"count":2,"cost":1,"oomph":0,"scramble":0,"conditionalStat":false,"text":"Holding: Whenever your partner draws a card during Play, Exhaust 1. Can't be used to pay for other cards. Play: Scrap this card.","flavor":"Disorientation drains stamina whenever team communication spikes."},
     {"name":"Panic","set":"proposed","kind":"bad_stuff","owner":null,"rarity":null,"starter":false,"count":2,"cost":1,"oomph":0,"scramble":0,"conditionalStat":false,"text":"Holding: Every room threshold requires +2 Scramble to be met. Can't be used to pay for other cards. Play: Exhaust 2. Scrap this card.","flavor":"Blinding fear raises room difficulty and drains team stamina."},
@@ -120,10 +120,10 @@ export const CARD_CONTENT = {
 } as const satisfies CardContent;
 
 /** The first 12 hex of sha256 over the JSON of CARD_CONTENT above — identifies this card list. */
-export const CARD_LIST_ID = "0c4d99b6012c";
+export const CARD_LIST_ID = "5948b09f6f7d";
 
 /** R of the kit revision: the rulebook's "Rules version:" line. Recorded runs refuse to replay across a change to it. Kept out of CARD_CONTENT so a rules bump does not change CARD_LIST_ID. */
 export const RULES_VERSION = "R40";
 
 /** C of the kit revision: the "version:" line under meta in cards.yaml, bumped when the card list changes. The print sheet stamps RULES_VERSION.CARDS_VERSION on every card; tools/kit-revision.sh adds the engine count. */
-export const CARDS_VERSION = "C64";
+export const CARDS_VERSION = "C65";

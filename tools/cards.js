@@ -11,10 +11,10 @@
  * and no server.
  */
 var NVU_CARDS = {
-  meta: {"version":"C64","updated":"2026-10-03"},
+  meta: {"version":"C65","updated":"2026-10-03"},
   rulesVersion: "R40",
-  cardsVersion: "C64",
-  cardListId: "0c4d99b6012c",
+  cardsVersion: "C65",
+  cardListId: "5948b09f6f7d",
   cards: [
     {"name":"Shove","set":"official","kind":"player","owner":"Red","starter":true,"cost":1,"oomph":2,"flavor":"'Oomph!', he shouted.","count":4},
     {"name":"Charge","set":"official","kind":"player","owner":"Red","starter":true,"cost":2,"oomph":4,"flavor":"I am bolder, so I lower my shoulder.","count":4},
@@ -72,7 +72,7 @@ var NVU_CARDS = {
     {"name":"Torn Seal","set":"proposed","kind":"bad_stuff","cost":2,"flavor":"Broken rubber gasket. Useless dead weight clogging your pack.","text":"Can't be used to pay for other cards. Play: Scrap this card.","count":2},
     {"name":"Sluggish","set":"proposed","kind":"bad_stuff","cost":1,"flavor":"Limb fatigue slows down every movement.","text":"Holding: Cards you play cost +1 card to play. Can't be used to pay for other cards. Play: Scrap this card.","count":2},
     {"name":"Rust","set":"proposed","kind":"bad_stuff","cost":2,"flavor":"Corrosion degrades the quality of your scavenged gear.","text":"Holding: Stuff cards you play have -1 Oomph and -1 Scramble. Can't be used to pay for other cards. Play: Scrap this card.","count":2},
-    {"name":"Faceful Of Slime","set":"proposed","kind":"bad_stuff","cost":2,"flavor":"Murky goop blinds your vision and slows drawing.","text":"Holding: At Turn Start, discard 1 card from your hand. Can't be used to pay for other cards. Play: Scrap this card.","count":2},
+    {"name":"Faceful Of Slime","set":"proposed","kind":"bad_stuff","cost":2,"flavor":"Murky goop blinds your vision and slows drawing.","text":"Holding: During the Draw phase, draw 1 fewer card. Can't be used to pay for other cards. Play: Scrap this card.","count":2},
     {"name":"Spore Cloud","set":"proposed","kind":"bad_stuff","cost":2,"flavor":"Choking spores force you to drop excess gear.","text":"Holding: At Cleanup, discard cards other than this one until you hold 3. Can't be used to pay for other cards. Play: Scrap this card.","count":2},
     {"name":"My Head Is Quantum Spinning","set":"proposed","kind":"bad_stuff","cost":1,"flavor":"Disorientation drains stamina whenever team communication spikes.","text":"Holding: Whenever your partner draws a card during Play, Exhaust 1. Can't be used to pay for other cards. Play: Scrap this card.","count":2},
     {"name":"Panic","set":"proposed","kind":"bad_stuff","cost":1,"flavor":"Blinding fear raises room difficulty and drains team stamina.","text":"Holding: Every room threshold requires +2 Scramble to be met. Can't be used to pay for other cards. Play: Exhaust 2. Scrap this card.","count":2},

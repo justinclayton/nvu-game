@@ -572,8 +572,10 @@ function answerExhaust(state: GameState, cardId: CardId | null, run: Run): GameS
   const s = exhaustOwedCard({ ...state, pending: null }, card, run);
   if (s.phase === "GameOver") return s;
   const drained = drain(settle(s, run), run);
-  // Step 1 was waiting on this choice: the rooms are revealed once it is made.
-  if (drained.phase === "Turn Start" && !drained.pending) return revealRooms(drained, run);
+  const askedInStepOne = state.phase === "Turn Start";
+  if (askedInStepOne && drained.phase === "Turn Start" && !drained.pending) {
+    return finishTurnStart(drained, run);
+  }
   return drained;
 }
 

@@ -1421,7 +1421,7 @@ describe("Corrosive Acid — 'Holding: At Turn Start, Exhaust 1. Play: Scrap 1 G
     });
     const { state: next, events } = exhaustFromDeck(must(state, { type: "FLIP_ROOM" }));
     expect(next.Red.hand).toHaveLength(5);
-    expect(next.Red.deck).toHaveLength(2);
+    expect(next.Red.deck).toHaveLength(1);
     expect(next.Red.exhaust).toHaveLength(1);
     const types = eventTypes(events);
     expect(types.indexOf("CARD_EXHAUSTED")).toBeGreaterThanOrEqual(0);
@@ -1433,7 +1433,7 @@ describe("Corrosive Acid — 'Holding: At Turn Start, Exhaust 1. Play: Scrap 1 G
   it("waits for the Exhaust choice before the rooms are revealed, then goes on as normal", () => {
     const state = rig({
       phase: "Turn Start",
-      floorDeck: [room("Security Turnstile"), room("Dark Room"), room("Dead End")],
+      floorDeck: [room("Security Turnstile"), room("Dark Room"), room("Ventilation Shaft")],
       Red: player({ deck: pile("Shove", 6), hand: [card("Corrosive Acid")] }),
       Gray: player({ deck: pile("Duck Under", 6) }),
     });

@@ -2,9 +2,11 @@
 # coder, both on the source PR. A push to a branch with an open PR to main
 # whose rulebook.md or cards.yaml differ from main, that PR's opened event, or
 # any comment on the PR from the designer, runs the planner. It reads what
-# changed in the sources and the PR's thread, and posts one plan comment
-# listing the work as items, with each question for the designer as a comment
-# of its own. A designer's comment can answer a question, ask for an
+# changed in the sources and the PR's thread, and posts one plan comment: the
+# work as items in a collapsed section, then its questions for the designer.
+# The comment that says planning started is edited into the plan, and a plan
+# with nothing to build is edited again to say the PR is ready.
+# A designer's comment can answer a question, ask for an
 # adjustment (a new item), or change nothing, and the planner says which. The
 # coder then builds every unblocked item as one commit on the PR's branch and,
 # when every item is built and both checks pass, marks the PR ready for
@@ -39,15 +41,17 @@ permissions:
 
 jobs:
   gate:
-    # Pushes and PR events from this repo only; a comment, in the conversation
-    # or on the diff, only from the designer and only on an open PR to main.
+    # Pushes and PR events from this repo only, and never Dependabot's; a
+    # comment, in the conversation or on the diff, only from the designer and
+    # only on an open PR to main.
     if: >-
-      github.event_name == 'push'
+      github.actor != 'dependabot[bot]'
+      && (github.event_name == 'push'
       || (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository)
       || (github.event_name == 'issue_comment' && github.event.issue.pull_request != null
           && github.event.comment.user.login == github.repository_owner)
       || (github.event_name == 'pull_request_review_comment'
-          && github.event.comment.user.login == github.repository_owner)
+          && github.event.comment.user.login == github.repository_owner))
     runs-on: ubuntu-latest
     outputs:
       pr: ${{ steps.pr.outputs.pr }}
@@ -250,16 +254,18 @@ jobs:
           } > "$RUNNER_TEMP/plan-prompt.md"
 
       - name: Say the plan has started
+        id: start
         if: steps.range.outputs.from != ''
         env:
           GH_TOKEN: ${{ steps.app-token.outputs.token }}
           FROM: ${{ steps.range.outputs.from }}
         run: |
           # shellcheck disable=SC2016
-          printf 'Planning started: reading the sources from `%s` to `%s`. [Run](%s)\n\n<!-- nvu-loop: plan-start %s -->\n' \
+          printf 'Planning started: reading the sources from `%s` to `%s`. [See log](%s)\n\n<!-- nvu-loop: plan-start %s -->\n' \
             "${FROM:0:7}" "${SHA:0:7}" "$RUN" "$SHA" > "$RUNNER_TEMP/plan-start.md"
-          gh api -X POST "repos/$GITHUB_REPOSITORY/issues/$PR/comments" \
-            -F body=@"$RUNNER_TEMP/plan-start.md" --jq '"posted \(.html_url)"'
+          id=$(gh api -X POST "repos/$GITHUB_REPOSITORY/issues/$PR/comments" \
+            -F body=@"$RUNNER_TEMP/plan-start.md" --jq .id)
+          echo "id=$id" >> "$GITHUB_OUTPUT"
 
       - name: Plan
         if: steps.range.outputs.from != ''
@@ -292,6 +298,7 @@ jobs:
           if [ "$(git rev-parse HEAD)" != "$SHA" ] || [ -n "$(git status --porcelain)" ]; then
             git status
             echo "The planner changed the checkout; it may only post comments."
+            echo "the planner changed files in the checkout" > "$RUNNER_TEMP/plan-fail-reason"
             exit 1
           fi
 
@@ -301,6 +308,7 @@ jobs:
         env:
           GH_TOKEN: ${{ steps.app-token.outputs.token }}
           MARKER: ${{ steps.range.outputs.marker }}
+          START: ${{ steps.start.outputs.id }}
         run: |
           set -eu
           result=$(jq -r 'select(.type == "result") | select(.subtype == "success" and (.is_error | not)) | .result' "$RUNNER_TEMP/plan-transcript.jsonl")
@@ -309,26 +317,65 @@ jobs:
             exit 1
           fi
           marker=$MARKER
+          printf '%s\n' "$result" > "$RUNNER_TEMP/plan-result.md"
+          count=$(grep -cE '^### Item: [a-z0-9-]+[[:space:]]*$' "$RUNNER_TEMP/plan-result.md" || true)
           case "$result" in
             "No change to the plan"*)
               # The build reads only plan comments whose marker ends in the sha or comment id.
               marker="${MARKER% -->} unchanged -->"
               echo "unchanged=true" >> "$GITHUB_OUTPUT" ;;
           esac
-          printf '%s\n\n%s\n' "$result" "$marker" > "$RUNNER_TEMP/plan-comment.md"
-          gh api -X POST "repos/$GITHUB_REPOSITORY/issues/$PR/comments" \
-            -F body=@"$RUNNER_TEMP/plan-comment.md" --jq '"posted \(.html_url)"'
+          if [ "$count" = 0 ]; then
+            # Nothing to build: the planner's sentence is the whole comment.
+            printf '%s\n\n%s\n' "$result" "$marker" > "$RUNNER_TEMP/plan-comment.md"
+          else
+            # The opening sentences, the items folded away, then the questions.
+            {
+              echo "## Plan"
+              echo
+              awk '/^### Item: / { exit } { print }' "$RUNNER_TEMP/plan-result.md"
+              echo "<details>"
+              echo "<summary>$count item(s) to build</summary>"
+              echo
+              awk '/^## / { p = 0 } /^### Item: / { p = 1 } p' "$RUNNER_TEMP/plan-result.md"
+              echo
+              echo "</details>"
+              echo
+              awk '/^## / { p = 1 } p' "$RUNNER_TEMP/plan-result.md"
+              echo
+              echo "$marker"
+            } > "$RUNNER_TEMP/plan-comment.md"
+          fi
+          # The start comment becomes the plan.
+          if [ -n "$START" ]; then
+            gh api -X PATCH "repos/$GITHUB_REPOSITORY/issues/comments/$START" \
+              -F body=@"$RUNNER_TEMP/plan-comment.md" --jq '"posted \(.html_url)"'
+          else
+            gh api -X POST "repos/$GITHUB_REPOSITORY/issues/$PR/comments" \
+              -F body=@"$RUNNER_TEMP/plan-comment.md" --jq '"posted \(.html_url)"'
+          fi
 
       - name: Say the plan failed
         if: failure() && steps.range.outputs.from != '' && steps.post.outcome != 'success'
         env:
           GH_TOKEN: ${{ steps.app-token.outputs.token }}
+          START: ${{ steps.start.outputs.id }}
         run: |
-          # shellcheck disable=SC2016
-          printf 'Planning `%s` failed before the plan was posted. Re-run it from the [run](%s); the transcript is on the run.\n' "${SHA:0:7}" "$RUN" \
+          reason=$(cat "$RUNNER_TEMP/plan-fail-reason" 2>/dev/null || true)
+          if [ -z "$reason" ] && [ -s "$RUNNER_TEMP/plan-transcript.jsonl" ]; then
+            reason=$(jq -R -r 'fromjson? | select(.type == "result") | select(.subtype != "success" or .is_error)
+              | (.result // (.subtype | gsub("_"; " ")))' "$RUNNER_TEMP/plan-transcript.jsonl" | tail -1 | tr -s '[:space:]' ' ' | cut -c1-200)
+          fi
+          reason=${reason:-the planner stopped before it finished}
+          printf 'Planning failed: %s. [See log](%s)\n' "${reason%.}" "$RUN" \
             > "$RUNNER_TEMP/plan-failed.md"
-          gh api -X POST "repos/$GITHUB_REPOSITORY/issues/$PR/comments" \
-            -F body=@"$RUNNER_TEMP/plan-failed.md" --jq '"posted \(.html_url)"'
+          if [ -n "$START" ]; then
+            gh api -X PATCH "repos/$GITHUB_REPOSITORY/issues/comments/$START" \
+              -F body=@"$RUNNER_TEMP/plan-failed.md" --jq '"posted \(.html_url)"'
+          else
+            gh api -X POST "repos/$GITHUB_REPOSITORY/issues/$PR/comments" \
+              -F body=@"$RUNNER_TEMP/plan-failed.md" --jq '"posted \(.html_url)"'
+          fi
 
       # --------------------------------------------------------------- build
 
@@ -349,11 +396,11 @@ jobs:
           set -eu
           # Comments come oldest first, so the last plan comment is the newest plan.
           # gh refuses --slurp together with --jq, so the filter runs page by page
-          # and prints each plan's body as one base64 line; the last line is the newest.
+          # and prints each plan's id and its body as base64 on one line; the last line is the newest.
           gh api --paginate "repos/$GITHUB_REPOSITORY/issues/$PR/comments" \
-            --jq ".[] | select(.user.login == \"$BOT\") | select(.body | test(\"<!-- nvu-loop: plan [0-9a-f]{40}( comment [0-9]+)? -->\")) | .body | @base64" \
+            --jq ".[] | select(.user.login == \"$BOT\") | select(.body | test(\"<!-- nvu-loop: plan [0-9a-f]{40}( comment [0-9]+)? -->\")) | \"\(.id) \(.body | @base64)\"" \
             > "$RUNNER_TEMP/plans.b64"
-          tail -n 1 "$RUNNER_TEMP/plans.b64" | base64 --decode > "$RUNNER_TEMP/plan.md"
+          tail -n 1 "$RUNNER_TEMP/plans.b64" | cut -d' ' -f2 | base64 --decode > "$RUNNER_TEMP/plan.md"
           if [ ! -s "$RUNNER_TEMP/plan.md" ]; then
             echo "No plan is posted on #$PR: nothing to build."
             exit 0
@@ -361,17 +408,21 @@ jobs:
           mkdir -p "$RUNNER_TEMP/items"
           awk -v dir="$RUNNER_TEMP/items" '
             /^### Item: [a-z0-9-]+[[:space:]]*$/ { if (f) close(f); n++; f = sprintf("%s/%02d-%s.md", dir, n, $3); print > f; next }
-            /^### / { if (f) close(f); f = ""; next }
+            /^##+ / || /^<\/?details>/ { if (f) close(f); f = ""; next }
             /^<!-- nvu-loop: / { next }
             f { print > f }
           ' "$RUNNER_TEMP/plan.md"
           count=$(find "$RUNNER_TEMP/items" -name '*.md' | wc -l | tr -d ' ')
           echo "The newest plan has $count item(s):"
           find "$RUNNER_TEMP/items" -name '*.md' | sort
-          echo "count=$count" >> "$GITHUB_OUTPUT"
-          echo "plan=true" >> "$GITHUB_OUTPUT"
+          {
+            echo "count=$count"
+            echo "comment=$(tail -n 1 "$RUNNER_TEMP/plans.b64" | cut -d' ' -f1)"
+            echo "plan=true"
+          } >> "$GITHUB_OUTPUT"
 
       - name: Install the app's dependencies
+        id: install
         if: steps.items.outputs.plan == 'true'
         run: make app-install
 
@@ -387,8 +438,11 @@ jobs:
           id=$(GH_TOKEN=$TOKEN gh api "users/$BOT_SLUG" --jq .id)
           git config user.name "$BOT_SLUG"
           git config user.email "$id+$BOT_SLUG@users.noreply.github.com"
+          # $summary is what still stands between the PR and ready; $detail is what was built.
           summary=$RUNNER_TEMP/build-summary.md
+          detail=$RUNNER_TEMP/build-detail.md
           : > "$summary"
+          : > "$detail"
           built=0; skipped=0; blocked=0; failed=0
           for item in "$RUNNER_TEMP"/items/*.md; do
             [ -e "$item" ] || break
@@ -396,12 +450,12 @@ jobs:
             title=$(sed -n '2,$p' "$item" | grep -m1 . | sed 's/^[[:space:]]*//')
             if git log --format=%s "origin/main..HEAD" | grep -qF "Item $slug:"; then
               echo "## $slug: built already"
-              printf -- '- `%s` was built already.\n' "$slug" >> "$summary"
+              printf -- '- %s (built earlier)\n' "$title" >> "$detail"
               skipped=$((skipped + 1)); continue
             fi
             if grep -q '^Blocked by:' "$item"; then
               echo "## $slug: blocked"
-              printf -- '- `%s` waits on a question: %s\n' "$slug" "$(grep -m1 '^Blocked by:' "$item" | sed 's/^Blocked by:[[:space:]]*//')" >> "$summary"
+              printf -- '- Waiting on your answer to `%s`: %s\n' "$(grep -m1 '^Blocked by:' "$item" | sed 's/^Blocked by:[[:space:]]*//')" "$title" >> "$summary"
               blocked=$((blocked + 1)); continue
             fi
             echo "## $slug: building"
@@ -442,7 +496,7 @@ jobs:
             if ! node tools/cards.mjs build > "$RUNNER_TEMP/generate-$slug.log" 2>&1; then
               echo "The generator failed:"; cat "$RUNNER_TEMP/generate-$slug.log"
               git checkout -- . && git clean -fdq
-              printf -- '- `%s` failed: `node tools/cards.mjs build` failed: %s\n' "$slug" "$(grep -m1 'Error' "$RUNNER_TEMP/generate-$slug.log" || tail -1 "$RUNNER_TEMP/generate-$slug.log")" >> "$summary"
+              printf -- '- Could not build "%s": `node tools/cards.mjs build` failed: %s\n' "$title" "$(grep -m1 'Error' "$RUNNER_TEMP/generate-$slug.log" || tail -1 "$RUNNER_TEMP/generate-$slug.log")" >> "$summary"
               failed=$((failed + 1)); continue
             fi
             bad=$(git status --porcelain | awk '{print $NF}' \
@@ -450,28 +504,29 @@ jobs:
             if [ -n "$bad" ]; then
               echo "The coder changed files that are not its to change:"; echo "$bad"
               git checkout -- . && git clean -fdq
-              printf -- '- `%s` failed: the coder changed %s.\n' "$slug" "$(echo "$bad" | tr '\n' ' ')" >> "$summary"
+              printf -- '- Could not build "%s": the coder changed %s.\n' "$title" "$(echo "$bad" | tr '\n' ' ')" >> "$summary"
               failed=$((failed + 1)); continue
             fi
             if [ -z "$(git status --porcelain)" ]; then
               echo "The coder changed nothing."
-              printf -- '- `%s` failed: the coder changed nothing. It said: %s\n' "$slug" "${result:-(nothing)}" >> "$summary"
+              printf -- '- Could not build "%s": the coder changed nothing. It said: %s\n' "$title" "${result:-(nothing)}" >> "$summary"
               failed=$((failed + 1)); continue
             fi
             git add -A
             git commit -q -m "Item $slug: $title"
             if ! git push "https://x-access-token:$TOKEN@github.com/$GITHUB_REPOSITORY" "HEAD:refs/heads/$BRANCH"; then
               echo "The push failed; the commit stays local and the next run builds the item again."
-              printf -- '- `%s` failed: its commit could not be pushed.\n' "$slug" >> "$summary"
+              printf -- '- Could not build "%s": its commit could not be pushed.\n' "$title" >> "$summary"
               failed=$((failed + 1)); break
             fi
-            printf -- '- `%s` built as `%s`: %s\n' "$slug" "$(git rev-parse --short HEAD)" "$title" >> "$summary"
-            printf '  %s\n' "${result:-(no final message)}" | sed 's/^/  > /' >> "$summary"
+            printf -- '- %s (`%s`)\n' "$title" "$(git rev-parse --short HEAD)" >> "$detail"
+            printf '  %s\n' "${result:-(no final message)}" | sed 's/^/  > /' >> "$detail"
             built=$((built + 1))
           done
           echo "built=$built skipped=$skipped blocked=$blocked failed=$failed"
           {
             echo "built=$built"
+            echo "skipped=$skipped"
             echo "blocked=$blocked"
             echo "failed=$failed"
             echo "final=$(git rev-parse HEAD)"
@@ -508,13 +563,15 @@ jobs:
         env:
           GH_TOKEN: ${{ steps.final-token.outputs.token }}
           BOT: ${{ steps.range.outputs.bot }}
+          COUNT: ${{ steps.items.outputs.count }}
+          PLAN_COMMENT: ${{ steps.items.outputs.comment }}
           BUILT: ${{ steps.build.outputs.built }}
+          SKIPPED: ${{ steps.build.outputs.skipped }}
           BLOCKED: ${{ steps.build.outputs.blocked }}
           FAILED: ${{ steps.build.outputs.failed }}
           FINAL: ${{ steps.build.outputs.final }}
           CHECK: ${{ steps.checks.outputs.check }}
           APP: ${{ steps.checks.outputs.app }}
-          TESTS: ${{ steps.checks.outputs.tests }}
         run: |
           set -eu
           marker="<!-- nvu-loop: build $FINAL -->"
@@ -531,17 +588,42 @@ jobs:
             gh pr ready --undo "$PR"
             echo "#$PR is a draft again."
           fi
+          done=$((BUILT + SKIPPED))
           {
-            if [ "$ready" = true ]; then
-              printf 'Built: every item is in, both checks pass, and the PR is ready for review. [Run](%s)\n\n' "$RUN"
+            if [ "$ready" = true ] && [ "$done" = 0 ]; then
+              printf '**Ready for review.** No code changes were needed. [See log](%s)\n\n' "$RUN"
+            elif [ "$ready" = true ]; then
+              printf '**Ready for review.** %s change(s) implemented. [See log](%s)\n\n' "$done" "$RUN"
             else
-              printf 'Build stopped short: the PR is a draft until every item is built and both checks pass. [Run](%s)\n\n' "$RUN"
+              printf '**Not ready for review yet.** [See log](%s)\n\n' "$RUN"
+              cat "$RUNNER_TEMP/build-summary.md"
+              # shellcheck disable=SC2016
+              [ "$CHECK" = pass ] || printf -- '- `make check` fails.\n'
+              # shellcheck disable=SC2016
+              [ "$APP" = pass ] || printf -- '- `make app-check` fails.\n'
+              echo
             fi
-            printf '%s\n\n' "$( [ -s "$RUNNER_TEMP/build-summary.md" ] && cat "$RUNNER_TEMP/build-summary.md" || echo '- The plan has no items.')"
-            # shellcheck disable=SC2016
-            printf -- '- `make check`: %s\n- `make app-check`: %s%s\n\n%s\n' "$CHECK" "$APP" "${TESTS:+ ($TESTS)}" "$marker"
+            if [ -s "$RUNNER_TEMP/build-detail.md" ]; then
+              printf '<details>\n<summary>What was built</summary>\n\n'
+              cat "$RUNNER_TEMP/build-detail.md"
+              printf '\n</details>\n\n'
+            fi
+            echo "$marker"
           } > "$RUNNER_TEMP/build-done.md"
-          if gh api --paginate "repos/$GITHUB_REPOSITORY/issues/$PR/comments" \
+          if [ "$ready" = true ] && [ "$COUNT" = 0 ]; then
+            # A plan with nothing to build: its own comment says the PR is ready.
+            gh api "repos/$GITHUB_REPOSITORY/issues/comments/$PLAN_COMMENT" --jq .body > "$RUNNER_TEMP/plan-now.md"
+            if grep -qF '**Ready for review.**' "$RUNNER_TEMP/plan-now.md"; then
+              echo "The plan comment says ready already."
+            else
+              awk -v line="**Ready for review.** No code changes were needed. [See log]($RUN)" \
+                '/^<!-- nvu-loop: / { print line; print "" } { print }' "$RUNNER_TEMP/plan-now.md" > "$RUNNER_TEMP/plan-ready.md"
+              gh api -X PATCH "repos/$GITHUB_REPOSITORY/issues/comments/$PLAN_COMMENT" \
+                -F body=@"$RUNNER_TEMP/plan-ready.md" --jq '"updated \(.html_url)"'
+            fi
+          elif [ "$ready" = true ] && [ "$draft" = false ] && [ "$BUILT" = 0 ]; then
+            echo "Nothing was built this run and #$PR is ready already: posting nothing."
+          elif gh api --paginate "repos/$GITHUB_REPOSITORY/issues/$PR/comments" \
               --jq ".[] | select(.user.login == \"$BOT\") | .body" | grep -qF "$marker"; then
             echo "The build is reported already."
           else
@@ -555,8 +637,16 @@ jobs:
         if: failure() && steps.items.outputs.plan == 'true' && steps.ready.outputs.reported != 'true'
         env:
           GH_TOKEN: ${{ steps.final-token.outputs.token }}
+          INSTALL: ${{ steps.install.outcome }}
+          BUILD: ${{ steps.build.outcome }}
+          CHECKS: ${{ steps.checks.outcome }}
         run: |
-          printf 'The build failed before it was reported. Re-run it from the [run](%s); the transcripts are on the run.\n' "$RUN" \
+          if [ "$INSTALL" = failure ]; then reason="the app's dependencies did not install"
+          elif [ "$BUILD" = failure ]; then reason="the job stopped while building the items"
+          elif [ "$CHECKS" = failure ]; then reason="the checks could not be run"
+          else reason="the result could not be posted"
+          fi
+          printf 'Build failed: %s. [See log](%s)\n' "$reason" "$RUN" \
             > "$RUNNER_TEMP/build-failed.md"
           gh api -X POST "repos/$GITHUB_REPOSITORY/issues/$PR/comments" \
             -F body=@"$RUNNER_TEMP/build-failed.md" --jq '"posted \(.html_url)"'

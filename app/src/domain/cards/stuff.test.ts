@@ -1212,13 +1212,13 @@ describe("Panic — 'Holding: every room threshold requires +2 Scramble to be me
       }),
     });
     const payWith = state.Red.hand.filter((c) => c.name === "Shove").map((c) => c.id);
-    const { state: next } = must(state, {
-      type: "PLAY_CARD",
-      character: "Red",
-      cardId: handCard(state, "Red", "Panic").id,
-      payWith,
-    });
+    const { state: next } = play(state, [
+      { type: "PLAY_CARD", character: "Red", cardId: handCard(state, "Red", "Panic").id, payWith },
+      { type: "EXHAUST_CARD", cardId: null },
+      { type: "EXHAUST_CARD", cardId: null },
+    ]);
     expect(next.Red.deck).toHaveLength(2);
+    expect(next.Red.exhaust).toHaveLength(2);
   });
 });
 

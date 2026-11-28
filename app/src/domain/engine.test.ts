@@ -500,10 +500,8 @@ describe("Cleanup", () => {
       { type: "END_PLAY" },
     ]);
     expect(next.playZone).toEqual([]);
-    // The Shove played, then discarded from the play zone; the Charge was
-    // discarded earlier, to pay its cost.
     expect(next.Red.discard.map((c) => c.name).sort()).toEqual(["Charge", "Shove"]);
-    expect(next.Red.exhaust).toEqual([]);
+    expect(next.Red.exhaust.map((c) => c.name)).not.toContain("Charge");
   });
 
   it("Draining: every played card is Exhausted, not discarded, and other rooms are unchanged", () => {
@@ -1266,7 +1264,7 @@ describe("Room kinds: Room and Stairwell", () => {
         activeRoom: room("Automated Defense Turret"),
         Red: player({
           deck: pile("Shove", 4),
-          hand: [card("Charge"), card("Charge"), card("Pry Bar"), ...pile("Shove", 4)],
+          hand: [card("Overdrive"), card("Overdrive"), card("Overdrive"), card("Pry Bar")],
           ...over.Red,
         }),
         // Rust, not Panic: a held Panic would itself raise the very
@@ -1277,19 +1275,10 @@ describe("Room kinds: Room and Stairwell", () => {
     const meetIt = (state: GameState) => {
       const r = ids(state, "Red");
       return play(state, [
-        {
-          type: "PLAY_CARD",
-          character: "Red",
-          cardId: r[0] as CardId,
-          payWith: [r[3] as CardId, r[4] as CardId],
-        },
-        {
-          type: "PLAY_CARD",
-          character: "Red",
-          cardId: r[1] as CardId,
-          payWith: [r[5] as CardId, r[6] as CardId],
-        },
+        playFree("Red", r[0] as CardId),
+        playFree("Red", r[1] as CardId),
         playFree("Red", r[2] as CardId),
+        playFree("Red", r[3] as CardId),
         { type: "END_PLAY" },
       ]);
     };

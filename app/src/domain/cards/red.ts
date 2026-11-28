@@ -21,10 +21,11 @@ export const RED: Registry = {
 
   Overdrive: { exhaustX: 1, exhaustFromDeck: true },
 
-  "Reckless Swing": { exhaustX: 1 },
+  "Reckless Swing": { exhaustX: 1, exhaustFromDeck: true },
 
   "It Pays To Be Reckless": {
     exhaustX: 1,
+    exhaustFromDeck: true,
     stats(state, owner) {
       const bonus = 2 * state.thisTurn.exhausted[owner];
       return { oomph: bonus, scramble: bonus };

@@ -31,7 +31,7 @@
 #   flee    string               room and stairwell only: the printed Flee line
 
 meta:
-  version: C63
+  version: C64
   updated: 2026-10-03
 
 cards:
@@ -642,7 +642,7 @@ cards:
     set: proposed
     kind: bad_stuff
     cost: 2
-    text: "Holding: At Turn Start, draw 1 fewer card. Can't be used to pay for other cards. Play: Scrap this card."
+    text: "Holding: At Turn Start, discard 1 card from your hand. Can't be used to pay for other cards. Play: Scrap this card."
     flavor: Murky goop blinds your vision and slows drawing.
 
   - name: Spore Cloud

@@ -1,6 +1,6 @@
 # *North vs Up*: Rulebook
 
-Rules version: R39
+Rules version: R40
 
 ---
 
@@ -67,7 +67,7 @@ In the middle of the table:
 
 ### 1. Start of Turn
 
-1. **Resolve `At Turn Start` effects:** Resolve each effect that says `At Turn Start`. An effect that changes how many cards you draw applies in step 5.
+1. **Resolve `At Turn Start` effects:** Resolve each effect that says `At Turn Start`.
 2. **Reveal the rooms:** Turn the top **3** cards of the Floor deck face up. If fewer than 3 remain, turn up all of them.
 3. **Enter a room:** Choose **one** revealed card and put it on the Rooms pile. This is the new Active Room. If only one card is revealed, you must enter it.
 4. **Pass the rest:** Put the other revealed cards on the bottom of the Floor deck, in any order you choose.

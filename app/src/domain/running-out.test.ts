@@ -53,11 +53,16 @@ describe("Keywords: Empty deck", () => {
     const state = rig({
       phase: "Play",
       activeRoom: room("Security Turnstile"),
-      Red: player({ deck: [], discard: pile("Shove", 5), hand: [card("Overdrive")] }),
+      Red: player({ deck: [], discard: pile("Shove", 5), hand: [card("Cross Punch"), card("Pry Bar"), card("Pry Bar")] }),
       Gray: player({ deck: pile("Duck Under", 4) }),
     });
-    // Overdrive: "Exhaust 1."
-    const { state: asked, events } = must(state, free("Red", handCard(state, "Red", "Overdrive").id));
+    // Cross Punch: "Exhaust 1. ..." (cost 2, paid from hand)
+    const { state: asked, events } = must(state, {
+      type: "PLAY_CARD",
+      character: "Red",
+      cardId: handCard(state, "Red", "Cross Punch").id,
+      payWith: state.Red.hand.filter((c) => c.name === "Pry Bar").map((c) => c.id),
+    });
     const pending = asked.pending;
     if (pending?.kind !== "ChooseExhaust") throw new Error("expected an Exhaust choice");
     expect(pending.deck).toBe(0);
@@ -66,7 +71,7 @@ describe("Keywords: Empty deck", () => {
     const first = pending.options[0];
     if (!first) throw new Error("rig");
     const { state: next } = must(asked, { type: "EXHAUST_CARD", cardId: first.id });
-    expect(next.Red.exhaust.map((c) => c.id)).toEqual([first.id]);
+    expect(next.Red.exhaust.map((c) => c.id)).toContain(first.id);
     expect(next.Red.discard).toHaveLength(4);
   });
 

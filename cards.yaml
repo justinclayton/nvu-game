@@ -31,7 +31,7 @@
 #   flee    string               room and stairwell only: the printed Flee line
 
 meta:
-  version: C61
+  version: C62
   updated: 2026-10-03
 
 cards:
@@ -81,7 +81,7 @@ cards:
     owner: Red
     cost: 0
     oomph: 3
-    text: Exhaust 1.
+    text: Exhaust 1 from the top of your deck.
     flavor: "See the fear in their eyes when they see the LACK of fear in mine?"
 
   ### Gray
@@ -792,7 +792,7 @@ cards:
     flee: "Both players Exhaust 1."
 
   - name: The Sentry Drone
-    count: 3
+    count: 1
     set: proposed
     kind: stairwell
     tier: 1
@@ -887,7 +887,7 @@ cards:
     flee: "Both players Exhaust 1."
 
   - name: Gears & Glitch
-    count: 3
+    count: 1
     set: proposed
     kind: stairwell
     tier: 2
@@ -1168,7 +1168,7 @@ cards:
     flee: "Both players Exhaust 2."
 
   - name: The Iron Sentinel
-    count: 3
+    count: 1
     set: proposed
     kind: stairwell
     tier: 3

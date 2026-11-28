@@ -84,7 +84,7 @@ jobs:
           SEED: ${{ steps.seed.outputs.seed }}
         run: |
           # shellcheck disable=SC2016
-          printf 'Playtest started on `%s` at `%s`, seed %s. [Run](%s)\n\n<!-- nvu-loop: playtest-start %s -->\n' \
+          printf 'Playtest started on `%s` at `%s`, seed %s. [See log](%s)\n\n<!-- nvu-loop: playtest-start %s -->\n' \
             "$BRANCH" "${SHA:0:7}" "$SEED" "$RUN" "$SHA" > "$RUNNER_TEMP/playtest-start.md"
           gh api -X POST "repos/$GITHUB_REPOSITORY/issues/$PR/comments" \
             -F body=@"$RUNNER_TEMP/playtest-start.md" --jq '"posted \(.html_url)"'

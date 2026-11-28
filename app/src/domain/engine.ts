@@ -762,7 +762,14 @@ function playCard(
   const behaviour = behaviourOf(card.name);
   if (behaviour?.exhaustX !== undefined) {
     const at = run.events.length;
-    const exhausted = printedExhaust(s, c, behaviour.exhaustX, card.name, run);
+    const exhausted = printedExhaust(
+      s,
+      c,
+      behaviour.exhaustX,
+      card.name,
+      run,
+      behaviour.exhaustFromDeck === true,
+    );
     attribute(run, at, card.name);
     s = settle(exhausted, run);
   }

@@ -38,8 +38,8 @@ restates every item still to do and every item built already, and leaves out
 an item a source change made moot, saying so in one line.
 
 It opens with one or two sentences: what the diff changes and whether code
-must change. If nothing must change, that is the whole message, naming what
-the diff changed.
+must change. If nothing must change, that is the whole message: one or two
+sentences naming what the diff changed, with no list and no headings.
 
 Then one section per piece of work an agent can build and test on its own,
 exactly in this shape:
@@ -62,33 +62,39 @@ Acceptance criteria:
 The slug is lowercase letters, digits and hyphens, unique in the plan, and
 stable from one plan to the next: an item you restate keeps its slug, because
 the coder finds its commit by it. The `Blocked by:` line appears only while
-the item waits on a question. Nothing else in the message starts with `### `.
-End every item's criteria with the last line as written.
+the item waits on a question. Nothing else in the message starts with `### `,
+and only the questions' heading starts with `## `. End every item's criteria
+with the last line as written. The job folds the items away under a "Plan"
+heading when it posts the comment, so write no heading of your own above them.
 
 ## Questions
 
 When the sources can be read two ways and the reading changes the work, ask
-the designer instead of guessing. A question is its own comment on the PR,
-posted before the plan:
+the designer instead of guessing. Questions close your final message, after
+the last item, under one heading, exactly in this shape:
 
 ```
-gh pr comment <pr> --body-file - <<'EOF'
-<!-- nvu-loop: question <slug> -->
-**Question `<slug>`:** <the question, in one or two sentences>
+## Questions for you
 
-- <choice A> (recommended)
-- <choice B>
-EOF
+**1. <the question, in one plain sentence>** (`<slug>`)
+- **A.** <choice> (recommended)
+- **B.** <choice>
+
+Reply in a comment with the number and the letter, such as `1: A`.
 ```
 
-A question asks one thing, lists the choices you see, and recommends one. It
-carries no background, consequences or links. Every item that waits on it
-says `Blocked by: <slug>`. The designer answers in the thread; the next run
-reads the answer, and the plan it posts drops the `Blocked by:` line. Never
-ask what the thread already answers, and never ask the same question twice.
-An answer that changes what the rulebook or cards say is the designer's to
-make on the branch; say so in the plan and leave the item blocked until the
-sources change.
+A question asks one thing, in words the designer can answer without opening
+the code. It lists two or three choices of a few words each and recommends
+one. It carries no background, consequences or links. Number the questions
+from 1; the reply line appears once, after the last question. Every item that
+waits on a question says `Blocked by: <slug>`.
+
+The designer answers in the thread; the next run reads the answer, and the
+plan it posts drops the question and the item's `Blocked by:` line. A
+question still open is restated under its slug. Never ask what the thread
+already answers. An answer that changes what the rulebook or cards say is the
+designer's to make on the branch; say so in the plan and leave the item
+blocked until the sources change.
 
 ## A comment from the designer
 
@@ -129,5 +135,5 @@ adjustment to the item whose commit wrote that line.
 
 ## Your final message
 
-The plan, as above, and nothing else: no preamble, no summary of your
-reading.
+The plan, as above, then the questions if there are any, and nothing else: no
+preamble, no summary of your reading.

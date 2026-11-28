@@ -1008,6 +1008,31 @@ describe("Faceful Of Slime — 'Holding: At Turn Start, draw 1 fewer card'", () 
     expect(next.Red.drewThisTurn).toBe(1);
     expect(next.Red.hand).toHaveLength(3);
   });
+
+  it("a copy that arrives in the draw does not lower this turn's draw, but lowers the next turn's", () => {
+    const state = rig({
+      phase: "Turn Start",
+      floorDeck: [room("Security Turnstile")],
+      Red: player({ deck: [card("Faceful Of Slime"), ...pile("Shove", 10)] }),
+      Gray: player({ deck: pile("Duck Under", 6) }),
+    });
+    const first = must(state, { type: "FLIP_ROOM" }).state;
+    expect(first.Red.hand).toHaveLength(5);
+    expect(first.Red.hand.some((c) => c.name === "Faceful Of Slime")).toBe(true);
+
+    const second = must(
+      {
+        ...first,
+        phase: "Turn Start" as const,
+        floorDeck: [room("Security Turnstile")],
+        activeRoom: null,
+        playZone: [],
+        Red: { ...first.Red, hand: first.Red.hand.filter((c) => c.name === "Faceful Of Slime") },
+      },
+      { type: "FLIP_ROOM" },
+    ).state;
+    expect(second.Red.hand).toHaveLength(4);
+  });
 });
 
 describe("Rust — 'Holding: Stuff cards you play have -1 Oomph and -1 Scramble'", () => {
@@ -1297,7 +1322,7 @@ describe("My Head Is Quantum Spinning — 'Holding: whenever your partner draws 
 });
 
 describe("Corrosive Acid — 'Holding: At Turn Start, Exhaust 1. Play: Scrap 1 Good Stuff card from your hand.'", () => {
-  it("Exhausts 1 at Turn Start, once the draw is done", () => {
+  it("Exhausts 1 at Turn Start, step 1, before the last room is entered", () => {
     const state = rig({
       phase: "Turn Start",
       floorDeck: [room("Security Turnstile")],
@@ -1306,11 +1331,93 @@ describe("Corrosive Acid — 'Holding: At Turn Start, Exhaust 1. Play: Scrap 1 G
     });
     const { state: next, events } = exhaustFromDeck(must(state, { type: "FLIP_ROOM" }));
     expect(next.Red.hand).toHaveLength(5);
-    expect(next.Red.deck).toHaveLength(1);
+    expect(next.Red.deck).toHaveLength(2);
     expect(next.Red.exhaust).toHaveLength(1);
-    expect(eventTypes(events)).toContain("CARD_EXHAUSTED");
+    const types = eventTypes(events);
+    expect(types.indexOf("CARD_EXHAUSTED")).toBeGreaterThanOrEqual(0);
+    expect(types.indexOf("CARD_EXHAUSTED")).toBeLessThan(types.indexOf("ROOM_FLIPPED"));
     const exhausted = events.find((e) => e.type === "CARD_EXHAUSTED");
     expect(exhausted?.source).toBe("Corrosive Acid");
+  });
+
+  it("waits for the Exhaust choice before the rooms are revealed, then goes on as normal", () => {
+    const state = rig({
+      phase: "Turn Start",
+      floorDeck: [room("Security Turnstile"), room("Dark Room"), room("Dead End")],
+      Red: player({ deck: pile("Shove", 6), hand: [card("Corrosive Acid")] }),
+      Gray: player({ deck: pile("Duck Under", 6) }),
+    });
+    const asked = must(state, { type: "FLIP_ROOM" });
+    expect(asked.state.pending?.kind).toBe("ChooseExhaust");
+    expect(eventTypes(asked.events)).not.toContain("ROOMS_REVEALED");
+    expect(asked.state.Red.hand).toHaveLength(1);
+
+    const answered = must(asked.state, { type: "EXHAUST_CARD", cardId: null });
+    const types = eventTypes(answered.events);
+    expect(types.indexOf("CARD_EXHAUSTED")).toBeLessThan(types.indexOf("ROOMS_REVEALED"));
+    const chooseRoom = answered.state.pending;
+    if (chooseRoom?.kind !== "ChooseRoom") throw new Error("expected a room choice");
+    const [first, ...others] = chooseRoom.options;
+    if (!first) throw new Error("rig");
+    const entered = must(answered.state, {
+      type: "CHOOSE_ROOM",
+      roomId: first.id,
+      bottom: others.map((r) => r.id),
+    });
+    expect(entered.state.phase).toBe("Play");
+    expect(entered.state.Red.hand).toHaveLength(5);
+    expect(entered.state.Red.exhaust).toHaveLength(1);
+  });
+
+  it("does not fire for a copy drawn in this turn's own draw, but does next turn", () => {
+    const state = rig({
+      phase: "Turn Start",
+      floorDeck: [room("Security Turnstile")],
+      Red: player({ deck: [card("Corrosive Acid"), ...pile("Shove", 8)] }),
+      Gray: player({ deck: pile("Duck Under", 8) }),
+    });
+    const first = must(state, { type: "FLIP_ROOM" });
+    expect(first.state.Red.hand.some((c) => c.name === "Corrosive Acid")).toBe(true);
+    expect(eventTypes(first.events)).not.toContain("CARD_EXHAUSTED");
+    expect(first.state.pending).toBeNull();
+
+    const nextTurn = must(
+      {
+        ...first.state,
+        phase: "Turn Start" as const,
+        floorDeck: [room("Security Turnstile")],
+        activeRoom: null,
+        playZone: [],
+      },
+      { type: "FLIP_ROOM" },
+    );
+    expect(nextTurn.state.pending?.kind).toBe("ChooseExhaust");
+  });
+
+  it("does not fire this turn for Bad Stuff a Toxic room deals", () => {
+    const state = rig({
+      phase: "Turn Start",
+      floorDeck: [room("Slimy Bio-Hazard Containment")],
+      Red: player({ deck: pile("Shove", 8) }),
+      Gray: player({ deck: pile("Duck Under", 8) }),
+    });
+    const first = must(state, { type: "FLIP_ROOM" });
+    expect(eventTypes(first.events)).not.toContain("CARD_EXHAUSTED");
+    expect(first.state.pending).toBeNull();
+  });
+
+  it("is still stopped by Zen Mode in play (EXHAUST_PREVENTED)", () => {
+    const state = rig({
+      phase: "Turn Start",
+      floorDeck: [room("Security Turnstile")],
+      playZone: [{ owner: "Red", card: card("Zen Mode") }],
+      Red: player({ deck: pile("Shove", 6), hand: [card("Corrosive Acid")] }),
+      Gray: player({ deck: pile("Duck Under", 6) }),
+    });
+    const { state: next, events } = must(state, { type: "FLIP_ROOM" });
+    expect(eventTypes(events)).toContain("EXHAUST_PREVENTED");
+    expect(eventTypes(events)).not.toContain("CARD_EXHAUSTED");
+    expect(next.Red.exhaust).toHaveLength(0);
   });
 
   it("Scraps a chosen Good Stuff card from hand when played", () => {

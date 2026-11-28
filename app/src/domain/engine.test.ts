@@ -277,7 +277,7 @@ describe("Turn Start", () => {
       Gray: player({ deck: pile("Duck Under", 5) }),
     });
     const { state: next } = must(state, { type: "FLIP_ROOM" });
-    // Target 4 - 1 = 3, and the held Faceful Of Slime counts toward it.
+    // Held at step 1: target 4 - 1 = 3, and the held Faceful Of Slime counts toward it.
     expect(next.Red.hand).toHaveLength(3);
     expect(next.Gray.hand).toHaveLength(4);
   });

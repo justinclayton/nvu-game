@@ -154,6 +154,12 @@ export interface TurnRecord {
    * and asks a `ChooseExhaust` for the rest, as soon as nothing else is waiting.
    */
   readonly exhaustOwed: readonly OwedExhaust[];
+  /**
+   * Faceful Of Slime: how many cards fewer each character draws in step 5,
+   * counted from the hand held when step 1 (`At Turn Start`) resolves. A card
+   * that arrives later does not change this turn's draw.
+   */
+  readonly drawLowered: Readonly<Record<Character, number>>;
 }
 
 /** One printed Exhaust line still to be carried out. */
@@ -173,10 +179,12 @@ export interface OwedExhaust {
 /* ------------------------------------------------------------ the phases */
 
 /**
- * Rulebook, Each Turn, Turn Start: `FLIP_ROOM` reveals the top rooms of the
- * floor deck and rests at `Turn Start` on a `ChooseRoom` pending; `CHOOSE_ROOM`
- * enters one and draws up to five, moving straight to `Play`. With one room
- * left there is no choice, and `FLIP_ROOM` runs straight through to `Play`. `END_PLAY` moves the state into `Outcome`, and once the room's
+ * Rulebook, Each Turn, Turn Start: `FLIP_ROOM` resolves `At Turn Start`
+ * effects (step 1; a `ChooseExhaust` may rest here first), then reveals the top
+ * rooms of the floor deck (step 2) and rests at `Turn Start` on a `ChooseRoom`
+ * pending; `CHOOSE_ROOM` enters one (step 3) and draws up to five (step 5),
+ * moving straight to `Play`. With one room left there is no choice, and
+ * `FLIP_ROOM` runs straight through to `Play`. `END_PLAY` moves the state into `Outcome`, and once the room's
  * effects are drained, into `Cleanup`. Both rest there only while a card or
  * the room has raised a `pending` choice — otherwise the transition runs
  * straight through to `Turn Start`, or to the next floor's `Turn Start` on an Ascend.

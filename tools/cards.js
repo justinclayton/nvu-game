@@ -11,10 +11,10 @@
  * and no server.
  */
 var NVU_CARDS = {
-  meta: {"version":"C62","updated":"2026-10-03"},
-  rulesVersion: "R37",
-  cardsVersion: "C62",
-  cardListId: "632d65d99e56",
+  meta: {"version":"C63","updated":"2026-10-03"},
+  rulesVersion: "R38",
+  cardsVersion: "C63",
+  cardListId: "b6ec6227122c",
   cards: [
     {"name":"Shove","set":"official","kind":"player","owner":"Red","starter":true,"cost":1,"oomph":2,"flavor":"'Oomph!', he shouted.","count":4},
     {"name":"Charge","set":"official","kind":"player","owner":"Red","starter":true,"cost":2,"oomph":4,"flavor":"I am bolder, so I lower my shoulder.","count":4},
@@ -38,7 +38,7 @@ var NVU_CARDS = {
     {"name":"Brute Recycle","set":"proposed","kind":"player","owner":"Red","rarity":"Cool","cost":1,"oomph":3,"flavor":"Crush outdated gear into raw momentum.","text":"Play: Scrap 1 starter card from your hand or discard pile. If you do, you may draw 1 card.","count":2},
     {"name":"Rhythm & Bruise","set":"proposed","kind":"player","owner":"Red","rarity":"Cool","cost":2,"conditional_stat":true,"flavor":"Let's get it on...leeeettt's get it on...","text":"Oomph equal to 2 times the number of cards Gray has played this turn.","count":2},
     {"name":"Momentum Shift","set":"proposed","kind":"player","owner":"Red","rarity":"Cool","cost":1,"oomph":4,"flavor":"Keep charging forward without looking back.","text":"Play: You may draw up to 2 cards, then Exhaust 1 card from your hand.","count":2},
-    {"name":"Zen Mode","set":"proposed","kind":"player","owner":"Gray","rarity":"Woah","cost":1,"flavor":"Sorry, I can't hear you over the sound of how friggin calm I am","text":"While this is in play, you don't exhaust cards.","count":1},
+    {"name":"Zen Mode","set":"proposed","kind":"player","owner":"Red","rarity":"Woah","cost":1,"flavor":"Sorry, I can't hear you over the sound of how friggin calm I am","text":"While this is in play, you don't exhaust cards.","count":1},
     {"name":"Catch Your Breath","set":"proposed","kind":"player","owner":"Gray","rarity":"Cool","cost":0,"flavor":"Pause for a second to read the room.","text":"At the end of the Play phase, if this was the only card you played this turn, move 3 cards from your Exhaust pile to the bottom of your deck.","count":2},
     {"name":"Pack Mule","set":"proposed","kind":"player","owner":"Gray","rarity":"Fine","cost":1,"scramble":3,"flavor":"I'll carry your books for you, Senpai!","text":"Move any number of Stuff cards from Red's hand to yours.","count":2},
     {"name":"Hit 'n Run","set":"proposed","kind":"player","owner":"Gray","rarity":"Fine","cost":1,"oomph":1,"scramble":2,"flavor":"Strike fast and disappear into the shadows.","text":"Shuffle a card from your Exhaust pile into your deck.","count":2},
@@ -100,7 +100,7 @@ var NVU_CARDS = {
     {"name":"Gravity...Room","set":"official","kind":"room","tier":3,"flavor":"something to do with gravity","challenges":[{"thresholds":[{"stats":{"Oomph":8,"Scramble":8},"outcome":"Both players reveal a card reward."}]}],"flee":"Both players Exhaust 2.","text":"Heavy (Whenever you play a card, Exhaust 1 from the top of your deck)."},
     {"name":"Communist Botox Lab","set":"proposed","kind":"room","tier":4,"challenges":[{"thresholds":[{"stats":{"Oomph":10,"Scramble":10},"outcome":"Both players reveal a card reward."}]}],"flee":"Both players Exhaust 2.","text":"Toxic (On Enter: Both players get Bad Stuff.)"},
     {"name":"Mercenaries","set":"proposed","kind":"room","tier":3,"flavor":"They found us!","challenges":[{"thresholds":[{"stats":{"Oomph":10,"Scramble":10},"outcome":"Both players reveal a card reward."},{"stat":"Oomph","value":15,"outcome":"Both players reveal a card reward. Both players get Good Stuff."}]}],"flee":"Both players Exhaust 1.","text":"Relentless (If you Flee, this room goes on top of the Floor deck)"},
-    {"name":"Bubbly Slime Monster","set":"proposed","kind":"room","tier":5,"flavor":"he stanky","challenges":[{"thresholds":[{"stats":{"Oomph":8,"Scramble":8},"outcome":"Both players reveal a card reward."}]}],"flee":"Both players Exhaust 2.","text":"Corrosive (Cards paid here are Scrapped, not Exhausted.)"},
+    {"name":"Bubbly Slime Monster","set":"proposed","kind":"room","tier":5,"flavor":"he stanky","challenges":[{"thresholds":[{"stats":{"Oomph":8,"Scramble":8},"outcome":"Both players reveal a card reward."}]}],"flee":"Both players Exhaust 2.","text":"Corrosive (Cards paid here are Scrapped, not discarded.)"},
     {"name":"Scrap Pile","set":"proposed","kind":"room","tier":3,"challenges":[{"thresholds":[{"stat":"Scramble","value":15,"outcome":"Both players may Scrap a card from their hand or discard pile."}]},{"thresholds":[{"stat":"Oomph","value":15,"outcome":"Both Players get Good Stuff."}]}],"flee":"Both players Exhaust 1."},
     {"name":"Laser Grid","set":"proposed","kind":"room","tier":4,"flavor":"Dance, dance, for the revolution!","challenges":[{"thresholds":[{"stat":"Scramble","value":12,"outcome":"Both players reveal a card reward."}]}],"flee":"Both players Exhaust 2.","text":"Lockstep (no player may play two cards in a row)"},
     {"name":"Oasis of Doom","set":"official","kind":"room","tier":4,"flavor":"actually nm it's chill ","challenges":[{"thresholds":[{"stats":{"Oomph":5,"Scramble":5},"outcome":"Both players may Scrap a card from their hand or discard pile."},{"stats":{"Oomph":10,"Scramble":10},"outcome":"Both players may Scrap a card from their hand or discard pile. Both players may Scrap a card from their hand or discard pile."}]}],"flee":"Both players Exhaust 1."},

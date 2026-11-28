@@ -31,7 +31,7 @@
 #   flee    string               room and stairwell only: the printed Flee line
 
 meta:
-  version: C62
+  version: C63
   updated: 2026-10-03
 
 cards:
@@ -292,7 +292,7 @@ cards:
     count: 1
     set: proposed
     kind: player
-    owner: Gray
+    owner: Red
     cost: 1
     text: "While this is in play, you don't exhaust cards."
     rarity: Woah
@@ -1027,7 +1027,7 @@ cards:
     kind: room
     tier: 5
     flavor: "he stanky"
-    text: "Corrosive (Cards paid here are Scrapped, not Exhausted.)"
+    text: "Corrosive (Cards paid here are Scrapped, not discarded.)"
     challenges:
       - thresholds:
           - stats: { Oomph: 8, Scramble: 8 }

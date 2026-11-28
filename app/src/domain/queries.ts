@@ -90,13 +90,15 @@ export const handsShared = (state: GameState): boolean =>
   state.playZone.some((p) => inPlay(p.card)?.sharesHands === true);
 
 /**
- * Each Turn, Turn Start: draw up to 5, or up to 4 under a Dim Active Room. A
- * "draw N fewer" `Holding:` line comes off that target; copies stack, and the
- * target never goes below 0.
+ * Each Turn, Turn Start, step 5: draw up to 5, or up to 4 under a Dim Active
+ * Room. A "draw N fewer" `Holding:` line comes off that target; copies stack,
+ * and the target never goes below 0. Only cards held when step 5 began count
+ * (`thisTurn.drawLowered`, set as the draw starts); a card drawn during the
+ * draw does not change the rest of it.
  */
 export const drawTargetFor = (state: GameState, c: Character): number => {
   const dim = state.activeRoom?.keywords.includes("Dim") ?? false;
-  return Math.max(0, (dim ? DIM_HAND_CAP : HAND_CAP) - heldModifiers(state, c).drawTargetDelta);
+  return Math.max(0, (dim ? DIM_HAND_CAP : HAND_CAP) - state.thisTurn.drawLowered[c]);
 };
 
 /* ------------------------------------------------------------- the play zone */

@@ -107,11 +107,15 @@ export function RoomCardView({
   state,
   size,
   inspect,
+  selected,
+  onClick,
 }: {
   readonly room: Room;
   readonly state?: GameState | undefined;
   readonly size?: "table" | "large" | undefined;
   readonly inspect?: Inspect | undefined;
+  readonly selected?: boolean | undefined;
+  readonly onClick?: (() => void) | undefined;
 }) {
   const touch = useTouchInspect();
   const item: Inspected = { kind: "room", room };
@@ -120,10 +124,31 @@ export function RoomCardView({
     "card--room",
     toneOf(room),
     size === "large" ? "card--large" : "",
+    selected ? "is-selected" : "",
+    onClick ? "is-clickable" : "",
     inspect ? "is-inspectable" : "",
   ]
     .filter(Boolean)
     .join(" ");
+  if (onClick) {
+    return (
+      <button
+        type="button"
+        className={classes}
+        onClick={() => {
+          /* Touch: the first tap reads the card, the second one acts on it. */
+          if (touch && inspect && !isInspected(inspect.inspected, item)) {
+            inspect.onInspect(item);
+            return;
+          }
+          onClick();
+        }}
+        {...(inspect ? inspectHandlers(inspect.onInspect, item, touch) : {})}
+      >
+        <RoomFace room={room} state={state} />
+      </button>
+    );
+  }
   return (
     <div
       className={classes}

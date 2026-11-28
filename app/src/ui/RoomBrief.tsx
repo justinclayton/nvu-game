@@ -41,12 +41,13 @@ export function RoomBrief({ state }: { readonly state: GameState }) {
           </div>
           <ul className="brief__lines">
             {allThresholds(room).map((t, i) => {
+              const first = room.challenges.slice(1).some((c) => c.thresholds[0] === t);
               const met = thresholdIsMet(state, t);
               const lines = thresholdLines(state, t);
               const need = lines.map((l) => `${l.stat} ${l.effective}`).join(" and ");
               const have = lines.map((l) => (l.stat === "Oomph" ? pool.oomph : pool.scramble)).join(" / ");
               return (
-                <li key={i} className={met ? "bline is-met" : "bline"}>
+                <li key={i} className={(met ? "bline is-met" : "bline") + (first ? " bline--new-challenge" : "")}>
                   <span className="bline__need">{need}</span>
                   <span className="bline__outcome">{t.outcome}</span>
                   <span className="bline__have">{have}</span>

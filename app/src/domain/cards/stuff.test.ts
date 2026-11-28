@@ -224,8 +224,9 @@ describe("A Pair Of Stitch-Em-Ups — 'Choose a character, move 2 cards from the
     const { state: next, events } = must(asked.state, { type: "CHOOSE_CARDS", cardIds: chosen });
     expect(next.Red.deck.slice(-2).map((c) => c.id)).toEqual(chosen);
     expect(next.Red.deck).toHaveLength(4);
-    // Two moved out of the Exhaust pile; the Shove that paid for the card joined it.
-    expect(next.Red.exhaust).toHaveLength(2);
+    // Two moved out of the Exhaust pile; the Shove that paid for the card went to the discard pile.
+    expect(next.Red.exhaust).toHaveLength(1);
+    expect(next.Red.discard).toHaveLength(1);
     expect(eventTypes(events)).toContain("CARD_MOVED");
   });
 
@@ -271,7 +272,7 @@ describe("A Pair Of Stitch-Em-Ups — 'Choose a character, move 2 cards from the
       Red: player({
         deck: pile("Shove", 2),
         hand: [card("A Pair Of Stitch-Em-Ups"), card("Shove")],
-        // The one card that pays for it is the whole Exhaust pile.
+        exhaust: [card("Charge")], // The whole Exhaust pile is one card.
       }),
     });
     const asked = must(state, {
@@ -979,33 +980,148 @@ describe("Emergency Power Core — 'Exhaust 2'", () => {
   });
 });
 
-describe("Faceful Of Slime — 'Holding: At Turn Start, draw 1 fewer card'", () => {
-  it("trims the automatic draw's target from 5 to 4", () => {
-    const state = rig({
-      phase: "Turn Start",
-      floorDeck: [room("Security Turnstile")],
-      Red: player({ deck: pile("Shove", 6), hand: [card("Faceful Of Slime")] }),
-      Gray: player({ deck: pile("Duck Under", 6) }),
-    });
+describe("Faceful Of Slime — 'Holding: During the Draw step, draw 1 fewer card.'", () => {
+  const turnStart = (
+    red: ReturnType<typeof player>,
+    floor = [room("Security Turnstile")],
+    gray = player({ deck: pile("Duck Under", 6) }),
+  ) => rig({ phase: "Turn Start", floorDeck: floor, Red: red, Gray: gray });
+
+  it("has no At Turn Start effect: nothing is discarded or asked, and the rooms are revealed", () => {
+    const state = turnStart(
+      player({ deck: pile("Shove", 6), hand: [card("Faceful Of Slime"), card("Shove")] }),
+      [room("Security Turnstile"), room("Dark Room"), room("Ventilation Shaft")],
+    );
+    const { state: next, events } = must(state, { type: "FLIP_ROOM" });
+    expect(eventTypes(events)).not.toContain("CARD_DISCARDED");
+    expect(eventTypes(events)).toContain("ROOMS_REVEALED");
+    expect(next.pending?.kind).toBe("ChooseRoom");
+    expect(next.Red.discard).toHaveLength(0);
+  });
+
+  it("a copy held when step 5 begins lowers the draw target from 5 to 4", () => {
+    const state = turnStart(player({ deck: pile("Shove", 6), hand: [card("Faceful Of Slime")] }));
     const { state: next } = must(state, { type: "FLIP_ROOM" });
     expect(next.Red.drewThisTurn).toBe(3);
     expect(next.Red.hand).toHaveLength(4);
+    expect(next.pending).toBeNull();
   });
 
-  it("stacks with another copy of the same source", () => {
+  it("copies stack, and the target never goes below 0", () => {
+    const two = must(
+      turnStart(player({ deck: pile("Shove", 6), hand: pile("Faceful Of Slime", 2) })),
+      { type: "FLIP_ROOM" },
+    ).state;
+    // Target 5 - 2 = 3: one draw to go with the two copies held.
+    expect(two.Red.drewThisTurn).toBe(1);
+    expect(two.Red.hand).toHaveLength(3);
+
+    const six = must(
+      turnStart(player({ deck: pile("Shove", 6), hand: pile("Faceful Of Slime", 6) })),
+      { type: "FLIP_ROOM" },
+    ).state;
+    expect(six.Red.drewThisTurn).toBe(0);
+    expect(six.Red.hand).toHaveLength(6);
+  });
+
+  it("lowers a Dim room's target from 4 to 3", () => {
+    const state = turnStart(
+      player({ deck: pile("Shove", 6), hand: [card("Faceful Of Slime")] }),
+      [room("Dark Room")],
+    );
+    const { state: next } = must(state, { type: "FLIP_ROOM" });
+    expect(next.Red.hand).toHaveLength(3);
+  });
+
+  it("lowers only its holder's draw, not the partner's", () => {
+    const state = turnStart(player({ deck: pile("Shove", 6), hand: [card("Faceful Of Slime")] }));
+    const { state: next } = must(state, { type: "FLIP_ROOM" });
+    expect(next.Red.hand).toHaveLength(4);
+    expect(next.Gray.hand).toHaveLength(5);
+  });
+
+  it("a copy a Toxic room deals before the draw lowers that turn's draw", () => {
     const state = rig({
       phase: "Turn Start",
-      floorDeck: [room("Security Turnstile")],
-      Red: player({
-        deck: pile("Shove", 6),
-        hand: pile("Faceful Of Slime", 2),
-      }),
-      Gray: player({ deck: pile("Duck Under", 6) }),
+      floorDeck: [room("Slimy Bio-Hazard Containment")],
+      Red: player({ deck: pile("Shove", 8) }),
+      Gray: player({ deck: pile("Duck Under", 8) }),
+      pools: {
+        Red: [],
+        Gray: [],
+        goodStuff: [],
+        badStuff: pile("Faceful Of Slime", 2),
+      },
     });
     const { state: next } = must(state, { type: "FLIP_ROOM" });
-    // Two held copies: target 5 - 1 - 1 = 3, one draw short of the two already held.
-    expect(next.Red.drewThisTurn).toBe(1);
-    expect(next.Red.hand).toHaveLength(3);
+    // The dealt copy is in hand, so the draw goes up to 4: three Shoves and the slime.
+    expect(next.Red.hand.filter((c) => c.name === "Faceful Of Slime")).toHaveLength(1);
+    expect(next.Red.hand).toHaveLength(4);
+    expect(next.Gray.hand).toHaveLength(4);
+  });
+
+  it("a copy Scrapped or discarded before step 5 does not lower the draw", () => {
+    // The rooms and the draw are one run, so the only way to be rid of a copy before step 5
+    // is to not hold it: a hand without one draws up to 5.
+    const state = turnStart(player({ deck: pile("Shove", 6), hand: [card("Shove")] }));
+    const { state: next } = must(state, { type: "FLIP_ROOM" });
+    expect(next.Red.hand).toHaveLength(5);
+
+    const played = must(
+      turnStart(player({ deck: pile("Shove", 6), hand: [card("Faceful Of Slime")] })),
+      { type: "FLIP_ROOM" },
+    ).state;
+    // Scrap it in Play; the next turn's draw is back to 5.
+    const slime = played.Red.hand.find((c) => c.name === "Faceful Of Slime");
+    if (!slime) throw new Error("rig");
+    const gone = {
+      ...played,
+      phase: "Turn Start" as const,
+      floorDeck: [room("Security Turnstile")],
+      activeRoom: null,
+      playZone: [],
+      Red: { ...played.Red, hand: played.Red.hand.filter((c) => c.id !== slime.id) },
+    };
+    const again = must(gone, { type: "FLIP_ROOM" }).state;
+    expect(again.Red.hand).toHaveLength(5);
+  });
+
+  it("a copy drawn in step 5 does not lower that draw, but lowers the next turn's", () => {
+    const state = turnStart(player({ deck: [card("Faceful Of Slime"), ...pile("Shove", 10)] }));
+    const first = must(state, { type: "FLIP_ROOM" });
+    expect(first.state.Red.hand).toHaveLength(5);
+    expect(first.state.Red.hand.some((c) => c.name === "Faceful Of Slime")).toBe(true);
+    expect(first.state.pending).toBeNull();
+
+    const second = must(
+      {
+        ...first.state,
+        phase: "Turn Start" as const,
+        floorDeck: [room("Security Turnstile")],
+        activeRoom: null,
+        playZone: [],
+        Red: {
+          ...first.state.Red,
+          hand: first.state.Red.hand.filter((c) => c.name === "Faceful Of Slime"),
+        },
+      },
+      { type: "FLIP_ROOM" },
+    ).state;
+    expect(second.Red.hand).toHaveLength(4);
+  });
+
+  it("Corrosive Acid still Exhausts in step 1, before the reveal, beside a Faceful Of Slime", () => {
+    const state = turnStart(
+      player({ deck: pile("Shove", 6), hand: [card("Corrosive Acid"), card("Faceful Of Slime")] }),
+    );
+    const asked = must(state, { type: "FLIP_ROOM" });
+    expect(asked.state.pending?.kind).toBe("ChooseExhaust");
+    expect(eventTypes(asked.events)).not.toContain("ROOM_FLIPPED");
+    const { state: next, events } = must(asked.state, { type: "EXHAUST_CARD", cardId: null });
+    const types = eventTypes([...asked.events, ...events]);
+    expect(types.indexOf("CARD_EXHAUSTED")).toBeLessThan(types.indexOf("ROOM_FLIPPED"));
+    expect(next.Red.exhaust).toHaveLength(1);
+    expect(next.Red.discard).toHaveLength(0);
   });
 });
 
@@ -1211,13 +1327,13 @@ describe("Panic — 'Holding: every room threshold requires +2 Scramble to be me
       }),
     });
     const payWith = state.Red.hand.filter((c) => c.name === "Shove").map((c) => c.id);
-    const { state: next } = must(state, {
-      type: "PLAY_CARD",
-      character: "Red",
-      cardId: handCard(state, "Red", "Panic").id,
-      payWith,
-    });
+    const { state: next } = play(state, [
+      { type: "PLAY_CARD", character: "Red", cardId: handCard(state, "Red", "Panic").id, payWith },
+      { type: "EXHAUST_CARD", cardId: null },
+      { type: "EXHAUST_CARD", cardId: null },
+    ]);
     expect(next.Red.deck).toHaveLength(2);
+    expect(next.Red.exhaust).toHaveLength(2);
   });
 });
 
@@ -1296,7 +1412,7 @@ describe("My Head Is Quantum Spinning — 'Holding: whenever your partner draws 
 });
 
 describe("Corrosive Acid — 'Holding: At Turn Start, Exhaust 1. Play: Scrap 1 Good Stuff card from your hand.'", () => {
-  it("Exhausts 1 at Turn Start, once the draw is done", () => {
+  it("Exhausts 1 at Turn Start, step 1, before the last room is entered", () => {
     const state = rig({
       phase: "Turn Start",
       floorDeck: [room("Security Turnstile")],
@@ -1307,9 +1423,91 @@ describe("Corrosive Acid — 'Holding: At Turn Start, Exhaust 1. Play: Scrap 1 G
     expect(next.Red.hand).toHaveLength(5);
     expect(next.Red.deck).toHaveLength(1);
     expect(next.Red.exhaust).toHaveLength(1);
-    expect(eventTypes(events)).toContain("CARD_EXHAUSTED");
+    const types = eventTypes(events);
+    expect(types.indexOf("CARD_EXHAUSTED")).toBeGreaterThanOrEqual(0);
+    expect(types.indexOf("CARD_EXHAUSTED")).toBeLessThan(types.indexOf("ROOM_FLIPPED"));
     const exhausted = events.find((e) => e.type === "CARD_EXHAUSTED");
     expect(exhausted?.source).toBe("Corrosive Acid");
+  });
+
+  it("waits for the Exhaust choice before the rooms are revealed, then goes on as normal", () => {
+    const state = rig({
+      phase: "Turn Start",
+      floorDeck: [room("Security Turnstile"), room("Dark Room"), room("Ventilation Shaft")],
+      Red: player({ deck: pile("Shove", 6), hand: [card("Corrosive Acid")] }),
+      Gray: player({ deck: pile("Duck Under", 6) }),
+    });
+    const asked = must(state, { type: "FLIP_ROOM" });
+    expect(asked.state.pending?.kind).toBe("ChooseExhaust");
+    expect(eventTypes(asked.events)).not.toContain("ROOMS_REVEALED");
+    expect(asked.state.Red.hand).toHaveLength(1);
+
+    const answered = must(asked.state, { type: "EXHAUST_CARD", cardId: null });
+    const types = eventTypes(answered.events);
+    expect(types.indexOf("CARD_EXHAUSTED")).toBeLessThan(types.indexOf("ROOMS_REVEALED"));
+    const chooseRoom = answered.state.pending;
+    if (chooseRoom?.kind !== "ChooseRoom") throw new Error("expected a room choice");
+    const [first, ...others] = chooseRoom.options;
+    if (!first) throw new Error("rig");
+    const entered = must(answered.state, {
+      type: "CHOOSE_ROOM",
+      roomId: first.id,
+      bottom: others.map((r) => r.id),
+    });
+    expect(entered.state.phase).toBe("Play");
+    expect(entered.state.Red.hand).toHaveLength(5);
+    expect(entered.state.Red.exhaust).toHaveLength(1);
+  });
+
+  it("does not fire for a copy drawn in this turn's own draw, but does next turn", () => {
+    const state = rig({
+      phase: "Turn Start",
+      floorDeck: [room("Security Turnstile")],
+      Red: player({ deck: [card("Corrosive Acid"), ...pile("Shove", 8)] }),
+      Gray: player({ deck: pile("Duck Under", 8) }),
+    });
+    const first = must(state, { type: "FLIP_ROOM" });
+    expect(first.state.Red.hand.some((c) => c.name === "Corrosive Acid")).toBe(true);
+    expect(eventTypes(first.events)).not.toContain("CARD_EXHAUSTED");
+    expect(first.state.pending).toBeNull();
+
+    const nextTurn = must(
+      {
+        ...first.state,
+        phase: "Turn Start" as const,
+        floorDeck: [room("Security Turnstile")],
+        activeRoom: null,
+        playZone: [],
+      },
+      { type: "FLIP_ROOM" },
+    );
+    expect(nextTurn.state.pending?.kind).toBe("ChooseExhaust");
+  });
+
+  it("does not fire this turn for Bad Stuff a Toxic room deals", () => {
+    const state = rig({
+      phase: "Turn Start",
+      floorDeck: [room("Slimy Bio-Hazard Containment")],
+      Red: player({ deck: pile("Shove", 8) }),
+      Gray: player({ deck: pile("Duck Under", 8) }),
+    });
+    const first = must(state, { type: "FLIP_ROOM" });
+    expect(eventTypes(first.events)).not.toContain("CARD_EXHAUSTED");
+    expect(first.state.pending).toBeNull();
+  });
+
+  it("is still stopped by Zen Mode in play (EXHAUST_PREVENTED)", () => {
+    const state = rig({
+      phase: "Turn Start",
+      floorDeck: [room("Security Turnstile")],
+      playZone: [{ owner: "Red", card: card("Zen Mode") }],
+      Red: player({ deck: pile("Shove", 6), hand: [card("Corrosive Acid")] }),
+      Gray: player({ deck: pile("Duck Under", 6) }),
+    });
+    const { state: next, events } = must(state, { type: "FLIP_ROOM" });
+    expect(eventTypes(events)).toContain("EXHAUST_PREVENTED");
+    expect(eventTypes(events)).not.toContain("CARD_EXHAUSTED");
+    expect(next.Red.exhaust).toHaveLength(0);
   });
 
   it("Scraps a chosen Good Stuff card from hand when played", () => {
@@ -1454,10 +1652,11 @@ describe("Bad Stuff — 'Play: Scrap this card.'", () => {
     }
   });
 
-  it("Exhausts the cards that paid for it", () => {
+  it("discards the cards that paid for it", () => {
     const { state, bad, payWith } = playBad("Torn Seal", [], 4);
     const { state: next } = must(state, { type: "PLAY_CARD", character: "Red", cardId: bad.id, payWith });
-    expect(next.Red.exhaust.map((c) => c.id).sort()).toEqual([...payWith].sort());
+    expect(next.Red.discard.map((c) => c.id).sort()).toEqual([...payWith].sort());
+    expect(next.Red.exhaust).toEqual([]);
   });
 
   it("Panic Exhausts 2, then is Scrapped", () => {

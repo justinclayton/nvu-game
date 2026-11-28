@@ -31,7 +31,7 @@
 #   flee    string               room and stairwell only: the printed Flee line
 
 meta:
-  version: C62
+  version: C66
   updated: 2026-10-03
 
 cards:
@@ -292,7 +292,7 @@ cards:
     count: 1
     set: proposed
     kind: player
-    owner: Gray
+    owner: Red
     cost: 1
     text: "While this is in play, you don't exhaust cards."
     rarity: Woah
@@ -642,7 +642,7 @@ cards:
     set: proposed
     kind: bad_stuff
     cost: 2
-    text: "Holding: At Turn Start, draw 1 fewer card. Can't be used to pay for other cards. Play: Scrap this card."
+    text: "Holding: During the Draw step, draw 1 fewer card. Can't be used to pay for other cards. Play: Scrap this card."
     flavor: Murky goop blinds your vision and slows drawing.
 
   - name: Spore Cloud
@@ -1027,7 +1027,7 @@ cards:
     kind: room
     tier: 5
     flavor: "he stanky"
-    text: "Corrosive (Cards paid here are Scrapped, not Exhausted.)"
+    text: "Corrosive (Cards paid here are Scrapped, not discarded.)"
     challenges:
       - thresholds:
           - stats: { Oomph: 8, Scramble: 8 }

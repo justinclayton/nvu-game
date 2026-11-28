@@ -37,7 +37,7 @@ function describeWhat(event: DomainEvent): string {
     case "CARD_PLAYED":
       return `${event.character} plays ${event.card.name}.`;
     case "COST_PAID":
-      return `${event.character} pays with ${event.cards.map((c) => c.name).join(", ")}, ${event.scrapped ? "Scrapping" : "Exhausting"} ${event.cards.length === 1 ? "it" : "them"}.`;
+      return `${event.character} pays with ${event.cards.map((c) => c.name).join(", ")}, ${event.scrapped ? "Scrapping" : "discarding"} ${event.cards.length === 1 ? "it" : "them"}.`;
     case "CARD_DISCARDED":
       return `${event.character} discards ${event.card.name} from their ${event.from === "playZone" ? "play zone" : event.from}.`;
     case "CARD_SCRAPPED":
@@ -56,6 +56,8 @@ function describeWhat(event: DomainEvent): string {
       return `${event.card.name} goes to ${event.character}'s ${event.to}.`;
     case "CARDS_PEEKED":
       return `A look at the ${event.pile}: ${event.cards.map((c) => c.name).join(", ")}.`;
+    case "CARDS_TO_BOTTOM":
+      return `${event.character} moves ${event.cards.map((c) => c.name).join(", ")} to the bottom of the ${event.pile}.`;
     case "THRESHOLD_MET": {
       const need = printedThresholdLines(event.threshold)
         .map((l) => `${l.stat} ${String(l.effective)}`)

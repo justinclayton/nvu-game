@@ -16,8 +16,8 @@ import {
   costOverrideSpentBy,
   drawTargetFor,
   enterableRooms,
-  exhaustPreventedBy,
   exhaustXPreventedBy,
+  heldModifiers,
   lockedOut,
   payOptions,
   playedStats,
@@ -203,12 +203,21 @@ function validateAnswer(pending: Pending, command: Command): Rejection | null {
           ? null
           : reject("NotAnOption", "That card was not revealed.");
       }
+      if (pending.kind === "ChooseBottom") {
+        const shown = new Set(pending.cards.map((x) => x.id));
+        if (new Set(command.cardIds).size !== command.cardIds.length) {
+          return reject("NotAnOption", "The same card was chosen twice.");
+        }
+        return command.cardIds.every((id) => shown.has(id))
+          ? null
+          : reject("NotAnOption", "That card was not revealed.");
+      }
       if (pending.kind !== "ChooseCards") return waiting;
       const chosen = new Set(command.cardIds);
       if (chosen.size !== command.cardIds.length) {
         return reject("NotAnOption", "The same card was chosen twice.");
       }
-      const options = new Set(pending.options.map((x) => x.id));
+      const options = new Set<CardId | RoomId>(pending.options.map((x) => x.id));
       for (const id of chosen) {
         if (!options.has(id)) return reject("NotAnOption", "That card was not offered.");
       }
@@ -562,7 +571,12 @@ function answerExhaust(state: GameState, cardId: CardId | null, run: Run): GameS
   if (!card) throw new CorruptStateError("Exhausted a card that was not offered.");
   const s = exhaustOwedCard({ ...state, pending: null }, card, run);
   if (s.phase === "GameOver") return s;
-  return drain(settle(s, run), run);
+  const drained = drain(settle(s, run), run);
+  const askedInStepOne = state.phase === "Turn Start";
+  if (askedInStepOne && drained.phase === "Turn Start" && !drained.pending) {
+    return finishTurnStart(drained, run);
+  }
+  return drained;
 }
 
 /* ------------------------------------------------------------ Turn Start */
@@ -571,23 +585,48 @@ function answerExhaust(state: GameState, cardId: CardId | null, run: Run): GameS
 const ROOMS_REVEALED = 3;
 
 /**
- * Rulebook, Each Turn, Turn Start, step 1: reveal the top 3 rooms of the floor
- * deck, or all that remain. With one left there is nothing to choose, so it is
- * entered at once; this is how a Stairwell left alone must be fought.
+ * Rulebook, Each Turn, Turn Start, step 1: resolve `At Turn Start` effects
+ * (Corrosive Acid) of the cards held now. If an Exhaust asks which card, the
+ * state rests on that question and `answerExhaust` carries on to `revealRooms`
+ * once it is answered. Faceful Of Slime is not here: it lowers the draw at the
+ * start of step 5 (`drawPhase`).
  */
 function flipRoom(state: GameState, run: Run): GameState {
-  const revealed = state.floorDeck.slice(0, ROOMS_REVEALED);
-  const [only] = revealed;
-  if (!only) throw new CorruptStateError("Flipped an empty floor deck.");
+  if (state.floorDeck.length === 0) throw new CorruptStateError("Flipped an empty floor deck.");
 
   run.events.push({ type: "PHASE_STARTED", phase: "Turn Start" });
-  const started: GameState = {
+  const reset: GameState = {
     ...state,
     turn: state.turn + 1,
     Red: { ...state.Red, drewThisTurn: 0 },
     Gray: { ...state.Gray, drewThisTurn: 0 },
     thisTurn: emptyTurnRecord(),
   };
+  return finishTurnStart(reset, run);
+}
+
+/**
+ * Step 1 to the reveal: each held `At Turn Start` line, then any Exhaust that
+ * line owes, then step 2. Stops on a question; the answer calls this again and
+ * `turnStartDone` keeps the lines already resolved from firing twice.
+ */
+function finishTurnStart(state: GameState, run: Run): GameState {
+  const held = turnStartHands(state, run);
+  if (held.phase === "GameOver" || held.pending) return held;
+  const owed = offerExhaust(held, run);
+  if (owed.phase === "GameOver" || owed.pending) return owed;
+  return revealRooms(owed, run);
+}
+
+/**
+ * Rulebook, Each Turn, Turn Start, step 2: reveal the top 3 rooms of the floor
+ * deck, or all that remain. With one left there is nothing to choose, so it is
+ * entered at once; this is how a Stairwell left alone must be fought.
+ */
+function revealRooms(started: GameState, run: Run): GameState {
+  const revealed = started.floorDeck.slice(0, ROOMS_REVEALED);
+  const [only] = revealed;
+  if (!only) throw new CorruptStateError("Flipped an empty floor deck.");
   if (revealed.length === 1) return enterRoom(started, only.id, [], run);
 
   run.events.push({ type: "ROOMS_REVEALED", rooms: revealed });
@@ -598,7 +637,7 @@ function flipRoom(state: GameState, run: Run): GameState {
 }
 
 /**
- * Rulebook, Each Turn, Turn Start, steps 2 and 3: enter the chosen room, put
+ * Rulebook, Each Turn, Turn Start, steps 3 to 5: enter the chosen room, put
  * the other revealed rooms on the bottom of the floor deck in the order
  * given, then draw both hands to 5.
  */
@@ -633,16 +672,14 @@ function enterRoom(
   if (toxic.phase === "GameOver") return toxic;
   const drawn = settle(drawPhase(toxic, run), run);
   if (drawn.phase === "GameOver") return drawn;
-  const held = turnStartHands(drawn, run);
-  if (held.phase === "GameOver") return held;
   run.events.push({ type: "PHASE_ENDED", phase: "Turn Start" });
   run.events.push({ type: "PHASE_STARTED", phase: "Play" });
-  return held;
+  return drawn;
 }
 
 /**
  * Toxic (On Enter: Both players get Bad Stuff.): a room is entered when it is chosen as the
- * Active Room, so this lands in step 2, before the draw, and each Bad Stuff counts toward the hand.
+ * Active Room, so this lands in step 3, before the draw, and each Bad Stuff counts toward the hand.
  */
 function enterToxic(state: GameState, room: Room, run: Run): GameState {
   if (!room.keywords.includes("Toxic")) return state;
@@ -653,31 +690,51 @@ function enterToxic(state: GameState, room: Room, run: Run): GameState {
   return s;
 }
 
-/** A held card's own Turn Start line (Corrosive Acid), once the draw is done. */
+/**
+ * Step 1: a held card's own `At Turn Start` line (Corrosive Acid), before any
+ * room is revealed. One card at a time, each only if it is still in hand when
+ * its turn comes. Stops on a question. Cards that work at the start of step 5
+ * (Faceful Of Slime) are not read here.
+ */
 function turnStartHands(state: GameState, run: Run): GameState {
   let s = state;
   for (const c of CHARACTERS) {
-    for (const card of playerOf(s, c).hand) {
-      const onTurnStart = behaviourOf(card.name)?.onTurnStart;
-      if (!onTurnStart) continue;
+    for (;;) {
+      const done = s.thisTurn.turnStartDone;
+      const card = playerOf(s, c).hand.find(
+        (x) => !done.includes(x.id) && behaviourOf(x.name)?.onTurnStart,
+      );
+      const onTurnStart = card && behaviourOf(card.name)?.onTurnStart;
+      if (!card || !onTurnStart) break;
+      s = { ...s, thisTurn: { ...s.thisTurn, turnStartDone: [...done, card.id] } };
       const step = onTurnStart(s, { card, character: c, zone: "hand" });
       run.events.push(...causedBy(step.events, card.name));
       s = settle(step.state, run);
-      if (s.phase === "GameOver") return s;
+      if (s.phase === "GameOver" || s.pending) return s;
     }
   }
   return s;
 }
 
 /**
- * Step 2, Draw up to five: both characters draw until holding 5, all at once —
+ * Step 5, Draw up to five: both characters draw until holding 5, all at once —
  * no opening draw, no alternating turns, no decision to make, so this never
- * pauses on its own (see `types.ts`, `Phase`: `Turn Start` covers both steps).
- * A card can still lower a character's own target (`drawTargetFor`). Nothing
- * here settles: effects triggered by these draws resolve after both have drawn.
+ * pauses on its own (see `types.ts`, `Phase`: `Turn Start` covers all the steps).
+ * A card can still lower a character's own target (`drawTargetFor`): the count
+ * is taken once as step 5 starts and held for the whole draw. Nothing here
+ * settles: effects triggered by these draws resolve after both have drawn.
  */
 function drawPhase(state: GameState, run: Run): GameState {
-  let s = state;
+  let s: GameState = {
+    ...state,
+    thisTurn: {
+      ...state.thisTurn,
+      drawLowered: {
+        Red: heldModifiers(state, "Red").drawTargetDelta,
+        Gray: heldModifiers(state, "Gray").drawTargetDelta,
+      },
+    },
+  };
   for (const c of CHARACTERS) {
     s = drawToCap(s, c, run);
     if (s.phase === "GameOver") return s;
@@ -727,24 +784,18 @@ function playCard(
     s = spendPlayDiscount(s, c);
   }
 
-  // Each payment card goes to its owner's Exhaust pile, unless its owner has Zen Mode in play.
+  // Each payment card goes to its owner's discard pile (Scrapped under Corrosive). Paying is not Exhausting, so Zen Mode has nothing to stop.
   const from = run.events.length;
-  const exhausted: Card[] = [];
+  const paid: Card[] = [];
   const corrosive = s.activeRoom?.keywords.includes("Corrosive") ?? false;
   for (const owner of CHARACTERS) {
     const cards = payment.filter((x) => x.owner === owner).map((x) => x.card);
     if (cards.length === 0) continue;
-    // Corrosive pays by Scrapping, which Zen Mode does not stop.
-    const keptBy = corrosive ? null : exhaustPreventedBy(s, owner);
-    if (keptBy) {
-      run.events.push({ type: "EXHAUST_PREVENTED", character: owner, amount: cards.length, by: keptBy });
-      continue;
-    }
     s = payCostFromHand(s, owner, cards);
-    exhausted.push(...cards);
+    paid.push(...cards);
   }
-  if (exhausted.length > 0) {
-    run.events.push({ type: "COST_PAID", character: c, cards: exhausted, scrapped: corrosive });
+  if (paid.length > 0) {
+    run.events.push({ type: "COST_PAID", character: c, cards: paid, scrapped: corrosive });
   }
 
   // Bad Stuff is never put in the play zone and is not a played card: it stays in hand until its Play line has resolved, then is Scrapped from there.
@@ -1404,6 +1455,14 @@ function answerCards(
     const [only] = ids as readonly CardId[];
     if (only === undefined) throw new CorruptStateError("Kept no Good Stuff.");
     return answerGoodStuff(state, only, run);
+  }
+  if (kind === "cards" && pending.kind === "ChooseBottom") {
+    if (!pending.source) throw new CorruptStateError("No card is waiting on that answer.");
+    const cards = ids.flatMap((id) => {
+      const found = pending.cards.find((x) => x.id === id);
+      return found ? [found] : [];
+    });
+    return runChoice(state, { kind: "order", tag: pending.source.tag, cards }, run);
   }
   if (kind === "cards") {
     if (!pending.source) return answerRoomCards(state, pending, ids as readonly CardId[], run);

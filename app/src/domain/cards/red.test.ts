@@ -12,6 +12,7 @@ import {
   handCard,
   ids,
   must,
+  names,
   noDraw,
   pile,
   play,
@@ -20,7 +21,7 @@ import {
   resetRig,
 } from "../__fixtures__/rig";
 
-import type { CardId, GameState } from "../types";
+import type { Card, CardId, GameState } from "../types";
 
 beforeEach(resetRig);
 
@@ -36,14 +37,14 @@ describe("Reckless Swing — 'Exhaust 1 from the top of your deck'", () => {
       payWith: [handCard(state, "Red", "Shove").id],
     });
     expect(next.Red.deck).toHaveLength(3);
-    // The Shove paid from hand is Exhausted too; the played card waits in the play zone.
-    expect(next.Red.discard).toHaveLength(0);
-    expect(next.Red.exhaust).toHaveLength(2);
+    // The Shove paid from hand is discarded; the played card waits in the play zone.
+    expect(next.Red.discard).toHaveLength(1);
+    expect(next.Red.exhaust).toHaveLength(1);
   });
 });
 
 describe("It Pays To Be Reckless — '+2 Scramble and +2 Oomph for every card you exhaust this turn. Exhaust 1 from the top of the deck'", () => {
-  it("counts cards paid for costs and its own Exhaust 1, before and after it", () => {
+  it("counts its own Exhaust 1 but not cards paid for costs, which are discarded", () => {
     const state = playing({
       Red: player({
         deck: pile("Shove", 5),
@@ -54,11 +55,11 @@ describe("It Pays To Be Reckless — '+2 Scramble and +2 Oomph for every card yo
     const reckless = cast(first, "Red", "It Pays To Be Reckless").state;
     const card1 = reckless.playZone.find((p) => p.card.name === "It Pays To Be Reckless");
     if (!card1) throw new Error("not in play");
-    // Shove's 1 payment and its own Exhaust 1.
-    expect(contributionOf(reckless, card1)).toEqual({ oomph: 4, scramble: 4 });
+    // Only its own Exhaust 1; Shove's payment was discarded.
+    expect(contributionOf(reckless, card1)).toEqual({ oomph: 2, scramble: 2 });
     const after = cast(reckless, "Red", "Charge").state;
-    // Charge's 2 payments count too.
-    expect(contributionOf(after, card1)).toEqual({ oomph: 8, scramble: 8 });
+    // Charge's 2 payments are discarded, so they add nothing.
+    expect(contributionOf(after, card1)).toEqual({ oomph: 2, scramble: 2 });
   });
 });
 
@@ -123,7 +124,7 @@ describe("Cross Punch — 'Exhaust 1. If a Scramble card was already played this
   it("takes one off the top of your own deck, into the Exhaust pile", () => {
     const { state: next } = punch(punchHand());
     expect(next.Red.deck).toHaveLength(3);
-    expect(next.Red.exhaust).toHaveLength(3);
+    expect(next.Red.exhaust).toHaveLength(1);
   });
 
   it("adds nothing when no Scramble card was played", () => {
@@ -690,8 +691,9 @@ describe("Momentum Shift — 'You may draw up to 2 cards, then Exhaust 1 card fr
     const target = pending.options.find((c) => c.name === "Lean In");
     if (!target) throw new Error("drawn card not offered");
     const { state: next, events } = must(drawn.state, { type: "CHOOSE_CARDS", cardIds: [target.id] });
-    // The Shove that paid for Momentum Shift is already there.
-    expect(next.Red.exhaust.map((c) => c.id)).toEqual([paid.id, target.id]);
+    // The Shove that paid for Momentum Shift was discarded, not Exhausted.
+    expect(next.Red.exhaust.map((c) => c.id)).toEqual([target.id]);
+    expect(next.Red.discard.map((c) => c.id)).toContain(paid.id);
     expect(next.Red.hand.some((c) => c.id === target.id)).toBe(false);
     expect(eventTypes(events)).toContain("CARD_EXHAUSTED");
   });
@@ -731,5 +733,62 @@ describe("Momentum Shift — 'You may draw up to 2 cards, then Exhaust 1 card fr
     expect(pending.options.map((c) => c.name)).toEqual(["Pry Bar"]);
     const { state: next } = must(declined.state, { type: "CHOOSE_CARDS", cardIds: [pending.options[0]?.id as CardId] });
     expect(next.Red.hand).toHaveLength(0);
+  });
+});
+
+describe("Zen Mode — 'While this is in play, you don't exhaust cards'", () => {
+  const zen = (red: Card[], gray: Card[] = []) => {
+    const state = playing({
+      Red: player({ deck: pile("Shove", 4), hand: [card("Zen Mode"), card("Shove"), ...red] }),
+      Gray: player({ deck: pile("Duck Under", 4), hand: gray }),
+    });
+    return must(state, {
+      type: "PLAY_CARD",
+      character: "Red",
+      cardId: handCard(state, "Red", "Zen Mode").id,
+      payWith: [handCard(state, "Red", "Shove").id],
+    }).state;
+  };
+
+  it("pays its own cost as normal", () => {
+    const armed = zen([]);
+    expect(names(armed.Red.discard)).toEqual(["Shove"]);
+    expect(armed.Red.exhaust).toEqual([]);
+  });
+
+  it("still moves Red's payment cards to the discard pile, and logs no EXHAUST_PREVENTED", () => {
+    const armed = zen([card("Shove"), card("Shove")]);
+    const [played, payer] = armed.Red.hand;
+    if (!played || !payer) throw new Error("hand too short");
+    const next = must(armed, { type: "PLAY_CARD", character: "Red", cardId: played.id, payWith: [payer.id] });
+    expect(next.state.Red.discard.map((c) => c.id)).toContain(payer.id);
+    expect(next.state.Red.exhaust).toEqual([]);
+    expect(eventTypes(next.events)).not.toContain("EXHAUST_PREVENTED");
+    expect(eventTypes(next.events)).toContain("COST_PAID");
+  });
+
+  it("still needs the payment cards in hand", () => {
+    const armed = zen([card("Shove")]);
+    const rejected = execute(armed, {
+      type: "PLAY_CARD",
+      character: "Red",
+      cardId: handCard(armed, "Red", "Shove").id,
+      payWith: [],
+    });
+    expect(rejected.ok).toBe(false);
+  });
+
+  it("stops a bare Exhaust X off Red's deck", () => {
+    const armed = zen([card("Emergency Power Core")]);
+    const next = must(armed, free("Red", handCard(armed, "Red", "Emergency Power Core").id));
+    expect(next.state.Red.deck).toHaveLength(4);
+    expect(next.state.Red.exhaust).toEqual([]);
+  });
+
+  it("does not stop an Exhaust of Gray's cards", () => {
+    const armed = zen([], [card("Emergency Power Core")]);
+    const next = must(armed, free("Gray", handCard(armed, "Gray", "Emergency Power Core").id));
+    expect(next.state.Gray.exhaust.length).toBeGreaterThan(0);
+    expect(next.state.Gray.deck.length).toBeLessThan(4);
   });
 });

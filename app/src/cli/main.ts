@@ -238,6 +238,11 @@ function buildChoose(state: GameState, action: Extract<PlayAction, { kind: "choo
     return { type: "CHOOSE_STAT", stat };
   }
 
+  if (pending.kind === "ChooseBottom") {
+    const cardIds = resolveEach(action.names, pending.cards).map((c) => c.id);
+    return { type: "CHOOSE_CARDS", cardIds };
+  }
+
   if (pending.kind === "ChooseCards") {
     const cardIds = resolveEach(action.names, pending.options).map((c) => c.id);
     return { type: "CHOOSE_CARDS", cardIds };
@@ -626,7 +631,7 @@ function renderReport(report: BalanceReport): string {
     lines.push(`  ${card.name}: ${String(card.played)} / ${String(card.taken)} / ${String(card.paid)}`);
   }
   lines.push("");
-  lines.push("Where cards went, by floor — Exhausted / Scrapped / paid as cost:");
+  lines.push("Where cards went, by floor — Exhausted / Scrapped / paid as cost (discarded, or Scrapped under Corrosive):");
   for (const c of CHARACTERS) {
     lines.push(`  ${c}:`);
     for (const row of report.floorLosses.filter((r) => r.character === c)) {

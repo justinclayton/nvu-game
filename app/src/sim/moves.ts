@@ -91,6 +91,13 @@ function answers(pending: Pending): readonly Command[] {
         })),
         { type: "CHOOSE_DRAW", character: null, count: 0 },
       ];
+    case "ChooseBottom":
+      // Every subset, none first (the order shown within each): none to all.
+      return Array.from({ length: pending.cards.length + 1 }, (_, k) =>
+        combinations(pending.cards, k),
+      ).flatMap((subsets) =>
+        subsets.map((cards): Command => ({ type: "CHOOSE_CARDS", cardIds: cards.map((c) => c.id) })),
+      );
     case "OrderCards": {
       const pileIds = (items: readonly (Card | Room)[]): (CardId | RoomId)[] =>
         items.map((c) => c.id);

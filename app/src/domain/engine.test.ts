@@ -277,8 +277,9 @@ describe("Turn Start", () => {
       Gray: player({ deck: pile("Duck Under", 5) }),
     });
     const { state: next } = must(state, { type: "FLIP_ROOM" });
-    // Target 4 - 1 = 3, and the held Faceful Of Slime counts toward it.
+    // Held as step 5 begins: target 4 - 1 = 3, and the held Faceful Of Slime counts toward it.
     expect(next.Red.hand).toHaveLength(3);
+    expect(next.Red.discard).toHaveLength(0);
     expect(next.Gray.hand).toHaveLength(4);
   });
 
@@ -358,7 +359,7 @@ describe("Play", () => {
     if (!rejected.ok) expect(rejected.reason.code).toBe("WrongPayment");
   });
 
-  describe("'move that number of cards from your hand to your Exhaust pile' — paying", () => {
+  describe("'move that number of cards from your hand to your discard pile' — paying", () => {
     const paidWith = (payerName: string) => {
       const state = playState({
         Red: player({ deck: pile("Shove", 5), hand: [card("Charge"), card(payerName), card(payerName)] }),
@@ -374,10 +375,10 @@ describe("Play", () => {
       return { next, payers, charge };
     };
 
-    it.each([["Shove"], ["Crowbar"]])("Exhausts %s paid as a cost", (payer) => {
+    it.each([["Shove"], ["Crowbar"]])("discards %s paid as a cost, leaving the Exhaust pile alone", (payer) => {
       const { next, payers, charge } = paidWith(payer);
-      expect(next.Red.exhaust.map((c) => c.id)).toEqual(payers.map((c) => c.id));
-      expect(next.Red.discard).toHaveLength(0);
+      expect(next.Red.discard.map((c) => c.id)).toEqual(payers.map((c) => c.id));
+      expect(next.Red.exhaust).toHaveLength(0);
       expect(next.Red.hand).toHaveLength(0);
       expect(next.playZone.map((z) => z.card.id)).toEqual([charge.id]);
     });
@@ -500,10 +501,8 @@ describe("Cleanup", () => {
       { type: "END_PLAY" },
     ]);
     expect(next.playZone).toEqual([]);
-    // The Shove played, then discarded from the play zone; the Charge was
-    // Exhausted earlier, to pay its cost.
-    expect(next.Red.discard).toHaveLength(1);
-    expect(next.Red.exhaust.map((c) => c.name)).toContain("Charge");
+    expect(next.Red.discard.map((c) => c.name).sort()).toEqual(["Charge", "Shove"]);
+    expect(next.Red.exhaust.map((c) => c.name)).not.toContain("Charge");
   });
 
   it("Draining: every played card is Exhausted, not discarded, and other rooms are unchanged", () => {
@@ -616,7 +615,7 @@ describe("Cleanup", () => {
     expect(execute(three, { type: "END_PLAY" }).ok).toBe(true);
   });
 
-  it("Corrosive: cards paid for a play are Scrapped, not Exhausted; other rooms are unchanged", () => {
+  it("Corrosive: cards paid for a play are Scrapped, not discarded; other rooms discard them", () => {
     for (const [name, corrosive] of [["Bubbly Slime Monster", true], ["Security Turnstile", false]] as const) {
       const state = rig({
         phase: "Play",
@@ -633,7 +632,8 @@ describe("Cleanup", () => {
         },
       ]);
       expect(next.scrapyard.map((c) => c.name)).toEqual(corrosive ? ["Charge"] : []);
-      expect(next.Red.exhaust.map((c) => c.name)).toEqual(corrosive ? [] : ["Charge"]);
+      expect(next.Red.exhaust).toEqual([]);
+      expect(next.Red.discard.map((c) => c.name)).toEqual(corrosive ? [] : ["Charge"]);
     }
   });
 
@@ -1265,7 +1265,7 @@ describe("Room kinds: Room and Stairwell", () => {
         activeRoom: room("Automated Defense Turret"),
         Red: player({
           deck: pile("Shove", 4),
-          hand: [card("Charge"), card("Charge"), card("Pry Bar"), ...pile("Shove", 4)],
+          hand: [card("Overdrive"), card("Overdrive"), card("Overdrive"), card("Pry Bar")],
           ...over.Red,
         }),
         // Rust, not Panic: a held Panic would itself raise the very
@@ -1276,19 +1276,10 @@ describe("Room kinds: Room and Stairwell", () => {
     const meetIt = (state: GameState) => {
       const r = ids(state, "Red");
       return play(state, [
-        {
-          type: "PLAY_CARD",
-          character: "Red",
-          cardId: r[0] as CardId,
-          payWith: [r[3] as CardId, r[4] as CardId],
-        },
-        {
-          type: "PLAY_CARD",
-          character: "Red",
-          cardId: r[1] as CardId,
-          payWith: [r[5] as CardId, r[6] as CardId],
-        },
+        playFree("Red", r[0] as CardId),
+        playFree("Red", r[1] as CardId),
         playFree("Red", r[2] as CardId),
+        playFree("Red", r[3] as CardId),
         { type: "END_PLAY" },
       ]);
     };

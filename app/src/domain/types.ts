@@ -280,6 +280,18 @@ export type Pending =
       readonly source: PendingSource | null;
     }
   | {
+      /**
+       * Rulebook, Keywords: `Peek X` — `cards` are the top of `pile`, still in
+       * it. The answer, `CHOOSE_CARDS`, is any number of them, none to all,
+       * to move to the bottom of that pile.
+       */
+      readonly kind: "ChooseBottom";
+      readonly prompt: string;
+      readonly pile: Pile;
+      readonly cards: readonly (Card | Room)[];
+      readonly source: PendingSource | null;
+    }
+  | {
       readonly kind: "OrderCards";
       readonly prompt: string;
       readonly pile: Pile;
@@ -412,7 +424,7 @@ export type Command =
   | { readonly type: "CHOOSE_CHARACTER"; readonly character: Character }
   | { readonly type: "CHOOSE_PILE"; readonly pile: Pile }
   | { readonly type: "CHOOSE_STAT"; readonly stat: Stat }
-  | { readonly type: "CHOOSE_CARDS"; readonly cardIds: readonly CardId[] }
+  | { readonly type: "CHOOSE_CARDS"; readonly cardIds: readonly (CardId | RoomId)[] }
   | {
       /** One of the draws on offer, or `{ character: null, count: 0 }` to draw nothing. */
       readonly type: "CHOOSE_DRAW";
@@ -504,6 +516,13 @@ type DomainEventBody =
     }
   | {
       readonly type: "CARDS_PEEKED";
+      readonly character: Character;
+      readonly pile: Pile;
+      readonly cards: readonly (Card | Room)[];
+    }
+  | {
+      /** Rulebook, Keywords: `Peek X` — these peeked cards were moved to the bottom of `pile`. */
+      readonly type: "CARDS_TO_BOTTOM";
       readonly character: Character;
       readonly pile: Pile;
       readonly cards: readonly (Card | Room)[];

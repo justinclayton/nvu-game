@@ -213,6 +213,11 @@ export function moveHint(state: GameState): string {
         lines.push(`${form} — draw: ${draws} — or choose none`);
         break;
       }
+      case "ChooseBottom":
+        lines.push(
+          `choose <Name>... — any of these to the bottom of the ${pending.pile}, or choose none: ${pending.cards.map((c) => c.name).join(", ")}`,
+        );
+        break;
       case "OrderCards":
         lines.push(
           `order <Name> <Name>... — top first, every one of: ${pending.cards.map((c) => c.name).join(", ")}`,

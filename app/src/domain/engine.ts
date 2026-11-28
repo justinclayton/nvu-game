@@ -203,12 +203,21 @@ function validateAnswer(pending: Pending, command: Command): Rejection | null {
           ? null
           : reject("NotAnOption", "That card was not revealed.");
       }
+      if (pending.kind === "ChooseBottom") {
+        const shown = new Set(pending.cards.map((x) => x.id));
+        if (new Set(command.cardIds).size !== command.cardIds.length) {
+          return reject("NotAnOption", "The same card was chosen twice.");
+        }
+        return command.cardIds.every((id) => shown.has(id))
+          ? null
+          : reject("NotAnOption", "That card was not revealed.");
+      }
       if (pending.kind !== "ChooseCards") return waiting;
       const chosen = new Set(command.cardIds);
       if (chosen.size !== command.cardIds.length) {
         return reject("NotAnOption", "The same card was chosen twice.");
       }
-      const options = new Set(pending.options.map((x) => x.id));
+      const options = new Set<CardId | RoomId>(pending.options.map((x) => x.id));
       for (const id of chosen) {
         if (!options.has(id)) return reject("NotAnOption", "That card was not offered.");
       }
@@ -1424,6 +1433,14 @@ function answerCards(
     const [only] = ids as readonly CardId[];
     if (only === undefined) throw new CorruptStateError("Kept no Good Stuff.");
     return answerGoodStuff(state, only, run);
+  }
+  if (kind === "cards" && pending.kind === "ChooseBottom") {
+    if (!pending.source) throw new CorruptStateError("No card is waiting on that answer.");
+    const cards = ids.flatMap((id) => {
+      const found = pending.cards.find((x) => x.id === id);
+      return found ? [found] : [];
+    });
+    return runChoice(state, { kind: "order", tag: pending.source.tag, cards }, run);
   }
   if (kind === "cards") {
     if (!pending.source) return answerRoomCards(state, pending, ids as readonly CardId[], run);

@@ -3,10 +3,10 @@
 import { describe, expect, it } from "vitest";
 import { CARD_CONTENT } from "@content/index";
 import { execute, validate } from "@domain/engine";
-import { card, player, resetRig, rig, room } from "@domain/__fixtures__/rig";
+import { card, pile, player, playing, resetRig, rig, room } from "@domain/__fixtures__/rig";
 import { createInitialState } from "@domain/setup";
 import type { Command, GameState } from "@domain/types";
-import { CHARACTERS } from "@domain/verbs";
+import { CHARACTERS, pileCards } from "@domain/verbs";
 import { combinations, legalCommands, permutations } from "./moves";
 import { randomPolicy } from "./policy";
 import { policySeed } from "./rng";
@@ -226,5 +226,56 @@ describe("a ChooseDraw", () => {
       { type: "CHOOSE_DRAW", character: "Red", count: 2 },
       { type: "CHOOSE_DRAW", character: null, count: 0 },
     ]);
+  });
+});
+
+describe("Hack the Doors (Peek 3)", () => {
+  const PILES_TO_PEEK = [
+    "Red deck",
+    "Gray deck",
+    "Floor deck",
+    "Red reward pool",
+    "Gray reward pool",
+    "Good Stuff pool",
+  ] as const;
+
+  /** Follow every legal answer from here to the end of the question; report each end state. */
+  function everyEnding(state: GameState, depth = 0): GameState[] {
+    if (!state.pending) return [state];
+    const legal = legalCommands(state);
+    if (legal.length === 0 || depth > 6) throw new Error(`stalled on ${state.pending.kind}`);
+    return legal.flatMap((command) => {
+      const result = execute(state, command);
+      if (!result.ok) throw new Error(`${command.type} refused: ${result.reason.message}`);
+      return everyEnding(result.state, depth + 1);
+    });
+  }
+
+  it.each(PILES_TO_PEEK)("never stalls on the %s, and keeps every card in it", (name) => {
+    resetRig();
+    const state = playing({
+      Red: player({ deck: pile("Shove", 5) }),
+      Gray: player({ deck: pile("Duck Under", 5), hand: [card("Hack the Doors"), card("Duck Under")] }),
+      floorDeck: [room("Security Turnstile"), room("Puzzle Room"), room("The Sentry Drone"), room("Security Turnstile")],
+      pools: { Red: pile("Charge", 5), Gray: pile("Duck Under", 5), goodStuff: pile("Stim Pack", 5), badStuff: [] },
+    });
+    const play = legalCommands(state).find(
+      (c) => c.type === "PLAY_CARD" && c.cardId === state.Gray.hand[0]?.id,
+    );
+    if (!play) throw new Error("Hack the Doors cannot be played");
+    const asked = execute(state, play);
+    if (!asked.ok) throw new Error(asked.reason.message);
+    const chosen = execute(asked.state, { type: "CHOOSE_PILE", pile: name });
+    if (!chosen.ok) throw new Error(chosen.reason.message);
+    const before = pileCards(chosen.state, name).map((c) => c.id).sort();
+
+    const endings = everyEnding(chosen.state);
+    // 8 subsets, each with every order of those that go and of those that stay.
+    expect(endings.length).toBeGreaterThan(8);
+    for (const end of endings) {
+      expect(pileCards(end, name).map((c) => c.id).sort()).toEqual(before);
+      expect(end.Gray.discard).toEqual(chosen.state.Gray.discard);
+      expect(end.Red.discard).toEqual(chosen.state.Red.discard);
+    }
   });
 });

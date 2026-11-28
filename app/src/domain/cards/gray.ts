@@ -3,15 +3,12 @@
 import { playedBy } from "../queries";
 import {
   PILES,
-  type Card,
   type Character,
   type DomainEvent,
   type GameState,
   type Pile,
-  type Room,
 } from "../types";
 import {
-  discard,
   drawCards,
   grantPlayDiscount,
   moveToBottomOfDeck,
@@ -21,7 +18,6 @@ import {
   shuffleIntoDeck,
   takeFrom,
   withPile,
-  withPlayer,
 } from "../verbs";
 import {
   ask,
@@ -36,68 +32,36 @@ import {
   type Registry,
 } from "./behaviour";
 
-/** The character whose discard pile a Peek at this pile can discard to; the other piles have none. */
-function deckOwner(pile: Pile): Character | null {
-  if (pile === "Red deck") return "Red";
-  if (pile === "Gray deck") return "Gray";
-  return null;
-}
-
 /**
- * Rulebook, Keywords: `Peek X` — reveal the top X of any face-down pile,
- * discard any number of them, then put the rest back in any order.
+ * Rulebook, Keywords: `Peek X`: "Reveal the top **X** cards of ANY face-down
+ * pile. Move any number of them to the bottom of that pile in any order, then
+ * put the rest back on top in any order."
  *
- * Up to three questions: which pile, what to discard, what order. The discard
- * question is asked one card at a time until the player keeps the rest, since
- * a question offers an exact count. Only a character deck has a discard pile
- * to discard to, so the other piles go straight to the order. A short pile
- * shows what is there; nothing reshuffles (Peek is not a draw).
+ * Up to four questions: which pile; which of the peeked cards go to the
+ * bottom (none to all); the order of those, when two or more; the order of
+ * those that stay, when two or more. The chosen cards move at once, so the
+ * pile is [stay, untouched rest, bottom] and each later order only rearranges
+ * the first or last few of it; the tags carry those counts. Nothing is
+ * discarded and nothing reshuffles (Peek is not a draw): a short pile shows
+ * what is there.
  */
 function peek(depth: number): CardBehaviour {
-  const order = (
+  const orderTop = (
     state: GameState,
     ctx: BehaviourContext,
     pile: Pile,
-    shown: readonly (Card | Room)[],
+    staying: number,
     events: DomainEvent[],
   ) => {
-    if (shown.length < 2) return done(state, events);
+    if (staying < 2) return done(state, events);
     return ask(
       state,
       {
         kind: "OrderCards",
-        prompt: `${pile}. Put those ${String(shown.length)} back on top, in the order you choose.`,
+        prompt: `${pile}. Put those ${String(staying)} back on top, in the order you choose.`,
         pile,
-        cards: shown,
-        source: source(ctx, `order:${pile}`),
-      },
-      events,
-    );
-  };
-  const offerDiscard = (
-    state: GameState,
-    ctx: BehaviourContext,
-    pile: Pile,
-    owner: Character,
-    showing: number,
-    events: DomainEvent[],
-  ) => {
-    const shown = playerOf(state, owner).deck.slice(0, showing);
-    if (shown.length === 0) return done(state, events);
-    const prompt =
-      shown.length === 1
-        ? `${pile}: discard ${shown[0]?.name ?? "it"}, or leave it on top?`
-        : `${pile}: discard one of these, or choose none to keep the rest?`;
-    return ask(
-      state,
-      {
-        kind: "ChooseCards",
-        prompt,
-        character: ctx.character,
-        options: shown,
-        count: 1,
-        optional: true,
-        source: source(ctx, `discard:${pile}:${String(shown.length)}`),
+        cards: pileCards(state, pile).slice(0, staying),
+        source: source(ctx, `top:${pile}:${String(staying)}`),
       },
       events,
     );
@@ -119,29 +83,59 @@ function peek(depth: number): CardBehaviour {
         const events: DomainEvent[] = [
           { type: "CARDS_PEEKED", character: ctx.character, pile: answer.pile, cards: top },
         ];
-        const owner = deckOwner(answer.pile);
-        if (owner === null) return order(state, ctx, answer.pile, top, events);
-        return offerDiscard(state, ctx, answer.pile, owner, top.length, events);
-      }
-      if (answer.kind === "cards") {
-        const [, pileName, count] = answer.tag.split(":");
-        const pile = pileName as Pile;
-        const owner = deckOwner(pile);
-        if (owner === null) return nothing(state);
-        const showing = Number(count);
-        if (answer.cards.length === 0) {
-          return order(state, ctx, pile, playerOf(state, owner).deck.slice(0, showing), []);
-        }
-        const events: DomainEvent[] = [];
-        const p = playerOf(state, owner);
-        const gone = new Set(answer.cards.map((c) => c.id));
-        let next = withPlayer(state, owner, { ...p, deck: p.deck.filter((c) => !gone.has(c.id)) });
-        for (const card of answer.cards) next = discard(next, owner, card, "deck", events);
-        return offerDiscard(next, ctx, pile, owner, showing - answer.cards.length, events);
+        if (top.length === 0) return done(state, events);
+        return ask(
+          state,
+          {
+            kind: "ChooseBottom",
+            prompt: `${answer.pile}: choose any of these to move to the bottom of the pile, or none to keep them all on top.`,
+            pile: answer.pile,
+            cards: top,
+            source: source(ctx, `bottom:${answer.pile}`),
+          },
+          events,
+        );
       }
       if (answer.kind !== "order") return nothing(state);
-      const pile = answer.tag.split(":")[1] as Pile;
-      const rest = pileCards(state, pile).slice(answer.cards.length);
+      const [step, pileName, count] = answer.tag.split(":");
+      const pile = pileName as Pile;
+      const all = pileCards(state, pile);
+      if (step === "bottom") {
+        // Rulebook: the cards go to the bottom; the rest of what was shown stays on top.
+        const moved = new Set(answer.cards.map((c) => c.id));
+        const shown = all.slice(0, depth);
+        const stay = shown.filter((c) => !moved.has(c.id));
+        const events: DomainEvent[] =
+          answer.cards.length === 0
+            ? []
+            : [{ type: "CARDS_TO_BOTTOM", character: ctx.character, pile, cards: answer.cards }];
+        const next = withPile(state, pile, [
+          ...stay,
+          ...all.slice(shown.length),
+          ...answer.cards,
+        ]);
+        if (answer.cards.length > 1) {
+          return ask(
+            next,
+            {
+              kind: "OrderCards",
+              prompt: `${pile}. Put those ${String(answer.cards.length)} on the bottom, in the order you choose: the first goes in highest, the last is the very bottom.`,
+              pile,
+              cards: answer.cards,
+              source: source(ctx, `bottomorder:${pile}:${String(stay.length)}`),
+            },
+            events,
+          );
+        }
+        return orderTop(next, ctx, pile, stay.length, events);
+      }
+      if (step === "bottomorder") {
+        const stay = Number(count);
+        const head = all.slice(0, all.length - answer.cards.length);
+        const next = withPile(state, pile, [...head, ...answer.cards]);
+        return orderTop(next, ctx, pile, stay, []);
+      }
+      const rest = all.slice(answer.cards.length);
       return done(withPile(state, pile, [...answer.cards, ...rest]));
     },
   };

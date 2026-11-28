@@ -147,32 +147,27 @@ function peek(depth: number): CardBehaviour {
   };
 }
 
-/** Shared behaviour: shuffle a chosen Stuff card from one character's hand into their own deck. */
-function shuffleStuffFromHand(whose: (ctx: BehaviourContext) => Character): CardBehaviour {
-  return {
-    onPlay(state, ctx) {
-      const target = whose(ctx);
-      const options = playerOf(state, target).hand.filter((c) => c.kind !== "player");
-      if (options.length === 0) return nothing(state);
-      return ask(state, {
-        kind: "ChooseCards",
-        prompt: `Shuffle which piece of Stuff into ${target}'s deck?`,
-        character: ctx.character,
-        options,
-        count: 1,
-        optional: false,
-        source: source(ctx, "shuffle-stuff"),
-      });
-    },
-    onChoice(answer, state, ctx) {
-      if (answer.kind !== "cards") return nothing(state);
-      const target = whose(ctx);
-      const events: DomainEvent[] = [];
-      const lifted = takeFrom(state, target, "hand", answer.cards);
-      return done(shuffleIntoDeck(lifted, target, answer.cards, events), events);
-    },
-  };
-}
+const illTakeThat: CardBehaviour = {
+  onPlay(state, ctx) {
+    const options = playerOf(state, "Red").hand;
+    if (options.length === 0) return nothing(state);
+    return ask(state, {
+      kind: "ChooseCards",
+      prompt: `Shuffle which card from Red's hand into ${ctx.character}'s deck?`,
+      character: ctx.character,
+      options,
+      count: 1,
+      optional: false,
+      source: source(ctx, "ill-take-that"),
+    });
+  },
+  onChoice(answer, state, ctx) {
+    if (answer.kind !== "cards") return nothing(state);
+    const events: DomainEvent[] = [];
+    const lifted = takeFrom(state, "Red", "hand", answer.cards);
+    return done(shuffleIntoDeck(lifted, ctx.character, answer.cards, events), events);
+  },
+};
 
 /** Pack Mule: offer the next piece of Stuff in Red's hand, or stop when none is left. */
 function packMule(state: GameState, ctx: BehaviourContext, events: readonly DomainEvent[]) {
@@ -290,7 +285,7 @@ export const GRAY: Registry = {
     },
   },
 
-  "I'll Take That": shuffleStuffFromHand(() => "Red"),
+  "I'll Take That": illTakeThat,
 
   /* A card-driven exception to Play's no-draw rule. A reaction cannot suspend, so each Red play
    * queues the question and the engine asks it once the play is done (`TurnRecord.questions`). */

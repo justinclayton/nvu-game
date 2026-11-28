@@ -11,10 +11,10 @@
  * and no server.
  */
 var NVU_CARDS = {
-  meta: {"version":"C62","updated":"2026-10-03"},
+  meta: {"version":"C63","updated":"2026-10-03"},
   rulesVersion: "R37",
-  cardsVersion: "C62",
-  cardListId: "632d65d99e56",
+  cardsVersion: "C63",
+  cardListId: "f6b2e7fb02f1",
   cards: [
     {"name":"Shove","set":"official","kind":"player","owner":"Red","starter":true,"cost":1,"oomph":2,"flavor":"'Oomph!', he shouted.","count":4},
     {"name":"Charge","set":"official","kind":"player","owner":"Red","starter":true,"cost":2,"oomph":4,"flavor":"I am bolder, so I lower my shoulder.","count":4},
@@ -42,7 +42,7 @@ var NVU_CARDS = {
     {"name":"Catch Your Breath","set":"proposed","kind":"player","owner":"Gray","rarity":"Cool","cost":0,"flavor":"Pause for a second to read the room.","text":"At the end of the Play phase, if this was the only card you played this turn, move 3 cards from your Exhaust pile to the bottom of your deck.","count":2},
     {"name":"Pack Mule","set":"proposed","kind":"player","owner":"Gray","rarity":"Fine","cost":1,"scramble":3,"flavor":"I'll carry your books for you, Senpai!","text":"Move any number of Stuff cards from Red's hand to yours.","count":2},
     {"name":"Hit 'n Run","set":"proposed","kind":"player","owner":"Gray","rarity":"Fine","cost":1,"oomph":1,"scramble":2,"flavor":"Strike fast and disappear into the shadows.","text":"Shuffle a card from your Exhaust pile into your deck.","count":2},
-    {"name":"I'll Take That","set":"proposed","kind":"player","owner":"Gray","rarity":"Fine","cost":1,"scramble":3,"flavor":"Relieve Red of that cumbersome pack.","text":"Shuffle 1 Stuff from Red's hand into Red's deck.","count":2},
+    {"name":"I'll Take That","set":"proposed","kind":"player","owner":"Gray","rarity":"Fine","cost":1,"scramble":3,"flavor":"Relieve Red of that cumbersome pack.","text":"Shuffle a card from Red's hand into your own deck.","count":2},
     {"name":"Quick Vault","set":"proposed","kind":"player","owner":"Gray","rarity":"Fine","cost":0,"flavor":"Spring off Red's shoulder to clear the gap.","text":"You may draw 2 cards.","count":2},
     {"name":"In Step","set":"proposed","kind":"player","owner":"Gray","rarity":"Cool","cost":2,"conditional_stat":true,"flavor":"Sync your movements perfectly with Red's brute rhythm.","text":"Scramble equal to 2 times the number of cards Red has played this turn.","count":2},
     {"name":"One Man's Junk","set":"proposed","kind":"player","owner":"Gray","rarity":"Cool","cost":1,"conditional_stat":true,"flavor":"Turn hazardous junk into a makeshift advantage.","text":"+3 Oomph and +3 Scramble for each Bad Stuff you're holding.","count":2},

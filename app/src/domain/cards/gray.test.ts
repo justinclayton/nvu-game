@@ -331,29 +331,38 @@ describe("Hit 'n Run — 'Shuffle a card from your Exhaust pile into your deck'"
   });
 });
 
-describe("I'll Take That — 'Shuffle 1 Stuff from Red's hand into Red's deck'", () => {
-  it("reaches into Red's hand, not Gray's", () => {
+describe("I'll Take That — 'Shuffle a card from Red's hand into your own deck'", () => {
+  const asked = () => {
     const state = playing({
-      Red: player({ deck: pile("Shove", 3), hand: [card("Pry Bar")] }),
+      Red: player({ deck: pile("Shove", 3), hand: [card("Pry Bar"), card("Shove")] }),
       Gray: player({
         deck: pile("Duck Under", 3),
         hand: [card("I'll Take That"), card("Duck Under"), card("Coil Of Cable")],
       }),
     });
-    const asked = must(state, {
+    return must(state, {
       type: "PLAY_CARD",
       character: "Gray",
       cardId: handCard(state, "Gray", "I'll Take That").id,
       payWith: [handCard(state, "Gray", "Duck Under").id],
-    });
-    const pending = asked.state.pending;
+    }).state;
+  };
+
+  it("offers every card in Red's hand, Stuff or not, and none of Gray's", () => {
+    const pending = asked().pending;
     if (pending?.kind !== "ChooseCards") throw new Error("expected a card choice");
-    expect(pending.options.map((c) => c.name)).toEqual(["Pry Bar"]);
-    const pryBar = pending.options[0];
-    if (!pryBar) throw new Error("Pry Bar not offered");
-    const { state: next } = must(asked.state, { type: "CHOOSE_CARDS", cardIds: [pryBar.id] });
-    expect(next.Red.hand).toEqual([]);
-    expect(next.Red.deck).toHaveLength(4);
+    expect(pending.character).toBe("Gray");
+    expect(pending.options.map((c) => c.name)).toEqual(["Pry Bar", "Shove"]);
+  });
+
+  it("shuffles the chosen card into Gray's deck", () => {
+    const state = asked();
+    const shove = handCard(state, "Red", "Shove");
+    const { state: next } = must(state, { type: "CHOOSE_CARDS", cardIds: [shove.id] });
+    expect(next.Red.hand.map((c) => c.name)).toEqual(["Pry Bar"]);
+    expect(next.Red.deck).toHaveLength(3);
+    expect(next.Gray.deck).toHaveLength(4);
+    expect(next.Gray.deck.map((c) => c.id)).toContain(shove.id);
   });
 });
 

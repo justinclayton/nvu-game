@@ -42,7 +42,7 @@ export const CARD_CONTENT = {
     {"name":"Catch Your Breath","set":"proposed","kind":"player","owner":"Gray","rarity":"Cool","starter":false,"count":2,"cost":0,"oomph":0,"scramble":0,"conditionalStat":false,"text":"At the end of the Play phase, if this was the only card you played this turn, move 3 cards from your Exhaust pile to the bottom of your deck.","flavor":"Pause for a second to read the room."},
     {"name":"Pack Mule","set":"proposed","kind":"player","owner":"Gray","rarity":"Fine","starter":false,"count":2,"cost":1,"oomph":0,"scramble":3,"conditionalStat":false,"text":"Move any number of Stuff cards from Red's hand to yours.","flavor":"I'll carry your books for you, Senpai!"},
     {"name":"Hit 'n Run","set":"proposed","kind":"player","owner":"Gray","rarity":"Fine","starter":false,"count":2,"cost":1,"oomph":1,"scramble":2,"conditionalStat":false,"text":"Shuffle a card from your Exhaust pile into your deck.","flavor":"Strike fast and disappear into the shadows."},
-    {"name":"I'll Take That","set":"proposed","kind":"player","owner":"Gray","rarity":"Fine","starter":false,"count":2,"cost":1,"oomph":0,"scramble":3,"conditionalStat":false,"text":"Shuffle 1 Stuff from Red's hand into Red's deck.","flavor":"Relieve Red of that cumbersome pack."},
+    {"name":"I'll Take That","set":"proposed","kind":"player","owner":"Gray","rarity":"Fine","starter":false,"count":2,"cost":1,"oomph":0,"scramble":3,"conditionalStat":false,"text":"Shuffle a card from Red's hand into your own deck.","flavor":"Relieve Red of that cumbersome pack."},
     {"name":"Quick Vault","set":"proposed","kind":"player","owner":"Gray","rarity":"Fine","starter":false,"count":2,"cost":0,"oomph":0,"scramble":0,"conditionalStat":false,"text":"You may draw 2 cards.","flavor":"Spring off Red's shoulder to clear the gap."},
     {"name":"In Step","set":"proposed","kind":"player","owner":"Gray","rarity":"Cool","starter":false,"count":2,"cost":2,"oomph":0,"scramble":0,"conditionalStat":true,"text":"Scramble equal to 2 times the number of cards Red has played this turn.","flavor":"Sync your movements perfectly with Red's brute rhythm."},
     {"name":"One Man's Junk","set":"proposed","kind":"player","owner":"Gray","rarity":"Cool","starter":false,"count":2,"cost":1,"oomph":0,"scramble":0,"conditionalStat":true,"text":"+3 Oomph and +3 Scramble for each Bad Stuff you're holding.","flavor":"Turn hazardous junk into a makeshift advantage."},
@@ -120,10 +120,10 @@ export const CARD_CONTENT = {
 } as const satisfies CardContent;
 
 /** The first 12 hex of sha256 over the JSON of CARD_CONTENT above — identifies this card list. */
-export const CARD_LIST_ID = "632d65d99e56";
+export const CARD_LIST_ID = "f6b2e7fb02f1";
 
 /** R of the kit revision: the rulebook's "Rules version:" line. Recorded runs refuse to replay across a change to it. Kept out of CARD_CONTENT so a rules bump does not change CARD_LIST_ID. */
 export const RULES_VERSION = "R37";
 
 /** C of the kit revision: the "version:" line under meta in cards.yaml, bumped when the card list changes. The print sheet stamps RULES_VERSION.CARDS_VERSION on every card; tools/kit-revision.sh adds the engine count. */
-export const CARDS_VERSION = "C62";
+export const CARDS_VERSION = "C63";

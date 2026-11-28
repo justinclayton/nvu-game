@@ -727,24 +727,18 @@ function playCard(
     s = spendPlayDiscount(s, c);
   }
 
-  // Each payment card goes to its owner's Exhaust pile, unless its owner has Zen Mode in play.
+  // Each payment card goes to its owner's discard pile (Scrapped under Corrosive). Paying is not Exhausting, so Zen Mode has nothing to stop.
   const from = run.events.length;
-  const exhausted: Card[] = [];
+  const paid: Card[] = [];
   const corrosive = s.activeRoom?.keywords.includes("Corrosive") ?? false;
   for (const owner of CHARACTERS) {
     const cards = payment.filter((x) => x.owner === owner).map((x) => x.card);
     if (cards.length === 0) continue;
-    // Corrosive pays by Scrapping, which Zen Mode does not stop.
-    const keptBy = corrosive ? null : exhaustPreventedBy(s, owner);
-    if (keptBy) {
-      run.events.push({ type: "EXHAUST_PREVENTED", character: owner, amount: cards.length, by: keptBy });
-      continue;
-    }
     s = payCostFromHand(s, owner, cards);
-    exhausted.push(...cards);
+    paid.push(...cards);
   }
-  if (exhausted.length > 0) {
-    run.events.push({ type: "COST_PAID", character: c, cards: exhausted, scrapped: corrosive });
+  if (paid.length > 0) {
+    run.events.push({ type: "COST_PAID", character: c, cards: paid, scrapped: corrosive });
   }
 
   // Bad Stuff is never put in the play zone and is not a played card: it stays in hand until its Play line has resolved, then is Scrapped from there.

@@ -73,10 +73,10 @@ describe("describeEvent", () => {
     expect(describeEvent(shuffled(3))).toBe("Red shuffles 3 cards back in.");
   });
 
-  it("says Scrapping for a payment a Corrosive room Scrapped, and Exhausting otherwise", () => {
+  it("says Scrapping for a payment a Corrosive room Scrapped, and discarding otherwise", () => {
     const paid = (scrapped: boolean): DomainEvent => ({ type: "COST_PAID", character: "Gray", cards: [crowbar], scrapped });
     expect(describeEvent(paid(true))).toBe("Gray pays with Crowbar, Scrapping it.");
-    expect(describeEvent(paid(false))).toBe("Gray pays with Crowbar, Exhausting it.");
+    expect(describeEvent(paid(false))).toBe("Gray pays with Crowbar, discarding it.");
   });
 
   it("pluralises the reshuffled discard count", () => {

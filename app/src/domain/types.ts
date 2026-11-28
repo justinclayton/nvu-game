@@ -451,7 +451,7 @@ type DomainEventBody =
       readonly turnStart?: boolean;
     }
   | { readonly type: "CARD_PLAYED"; readonly character: Character; readonly card: Card }
-  /** `scrapped`: a Corrosive room took the payment to the Scrapyard, not the Exhaust pile. */
+  /** `scrapped`: a Corrosive room took the payment to the Scrapyard, not the discard pile. */
   | {
       readonly type: "COST_PAID";
       readonly character: Character;

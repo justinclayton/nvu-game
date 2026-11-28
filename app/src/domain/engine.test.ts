@@ -358,7 +358,7 @@ describe("Play", () => {
     if (!rejected.ok) expect(rejected.reason.code).toBe("WrongPayment");
   });
 
-  describe("'move that number of cards from your hand to your Exhaust pile' — paying", () => {
+  describe("'move that number of cards from your hand to your discard pile' — paying", () => {
     const paidWith = (payerName: string) => {
       const state = playState({
         Red: player({ deck: pile("Shove", 5), hand: [card("Charge"), card(payerName), card(payerName)] }),
@@ -374,10 +374,10 @@ describe("Play", () => {
       return { next, payers, charge };
     };
 
-    it.each([["Shove"], ["Crowbar"]])("Exhausts %s paid as a cost", (payer) => {
+    it.each([["Shove"], ["Crowbar"]])("discards %s paid as a cost, leaving the Exhaust pile alone", (payer) => {
       const { next, payers, charge } = paidWith(payer);
-      expect(next.Red.exhaust.map((c) => c.id)).toEqual(payers.map((c) => c.id));
-      expect(next.Red.discard).toHaveLength(0);
+      expect(next.Red.discard.map((c) => c.id)).toEqual(payers.map((c) => c.id));
+      expect(next.Red.exhaust).toHaveLength(0);
       expect(next.Red.hand).toHaveLength(0);
       expect(next.playZone.map((z) => z.card.id)).toEqual([charge.id]);
     });
@@ -501,9 +501,9 @@ describe("Cleanup", () => {
     ]);
     expect(next.playZone).toEqual([]);
     // The Shove played, then discarded from the play zone; the Charge was
-    // Exhausted earlier, to pay its cost.
-    expect(next.Red.discard).toHaveLength(1);
-    expect(next.Red.exhaust.map((c) => c.name)).toContain("Charge");
+    // discarded earlier, to pay its cost.
+    expect(next.Red.discard.map((c) => c.name).sort()).toEqual(["Charge", "Shove"]);
+    expect(next.Red.exhaust).toEqual([]);
   });
 
   it("Draining: every played card is Exhausted, not discarded, and other rooms are unchanged", () => {
@@ -616,7 +616,7 @@ describe("Cleanup", () => {
     expect(execute(three, { type: "END_PLAY" }).ok).toBe(true);
   });
 
-  it("Corrosive: cards paid for a play are Scrapped, not Exhausted; other rooms are unchanged", () => {
+  it("Corrosive: cards paid for a play are Scrapped, not discarded; other rooms discard them", () => {
     for (const [name, corrosive] of [["Bubbly Slime Monster", true], ["Security Turnstile", false]] as const) {
       const state = rig({
         phase: "Play",
@@ -633,7 +633,8 @@ describe("Cleanup", () => {
         },
       ]);
       expect(next.scrapyard.map((c) => c.name)).toEqual(corrosive ? ["Charge"] : []);
-      expect(next.Red.exhaust.map((c) => c.name)).toEqual(corrosive ? [] : ["Charge"]);
+      expect(next.Red.exhaust).toEqual([]);
+      expect(next.Red.discard.map((c) => c.name)).toEqual(corrosive ? [] : ["Charge"]);
     }
   });
 

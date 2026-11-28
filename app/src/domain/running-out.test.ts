@@ -66,13 +66,37 @@ describe("Keywords: Empty deck", () => {
     const pending = asked.pending;
     if (pending?.kind !== "ChooseExhaust") throw new Error("expected an Exhaust choice");
     expect(pending.deck).toBe(0);
-    expect(pending.options).toHaveLength(5);
+    // The 5 in the discard pile, plus the 2 Pry Bars that paid for Cross Punch.
+    expect(pending.options).toHaveLength(7);
     expect(eventTypes(events)).not.toContain("DISCARD_RESHUFFLED");
     const first = pending.options[0];
     if (!first) throw new Error("rig");
     const { state: next } = must(asked, { type: "EXHAUST_CARD", cardId: first.id });
     expect(next.Red.exhaust.map((c) => c.id)).toContain(first.id);
-    expect(next.Red.discard).toHaveLength(4);
+    expect(next.Red.discard).toHaveLength(6);
+  });
+
+  it("cards paid for a play land in the discard pile, so the reshuffle brings them back into the deck", () => {
+    const state = rig({
+      phase: "Play",
+      activeRoom: room("Comrade Black"),
+      Red: player({ deck: [], discard: [], hand: [card("Charge"), card("Shove"), card("Shove"), card("Pry Bar")] }),
+      Gray: player({ deck: pile("Duck Under", 4) }),
+    });
+    const payers = state.Red.hand.filter((c) => c.name === "Shove");
+    // Comrade Black is Heavy: playing Charge Exhausts 1 from the top of an empty deck, so the discard pile
+    // (just the two paid Shoves) is shuffled into a new deck first.
+    const { state: next, events } = must(state, {
+      type: "PLAY_CARD",
+      character: "Red",
+      cardId: handCard(state, "Red", "Charge").id,
+      payWith: payers.map((c) => c.id),
+    });
+    expect(eventTypes(events)).toContain("DISCARD_RESHUFFLED");
+    expect(next.Red.discard).toEqual([]);
+    expect(next.Red.deck).toHaveLength(1);
+    expect(next.Red.exhaust).toHaveLength(1);
+    expect([...next.Red.deck, ...next.Red.exhaust].map((c) => c.id).sort()).toEqual(payers.map((c) => c.id).sort());
   });
 
   it("'if your discard pile is also empty, you go Down' — on a draw", () => {

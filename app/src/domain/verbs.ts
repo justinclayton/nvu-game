@@ -205,17 +205,17 @@ function countExhausted(state: GameState, c: Character, n: number, fromDeck: boo
 }
 
 /**
- * Rulebook, Each Turn, Play: the cards you pay with go from hand to your Exhaust pile, gone for
- * the run. No event: `COST_PAID` says so.
+ * Rulebook, Each Turn, Play: the cards you pay with go from hand to your discard pile (Scrapped
+ * under Corrosive); paying is not Exhausting. No event: `COST_PAID` says so.
  */
 export function payCostFromHand(state: GameState, c: Character, cards: readonly Card[]): GameState {
   const next = takeFrom(state, c, "hand", cards);
   if (state.activeRoom?.keywords.includes("Corrosive")) {
-    // Corrosive (Cards paid here are Scrapped, not Exhausted.): they go to the Scrapyard.
+    // Corrosive (Cards paid here are Scrapped, not discarded.): they go to the Scrapyard.
     return { ...next, scrapyard: [...next.scrapyard, ...cards] };
   }
   const p = playerOf(next, c);
-  return countExhausted(withPlayer(next, c, { ...p, exhaust: [...p.exhaust, ...cards] }), c, cards.length, false);
+  return withPlayer(next, c, { ...p, discard: [...p.discard, ...cards] });
 }
 
 /** Rulebook, Card anatomy: Keywords: `Discard X cards from your hand` — a cost you chose. */

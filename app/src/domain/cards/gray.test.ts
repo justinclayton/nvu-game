@@ -558,18 +558,20 @@ describe("Zen Mode — 'While this is in play, you don't exhaust cards'", () => 
 
   it("pays its own cost as normal", () => {
     const armed = zen([]);
-    expect(names(armed.Gray.exhaust)).toEqual(["Duck Under"]);
+    expect(names(armed.Gray.discard)).toEqual(["Duck Under"]);
+    expect(armed.Gray.exhaust).toEqual([]);
   });
 
-  it("keeps Gray's payment cards in hand", () => {
+  it("still moves Gray's payment cards to the discard pile, and logs no EXHAUST_PREVENTED", () => {
     const armed = zen([card("Duck Under"), card("Duck Under")]);
     const [played, payer] = armed.Gray.hand;
     if (!played || !payer) throw new Error("hand too short");
     const next = must(armed, { type: "PLAY_CARD", character: "Gray", cardId: played.id, payWith: [payer.id] });
-    expect(next.state.Gray.hand.map((c) => c.id)).toEqual([payer.id]);
-    expect(next.state.Gray.exhaust).toHaveLength(1);
-    expect(eventTypes(next.events)).toContain("EXHAUST_PREVENTED");
-    expect(eventTypes(next.events)).not.toContain("COST_PAID");
+    expect(next.state.Gray.hand.map((c) => c.id)).not.toContain(payer.id);
+    expect(next.state.Gray.discard.map((c) => c.id)).toContain(payer.id);
+    expect(next.state.Gray.exhaust).toEqual([]);
+    expect(eventTypes(next.events)).not.toContain("EXHAUST_PREVENTED");
+    expect(eventTypes(next.events)).toContain("COST_PAID");
   });
 
   it("still needs the payment cards in hand", () => {
@@ -587,7 +589,7 @@ describe("Zen Mode — 'While this is in play, you don't exhaust cards'", () => 
     const armed = zen([card("Emergency Power Core")]);
     const next = must(armed, free("Gray", handCard(armed, "Gray", "Emergency Power Core").id));
     expect(next.state.Gray.deck).toHaveLength(4);
-    expect(next.state.Gray.exhaust).toHaveLength(1);
+    expect(next.state.Gray.exhaust).toEqual([]);
   });
 
   it("does nothing for Red's cards", () => {
@@ -595,7 +597,8 @@ describe("Zen Mode — 'While this is in play, you don't exhaust cards'", () => 
     const [played, payer] = armed.Red.hand;
     if (!played || !payer) throw new Error("hand too short");
     const next = must(armed, { type: "PLAY_CARD", character: "Red", cardId: played.id, payWith: [payer.id] });
-    expect(names(next.state.Red.exhaust)).toEqual(["Shove"]);
+    expect(names(next.state.Red.discard)).toEqual(["Shove"]);
+    expect(next.state.Red.exhaust).toEqual([]);
   });
 });
 
@@ -607,13 +610,14 @@ describe("Sharing Is Caring — 'Play: both players may pay for cards from the o
     });
   const shared = (state = setup()) => must(state, free("Gray", handCard(state, "Gray", "Sharing Is Caring").id)).state;
 
-  it("lets Red pay with a card from Gray's hand, which goes to Gray's Exhaust pile", () => {
+  it("lets Red pay with a card from Gray's hand, which goes to Gray's discard pile", () => {
     const state = shared();
     const charge = handCard(state, "Red", "Charge");
     const [g1, g2] = state.Gray.hand;
     if (!g1 || !g2) throw new Error("hand too short");
     const next = must(state, { type: "PLAY_CARD", character: "Red", cardId: charge.id, payWith: [g1.id, g2.id] });
-    expect(names(next.state.Gray.exhaust)).toEqual(["Duck Under", "Duck Under"]);
+    expect(names(next.state.Gray.discard)).toEqual(["Duck Under", "Duck Under"]);
+    expect(next.state.Gray.exhaust).toEqual([]);
     expect(next.state.Gray.hand).toHaveLength(0);
     expect(names(next.state.Red.hand)).toEqual(["Shove"]);
   });
@@ -625,8 +629,8 @@ describe("Sharing Is Caring — 'Play: both players may pay for cards from the o
     const [g1] = state.Gray.hand;
     if (!g1) throw new Error("hand too short");
     const next = must(state, { type: "PLAY_CARD", character: "Red", cardId: charge.id, payWith: [shove.id, g1.id] });
-    expect(names(next.state.Red.exhaust)).toEqual(["Shove"]);
-    expect(names(next.state.Gray.exhaust)).toEqual(["Duck Under"]);
+    expect(names(next.state.Red.discard)).toEqual(["Shove"]);
+    expect(names(next.state.Gray.discard)).toEqual(["Duck Under"]);
   });
 
   it("does not open Gray's hand before it is played", () => {
@@ -642,7 +646,7 @@ describe("Sharing Is Caring — 'Play: both players may pay for cards from the o
     expect(rejected.ok).toBe(false);
   });
 
-  it("with Zen Mode in play, Gray's cards that Red pays with stay in Gray's hand", () => {
+  it("with Zen Mode in play, Gray's cards that Red pays with still go to Gray's discard pile", () => {
     const state = setup([card("Zen Mode"), card("Duck Under"), card("Duck Under"), card("Duck Under")]);
     const zen = must(state, {
       type: "PLAY_CARD",
@@ -659,7 +663,9 @@ describe("Sharing Is Caring — 'Play: both players may pay for cards from the o
       cardId: handCard(armed, "Red", "Charge").id,
       payWith: [g1.id, g2.id],
     });
-    expect(next.state.Gray.hand).toHaveLength(2);
-    expect(next.state.Gray.exhaust).toHaveLength(1);
+    expect(next.state.Gray.hand).toHaveLength(0);
+    expect(next.state.Gray.discard.map((c) => c.id)).toEqual(expect.arrayContaining([g1.id, g2.id]));
+    expect(next.state.Gray.exhaust).toHaveLength(0);
+    expect(eventTypes(next.events)).not.toContain("EXHAUST_PREVENTED");
   });
 });

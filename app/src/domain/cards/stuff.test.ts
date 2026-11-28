@@ -224,8 +224,9 @@ describe("A Pair Of Stitch-Em-Ups — 'Choose a character, move 2 cards from the
     const { state: next, events } = must(asked.state, { type: "CHOOSE_CARDS", cardIds: chosen });
     expect(next.Red.deck.slice(-2).map((c) => c.id)).toEqual(chosen);
     expect(next.Red.deck).toHaveLength(4);
-    // Two moved out of the Exhaust pile; the Shove that paid for the card joined it.
-    expect(next.Red.exhaust).toHaveLength(2);
+    // Two moved out of the Exhaust pile; the Shove that paid for the card went to the discard pile.
+    expect(next.Red.exhaust).toHaveLength(1);
+    expect(next.Red.discard).toHaveLength(1);
     expect(eventTypes(events)).toContain("CARD_MOVED");
   });
 
@@ -271,7 +272,7 @@ describe("A Pair Of Stitch-Em-Ups — 'Choose a character, move 2 cards from the
       Red: player({
         deck: pile("Shove", 2),
         hand: [card("A Pair Of Stitch-Em-Ups"), card("Shove")],
-        // The one card that pays for it is the whole Exhaust pile.
+        exhaust: [card("Charge")], // The whole Exhaust pile is one card.
       }),
     });
     const asked = must(state, {
@@ -1454,10 +1455,11 @@ describe("Bad Stuff — 'Play: Scrap this card.'", () => {
     }
   });
 
-  it("Exhausts the cards that paid for it", () => {
+  it("discards the cards that paid for it", () => {
     const { state, bad, payWith } = playBad("Torn Seal", [], 4);
     const { state: next } = must(state, { type: "PLAY_CARD", character: "Red", cardId: bad.id, payWith });
-    expect(next.Red.exhaust.map((c) => c.id).sort()).toEqual([...payWith].sort());
+    expect(next.Red.discard.map((c) => c.id).sort()).toEqual([...payWith].sort());
+    expect(next.Red.exhaust).toEqual([]);
   });
 
   it("Panic Exhausts 2, then is Scrapped", () => {

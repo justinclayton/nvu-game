@@ -980,58 +980,165 @@ describe("Emergency Power Core — 'Exhaust 2'", () => {
   });
 });
 
-describe("Faceful Of Slime — 'Holding: At Turn Start, draw 1 fewer card'", () => {
-  it("trims the automatic draw's target from 5 to 4", () => {
+describe("Faceful Of Slime — 'Holding: At Turn Start, discard 1 card from your hand.'", () => {
+  const turnStart = (red: ReturnType<typeof player>, floor = [room("Security Turnstile")]) =>
+    rig({
+      phase: "Turn Start",
+      floorDeck: floor,
+      Red: red,
+      Gray: player({ deck: pile("Duck Under", 6) }),
+    });
+  const threeRooms = () => [room("Security Turnstile"), room("Dark Room"), room("Dead End")];
+
+  it("a lone card in hand is discarded without asking, before the last room is entered", () => {
+    const state = turnStart(player({ deck: pile("Shove", 6), hand: [card("Faceful Of Slime")] }));
+    const { state: next, events } = must(state, { type: "FLIP_ROOM" });
+    expect(next.pending).toBeNull();
+    const types = eventTypes(events);
+    expect(types.indexOf("CARD_DISCARDED")).toBeGreaterThanOrEqual(0);
+    expect(types.indexOf("CARD_DISCARDED")).toBeLessThan(types.indexOf("ROOM_FLIPPED"));
+    expect(events.find((e) => e.type === "CARD_DISCARDED")?.source).toBe("Faceful Of Slime");
+    expect(next.Red.discard.map((c) => c.name)).toEqual(["Faceful Of Slime"]);
+    // The draw is not touched: up to 5.
+    expect(next.Red.hand).toHaveLength(5);
+    expect(next.Red.drewThisTurn).toBe(5);
+  });
+
+  it("asks the holder which card, Faceful Of Slime included, and reveals the rooms only after", () => {
+    const state = turnStart(
+      player({ deck: pile("Shove", 6), hand: [card("Faceful Of Slime"), card("Shove")] }),
+      threeRooms(),
+    );
+    const asked = must(state, { type: "FLIP_ROOM" });
+    const pending = asked.state.pending;
+    if (pending?.kind !== "ChooseCards") throw new Error("expected a card choice");
+    expect(pending.options.map((c) => c.name).sort()).toEqual(["Faceful Of Slime", "Shove"]);
+    expect(pending.prompt).toContain("Faceful Of Slime");
+    expect(eventTypes(asked.events)).not.toContain("ROOMS_REVEALED");
+
+    const slime = pending.options.find((c) => c.name === "Faceful Of Slime");
+    if (!slime) throw new Error("rig");
+    const answered = must(asked.state, { type: "CHOOSE_CARDS", cardIds: [slime.id] });
+    const types = eventTypes(answered.events);
+    expect(types.indexOf("CARD_DISCARDED")).toBeLessThan(types.indexOf("ROOMS_REVEALED"));
+    expect(answered.events.find((e) => e.type === "CARD_DISCARDED")?.source).toBe("Faceful Of Slime");
+    const chooseRoom = answered.state.pending;
+    if (chooseRoom?.kind !== "ChooseRoom") throw new Error("expected a room choice");
+    const [first, ...others] = chooseRoom.options;
+    if (!first) throw new Error("rig");
+    const entered = must(answered.state, {
+      type: "CHOOSE_ROOM",
+      roomId: first.id,
+      bottom: others.map((r) => r.id),
+    });
+    expect(entered.state.phase).toBe("Play");
+    expect(entered.state.Red.hand).toHaveLength(5);
+    expect(entered.state.Red.discard.some((c) => c.name === "Faceful Of Slime")).toBe(true);
+  });
+
+  it("two copies discard 2 cards, one at a time", () => {
+    const state = turnStart(
+      player({
+        deck: pile("Shove", 6),
+        hand: [card("Faceful Of Slime"), card("Faceful Of Slime"), card("Shove"), card("Shove")],
+      }),
+    );
+    const first = must(state, { type: "FLIP_ROOM" });
+    const p1 = first.state.pending;
+    if (p1?.kind !== "ChooseCards") throw new Error("expected a card choice");
+    const shove1 = p1.options.find((c) => c.name === "Shove");
+    if (!shove1) throw new Error("rig");
+    const second = must(first.state, { type: "CHOOSE_CARDS", cardIds: [shove1.id] });
+    const p2 = second.state.pending;
+    if (p2?.kind !== "ChooseCards") throw new Error("expected a second card choice");
+    expect(p2.options).toHaveLength(3);
+    const shove2 = p2.options.find((c) => c.name === "Shove");
+    if (!shove2) throw new Error("rig");
+    const last = must(second.state, { type: "CHOOSE_CARDS", cardIds: [shove2.id] });
+    expect(last.state.Red.discard.map((c) => c.name)).toEqual(["Shove", "Shove"]);
+    expect(eventTypes(last.events)).toContain("ROOM_FLIPPED");
+  });
+
+  it("when the first copy discards the second, the second does not fire", () => {
+    const state = turnStart(
+      player({
+        deck: pile("Shove", 6),
+        hand: [card("Faceful Of Slime"), card("Faceful Of Slime")],
+      }),
+    );
+    // Two cards in hand, so the first copy asks; it discards the other copy.
+    const asked = must(state, { type: "FLIP_ROOM" });
+    const pending = asked.state.pending;
+    if (pending?.kind !== "ChooseCards") throw new Error("expected a card choice");
+    const other = pending.options.find((c) => c.id !== pending.source?.card.id);
+    if (!other) throw new Error("rig");
+    const { state: next, events } = must(asked.state, { type: "CHOOSE_CARDS", cardIds: [other.id] });
+    expect(next.pending).toBeNull();
+    expect(events.filter((e) => e.type === "CARD_DISCARDED")).toHaveLength(1);
+    expect(next.Red.discard).toHaveLength(1);
+    expect(next.Red.hand.filter((c) => c.name === "Faceful Of Slime")).toHaveLength(1);
+  });
+
+  it("is not stopped by Zen Mode: discarding is not Exhausting", () => {
     const state = rig({
       phase: "Turn Start",
       floorDeck: [room("Security Turnstile")],
+      playZone: [{ owner: "Red", card: card("Zen Mode") }],
       Red: player({ deck: pile("Shove", 6), hand: [card("Faceful Of Slime")] }),
       Gray: player({ deck: pile("Duck Under", 6) }),
     });
-    const { state: next } = must(state, { type: "FLIP_ROOM" });
-    expect(next.Red.drewThisTurn).toBe(3);
-    expect(next.Red.hand).toHaveLength(4);
+    const { state: next, events } = must(state, { type: "FLIP_ROOM" });
+    expect(eventTypes(events)).toContain("CARD_DISCARDED");
+    expect(eventTypes(events)).not.toContain("EXHAUST_PREVENTED");
+    expect(next.Red.discard.map((c) => c.name)).toEqual(["Faceful Of Slime"]);
   });
 
-  it("stacks with another copy of the same source", () => {
-    const state = rig({
-      phase: "Turn Start",
-      floorDeck: [room("Security Turnstile")],
-      Red: player({
-        deck: pile("Shove", 6),
-        hand: pile("Faceful Of Slime", 2),
-      }),
-      Gray: player({ deck: pile("Duck Under", 6) }),
-    });
-    const { state: next } = must(state, { type: "FLIP_ROOM" });
-    // Two held copies: target 5 - 1 - 1 = 3, one draw short of the two already held.
-    expect(next.Red.drewThisTurn).toBe(1);
-    expect(next.Red.hand).toHaveLength(3);
+  it("with Corrosive Acid, both resolve in step 1 before the rooms are revealed", () => {
+    const state = turnStart(
+      player({ deck: pile("Shove", 6), hand: [card("Corrosive Acid"), card("Faceful Of Slime")] }),
+    );
+    const asked = must(state, { type: "FLIP_ROOM" });
+    const pending = asked.state.pending;
+    if (pending?.kind !== "ChooseCards") throw new Error("expected a card choice");
+    const slime = pending.options.find((c) => c.name === "Faceful Of Slime");
+    if (!slime) throw new Error("rig");
+    const exhaustAsked = must(asked.state, { type: "CHOOSE_CARDS", cardIds: [slime.id] });
+    expect(exhaustAsked.state.pending?.kind).toBe("ChooseExhaust");
+    expect(eventTypes(exhaustAsked.events)).not.toContain("ROOM_FLIPPED");
+    const { state: next, events } = must(exhaustAsked.state, { type: "EXHAUST_CARD", cardId: null });
+    const types = eventTypes([...asked.events, ...exhaustAsked.events, ...events]);
+    expect(types.indexOf("CARD_DISCARDED")).toBeLessThan(types.indexOf("ROOM_FLIPPED"));
+    expect(types.indexOf("CARD_EXHAUSTED")).toBeLessThan(types.indexOf("ROOM_FLIPPED"));
+    expect(next.Red.exhaust).toHaveLength(1);
+    expect(next.Red.discard.some((c) => c.name === "Faceful Of Slime")).toBe(true);
   });
 
-  it("a copy that arrives in the draw does not lower this turn's draw, but lowers the next turn's", () => {
-    const state = rig({
-      phase: "Turn Start",
-      floorDeck: [room("Security Turnstile")],
-      Red: player({ deck: [card("Faceful Of Slime"), ...pile("Shove", 10)] }),
-      Gray: player({ deck: pile("Duck Under", 6) }),
-    });
-    const first = must(state, { type: "FLIP_ROOM" }).state;
-    expect(first.Red.hand).toHaveLength(5);
-    expect(first.Red.hand.some((c) => c.name === "Faceful Of Slime")).toBe(true);
+  it("a copy that arrives in the draw does not discard this turn, but does next turn", () => {
+    const state = turnStart(player({ deck: [card("Faceful Of Slime"), ...pile("Shove", 10)] }));
+    const first = must(state, { type: "FLIP_ROOM" });
+    expect(first.state.Red.hand).toHaveLength(5);
+    expect(first.state.Red.hand.some((c) => c.name === "Faceful Of Slime")).toBe(true);
+    expect(eventTypes(first.events)).not.toContain("CARD_DISCARDED");
+    expect(first.state.pending).toBeNull();
 
-    const second = must(
+    const nextTurn = must(
       {
-        ...first,
+        ...first.state,
         phase: "Turn Start" as const,
         floorDeck: [room("Security Turnstile")],
         activeRoom: null,
         playZone: [],
-        Red: { ...first.Red, hand: first.Red.hand.filter((c) => c.name === "Faceful Of Slime") },
       },
       { type: "FLIP_ROOM" },
-    ).state;
-    expect(second.Red.hand).toHaveLength(4);
+    );
+    expect(nextTurn.state.pending?.kind).toBe("ChooseCards");
+  });
+
+  it("does not discard this turn for Bad Stuff a Toxic room deals", () => {
+    const state = turnStart(player({ deck: pile("Shove", 8) }), [room("Slimy Bio-Hazard Containment")]);
+    const first = must(state, { type: "FLIP_ROOM" });
+    expect(eventTypes(first.events)).not.toContain("CARD_DISCARDED");
+    expect(first.state.pending).toBeNull();
   });
 });
 

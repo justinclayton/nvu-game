@@ -209,6 +209,26 @@ describe("greedy", () => {
     });
   });
 
+  it("answers Faceful Of Slime's Turn Start discard and goes on without stalling", () => {
+    resetRig();
+    let s: GameState = rig({
+      phase: "Turn Start",
+      floorDeck: [room("Security Turnstile"), room("Dark Room"), room("Dead End")],
+      Red: player({ deck: pile("Shove", 6), hand: [card("Faceful Of Slime"), card("Shove")] }),
+      Gray: player({ deck: pile("Duck Under", 6) }),
+    });
+    s = must(s, { type: "FLIP_ROOM" }).state;
+    expect(s.pending?.kind).toBe("ChooseCards");
+    for (let i = 0; i < 4 && s.phase === "Turn Start"; i++) {
+      const legal = legalCommands(s);
+      expect(legal.length).toBeGreaterThan(0);
+      const [command] = greedyPolicy.choose(s, legal, policySeed(1));
+      s = must(s, command).state;
+    }
+    expect(s.phase).toBe("Play");
+    expect(s.Red.discard).toHaveLength(1);
+  });
+
   it("pays with the card worth least: one that adds nothing toward the line", () => {
     resetRig();
     const chargeIn = card("Charge"); // cost 2, oomph 4 — clears a 4-Oomph line alone

@@ -143,7 +143,7 @@ export const emptyTurnRecord = (): TurnRecord => ({
   exhausted: { Red: 0, Gray: 0 },
   exhaustedFromDeck: { Red: 0, Gray: 0 },
   exhaustOwed: [],
-  drawLowered: { Red: 0, Gray: 0 },
+  turnStartDone: [],
 });
 
 const freshPlayer = (deck: readonly Card[]): PlayerState => ({

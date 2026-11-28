@@ -155,11 +155,10 @@ export interface TurnRecord {
    */
   readonly exhaustOwed: readonly OwedExhaust[];
   /**
-   * Faceful Of Slime: how many cards fewer each character draws in step 5,
-   * counted from the hand held when step 1 (`At Turn Start`) resolves. A card
-   * that arrives later does not change this turn's draw.
+   * Cards whose `At Turn Start` line has already resolved this turn (step 1),
+   * so a step that paused on a question carries on without repeating them.
    */
-  readonly drawLowered: Readonly<Record<Character, number>>;
+  readonly turnStartDone: readonly CardId[];
 }
 
 /** One printed Exhaust line still to be carried out. */

@@ -269,7 +269,7 @@ describe("Turn Start", () => {
     expect(next.Red.deck).toHaveLength(1);
   });
 
-  it("Dim: a card that tightens the cap further still applies", () => {
+  it("Dim: Faceful Of Slime discards in step 1 but does not change the draw: still up to 4", () => {
     const state = rig({
       phase: "Turn Start",
       floorDeck: [room("Dark Room")],
@@ -277,8 +277,9 @@ describe("Turn Start", () => {
       Gray: player({ deck: pile("Duck Under", 5) }),
     });
     const { state: next } = must(state, { type: "FLIP_ROOM" });
-    // Held at step 1: target 4 - 1 = 3, and the held Faceful Of Slime counts toward it.
-    expect(next.Red.hand).toHaveLength(3);
+    // The lone Faceful Of Slime is discarded at step 1; the draw then goes up to 4.
+    expect(next.Red.discard.map((c) => c.name)).toEqual(["Faceful Of Slime"]);
+    expect(next.Red.hand).toHaveLength(4);
     expect(next.Gray.hand).toHaveLength(4);
   });
 

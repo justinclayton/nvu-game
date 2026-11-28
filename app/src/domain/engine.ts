@@ -17,7 +17,6 @@ import {
   drawTargetFor,
   enterableRooms,
   exhaustXPreventedBy,
-  heldModifiers,
   lockedOut,
   payOptions,
   playedStats,
@@ -584,9 +583,10 @@ const ROOMS_REVEALED = 3;
 
 /**
  * Rulebook, Each Turn, Turn Start, step 1: resolve `At Turn Start` effects
- * (Corrosive Acid, Faceful Of Slime) of the cards held now. If an Exhaust asks
- * which card, the state rests on that question and `answerExhaust` carries on
- * with `revealRooms` once it is answered.
+ * (Corrosive Acid, Faceful Of Slime) of the cards held now. If one asks which
+ * card (Faceful Of Slime's discard, an Exhaust), the state rests on that
+ * question and `runChoice` or `answerExhaust` carries on to `revealRooms` once
+ * it is answered.
  */
 function flipRoom(state: GameState, run: Run): GameState {
   if (state.floorDeck.length === 0) throw new CorruptStateError("Flipped an empty floor deck.");
@@ -599,18 +599,17 @@ function flipRoom(state: GameState, run: Run): GameState {
     Gray: { ...state.Gray, drewThisTurn: 0 },
     thisTurn: emptyTurnRecord(),
   };
-  const started: GameState = {
-    ...reset,
-    thisTurn: {
-      ...reset.thisTurn,
-      drawLowered: {
-        Red: heldModifiers(reset, "Red").drawTargetDelta,
-        Gray: heldModifiers(reset, "Gray").drawTargetDelta,
-      },
-    },
-  };
-  const held = turnStartHands(started, run);
-  if (held.phase === "GameOver") return held;
+  return finishTurnStart(reset, run);
+}
+
+/**
+ * Step 1 to the reveal: each held `At Turn Start` line, then any Exhaust that
+ * line owes, then step 2. Stops on a question; the answer calls this again and
+ * `turnStartDone` keeps the lines already resolved from firing twice.
+ */
+function finishTurnStart(state: GameState, run: Run): GameState {
+  const held = turnStartHands(state, run);
+  if (held.phase === "GameOver" || held.pending) return held;
   const owed = offerExhaust(held, run);
   if (owed.phase === "GameOver" || owed.pending) return owed;
   return revealRooms(owed, run);
@@ -688,17 +687,26 @@ function enterToxic(state: GameState, room: Room, run: Run): GameState {
   return s;
 }
 
-/** Step 1: a held card's own `At Turn Start` line (Corrosive Acid), before any room is revealed. */
+/**
+ * Step 1: a held card's own `At Turn Start` line (Corrosive Acid, Faceful Of
+ * Slime), before any room is revealed. One card at a time, each only if it is
+ * still in hand when its turn comes. Stops on a question.
+ */
 function turnStartHands(state: GameState, run: Run): GameState {
   let s = state;
   for (const c of CHARACTERS) {
-    for (const card of playerOf(s, c).hand) {
-      const onTurnStart = behaviourOf(card.name)?.onTurnStart;
-      if (!onTurnStart) continue;
+    for (;;) {
+      const done = s.thisTurn.turnStartDone;
+      const card = playerOf(s, c).hand.find(
+        (x) => !done.includes(x.id) && behaviourOf(x.name)?.onTurnStart,
+      );
+      const onTurnStart = card && behaviourOf(card.name)?.onTurnStart;
+      if (!card || !onTurnStart) break;
+      s = { ...s, thisTurn: { ...s.thisTurn, turnStartDone: [...done, card.id] } };
       const step = onTurnStart(s, { card, character: c, zone: "hand" });
       run.events.push(...causedBy(step.events, card.name));
       s = settle(step.state, run);
-      if (s.phase === "GameOver") return s;
+      if (s.phase === "GameOver" || s.pending) return s;
     }
   }
   return s;
@@ -1339,7 +1347,13 @@ function runChoice(state: GameState, answer: ChoiceAnswer, run: Run): GameState 
     const stayed = new Set(presentSince(s, run, 0));
     s = finishPlay(s, run, { ...play, listeners: play.listeners.filter((id) => stayed.has(id)) });
   }
-  return s.pending || s.phase === "GameOver" ? s : drain(s, run);
+  if (s.pending || s.phase === "GameOver") return s;
+  const drained = drain(s, run);
+  // Step 1 was waiting on this choice (Faceful Of Slime): carry on to the reveal.
+  if (drained.phase === "Turn Start" && !drained.pending && !drained.activeRoom) {
+    return finishTurnStart(drained, run);
+  }
+  return drained;
 }
 
 function answerCharacter(state: GameState, character: Character, run: Run): GameState {

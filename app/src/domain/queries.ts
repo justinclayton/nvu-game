@@ -34,7 +34,6 @@ interface Modifiers {
   readonly ignoresExhaustX: boolean;
   readonly playedPowerDelta: number;
   readonly stuffPowerDelta: number;
-  readonly drawTargetDelta: number;
 }
 
 const NO_MODIFIERS: Modifiers = {
@@ -42,7 +41,6 @@ const NO_MODIFIERS: Modifiers = {
   ignoresExhaustX: false,
   playedPowerDelta: 0,
   stuffPowerDelta: 0,
-  drawTargetDelta: 0,
 };
 
 const held = (card: Card): HeldModifiers | undefined => behaviourOf(card.name)?.whileHeld;
@@ -58,7 +56,6 @@ export function heldModifiers(state: GameState, c: Character): Modifiers {
       ignoresExhaustX: m.ignoresExhaustX || (h.ignoresExhaustX ?? false),
       playedPowerDelta: m.playedPowerDelta + (h.playedPowerDelta ?? 0),
       stuffPowerDelta: m.stuffPowerDelta + (h.stuffPowerDelta ?? 0),
-      drawTargetDelta: m.drawTargetDelta + (h.drawTargetDelta ?? 0),
     };
   }
   return m;
@@ -91,13 +88,11 @@ export const handsShared = (state: GameState): boolean =>
 
 /**
  * Each Turn, Turn Start, step 5: draw up to 5, or up to 4 under a Dim Active
- * Room. A "draw N fewer" `Holding:` line comes off that target; copies stack,
- * and the target never goes below 0. Only cards held when step 1 resolved
- * count (`thisTurn.drawLowered`).
+ * Room. No card changes this target.
  */
-export const drawTargetFor = (state: GameState, c: Character): number => {
+export const drawTargetFor = (state: GameState, _c: Character): number => {
   const dim = state.activeRoom?.keywords.includes("Dim") ?? false;
-  return Math.max(0, (dim ? DIM_HAND_CAP : HAND_CAP) - state.thisTurn.drawLowered[c]);
+  return dim ? DIM_HAND_CAP : HAND_CAP;
 };
 
 /* ------------------------------------------------------------- the play zone */

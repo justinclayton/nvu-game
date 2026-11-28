@@ -31,7 +31,7 @@
 #   flee    string               room and stairwell only: the printed Flee line
 
 meta:
-  version: C62
+  version: C63
   updated: 2026-10-03
 
 cards:
@@ -341,7 +341,7 @@ cards:
     rarity: Fine
     cost: 1
     scramble: 3
-    text: Shuffle 1 Stuff from Red's hand into Red's deck.
+    text: Shuffle a card from Red's hand into your own deck.
     flavor: Relieve Red of that cumbersome pack.
 
   - name: Quick Vault
